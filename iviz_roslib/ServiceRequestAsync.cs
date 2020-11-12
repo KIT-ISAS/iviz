@@ -114,7 +114,7 @@ namespace Iviz.Roslib
             if (!values.TryGetValue("callerid", out string? receivedId))
             {
                 return
-                    $"error=Expected callerid '{remoteCallerId}' but received instead '{receivedId}', closing connection";
+                    $"error=Expected callerid '{remoteCallerId}' but partner provided '{receivedId}', closing connection";
             }
 
             remoteCallerId = receivedId;
@@ -122,7 +122,7 @@ namespace Iviz.Roslib
             if (!values.TryGetValue("service", out string? receivedService) || receivedService != serviceInfo.Service)
             {
                 return
-                    $"error=Expected service '{serviceInfo.Service}' but received instead '{receivedService}', closing connection";
+                    $"error=Expected service '{serviceInfo.Service}' but partner provided '{receivedService}', closing connection";
             }
 
             if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
@@ -134,7 +134,7 @@ namespace Iviz.Roslib
                 else
                 {
                     return
-                        $"error=Expected md5 '{serviceInfo.Md5Sum}' but received instead '{receivedMd5Sum}', closing connection";
+                        $"error=Expected md5 '{serviceInfo.Md5Sum}' but partner provided '{receivedMd5Sum}', closing connection";
                 }
             }
 

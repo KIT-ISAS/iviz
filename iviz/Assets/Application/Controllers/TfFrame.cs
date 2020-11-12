@@ -24,7 +24,7 @@ namespace Iviz.Controllers
 
         Pose pose;
 
-        bool acceptsParents = true;
+        bool parentCanChange = true;
         float alpha = 1;
         float labelSize = 1.0f;
         bool labelVisible;
@@ -164,13 +164,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool AcceptsParents
+        public bool ParentCanChange
         {
-            get => acceptsParents;
+            get => parentCanChange;
             set
             {
-                acceptsParents = value;
-                if (!acceptsParents)
+                parentCanChange = value;
+                if (!parentCanChange)
                 {
                     Parent = TfListener.RootFrame;
                 }
@@ -275,13 +275,13 @@ namespace Iviz.Controllers
             CheckIfDead();
         }
 
-        void AddChild(TfFrame frame)
+        void AddChild([NotNull] TfFrame frame)
         {
             //Debug.Log(Id + " has new child " + frame);
             children.Add(frame.Id, frame);
         }
 
-        void RemoveChild(TfFrame frame)
+        void RemoveChild([NotNull] TfFrame frame)
         {
             if (IsChildless)
             {
@@ -302,7 +302,7 @@ namespace Iviz.Controllers
 
         public bool SetParent([CanBeNull] TfFrame newParent)
         {
-            if (!AcceptsParents &&
+            if (!ParentCanChange &&
                 newParent != TfListener.RootFrame &&
                 newParent != TfListener.UnityFrame &&
                 newParent != null)
@@ -343,7 +343,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool IsChildOf(TfFrame frame)
+        bool IsChildOf([NotNull] TfFrame frame)
         {
             if (Parent == null)
             {
@@ -351,6 +351,11 @@ namespace Iviz.Controllers
             }
 
             return Parent == frame || Parent.IsChildOf(frame);
+        }
+
+        public void SetPose(in Pose newPose)
+        {
+            SetPose(TimeSpan.Zero, newPose);
         }
 
         public void SetPose(in TimeSpan time, in Pose newPose)

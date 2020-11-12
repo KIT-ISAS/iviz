@@ -95,7 +95,7 @@ namespace Iviz.App
                     // not initialized yet
                     return;
                 }
-                
+
                 parentCanvas.gameObject.SetActive(value);
             }
         }
@@ -116,7 +116,7 @@ namespace Iviz.App
 
         HololensManager hololensManager;
 
-        
+
         public bool UnlockButtonVisible
         {
             get => UnlockButton.gameObject.activeSelf;
@@ -152,7 +152,7 @@ namespace Iviz.App
             loadConfigData = new LoadConfigDialogData(this);
             saveConfigData = new SaveConfigDialogData(this);
             markerData = new MarkerDialogData(this);
-            
+
             connectionData = new ConnectionDialogData(this);
 
             Directory.CreateDirectory(Settings.SavedFolder);
@@ -465,9 +465,11 @@ namespace Iviz.App
         }
 
         [NotNull]
-        public ModuleData CreateModule(Resource.ModuleType resource, [NotNull] string topic = "",
+        public ModuleData CreateModule(Resource.ModuleType resource,
+            [NotNull] string topic = "",
             [NotNull] string type = "",
-            [CanBeNull] IConfiguration configuration = null)
+            [CanBeNull] IConfiguration configuration = null,
+            [CanBeNull] string requestedId = null)
         {
             if (topic == null)
             {
@@ -484,9 +486,14 @@ namespace Iviz.App
 
             ModuleData moduleData = ModuleData.CreateFromResource(constructor);
 
+            if (requestedId != null)
+            {
+                moduleData.Configuration.Id = requestedId;
+            }
+
             moduleDatas.Add(moduleData);
             CreateButtonObject(moduleData);
-            
+
             return moduleData;
         }
 
@@ -623,7 +630,7 @@ namespace Iviz.App
         {
             imageData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
-        
+
         public void ShowMarkerDialog([NotNull] IMarkerDialogListener caller)
         {
             markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));

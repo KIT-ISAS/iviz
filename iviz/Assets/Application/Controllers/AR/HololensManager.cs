@@ -2,6 +2,7 @@
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -9,9 +10,14 @@ namespace Iviz.Controllers
 {
     class HololensManager : IDisposable
     {
-        TfFrame leftPalm;
+        readonly DisplayNode node;
+        readonly TfFrame leftPalm;
         bool disposed;
 
+        float leftHandScale = 1;
+
+        Pose leftPalmPose;
+        
         public HololensManager()
         {
 #if UNITY_EDITOR
@@ -31,7 +37,26 @@ namespace Iviz.Controllers
             leftPalm.transform.localScale = 0.05f * Vector3.one;
 
 
+            leftPalm = TfListener.GetOrCreateFrame("iviz/controller/left_hand");
+            node = SimpleDisplayNode.Instantiate("Hololens");
+            node.Parent = leftPalm;
             GameThread.EverySecond += Update;
+
+            leftPalmPose = new Pose(Vector3.up * 1f, Quaternion.identity);
+            leftPalm.SetPose(leftPalmPose);
+            leftPalm.ParentCanChange = false;
+
+            LeftHandScale = 0.1f;
+        }
+        
+        public float LeftHandScale
+        {
+            get => leftHandScale;
+            set
+            {
+                leftHandScale = value;
+                leftPalm.transform.localScale = value * Vector3.one;
+            }
         }
 
         public void Dispose()
@@ -42,12 +67,16 @@ namespace Iviz.Controllers
             }
 
             disposed = true;
+            
+            node.Parent = null;
+            UnityEngine.Object.Destroy(node.gameObject);
+            
             GameThread.EverySecond -= Update;
         }
 
         void Update()
         {
-            TfListener.Publish(null, leftPalm.Id, Pose.identity);
+            //TfListener.Publish(null, leftPalm.Id, leftPalmPose);
         }
     }
 }

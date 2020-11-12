@@ -1,4 +1,4 @@
-﻿//#define LOG_ENABLED
+﻿#define LOG_ENABLED
 
 using Iviz.Msgs;
 using Iviz.Roslib;

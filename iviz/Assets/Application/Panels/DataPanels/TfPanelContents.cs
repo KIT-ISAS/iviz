@@ -11,7 +11,7 @@
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }
         public ToggleWidget ConnectToParent { get; private set; }
-        public ToggleWidget KeepOnlyUsedFrames { get; private set; }
+        public ToggleWidget KeepAllFrames { get; private set; }
         public SenderWidget Sender { get; private set; }
 
         void Awake()
@@ -22,7 +22,7 @@
             Listener = p.AddListener();
             ListenerStatic = p.AddListener();
             Frame = p.AddFrame();
-            KeepOnlyUsedFrames = p.AddToggle("Keep Only Used Frames");
+            KeepAllFrames = p.AddToggle("Keep All Frames, Even if Unused");
             //ShowAxes = p.AddToggle("Show Frames");
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             ConnectToParent = p.AddToggle("Connect Children to Parents");

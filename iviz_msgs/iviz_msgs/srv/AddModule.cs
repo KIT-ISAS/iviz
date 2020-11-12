@@ -45,30 +45,34 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/AddModule";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "4e3219ce88a082923b30b014872396ae";
+        [Preserve] public const string RosMd5Sum = "9c05ee8917d1e268371f79ef13584f64";
     }
 
     public sealed class AddModuleRequest : IRequest, IDeserializable<AddModuleRequest>
     {
         // Adds a module by type
         [DataMember (Name = "module_type")] public string ModuleType { get; set; } // Module type
+        [DataMember (Name = "id")] public string Id { get; set; } // Requested id to identify this module, or empty to autogenerate
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleRequest()
         {
             ModuleType = "";
+            Id = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddModuleRequest(string ModuleType)
+        public AddModuleRequest(string ModuleType, string Id)
         {
             this.ModuleType = ModuleType;
+            this.Id = Id;
         }
         
         /// <summary> Constructor with buffer. </summary>
         public AddModuleRequest(ref Buffer b)
         {
             ModuleType = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -84,18 +88,21 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(ModuleType);
+            b.Serialize(Id);
         }
         
         public void RosValidate()
         {
             if (ModuleType is null) throw new System.NullReferenceException(nameof(ModuleType));
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 4;
+                int size = 8;
                 size += BuiltIns.UTF8.GetByteCount(ModuleType);
+                size += BuiltIns.UTF8.GetByteCount(Id);
                 return size;
             }
         }
@@ -105,7 +112,7 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
         [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
-        [DataMember (Name = "id")] public string Id { get; set; } // An id identifying this module
+        [DataMember (Name = "id")] public string Id { get; set; } // An id identifying this module, or empty if error
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleResponse()

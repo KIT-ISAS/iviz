@@ -89,6 +89,8 @@ namespace Iviz.Controllers
             {
                 imarker.GenerateLog(description);
             }
+
+            description.AppendLine().AppendLine();
         }
 
         public string BriefDescription
@@ -98,11 +100,11 @@ namespace Iviz.Controllers
                 switch (imarkers.Count)
                 {
                     case 0:
-                        return "<b>No interactive markers</b>";
+                        return "<b>No interactive markers →</b>";
                     case 1:
-                        return "<b>1 interactive marker</b>";
+                        return "<b>1 interactive marker →</b>";
                     default:
-                        return $"<b>{imarkers.Values.Count} interactive markers</b>";
+                        return $"<b>{imarkers.Values.Count} interactive markers →</b>";
                 }
             }
         }
@@ -115,7 +117,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, Handler);
+            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate);
             GameThread.EverySecond += CheckForExpiredMarkers;
 
             int lastSlash = config.Topic.LastIndexOf('/');
@@ -125,7 +127,7 @@ namespace Iviz.Controllers
             string fullTopic = $"{root}/update_full";
 
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
-            FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerFull);
+            FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerUpdateFull);
         }
 
         public override void StopController()
@@ -153,7 +155,7 @@ namespace Iviz.Controllers
             Publisher?.Reset();
         }
 
-        void Handler([NotNull] InteractiveMarkerUpdate msg)
+        void HandlerUpdate([NotNull] InteractiveMarkerUpdate msg)
         {
             if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
@@ -165,7 +167,7 @@ namespace Iviz.Controllers
             msg.Erases.ForEach(DestroyInteractiveMarker);
         }
 
-        void HandlerFull([NotNull] InteractiveMarkerInit msg)
+        void HandlerUpdateFull([NotNull] InteractiveMarkerInit msg)
         {
             msg.Markers.ForEach(CreateInteractiveMarker);
             FullListener.Pause();

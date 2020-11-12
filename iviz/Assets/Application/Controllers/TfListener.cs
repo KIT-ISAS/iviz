@@ -27,7 +27,7 @@ namespace Iviz.Controllers
         [DataMember] public float FrameSize { get; set; } = 0.125f;
         [DataMember] public bool FrameLabelsVisible { get; set; }
         [DataMember] public bool ParentConnectorVisible { get; set; }
-        [DataMember] public bool KeepOnlyUsedFrames { get; set; } = true;
+        [DataMember] public bool KeepAllFrames { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
@@ -80,7 +80,7 @@ namespace Iviz.Controllers
             MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
             MapFrame.Parent = RootFrame;
             MapFrame.AddListener(defaultListener);
-            MapFrame.AcceptsParents = false;
+            MapFrame.ParentCanChange = false;
             //BaseFrame.ForceInvisible = true;
 
             rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
@@ -127,7 +127,7 @@ namespace Iviz.Controllers
                 FrameSize = value.FrameSize;
                 FrameLabelsVisible = value.FrameLabelsVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
-                KeepOnlyUsedFrames = !value.KeepOnlyUsedFrames;
+                KeepAllFrames = value.KeepAllFrames;
             }
         }
 
@@ -195,13 +195,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool KeepOnlyUsedFrames
+        public bool KeepAllFrames
         {
-            get => config.KeepOnlyUsedFrames;
+            get => config.KeepAllFrames;
             set
             {
-                config.KeepOnlyUsedFrames = value;
-                if (!value)
+                config.KeepAllFrames = value;
+                if (value)
                 {
                     foreach (var frame in frames.Values)
                     {
@@ -237,29 +237,28 @@ namespace Iviz.Controllers
         {
             foreach (var t in transforms)
             {
-                if (t.Transform.HasNaN())
+                if (t.Transform.HasNaN() || t.ChildFrameId.Length == 0)
                 {
                     continue;
                 }
 
-                var timestamp = t.Header.Stamp == default ? TimeSpan.MaxValue : t.Header.Stamp.ToTimeSpan();
-
-                var childId = t.ChildFrameId;
-                if (childId.Length != 0 && childId[0] == '/')
-                {
-                    childId = childId.Substring(1);
-                }
+                var timestamp = t.Header.Stamp == default 
+                    ? TimeSpan.MaxValue 
+                    : t.Header.Stamp.ToTimeSpan();
+                var childId = t.ChildFrameId[0] != '/' 
+                    ? t.ChildFrameId 
+                    : t.ChildFrameId.Substring(1);
 
                 TfFrame child;
                 if (isStatic)
                 {
                     child = GetOrCreateFrame(childId, staticListener);
-                    if (config.KeepOnlyUsedFrames)
+                    if (config.KeepAllFrames)
                     {
                         child.AddListener(keepAllListener);
                     }
                 }
-                else if (config.KeepOnlyUsedFrames)
+                else if (config.KeepAllFrames)
                 {
                     child = GetOrCreateFrame(childId, keepAllListener);
                 }
@@ -268,13 +267,21 @@ namespace Iviz.Controllers
                     continue;
                 }
 
+                TfFrame parent;
                 var parentId = t.Header.FrameId;
-                if (parentId.Length != 0 && parentId[0] == '/') // remove starting '/' from tf v1
+                if (parentId.Length == 0)
                 {
-                    parentId = parentId.Substring(1);
+                    parent = RootFrame;
                 }
-
-                var parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
+                else if (parentId[0] == '/')
+                {
+                    // remove starting '/' from tf v1
+                    parent = GetOrCreateFrame(parentId.Substring(1));
+                }
+                else
+                {
+                    parent = GetOrCreateFrame(parentId);
+                }
 
                 if (child.SetParent(parent))
                 {
@@ -290,8 +297,8 @@ namespace Iviz.Controllers
             ListenerStatic?.Reset();
             Publisher.Reset();
 
-            var prevShowAllFrames = !KeepOnlyUsedFrames;
-            KeepOnlyUsedFrames = true;
+            var prevKeepAllFrames = KeepAllFrames;
+            KeepAllFrames = false;
 
             var framesCopy = frames.Values.ToList();
             foreach (var frame in framesCopy)
@@ -299,7 +306,7 @@ namespace Iviz.Controllers
                 frame.RemoveListener(staticListener);
             }
 
-            KeepOnlyUsedFrames = !prevShowAllFrames;
+            KeepAllFrames = prevKeepAllFrames;
         }
 
         [NotNull]

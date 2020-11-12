@@ -24,8 +24,8 @@ namespace Iviz.Controllers
                 .Cast<Resource.ModuleType>()
                 .Select(module => (module, module.ToString()))
                 .ToArray();
-        
-        
+
+
         public ControllerService()
         {
             Connection.AdvertiseService<AddModule>("add_module", AddModuleCallback);
@@ -36,7 +36,7 @@ namespace Iviz.Controllers
 
         static void AddModuleCallback([NotNull] AddModule srv)
         {
-            var (id, success, message) = TryCreateModule(srv.Request.ModuleType);
+            var (id, success, message) = TryCreateModule(srv.Request.ModuleType, srv.Request.Id);
             srv.Response.Success = success;
             srv.Response.Message = message;
             srv.Response.Id = id ?? "";
@@ -45,24 +45,24 @@ namespace Iviz.Controllers
         static Resource.ModuleType ModuleTypeFromString(string moduleName)
         {
             return ModuleNames.FirstOrDefault(entry => entry.name == moduleName).module;
-        } 
-        
-        static (string id, bool success, string message) TryCreateModule([NotNull] string moduleType)
+        }
+
+        static (string id, bool success, string message) TryCreateModule([NotNull] string moduleTypeStr,
+            [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = ("", false, "");
 
-            if (string.IsNullOrWhiteSpace(moduleType))
+            if (string.IsNullOrWhiteSpace(moduleTypeStr))
             {
-                result.message = "Invalid module type";
+                result.message = "EE Invalid module type";
                 return result;
             }
 
-            Resource.ModuleType resource = ModuleTypeFromString(moduleType);
+            Resource.ModuleType moduleType = ModuleTypeFromString(moduleTypeStr);
 
-            if (resource == Resource.ModuleType.Invalid)
+            if (moduleType == Resource.ModuleType.Invalid)
             {
-                result.message = "Invalid module type";
-                result.success = false;
+                result.message = "EE Invalid module type";
                 return result;
             }
 
@@ -72,12 +72,36 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    result.id = ModuleListPanel.Instance.CreateModule(resource).Configuration.Id;
+                    if (requestedId.Length != 0)
+                    {
+                        ModuleData module =
+                            ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
+                                data => data.Configuration.Id == requestedId);
+                        if (module != null)
+                        {
+                            if (module.ModuleType != moduleType)
+                            {
+                                result.message = "EE Another module of the same name already exists, but it has type " +
+                                                 module.ModuleType;
+                            }
+                            else
+                            {
+                                result.success = true;
+                                result.message = "** Module already exists";
+                            }
+
+                            return;
+                        }
+                    }
+                    
+                    var moduleData = ModuleListPanel.Instance.CreateModule(moduleType,
+                        requestedId: requestedId.Length != 0 ? requestedId : null);
+                    result.id = moduleData.Configuration.Id;
                     result.success = true;
                 }
                 catch (Exception e)
                 {
-                    result.message = $"An exception was raised: {e.Message}";
+                    result.message = $"EE An exception was raised: {e.Message}";
                 }
                 finally
                 {
@@ -85,9 +109,9 @@ namespace Iviz.Controllers
                 }
             });
 
-            return signal.Wait(5000) ? result : ("", false, "Request timed out!");
-        }        
-        
+            return signal.Wait(2000) ? result : ("", false, "EE Request timed out!");
+        }
+
         static void AddModuleFromTopicCallback([NotNull] AddModuleFromTopic srv)
         {
             var (id, success, message) = TryCreateModuleFromTopic(srv.Request.Topic);
@@ -102,13 +126,13 @@ namespace Iviz.Controllers
 
             if (string.IsNullOrWhiteSpace(topic))
             {
-                result.message = "Invalid topic name";
+                result.message = "EE Invalid topic name";
                 return result;
             }
 
             if (ModuleListPanel.Instance.ModuleDatas.Any(module => module.Topic == topic))
             {
-                result.message = "A module with that topic already exists";
+                result.message = "EE A module with that topic already exists";
                 result.success = true;
                 return result;
             }
@@ -124,13 +148,13 @@ namespace Iviz.Controllers
 
             if (type == null)
             {
-                return ("", false, $"Failed to find topic '{topic}'");
+                return ("", false, $"EE Failed to find topic '{topic}'");
             }
 
 
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
             {
-                result.message = $"Type '{type}' is unsupported";
+                result.message = $"EE Type '{type}' is unsupported";
             }
 
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -144,7 +168,7 @@ namespace Iviz.Controllers
                 }
                 catch (Exception e)
                 {
-                    result.message = $"An exception was raised: {e.Message}";
+                    result.message = $"EE An exception was raised: {e.Message}";
                 }
                 finally
                 {
@@ -152,7 +176,7 @@ namespace Iviz.Controllers
                 }
             });
 
-            return signal.Wait(5000) ? result : ("", false, "Request timed out!");
+            return signal.Wait(2000) ? result : ("", false, "EE Request timed out!");
         }
 
         static void UpdateModuleCallback([NotNull] UpdateModule srv)
@@ -168,13 +192,13 @@ namespace Iviz.Controllers
 
             if (string.IsNullOrWhiteSpace(id))
             {
-                result.message = "Empty configuration id!";
+                result.message = "EE Empty configuration id!";
                 return result;
             }
 
             if (string.IsNullOrWhiteSpace(config))
             {
-                result.message = "Empty configuration text!";
+                result.message = "EE Empty configuration text!";
                 return result;
             }
 
@@ -190,7 +214,7 @@ namespace Iviz.Controllers
                     if (module == null)
                     {
                         result.success = false;
-                        result.message = "There is no module with that id";
+                        result.message = "EE There is no module with that id";
                         return;
                     }
 
@@ -200,12 +224,12 @@ namespace Iviz.Controllers
                 catch (JsonException e)
                 {
                     result.success = false;
-                    result.message = $"Error parsing JSON config: {e.Message}";
+                    result.message = $"EE Error parsing JSON config: {e.Message}";
                 }
                 catch (Exception e)
                 {
                     result.success = false;
-                    result.message = $"An exception was raised: {e.Message}";
+                    result.message = $"EE An exception was raised: {e.Message}";
                 }
                 finally
                 {
@@ -213,7 +237,7 @@ namespace Iviz.Controllers
                 }
             });
 
-            return signal.Wait(5000) ? result : (false, "Request timed out!");
+            return signal.Wait(2000) ? result : (false, "EE Request timed out!");
         }
 
         static void GetModulesCallback([NotNull] GetModules srv)
@@ -254,7 +278,7 @@ namespace Iviz.Controllers
                 }
             });
 
-            if (!signal.Wait(5000))
+            if (!signal.Wait(2000))
             {
                 Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in GetModules");
             }
