@@ -10,7 +10,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class TfFrame : ClickableNode, IRecyclable
+    public sealed class TfFrame : ClickableNode
     {
         const int MaxPoseMagnitude = 1000;
         const int Layer = 9;
@@ -248,19 +248,7 @@ namespace Iviz.Controllers
             trail.Color = Color.yellow;
             TrailVisible = false;
         }
-
-        public void SplitForRecycle()
-        {
-            ResourcePool.DisposeDisplay(axis);
-            ResourcePool.DisposeDisplay(labelObjectText);
-            ResourcePool.DisposeDisplay(parentConnector);
-            ResourcePool.DisposeDisplay(trail);
-
-            axis = null;
-            parentConnector = null;
-            trail = null;
-        }
-
+        
         public void AddListener([NotNull] DisplayNode display)
         {
             if (display == null)
@@ -405,7 +393,8 @@ namespace Iviz.Controllers
             timeline.Clear();
             axis.DisposeDisplay();
             trail.DisposeDisplay();
-            TrailVisible = false;
+            axis = null;
+            trail = null;
         }
 
         protected override void OnDoubleClick()

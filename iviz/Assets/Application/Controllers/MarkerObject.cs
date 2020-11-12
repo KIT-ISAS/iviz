@@ -222,9 +222,6 @@ namespace Iviz.Controllers
                 case MarkerType.Image:
                     CreateImage(msg);
                     break;
-                default:
-                    // shouldn't reach this
-                    break;
             }
         }
 
@@ -298,7 +295,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Color.A == 0)
+            if (Mathf.Approximately(msg.Color.A, 0))
             {
                 description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
                 meshTriangles.Set(Array.Empty<Vector3>());
@@ -345,7 +342,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Color.A == 0 || msg.Color.A.IsInvalid())
+            if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.A.IsInvalid())
             {
                 description.Append(WarnStr).Append("Color has alpha 0 or NaN").AppendLine();
                 pointList.PointsWithColor = Array.Empty<PointWithColor>();
@@ -415,7 +412,7 @@ namespace Iviz.Controllers
                 .Append(msg.Color.A).AppendLine();
             description.Append("Size: ").Append(msg.Points.Length).AppendLine();
 
-            if (elementScale == 0 || elementScale.IsInvalid())
+            if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 lineResource.LinesWithColor = Array.Empty<LineWithColor>();
@@ -434,7 +431,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Color.A == 0 || msg.Color.A.IsInvalid())
+            if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.A.IsInvalid())
             {
                 description.Append(WarnStr).Append("Color has alpha 0 or NaN").AppendLine();
                 lineResource.LinesWithColor = Array.Empty<LineWithColor>();
@@ -472,7 +469,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Color.A == 0)
+            if (Mathf.Approximately(msg.Color.A, 0))
             {
                 description.Append(WarnStr).Append("Color has alpha 0").AppendLine();
                 meshList.PointsWithColor = Array.Empty<PointWithColor>();
@@ -537,7 +534,7 @@ namespace Iviz.Controllers
             textResource.ElementSize = (float) msg.Scale.Z;
 
             description.Append("Size: ").Append(msg.Scale.Z).AppendLine();
-            if (msg.Scale.Z == 0 || msg.Scale.Z.IsInvalid())
+            if (Mathf.Approximately((float) msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 numWarnings++;
@@ -562,7 +559,7 @@ namespace Iviz.Controllers
                 .Append(msg.Scale.Y).Append(", ")
                 .Append(msg.Scale.Z).Append("]").AppendLine();
             
-            if (msg.Scale.SquaredNorm == 0)
+            if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
             {
                 description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                 numWarnings++;
@@ -591,7 +588,7 @@ namespace Iviz.Controllers
             {
                 case 0:
                 {
-                    if (msg.Scale.SquaredNorm == 0)
+                    if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
                     {
                         description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         arrowMarker.Visible = false;

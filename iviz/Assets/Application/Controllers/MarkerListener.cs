@@ -137,14 +137,21 @@ namespace Iviz.Controllers
 
         public void GenerateLog(StringBuilder description)
         {
+            const int maxToDisplay = 50;
+            
             if (description == null)
             {
                 throw new ArgumentNullException(nameof(description));
             }
 
-            foreach (var marker in markers.Values)
+            foreach (var marker in markers.Values.Take(maxToDisplay))
             {
                 marker.GenerateLog(description);
+            }
+
+            if (markers.Count > maxToDisplay)
+            {
+                description.Append("<i>... and ").Append(markers.Count - maxToDisplay).Append(" more.</i>").AppendLine();
             }
         }
 
