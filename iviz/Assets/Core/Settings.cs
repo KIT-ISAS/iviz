@@ -23,8 +23,8 @@ namespace Iviz.Core
             true;
 #else
             false;
-#endif        
-        
+#endif
+
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -33,7 +33,8 @@ namespace Iviz.Core
             // bug: this will activate with any UWP device, not only Hololens! but what else? 
             true;
 #else
-            false;
+            true;
+            //false;
 #endif                
         
         public static string PlatformName => UnityEngine.Application.platform.ToString().ToLower();

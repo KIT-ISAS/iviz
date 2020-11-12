@@ -28,9 +28,7 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.ModuleType.AugmentedReality);
 
-            controller = Settings.IsHololens ?
-                new GameObject("AR Hololens Controller").AddComponent<ARHololensController>() :
-                Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
+            controller = Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
 
             controller.ModuleData = this;
             if (constructor.Configuration != null)

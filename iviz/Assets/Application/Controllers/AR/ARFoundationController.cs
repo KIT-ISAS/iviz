@@ -191,6 +191,7 @@ namespace Iviz.Controllers
 
             defaultCullingMask = arCamera.cullingMask;
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
+            
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);

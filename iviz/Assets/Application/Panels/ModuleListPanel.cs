@@ -114,6 +114,9 @@ namespace Iviz.App
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
+        HololensManager hololensManager;
+
+        
         public bool UnlockButtonVisible
         {
             get => UnlockButton.gameObject.activeSelf;
@@ -162,8 +165,7 @@ namespace Iviz.App
 
             if (Settings.IsHololens)
             {
-                ARController controller = (ARController) CreateModule(Resource.ModuleType.AugmentedReality).Controller;
-                controller.Visible = true;
+                hololensManager = new HololensManager();
             }
 
             save.onClick.AddListener(saveConfigData.Show);

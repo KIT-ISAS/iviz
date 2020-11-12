@@ -85,8 +85,6 @@ namespace Iviz.App
 
         void GenerateRobot()
         {
-            
-            IExternalServiceProvider Connection = null;
             // you can load your own urdf as a string
             string pandaUrdf = UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/panda").text;
 
