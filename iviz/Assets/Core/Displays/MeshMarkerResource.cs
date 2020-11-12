@@ -153,10 +153,19 @@ namespace Iviz.Displays
                     textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
                 }
 
-                MainRenderer.sharedMaterial = textureMaterial;
+                MainRenderer.sharedMaterial = textureMaterialAlpha;
             }
 
             MainRenderer.SetPropertyColor(effectiveColor);
+        }
+
+        // should only be used by the asset saver!
+        public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
+        {
+            this.texture = texture;
+            this.emissiveColor = emissiveColor;
+            this.color = color;
+            this.tint = tint;
         }
     }
 }

@@ -35,27 +35,29 @@ namespace Iviz.Editor
             {
                 DestroyImmediate(managerNode);
             }
-
-            /*
-            string packagePath = "/Users/akzeac/Shared/aws-robomaker-hospital-world";
-            string localPath = "/worlds/hospital.world";
-            
-            string xmlData = File.ReadAllText(packagePath + localPath);
-            Sdf.SdfFile sdf = Sdf.SdfFile.Create(xmlData);
-            
-            var modelPaths = Sdf.SdfFile.CreateModelPaths(packagePath);
-            Sdf.SdfFile newSdf = sdf.ResolveIncludes(modelPaths);
-            
-            CreateWorld(newSdf.Worlds[0]);
-            */
-
         }
+
+        /*
+        static void LoadWorld()
+        {
+        string packagePath = "/Users/akzeac/Shared/aws-robomaker-hospital-world";
+        string localPath = "/worlds/hospital.world";
+        
+        string xmlData = File.ReadAllText(packagePath + localPath);
+        Sdf.SdfFile sdf = Sdf.SdfFile.Create(xmlData);
+        
+        var modelPaths = Sdf.SdfFile.CreateModelPaths(packagePath);
+        Sdf.SdfFile newSdf = sdf.ResolveIncludes(modelPaths);
+        
+        CreateWorld(newSdf.Worlds[0]);
+        }
+        */            
 
 
         static void CreateRobots(ExternalResourceManager manager)
         {
             string unityDirectory = "Resources/Package/iviz/robots";
-            string absolutePath = UnityEngine.Application.dataPath + "/" + unityDirectory;
+            string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";
             Directory.CreateDirectory(absolutePath);
 
             Dictionary<string, string> resourceFile = new Dictionary<string, string>();
@@ -65,8 +67,6 @@ namespace Iviz.Editor
                 resourceFile[robotName] = filename;
             }
 
-            //string text = JsonConvert.SerializeObject(resourceFile, Formatting.Indented);
-            //File.WriteAllText(absolutePath + "/../resources.txt", text);
             Debug.LogWarning("SavedAssetLoader: Not writing robot resource files.");
             
             foreach (string robotName in manager.GetRobotNames())
@@ -137,6 +137,8 @@ namespace Iviz.Editor
             Material baseMaterial = UnityEngine.Resources.Load<Material>("Materials/Standard");
 
             Dictionary<(Color, Color, Texture2D), Material> writtenColors = new Dictionary<(Color, Color, Texture2D), Material>();
+
+            int textureId = 0;
             foreach (var resource in resources)
             {
                 MeshRenderer renderer = resource.GetComponent<MeshRenderer>();
@@ -146,6 +148,7 @@ namespace Iviz.Editor
                 
                 if (writtenColors.TryGetValue((color, emissive, texture), out Material material))
                 {
+                    resource.SetMaterialValuesDirect((Texture2D)material.mainTexture, emissive, color, Color.white);
                     renderer.sharedMaterial = material;
                     continue;
                 }
@@ -161,22 +164,21 @@ namespace Iviz.Editor
 
                 if (texture == null)
                 {
-                    continue;
-                }
-
-                if (AssetDatabase.Contains(texture))
-                {
-                    material.mainTexture = texture;
+                    resource.SetMaterialValuesDirect(null, emissive, color, Color.white);
                     continue;
                 }
 
                 byte[] bytes = texture.EncodeToPNG();
-                File.WriteAllBytes(absolutePath + "/texture.png", bytes);
+                File.WriteAllBytes($"{absolutePath}/texture-{textureId}.png", bytes);
                 AssetDatabase.Refresh();
 
-                string texturePath = innerPath + "/texture.png";
+                string texturePath = $"{innerPath}/texture-{textureId}.png";
                 Texture2D newTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);
                 material.mainTexture = newTexture;
+
+                textureId++;
+                
+                resource.SetMaterialValuesDirect(newTexture, emissive, color, Color.white);
             }
 
 

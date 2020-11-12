@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1590320236507278593
+--- !u!1 &1195890135843794233
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1807142247579674689}
+  - component: {fileID: 8717841502138335056}
   m_Layer: 0
   m_Name: Node:Scene
   m_TagString: Untagged
@@ -16,22 +16,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1807142247579674689
+--- !u!4 &8717841502138335056
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1590320236507278593}
+  m_GameObject: {fileID: 1195890135843794233}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 5346161022010641528}
-  m_Father: {fileID: 4588100981413059109}
+  - {fileID: 3676825743178873543}
+  m_Father: {fileID: 5898416397728171289}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2659569649511513890
+--- !u!1 &2567564758486184536
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -39,8 +39,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4588100981413059109}
-  - component: {fileID: 5166432291329646384}
+  - component: {fileID: 5898416397728171289}
+  - component: {fileID: 5077236170691882561}
   m_Layer: 0
   m_Name: bucket_raedlinger.dae
   m_TagString: Untagged
@@ -48,28 +48,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4588100981413059109
+--- !u!4 &5898416397728171289
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2659569649511513890}
+  m_GameObject: {fileID: 2567564758486184536}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1807142247579674689}
+  - {fileID: 8717841502138335056}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5166432291329646384
+--- !u!114 &5077236170691882561
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2659569649511513890}
+  m_GameObject: {fileID: 2567564758486184536}
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d4ba586f8fee54a1ea9f4d8823b6cffc, type: 3}
@@ -77,10 +77,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   markerCollider: {fileID: 0}
   children:
-  - {fileID: 2536175700168097785}
+  - {fileID: 4406276665661384579}
   occlusionOnly: 0
   tint: {r: 1, g: 1, b: 1, a: 1}
---- !u!1 &3783201208484514624
+--- !u!1 &7026982251464167236
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -88,42 +88,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5346161022010641528}
-  m_Layer: 0
-  m_Name: Node:Loeffel_Raedlinger
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5346161022010641528
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3783201208484514624}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 4034208663428063724}
-  m_Father: {fileID: 1807142247579674689}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7296214657587797297
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4034208663428063724}
-  - component: {fileID: 5919030767955586367}
-  - component: {fileID: 6208776479870942200}
-  - component: {fileID: 7650282128647973695}
-  - component: {fileID: 2536175700168097785}
+  - component: {fileID: 816068073899926585}
+  - component: {fileID: 3372421963174449242}
+  - component: {fileID: 5364830913216755281}
+  - component: {fileID: 6423514108563819698}
+  - component: {fileID: 4406276665661384579}
   m_Layer: 0
   m_Name: Loeffel Raedlinger
   m_TagString: Untagged
@@ -131,27 +100,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4034208663428063724
+--- !u!4 &816068073899926585
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7296214657587797297}
+  m_GameObject: {fileID: 7026982251464167236}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 5346161022010641528}
+  m_Father: {fileID: 3676825743178873543}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &5919030767955586367
+--- !u!23 &3372421963174449242
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7296214657587797297}
+  m_GameObject: {fileID: 7026982251464167236}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -163,7 +132,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5c4ba1f09d72b4a3cb4570220c6b466e, type: 2}
+  - {fileID: 2100000, guid: a81fba563b7d449e18caf26dad88ac78, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -184,41 +153,76 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &6208776479870942200
+--- !u!33 &5364830913216755281
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7296214657587797297}
-  m_Mesh: {fileID: 4300000, guid: 9c0976cbfdbca45ae9dd7f79e96ae8b2, type: 2}
---- !u!65 &7650282128647973695
+  m_GameObject: {fileID: 7026982251464167236}
+  m_Mesh: {fileID: 4300000, guid: 32e9affcb3e0e473597d79ce95b26a6d, type: 2}
+--- !u!65 &6423514108563819698
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7296214657587797297}
+  m_GameObject: {fileID: 7026982251464167236}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 0.5958271, y: 0.3022718, z: 0.62483466}
   m_Center: {x: 0.11916075, y: 0, z: 0.25985825}
---- !u!114 &2536175700168097785
+--- !u!114 &4406276665661384579
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7296214657587797297}
+  m_GameObject: {fileID: 7026982251464167236}
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3455a5dc1e9e7814284a01e807ebf3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boxCollider: {fileID: 0}
   texture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 0.6, g: 0.6, b: 0.6, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
+  localBounds:
+    m_Center: {x: 0.11916075, y: 0, z: 0.25985825}
+    m_Extent: {x: 0.29791355, y: 0.1511359, z: 0.31241733}
+--- !u!1 &7092055994723665675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3676825743178873543}
+  m_Layer: 0
+  m_Name: Node:Loeffel_Raedlinger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3676825743178873543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7092055994723665675}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 816068073899926585}
+  m_Father: {fileID: 8717841502138335056}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

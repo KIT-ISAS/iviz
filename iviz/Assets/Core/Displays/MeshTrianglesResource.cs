@@ -12,7 +12,7 @@ namespace Iviz.Displays
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
         [CanBeNull] Mesh mesh;
-        Bounds localBounds;
+        [SerializeField] Bounds localBounds;
 
         public Bounds LocalBounds
         {
@@ -201,11 +201,11 @@ namespace Iviz.Displays
         }
 
         public void Set(
-            [NotNull] IReadOnlyCollection<Vector3> points,
-            [CanBeNull] IReadOnlyCollection<Vector3> normals,
-            [CanBeNull] IReadOnlyCollection<Vector2> texCoords,
-            [NotNull] IReadOnlyCollection<int> triangles,
-            [CanBeNull] IReadOnlyCollection<Color32> colors = null)
+            [NotNull] Vector3[] points,
+            [CanBeNull] Vector3[] normals,
+            [CanBeNull] Vector2[] texCoords,
+            [NotNull] int[] triangles,
+            [CanBeNull] Color32[] colors = null)
         {
             if (points is null)
             {
@@ -217,26 +217,26 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(triangles));
             }
 
-            if (triangles.Count % 3 != 0)
+            if (triangles.Length % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Count}", nameof(points));
+                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (normals != null && normals.Count != 0 && normals.Count != points.Count)
+            if (normals != null && normals.Length != 0 && normals.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent normals size!", nameof(normals));
             }
 
-            if (colors != null && colors.Count != 0 && colors.Count != points.Count)
+            if (colors != null && colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            Mesh ownMesh = EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             SetVertices(points, ownMesh);
-            if (normals != null && normals.Count != 0)
+            if (normals != null && normals.Length != 0)
             {
                 SetNormals(normals, ownMesh);
             }
@@ -245,12 +245,12 @@ namespace Iviz.Displays
                 ownMesh.RecalculateNormals();
             }
 
-            if (texCoords != null && texCoords.Count != 0)
+            if (texCoords != null && texCoords.Length != 0)
             {
                 SetTexCoords(texCoords, ownMesh);
             }
 
-            if (colors != null && colors.Count != 0)
+            if (colors != null && colors.Length != 0)
             {
                 SetColors(colors, ownMesh);
             }

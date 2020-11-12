@@ -13,7 +13,7 @@
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows addshadow alpha
+        #pragma surface surf Standard fullforwardshadows addshadow alpha:fade
 
         sampler2D _MainTex;
 
@@ -37,7 +37,7 @@
             o.Albedo = albedoColor.rgb * textureColor.rgb;
             o.Smoothness = _Smoothness;
             o.Alpha = albedoColor.a * textureColor.a;
-            o.Metallic = _Metallic * o.Alpha;
+            o.Metallic = _Metallic;
             o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
         }
         ENDCG

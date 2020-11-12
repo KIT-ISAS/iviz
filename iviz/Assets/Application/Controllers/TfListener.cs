@@ -12,6 +12,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Object = System.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
@@ -402,7 +403,7 @@ namespace Iviz.Controllers
             frames.Remove(frame.Id);
             GuiCamera.Unselect(frame);
             frame.Stop();
-            ResourcePool.Dispose(Resource.Displays.TfFrame, frame.gameObject);
+            UnityEngine.Object.Destroy(frame);
         }
 
         static void Publish([NotNull] tfMessage_v2 msg)

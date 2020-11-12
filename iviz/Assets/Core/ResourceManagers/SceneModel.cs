@@ -63,13 +63,13 @@ namespace Iviz.Displays
                 MemCopy(mesh.Normals, normals, normals.Length * 3 * sizeof(float));
 
                 Color32[] colors = new Color32[mesh.Colors.Length];
-                MemCopy(mesh.Colors, colors, colors.Length * 4);
+                MemCopy(mesh.Colors, colors, colors.Length * sizeof(int));
 
                 Vector2[] texCoords = new Vector2[mesh.TexCoords.Length];
                 MemCopy(mesh.TexCoords, texCoords, texCoords.Length * 2 * sizeof(float));
 
                 int[] triangles = new int[mesh.Faces.Length * 3];
-                MemCopy(mesh.Faces, triangles, triangles.Length * 4);
+                MemCopy(mesh.Faces, triangles, triangles.Length * sizeof(int));
 
                 var material = msg.Materials[mesh.MaterialIndex];
                 r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
@@ -153,16 +153,21 @@ namespace Iviz.Displays
         static Vector3 Assimp2Unity(in Msgs.IvizMsgs.Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
 
-        static void MemCopy<TA, TB>(TA[] src, TB[] dst, int bytes)
+        static void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
             where TA : unmanaged
             where TB : unmanaged
         {
             unsafe
             {
+                if (sizeToCopy > src.Length * sizeof(TA) || sizeToCopy > dst.Length * sizeof(TB))
+                {
+                    throw new InvalidOperationException("Potential buffer overflow!");
+                }
+            
                 fixed (TA* a = src)
                 fixed (TB* b = dst)
                 {
-                    Buffer.MemoryCopy(a, b, bytes, bytes);
+                    Buffer.MemoryCopy(a, b, sizeToCopy, sizeToCopy);
                 }
             }
         }
