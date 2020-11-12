@@ -106,7 +106,7 @@ namespace Iviz.Controllers
 
             GameObject obj = new GameObject(name);
             SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
-            if (!(transform is null))
+            if (transform != null)
             {
                 obj.transform.parent = transform;
             }

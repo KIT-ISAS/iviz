@@ -241,6 +241,9 @@ namespace Iviz.App
                 }
 
                 robot.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
+
+                panel.HelpText.Label = robot.HelpText;
+                UpdateModuleButton();
             }
 
             ResetPanel();

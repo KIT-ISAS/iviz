@@ -80,7 +80,7 @@ namespace Iviz.Controllers
             MapFrame = Add(CreateFrameObject(BaseFrameId, UnityFrame.transform, RootFrame));
             MapFrame.Parent = RootFrame;
             MapFrame.AddListener(defaultListener);
-            MapFrame.AcceptsParents = false;
+            MapFrame.ParentCanChange = false;
             //BaseFrame.ForceInvisible = true;
 
             rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
@@ -237,18 +237,17 @@ namespace Iviz.Controllers
         {
             foreach (var t in transforms)
             {
-                if (t.Transform.HasNaN())
+                if (t.Transform.HasNaN() || t.ChildFrameId.Length == 0)
                 {
                     continue;
                 }
 
-                var timestamp = t.Header.Stamp == default ? TimeSpan.MaxValue : t.Header.Stamp.ToTimeSpan();
-
-                var childId = t.ChildFrameId;
-                if (childId.Length != 0 && childId[0] == '/')
-                {
-                    childId = childId.Substring(1);
-                }
+                var timestamp = t.Header.Stamp == default 
+                    ? TimeSpan.MaxValue 
+                    : t.Header.Stamp.ToTimeSpan();
+                var childId = t.ChildFrameId[0] != '/' 
+                    ? t.ChildFrameId 
+                    : t.ChildFrameId.Substring(1);
 
                 TfFrame child;
                 if (isStatic)
@@ -268,13 +267,21 @@ namespace Iviz.Controllers
                     continue;
                 }
 
+                TfFrame parent;
                 var parentId = t.Header.FrameId;
-                if (parentId.Length != 0 && parentId[0] == '/') // remove starting '/' from tf v1
+                if (parentId.Length == 0)
                 {
-                    parentId = parentId.Substring(1);
+                    parent = RootFrame;
                 }
-
-                var parent = string.IsNullOrEmpty(parentId) ? RootFrame : GetOrCreateFrame(parentId);
+                else if (parentId[0] == '/')
+                {
+                    // remove starting '/' from tf v1
+                    parent = GetOrCreateFrame(parentId.Substring(1));
+                }
+                else
+                {
+                    parent = GetOrCreateFrame(parentId);
+                }
 
                 if (child.SetParent(parent))
                 {

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -33,17 +34,16 @@ namespace Iviz.Core
             // bug: this will activate with any UWP device, not only Hololens! but what else? 
             true;
 #else
-            true;
-            //false;
+            false;
 #endif                
         
-        public static string PlatformName => UnityEngine.Application.platform.ToString().ToLower();
-        public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
-        public static string SavedFolder => PersistentDataPath + "/saved";
-        public static string SimpleConfigurationPath => PersistentDataPath + "/connection.json";
-        public static string ResourcesPath => PersistentDataPath + "/resources";
-        public static string SavedRobotsPath => PersistentDataPath + "/robots";
-        public static string ResourcesFilePath => PersistentDataPath + "/resources.json";
+        [NotNull] public static string PlatformName => UnityEngine.Application.platform.ToString().ToLower();
+        [NotNull] public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
+        [NotNull] public static string SavedFolder => PersistentDataPath + "/saved";
+        [NotNull] public static string SimpleConfigurationPath => PersistentDataPath + "/connection.json";
+        [NotNull] public static string ResourcesPath => PersistentDataPath + "/resources";
+        [NotNull] public static string SavedRobotsPath => PersistentDataPath + "/robots";
+        [NotNull] public static string ResourcesFilePath => PersistentDataPath + "/resources.json";
         public static Camera MainCamera { get; set; }
     }
 }
