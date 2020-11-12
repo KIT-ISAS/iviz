@@ -303,6 +303,16 @@ namespace Iviz.Controllers
                 return;
             }
 
+            if (msg.Points.Length % 3 != 0)
+            {
+                description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
+                    .Append(" needs to be a multiple of 3").AppendLine();
+                meshTriangles.Set(Array.Empty<Vector3>());
+                numErrors++;
+                return;
+            }
+
+            
             meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
             Vector3[] points = new Vector3[msg.Points.Length];
             for (int i = 0; i < points.Length; i++)
