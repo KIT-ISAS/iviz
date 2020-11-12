@@ -59,13 +59,12 @@ namespace Iviz.Displays
 #if UNITY_WSA
         public void OnFocusEnter(FocusEventData eventData)
         {
-            color = resource.EmissiveColor;
             resource.EmissiveColor = GetHighlightColor(Color.black);
         }
 
         public void OnFocusExit(FocusEventData eventData)
         {
-            resource.EmissiveColor = color;
+            resource.EmissiveColor = Color.black;
         }
 #endif
 

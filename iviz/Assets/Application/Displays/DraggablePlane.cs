@@ -120,13 +120,13 @@ namespace Iviz.Displays
 #if UNITY_WSA
         public void OnPointerDown(MixedRealityPointerEventData _)
         {
-            TFListener.GuiManager.DraggedObject = this;
+            TfListener.GuiCamera.DraggedObject = this;
             PointerDown?.Invoke();
         }
 
         public void OnPointerDragged(MixedRealityPointerEventData eventData)
         {
-            Vector3 cameraPosition = TFListener.MainCamera.transform.position;
+            Vector3 cameraPosition = Settings.MainCamera.transform.position;
             Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
 
             Ray pointerRay = new Ray(cameraPosition, pointerPosition - cameraPosition);
