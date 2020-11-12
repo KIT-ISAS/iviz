@@ -36,7 +36,7 @@ namespace Iviz.Roslib
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
-            
+
             Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
                 this, serviceInfo.Service, serviceInfo.Type, Uri);
 
@@ -71,7 +71,15 @@ namespace Iviz.Roslib
                         break;
                     }
 
-                    var sender = new ServiceRequestAsync<T>(serviceInfo, client, callback);
+                    IPEndPoint? endPoint;
+                    if (client == null
+                        || (endPoint = (IPEndPoint?) client.Client.RemoteEndPoint) == null)
+                    {
+                        Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
+                        continue;
+                    }
+
+                    var sender = new ServiceRequestAsync<T>(serviceInfo, client, new Endpoint(endPoint), callback);
                     connections.Add(sender);
 
                     Cleanup();
@@ -95,7 +103,7 @@ namespace Iviz.Roslib
             ServiceRequestAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
             foreach (ServiceRequestAsync<T> connection in toRemove)
             {
-                Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x", 
+                Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
                     this, connection.Hostname);
                 connection.Stop();
                 connections.Remove(connection);
@@ -111,7 +119,7 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            
+
             signal.Release();
             task.Wait();
 
@@ -129,7 +137,7 @@ namespace Iviz.Roslib
             {
                 return;
             }
-            
+
             disposed = true;
 
             signal.Release();
@@ -142,7 +150,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[ServiceSenderManager {Service} [{ServiceType}] at {Uri}]";
+            return $"[ServiceRequestManager {Service} [{ServiceType}] at {Uri}]";
         }
     }
 }

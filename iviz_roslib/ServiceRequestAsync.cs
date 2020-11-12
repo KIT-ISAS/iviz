@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -21,9 +20,9 @@ namespace Iviz.Roslib
 
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
-        
+
         readonly Func<TService, Task> callback;
-        readonly IPEndPoint remoteEndPoint;
+        readonly Endpoint remoteEndPoint;
         readonly ServiceInfo<TService> serviceInfo;
         readonly NetworkStream stream;
         readonly Task task;
@@ -34,22 +33,23 @@ namespace Iviz.Roslib
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
-        internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Func<TService, Task> callback)
+        internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
+            Func<TService, Task> callback)
         {
             stream = tcpClient.GetStream();
             this.tcpClient = tcpClient;
             this.callback = callback;
-            remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
+            this.remoteEndPoint = remoteEndPoint;
             this.serviceInfo = serviceInfo;
 
             keepRunning = true;
-            task = Task.Run(Run);
+            task = Task.Run(async() => await Run().Caf());
         }
 
         public bool IsAlive => !task.IsCompleted;
         string Service => serviceInfo.Service;
         int Port => remoteEndPoint.Port;
-        public string Hostname => remoteEndPoint.Address.ToString();
+        public string Hostname => remoteEndPoint.Hostname;
 
         public void Stop()
         {
@@ -189,13 +189,16 @@ namespace Iviz.Roslib
             {
                 throw new IOException("Connection closed during handshake.");
             }
-            
+
             List<string> fields = Utils.ParseHeader(readBuffer, totalLength);
             string? errorMessage = ProcessRemoteHeader(fields);
 
             await SendHeader(errorMessage).Caf();
 
-            throw new RosRpcException("Failed handshake: " + errorMessage);
+            if (errorMessage != null)
+            {
+                throw new RosRpcException($"Failed handshake: {errorMessage}");
+            }
         }
 
         async Task Run()
@@ -301,7 +304,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[ServiceSender {Hostname}:{Port} '{Service}' >>'{remoteCallerId}']";
+            return $"[ServiceRequest {Hostname}:{Port} '{Service}' >>'{remoteCallerId}']";
         }
     }
 }
