@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -17,7 +18,6 @@ namespace Iviz.Roslib
         const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
 
-        readonly bool persistent;
         readonly bool requestNoDelay;
         readonly ServiceInfo<T> serviceInfo;
         readonly NetworkStream stream;
@@ -31,11 +31,10 @@ namespace Iviz.Roslib
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
 
-        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, Uri remoteUri, bool requestNoDelay, bool persistent)
+        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, Uri remoteUri, bool requestNoDelay)
         {
             this.serviceInfo = serviceInfo;
             this.requestNoDelay = requestNoDelay;
-            this.persistent = persistent;
 
             string remoteHostname = remoteUri.Host;
             int remotePort = remoteUri.Port;
@@ -59,7 +58,7 @@ namespace Iviz.Roslib
             tcpClient.Dispose();
         }
 
-        async Task SendHeaderAsync()
+        async Task SendHeaderAsync(bool persistent)
         {
             string[] contents =
             {
@@ -74,9 +73,9 @@ namespace Iviz.Roslib
             await Utils.WriteHeaderAsync(stream, contents).Caf();
         }
 
-        async Task ProcessHandshake()
+        async Task ProcessHandshake(bool persistent)
         {
-            await SendHeaderAsync().Caf();
+            await SendHeaderAsync(persistent).Caf();
 
             int receivedLength = await ReceivePacketAsync().Caf();
             if (receivedLength == -1)
@@ -96,15 +95,15 @@ namespace Iviz.Roslib
             }
         }
         
-        public async Task StartAsync()
+        public async Task StartAsync(bool persistent)
         {
-            await ProcessHandshake();
+            await ProcessHandshake(persistent);
         }
 
-        public void Start()
+        public void Start(bool persistent)
         {
             // just call the async version from sync
-            Task.Run(async () => { await StartAsync().Caf(); }).WaitAndUnwrapException();
+            Task.Run(async () => { await StartAsync(persistent).Caf(); }).WaitAndUnwrapException();
         }
 
         async Task<int> ReceivePacketAsync()
@@ -133,34 +132,32 @@ namespace Iviz.Roslib
             return length;
         }
 
-        public async Task<bool> ExecuteAsync(T service)
+        public async Task<bool> ExecuteAsync(T service, CancellationToken token)
         {
             bool success;
             try
             {
-                success = await ExecuteImplAsync(service).Caf();
+                success = await ExecuteImplAsync(service, token).Caf();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                Logger.LogFormat("ServiceReceiver: Error during service call:{0}", e);
-                success = false;
-            }
-
-            if (!persistent)
-            {
-                Dispose();
+                throw new RosRpcException("Error during service call", e);
             }
 
             return success;
         }
 
-        public bool Execute(T service)
+        public bool Execute(T service, CancellationToken token)
         {
             // just call the async version from sync
-            return Task.Run(async () => await ExecuteAsync(service).Caf()).WaitAndUnwrapException();
+            return Task.Run(async () => await ExecuteAsync(service, token).Caf(), token).WaitAndUnwrapException();
         }
 
-        async Task<bool> ExecuteImplAsync(T service)
+        async Task<bool> ExecuteImplAsync(T service, CancellationToken token)
         {
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
@@ -170,10 +167,10 @@ namespace Iviz.Roslib
             }
 
             uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
-            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4).Caf();
-            await stream.WriteAsync(writeBuffer, 0, (int) sendLength).Caf();
+            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4, token).Caf();
+            await stream.WriteAsync(writeBuffer, 0, (int) sendLength, token).Caf();
 
-            int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1);
+            int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1, token);
             if (rcvLengthH == 0)
             {
                 throw new IOException("Partner closed the connection");

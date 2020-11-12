@@ -106,7 +106,7 @@ namespace Iviz.Roslib
 
             await sessionTask;
         }
-        
+
         async Task<TcpClient?> TryToConnect()
         {
             TcpClient client = new TcpClient();
@@ -207,8 +207,8 @@ namespace Iviz.Roslib
             }
 
             return length;
-        }        
-        
+        }
+
         async Task ProcessHandshake()
         {
             await SendHeader().Caf();
@@ -228,8 +228,8 @@ namespace Iviz.Roslib
             int index = responses[0].IndexOf('=');
             string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
             throw new RosRpcException($"Failed handshake: {errorMsg}");
-        }        
-        
+        }
+
         async Task StartSession()
         {
             while (KeepRunning)
@@ -237,22 +237,24 @@ namespace Iviz.Roslib
                 tcpClient = null;
                 Logger.LogDebugFormat("{0}: Trying to connect!", this);
 
-                tcpClient = await KeepReconnecting().Caf();
-                if (tcpClient == null)
+                TcpClient? newTcpClient = await KeepReconnecting().Caf();
+                IPEndPoint? newEndPoint;
+                if (newTcpClient == null
+                    || (newEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
                 {
                     Logger.LogDebugFormat(
                         KeepRunning ? "{0}: Ran out of retries. Leaving!" : "{0}: Disposed! Getting out.", this);
                     break;
                 }
 
+                endpoint = new Endpoint(newEndPoint);
                 Logger.LogDebugFormat("{0}: Connected!", this);
 
                 try
                 {
-                    using (tcpClient)
+                    using (tcpClient = newTcpClient)
                     using (stream = tcpClient.GetStream())
                     {
-                        endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint);
                         await ProcessLoop().Caf();
                     }
                 }

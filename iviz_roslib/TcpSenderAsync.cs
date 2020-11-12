@@ -265,12 +265,8 @@ namespace Iviz.Roslib
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
 
-                    try
-                    {
-                        managerSignal?.Release();
-                    }
+                    try { managerSignal?.Release(); }
                     catch (ObjectDisposedException) { }
-
                     managerSignal = null;
 
                     if (!KeepRunning)
@@ -278,8 +274,13 @@ namespace Iviz.Roslib
                         break;
                     }
 
+                    TcpClient newTcpClient;
+                    IPEndPoint? newRemoteEndPoint;
+                    
                     if (!await connectionTask.WaitFor(timeoutInMs, runningTs.Token).Caf()
-                        || !connectionTask.RanToCompletion())
+                        || !connectionTask.RanToCompletion()
+                        || (newTcpClient = await connectionTask.Caf()) == null
+                        || (newRemoteEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
                     {
                         Logger.LogFormat("{0}: Connection timed out (round {1}/{2}): {3}",
                             this, round + 1, MaxConnectionRetries, connectionTask.Exception);
@@ -288,15 +289,12 @@ namespace Iviz.Roslib
 
                     round = 0;
 
-                    using (tcpClient = await connectionTask.Caf())
+                    using (tcpClient = newTcpClient)
                     using (stream = tcpClient.GetStream())
                     {
                         status = SenderStatus.Active;
+                        remoteEndpoint = new Endpoint(newRemoteEndPoint);
                         Logger.LogDebugFormat("{0}: Started!", this);
-
-                        IPEndPoint remoteEndPoint = (IPEndPoint) tcpClient.Client.RemoteEndPoint;
-                        remoteEndpoint = new Endpoint(remoteEndPoint);
-
                         await ProcessLoop().Caf();
                     }
                 }
@@ -318,10 +316,7 @@ namespace Iviz.Roslib
             tcpClient = null;
             stream = null;
             
-            try
-            {
-                managerSignal?.Release();
-            }
+            try { managerSignal?.Release(); }
             catch (ObjectDisposedException) { }
         }
 

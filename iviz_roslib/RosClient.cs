@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Iviz.Msgs;
@@ -184,7 +185,7 @@ namespace Iviz.Roslib
         {
             masterUri ??= EnvironmentMasterUri;
 
-            if (masterUri is null) { throw new ArgumentException("No valid master uri provided", nameof(masterUri)); }
+            if (masterUri is null) { throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set", nameof(masterUri)); }
 
             if (masterUri.Scheme != "http")
             {
@@ -1311,10 +1312,13 @@ namespace Iviz.Roslib
         /// <param name="serviceName">Name of the ROS service</param>
         /// <param name="service">Service message. The response will be written in the response field.</param>
         /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public bool CallService<T>(string serviceName, T service, bool persistent = false) where T : IService
+        public bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000) where T : IService
         {
+            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
@@ -1326,7 +1330,7 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    return existingReceiver.Execute(service);
+                    return existingReceiver.Execute(service, timeoutTs.Token);
                 }
 
                 existingReceiver.Dispose();
@@ -1346,17 +1350,21 @@ namespace Iviz.Roslib
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-                    serviceCaller.Start();
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
+                    serviceCaller.Start(persistent);
                     subscribedServicesByName.Add(serviceName, serviceCaller);
-                    return serviceCaller.Execute(service);
+                    return serviceCaller.Execute(service, timeoutTs.Token);
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-                    serviceCaller.Start();
-                    return serviceCaller.Execute(service);
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
+                    serviceCaller.Start(persistent);
+                    return serviceCaller.Execute(service, timeoutTs.Token);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Service call to uri '{serviceUri}' timed out");
             }
             catch (Exception e)
             {
@@ -1370,11 +1378,14 @@ namespace Iviz.Roslib
         /// <param name="serviceName">Name of the ROS service</param>
         /// <param name="service">Service message. The response will be written in the response field.</param>
         /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false)
+        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService
         {
+            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
@@ -1386,7 +1397,7 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    return await existingReceiver.ExecuteAsync(service);
+                    return await existingReceiver.ExecuteAsync(service, timeoutTs.Token);
                 }
 
                 existingReceiver.Dispose();
@@ -1406,16 +1417,16 @@ namespace Iviz.Roslib
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-                    await serviceCaller.StartAsync().Caf();
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
+                    await serviceCaller.StartAsync(persistent).Caf();
                     subscribedServicesByName.Add(serviceName, serviceCaller);
-                    return await serviceCaller.ExecuteAsync(service).Caf();
+                    return await serviceCaller.ExecuteAsync(service, timeoutTs.Token).Caf();
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true, persistent);
-                    await serviceCaller.StartAsync().Caf();
-                    return await serviceCaller.ExecuteAsync(service).Caf();
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
+                    await serviceCaller.StartAsync(persistent).Caf();
+                    return await serviceCaller.ExecuteAsync(service, timeoutTs.Token).Caf();
                 }
             }
             catch (Exception e)
