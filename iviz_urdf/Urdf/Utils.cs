@@ -47,5 +47,10 @@ namespace Iviz.Urdf
 
             return attr.Value;
         }        
+        
+        public static string ParseString(XmlAttribute? attr, string @default)
+        {
+            return attr?.Value ?? @default;
+        }          
     }
 }

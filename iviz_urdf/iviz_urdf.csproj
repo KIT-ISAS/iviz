@@ -4,7 +4,7 @@
         <LangVersion>8</LangVersion>
         <AssemblyName>Iviz.Urdf</AssemblyName>
         <RootNamespace>Iviz.Urdf</RootNamespace>
-        <TargetFrameworks>netstandard2.0;netcoreapp3.1;netcoreapp5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
         <Nullable>annotations</Nullable>
     </PropertyGroup>
 

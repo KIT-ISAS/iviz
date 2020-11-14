@@ -4,8 +4,8 @@
         <LangVersion>8</LangVersion>
         <AssemblyName>Iviz.MsgsGen.Lib</AssemblyName>
         <RootNamespace>Iviz.MsgsGen</RootNamespace>
-        <TargetFrameworks>netcoreapp3.1;netcoreapp5.0</TargetFrameworks>
         <Nullable>disable</Nullable>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>

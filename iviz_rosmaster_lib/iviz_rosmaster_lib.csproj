@@ -4,10 +4,11 @@
         <AssemblyName>Iviz.Rosmaster.Lib</AssemblyName>
         <RootNamespace>Iviz.Rosmaster</RootNamespace>
         <LangVersion>8</LangVersion>
-        <TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
       <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
     </ItemGroup>
 

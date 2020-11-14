@@ -4,7 +4,7 @@
         <LangVersion>8</LangVersion>
         <AssemblyName>Iviz.XmlRpc</AssemblyName>
         <RootNamespace>Iviz.XmlRpc</RootNamespace>
-        <TargetFrameworks>netstandard2.0;netcoreapp3.1;netcoreapp5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 

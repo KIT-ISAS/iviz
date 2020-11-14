@@ -10,7 +10,7 @@ namespace Iviz.Urdf
 
         internal Material(XmlNode node)
         {
-            Name = Utils.ParseString(node.Attributes?["name"]);
+            Name = Utils.ParseString(node.Attributes?["name"], "");
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
