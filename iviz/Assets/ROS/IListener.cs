@@ -29,7 +29,7 @@ namespace Iviz.Ros
 
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
-        [NotNull] static RosConnection Connection => ConnectionManager.Connection;
+        [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
         
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
 

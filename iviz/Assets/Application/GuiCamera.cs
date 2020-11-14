@@ -17,6 +17,8 @@ namespace Iviz.App
 {
     public sealed class GuiCamera : DisplayNode
     {
+        const float MinShadowDistance = 4;
+
         public static GuiCamera Instance { get; private set; }
         
         Vector2 lastPointer;
@@ -203,7 +205,7 @@ namespace Iviz.App
         {
             bool prevPointerDown = PointerDown;
 
-            QualitySettings.shadowDistance = Mathf.Max(7, 2 * MainCamera.transform.position.y);
+            QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
             //Debug.Log(QualitySettings.shadowDistance);
             
             if (Settings.IsMobile)

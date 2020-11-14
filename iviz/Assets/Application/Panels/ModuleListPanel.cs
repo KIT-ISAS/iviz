@@ -44,6 +44,7 @@ namespace Iviz.App
         [SerializeField] Button addDisplay = null;
         [SerializeField] Button showTfTree = null;
         [SerializeField] Button resetAll = null;
+        [SerializeField] Button showNetwork = null;
 
         [SerializeField] Sprite connectedSprite = null;
         [SerializeField] Sprite connectingSprite = null;
@@ -73,6 +74,7 @@ namespace Iviz.App
         SaveConfigDialogData saveConfigData;
         TfDialogData tfTreeData;
         MarkerDialogData markerData;
+        NetworkDialogData networkData;
 
         ControllerService controllerService;
 
@@ -152,6 +154,7 @@ namespace Iviz.App
             loadConfigData = new LoadConfigDialogData(this);
             saveConfigData = new SaveConfigDialogData(this);
             markerData = new MarkerDialogData(this);
+            networkData = new NetworkDialogData(this);
 
             connectionData = new ConnectionDialogData(this);
 
@@ -173,9 +176,12 @@ namespace Iviz.App
             addDisplay.onClick.AddListener(availableModules.Show);
             showTfTree.onClick.AddListener(tfTreeData.Show);
             resetAll.onClick.AddListener(ResetAllModules);
+            showNetwork.onClick.AddListener(networkData.Show);
 
+            string MasterUriToString(Uri uri) =>
+                uri.AbsolutePath.Length == 0 ? uri + " →" : $"{uri.Host}:{uri.Port} →";
 
-            masterUriStr.Label = connectionData.MasterUri + " →";
+            masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += () =>
             {
                 connectionData.Show();
@@ -198,12 +204,12 @@ namespace Iviz.App
                 else if (RosServerManager.IsActive)
                 {
                     Logger.Internal($"Changing master uri to local master '{uri}'");
-                    masterUriStr.Label = "Master Mode\n" + uri + " →";
+                    masterUriStr.Label = $"Master Mode\n{uri.Host}:{uri.Port} →";
                 }
                 else
                 {
                     Logger.Internal($"Changing master uri to '{uri}'");
-                    masterUriStr.Label = uri + " →";
+                    masterUriStr.Label = MasterUriToString(uri);
                 }
             };
             connectionData.MyIdChanged += id =>
@@ -266,7 +272,7 @@ namespace Iviz.App
             initialized = true;
 
             InitFinished?.Invoke();
-            
+
             if (Settings.IsHololens)
             {
                 hololensManager = new HololensManager();

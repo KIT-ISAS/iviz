@@ -1,265 +1,66 @@
-﻿#define LOG_ENABLED
+﻿//#define LOG_ENABLED
 
-using Iviz.Msgs;
-using Iviz.Roslib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
+using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
+using Logger = Iviz.Msgs.Logger;
 
 namespace Iviz.Ros
 {
-    internal sealed class RoslibConnection : RosConnection
+    public sealed class RoslibConnection : RosConnection
     {
+        static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
+        readonly List<IRosPublisher> publishers = new List<IRosPublisher>();
+        readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
+        readonly Dictionary<string, IAdvertisedService> servicesByTopic = new Dictionary<string, IAdvertisedService>();
+        readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new Dictionary<string, ISubscribedTopic>();
+
+        [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
+        [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
         [CanBeNull] RosClient client;
 
-        interface IAdvertisedTopic
+        Uri masterUri;
+        string myId;
+        Uri myUri;
+
+        [CanBeNull]
+        public Uri MasterUri
         {
-            [CanBeNull] IRosPublisher Publisher { get; }
-            int Id { get; set; }
-            void Add([NotNull] ISender subscriber);
-            void Remove([NotNull] ISender subscriber);
-            int Count { get; }
-            Task AdvertiseAsync([CanBeNull] RosClient client);
-            Task UnadvertiseAsync([NotNull] RosClient client);
-            void Invalidate();
-        }
-
-        class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
-        {
-            int id;
-            [NotNull] readonly string topic;
-
-            readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
-
-            public IRosPublisher Publisher { get; private set; }
-
-            public AdvertisedTopic([NotNull] string topic)
-            {
-                this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            }
-
-            public int Id
-            {
-                get => id;
-                set
-                {
-                    id = value;
-                    foreach (Sender<T> sender in senders)
-                    {
-                        sender.SetId(value);
-                    }
-                }
-            }
-
-            public void Add(ISender publisher)
-            {
-                senders.Add((Sender<T>) publisher);
-            }
-
-            public void Remove(ISender publisher)
-            {
-                senders.Remove((Sender<T>) publisher);
-            }
-
-            public int Count => senders.Count;
-
-            public async Task AdvertiseAsync(RosClient client)
-            {
-                string fullTopic = (topic[0] == '/') ? topic : $"{client?.CallerId}/{topic}";
-                IRosPublisher publisher;
-                if (client != null)
-                {
-                    (_, publisher) = await client.AdvertiseAsync<T>(fullTopic);
-                }
-                else
-                {
-                    publisher = null;
-                }
-
-                Publisher = publisher;
-            }
-
-            public async Task UnadvertiseAsync(RosClient client)
-            {
-                if (client == null)
-                {
-                    throw new ArgumentNullException(nameof(client));
-                }
-
-                string fullTopic = (topic[0] == '/') ? topic : $"{client.CallerId}/{topic}";
-                if (Publisher != null)
-                {
-                    await Publisher.UnadvertiseAsync(fullTopic);
-                }
-            }
-
-            public void Invalidate()
-            {
-                Id = -1;
-                Publisher = null;
-            }
-        }
-
-        interface ISubscribedTopic
-        {
-            [CanBeNull] IRosSubscriber Subscriber { get; }
-            int Count { get; }
-            void Add([NotNull] IListener subscriber);
-            void Remove([NotNull] IListener subscriber);
-            Task SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null);
-            Task UnsubscribeAsync([NotNull] RosClient client);
-            void Invalidate();
-        }
-
-        class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
-        {
-            [NotNull] readonly string topic;
-
-            public IRosSubscriber Subscriber { get; private set; }
-
-            readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
-
-            public SubscribedTopic([NotNull] string topic)
-            {
-                this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            }
-
-            public void Add(IListener subscriber)
-            {
-                listeners.Add((Listener<T>) subscriber);
-            }
-
-            public void Remove(IListener subscriber)
-            {
-                listeners.Remove((Listener<T>) subscriber);
-            }
-
-            void Callback(T msg)
-            {
-                foreach (Listener<T> listener in listeners)
-                {
-                    listener.EnqueueMessage(msg);
-                }
-            }
-
-            public async Task SubscribeAsync(RosClient client, IListener listener)
-            {
-                string fullTopic = (topic[0] == '/') ? topic : $"{client?.CallerId}/{topic}";
-                IRosSubscriber subscriber;
-                if (listener != null)
-                {
-                    listeners.Add((Listener<T>) listener);
-                }
-
-                if (client != null)
-                {
-                    (_, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback);
-                }
-                else
-                {
-                    subscriber = null;
-                }
-
-                Subscriber = subscriber;
-            }
-
-            public async Task UnsubscribeAsync(RosClient client)
-            {
-                string fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
-
-                if (Subscriber != null)
-                {
-                    await Subscriber.UnsubscribeAsync(fullTopic);
-                }
-            }
-
-            public int Count => listeners.Count;
-
-            public void Invalidate()
-            {
-                Subscriber = null;
-            }
-        }
-
-        interface IAdvertisedService
-        {
-            Task AdvertiseAsync([CanBeNull] RosClient client);
-        }
-
-        class AdvertisedService<T> : IAdvertisedService where T : IService, new()
-        {
-            [NotNull] readonly string service;
-            [NotNull] readonly Func<T, Task> callback;
-
-            public AdvertisedService([NotNull] string service, [NotNull] Action<T> callback)
-            {
-                this.service = service ?? throw new ArgumentNullException(nameof(service));
-                if (callback == null)
-                {
-                    throw new ArgumentNullException(nameof(callback));
-                }
-
-                this.callback = async t =>
-                {
-                    callback(t);
-                    await Task.CompletedTask;
-                };
-            }
-
-            public AdvertisedService([NotNull] string service, [NotNull] Func<T, Task> callback)
-            {
-                this.service = service ?? throw new ArgumentNullException(nameof(service));
-                this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
-            }
-
-            public async Task AdvertiseAsync(RosClient client)
-            {
-                string fullService = (service[0] == '/') ? service : $"{client?.CallerId}/{service}";
-                if (client != null)
-                {
-                    await client.AdvertiseServiceAsync(fullService, callback);
-                }
-            }
-        }
-
-        readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
-        readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new Dictionary<string, ISubscribedTopic>();
-        readonly Dictionary<string, IAdvertisedService> servicesByTopic = new Dictionary<string, IAdvertisedService>();
-        readonly List<IRosPublisher> publishers = new List<IRosPublisher>();
-
-        public override Uri MasterUri
-        {
-            get => base.MasterUri;
+            get => masterUri;
             set
             {
-                base.MasterUri = value;
+                masterUri = value;
                 Disconnect();
             }
         }
 
-        public override string MyId
+        [CanBeNull]
+        public string MyId
         {
-            get => base.MyId;
+            get => myId;
             set
             {
-                base.MyId = value;
+                myId = value;
                 Disconnect();
             }
         }
 
-        public override Uri MyUri
+        [CanBeNull]
+        public Uri MyUri
         {
-            get => base.MyUri;
+            get => myUri;
             set
             {
-                base.MyUri = value;
+                myUri = value;
                 Disconnect();
             }
         }
@@ -296,20 +97,18 @@ namespace Iviz.Ros
 
             if (client != null)
             {
-                Debug.LogWarning("Warning: New client requested, but old client still running!");
+                Debug.LogWarning("Warning: New client requested, but old client still running?!");
                 await DisposeClient();
             }
 
             try
             {
 #if LOG_ENABLED
-                Msgs.Logger.LogDebug = Logger.Debug;
-                Msgs.Logger.LogError = Logger.Error;
-                Msgs.Logger.Log = Logger.Info;
+                Logger.LogDebug = Core.Logger.Debug;
+                Logger.LogError = Core.Logger.Error;
+                Logger.Log = Core.Logger.Info;
 #endif
-
-
-                Logger.Internal("Connecting...");
+                Core.Logger.Internal("Connecting...");
 
                 client = new RosClient(MasterUri, MyId, MyUri, false);
 
@@ -317,7 +116,7 @@ namespace Iviz.Ros
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
                 {
-                    Logger.Internal("Resubscribing and republishing...");
+                    Core.Logger.Internal("Resubscribing and republishing...");
                 }
 
                 await Task.WhenAll(publishersByTopic.Values.Select(Readvertise));
@@ -328,7 +127,7 @@ namespace Iviz.Ros
                     await entry.AdvertiseAsync(client);
                 }
 
-                Logger.Internal("<b>Connected.</b>");
+                Core.Logger.Internal("<b>Connected.</b>");
 
                 return true;
             }
@@ -338,16 +137,16 @@ namespace Iviz.Ros
              e is RosRpcException ||
              e is XmlRpcException)
             {
-                Logger.Internal("Error:", e);
+                Core.Logger.Internal("Error:", e);
                 if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                 {
-                    Logger.Internal(
+                    Core.Logger.Internal(
                         "Note: This appears to be my own master. Are you sure the uri network is reachable?");
                 }
             }
             catch (Exception e)
             {
-                Logger.Warn(e);
+                Core.Logger.Warn(e);
             }
 
             await DisposeClient();
@@ -376,9 +175,9 @@ namespace Iviz.Ros
 
             AddTask(async () =>
                 {
-                    Logger.Internal("Disconnecting...");
+                    Core.Logger.Internal("Disconnecting...");
                     await DisposeClient();
-                    Logger.Internal("<b>Disconnected.</b>");
+                    Core.Logger.Internal("<b>Disconnected.</b>");
 
                     foreach (var entry in publishersByTopic.Values)
                     {
@@ -396,7 +195,7 @@ namespace Iviz.Ros
             );
         }
 
-        internal override void Advertise<T>(Sender<T> advertiser)
+        internal void Advertise<T>([NotNull] Sender<T> advertiser) where T : IMessage
         {
             if (advertiser == null)
             {
@@ -411,7 +210,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
             });
@@ -419,49 +218,48 @@ namespace Iviz.Ros
 
         async Task AdvertiseImpl<T>([NotNull] Sender<T> advertiser) where T : IMessage
         {
-            if (!publishersByTopic.TryGetValue(advertiser.Topic, out IAdvertisedTopic advertisedTopic))
+            if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
-                AdvertisedTopic<T> newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
+                advertisedTopic.Add(advertiser);
+                advertiser.SetId(advertisedTopic.Id);
+                return;
+            }
 
-                int id;
-                if (client != null)
+            var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
+
+            int id;
+            if (client != null)
+            {
+                await newAdvertisedTopic.AdvertiseAsync(client);
+
+                var publisher = newAdvertisedTopic.Publisher;
+
+                id = publishers.FindIndex(x => x is null);
+                if (id == -1)
                 {
-                    await newAdvertisedTopic.AdvertiseAsync(client);
-
-                    var publisher = newAdvertisedTopic.Publisher;
-                    //Logger.Debug("Direct advertisement for " + advertiser.Topic);
-
-                    //client?.Advertise<T>(advertiser.Topic, out publisher);
-                    id = publishers.FindIndex(x => x is null);
-                    if (id == -1)
-                    {
-                        id = publishers.Count;
-                        publishers.Add(publisher);
-                        //Logger.Debug("Id is " + id);
-                    }
-                    else
-                    {
-                        publishers[id] = publisher;
-                        //Logger.Debug("Id is " + id);
-                    }
-
-                    PublishedTopics = client.PublishedTopics;
+                    id = publishers.Count;
+                    publishers.Add(publisher);
                 }
                 else
                 {
-                    id = -1;
+                    publishers[id] = publisher;
                 }
 
-                advertisedTopic = newAdvertisedTopic;
-                advertisedTopic.Id = id;
-                publishersByTopic.Add(advertiser.Topic, advertisedTopic);
+                PublishedTopics = client.PublishedTopics;
+            }
+            else
+            {
+                id = -1;
             }
 
-            advertisedTopic.Add(advertiser);
-            advertiser.SetId(advertisedTopic.Id);
+            newAdvertisedTopic.Id = id;
+            publishersByTopic.Add(advertiser.Topic, newAdvertisedTopic);
+            newAdvertisedTopic.Add(advertiser);
+            advertiser.SetId(newAdvertisedTopic.Id);
         }
 
-        public override void AdvertiseService<T>(string service, Action<T> callback)
+        public void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
+            where T : IService, new()
         {
             if (service == null)
             {
@@ -481,7 +279,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
             });
@@ -495,9 +293,10 @@ namespace Iviz.Ros
                 return;
             }
 
-            Logger.Internal($"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
+            Core.Logger.Internal(
+                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
 
-            AdvertisedService<T> newAdvertisedService = new AdvertisedService<T>(service, callback);
+            var newAdvertisedService = new AdvertisedService<T>(service, callback);
 
             if (client != null)
             {
@@ -519,7 +318,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(srv));
             }
 
-            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+            var signal = new SemaphoreSlim(0, 1);
             bool[] result = {false};
 
             AddTask(async () =>
@@ -530,7 +329,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Warn(e);
+                    Core.Logger.Warn(e);
                 }
 
                 signal.Release();
@@ -540,7 +339,7 @@ namespace Iviz.Ros
             return result[0];
         }
 
-        internal override void Publish<T>(Sender<T> advertiser, T msg)
+        internal void Publish<T>(Sender<T> advertiser, T msg) where T : IMessage
         {
             if (advertiser == null)
             {
@@ -560,7 +359,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
 
@@ -576,14 +375,14 @@ namespace Iviz.Ros
                 return;
             }
 
-            IRosPublisher basePublisher = publishers[advertiser.Id];
+            var basePublisher = publishers[advertiser.Id];
             if (basePublisher != null && basePublisher is IRosPublisher<T> publisher)
             {
                 publisher.Publish(msg);
             }
         }
 
-        internal override void Subscribe<T>(Listener<T> listener)
+        internal void Subscribe<T>([NotNull] Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (listener == null)
             {
@@ -598,7 +397,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
             });
@@ -606,21 +405,18 @@ namespace Iviz.Ros
 
         async Task SubscribeImpl<T>([NotNull] IListener listener) where T : IMessage, IDeserializable<T>, new()
         {
-            if (!subscribersByTopic.TryGetValue(listener.Topic, out ISubscribedTopic subscribedTopic))
+            if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
             {
-                SubscribedTopic<T> newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
-
-                await newSubscribedTopic.SubscribeAsync(client, listener);
-
-                subscribedTopic = newSubscribedTopic;
-                subscribersByTopic.Add(listener.Topic, subscribedTopic);
+                subscribedTopic.Add(listener);
                 return;
             }
 
-            subscribedTopic.Add(listener);
+            var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
+            await newSubscribedTopic.SubscribeAsync(client, listener);
+            subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
         }
 
-        internal override void Unadvertise(ISender advertiser)
+        internal void Unadvertise([NotNull] ISender advertiser)
         {
             if (advertiser == null)
             {
@@ -635,7 +431,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
             });
@@ -643,7 +439,7 @@ namespace Iviz.Ros
 
         async Task UnadvertiseImpl([NotNull] ISender advertiser)
         {
-            if (!publishersByTopic.TryGetValue(advertiser.Topic, out IAdvertisedTopic advertisedTopic))
+            if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
                 return;
             }
@@ -667,7 +463,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal override void Unsubscribe(IListener subscriber)
+        internal void Unsubscribe([NotNull] IListener subscriber)
         {
             if (subscriber == null)
             {
@@ -682,7 +478,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                     Disconnect();
                 }
             });
@@ -691,7 +487,7 @@ namespace Iviz.Ros
 
         async Task UnsubscribeImpl([NotNull] IListener subscriber)
         {
-            if (!subscribersByTopic.TryGetValue(subscriber.Topic, out ISubscribedTopic subscribedTopic))
+            if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
                 return;
             }
@@ -707,9 +503,7 @@ namespace Iviz.Ros
             }
         }
 
-        ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
-
-        public override ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedOnly)
@@ -717,48 +511,31 @@ namespace Iviz.Ros
                 return cachedTopics;
             }
 
-            SemaphoreSlim signal = null;
-            if (type == RequestType.WaitForRequest)
-            {
-                signal = new SemaphoreSlim(0, 1);
-            }
+            SemaphoreSlim signal = type == RequestType.WaitForRequest
+                ? new SemaphoreSlim(0, 1)
+                : null;
 
             AddTask(async () =>
             {
                 try
                 {
-                    if (client is null)
-                    {
-                        cachedTopics = EmptyTopics;
-                        return;
-                    }
-
-                    cachedTopics = await client.GetSystemPublishedTopicsAsync();
+                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync();
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                 }
-
-                if (type == RequestType.WaitForRequest)
+                finally
                 {
                     signal?.Release();
                 }
             });
 
-            if (type == RequestType.WaitForRequest)
-            {
-                signal?.Wait();
-            }
-
+            signal?.Wait();
             return cachedTopics;
         }
 
-        static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
-
-        ReadOnlyCollection<string> cachedParameters = EmptyParameters;
-
-        public override ReadOnlyCollection<string> GetSystemParameterList()
+        public ReadOnlyCollection<string> GetSystemParameterList()
         {
             AddTask(async () =>
             {
@@ -774,22 +551,22 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Core.Logger.Error(e);
                 }
             });
 
             return cachedParameters;
         }
 
-        public override object GetParameter(string parameter)
+        public object GetParameter([NotNull] string parameter)
         {
             if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-            object[] result = {null};
+            var signal = new SemaphoreSlim(0, 1);
+            object result = null;
 
             AddTask(async () =>
             {
@@ -797,40 +574,40 @@ namespace Iviz.Ros
                 {
                     if (client?.Parameters != null)
                     {
-                        (_, result[0]) = await client.Parameters.GetParameterAsync(parameter);
+                        (_, result) = await client.Parameters.GetParameterAsync(parameter);
                     }
                 }
                 catch (Exception e)
                 {
-                    Logger.Warn(e);
+                    Core.Logger.Warn(e);
                 }
 
                 signal.Release();
             });
 
             signal.Wait();
-            return result[0];
+            return result;
         }
 
-        public override int GetNumPublishers(string topic)
+        public int GetNumPublishers([NotNull] string topic)
         {
             if (topic == null)
             {
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            subscribersByTopic.TryGetValue(topic, out ISubscribedTopic subscribedTopic);
+            subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
             return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
         }
 
-        public override int GetNumSubscribers(string topic)
+        public int GetNumSubscribers([NotNull] string topic)
         {
             if (topic == null)
             {
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            publishersByTopic.TryGetValue(topic, out IAdvertisedTopic advertisedTopic);
+            publishersByTopic.TryGetValue(topic, out var advertisedTopic);
             return advertisedTopic?.Publisher?.NumSubscribers ?? 0;
         }
 
@@ -838,6 +615,310 @@ namespace Iviz.Ros
         {
             Disconnect();
             base.Stop();
+        }
+
+        public void GenerateReport(StringBuilder builder)
+        {
+            var mClient = client;
+            if (mClient == null)
+            {
+                return;
+            }
+
+            var subscriberStats = mClient.GetSubscriberStatistics();
+            var publisherStats = mClient.GetPublisherStatistics();
+
+            foreach (var stat in subscriberStats.Topics)
+            {
+                builder.Append("<b>** Subscribed: ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
+                builder.Append("<b>Connections:</b>").AppendLine();
+
+                if (stat.Receivers.Count == 0)
+                {
+                    builder.Append("(None)").AppendLine();
+                    continue;
+                }
+
+                foreach (var receiver in stat.Receivers)
+                {
+                    var isConnected = receiver.IsAlive;
+                    var isAlive = receiver.IsAlive;
+                    builder.Append("<b>→</b> ")
+                        .Append(receiver.RemoteUri == mClient.CallerUri ? "[Me]" : receiver.RemoteUri.Host);
+                    if (isAlive && isConnected)
+                    {
+                        int kbytes = receiver.BytesReceived / 1000;
+                        builder.Append(" ↓").Append(kbytes.ToString("N0")).Append("kB");
+                    }
+                    else if (!isAlive)
+                    {
+                        builder.Append(" <color=red>(dead)</color>");
+                    }
+                    else
+                    {
+                        builder.Append(" <color=navy>(connecting)</b>");
+                    }
+
+                    builder.AppendLine();
+                }
+
+                builder.AppendLine();
+            }
+
+            builder.AppendLine();
+
+            foreach (var stat in publisherStats.Topics)
+            {
+                builder.Append("<b>** Publishing: ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
+                builder.Append("<b>Connections:</b>").AppendLine();
+
+                if (stat.Senders.Count == 0)
+                {
+                    builder.Append("(None)").AppendLine();
+                    continue;
+                }
+
+                foreach (var receiver in stat.Senders)
+                {
+                    var isAlive = receiver.IsAlive;
+                    builder.Append("<b>→</b> ");
+                    if (receiver.RemoteId == mClient.CallerId)
+                    {
+                        builder.Append("[Me]");
+                    }
+                    else
+                    {
+                        builder.Append("[").Append(receiver.RemoteId).Append("] ")
+                            .Append(receiver.RemoteEndpoint?.Hostname ?? "(Unknown address)");
+                    }
+
+                    if (isAlive)
+                    {
+                        int kbytes = receiver.BytesSent / 1000;
+                        builder.Append(" ↑").Append(kbytes.ToString("N0")).Append("kB");
+                    }
+                    else
+                    {
+                        builder.Append(" <color=red>(dead)</color>");
+                    }
+
+                    builder.AppendLine();
+                }
+
+                builder.AppendLine();
+            }
+        }
+
+        interface IAdvertisedTopic
+        {
+            [CanBeNull] IRosPublisher Publisher { get; }
+            int Id { get; set; }
+            int Count { get; }
+            void Add([NotNull] ISender subscriber);
+            void Remove([NotNull] ISender subscriber);
+            Task AdvertiseAsync([CanBeNull] RosClient client);
+            Task UnadvertiseAsync([NotNull] RosClient client);
+            void Invalidate();
+        }
+
+        class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
+        {
+            readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
+            [NotNull] readonly string topic;
+            int id;
+
+            public AdvertisedTopic([NotNull] string topic)
+            {
+                this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            }
+
+            public IRosPublisher Publisher { get; private set; }
+
+            public int Id
+            {
+                get => id;
+                set
+                {
+                    id = value;
+                    foreach (var sender in senders)
+                    {
+                        sender.SetId(value);
+                    }
+                }
+            }
+
+            public void Add(ISender publisher)
+            {
+                senders.Add((Sender<T>) publisher);
+            }
+
+            public void Remove(ISender publisher)
+            {
+                senders.Remove((Sender<T>) publisher);
+            }
+
+            public int Count => senders.Count;
+
+            public async Task AdvertiseAsync(RosClient client)
+            {
+                var fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
+                IRosPublisher publisher;
+                if (client != null)
+                {
+                    (_, publisher) = await client.AdvertiseAsync<T>(fullTopic);
+                }
+                else
+                {
+                    publisher = null;
+                }
+
+                Publisher = publisher;
+            }
+
+            public async Task UnadvertiseAsync(RosClient client)
+            {
+                if (client == null)
+                {
+                    throw new ArgumentNullException(nameof(client));
+                }
+
+                var fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
+                if (Publisher != null)
+                {
+                    await Publisher.UnadvertiseAsync(fullTopic);
+                }
+            }
+
+            public void Invalidate()
+            {
+                Id = -1;
+                Publisher = null;
+            }
+        }
+
+        interface ISubscribedTopic
+        {
+            [CanBeNull] IRosSubscriber Subscriber { get; }
+            int Count { get; }
+            void Add([NotNull] IListener subscriber);
+            void Remove([NotNull] IListener subscriber);
+            Task SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null);
+            Task UnsubscribeAsync([NotNull] RosClient client);
+            void Invalidate();
+        }
+
+        class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+        {
+            readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
+            [NotNull] readonly string topic;
+
+            public SubscribedTopic([NotNull] string topic)
+            {
+                this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            }
+
+            public IRosSubscriber Subscriber { get; private set; }
+
+            public void Add(IListener subscriber)
+            {
+                listeners.Add((Listener<T>) subscriber);
+            }
+
+            public void Remove(IListener subscriber)
+            {
+                listeners.Remove((Listener<T>) subscriber);
+            }
+
+            public async Task SubscribeAsync(RosClient client, IListener listener)
+            {
+                var fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
+                IRosSubscriber subscriber;
+                if (listener != null)
+                {
+                    listeners.Add((Listener<T>) listener);
+                }
+
+                if (client != null)
+                {
+                    (_, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback);
+                }
+                else
+                {
+                    subscriber = null;
+                }
+
+                Subscriber = subscriber;
+            }
+
+            public async Task UnsubscribeAsync(RosClient client)
+            {
+                var fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
+
+                if (Subscriber != null)
+                {
+                    await Subscriber.UnsubscribeAsync(fullTopic);
+                }
+            }
+
+            public int Count => listeners.Count;
+
+            public void Invalidate()
+            {
+                Subscriber = null;
+            }
+
+            void Callback(T msg)
+            {
+                foreach (var listener in listeners)
+                {
+                    listener.EnqueueMessage(msg);
+                }
+            }
+        }
+
+        interface IAdvertisedService
+        {
+            Task AdvertiseAsync([CanBeNull] RosClient client);
+        }
+
+        class AdvertisedService<T> : IAdvertisedService where T : IService, new()
+        {
+            [NotNull] readonly Func<T, Task> callback;
+            [NotNull] readonly string service;
+
+            public AdvertisedService([NotNull] string service, [NotNull] Action<T> callback)
+            {
+                this.service = service ?? throw new ArgumentNullException(nameof(service));
+                if (callback == null)
+                {
+                    throw new ArgumentNullException(nameof(callback));
+                }
+
+                this.callback = async t =>
+                {
+                    callback(t);
+                    await Task.CompletedTask;
+                };
+            }
+
+            /*
+            public AdvertisedService([NotNull] string service, [NotNull] Func<T, Task> callback)
+            {
+                this.service = service ?? throw new ArgumentNullException(nameof(service));
+                this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            }
+            */
+
+            public async Task AdvertiseAsync(RosClient client)
+            {
+                var fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
+                if (client != null)
+                {
+                    await client.AdvertiseServiceAsync(fullService, callback);
+                }
+            }
         }
     }
 }

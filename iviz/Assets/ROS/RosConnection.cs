@@ -33,14 +33,9 @@ namespace Iviz.Ros
         }
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
-        [CanBeNull] public virtual Uri MasterUri { get; set; }
-        [CanBeNull] public virtual Uri MyUri { get; set; }
-        [CanBeNull] public virtual string MyId { get; set; }
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
-
         public abstract bool CallService<T>(string service, T srv) where T : IService;
-
         public event Action<ConnectionState> ConnectionStateChanged;
 
         internal virtual void Stop()
@@ -123,32 +118,6 @@ namespace Iviz.Ros
         {
             SetConnectionState(ConnectionState.Disconnected);
         }
-
-        internal abstract void Subscribe<T>([NotNull] Listener<T> listener)
-            where T : IMessage, IDeserializable<T>, new();
-
-        internal abstract void Unsubscribe([NotNull] IListener subscriber);
-        internal abstract void Advertise<T>([NotNull] Sender<T> advertiser) where T : IMessage;
-        internal abstract void Unadvertise([NotNull] ISender advertiser);
-        internal abstract void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage;
-
-        public abstract void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
-            where T : IService, new();
-
-        [ItemNotNull]
-        [NotNull]
-        public abstract ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
-            RequestType type = RequestType.CachedButRequestInBackground);
-
-        [NotNull]
-        [ItemNotNull]
-        public abstract ReadOnlyCollection<string> GetSystemParameterList();
-
-        public abstract int GetNumPublishers([NotNull] string topic);
-        public abstract int GetNumSubscribers([NotNull] string topic);
-
-        [NotNull]
-        public abstract object GetParameter([NotNull] string parameter);
     }
 
     public enum RequestType

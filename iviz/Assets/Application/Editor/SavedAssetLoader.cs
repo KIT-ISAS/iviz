@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -11,7 +12,7 @@ using LightType = Iviz.Sdf.LightType;
 namespace Iviz.Editor
 {
     public class SavedAssetLoader : UnityEditor.Editor
-    { 
+    {
         [MenuItem("Iviz/Import Saved Assets To Unity")]
         public static void CreateAllAssets()
         {
@@ -23,10 +24,10 @@ namespace Iviz.Editor
             {
                 CreateAsset(uri, manager);
             }
-            
+
             CreateRobots(manager);
             AssetDatabase.Refresh();
-            
+
             Debug.Log("SavedAssetLoader: Done!");
 
             // ugly workaround
@@ -51,7 +52,7 @@ namespace Iviz.Editor
         
         CreateWorld(newSdf.Worlds[0]);
         }
-        */            
+        */
 
 
         static void CreateRobots(ExternalResourceManager manager)
@@ -68,7 +69,7 @@ namespace Iviz.Editor
             }
 
             Debug.LogWarning("SavedAssetLoader: Not writing robot resource files.");
-            
+
             foreach (string robotName in manager.GetRobotNames())
             {
                 manager.TryGetRobot(robotName, out string robotDescription);
@@ -87,8 +88,8 @@ namespace Iviz.Editor
             if (!string.IsNullOrEmpty(relativePath) && Path.DirectorySeparatorChar == '\\')
             {
                 relativePath = relativePath.Replace('\\', '/');
-            }            
-            
+            }
+
             string filename = Path.GetFileNameWithoutExtension(uriPath);
             string filenameWithExtension = Path.GetFileName(uriPath);
 
@@ -103,19 +104,19 @@ namespace Iviz.Editor
                 Debug.Log("SavedAssetLoader: Skipping " + assetUri + "...");
                 return;
             }
-            
+
             Directory.CreateDirectory(absolutePath);
-            
+
             if (!manager.TryGet(assetUri, out Info<GameObject> resourceInfo, null))
             {
                 throw new FileNotFoundException(assetUri.ToString());
             }
-            
-            GameObject obj = resourceInfo.Object;             
 
+            GameObject obj = resourceInfo.Object;
             MeshTrianglesResource[] resources = obj.GetComponentsInChildren<MeshTrianglesResource>();
-
             HashSet<Mesh> writtenMeshes = new HashSet<Mesh>();
+
+            int meshId = 0;
             foreach (var resource in resources)
             {
                 MeshFilter filter = resource.GetComponent<MeshFilter>();
@@ -130,13 +131,49 @@ namespace Iviz.Editor
                 }
 
                 writtenMeshes.Add(filter.sharedMesh);
-                string meshPath = AssetDatabase.GenerateUniqueAssetPath(innerPath + "/mesh.mesh");
-                AssetDatabase.CreateAsset(filter.sharedMesh, meshPath);
+
+                //string meshPath = AssetDatabase.GenerateUniqueAssetPath(innerPath + "/mesh.mesh");
+                //AssetDatabase.CreateAsset(filter.sharedMesh, meshPath);
+
+
+                StringBuilder sb = new StringBuilder();
+                Mesh m = filter.sharedMesh;
+                foreach (Vector3 v in m.vertices)
+                {
+                    sb.AppendFormat("v {0} {1} {2}\n", -v.x, v.y, v.z);
+                }
+
+                sb.AppendLine();
+                foreach (Vector2 v in m.uv)
+                {
+                    sb.AppendFormat("vt {0} {1}\n", v.x, v.y);
+                }
+
+                for (int subMesh = 0; subMesh < m.subMeshCount; subMesh++)
+                {
+                    sb.AppendLine();
+                    int[] triangles = m.GetTriangles(subMesh);
+                    for (int i = 0; i < triangles.Length; i += 3)
+                    {
+                        sb.AppendFormat("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
+                            triangles[i] + 1, triangles[i + 2] + 1, triangles[i + 1] + 1);
+                    }
+                }
+                
+                File.WriteAllText($"{absolutePath}/mesh-{meshId}.obj", sb.ToString());
+                AssetDatabase.Refresh();
+
+                string meshPath = $"{innerPath}/mesh-{meshId}.obj";
+                Mesh newMesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+                filter.sharedMesh = newMesh;                
+                
+                meshId++;
             }
 
             Material baseMaterial = UnityEngine.Resources.Load<Material>("Materials/Standard");
 
-            Dictionary<(Color, Color, Texture2D), Material> writtenColors = new Dictionary<(Color, Color, Texture2D), Material>();
+            Dictionary<(Color, Color, Texture2D), Material> writtenColors =
+                new Dictionary<(Color, Color, Texture2D), Material>();
 
             int textureId = 0;
             foreach (var resource in resources)
@@ -145,10 +182,10 @@ namespace Iviz.Editor
                 Color color = resource.Color;
                 Color emissive = resource.EmissiveColor;
                 Texture2D texture = resource.Texture;
-                
+
                 if (writtenColors.TryGetValue((color, emissive, texture), out Material material))
                 {
-                    resource.SetMaterialValuesDirect((Texture2D)material.mainTexture, emissive, color, Color.white);
+                    resource.SetMaterialValuesDirect((Texture2D) material.mainTexture, emissive, color, Color.white);
                     renderer.sharedMaterial = material;
                     continue;
                 }
@@ -177,7 +214,7 @@ namespace Iviz.Editor
                 material.mainTexture = newTexture;
 
                 textureId++;
-                
+
                 resource.SetMaterialValuesDirect(newTexture, emissive, color, Color.white);
             }
 
@@ -188,7 +225,7 @@ namespace Iviz.Editor
                 collider.center = resource.LocalBounds.center;
                 collider.size = resource.LocalBounds.size;
                 collider.enabled = false;
-                
+
                 //DestroyImmediate(resource);
                 resource.enabled = false;
             }
@@ -200,16 +237,17 @@ namespace Iviz.Editor
             }
 
             Debug.Log("Writing to " + topPath + "/" + filenameWithExtension + ".prefab");
-            PrefabUtility.SaveAsPrefabAssetAndConnect(obj, topPath + "/" + filenameWithExtension + ".prefab", InteractionMode.UserAction);
+            PrefabUtility.SaveAsPrefabAssetAndConnect(obj, topPath + "/" + filenameWithExtension + ".prefab",
+                InteractionMode.UserAction);
 
             //DestroyImmediate(obj);
         }
 
-        
+
         static void CreateWorld(Sdf.World world)
         {
             GameObject worldObject = new GameObject("World:" + world.Name);
-            
+
             foreach (Sdf.Model model in world.Models)
             {
                 CreateModel(model)?.transform.SetParent(worldObject.transform, false);
@@ -233,16 +271,17 @@ namespace Iviz.Editor
                     case LightType.Spot:
                         light.type = UnityEngine.LightType.Spot;
                         light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
-                        light.spotAngle = (float)source.Spot.OuterAngle * Mathf.Rad2Deg;
+                        light.spotAngle = (float) source.Spot.OuterAngle * Mathf.Rad2Deg;
                         light.innerSpotAngle = (float) source.Spot.InnerAngle * Mathf.Rad2Deg;
                         break;
                     case LightType.Directional:
-                        light.type = UnityEngine.LightType.Directional; 
+                        light.type = UnityEngine.LightType.Directional;
                         light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
                         break;
                 }
             }
         }
+
         static GameObject CreateModel(Sdf.Model model)
         {
             GameObject modelObject = new GameObject("Model:" + model.Name);
@@ -255,7 +294,7 @@ namespace Iviz.Editor
                 // invalid
                 return modelObject;
             }
-            
+
             foreach (Sdf.Model innerModel in model.Models)
             {
                 CreateModel(innerModel)?.transform.SetParent(modelObject.transform, false);
@@ -265,10 +304,10 @@ namespace Iviz.Editor
             {
                 CreateLink(link)?.transform.SetParent(modelObject.transform, false);
             }
-            
+
             return modelObject;
         }
-        
+
         static GameObject CreateLink(Sdf.Link link)
         {
             GameObject linkObject = new GameObject("Link:" + link.Name);
@@ -300,7 +339,7 @@ namespace Iviz.Editor
                     {
                         throw new Exception();
                     }
-                    
+
                     resourceObject = Instantiate(assetObject, visualObject.transform, false);
                     visualObject.transform.localScale = geometry.Mesh.Scale?.ToVector3().Abs() ?? Vector3.one;
                     //isSynthetic = true;
@@ -309,9 +348,9 @@ namespace Iviz.Editor
                 {
                     resourceObject = Instantiate(Resource.Displays.Cylinder.Object, visualObject.transform, false);
                     visualObject.transform.localScale = new Vector3(
-                        (float)geometry.Cylinder.Radius * 2,
-                        (float)geometry.Cylinder.Length,
-                        (float)geometry.Cylinder.Radius * 2);
+                        (float) geometry.Cylinder.Radius * 2,
+                        (float) geometry.Cylinder.Length,
+                        (float) geometry.Cylinder.Radius * 2);
                 }
                 else if (geometry.Box != null)
                 {
@@ -321,7 +360,7 @@ namespace Iviz.Editor
                 else if (geometry.Sphere != null)
                 {
                     resourceObject = Instantiate(Resource.Displays.Sphere.Object, visualObject.transform, false);
-                    visualObject.transform.localScale = (float)geometry.Sphere.Radius * Vector3.one;
+                    visualObject.transform.localScale = (float) geometry.Sphere.Radius * Vector3.one;
                 }
 
                 if (resourceObject == null)
@@ -332,8 +371,5 @@ namespace Iviz.Editor
 
             return linkObject;
         }
-
-        
-
     }
 }

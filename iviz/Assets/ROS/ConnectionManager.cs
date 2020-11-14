@@ -1,16 +1,12 @@
 ﻿//#define PUBLISH_LOG
 
-using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Msgs.Logger;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
@@ -24,23 +20,26 @@ namespace Iviz.Ros
     public class ConnectionManager : MonoBehaviour
     {
         static ConnectionManager Instance;
-
-        [NotNull] public static IExternalServiceProvider ServiceProvider => Connection;
-
-        static RosConnection connection;
-        [NotNull] public static RosConnection Connection => connection ?? (connection = new RoslibConnection());
+        static RoslibConnection connection;
+        
+        int frameBandwidthDown;
+        int frameBandwidthUp;
+        uint logSeq;
 
         Sender<Log> sender;
 
-        int frameBandwidthUp;
-        int frameBandwidthDown;
+        [NotNull] public static IExternalServiceProvider ServiceProvider => Connection;
+        [NotNull] public static RoslibConnection Connection => connection ?? (connection = new RoslibConnection());
+
+        [CanBeNull] public static string MyId => Connection.MyId;
+        public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;
 
         void Awake()
         {
             Instance = this;
 
             sender = new Sender<Log>("/rosout");
-            Core.Logger.LogExternal += LogMessage;
+            Logger.LogExternal += LogMessage;
         }
 
         void OnDestroy()
@@ -50,7 +49,6 @@ namespace Iviz.Ros
             RosServerManager.Dispose();
         }
 
-        uint logSeq = 0;
         void LogMessage(in LogMessage msg)
         {
             sender.Publish(new Log
@@ -63,9 +61,6 @@ namespace Iviz.Ros
                 Line = (uint) msg.Line
             });
         }
-
-        [CanBeNull] public static string MyId => Connection.MyId;
-        public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;
 
         internal static void ReportBandwidthUp(int size)
         {

@@ -20,7 +20,7 @@ namespace Iviz.Ros
 
     public sealed class Sender<T> : ISender where T : IMessage
     {
-        static RosConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => ConnectionManager.Connection;
         
         int lastMsgBytes;
         int lastMsgCounter;

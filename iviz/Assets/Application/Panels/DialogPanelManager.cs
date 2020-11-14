@@ -15,7 +15,8 @@ namespace Iviz.App
         Image,
         Tf,
         SaveAs,
-        Marker
+        Marker,
+        Network
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -52,6 +53,8 @@ namespace Iviz.App
                 .GetComponent<AddTopicDialogContents>();
             PanelByType[DialogPanelType.Marker] = Resource.Widgets.MarkerPanel.Instantiate(transform)
                 .GetComponent<MarkerDialogContents>();
+            PanelByType[DialogPanelType.Network] = Resource.Widgets.NetworkPanel.Instantiate(transform)
+                .GetComponent<NetworkDialogContents>();
 
             PanelByType.Values.ForEach(x => x.Active = false);
             Active = false;

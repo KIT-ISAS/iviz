@@ -12,7 +12,7 @@ namespace Iviz.App
 {
     public class ExtensionTest : MonoBehaviour
     {
-        static RosConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => ConnectionManager.Connection;
 
         Listener<TFMessage> tfListener;
         LineResource lines;

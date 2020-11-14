@@ -17,7 +17,7 @@ namespace Iviz.Controllers
 {
     public class ControllerService
     {
-        [NotNull] static RosConnection Connection => ConnectionManager.Connection;
+        [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
 
         static readonly (Resource.ModuleType module, string name)[] ModuleNames =
             typeof(Resource.ModuleType).GetEnumValues()

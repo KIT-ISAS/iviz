@@ -194,7 +194,6 @@ namespace Iviz.Displays
             }
 
             SetTriangles(triangles, ownMesh, 0);
-            //mesh.SetTriangles(triangles, 0);
             ownMesh.RecalculateNormals();
 
             LocalBounds = ownMesh.bounds;
@@ -233,16 +232,14 @@ namespace Iviz.Displays
             }
 
             Mesh ownMesh = EnsureOwnMesh(points.Length);
-
+            bool hasNormals = normals != null && normals.Length != 0;
+            
+            
             ownMesh.Clear();
             SetVertices(points, ownMesh);
-            if (normals != null && normals.Length != 0)
+            if (hasNormals)
             {
                 SetNormals(normals, ownMesh);
-            }
-            else
-            {
-                ownMesh.RecalculateNormals();
             }
 
             if (texCoords != null && texCoords.Length != 0)
@@ -257,8 +254,12 @@ namespace Iviz.Displays
 
             SetTriangles(triangles, ownMesh, 0);
 
-            ownMesh.Optimize();
+            if (!hasNormals)
+            {
+                ownMesh.RecalculateNormals();
+            }
 
+            ownMesh.Optimize();
             LocalBounds = ownMesh.bounds;
         }
 
