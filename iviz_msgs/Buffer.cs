@@ -31,7 +31,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        readonly void AssertInRange(uint off)
+        readonly void ThrowIfOutOfRange(uint off)
         {
             if (ptr + off <= end)
             {
@@ -43,12 +43,12 @@ namespace Iviz.Msgs
                 throw new InvalidOperationException("Buffer has not been initialized!");
             }
 
-            throw new InvalidOperationException(
+            throw new IndexOutOfRangeException(
                 $"Buffer: Requested {off} bytes, but only {(end - ptr)} remain!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void AssertSize<T>(T[] array, uint size)
+        static void ThrowIfWrongSize<T>(T[] array, uint size)
         {
             if (array is null)
             {
@@ -57,15 +57,14 @@ namespace Iviz.Msgs
 
             if (array.Length != size)
             {
-                throw new ArgumentException($"Invalid array size. Expected {size}, but got {array.Length}.",
-                    nameof(array));
+                throw new InvalidOperationException($"Cannot write {array.Length} values into array of fixed size {size}.");
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string DeserializeString()
         {
-            AssertInRange(4);
+            ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
             if (count == 0)
@@ -73,7 +72,7 @@ namespace Iviz.Msgs
                 return string.Empty;
             }
 
-            AssertInRange(count);
+            ThrowIfOutOfRange(count);
             string val = BuiltIns.UTF8.GetString(ptr, (int) count);
             ptr += count;
             return val;
@@ -82,7 +81,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string[] DeserializeStringArray()
         {
-            AssertInRange(4);
+            ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
             return count == 0 ? Array.Empty<string>() : DeserializeStringArray(count);
@@ -103,7 +102,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Deserialize<T>() where T : unmanaged
         {
-            AssertInRange((uint) sizeof(T));
+            ThrowIfOutOfRange((uint) sizeof(T));
             T val = *(T*) ptr;
             ptr += sizeof(T);
             return val;
@@ -112,7 +111,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Deserialize<T>(out T t) where T : unmanaged
         {
-            AssertInRange((uint) sizeof(T));
+            ThrowIfOutOfRange((uint) sizeof(T));
             t = *(T*) ptr;
             ptr += sizeof(T);
         }
@@ -120,7 +119,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeStructArray<T>() where T : unmanaged
         {
-            AssertInRange(4);
+            ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
             return count == 0 ? Array.Empty<T>() : DeserializeStructArray<T>(count);
@@ -129,7 +128,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeStructArray<T>(uint count) where T : unmanaged
         {
-            AssertInRange(count * (uint) sizeof(T));
+            ThrowIfOutOfRange(count * (uint) sizeof(T));
             T[] val = new T[count];
             fixed (T* bPtr = val)
             {
@@ -144,7 +143,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeArray<T>() where T : IMessage, new()
         {
-            AssertInRange(4);
+            ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
             return count == 0 ? Array.Empty<T>() : new T[count];
@@ -153,7 +152,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Serialize<T>(in T val) where T : unmanaged
         {
-            AssertInRange((uint) sizeof(T));
+            ThrowIfOutOfRange((uint) sizeof(T));
             *(T*) ptr = val;
             ptr += sizeof(T);
         }
@@ -162,7 +161,7 @@ namespace Iviz.Msgs
         public void Serialize(string val)
         {
             uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
-            AssertInRange(4 + count);
+            ThrowIfOutOfRange(4 + count);
             *(uint*) ptr = count;
             ptr += 4;
             if (count == 0) { return; }
@@ -179,13 +178,13 @@ namespace Iviz.Msgs
         {
             if (count == 0)
             {
-                AssertInRange(4);
+                ThrowIfOutOfRange(4);
                 *(int*) ptr = val.Length;
                 ptr += 4;
             }
             else
             {
-                AssertSize(val, count);
+                ThrowIfWrongSize(val, count);
             }
 
             foreach (string str in val)
@@ -199,14 +198,14 @@ namespace Iviz.Msgs
         {
             if (count == 0)
             {
-                AssertInRange((uint) (4 + val.Length * sizeof(T)));
+                ThrowIfOutOfRange((uint) (4 + val.Length * sizeof(T)));
                 *(int*) ptr = val.Length;
                 ptr += 4;
             }
             else
             {
-                AssertSize(val, count);
-                AssertInRange(count * (uint) sizeof(T));
+                ThrowIfWrongSize(val, count);
+                ThrowIfOutOfRange(count * (uint) sizeof(T));
             }
 
             fixed (T* bPtr = val)
@@ -222,13 +221,13 @@ namespace Iviz.Msgs
         {
             if (count == 0)
             {
-                AssertInRange(4);
+                ThrowIfOutOfRange(4);
                 *(int*) ptr = val.Length;
                 ptr += 4;
             }
             else
             {
-                AssertSize(val, count);
+                ThrowIfWrongSize(val, count);
             }
 
             foreach (T t in val)
