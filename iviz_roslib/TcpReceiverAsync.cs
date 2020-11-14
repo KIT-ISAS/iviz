@@ -31,6 +31,7 @@ namespace Iviz.Roslib
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         bool KeepRunning => !runningTs.IsCancellationRequested;
+        bool IsConnected => tcpClient?.Connected ?? false;
 
         byte[] readBuffer = new byte[BufferSizeIncrease];
         NetworkStream? stream;
@@ -54,7 +55,7 @@ namespace Iviz.Roslib
         public bool IsAlive => task != null && !task.IsCompleted;
 
         public SubscriberReceiverState State => new SubscriberReceiverState(
-            IsAlive, requestNoDelay, endpoint,
+            IsAlive, IsConnected, requestNoDelay, endpoint,
             RemoteUri, remoteEndpoint,
             numReceived, bytesReceived
         );

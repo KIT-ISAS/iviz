@@ -20,7 +20,7 @@ namespace Iviz.Roslib
     /// in the background, and can be accessed without having to use a separate callback.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class RosSubscriberChannelReader<T> : IDisposable, IEnumerable<T>, ISubscriberChannelReader
+    public sealed class RosChannelReader<T> : IDisposable, IEnumerable<T>, IRosChannelReader
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
@@ -32,7 +32,7 @@ namespace Iviz.Roslib
         string? subscriberId;
         IRosSubscriber<T>? subscriber;
 
-        public RosSubscriberChannelReader()
+        public RosChannelReader()
         {
         }
 
@@ -42,7 +42,7 @@ namespace Iviz.Roslib
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested.</param>
-        public RosSubscriberChannelReader(IRosClient client, string topic, bool requestNoDelay = false)
+        public RosChannelReader(IRosClient client, string topic, bool requestNoDelay = false)
         {
             Start(client, topic, requestNoDelay);
         }
@@ -123,12 +123,12 @@ namespace Iviz.Roslib
             return GetEnumerator();
         }
 
-        IMessage ISubscriberChannelReader.Read(CancellationToken token)
+        IMessage IRosChannelReader.Read(CancellationToken token)
         {
             return Read(token);
         }
 
-        async Task<IMessage> ISubscriberChannelReader.ReadAsync(CancellationToken token)
+        async Task<IMessage> IRosChannelReader.ReadAsync(CancellationToken token)
         {
             return await ReadAsync(token);
         }

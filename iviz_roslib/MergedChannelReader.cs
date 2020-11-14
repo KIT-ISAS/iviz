@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace Iviz.Roslib
 {
-    public interface ISubscriberChannelReader
+    public interface IRosChannelReader
     {
         Task<bool> WaitToReadAsync(CancellationToken token);
         IMessage Read(CancellationToken token);
@@ -20,13 +20,13 @@ namespace Iviz.Roslib
     }
 
     /// <summary>
-    /// A subscriber queue that merges two or more <see cref="RosSubscriberChannelReader{T}"/>
+    /// A subscriber queue that merges two or more <see cref="RosChannelReader{T}"/>
     /// </summary>
     public class MergedChannelReader : IEnumerable<IMessage>
     {
-        readonly ISubscriberChannelReader[] sources;
+        readonly IRosChannelReader[] sources;
 
-        public MergedChannelReader(params ISubscriberChannelReader[] sources)
+        public MergedChannelReader(params IRosChannelReader[] sources)
         {
             if (sources == null)
             {
@@ -41,7 +41,7 @@ namespace Iviz.Roslib
             this.sources = sources;
         }
 
-        public MergedChannelReader(IEnumerable<ISubscriberChannelReader> sources)
+        public MergedChannelReader(IEnumerable<IRosChannelReader> sources)
         {
             if (sources == null)
             {

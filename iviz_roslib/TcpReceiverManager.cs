@@ -94,7 +94,7 @@ namespace Iviz.Roslib
 
             if (!response.IsValid || response.Protocol == null)
             {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} has failed: {2}", 
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}", 
                     this, remoteUri, response.StatusMessage);
                 return null;
             }

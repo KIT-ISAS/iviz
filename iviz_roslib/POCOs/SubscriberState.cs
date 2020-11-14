@@ -7,6 +7,7 @@ namespace Iviz.Roslib
     public sealed class SubscriberReceiverState
     {
         public bool IsAlive { get; }
+        public bool IsConnected { get; }
         public bool RequestNoDelay { get; }
         public Endpoint? EndPoint { get; }
         public Uri RemoteUri { get; }
@@ -14,12 +15,14 @@ namespace Iviz.Roslib
         public int NumReceived { get; }
         public int BytesReceived { get; }
 
-        internal SubscriberReceiverState(bool isAlive, bool requestNoDelay,
+        internal SubscriberReceiverState(bool isAlive, bool isConnected,
+            bool requestNoDelay,
             Endpoint? endPoint,
             Uri remoteUri, Endpoint remoteEndpoint,
             int numReceived, int bytesReceived)
         {
             IsAlive = isAlive;
+            IsConnected = isConnected;
             RequestNoDelay = requestNoDelay;
             EndPoint = endPoint; 
             RemoteUri = remoteUri;

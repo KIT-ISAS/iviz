@@ -30,8 +30,8 @@ namespace Iviz.Roslib.Actionlib
         string? callerId;
         bool disposed;
 
-        RosSubscriberChannelReader<TAFeedback>? feedbackSubscriber;
-        RosSubscriberChannelReader<TAResult>? resultSubscriber;
+        RosChannelReader<TAFeedback>? feedbackSubscriber;
+        RosChannelReader<TAResult>? resultSubscriber;
         RosPublisher<GoalID>? cancelPublisher;
         RosPublisher<TAGoal>? goalPublisher;
         string? cancelPublisherId;
@@ -140,8 +140,8 @@ namespace Iviz.Roslib.Actionlib
 
             goalPublisherId = client.Advertise($"/{newActionName}/goal", out goalPublisher);
             cancelPublisherId = client.Advertise($"/{newActionName}/cancel", out cancelPublisher);
-            feedbackSubscriber = new RosSubscriberChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
-            resultSubscriber = new RosSubscriberChannelReader<TAResult>(client, $"/{newActionName}/result");
+            feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
+            resultSubscriber = new RosChannelReader<TAResult>(client, $"/{newActionName}/result");
             channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
@@ -152,8 +152,8 @@ namespace Iviz.Roslib.Actionlib
             (goalPublisherId, goalPublisher) = await client.AdvertiseAsync<TAGoal>($"/{newActionName}/goal");
             (cancelPublisherId, cancelPublisher) = await client.AdvertiseAsync<GoalID>($"/{newActionName}/cancel");
 
-            feedbackSubscriber = new RosSubscriberChannelReader<TAFeedback>();
-            resultSubscriber = new RosSubscriberChannelReader<TAResult>();
+            feedbackSubscriber = new RosChannelReader<TAFeedback>();
+            resultSubscriber = new RosChannelReader<TAResult>();
 
             await feedbackSubscriber.StartAsync(client, $"/{newActionName}/feedback");
             await resultSubscriber.StartAsync(client, $"/{newActionName}/result");
