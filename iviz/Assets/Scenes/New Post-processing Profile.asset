@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
   m_Name: MotionBlur
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   shutterAngle:
-    overrideState: 0
-    value: 270
+    overrideState: 1
+    value: 90
   sampleCount:
     overrideState: 1
     value: 10
@@ -40,13 +40,13 @@ MonoBehaviour:
     value: 1
   focusDistance:
     overrideState: 1
-    value: 3
+    value: 1
   aperture:
     overrideState: 1
-    value: 7.9
+    value: 11.9
   focalLength:
     overrideState: 1
-    value: 34
+    value: 57
   kernelSize:
     overrideState: 1
     value: 3
@@ -79,13 +79,13 @@ MonoBehaviour:
     overrideState: 0
     value: 8
   maximumMarchDistance:
-    overrideState: 0
+    overrideState: 1
     value: 100
   distanceFade:
     overrideState: 1
-    value: 0.49
+    value: 0.04
   vignette:
-    overrideState: 0
+    overrideState: 1
     value: 0.5
 --- !u!114 &11400000
 MonoBehaviour:
@@ -167,10 +167,10 @@ MonoBehaviour:
     value: 1
   color:
     overrideState: 1
-    value: {r: 0, g: 0.05194448, b: 0.13207549, a: 1}
+    value: {r: 0.13333334, g: 0, b: 0.027978644, a: 1}
   ambientOnly:
     overrideState: 1
-    value: 1
+    value: 0
   noiseFilterTolerance:
     overrideState: 0
     value: 0
@@ -187,11 +187,11 @@ MonoBehaviour:
     overrideState: 0
     value: 0
   radius:
-    overrideState: 0
-    value: 0.25
+    overrideState: 1
+    value: 0.02
   quality:
     overrideState: 1
-    value: 2
+    value: 3
 --- !u!114 &7797840798155541623
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -210,7 +210,7 @@ MonoBehaviour:
     value: 1
   intensity:
     overrideState: 1
-    value: 2
+    value: 3
   threshold:
     overrideState: 1
     value: 1.1
