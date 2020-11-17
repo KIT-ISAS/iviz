@@ -4,7 +4,6 @@ using Iviz.Core;
 using Iviz.ModelService;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Ros;
-using UnityEngine.WSA;
 
 namespace Iviz.Controllers
 {
@@ -53,7 +52,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            modelServer = new ModelServer(rosPackagePathExtras);
+            modelServer = new ModelServer(rosPackagePathExtras, true);
             if (modelServer.NumPackages == 0)
             {
                 IsEnabled = false;

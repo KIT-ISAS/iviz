@@ -23,8 +23,9 @@ namespace Iviz.ModelService
         readonly Dictionary<string, List<string>> packagePaths = new Dictionary<string, List<string>>();
 
         public int NumPackages => packagePaths.Count;
+        public bool IsFileSchemaEnabled { get; }
 
-        public ModelServer(string additionalPaths = null)
+        public ModelServer(string additionalPaths = null, bool enableFileSchema = false)
         {
             Logger.Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
@@ -34,7 +35,7 @@ namespace Iviz.ModelService
             }
             else
             {
-                List<string> paths = new List<string>(); 
+                List<string> paths = new List<string>();
 
                 if (packagePath != null)
                 {
@@ -45,7 +46,7 @@ namespace Iviz.ModelService
                 {
                     paths.AddRange(additionalPaths.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries));
                 }
-                
+
                 foreach (string path in paths)
                 {
                     string pathNormalized = path.Trim();
@@ -64,6 +65,8 @@ namespace Iviz.ModelService
             {
                 Logger.Log("EE Empty list of package paths. Nothing to do.");
             }
+
+            IsFileSchemaEnabled = enableFileSchema;
         }
 
         void CheckPath(string folderName, string path)
@@ -140,7 +143,7 @@ namespace Iviz.ModelService
             {
                 throw new ArgumentNullException(nameof(msg));
             }
-            
+
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -149,21 +152,34 @@ namespace Iviz.ModelService
                 return;
             }
 
-            if (uri.Scheme != "package")
+            string modelPath;
+            if (uri.Scheme == "package")
+            {
+                modelPath = ResolvePath(uri);
+                if (modelPath is null)
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = "Failed to find resource path";
+                    return;
+                }
+            }
+            else if (uri.Scheme == "file")
+            {
+                modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
+                if (!File.Exists(modelPath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File '{modelPath}' does not exist";
+                    return;
+                }
+            }
+            else
             {
                 msg.Response.Success = false;
-                msg.Response.Message = "Only 'package' scheme is supported";
+                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
                 return;
             }
 
-            string modelPath = ResolvePath(uri);
-            if (modelPath is null)
-            {
-                msg.Response.Success = false;
-                msg.Response.Message = "Failed to find resource path";
-                return;
-            }
- 
             Logger.Log("** Requesting " + modelPath);
 
             Model model;
@@ -195,7 +211,7 @@ namespace Iviz.ModelService
             {
                 throw new ArgumentNullException(nameof(msg));
             }
-            
+
             // TODO: force conversion to either png or jpg
 
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
@@ -389,7 +405,7 @@ namespace Iviz.ModelService
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
             return new Color32((byte) r, (byte) g, (byte) b, (byte) a);
         }
-        
+
 
         static Matrix4 ToMatrix(in Matrix4x4 v)
         {
@@ -401,14 +417,14 @@ namespace Iviz.ModelService
                 v.A4, v.B4, v.C4, v.D4,
             });
         }
-        
+
         public void FileCallback(GetFile msg)
         {
             if (msg == null)
             {
                 throw new ArgumentNullException(nameof(msg));
             }
-            
+
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -448,7 +464,7 @@ namespace Iviz.ModelService
             {
                 throw new ArgumentNullException(nameof(msg));
             }
-            
+
             bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
             if (!success)
             {
@@ -536,7 +552,7 @@ namespace Iviz.ModelService
             {
                 return;
             }
-            
+
             Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
 
             foreach (Sdf.Link link in model.Links)
@@ -547,7 +563,7 @@ namespace Iviz.ModelService
                     ResolveIncludes(visual, includes, linkPose);
                 }
             }
-            
+
             foreach (Sdf.Model innerModel in model.Models)
             {
                 ResolveIncludes(innerModel, includes, pose);
@@ -619,9 +635,9 @@ namespace Iviz.ModelService
                 {
                     Uri = "package://iviz_internal/cylinder",
                     Pose = ToMatrix(pose),
-
                 });
-            } else if (visual.Geometry.Mesh != null)
+            }
+            else if (visual.Geometry.Mesh != null)
             {
                 Vector3D diag = new Vector3D(
                     (float) visual.Geometry.Mesh.Scale.X,
@@ -635,7 +651,7 @@ namespace Iviz.ModelService
                     Uri = visual.Geometry.Mesh.Uri.Value,
                     Pose = ToMatrix(pose),
                     Material = includeMaterial
-                });                
+                });
             }
         }
 
@@ -655,7 +671,7 @@ namespace Iviz.ModelService
             result.A4 = (float) pose.Position.X;
             result.B4 = (float) pose.Position.Y;
             result.C4 = (float) pose.Position.Z;
-            
+
             return result;
         }
 
@@ -676,6 +692,7 @@ namespace Iviz.ModelService
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
