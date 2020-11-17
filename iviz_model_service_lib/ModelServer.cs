@@ -24,17 +24,28 @@ namespace Iviz.ModelService
 
         public int NumPackages => packagePaths.Count;
 
-        public ModelServer()
+        public ModelServer(string additionalPaths = null)
         {
             Logger.Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
-            if (packagePath is null)
+            if (packagePath is null && additionalPaths is null)
             {
                 Logger.LogError("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
             }
             else
             {
-                string[] paths = packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
+                List<string> paths = new List<string>(); 
+
+                if (packagePath != null)
+                {
+                    paths.AddRange(packagePath.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries));
+                }
+
+                if (additionalPaths != null)
+                {
+                    paths.AddRange(additionalPaths.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries));
+                }
+                
                 foreach (string path in paths)
                 {
                     string pathNormalized = path.Trim();

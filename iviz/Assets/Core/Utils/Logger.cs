@@ -34,22 +34,22 @@ namespace Iviz.Core
         public static event Action<string> LogInternal;
         public static event ExternalLogDelegate LogExternal;
 
-        public static void Info<T>(T t)
+        public static void Info(object t)
         {
             UnityEngine.Debug.Log(t);
         }
 
-        public static void Error<T>(T t)
+        public static void Error(object t)
         {
             UnityEngine.Debug.LogWarning(t);
         }
 
-        public static void Warn<T>(T t)
+        public static void Warn(object t)
         {
             UnityEngine.Debug.LogWarning(t);
         }
 
-        public static void Debug<T>(T t)
+        public static void Debug(object t)
         {
             UnityEngine.Debug.Log(t);
         }

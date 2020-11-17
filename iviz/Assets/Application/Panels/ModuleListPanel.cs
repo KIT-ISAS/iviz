@@ -431,6 +431,8 @@ namespace Iviz.App
 
             try
             {
+                Debug.Log("Using settings from " + path);
+
                 string text = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
                 connectionData.MasterUri = config.MasterUri;

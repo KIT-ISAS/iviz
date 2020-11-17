@@ -193,7 +193,7 @@ namespace Iviz.Displays
 
             File.WriteAllText($"{Settings.SavedRobotsPath}/{localPath}", robotDescription);
             Debug.Log($"Saving to {Settings.SavedRobotsPath}/{localPath}");
-            Logger.Internal($"Added robot <i>{robotName}</i> to cache");
+            //Logger.Internal($"Added robot <i>{robotName}</i> to cache");
 
             resourceFiles.RobotDescriptions[robotName] = localPath;
             WriteResourceFile();
@@ -222,7 +222,7 @@ namespace Iviz.Displays
                 Logger.Warn("ExternalResourceManager: Failed to delete robot file '" + localPath + "'");
             }
 
-            Logger.Internal($"Removed robot <i>{robotName}</i> from cache");
+            //Logger.Internal($"Removed robot <i>{robotName}</i> from cache");
             resourceFiles.RobotDescriptions.Remove(robotName);
             WriteResourceFile();
         }
@@ -502,7 +502,7 @@ namespace Iviz.Displays
                 Msgs.Buffer.Serialize(msg.Model, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
                 Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
-                Logger.Internal($"Added external model <i>{uri}</i>");
+                //Logger.Internal($"Added external model <i>{uri}</i>");
 
                 resourceFiles.Models[uri] = localPath;
                 WriteResourceFile();
@@ -533,7 +533,7 @@ namespace Iviz.Displays
                 byte[] buffer = msg.Image.Data;
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
                 Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
-                Logger.Internal($"Added external texture <i>{uri}</i>");
+                //Logger.Internal($"Added external texture <i>{uri}</i>");
 
                 resourceFiles.Textures[uri] = localPath;
                 WriteResourceFile();
@@ -565,7 +565,7 @@ namespace Iviz.Displays
                 Msgs.Buffer.Serialize(msg.Scene, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
                 Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
-                Logger.Internal($"Added external scene <i>{uri}</i>");
+                //Logger.Internal($"Added external scene <i>{uri}</i>");
 
                 resourceFiles.Scenes[uri] = localPath;
                 WriteResourceFile();
