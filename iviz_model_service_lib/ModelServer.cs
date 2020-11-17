@@ -165,6 +165,13 @@ namespace Iviz.ModelService
             }
             else if (uri.Scheme == "file")
             {
+                if (!IsFileSchemaEnabled)
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File schema is disabled";
+                    return;
+                }
+                
                 modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
                 if (!File.Exists(modelPath))
                 {
@@ -222,18 +229,38 @@ namespace Iviz.ModelService
                 return;
             }
 
-            if (uri.Scheme != "package")
+            string texturePath;
+            if (uri.Scheme == "package")
             {
-                msg.Response.Success = false;
-                msg.Response.Message = "Only 'package' scheme is supported";
-                return;
+                texturePath = ResolvePath(uri);
+                if (string.IsNullOrWhiteSpace(texturePath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = "Failed to find resource path";
+                    return;
+                }
             }
+            else if (uri.Scheme == "file")
+            {
+                if (!IsFileSchemaEnabled)
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File schema is disabled";
+                    return;
+                }
 
-            string texturePath = ResolvePath(uri);
-            if (string.IsNullOrWhiteSpace(texturePath))
+                texturePath = Uri.UnescapeDataString(uri.AbsolutePath);
+                if (!File.Exists(texturePath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File '{texturePath}' does not exist";
+                    return;
+                }
+            }
+            else
             {
                 msg.Response.Success = false;
-                msg.Response.Message = "Failed to find resource path";
+                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
                 return;
             }
 
