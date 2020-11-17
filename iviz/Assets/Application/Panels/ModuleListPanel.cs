@@ -117,6 +117,7 @@ namespace Iviz.App
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         HololensManager hololensManager;
+        Controllers.ModelService modelService;
 
 
         public bool UnlockButtonVisible
@@ -271,12 +272,14 @@ namespace Iviz.App
 
             initialized = true;
 
-            InitFinished?.Invoke();
-
             if (Settings.IsHololens)
             {
                 hololensManager = new HololensManager();
             }
+            
+            modelService = new Controllers.ModelService();
+            
+            InitFinished?.Invoke();
         }
 
         void OnConnectionStateChanged(ConnectionState state)

@@ -4,12 +4,12 @@ namespace Iviz.Core
 {
     public static class SdfUtils
     {
-        public static Vector3 ToVector3(this Sdf.Vector3 v)
+        public static Vector3 ToVector3(this Sdf.Vector3f v)
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z).Ros2Unity();
         }
 
-        static Quaternion ToQuaternion(this Sdf.Vector3 v)
+        static Quaternion ToQuaternion(this Sdf.Vector3f v)
         {
             return new Vector3((float)v.X, (float)v.Y, (float)v.Z).RosRpy2Unity();
         }

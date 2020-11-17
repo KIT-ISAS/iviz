@@ -118,7 +118,8 @@ namespace Iviz.Displays
             }
         }
 
-        static string EncodingFromPng(BigGustave.Png png)
+        [CanBeNull]
+        static string EncodingFromPng([NotNull] BigGustave.Png png)
         {
             switch (png.Header.ColorType)
             {

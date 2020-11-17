@@ -15,7 +15,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public class ControllerService
+    public sealed class ControllerService
     {
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
 

@@ -6,7 +6,7 @@ namespace Iviz.Core
 {
     public static class UrdfUtils
     {
-        public static Vector3 ToVector3([NotNull] this Urdf.Vector3 v)
+        public static Vector3 ToVector3([NotNull] this Urdf.Vector3f v)
         {
             if (v == null)
             {
@@ -16,7 +16,7 @@ namespace Iviz.Core
             return new Vector3(v.X, v.Y, v.Z).Ros2Unity();
         }
 
-        static Quaternion ToQuaternion([NotNull] this Urdf.Vector3 v)
+        static Quaternion ToQuaternion([NotNull] this Urdf.Vector3f v)
         {
             if (v == null)
             {

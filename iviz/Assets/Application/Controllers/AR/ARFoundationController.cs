@@ -419,6 +419,9 @@ namespace Iviz.Controllers
             ArSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
             Destroy(fovDisplay.gameObject);
+            
+            ArSet.Visible = false;
+            ArInfoPanel.SetActive(false);
         }
     }
 }
