@@ -9,6 +9,7 @@
     ".NETStandard,Version=v2.0/": {
       "Iviz.Rosmaster.Lib/1.0.0": {
         "dependencies": {
+          "Iviz.Msgs": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "NETStandard.Library": "2.0.3"
         },

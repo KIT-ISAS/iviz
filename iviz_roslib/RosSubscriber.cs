@@ -59,7 +59,6 @@ namespace Iviz.Roslib
             this.client = client;
             Manager = new TcpReceiverManager<T>(this, client, topicInfo, requestNoDelay)
                 {TimeoutInMs = timeoutInMs};
-            // note: The first MessageCallback can arrive before this function returns
         }
 
         internal void MessageCallback(in T msg)

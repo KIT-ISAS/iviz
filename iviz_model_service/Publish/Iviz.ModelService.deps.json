@@ -116,27 +116,6 @@
           }
         }
       },
-      "Nito.AsyncEx/5.1.0": {
-        "dependencies": {
-          "Nito.AsyncEx.Context": "5.1.0",
-          "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Interop.WaitHandles": "5.1.0",
-          "Nito.AsyncEx.Oop": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0",
-          "Nito.Cancellation": "1.1.0"
-        }
-      },
-      "Nito.AsyncEx.Context/5.1.0": {
-        "dependencies": {
-          "Nito.AsyncEx.Tasks": "5.1.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Nito.AsyncEx.Context.dll": {
-            "assemblyVersion": "5.1.0.0",
-            "fileVersion": "5.1.0.0"
-          }
-        }
-      },
       "Nito.AsyncEx.Coordination/5.1.0": {
         "dependencies": {
           "Nito.AsyncEx.Tasks": "5.1.0",
@@ -144,28 +123,6 @@
         },
         "runtime": {
           "lib/netstandard2.0/Nito.AsyncEx.Coordination.dll": {
-            "assemblyVersion": "5.1.0.0",
-            "fileVersion": "5.1.0.0"
-          }
-        }
-      },
-      "Nito.AsyncEx.Interop.WaitHandles/5.1.0": {
-        "dependencies": {
-          "Nito.AsyncEx.Tasks": "5.1.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Nito.AsyncEx.Interop.WaitHandles.dll": {
-            "assemblyVersion": "5.1.0.0",
-            "fileVersion": "5.1.0.0"
-          }
-        }
-      },
-      "Nito.AsyncEx.Oop/5.1.0": {
-        "dependencies": {
-          "Nito.AsyncEx.Coordination": "5.1.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Nito.AsyncEx.Oop.dll": {
             "assemblyVersion": "5.1.0.0",
             "fileVersion": "5.1.0.0"
           }
@@ -179,17 +136,6 @@
           "lib/netstandard2.0/Nito.AsyncEx.Tasks.dll": {
             "assemblyVersion": "5.1.0.0",
             "fileVersion": "5.1.0.0"
-          }
-        }
-      },
-      "Nito.Cancellation/1.1.0": {
-        "dependencies": {
-          "Nito.Disposables": "2.2.0"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Nito.Cancellation.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.0"
           }
         }
       },
@@ -842,7 +788,8 @@
           "Iviz.Msgs": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
-          "Nito.AsyncEx": "5.1.0"
+          "Nito.AsyncEx.Coordination": "5.1.0",
+          "Nito.AsyncEx.Tasks": "5.1.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
@@ -915,20 +862,6 @@
       "path": "newtonsoft.json/12.0.3",
       "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
     },
-    "Nito.AsyncEx/5.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-KOahZdW0fRLnoym5lGtyWpFUZ94I5s0wLgYF5RHhK8RUhXpCiEX+185qjNvkse3H9WJV2/pFfPlKZHv8Eej7Hw==",
-      "path": "nito.asyncex/5.1.0",
-      "hashPath": "nito.asyncex.5.1.0.nupkg.sha512"
-    },
-    "Nito.AsyncEx.Context/5.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-EE7M37c5E/kvulzEkpUR6v1AnK34b2wysOLJHSjl78p/3hL7grte0XCPRqCfLZDwq98AD9GHMTCRfZy7TEeHhw==",
-      "path": "nito.asyncex.context/5.1.0",
-      "hashPath": "nito.asyncex.context.5.1.0.nupkg.sha512"
-    },
     "Nito.AsyncEx.Coordination/5.1.0": {
       "type": "package",
       "serviceable": true,
@@ -936,33 +869,12 @@
       "path": "nito.asyncex.coordination/5.1.0",
       "hashPath": "nito.asyncex.coordination.5.1.0.nupkg.sha512"
     },
-    "Nito.AsyncEx.Interop.WaitHandles/5.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-wFm3lrXXNPBtZHjLI21xhcADoh5CzO5KKNO38ybLO/CcL9zMUWWfsNiAFbw8JGp/wHoxhfdEUlThBnY3XaLR/w==",
-      "path": "nito.asyncex.interop.waithandles/5.1.0",
-      "hashPath": "nito.asyncex.interop.waithandles.5.1.0.nupkg.sha512"
-    },
-    "Nito.AsyncEx.Oop/5.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-J5DVgQrmE9qMNhK2eEMsuEw7V7cw7MIPrv3jqqQWolzDXkOxJFFYKUK+4dnC6UAEmum3xRVD2oBAoXg0vdYDDQ==",
-      "path": "nito.asyncex.oop/5.1.0",
-      "hashPath": "nito.asyncex.oop.5.1.0.nupkg.sha512"
-    },
     "Nito.AsyncEx.Tasks/5.1.0": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-tU3Ib4zs8ivM+uS8n7F7ReWZlA3mODyLqwPE+v+WJI94hZ8xLXl+a9npfj/IcmeXo9a6fGKLWkswKQHOeTWqwA==",
       "path": "nito.asyncex.tasks/5.1.0",
       "hashPath": "nito.asyncex.tasks.5.1.0.nupkg.sha512"
-    },
-    "Nito.Cancellation/1.1.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-BSezc6jsEEAoa8UtVjQ6Qr/D5xX+FozlDKFHAvDeTv24I7ZZmmfbFxEmdjaSLnrboz1WMRjUKCQwZw7Gf4+WcA==",
-      "path": "nito.cancellation/1.1.0",
-      "hashPath": "nito.cancellation.1.1.0.nupkg.sha512"
     },
     "Nito.Collections.Deque/1.1.0": {
       "type": "package",
