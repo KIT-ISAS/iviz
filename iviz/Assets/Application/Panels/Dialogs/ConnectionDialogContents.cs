@@ -8,8 +8,8 @@ namespace Iviz.App
     public sealed class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] InputFieldWidget masterUri = null;
-        [SerializeField] InputFieldWidget myUri = null;
-        [SerializeField] InputFieldWidget myId = null;
+        [SerializeField] InputFieldWithHintsWidget myUri = null;
+        [SerializeField] InputFieldWithHintsWidget myId = null;
         [SerializeField] TrashButtonWidget refreshMyUri = null;
         [SerializeField] TrashButtonWidget refreshMyId = null;
         [SerializeField] TrashButtonWidget close = null;
@@ -17,8 +17,8 @@ namespace Iviz.App
         [SerializeField] LineLog lineLog = null;
 
         public InputFieldWidget MasterUri => masterUri;
-        public InputFieldWidget MyUri => myUri;
-        public InputFieldWidget MyId => myId;
+        public InputFieldWithHintsWidget MyUri => myUri;
+        public InputFieldWithHintsWidget MyId => myId;
         public TrashButtonWidget RefreshMyUri => refreshMyUri;
         public TrashButtonWidget RefreshMyId => refreshMyId;
         public TrashButtonWidget Close => close;

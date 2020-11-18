@@ -60,7 +60,14 @@ namespace Iviz.Controllers
             UpdateMarkers(msg.Markers);
             UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
 
-            description.Append("Size: ").Append(markers.Count).AppendLine();
+            if (markers.Count == 0)
+            {
+                description.Append("Markers: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Markers: ").Append(markers.Count).AppendLine();
+            }
         }
 
         void EnsureControlDisplayExists()

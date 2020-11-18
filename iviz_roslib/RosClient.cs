@@ -185,7 +185,11 @@ namespace Iviz.Roslib
         {
             masterUri ??= EnvironmentMasterUri;
 
-            if (masterUri is null) { throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set", nameof(masterUri)); }
+            if (masterUri is null)
+            {
+                throw new ArgumentException("No valid master uri provided, and ROS_MASTER_URI is not set",
+                    nameof(masterUri));
+            }
 
             if (masterUri.Scheme != "http")
             {
@@ -335,16 +339,38 @@ namespace Iviz.Roslib
                    new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
         }
 
+        static IEnumerable<UnicastIPAddressInformation> GetInterfaceCandidates(NetworkInterfaceType type)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                .Where(@interface => @interface.NetworkInterfaceType == type &&
+                                     @interface.OperationalStatus == OperationalStatus.Up)
+                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
+        }
+
+        public static ReadOnlyCollection<Uri> GetCallerUriCandidates(int usingPort = AnyPort)
+        {
+            List<Uri> candidates = new List<Uri>();
+            string? envHostname = EnvironmentCallerHostname;
+            if (envHostname != null)
+            {
+                candidates.Add(new Uri($"http://{envHostname}:{usingPort}/"));
+            }
+
+            IEnumerable<Uri> GetInfosAsUri(NetworkInterfaceType type) => 
+                GetInterfaceCandidates(type)
+                    .Select(info => new Uri($"http://{info.Address}:{usingPort}/")).ToArray();
+
+            candidates.AddRange(GetInfosAsUri(NetworkInterfaceType.Wireless80211));
+            candidates.AddRange(GetInfosAsUri(NetworkInterfaceType.Ethernet));
+            candidates.Add(new Uri($"http://{Dns.GetHostName()}:{usingPort}/"));
+
+            return candidates.AsReadOnly();
+        }
+
         static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
         {
-            UnicastIPAddressInformation? ipInfo =
-                NetworkInterface.GetAllNetworkInterfaces()
-                    .Where(@interface =>
-                        @interface.NetworkInterfaceType == type && @interface.OperationalStatus == OperationalStatus.Up)
-                    .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
-                    .FirstOrDefault(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
-            // TODO: Consider ipv6 too
-
+            UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
         }
 
@@ -585,7 +611,6 @@ namespace Iviz.Roslib
             subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
                 $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
             return subscriber.Subscribe(callback);
-
         }
 
         string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
@@ -1315,10 +1340,11 @@ namespace Iviz.Roslib
         /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000) where T : IService
+        public bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+            where T : IService
         {
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            
+
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
@@ -1381,11 +1407,12 @@ namespace Iviz.Roslib
         /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+            int timeoutInMs = 5000)
             where T : IService
         {
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            
+
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
