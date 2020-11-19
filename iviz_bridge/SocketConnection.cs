@@ -166,7 +166,7 @@ namespace Iviz.Bridge
                         if (!TryGet(advertisements, msg.Topic, out advertisement))
                         {
                             client.Types.TryGetType(msg.Type, out TypeInfo typeInfo);
-                            string advertisementId = client.RosClient.Advertise(
+                            string advertisementId = ((IRosClient)client.RosClient).Advertise(
                                 msg.Topic,
                                 typeInfo.msgType,
                                 out IRosPublisher publisher

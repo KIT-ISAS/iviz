@@ -8,9 +8,9 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
-
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
+
 #endif
 
 namespace Iviz.Roslib
@@ -57,7 +57,7 @@ namespace Iviz.Roslib
 
             disposed = true;
             messageQueue.CompleteAdding();
-            
+
             if (subscriber == null)
             {
                 return; // not started
@@ -72,7 +72,6 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
-
         }
 #endif
 
@@ -89,8 +88,8 @@ namespace Iviz.Roslib
             if (subscriber == null)
             {
                 return; // not started
-            }            
-            
+            }
+
             try
             {
                 subscriberToken.Dispose();
@@ -165,7 +164,7 @@ namespace Iviz.Roslib
             subscriber = newSubscriber;
             subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
         }
-        
+
         /// <summary>
         /// Starts the channel. Must be called after the constructor.
         /// </summary>
@@ -182,7 +181,7 @@ namespace Iviz.Roslib
 
             subscriberId = client.Subscribe(topic, Callback, out subscriber, requestNoDelay);
             subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
-        }        
+        }
 
         void OnSubscriberDisposed()
         {
@@ -218,7 +217,7 @@ namespace Iviz.Roslib
         {
             return messageQueue.OutputAvailable(token);
         }
-        
+
         /// <summary>
         /// Waits until a message arrives.
         /// </summary>
@@ -238,7 +237,7 @@ namespace Iviz.Roslib
         {
             return await messageQueue.OutputAvailableAsync(token);
         }
-        
+
 
         /// <summary>
         /// Waits a given time until a message arrives, and pulls it from the queue.
@@ -264,7 +263,7 @@ namespace Iviz.Roslib
         {
             return messageQueue.Dequeue(token);
         }
-        
+
         /// Awaits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
@@ -369,6 +368,24 @@ namespace Iviz.Roslib
             }
         }
 
+        IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken externalToken)
+        {
+            while (true)
+            {
+                T msg;
+                try
+                {
+                    msg = Read(externalToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                yield return msg;
+            }
+        }
+
 #if !NETSTANDARD2_0
         /// <summary>
         /// Enumerates through the available messages, and blocks while waiting for the next.
@@ -377,7 +394,27 @@ namespace Iviz.Roslib
         /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async IAsyncEnumerable<T> ReadAllAsync([EnumeratorCancellation] CancellationToken externalToken)
+        public async IAsyncEnumerable<T> ReadAllAsync(
+            [EnumeratorCancellation] CancellationToken externalToken)
+        {
+            while (true)
+            {
+                T msg;
+                try
+                {
+                    msg = await ReadAsync(externalToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                yield return msg;
+            }
+        }
+
+        async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
+            [EnumeratorCancellation] CancellationToken externalToken)
         {
             while (true)
             {
@@ -406,6 +443,20 @@ namespace Iviz.Roslib
             return disposed
                 ? "[RosSubscriberQueue (disposed)]"
                 : $"[RosSubscriberQueue {subscriber.Topic} [{subscriber.TopicType}]]";
+        }
+    }
+
+    public static class RosChannelReader
+    {
+        public static IRosChannelReader CreateInstance(Type msgType)
+        {
+            if (typeof(IMessage) == msgType || !typeof(IMessage).IsAssignableFrom(msgType))
+            {
+                throw new ArgumentException("msgType is not a message type", nameof(msgType));
+            }
+
+            Type readerType = typeof(RosChannelReader<>).MakeGenericType(msgType);
+            return (IRosChannelReader) Activator.CreateInstance(readerType)!;
         }
     }
 }

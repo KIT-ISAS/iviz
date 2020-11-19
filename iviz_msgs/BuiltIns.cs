@@ -14,11 +14,13 @@ namespace Iviz.Msgs
 
         static string GetClassStringConstant(Type type, string name)
         {
-            string? constant = (string?)type.GetField(name)?.GetRawConstantValue();
+            string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
             if (constant == null)
             {
-                throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName, nameof(name));
+                throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName,
+                    nameof(name));
             }
+
             return constant;
         }
 
@@ -72,15 +74,50 @@ namespace Iviz.Msgs
 
             using var inputStream = new MemoryStream(inputBytes);
             using var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress);
-            
+
             int read;
             do
             {
                 read = gZipStream.Read(outputBytes, 0, outputBytes.Length);
                 str.Append(UTF8.GetString(outputBytes, 0, read));
-            }
-            while (read != 0);
+            } while (read != 0);
+
             return str.ToString();
+        }
+
+        public static string RosNameToCs(string name)
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append(char.ToUpper(name[0], Culture));
+            for (int i = 1; i < name.Length; i++)
+            {
+                switch (name[i])
+                {
+                    case '_' when i != name.Length - 1:
+                        str.Append(char.ToUpper(name[i + 1], Culture));
+                        i++;
+                        break;
+                    case '/':
+                        str.Append('.');
+                        break;
+                    default:
+                        str.Append(name[i]);
+                        break;
+                }
+            }
+
+            return str.ToString();
+        }
+
+        public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
+        {
+            if (fullRosMessageName == "Header")
+            {
+                return typeof(StdMsgs.Header);
+            }
+
+            string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
+            return Type.GetType(guessName);
         }
     }
 }

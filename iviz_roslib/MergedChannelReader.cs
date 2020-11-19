@@ -12,13 +12,6 @@ using System.Runtime.CompilerServices;
 
 namespace Iviz.Roslib
 {
-    public interface IRosChannelReader
-    {
-        Task<bool> WaitToReadAsync(CancellationToken token);
-        IMessage Read(CancellationToken token);
-        Task<IMessage> ReadAsync(CancellationToken token);
-    }
-
     /// <summary>
     /// A subscriber queue that merges two or more <see cref="RosChannelReader{T}"/>
     /// </summary>
