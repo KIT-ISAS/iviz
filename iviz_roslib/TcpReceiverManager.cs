@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
@@ -16,7 +18,10 @@ namespace Iviz.Roslib
         const int DefaultTimeoutInMs = 5000;
 
         readonly AsyncLock mutex = new AsyncLock();
-        readonly Dictionary<Uri, TcpReceiverAsync<T>> connectionsByUri = new Dictionary<Uri, TcpReceiverAsync<T>>();
+
+        readonly ConcurrentDictionary<Uri, TcpReceiverAsync<T>> connectionsByUri =
+            new ConcurrentDictionary<Uri, TcpReceiverAsync<T>>();
+
         readonly RosClient client;
         readonly RosSubscriber<T> subscriber;
         readonly TopicInfo<T> topicInfo;
@@ -81,20 +86,20 @@ namespace Iviz.Roslib
             }
             catch (Exception e) when (e is TimeoutException || e is AggregateException || e is XmlRpcException)
             {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}", 
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}",
                     this, remoteUri, e);
                 return null;
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}", 
+                Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}",
                     this, remoteUri, e);
                 return null;
             }
 
             if (!response.IsValid || response.Protocol == null)
             {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}", 
+                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}",
                     this, remoteUri, response.StatusMessage);
                 return null;
             }
@@ -130,6 +135,7 @@ namespace Iviz.Roslib
         {
             TcpReceiverAsync<T> connection =
                 new TcpReceiverAsync<T>(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay);
+
             connectionsByUri[remoteUri] = connection;
             connection.Start(TimeoutInMs);
         }
@@ -158,6 +164,7 @@ namespace Iviz.Roslib
                     receiver.Dispose();
                 }
 
+                // these will run concurrently!
                 bool[] results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).Caf();
                 numConnectionsChanged = results.Any(b => b) | Cleanup();
             }
@@ -174,7 +181,7 @@ namespace Iviz.Roslib
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             foreach (TcpReceiverAsync<T> receiver in toDelete)
             {
-                connectionsByUri.Remove(receiver.RemoteUri);
+                connectionsByUri.TryRemove(receiver.RemoteUri, out _);
                 Logger.LogFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
                 receiver.Dispose();
             }

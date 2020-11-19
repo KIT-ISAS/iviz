@@ -24,19 +24,27 @@ namespace Iviz.Republisher
             */
 
 
-            var masterUriA = new Uri("http://141.3.59.19:11311");
+            var masterUriA = new Uri("http://141.3.88.138:11311");
             var masterUriB = new Uri("http://141.3.59.5:11311");
 
-            var callerUriA = new Uri("http://141.3.59.19:7623");
-            var callerUriB = new Uri("http://141.3.59.19:7624");
+            var callerUriA = new Uri("http://141.3.88.89:7643");
+            var callerUriB = new Uri("http://141.3.59.11:7644");
 
             topicsAtoB = new[]
             {
-                "/tf"
+                //"/PointCloudToROSProvider/point_cloud",
+                "/ArVizToRViz/arviz",
+                "/tf",
+                //"/grasping/update",
+                //"/grasping/update_full",
+                //"/exploration/update",
+                //"/exploration/update_full",
             };
 
             topicsBtoA = new string[]
             {
+                "/grasping/feedback",
+                //"/exploration/feedback",
             };
 
             try
@@ -54,7 +62,7 @@ namespace Iviz.Republisher
             }
             catch (RoslibException e)
             {
-                Console.WriteLine($"EE: Failed to connect to master B with uri '{masterUriA}': {e.Message}");
+                Console.WriteLine($"EE: Failed to connect to master B with uri '{masterUriB}': {e.Message}");
             }
         }
 
@@ -110,7 +118,7 @@ namespace Iviz.Republisher
             var tasksA = topicsAtoB.Zip(typesAtoB,
                 (topic, type) => Republish(clientA, clientB, topic, type));
 
-            var tasksB = topicsAtoB.Zip(typesBtoA,
+            var tasksB = topicsBtoA.Zip(typesBtoA,
                 (topic, type) => Republish(clientB, clientA, topic, type));
 
             Task[] tasks = tasksA.Concat(tasksB).ToArray();
