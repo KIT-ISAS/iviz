@@ -71,7 +71,14 @@ namespace Iviz.Roslib.XmlRpc
             signal.Release();
             signal.Dispose();
 
-            task.Wait();
+            try
+            {
+                task.Wait();
+            }
+            catch (Exception e)
+            {
+                Logger.LogFormat("{0}: {1}", this, e);
+            }            
         }
 
         public void Start()

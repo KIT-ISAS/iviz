@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -84,7 +86,11 @@ namespace Iviz.Roslib
             {
                 response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic).Caf();
             }
-            catch (Exception e) when (e is TimeoutException || e is AggregateException || e is XmlRpcException)
+            catch (Exception e) when (
+                e is TimeoutException || 
+                e is XmlRpcException || 
+                e is SocketException ||
+                e is IOException)
             {
                 Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}",
                     this, remoteUri, e);
@@ -121,14 +127,23 @@ namespace Iviz.Roslib
 
         async Task<bool> AddPublisherAsync(Uri remoteUri)
         {
-            Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
-            if (remoteEndpoint == null)
+            try
             {
+                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
+                if (remoteEndpoint == null)
+                {
+                    return false;
+                }
+
+                CreateConnection(remoteEndpoint, remoteUri);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Connection request to publisher {1} returned an unexpected exception: {2}",
+                    this, remoteUri, e);
                 return false;
             }
-
-            CreateConnection(remoteEndpoint, remoteUri);
-            return true;
         }
 
         void CreateConnection(Endpoint remoteEndpoint, Uri remoteUri)

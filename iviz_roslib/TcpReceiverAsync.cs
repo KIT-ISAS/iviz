@@ -27,6 +27,7 @@ namespace Iviz.Roslib
         int numReceived;
         int bytesReceived;
 
+        string? errorDescription;
         int connectionTimeoutInMs;
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
@@ -57,7 +58,8 @@ namespace Iviz.Roslib
         public SubscriberReceiverState State => new SubscriberReceiverState(
             IsAlive, IsConnected, requestNoDelay, endpoint,
             RemoteUri, remoteEndpoint,
-            numReceived, bytesReceived
+            numReceived, bytesReceived,
+            errorDescription
         );
 
         public void Dispose()
@@ -105,7 +107,14 @@ namespace Iviz.Roslib
             stream?.Dispose();
             tcpClient?.Dispose();
 
-            await sessionTask;
+            try
+            {
+                sessionTask.WaitAndUnwrapException();
+            }
+            catch (Exception e)
+            {
+                Logger.LogFormat("{0}: {1}", this, e);
+            }
         }
 
         async Task<TcpClient?> TryToConnect()
@@ -228,6 +237,7 @@ namespace Iviz.Roslib
 
             int index = responses[0].IndexOf('=');
             string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+            errorDescription = errorMsg;
             throw new RosRpcException($"Failed handshake: {errorMsg}");
         }
 
@@ -250,6 +260,7 @@ namespace Iviz.Roslib
 
                 endpoint = new Endpoint(newEndPoint);
                 Logger.LogDebugFormat("{0}: Connected!", this);
+                errorDescription = null;
 
                 try
                 {
@@ -272,6 +283,7 @@ namespace Iviz.Roslib
                 }
             }
 
+            errorDescription = null;
             tcpClient = null;
             stream = null;
             Logger.LogFormat("{0}: Stopped!", this);

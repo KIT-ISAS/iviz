@@ -14,12 +14,14 @@ namespace Iviz.Roslib
         public Endpoint RemoteEndpoint { get; }
         public int NumReceived { get; }
         public int BytesReceived { get; }
+        public string? ErrorDescription { get; }
 
         internal SubscriberReceiverState(bool isAlive, bool isConnected,
             bool requestNoDelay,
             Endpoint? endPoint,
             Uri remoteUri, Endpoint remoteEndpoint,
-            int numReceived, int bytesReceived)
+            int numReceived, int bytesReceived,
+            string? errorDescription)
         {
             IsAlive = isAlive;
             IsConnected = isConnected;
@@ -29,6 +31,7 @@ namespace Iviz.Roslib
             RemoteEndpoint = remoteEndpoint;
             NumReceived = numReceived;
             BytesReceived = bytesReceived;
+            ErrorDescription = errorDescription;
         }
 
     }

@@ -114,8 +114,7 @@ namespace Iviz.Roslib.XmlRpc
                 if (a is null ||
                     a.Length != 3 ||
                     !(a[0] is int code) ||
-                    !(a[1] is string statusMessage) ||
-                    !(a[2] is object[] protocols))
+                    !(a[1] is string statusMessage))
                 {
                     Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
                     Code = StatusCode.Error;
@@ -130,6 +129,14 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return;
                 }
+                
+                if (!(a[2] is object[] protocols))
+                {
+                    Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
+                    Code = StatusCode.Error;
+                    hasParseError = true;
+                    return;
+                }                
 
                 if (protocols.Length == 0)
                 {
