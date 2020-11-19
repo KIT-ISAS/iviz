@@ -197,8 +197,7 @@ namespace Iviz.MsgsGen
             }
 
             // is it in the assembly?
-            string guessName = $"Iviz.Msgs.{MsgParser.CsIfiy(RosClassName).Replace("/", ".")}, Iviz.Msgs";
-            Type guessType = System.Type.GetType(guessName);
+            Type guessType = BuiltIns.TryGetTypeFromMessageName(RosClassName);
             if (guessType == null)
             {
                 // nope? we bail out

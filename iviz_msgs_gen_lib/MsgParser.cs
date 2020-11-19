@@ -32,22 +32,7 @@ namespace Iviz.MsgsGen
 
         internal static string CsIfiy(string name)
         {
-            StringBuilder str = new StringBuilder();
-            str.Append(char.ToUpper(name[0], Culture));
-            for (int i = 1; i < name.Length; i++)
-            {
-                if (name[i] == '_' && i != name.Length - 1)
-                {
-                    str.Append(char.ToUpper(name[i + 1], Culture));
-                    i++;
-                }
-                else
-                {
-                    str.Append(name[i]);
-                }
-            }
-
-            return str.ToString();
+            return Msgs.BuiltIns.RosNameToCs(name);
         }
 
 
