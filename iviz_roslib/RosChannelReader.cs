@@ -20,10 +20,7 @@ namespace Iviz.Roslib
     /// in the background, and can be accessed without having to use a separate callback.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class RosChannelReader<T> : IDisposable, IEnumerable<T>, IRosChannelReader
-#if !NETSTANDARD2_0
-        , IAsyncDisposable
-#endif
+    public sealed class RosChannelReader<T> : IEnumerable<T>, IRosChannelReader
         where T : IMessage, IDeserializable<T>, new()
     {
         readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
@@ -437,12 +434,12 @@ namespace Iviz.Roslib
         {
             if (subscriber == null)
             {
-                return "[RosSubscriberQueue (uninitialized)]";
+                return "[RosChannelReader (uninitialized)]";
             }
 
             return disposed
-                ? "[RosSubscriberQueue (disposed)]"
-                : $"[RosSubscriberQueue {subscriber.Topic} [{subscriber.TopicType}]]";
+                ? "[RosChannelReader (disposed)]"
+                : $"[RosChannelReader {subscriber.Topic} [{subscriber.TopicType}]]";
         }
     }
 

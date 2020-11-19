@@ -30,8 +30,10 @@ namespace Iviz.Roslib
         Task<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic) where T : IMessage;
         string Advertise(string topic, Type msgType, out IRosPublisher publisher);
         Task<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType);
+
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
             bool requestNoDelay = false) where T : IMessage, IDeserializable<T>, new();
+
         Task<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, IDeserializable<T>, new();
@@ -815,14 +817,24 @@ namespace Iviz.Roslib
 
             publishersByTopic[topic] = publisher;
 
-            var response = Master.RegisterPublisher(topic, topicInfo.Type);
+            RegisterPublisherResponse? response;
+            try
+            {
+                response = Master.RegisterPublisher(topic, topicInfo.Type);
+            }
+            catch (Exception e)
+            {
+                publishersByTopic.TryRemove(topic, out _);
+                throw new RosRpcException("Error registering publisher", e);
+            }            
+
             if (response.IsValid)
             {
                 return publisher;
             }
 
             publishersByTopic.TryRemove(topic, out _);
-            throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
+            throw new RosRpcException($"Error registering publisher: {response.StatusMessage}");
         }
 
         async Task<IRosPublisher> CreatePublisherAsync<T>(string topic) where T : IMessage
@@ -837,14 +849,24 @@ namespace Iviz.Roslib
 
             publishersByTopic[topic] = publisher;
 
-            var response = await Master.RegisterPublisherAsync(topic, topicInfo.Type).Caf();
+            RegisterPublisherResponse? response;
+            try
+            {
+                response = await Master.RegisterPublisherAsync(topic, topicInfo.Type).Caf();
+            }
+            catch (Exception e)
+            {
+                publishersByTopic.TryRemove(topic, out _);
+                throw new RosRpcException("Error registering publisher", e);
+            }
+
             if (response.IsValid)
             {
                 return publisher;
             }
 
             publishersByTopic.TryRemove(topic, out _);
-            throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
+            throw new RosRpcException($"Error registering publisher: {response.StatusMessage}");
         }
 
         /// <summary>
@@ -984,7 +1006,7 @@ namespace Iviz.Roslib
                 object? result = method.Invoke(this, flags, null, new object[] {topic}, BuiltIns.Culture);
                 if (result == null)
                 {
-                    throw new InvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");                    
+                    throw new InvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
                 }
 
                 Task<IRosPublisher> task = (Task<IRosPublisher>) result;

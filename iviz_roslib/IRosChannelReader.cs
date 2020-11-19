@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -6,7 +7,10 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    public interface IRosChannelReader
+    public interface IRosChannelReader : IDisposable 
+#if !NETSTANDARD2_0
+        , IAsyncDisposable
+#endif
     {
         Task<bool> WaitToReadAsync(CancellationToken token);
         IMessage Read(CancellationToken token);

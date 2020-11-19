@@ -87,7 +87,7 @@ namespace Iviz.Roslib
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage
     {
-        void Publish(T message);
+        public void Publish(T message);
     }
 
 }

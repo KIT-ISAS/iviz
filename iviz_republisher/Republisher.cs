@@ -17,8 +17,15 @@ namespace Iviz.Republisher
 
         Republisher(string[] args)
         {
-            var masterUriA = new Uri("http://141.3.59.5:11311");
-            var masterUriB = new Uri("http://141.3.59.19:11311");
+            /*
+            Logger.Log = Console.WriteLine;
+            Logger.LogDebug = Console.WriteLine;
+            Logger.LogError= Console.WriteLine;
+            */
+
+
+            var masterUriA = new Uri("http://141.3.59.19:11311");
+            var masterUriB = new Uri("http://141.3.59.5:11311");
 
             var callerUriA = new Uri("http://141.3.59.19:7623");
             var callerUriB = new Uri("http://141.3.59.19:7624");
@@ -50,7 +57,7 @@ namespace Iviz.Republisher
                 Console.WriteLine($"EE: Failed to connect to master B with uri '{masterUriA}': {e.Message}");
             }
         }
-        
+
         async Task StartAsync()
         {
             if (clientA == null || clientB == null)
@@ -100,7 +107,7 @@ namespace Iviz.Republisher
                 return;
             }
 
-            var tasksA = topicsAtoB.Zip(typesAtoB, 
+            var tasksA = topicsAtoB.Zip(typesAtoB,
                 (topic, type) => Republish(clientA, clientB, topic, type));
 
             var tasksB = topicsAtoB.Zip(typesBtoA,
@@ -109,30 +116,27 @@ namespace Iviz.Republisher
             Task[] tasks = tasksA.Concat(tasksB).ToArray();
             await Task.WhenAll(tasks);
         }
-        
+
         static async Task Republish(IRosClient sourceClient, IRosClient destClient, string topic, Type msgType)
         {
-            IRosChannelReader reader = RosChannelReader.CreateInstance(msgType);
-            await reader.StartAsync(sourceClient, topic);
+            await using IRosChannelReader reader = RosChannelReader.CreateInstance(msgType);
+            await using IRosChannelWriter writer = RosChannelWriter.CreateInstance(msgType);
 
-            string id; 
-            IRosPublisher publisher;
             try
             {
-                (id, publisher) = await destClient.AdvertiseAsync(topic, msgType);
+                Console.WriteLine($"** Starting reader for '{topic}'...");
+                await reader.StartAsync(sourceClient, topic);
+                Console.WriteLine($"** Starting writer for '{topic}'...");
+                await writer.StartAsync(destClient, topic);
+                Console.WriteLine($"** Transferring '{topic}'!");
+                await writer.WriteAllAsync(reader.ReadAllAsync(CancellationToken.None));
+                Console.WriteLine($"** Circuit for '{topic}' closed.");
             }
-            catch (RoslibException e)
+            catch (Exception e)
             {
-                Console.WriteLine($"EE Circuit for topic '{topic}' stopped! {e.Message}");
-                return;
+                Console.WriteLine($"EE Circuit for topic '{topic}' stopped!");
+                Console.WriteLine(e);
             }
-
-            await foreach (var message in reader.ReadAllAsync(CancellationToken.None))
-            {
-                publisher.Publish(message);
-            }
-
-            await publisher.UnadvertiseAsync(id);
         }
 
         public async ValueTask DisposeAsync()
@@ -141,7 +145,7 @@ namespace Iviz.Republisher
             {
                 await clientA.DisposeAsync();
             }
-            
+
             if (clientB != null)
             {
                 await clientB.DisposeAsync();

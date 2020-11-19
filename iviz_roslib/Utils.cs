@@ -221,5 +221,10 @@ namespace Iviz.Roslib
                 return hash1 + (hash2 * 1566083941);
             }
         }
+        
+        public static bool IsAlive(this IRosPublisher t)
+        {
+            return !t.CancellationToken.IsCancellationRequested;
+        }        
     }
 }
