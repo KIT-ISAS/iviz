@@ -630,22 +630,24 @@ namespace Iviz.Ros
 
             foreach (var stat in subscriberStats.Topics)
             {
-                builder.Append("<b>** Subscribed: ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<b>** Subscribed to ").Append(stat.Topic).Append("</b>").AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
                 builder.Append("<b>Connections:</b>").AppendLine();
 
                 if (stat.Receivers.Count == 0)
                 {
                     builder.Append("(None)").AppendLine();
+                    builder.AppendLine();
                     continue;
                 }
 
                 foreach (var receiver in stat.Receivers)
                 {
-                    var isConnected = receiver.IsAlive;
+                    var isConnected = receiver.IsConnected;
                     var isAlive = receiver.IsAlive;
                     builder.Append("<b>→</b> ")
                         .Append(receiver.RemoteUri == mClient.CallerUri ? "[Me]" : receiver.RemoteUri.Host);
+                    builder.Append(":").Append(receiver.RemoteUri.Port);
                     if (isAlive && isConnected)
                     {
                         int kbytes = receiver.BytesReceived / 1000;
@@ -657,7 +659,13 @@ namespace Iviz.Ros
                     }
                     else
                     {
-                        builder.Append(" <color=navy>(connecting)</b>");
+                        builder.Append(" <color=navy>(connecting)</color>");
+                    }
+
+                    if (receiver.ErrorDescription != null)
+                    {
+                        builder.AppendLine();
+                        builder.Append("<color=brown>\"").Append(receiver.ErrorDescription).Append("\"</color>");
                     }
 
                     builder.AppendLine();
@@ -670,7 +678,7 @@ namespace Iviz.Ros
 
             foreach (var stat in publisherStats.Topics)
             {
-                builder.Append("<b>** Publishing: ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<b>** Publishing to ").Append(stat.Topic).Append("</b>").AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
                 builder.Append("<b>Connections:</b>").AppendLine();
 

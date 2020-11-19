@@ -45,8 +45,10 @@ namespace Iviz.App
         {
             panel.Listener.Listener = listener.Listener;
 
+            const string NoneStr = "<none>";
+            
             robotNames.Clear();
-            robotNames.Add("<none>");
+            robotNames.Add(NoneStr);
             robotNames.AddRange(
                 ModuleListPanel.ModuleDatas.
                     Select(x => x.Controller).
@@ -54,7 +56,7 @@ namespace Iviz.App
                     Select(x => x.Name)
             );
             panel.Robot.Options = robotNames;
-            panel.Robot.Value = listener.RobotName;
+            panel.Robot.Value = listener.RobotName.Length != 0 ? listener.RobotName : NoneStr;
 
             panel.JointPrefix.Value = listener.MsgJointPrefix;
             panel.JointSuffix.Value = listener.MsgJointSuffix;

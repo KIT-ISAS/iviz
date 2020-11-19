@@ -152,7 +152,7 @@ namespace Iviz.Controllers
 
             description.Length = 0;
             description.Append("<color=maroon><b>* Marker: ").Append(id).Append("</b></color>").AppendLine();
-            description.Append("Type: ").Append(DescriptionFromType(msg)).AppendLine();
+            description.Append("Type: <b>").Append(DescriptionFromType(msg)).Append("</b>").AppendLine();
 
             ExpirationTime = msg.Lifetime.IsZero ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
 
@@ -285,6 +285,25 @@ namespace Iviz.Controllers
 
         void CreateTriangleList([NotNull] Marker msg)
         {
+            description.Append("Scale: [")
+                .Append(msg.Scale.X).Append(" | ")
+                .Append(msg.Scale.Y).Append(" | ")
+                .Append(msg.Scale.Z).Append("]").AppendLine();
+            description.Append("Color: ")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
+                .Append(msg.Color.A).AppendLine();            
+            
+            if (msg.Points.Length == 0)
+            {
+                description.Append("Elements: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+            }
+            
             MeshTrianglesResource meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
@@ -343,6 +362,14 @@ namespace Iviz.Controllers
             PointListResource pointList = ValidateResource<PointListResource>();
             pointList.ElementScale = Mathf.Abs((float) msg.Scale.X);
 
+            description.Append("Scale: ").Append(msg.Scale.X).AppendLine();
+            description.Append("Color: ")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
+                .Append(msg.Color.A).AppendLine();
+            
+            
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
@@ -360,6 +387,15 @@ namespace Iviz.Controllers
                 return;
             }
 
+            if (msg.Points.Length == 0)
+            {
+                description.Append("Elements: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+            }
+            
             IEnumerable<PointWithColor> points;
             Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
             if (msg.Colors.Length == 0)
@@ -416,11 +452,19 @@ namespace Iviz.Controllers
 
             description.Append("Scale: ").Append(elementScale).AppendLine();
             description.Append("Color: ")
-                .Append(msg.Color.R).Append(",")
-                .Append(msg.Color.G).Append(",")
-                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
-            description.Append("Size: ").Append(msg.Points.Length).AppendLine();
+
+            if (msg.Points.Length == 0)
+            {
+                description.Append("Elements: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+            }
 
             if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
@@ -465,9 +509,9 @@ namespace Iviz.Controllers
                 : Resource.Displays.Sphere;
 
             description.Append("Color: ")
-                .Append(msg.Color.R).Append(",")
-                .Append(msg.Color.G).Append(",")
-                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
@@ -543,7 +587,7 @@ namespace Iviz.Controllers
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
             textResource.ElementSize = (float) msg.Scale.Z;
 
-            description.Append("Size: ").Append(msg.Scale.Z).AppendLine();
+            description.Append("Scale: ").Append(msg.Scale.Z).AppendLine();
             if (Mathf.Approximately((float) msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
@@ -551,9 +595,9 @@ namespace Iviz.Controllers
             }
             
             description.Append("Color: ")
-                .Append(msg.Color.R).Append(",")
-                .Append(msg.Color.G).Append(",")
-                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
         }
 
@@ -565,8 +609,8 @@ namespace Iviz.Controllers
             }
 
             description.Append("Scale: [")
-                .Append(msg.Scale.X).Append(", ")
-                .Append(msg.Scale.Y).Append(", ")
+                .Append(msg.Scale.X).Append(" | ")
+                .Append(msg.Scale.Y).Append(" | ")
                 .Append(msg.Scale.Z).Append("]").AppendLine();
             
             if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
@@ -581,9 +625,9 @@ namespace Iviz.Controllers
             }
 
             description.Append("Color: ")
-                .Append(msg.Color.R).Append(",")
-                .Append(msg.Color.G).Append(",")
-                .Append(msg.Color.B).Append(",")
+                .Append(msg.Color.R).Append(" | ")
+                .Append(msg.Color.G).Append(" | ")
+                .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
             
             transform.localScale = msg.Scale.Ros2Unity().Abs();
@@ -619,15 +663,15 @@ namespace Iviz.Controllers
                     
                     
                     description.Append("Scale: [")
-                        .Append(msg.Scale.X).Append(", ")
-                        .Append(msg.Scale.Y).Append(", ")
+                        .Append(msg.Scale.X).Append(" | ")
+                        .Append(msg.Scale.Y).Append(" | ")
                         .Append(msg.Scale.Z).Append("]").AppendLine();
                     return;
                 }
                 case 2:
                 {
                     float sx = Mathf.Abs((float) msg.Scale.X);
-                    description.Append("Size: ").Append(msg.Scale.X).AppendLine();
+                    description.Append("Scale: ").Append(msg.Scale.X).AppendLine();
                     switch (sx)
                     {
                         case 0:
@@ -794,19 +838,19 @@ namespace Iviz.Controllers
                 case MarkerType.Text:
                     return "Text";
                 case MarkerType.LineStrip:
-                    return "Line_Strip";
+                    return "LineStrip";
                 case MarkerType.LineList:
-                    return "Line_List";
+                    return "LineList";
                 case MarkerType.MeshResource:
-                    return $"Mesh_Resource: {msg.MeshResource}";
+                    return $"MeshResource: {msg.MeshResource}";
                 case MarkerType.CubeList:
-                    return "Cube_List";
+                    return "CubeList";
                 case MarkerType.SphereList:
-                    return "Sphere_List";
+                    return "SphereList";
                 case MarkerType.Points:
                     return "Points";
                 case MarkerType.TriangleList:
-                    return "Triangle_List";
+                    return "TriangleList";
                 case MarkerType.Image:
                     return "Image";
                 default:
