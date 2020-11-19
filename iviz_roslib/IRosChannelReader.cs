@@ -15,7 +15,7 @@ namespace Iviz.Roslib
         public void Start(IRosClient client, string topic, bool requestNoDelay = false);
         public IEnumerable<IMessage> ReadAll(CancellationToken externalToken);
 #if !NETSTANDARD2_0
-        public IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken externalToken);
+        public IAsyncEnumerable<IMessage> ReadAllAsync(CancellationToken externalToken);
 #endif
     }
 }

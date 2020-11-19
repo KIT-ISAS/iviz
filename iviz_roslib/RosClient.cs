@@ -30,10 +30,8 @@ namespace Iviz.Roslib
         Task<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic) where T : IMessage;
         string Advertise(string topic, Type msgType, out IRosPublisher publisher);
         Task<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType);
-
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
             bool requestNoDelay = false) where T : IMessage, IDeserializable<T>, new();
-
         Task<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, IDeserializable<T>, new();
@@ -827,7 +825,7 @@ namespace Iviz.Roslib
             throw new ArgumentException($"Error registering publisher: {response.StatusMessage}", nameof(topic));
         }
 
-        async Task<IRosPublisher<T>> CreatePublisherAsync<T>(string topic) where T : IMessage
+        async Task<IRosPublisher> CreatePublisherAsync<T>(string topic) where T : IMessage
         {
             if (!IsValidResourceName(topic))
             {
