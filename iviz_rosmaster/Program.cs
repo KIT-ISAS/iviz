@@ -9,9 +9,12 @@ namespace Iviz.RosMaster
     {
         static async Task Main(string[] args)
         {
+            Logger.Log = Console.WriteLine;
+            Logger.LogError = Console.Error.WriteLine;
+            
             Uri masterUri = RosClient.TryGetCallerUri(RosMasterServer.DefaultPort);
             using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);
-            Logger.Log("** Iviz.RosMaster: Starting...");
+            Console.WriteLine("** Iviz.RosMaster: Starting...");
             rosMasterServer.AddKey("/rosdistro", "noetic");
             rosMasterServer.AddKey("/rosversion", "1.15.8");
             await rosMasterServer.Start();

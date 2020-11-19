@@ -161,7 +161,7 @@ namespace Iviz.RosMaster
                 Logger.Log($"++ Topic: {topic} [{topicType}]");
             }
 
-            publishers.Add(callerId, callerUri);
+            publishers[callerId] = callerUri;
             Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
 
             IEnumerable<Uri> currentSubscribers =
@@ -229,7 +229,7 @@ namespace Iviz.RosMaster
                 subscribersByTopic[topic] = subscribers;
             }
 
-            subscribers.Add(callerId, callerUri);
+            subscribers[callerId] = callerUri;
 
             IEnumerable<Uri> currentPublishers =
                 publishersByTopic.TryGetValue(topic, out var publishers)
@@ -261,7 +261,7 @@ namespace Iviz.RosMaster
                 return DefaultOkResponse;
             }
 
-            if (!subscribers.Any())
+            if (subscribers.Count == 0)
             {
                 subscribersByTopic.Remove(topic);
             }
@@ -293,7 +293,7 @@ namespace Iviz.RosMaster
 
             Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
 
-            if (!publishers.Any())
+            if (publishers.Count == 0)
             {
                 publishersByTopic.Remove(topic);
                 topicTypes.Remove(topic);
