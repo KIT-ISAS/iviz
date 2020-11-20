@@ -6,7 +6,7 @@ namespace Iviz.MsgsGen
 {
     public sealed class VariableElement : IElement
     {
-        const string HeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
+        const string CachedHeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
 
         public const int NotAnArray = -1;
         public const int DynamicSizeArray = 0;
@@ -193,7 +193,7 @@ namespace Iviz.MsgsGen
             // now we start improvising
             if (RosClassName == "std_msgs/Header")
             {
-                return $"{HeaderMd5} {RosFieldName}";
+                return $"{CachedHeaderMd5} {RosFieldName}";
             }
 
             // is it in the assembly?
