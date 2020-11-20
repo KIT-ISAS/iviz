@@ -113,7 +113,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: {1}", this, e);
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
             }
         }
 

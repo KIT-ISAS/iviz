@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -55,14 +56,30 @@ namespace Iviz.Roslib
         {
             keepRunning = false;
             tcpClient.Close();
-            task.Wait();
+
+            try
+            {
+                task.WaitAndUnwrapException();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
+            }
         }
 
         public async Task StopAsync()
         {
             keepRunning = false;
             tcpClient.Close();
-            await task.Caf();
+
+            try
+            {
+                await task.Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
+            }
         }
 
         async Task<int> ReceivePacket()

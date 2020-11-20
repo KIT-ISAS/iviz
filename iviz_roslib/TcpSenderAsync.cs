@@ -324,7 +324,7 @@ namespace Iviz.Roslib
         {
             await ProcessHandshake().Caf();
 
-            List<(T msg, int msgLength)> localQueue = new List<(T, int)>();
+            List<(T msg, int msgLength)> tmpQueue = new List<(T, int)>();
 
             byte[] lengthArray = new byte[4];
 
@@ -342,30 +342,14 @@ namespace Iviz.Roslib
                 Task<bool> waitTask = messageQueue.OutputAvailableAsync(runningTs.Token);
                 if (waitTask.IsCanceled || !await waitTask.Caf())
                 {
+                    // sender is shutting down
                     continue;
                 }
 
-                int totalQueueSizeInBytes = 0;
-                localQueue.Clear();
-
-                while (true)
-                {
-                    CancellationToken cancelledToken = new CancellationToken(true); // ensure we don't block
-                    var queueTask = messageQueue.DequeueAsync(cancelledToken);
-                    if (!queueTask.RanToCompletion())
-                    {
-                        break;
-                    }
-
-                    T msg = await queueTask.Caf();
-
-                    int msgLength = msg.RosMessageLength;
-                    localQueue.Add((msg, msgLength));
-                    totalQueueSizeInBytes += msgLength;
-                }
+                int totalQueueSizeInBytes = await ReadFromQueueWithoutBlocking(tmpQueue);
 
                 int startIndex, newBytesDropped;
-                if (localQueue.Count <= MaxSizeInPacketsWithoutConstraint ||
+                if (tmpQueue.Count <= MaxSizeInPacketsWithoutConstraint ||
                     totalQueueSizeInBytes < MaxQueueSizeInBytes)
                 {
                     startIndex = 0;
@@ -373,17 +357,17 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    DiscardOldMessages(localQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
+                    DiscardOldMessages(tmpQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
                         out startIndex, out newBytesDropped);
                 }
 
                 numDropped += startIndex;
                 bytesDropped += newBytesDropped;
 
-                for (int i = startIndex; i < localQueue.Count; i++)
+                for (int i = startIndex; i < tmpQueue.Count; i++)
                 {
-                    T message = localQueue[i].msg;
-                    int msgLength = localQueue[i].msgLength;
+                    T message = tmpQueue[i].msg;
+                    int msgLength = tmpQueue[i].msgLength;
                     if (writeBuffer.Length < msgLength)
                     {
                         writeBuffer = new byte[msgLength + BufferSizeIncrease];
@@ -408,6 +392,24 @@ namespace Iviz.Roslib
             }
 
             messageQueue.Enqueue(message);
+        }
+
+        async Task<int> ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength)> result)
+        {
+            CancellationToken cancelledToken = new CancellationToken(true); // ensure we don't block
+            int totalQueueSizeInBytes = 0;
+            Task<T> queueTask;
+
+            result.Clear();
+            while ((queueTask = messageQueue.DequeueAsync(cancelledToken)).RanToCompletion())
+            {
+                T msg = await queueTask.Caf();
+                int msgLength = msg.RosMessageLength;
+                result.Add((msg, msgLength));
+                totalQueueSizeInBytes += msgLength;
+            }
+
+            return totalQueueSizeInBytes;
         }
 
         static void DiscardOldMessages(List<(T msg, int msgLength)> queue,

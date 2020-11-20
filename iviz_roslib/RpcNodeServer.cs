@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib.XmlRpc
 {
@@ -73,12 +74,12 @@ namespace Iviz.Roslib.XmlRpc
 
             try
             {
-                task.Wait();
+                task.WaitAndUnwrapException();
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: {1}", this, e);
-            }            
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
+            }
         }
 
         public void Start()

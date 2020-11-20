@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib
 {
@@ -121,7 +122,14 @@ namespace Iviz.Roslib
             disposed = true;
 
             signal.Release();
-            task.Wait();
+            try
+            {
+                task.WaitAndUnwrapException();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
+            }
 
             foreach (ServiceRequestAsync<T> sender in connections)
             {
