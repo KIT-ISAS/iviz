@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
@@ -9,6 +8,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR;
 
 namespace Iviz.Displays
 {
@@ -292,7 +292,12 @@ namespace Iviz.Displays
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds pointBounds, out Vector2 span);
-            argsBuffer[1] = (uint) Size;
+            
+            bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
+            int instanceCount = isSinglePassStereo ? 2 * Size : Size;
+            
+            argsBuffer[1] = (uint) instanceCount;
+            argsComputeBuffer?.SetData(argsBuffer);
 
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)

@@ -61,6 +61,13 @@ Shader "iviz/Line"
 			float _AtlasRow;
 			sampler2D _MainTex;
 
+			struct appdata
+			{
+				uint id : SV_VertexID;
+				uint inst : SV_InstanceID;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};
+			
 			struct v2f
 			{
 				float4 position : SV_POSITION;
@@ -69,13 +76,27 @@ Shader "iviz/Line"
 #else
 				fixed3 color : COLOR;
 #endif
+				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
-			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+			//v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+			v2f vert(appdata In)
 			{
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
+				uint id = In.id;
+				uint inst = In.inst;
+				
+				v2f o;
+#ifdef USING_STEREO_MATRICES
+				UNITY_SETUP_INSTANCE_ID(In);
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+				inst /= 2;
+#endif
+				
 				float3 camPos = mul(_WorldToLocal, UNITY_MATRIX_IT_MV[3]).xyz;
 				
 				float3 V = Quads[id];
@@ -92,7 +113,6 @@ Shader "iviz/Line"
 
                 float3 p = right * V.x + up * V.y + BA * V.z + A;
 
-				v2f o;
 				o.position = UnityObjectToClipPos(p);
 
 	#if USE_TEXTURE

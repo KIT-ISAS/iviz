@@ -35,6 +35,7 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
         struct Input
         {
             float dummy; // unused
+        	UNITY_VERTEX_OUTPUT_STEREO
         };
 
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
@@ -57,17 +58,27 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
         {
             UNITY_SETUP_INSTANCE_ID(v);
             UNITY_INITIALIZE_OUTPUT(Input, o);
+        	
+#ifdef USING_STEREO_MATRICES
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+#endif        	
 
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
             v.vertex *= _LocalScale;
             v.vertex += _LocalOffset;
 
+        	uint instanceID = v.instanceID;
+
+	#ifdef USING_STEREO_MATRICES
+			instanceID /= 2;
+	#endif        	
+        	
 	#if USE_TEXTURE_SCALE
-			float intensity = _Points[v.instanceID].intensity;
+			float intensity = _Points[instanceID].intensity;
 			v.vertex.y *= intensity;
     #endif
 
-            v.vertex.xyz += _Points[v.instanceID].pos;
+            v.vertex.xyz += _Points[instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
             v.vertex -= _BoundaryCenter;
 #endif

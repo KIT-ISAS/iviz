@@ -127,6 +127,7 @@ namespace Iviz.Displays
                 : Resource.Materials.PointCloud.Object;
 
             Bounds worldBounds = BoxCollider.bounds;
+
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size, null, Properties,
                 ShadowCastingMode.Off, false, gameObject.layer);
         }

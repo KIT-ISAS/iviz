@@ -32,6 +32,7 @@ Shader "iviz/MultiplyMesh"
         struct Input
         {
             fixed3 color;
+			UNITY_VERTEX_OUTPUT_STEREO
         };
 
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
@@ -60,26 +61,37 @@ Shader "iviz/MultiplyMesh"
             UNITY_SETUP_INSTANCE_ID(v);
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
+#ifdef USING_STEREO_MATRICES
+			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+#endif
+        	
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
             v.vertex *= _LocalScale;
             v.vertex += _LocalOffset;
 
-	#if USE_TEXTURE || USE_TEXTURE_SCALE
-			float intensity = _Points[v.instanceID].intensity;
+        	uint instanceID = v.instanceID;
+
+	#ifdef USING_STEREO_MATRICES
+			instanceID /= 2;
+	#endif
+
+
+    #if USE_TEXTURE || USE_TEXTURE_SCALE
+			float intensity = _Points[instanceID].intensity;
     #endif
 
 	#if USE_TEXTURE_SCALE
 			v.vertex.y *= intensity;
     #endif
 
-            v.vertex.xyz += _Points[v.instanceID].pos;
+            v.vertex.xyz += _Points[instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
             v.vertex -= _BoundaryCenter;
 
 	#if USE_TEXTURE || USE_TEXTURE_SCALE
 			o.color = tex2Dlod(_MainTex, float4(intensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
     #else
-            int color = _Points[v.instanceID].intensity;
+            int color = _Points[instanceID].intensity;
             o.color = float3(
                 (color >> 0) & 0xff,
                 (color >> 8) & 0xff,
