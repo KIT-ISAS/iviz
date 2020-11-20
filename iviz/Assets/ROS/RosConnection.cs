@@ -93,6 +93,7 @@ namespace Iviz.Ros
             {
                 // shouldn't happen
                 Logger.Internal("Left connection thread!");
+                Logger.Internal("Error:", e);
                 Debug.LogError("XXX Left connection thread: " + e);
             }
         }

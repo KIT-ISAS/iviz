@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using Iviz.Core;
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
 using Iviz.ModelService;
+#endif
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Ros;
 
@@ -10,10 +12,14 @@ namespace Iviz.Controllers
     public sealed class ModelService
     {
         public bool IsEnabled { get; }
+
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
         ModelServer modelServer;
+#endif
 
         public ModelService()
         {
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
             Logger.Internal("Trying to start embedded <b>Iviz.Model.Service</b>...");
 
             string homeFolder;
@@ -61,10 +67,12 @@ namespace Iviz.Controllers
 
                 if (isRosInstalled && rosPackagePathExtras == null)
                 {
-                    Logger.Warn("Iviz.Model.Service could not be started because ROS_PACKAGE_PATH could not be read.\n" +
-                                "However, a ROS distro has been detected. You can try creating the folder $HOME/.iviz/ " +
-                                "and then calling \"echo $ROS_PACKAGE_PATH > ros_package_path\" in there.");
+                    Logger.Warn(
+                        "Iviz.Model.Service could not be started because ROS_PACKAGE_PATH could not be read.\n" +
+                        "However, a ROS distro has been detected. You can try creating the folder $HOME/.iviz/ " +
+                        "and then calling \"echo $ROS_PACKAGE_PATH > ros_package_path\" in there.");
                 }
+
                 return;
             }
 
@@ -79,6 +87,7 @@ namespace Iviz.Controllers
 
             IsEnabled = true;
             Logger.Internal($"Embedded Iviz.Model.Service started with {modelServer.NumPackages} paths.");
+#endif
         }
     }
 }

@@ -125,7 +125,9 @@ PlayerSettings:
     16:9: 1
     Others: 1
   bundleVersion: 0.1
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 4800000, guid: e7c77f6eaab324a819efdc13b8125a39, type: 3}
+  - {fileID: 8422642450306884981, guid: 3a62d44fea27046dab86eb4a9323754b, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -234,6 +236,7 @@ PlayerSettings:
   metalEditorSupport: 1
   metalAPIValidation: 1
   iOSRenderExtraFrameOnPause: 0
+  iosCopyPluginsCodeInsteadOfSymlink: 0
   appleDeveloperTeamID: TF5SLD77X2
   iOSManualSigningProvisioningProfileID: 
   tvOSManualSigningProvisioningProfileID: 
@@ -427,7 +430,7 @@ PlayerSettings:
     - OpenVR
     - Oculus
   - m_BuildTarget: iPhone
-    m_Enabled: 0
+    m_Enabled: 1
     m_Devices: []
   openGLRequireES31: 0
   openGLRequireES31AEP: 0

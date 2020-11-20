@@ -68,7 +68,7 @@ namespace Iviz.Controllers
             transform.SetParentLocal(TfListener.MapFrame.transform);
             if (parentId.Length == 0)
             {
-                transform.SetPose(Pose.identity);
+                transform.SetLocalPose(Pose.identity);
             }
             else
             {
@@ -80,7 +80,7 @@ namespace Iviz.Controllers
 
                 if (!(Parent is null))
                 {
-                    transform.SetPose(Parent.LookupPose(timestamp));
+                    transform.SetLocalPose(Parent.LookupPose(timestamp));
                 }
             }
         }
