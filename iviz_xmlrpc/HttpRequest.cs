@@ -74,6 +74,11 @@ namespace Iviz.XmlRpc
 
         static string ProcessResponse(string response)
         {
+            if (response.Length == 0)
+            {
+                throw new IOException("Partner closed connection or returned empty response");
+            }
+            
             int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
             if (index == -1)
             {
