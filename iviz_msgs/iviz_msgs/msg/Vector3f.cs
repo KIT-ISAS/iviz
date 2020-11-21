@@ -71,7 +71,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0vLyU8sMTZSqODlSoMyKxHMKl4uLgBBrUF3IgAAAA==";
+                "H4sIAAAAAAAACkvLyU8sMTZSqODlSoMyKxHMKl4uXi4A/6A6fCMAAAA=";
                 
         /// Custom iviz code
         public static readonly Vector3f Zero = new Vector3f(0, 0, 0);

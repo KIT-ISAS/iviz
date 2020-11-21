@@ -45,30 +45,34 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/AddModuleFromTopic";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "801b72bf30166359c828a5faf372e586";
+        [Preserve] public const string RosMd5Sum = "68ab9eda5fc795e020e1e72fec9f4815";
     }
 
     public sealed class AddModuleFromTopicRequest : IRequest, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
         [DataMember (Name = "topic")] public string Topic { get; set; } // Name of the topic
+        [DataMember (Name = "id")] public string Id { get; set; } // Requested id to identify this module, or empty to autogenerate
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleFromTopicRequest()
         {
             Topic = "";
+            Id = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AddModuleFromTopicRequest(string Topic)
+        public AddModuleFromTopicRequest(string Topic, string Id)
         {
             this.Topic = Topic;
+            this.Id = Id;
         }
         
         /// <summary> Constructor with buffer. </summary>
         public AddModuleFromTopicRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -84,18 +88,21 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Topic);
+            b.Serialize(Id);
         }
         
         public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 4;
+                int size = 8;
                 size += BuiltIns.UTF8.GetByteCount(Topic);
+                size += BuiltIns.UTF8.GetByteCount(Id);
                 return size;
             }
         }

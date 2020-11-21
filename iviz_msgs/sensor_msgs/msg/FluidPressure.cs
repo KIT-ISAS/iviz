@@ -80,16 +80,16 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61UwYrbMBC96ysGcthN6WZLW3oI9FBY2u6hUNi9h4k8sUVlyZXGSfP3fWNvkqVLoYcK" +
-                "B8fWzNOb92ZMC3oIqY1CQ5FaxyJUhBu8WhE9dqFSj9fcCuEvD0PJQwmsQrtcsMXIQCxpJ44WF4yQamiE" +
-                "8o6YdnEMDV1zKK/pgFTcRP3yhM+xZsT7ODZSDYS1z3XopARPOGTLJfei9nSCXzmL+5NdyvqCIX5ebs+0" +
-                "fE7KXqlKqrlUw/mKaqVQN98ua0EaAK7cD1YGCnwqV3pJ6uhva0G7wr1sUDI4WVrMnjXkdII5s5lZgMMu" +
-                "ZtYP72elNud9YH3a1hxHfekOFKPvXD3UWz1D2DNqT14ubN4YjZAgOyBUGuJ6iRrTj5QPyX38z8t9e/iy" +
-                "pqrNpq9tvZ01dmg15dRwaSClcsPKk0ldaOH2TZS9RJoUB81pV4+DoL4nr3G1kqRwjEcaK4I0w9K+H1Pw" +
-                "5vjZsVM+MqET08BFgx8jF8TnAgGnBjGjDB1XlZ+jmCT3d2trkyp+1ABCR+tNiF5N9Ps7ciPEfPfWEtzi" +
-                "8ZBvTNsWrXNpF+1Yjaz8mlybNF/jjFdzcStgQxzBKU2l6+ndBo91STgEFGTIvqNrc/ioHRrHumbybBun" +
-                "TofrEahXlnS1fIacJujEKZ/gZ8TLGf8Cm864VtNNB8+iVV/HFgIiEDO2x3g3tD1OID4GzATFsC1cjs6y" +
-                "5iPd4rNpjCBkTY7YwNeavU1oQ4egnas6fUJOY+Pcb9ZVTmGUBAAA";
+                "H4sIAAAAAAAACq1UwW7TQBC9W/I/jJRDW0RSBIhDJA5IFdADElJ7jybrib1ivWt2xw35e97YTQ1USByw" +
+                "Yjm2Z968eW/GtKI7H9sgNGQpZcxCWbjBow3RfecL9XjMrRD+8jDkNGTPKnRIGa8YGYgl7aSuaLWA+Fh8" +
+                "I5QOxHQIo2/okn1+SUfk4iLqrs4FOJSEeBfGRsqEwtqnMnSSvSOU2XNOvajdnfE3dTVF/skwJn3GEqeT" +
+                "6ydmLkVlp1QklpTLjPQZPUumbr4sx4rUA165H6wXtPnYtPQSFYl/O1Z0yNzLDo2DluWF5Fh9imecJ0Iz" +
+                "kYnGISTWd29nxXZPEUD7sC8pjPrcJihHX7k4qLj5DeOBIUF0sjB6ZVR8hAEAUWmIyxI1xm8xHWNdvf/P" +
+                "R119ufu0paLNri9tuZ6lrisMnnJsODeQVLlh5cmuzrdwfh3kQQJNyoPp9FZPg1iTj7bj10qUzCGcaCyI" +
+                "0gR3+36MHlLLYt0ZwFIhF9PAWb0bA2ckpAwdp2ExxyZ8O4t8H8WUub3Z2tAUcaN6kDrZsEL9Yurf3iB4" +
+                "hKhvXlsGEu+PaW0itxikZXi0YzXG8mMycBJ/a2VezD1uAA+RBIWaQpfTsx1uyxWhDljIkFxHl+b2STuM" +
+                "kc3Q5N4eywtkTEAA7IUlXVz9Cm3UtxQ5pjP+DLkU+RdcQ3kEtrbWHcwLJkEZW+iISKzdA5a+of1pQnHB" +
+                "Y0ko+H3mfKorS5uLAuSjiY0w5E3e2IeglORsbRs6eu3qqmDnUeC8STbePwG9l+i5sAQAAA==";
                 
     }
 }

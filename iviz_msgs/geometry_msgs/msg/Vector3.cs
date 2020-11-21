@@ -77,11 +77,11 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
-                "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
-                "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +
-                "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
-                "0nqk3+YP1MrAiH8BAAA=";
+                "H4sIAAAAAAAACkWQwUrFQAxF94X+w4W3USgVVPyHt3MhbiWvTaeD7aRk8qz16828it1dhpyTmznhbYwZ" +
+                "yoty5mQZhC/uTBQxYVBm5IU6blFXJ5wNPixp2jAzJYPJgTrZR3U2Smpdy8qDKDeIhl44I4kVyUyfLuWU" +
+                "ueC0LG4jmFLKExW4PDtzx21oG6wjp30qpuCDRRE4scYOGkPsd9RXzf804f12w1MDGx6xxmnaW+/bbORi" +
+                "UbEbcd/iPGCTK9ZykwdFT+adBBcv+deMLlNpLA2upfruCCwzm24fcw754VWiC2bOmQL7B2Zj6tu6qqth" +
+                "ErKXZ3wfcTviT139AlnSJqmJAQAA";
                 
         /// Custom iviz code
         public static readonly Vector3 Zero = new Vector3(0, 0, 0);

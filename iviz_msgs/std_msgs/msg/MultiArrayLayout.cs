@@ -104,16 +104,16 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61UTWvbQBC961cM9sV2bdcfITQBHwyFXppTCqUYYTbakbS2tGt2V3HTX9+3kizLaY4V" +
-                "Aq3m872nGQ3pR85UVoVXwlrxRpKTQlh2JChjzVYljXcmVcnaKaNFQU2oSUlEQzoJ61VSIYuk8IL824nn" +
-                "RF8v8ShlmYyVbFlSak1JpvJsqTTOI98bUlq37/MoegrttqFDV2IXE9rTkLaXxh0aOllzYiBgF1VK+/Wq" +
-                "RrE3aerYU3sFlFIqnREXjEwPUD5g0b6uhowIULZJws4Z68jlpiokbb//3P56phems1XeswZUAvbS3YJw" +
-                "3irJqCC0JHfiRKUKZGues8CrF5sqG3gOCfdV+JGaHqbHMW1qMLs+h08hed+02C3jibq1rOLJAZZjHA0D" +
-                "BWABCGHllNazJBeQtqD7u8Xvuy8LUqXIwEX5HESArWDxCpyJKYylNtihyrlmD9pXLsI91g3QebeI54V4" +
-                "QV3AHeSsstwPri6n/jAFFzr2rDVaWNcToJkENBt6WC3vFwuikTae28hWTFKODhWUq8tB7Rr7uC247CM4" +
-                "K+nzwdXTAUCjnvUGAJ7Lh9XFveqXa3UYXH1dwXXP1pWrZfn3S1pOGZOE8fZYsSC5NecpHXCA3lWpp/W0" +
-                "HMN70xHDv/nPV/T0/O0Risp96TL3+YPdigIRLEbLH6vSnKB4pl4x8d3kXvarVQORl0/zLpBGYUvwG6BK" +
-                "K+/GXWIjWUhsTh/0+AtWkePpkQQAAA==";
+                "H4sIAAAAAAAACq1UW2/aMBR+R+I/HMELZcC4VNVaiQekSn3ZnjppmhBCbnySGBIb2U5Z9+v32Qlp2Pq4" +
+                "SIhw7PPd7MOQvudMZVV4JawVbyQ5KYRlR4Iy1mxVUq9OpSpZO2W0KKjealIS/d6QTsJ6lVRoIym8IP92" +
+                "4hnR46UBWJbJWMmWJaXWlGQqz5ZK43wA8IaU1k1h1u/1e98C5SawtCjbHUECDWlzIW8V0cmaE0MEu36v" +
+                "UtqvllHJ3qSpY0/NE5RKqXRGXDBaPYT5oEf7CIeOwA2GJGHnjHXkclMVkjZff2x+PtML09kq71lDL8FB" +
+                "6a51OG+V5AAhtCR34kSlCp6j3Wlw19mcKhvdDil83o9gpCaHyfGG1lHRtmvkU2jf1yzbxW6srivL3fiA" +
+                "ynEHwOgDgiBEWDmh1TTJBUIu6O52/uv2y5xUKTIYUj6HG+grWLxCa2IKY6nZjDyHdI4ZwPy7IeEeGg7Q" +
+                "b+e7WSFeAA3Ng5xVlvtBZ82p34z41wTWbjmKRnk1hqRxkLSm++Xibj4nGmnjudnZxErK0aFChBEPuUcD" +
+                "NxfERVfEWUmfDzpLrQZQdctXGvC9uF+268suYhPIoLPYYq66xRaxCejfg7WcMu4Wbr3H7IX8rTlP6IAX" +
+                "hF+VehKvzzH8rlnjTKz/84Mpe356QLhyX7rMff5g5vq9YAcD0+SAEarfkH6mXjEH7XVuB69JBVsv5/TX" +
+                "ThqF4cF/BFVaeYcDvHTW0YXO+u0jlj9CA/MksQQAAA==";
                 
     }
 }

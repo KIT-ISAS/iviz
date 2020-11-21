@@ -87,13 +87,13 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61STUsDMRC951c86EVhXaGKB6EnD9JDQbB4kSrT3dlt6CYpSWq7S3+8k137IXg0MDC8" +
-                "vPcyHxlhRiHgfV0vVNU4ig/3MEqN8MQ2soerYHqCWaianeHo208T6nD7xkV0/g6F6/lTyz5qwpxtcD4Z" +
-                "3piP8UJu0jlA7/cSrUSHQ+Jj0qOCtCkG9MjtekR3CT2WJQ4XeXuRd+e8vcDbC7zrlJr881Gz1+dH/DkV" +
-                "aWW+0gGeN56DjDKA8NXfQVtUnhlhQwXnSLOIEK6zTQvDZCOiOytFWGovUu1sLq7suXKeM+iI0nGAdVE8" +
-                "DK3FUobPSU2bjZgRoicbGkraBIvkivM6z7BbsR1Y2tZCFIeaZYW6gNe1LgelPGROYsJPcxliNcZON81Q" +
-                "8/BYXLGYeBd7wXWOaYXWbbFLDUniUVKkZLTkU120bFK9LsM2Fd5b/B7oi9OiNxwC1SyzC5GpzNVps+c/" +
-                "cd58p74BX6ix6tcCAAA=";
+                "H4sIAAAAAAAACq1STUvDQBC9B/IfHvSiECNU8SD05EF6KAgWL6KybSbp0uxO2d3aJvTHO5ukGsGjCwM7" +
+                "H+/tm5mdYKG8x+u2ekuTsmYV7m5h0iRNJnggG8iBS5iuxkhJRWwouObD+Mpfv9A6sLvBmgfI3JILWmFJ" +
+                "1rOLtFfmfSq4CeI5QR+PYo1Yi1OHwKwLS6iJNoTP1W0X0m0XPusTkrHTjJ125DTjTDPOtOKkyeyfT5os" +
+                "nh/v8eeMYlPLjfZwtHPkZbQeCp9dEtqidETwO7WmHN1cAqSYbd3AkLIBgX+ggiy0E6xmmwstOSrZUQYd" +
+                "UDB5WA6RxKitkMouKMLVbidsCsEp62sVwTEsmAvKqzzDYUO2r9K2ksJIUZGsVK/hdKWLHipPmW+0wtBg" +
+                "hlBOcdB13avuXwsbiiyOQ4e4zDEv0fAeh9iTXBwKFUQTYyUiB2VqVUfFnGEfpfccv8f6xFoIDHmvKpIB" +
+                "+kCqyONWz0se/ZHRP5DFfwHcg+JT9AIAAA==";
                 
     }
 }

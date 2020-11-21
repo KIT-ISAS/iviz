@@ -1,6 +1,7 @@
 # Adds a module
 
 string topic		# Name of the topic
+string id		# Requested id to identify this module, or empty to autogenerate
 ---
 bool success		# Whether the retrieval succeeded
 string message		# An error message if success is false
