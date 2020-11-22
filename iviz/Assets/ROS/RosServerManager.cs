@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Core;
 using Iviz.RosMaster;
 using JetBrains.Annotations;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
@@ -107,7 +108,14 @@ namespace Iviz.Ros
             // tell TryCreate() to stop waiting
             signal2.Release();
 
-            task.Wait();
+            try
+            {
+                task.Wait();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
         }
     }
 }

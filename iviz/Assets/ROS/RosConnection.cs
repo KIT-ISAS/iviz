@@ -42,7 +42,14 @@ namespace Iviz.Ros
         {
             keepRunning = false;
             Signal();
-            task?.Wait();
+            try
+            {
+                task?.Wait();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -64,8 +71,13 @@ namespace Iviz.Ros
 
         protected void Signal()
         {
-            try { signal.Release(); }
-            catch (SemaphoreFullException) { }
+            try
+            {
+                signal.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+            }
         }
 
         async Task Run()
@@ -78,13 +90,31 @@ namespace Iviz.Ros
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
-                        var connectionResult = await Connect();
+                        bool connectionResult;
+
+                        try
+                        {
+                            connectionResult = await Connect();
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Error("XXX Error in Connect!: " + e);
+                            connectionResult = false;
+                        }
 
                         SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
                     }
 
                     await signal.WaitAsync(TaskWaitTimeInMs);
-                    await ExecuteTasks();
+
+                    try
+                    {
+                        await ExecuteTasks();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("XXX Error in ExecuteTask!: " + e);
+                    }
                 }
 
                 SetConnectionState(ConnectionState.Disconnected);
@@ -94,7 +124,7 @@ namespace Iviz.Ros
                 // shouldn't happen
                 Logger.Internal("Left connection thread!");
                 Logger.Internal("Error:", e);
-                Debug.LogError("XXX Left connection thread: " + e);
+                Logger.Error("XXX Left connection thread: " + e);
             }
         }
 

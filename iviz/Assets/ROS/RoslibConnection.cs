@@ -1,4 +1,4 @@
-﻿//#define LOG_ENABLED
+﻿#define LOG_ENABLED
 
 using System;
 using System.Collections.Generic;
@@ -104,7 +104,7 @@ namespace Iviz.Ros
             try
             {
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -319,24 +319,24 @@ namespace Iviz.Ros
             }
 
             var signal = new SemaphoreSlim(0, 1);
-            bool[] result = {false};
+            bool result = false;
 
             AddTask(async () =>
             {
                 try
                 {
-                    result[0] = client != null && await client.CallServiceAsync(service, srv);
+                    result = client != null && await client.CallServiceAsync(service, srv);
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Warn(e);
+                    Core.Logger.Debug(e);
                 }
 
                 signal.Release();
             });
 
             signal.Wait();
-            return result[0];
+            return result;
         }
 
         internal void Publish<T>(Sender<T> advertiser, T msg) where T : IMessage

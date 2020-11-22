@@ -1,4 +1,4 @@
-Shader "iviz/DepthImage"
+Shader "iviz/DepthCloud"
 {
 	Properties
 	{
@@ -18,6 +18,8 @@ Shader "iviz/DepthImage"
 		Pass
 		{
 			CGPROGRAM
+			#include "UnityCG.cginc"
+
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile _ USE_INTENSITY
@@ -33,7 +35,6 @@ Shader "iviz/DepthImage"
 			float4x4 _WorldToLocal;
 
 			float _PointSize;
-			//float4 _TexCoordOffset;
 			sampler2D _ColorTexture;
 			sampler2D _DepthTexture;
 
@@ -42,17 +43,38 @@ Shader "iviz/DepthImage"
 			StructuredBuffer<float2> _Quad;
 			StructuredBuffer<float2> _Points;
 
+			struct appdata
+			{
+				uint id : SV_VertexID;
+				uint inst : SV_InstanceID;
+				UNITY_VERTEX_INPUT_INSTANCE_ID
+			};			
+			
 			struct v2f
 			{
 				float4 position : SV_POSITION;
 				half3 color : COLOR;
+				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 
-			v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+			//v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
+			v2f vert(appdata In)
 			{
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
+
+				uint id = In.id;
+				uint inst = In.inst;
+
+				v2f o;
+#ifdef USING_STEREO_MATRICES
+				UNITY_SETUP_INSTANCE_ID(In);
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+				inst /= 2;
+#endif				
 
 				float2 extent = abs(UNITY_MATRIX_P._11_22);
 				float2 quadVertex = _Quad[id] * _Scale;
@@ -68,7 +90,6 @@ Shader "iviz/DepthImage"
 				pos.w = 1;
 
 				// Set vertex output.
-				v2f o;
 				o.position = UnityObjectToClipPos(pos) + float4(quadVertex * size, 0, 0);
 #if USE_INTENSITY
 				o.color = tex2Dlod(_IntensityTexture, float4(z * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
