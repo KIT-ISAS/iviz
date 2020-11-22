@@ -37,16 +37,19 @@ namespace Iviz.Core
         public static void Info(object t)
         {
             UnityEngine.Debug.Log(t);
+            Console.WriteLine(t);
         }
 
         public static void Error(object t)
         {
             UnityEngine.Debug.LogWarning(t);
+            Console.Error.WriteLine(t);
         }
 
         public static void Warn(object t)
         {
             UnityEngine.Debug.LogWarning(t);
+            Console.Error.WriteLine(t);
         }
 
         public static void Debug(object t)
@@ -91,7 +94,7 @@ namespace Iviz.Core
             }
 
             LogInternal?.Invoke(str.ToString());
-            UnityEngine.Debug.LogWarning(str);
+            Warn(str);
         }
 
         public static void External(LogLevel level, [CanBeNull] string msg, [CallerFilePath] string file = "",

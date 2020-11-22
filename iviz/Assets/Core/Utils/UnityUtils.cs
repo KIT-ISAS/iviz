@@ -299,6 +299,115 @@ namespace Iviz.Core
                 ResourcePool.Dispose(info, resource.gameObject);
             }
         }
+        
+        public static Bounds TransformBound(Bounds bounds, Pose pose, Vector3 scale)
+        {
+            if (pose == Pose.identity)
+            {
+                return scale == Vector3.one 
+                    ? bounds 
+                    : new Bounds(bounds.center, Vector3.Scale(scale, bounds.size));
+            }
 
+            if (pose.rotation == Quaternion.identity)
+            {
+                return scale == Vector3.one 
+                    ? new Bounds(bounds.center + pose.position, bounds.size) 
+                    : new Bounds(bounds.center + pose.position, Vector3.Scale(scale, bounds.size));
+            }
+            
+            Vector3[] boundPoints = {
+                 bounds.extents.x * Vector3.right,
+                -bounds.extents.x * Vector3.right,
+                 bounds.extents.y * Vector3.up,
+                -bounds.extents.y * Vector3.up,
+                 bounds.extents.z * Vector3.forward,
+                -bounds.extents.z * Vector3.forward
+            };
+            Vector3 positionMin = float.MaxValue * Vector3.one;
+            Vector3 positionMax = float.MinValue * Vector3.one;
+            foreach (Vector3 point in boundPoints)
+            {
+                Vector3 position = pose.rotation * (Vector3.Scale(point, scale) + bounds.center) + pose.position;
+                positionMin = Vector3.Min(positionMin, position);
+                positionMax = Vector3.Max(positionMax, position);
+            }
+            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+        }
+
+        public static Bounds TransformBound(Bounds bounds, Transform transform)
+        {
+            return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
+        }
+        
+        public static Bounds? TransformBound(Bounds? bounds, Pose pose, Vector3 scale)
+        {
+            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, pose, scale);
+        }
+
+        public static Bounds? TransformBound(Bounds? bounds, Transform transform)
+        {
+            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, transform);
+        }
+
+        
+        public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds?> enumOfBounds)
+        {
+            if (enumOfBounds == null)
+            {
+                throw new ArgumentNullException(nameof(enumOfBounds));
+            }
+            
+            Bounds? result = null;
+            using (IEnumerator<Bounds?> it = enumOfBounds.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    Bounds? bounds = it.Current;
+                    if (bounds == null)
+                    {
+                        continue;
+                    }
+
+                    if (result == null)
+                    {
+                        result = bounds;
+                    }
+                    else
+                    {
+                        result.Value.Encapsulate(bounds.Value);
+                    }
+                }
+            }
+
+            return result;
+        }
+        
+        public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds> enumOfBounds)
+        {
+            if (enumOfBounds == null)
+            {
+                throw new ArgumentNullException(nameof(enumOfBounds));
+            }
+            
+            Bounds? result = null;
+            using (IEnumerator<Bounds> it = enumOfBounds.GetEnumerator())
+            {
+                while (it.MoveNext())
+                {
+                    Bounds bounds = it.Current;
+                    if (result == null)
+                    {
+                        result = bounds;
+                    }
+                    else
+                    {
+                        result.Value.Encapsulate(bounds);
+                    }
+                }
+            }
+
+            return result;
+        }        
     }
 }

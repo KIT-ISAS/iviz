@@ -10,14 +10,10 @@ namespace Iviz.Displays
     public sealed class AggregatedMeshMarkerResource : MonoBehaviour, ISupportsTintAndAROcclusion
     {
         [SerializeField] BoxCollider markerCollider;
-
-        public Bounds Bounds => new Bounds(markerCollider.center, markerCollider.size);
-        public Bounds WorldBounds => markerCollider.bounds;
-
-        public Vector3 WorldScale => transform.lossyScale;
-        public Pose WorldPose => transform.AsPose();
-
         [SerializeField] MeshMarkerResource[] children = Array.Empty<MeshMarkerResource>();
+
+        public Bounds? Bounds => new Bounds(markerCollider.center, markerCollider.size);
+
         public IReadOnlyCollection<MeshMarkerResource> Children
         {
             get => children;

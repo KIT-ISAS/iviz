@@ -1,3 +1,4 @@
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -6,16 +7,15 @@ namespace Iviz.Resources
     {
         public Info<Material> FontMaterial { get; }
         public Info<Material> FontMaterialZWrite { get; }
-        
+
         public Info<Material> Lit { get; }
-        public Info<Material> SimpleLit { get; }
         public Info<Material> TexturedLit { get; }
         public Info<Material> TransparentLit { get; }
         public Info<Material> TransparentTexturedLit { get; }
         public Info<Material> ImagePreview { get; }
         public Info<Material> PointCloud { get; }
         public Info<Material> PointCloudWithColormap { get; }
-        public Info<Material> DepthImageProjector { get; }
+        public Info<Material> DepthCloud { get; }
         public Info<Material> Grid { get; }
         public Info<Material> GridInterior { get; }
         public Info<Material> GridMap { get; }
@@ -42,40 +42,41 @@ namespace Iviz.Resources
             FontMaterial = new Info<Material>("Materials/Font Material Normal");
             FontMaterialZWrite = new Info<Material>("Materials/Font Material ZWrite");
 
-            SimpleLit = new Info<Material>("Materials/SimpleWhite");
-            Lit = new Info<Material>("Materials/White");
-            TexturedLit = new Info<Material>("Materials/Textured Lit");
-            TransparentLit = new Info<Material>("Materials/Transparent Lit");
-            TransparentTexturedLit = new Info<Material>("Materials/Transparent Textured Lit");
+            Lit = Settings.IsHololens
+                ? new Info<Material>("Hololens Materials/White")
+                : new Info<Material>("Materials/White");
+            TexturedLit = Settings.IsHololens
+                ? new Info<Material>("Hololens Materials/Textured Lit")
+                : new Info<Material>("Materials/Textured Lit");
+            TransparentLit = Settings.IsHololens
+                ? new Info<Material>("Hololens Materials/Transparent Lit")
+                : new Info<Material>("Materials/Transparent Lit");
+            TransparentTexturedLit = Settings.IsHololens
+                ? new Info<Material>("Hololens Materials/Transparent Textured Lit")
+                : new Info<Material>("Materials/Transparent Textured Lit");
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             Grid = new Info<Material>("Materials/Grid");
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
-            DepthImageProjector = new Info<Material>("Materials/DepthImage Material");
+            DepthCloud = new Info<Material>("Materials/DepthCloud");
 
-            PointCloud = new Info<Material>("Materials/PointCloud Material");
+            PointCloud = new Info<Material>("Materials/PointCloud");
             Line = new Info<Material>("Materials/Lines/Line");
             TransparentLine = new Info<Material>("Materials/Lines/Transparent Line");
             LineSimple = new Info<Material>("Materials/Lines/LineSimple");
             TransparentLineSimple = new Info<Material>("Materials/Lines/Transparent LineSimple");
 
-            PointCloudWithColormap = new Info<Material>("Materials/PointCloud Material with Colormap");
-            //PointCloudWithColormap.Object.EnableKeyword("USE_TEXTURE");
+            PointCloudWithColormap = new Info<Material>("Materials/PointCloud with Colormap");
             LineWithColormap = new Info<Material>("Materials/Lines/Line with Colormap");
-            //LineWithColormap.Object.EnableKeyword("USE_TEXTURE");
             TransparentLineWithColormap = new Info<Material>("Materials/Lines/Transparent Line with Colormap");
-            //TransparentLineWithColormap.Object.EnableKeyword("USE_TEXTURE");
             LineSimpleWithColormap = new Info<Material>("Materials/Lines/LineSimple with Colormap");
-            //LineSimpleWithColormap.Object.EnableKeyword("USE_TEXTURE");
-            TransparentLineSimpleWithColormap = new Info<Material>("Materials/Lines/Transparent LineSimple with Colormap");
-            //TransparentLineSimpleWithColormap.Object.EnableKeyword("USE_TEXTURE");
+            TransparentLineSimpleWithColormap =
+                new Info<Material>("Materials/Lines/Transparent LineSimple with Colormap");
 
             MeshList = new Info<Material>("Materials/MeshList");
             MeshListWithColormap = new Info<Material>("Materials/MeshList with Colormap");
-            //MeshListWithColormap.Object.EnableKeyword("USE_TEXTURE");
             MeshListWithColormapScaleY = new Info<Material>("Materials/MeshList with Colormap ScaleY");
             MeshListWithColormapScaleY.Object.enableInstancing = true;
-            //MeshListWithColormapScaleY.Object.EnableKeyword("USE_TEXTURE_SCALE");
             MeshListOcclusionOnly = new Info<Material>("Materials/MeshList OcclusionOnly");
             MeshListOcclusionOnlyWithScaleY = new Info<Material>("Materials/MeshList OcclusionOnly with ScaleY");
 

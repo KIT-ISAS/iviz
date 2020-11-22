@@ -1,5 +1,4 @@
 ﻿using System;
-using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -8,6 +7,8 @@ namespace Iviz.Displays
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
         [SerializeField] [CanBeNull] BoxCollider boxCollider;
+
+        bool colliderEnabled = true;
 
         protected bool HasBoxCollider => boxCollider != null;
 
@@ -23,35 +24,16 @@ namespace Iviz.Displays
                     : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
         }
 
-        public Bounds Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : new Bounds();
-        public Bounds WorldBounds => HasBoxCollider ? BoxCollider.bounds : new Bounds();
+        protected Bounds WorldBounds => BoxCollider.bounds;
 
-        public virtual string Name
+        public string Name
         {
             get => gameObject.name;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                if (value == null) throw new ArgumentNullException(nameof(value));
 
                 gameObject.name = value;
-            }
-        }
-
-        bool colliderEnabled = true;
-
-        public bool ColliderEnabled
-        {
-            get => colliderEnabled;
-            set
-            {
-                colliderEnabled = value;
-                if (HasBoxCollider)
-                {
-                    BoxCollider.enabled = value;
-                }
             }
         }
 
@@ -61,30 +43,35 @@ namespace Iviz.Displays
             set => transform.parent = value;
         }
 
+        protected virtual void Awake()
+        {
+            if (boxCollider == null) boxCollider = GetComponent<BoxCollider>();
+
+            ColliderEnabled = ColliderEnabled;
+        }
+
+        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : (Bounds?) null;
+
+        public bool ColliderEnabled
+        {
+            get => colliderEnabled;
+            set
+            {
+                colliderEnabled = value;
+                if (HasBoxCollider) BoxCollider.enabled = value;
+            }
+        }
+
         public virtual bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
-        public virtual Vector3 WorldScale => transform.lossyScale;
-
-        public virtual Pose WorldPose => transform.AsPose();
-
         public virtual int Layer
         {
             get => gameObject.layer;
             set => gameObject.layer = value;
-        }
-
-        protected virtual void Awake()
-        {
-            if (boxCollider == null)
-            {
-                boxCollider = GetComponent<BoxCollider>();
-            }
-
-            ColliderEnabled = ColliderEnabled;
         }
 
         public virtual void Suspend()

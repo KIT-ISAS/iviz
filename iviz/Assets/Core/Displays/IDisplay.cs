@@ -10,33 +10,13 @@ namespace Iviz.Displays
     public interface IDisplay
     {
         /// <summary>
-        /// Name of the display. Used for the selection caption.
+        /// Bounds of the display in local coordinates, or null if the display is empty.
         /// </summary>
-        [NotNull] string Name { get; }
-        /// <summary>
-        /// Bounds of the display in local coordinates.
-        /// </summary>
-        Bounds Bounds { get; }
-        /// <summary>
-        /// Bounds of the display in world coordinates.
-        /// </summary>
-        Bounds WorldBounds { get; }
-        /// <summary>
-        /// Pose of the display in world coordinates.
-        /// </summary>
-        Pose WorldPose { get; }
-        /// <summary>
-        /// Approximate scale of the display in world coordinates.
-        /// </summary>
-        Vector3 WorldScale { get; }
+        Bounds? Bounds { get; }
         /// <summary>
         /// Unity layer of the display.
         /// </summary>
         int Layer { get; set; }
-        /// <summary>
-        /// Parent transform of the display.
-        /// </summary>
-        [CanBeNull] Transform Parent { get; set; }
         /// <summary>
         /// Gets or sets whether the display collider is enabled.
         /// </summary>

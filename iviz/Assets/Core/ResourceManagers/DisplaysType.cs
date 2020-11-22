@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Iviz.Core;
 using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace Iviz.Resources
         public Info<GameObject> Trail { get; }
         public Info<GameObject> InteractiveControl { get; }
         public Info<GameObject> GridMap { get; }
-        
+
         public DisplaysType()
         {
             Cube = new Info<GameObject>("Displays/Cube");
@@ -60,7 +61,9 @@ namespace Iviz.Resources
             AxisFrame = new Info<GameObject>("Displays/AxisFrameResource");
             AngleAxis = new Info<GameObject>("Displays/AngleAxis");
             Trail = new Info<GameObject>("Displays/Trail");
-            InteractiveControl = new Info<GameObject>("Displays/InteractiveControl");
+            InteractiveControl = Settings.IsHololens
+                ? new Info<GameObject>("Hololens Assets/HololensControl")
+                : new Info<GameObject>("Displays/InteractiveControl");
             GridMap = new Info<GameObject>("Displays/GridMap");
 
             resourceByType = CreateTypeDictionary();

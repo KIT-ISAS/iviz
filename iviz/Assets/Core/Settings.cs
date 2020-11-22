@@ -7,6 +7,16 @@ namespace Iviz.Core
     {
 
         /// <summary>
+        /// Does this device support a way to move the root node?
+        /// </summary>
+        public const bool IsRootMovable =
+#if UNITY_IOS || UNITY_ANDROID || UNITY_WSA
+            true;
+#else
+            false;
+#endif
+
+        /// <summary>
         /// Is this being run on an Android, IOS, or Hololens device?
         /// </summary>
         public const bool IsMobile =
@@ -30,7 +40,7 @@ namespace Iviz.Core
         /// Is this being run in a Hololens?
         /// </summary>
         public const bool IsHololens =
-#if !UNITY_EDITOR && UNITY_WSA
+#if UNITY_WSA
             // bug: this will activate with any UWP device, not only Hololens! but what else? 
             true;
 #else
