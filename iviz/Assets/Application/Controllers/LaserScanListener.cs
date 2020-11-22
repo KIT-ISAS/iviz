@@ -31,7 +31,7 @@ namespace Iviz.Controllers
     public sealed class LaserScanListener : ListenerController
     {
         readonly RadialScanResource resource;
-        readonly DisplayNode node;
+        readonly FrameNode node;
 
         public override IModuleData ModuleData { get; }
 
@@ -169,7 +169,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData;
 
-            node = SimpleDisplayNode.Instantiate("[LaserScanNode]");
+            node = FrameNode.Instantiate("[LaserScanNode]");
             resource = ResourcePool.GetOrCreateDisplay<RadialScanResource>(node.transform);
             Config = new LaserScanConfiguration();
         }

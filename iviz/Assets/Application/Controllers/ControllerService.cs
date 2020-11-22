@@ -17,7 +17,10 @@ namespace Iviz.Controllers
 {
     public sealed class ControllerService
     {
+        const int DefaultTimeoutInMs = 4500;
+        
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
+        [NotNull] static ReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly (Resource.ModuleType module, string name)[] ModuleNames =
             typeof(Resource.ModuleType).GetEnumValues()
@@ -36,7 +39,7 @@ namespace Iviz.Controllers
 
         static void AddModuleCallback([NotNull] AddModule srv)
         {
-            var (id, success, message) = TryCreateModule(srv.Request.ModuleType, srv.Request.Id);
+            var (id, success, message) = TryAddModule(srv.Request.ModuleType, srv.Request.Id);
             srv.Response.Success = success;
             srv.Response.Message = message;
             srv.Response.Id = id ?? "";
@@ -44,10 +47,10 @@ namespace Iviz.Controllers
 
         static Resource.ModuleType ModuleTypeFromString(string moduleName)
         {
-            return ModuleNames.FirstOrDefault(entry => entry.name == moduleName).module;
+            return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
         }
 
-        static (string id, bool success, string message) TryCreateModule([NotNull] string moduleTypeStr,
+        static (string id, bool success, string message) TryAddModule([NotNull] string moduleTypeStr,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = ("", false, "");
@@ -66,80 +69,100 @@ namespace Iviz.Controllers
                 return result;
             }
 
+            if (moduleType != Resource.ModuleType.Grid &&
+                moduleType != Resource.ModuleType.DepthCloud &&
+                moduleType != Resource.ModuleType.AugmentedReality &&
+                moduleType != Resource.ModuleType.Joystick &&
+                moduleType != Resource.ModuleType.Robot)
+            {
+                result.message = "EE Cannot create module of that type, use AddModuleFromTopic instead";
+                return result;
+            }
+
+            ModuleData moduleData;
+            if (requestedId.Length != 0 &&
+                (moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == requestedId)) != null)
+            {
+                if (moduleData.ModuleType != moduleType)
+                {
+                    result.message =
+                        $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                }
+                else
+                {
+                    result.success = true;
+                    result.id = requestedId;
+                    result.message = "** Module already exists";
+                }
+
+                return result;
+            }
+
+
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
             GameThread.Post(() =>
             {
                 try
                 {
-                    if (requestedId.Length != 0)
-                    {
-                        ModuleData module =
-                            ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
-                                data => data.Configuration.Id == requestedId);
-                        if (module != null)
-                        {
-                            if (module.ModuleType != moduleType)
-                            {
-                                result.message = "EE Another module of the same name already exists, but it has type " +
-                                                 module.ModuleType;
-                            }
-                            else
-                            {
-                                result.success = true;
-                                result.message = "** Module already exists";
-                            }
-
-                            return;
-                        }
-                    }
-                    
-                    var moduleData = ModuleListPanel.Instance.CreateModule(moduleType,
+                    Debug.Log(Time.time + ": Creating module of type " + moduleType);
+                    var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
-                    result.id = moduleData.Configuration.Id;
+                    result.id = newModuleData.Configuration.Id;
                     result.success = true;
+                    Debug.Log(Time.time + ": Done!");
                 }
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
+                    Debug.LogWarning(e);
                 }
                 finally
                 {
                     signal.Release();
                 }
             });
-
-            return signal.Wait(2000) ? result : ("", false, "EE Request timed out!");
+            return signal.Wait(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
         }
 
         static void AddModuleFromTopicCallback([NotNull] AddModuleFromTopic srv)
         {
-            var (id, success, message) = TryCreateModuleFromTopic(srv.Request.Topic);
+            var (id, success, message) = TryAddModuleFromTopic(srv.Request.Topic, srv.Request.Id);
             srv.Response.Success = success;
             srv.Response.Message = message;
             srv.Response.Id = id ?? "";
         }
 
-        static (string id, bool success, string message) TryCreateModuleFromTopic([NotNull] string topic)
+        static (string id, bool success, string message) TryAddModuleFromTopic([NotNull] string topic,
+            [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = ("", false, "");
-
             if (string.IsNullOrWhiteSpace(topic))
             {
                 result.message = "EE Invalid topic name";
                 return result;
             }
 
-            if (ModuleListPanel.Instance.ModuleDatas.Any(module => module.Topic == topic))
+            var data = ModuleDatas.FirstOrDefault(module => module.Topic == topic);
+            if (data != null)
             {
-                result.message = "EE A module with that topic already exists";
+                result.message = requestedId == data.Configuration.Id
+                    ? "** Module already exists"
+                    : "WW A module with that topic but different id already exists";
+                result.id = data.Configuration.Id;
                 result.success = true;
                 return result;
             }
 
-            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopics(RequestType.CachedOnly);
-            string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+            if (requestedId.Length != 0 && ModuleDatas.Any(module => module.Configuration.Id == requestedId))
+            {
+                result.message = "EE There is already another module with that id";
+                return result;
+            }
 
+            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopics(RequestType.CachedOnly);
+
+            string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             if (type == null)
             {
                 topics = Connection.GetSystemPublishedTopics(RequestType.WaitForRequest);
@@ -151,32 +174,33 @@ namespace Iviz.Controllers
                 return ("", false, $"EE Failed to find topic '{topic}'");
             }
 
-
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
             {
                 result.message = $"EE Type '{type}' is unsupported";
             }
 
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
             GameThread.Post(() =>
             {
                 try
                 {
-                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type).Configuration.Id;
+                    Debug.Log(Time.time + ": Adding topic " + topic);
+                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
+                        requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
                     result.success = true;
+                    Debug.Log(Time.time + ": Done!");
                 }
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
+                    Debug.LogWarning(e);
                 }
                 finally
                 {
                     signal.Release();
                 }
             });
-
-            return signal.Wait(2000) ? result : ("", false, "EE Request timed out!");
+            return signal.Wait(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
         }
 
         static void UpdateModuleCallback([NotNull] UpdateModule srv)
@@ -189,7 +213,6 @@ namespace Iviz.Controllers
         static (bool success, string message) TryUpdateModule([NotNull] string id, string[] fields, string config)
         {
             (bool success, string message) result = (false, "");
-
             if (string.IsNullOrWhiteSpace(id))
             {
                 result.message = "EE Empty configuration id!";
@@ -203,14 +226,13 @@ namespace Iviz.Controllers
             }
 
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
             GameThread.Post(() =>
             {
+                Debug.Log(Time.time + ": Updating module!");
+                
                 try
                 {
-                    ModuleData module =
-                        ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
-
+                    ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
                     if (module == null)
                     {
                         result.success = false;
@@ -225,19 +247,21 @@ namespace Iviz.Controllers
                 {
                     result.success = false;
                     result.message = $"EE Error parsing JSON config: {e.Message}";
+                    Debug.LogWarning(e);
                 }
                 catch (Exception e)
                 {
                     result.success = false;
                     result.message = $"EE An exception was raised: {e.Message}";
+                    Debug.LogWarning(e);
                 }
                 finally
                 {
+                    Debug.Log(Time.time + ": Done!");
                     signal.Release();
                 }
             });
-
-            return signal.Wait(2000) ? result : (false, "EE Request timed out!");
+            return signal.Wait(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
         }
 
         static void GetModulesCallback([NotNull] GetModules srv)
@@ -250,14 +274,12 @@ namespace Iviz.Controllers
         static string[] GetModules()
         {
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-
             string[] result = default;
             GameThread.Post(() =>
             {
                 try
                 {
-                    IConfiguration[] configurations =
-                        ModuleListPanel.Instance.ModuleDatas.Select(data => data.Configuration).ToArray();
+                    IConfiguration[] configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
                     result = configurations.Select(JsonConvert.SerializeObject).ToArray();
                 }
                 catch (JsonException e)
@@ -277,8 +299,7 @@ namespace Iviz.Controllers
                     signal.Release();
                 }
             });
-
-            if (!signal.Wait(2000))
+            if (!signal.Wait(DefaultTimeoutInMs))
             {
                 Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in GetModules");
             }

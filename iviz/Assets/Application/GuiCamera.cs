@@ -15,7 +15,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class GuiCamera : DisplayNode
+    public sealed class GuiCamera : FrameNode
     {
         const float MinShadowDistance = 4;
 
@@ -32,7 +32,7 @@ namespace Iviz.App
         bool alreadyScaling;
 
         static Camera MainCamera => Settings.MainCamera;
-        NamedBoundary namedBoundary;
+        BoundaryFrame boundaryFrame;
 
         bool PointerOnGui { get; set; }
 
@@ -83,7 +83,7 @@ namespace Iviz.App
             OrbitCenterOverride = null;
         }
 
-        ClickableNode SelectedDisplay { get; set; }
+        //ClickableNode SelectedDisplay { get; set; }
 
         bool PointerDown { get; set; }
 
@@ -132,10 +132,11 @@ namespace Iviz.App
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
-            namedBoundary = ResourcePool.GetOrCreate<NamedBoundary>(Resource.Displays.NamedBoundary);
+            boundaryFrame = ResourcePool.GetOrCreate<BoundaryFrame>(Resource.Displays.NamedBoundary);
             StartOrbiting();
         }
 
+        /*
         public void Unselect([CanBeNull] ClickableNode display)
         {
             if (SelectedDisplay != display)
@@ -145,7 +146,7 @@ namespace Iviz.App
 
             SelectedDisplay.Selected = false;
             SelectedDisplay = null;
-            namedBoundary.Target = null;
+            boundaryFrame.Target = null;
         }
 
         public void Select([CanBeNull] ClickableNode display)
@@ -164,7 +165,7 @@ namespace Iviz.App
             if (!(SelectedDisplay is null))
             {
                 SelectedDisplay.Selected = true;
-                namedBoundary.Target = display;
+                boundaryFrame.Target = display;
             }
         }
 
@@ -187,8 +188,9 @@ namespace Iviz.App
                 return;
             }
 
-            namedBoundary.Target = display;
+            boundaryFrame.Target = display;
         }
+        */
 
         void OnEnable()
         {

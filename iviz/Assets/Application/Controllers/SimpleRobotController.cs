@@ -32,11 +32,11 @@ namespace Iviz.Controllers
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
         readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
-        readonly SimpleDisplayNode node;
+        readonly FrameNode node;
 
         public SimpleRobotController([NotNull] IModuleData moduleData)
         {
-            node = SimpleDisplayNode.Instantiate("SimpleRobotNode");
+            node = FrameNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             Config = new SimpleRobotConfiguration();

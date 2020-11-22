@@ -180,11 +180,7 @@ namespace Iviz.Displays
             MaxLineDistance = 0.3f;
         }
 
-        public string Name => "RadialScanResource";
-        public Bounds Bounds => UseLines ? lines.Bounds : pointCloud.Bounds;
-        public Bounds WorldBounds => UseLines ? lines.WorldBounds : pointCloud.WorldBounds;
-        public Pose WorldPose => UseLines ? lines.WorldPose : pointCloud.WorldPose;
-        public Vector3 WorldScale => UseLines ? lines.WorldScale : pointCloud.WorldScale;
+        public Bounds? Bounds => UseLines ? lines.Bounds : pointCloud.Bounds;
 
         public int Layer
         {
@@ -195,12 +191,6 @@ namespace Iviz.Displays
                 pointCloud.Layer = layer;
                 lines.Layer = layer;
             }
-        }
-
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
         }
 
         public bool ColliderEnabled
@@ -233,8 +223,15 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            pointCloud?.DisposeDisplay();
-            lines?.DisposeDisplay();
+            if (pointCloud != null)
+            {
+                pointCloud.DisposeDisplay();
+            }
+
+            if (lines != null)
+            {
+                lines.DisposeDisplay();
+            }
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,
@@ -325,15 +322,24 @@ namespace Iviz.Displays
 
         void SetLines()
         {
-            int n = pointBuffer.Count;
+            int numPoints = pointBuffer.Count;
             float maxLineDistanceSq = maxLineDistance * maxLineDistance;
             lineBuffer.Clear();
-            for (int i = 0;
-                i < pointBuffer.Count;
-                i++)
+
+            for (int i = 0; i < numPoints - 1; i++)
             {
                 PointWithColor pA = pointBuffer[i];
-                PointWithColor pB = pointBuffer[(i + 1) % n];
+                PointWithColor pB = pointBuffer[i + 1];
+                if ((pB.Position - pA.Position).MagnitudeSq() < maxLineDistanceSq)
+                {
+                    lineBuffer.Add(new LineWithColor(pA, pB));
+                }
+            }
+
+            if (numPoints != 0)
+            {
+                PointWithColor pA = pointBuffer[numPoints - 1];
+                PointWithColor pB = pointBuffer[0];
                 if ((pB.Position - pA.Position).MagnitudeSq() < maxLineDistanceSq)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));

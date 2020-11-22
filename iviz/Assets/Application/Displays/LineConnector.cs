@@ -5,12 +5,13 @@ namespace Iviz.Displays
 {
     public sealed class LineConnector : MonoBehaviour, IDisplay
     {
-        public Transform A;
-        public Transform B;
+        [field: SerializeField] public Transform A { get; set; }
+        [field: SerializeField] public Transform B { get; set;  }
 
         LineRenderer line;
         readonly Vector3[] positions = new Vector3[2];
-
+        
+        
         public float LineWidth
         {
             get => line.startWidth;
@@ -21,11 +22,7 @@ namespace Iviz.Displays
             }
         }
 
-        public string Name => "LineConnector";
-        public Bounds Bounds => new Bounds();
-        public Bounds WorldBounds => new Bounds();
-        public Pose WorldPose => transform.AsPose();
-        public Vector3 WorldScale => transform.lossyScale;
+        public Bounds? Bounds => null;
 
         public bool ColliderEnabled { get => false; set { } }
 

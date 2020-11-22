@@ -1,14 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 namespace Iviz.Controllers
 {
-    public sealed class InteractiveMarkerObject : DisplayNode
+    public sealed class InteractiveMarkerObject : FrameNode
     {
         const string WarnStr = "<b>Warning:</b> ";
         const string ErrorStr = "<color=red>Error:</color> ";
@@ -124,7 +127,7 @@ namespace Iviz.Controllers
             {
                 string controlId = controlMsg.Name.Length != 0 ? controlMsg.Name : $"[Unnamed-{(numUnnamed++)}]";
 
-                if (controls.TryGetValue(controlId, out InteractiveMarkerControlObject existingControl))
+                if (controls.TryGetValue(controlId, out var existingControl))
                 {
                     existingControl.Set(controlMsg);
                     controlsToDelete.Remove(controlId);
@@ -150,6 +153,21 @@ namespace Iviz.Controllers
                 InteractiveMarkerControlObject control = controls[controlId];
                 DeleteControlObject(control);
                 controls.Remove(controlId);
+            }
+
+            
+            // update the dimensions of the controls
+            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = controls.Values
+                .Select(marker => (marker.Bounds, marker.transform));
+
+            Bounds? totalBounds =
+                UnityUtils.CombineBounds(
+                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
+                );
+
+            foreach (var control in controls.Values)
+            {
+                control.UpdateControlBounds(totalBounds);
             }
         }
 

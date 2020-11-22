@@ -29,7 +29,7 @@ namespace Iviz.Controllers
 
     public sealed class PathListener : ListenerController
     {
-        readonly DisplayNode node;
+        readonly FrameNode node;
         readonly LineResource resource;
 
         public override IModuleData ModuleData { get; }
@@ -146,7 +146,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             
-            node = SimpleDisplayNode.Instantiate("PathNode");
+            node = FrameNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;

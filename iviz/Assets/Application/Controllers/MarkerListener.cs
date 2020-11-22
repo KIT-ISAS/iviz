@@ -269,7 +269,7 @@ namespace Iviz.Controllers
                     if (!markers.TryGetValue(id, out var markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
-                        markerToAdd.ModuleData = ModuleData;
+                        //markerToAdd.ModuleData = ModuleData;
                         markerToAdd.Parent = TfListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;

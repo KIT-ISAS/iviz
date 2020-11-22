@@ -24,7 +24,7 @@ namespace Iviz.Displays
         Vector3 startOffset;
 
         public event Action DoubleTap;
-        public event InteractiveControl.MovedAction Moved;
+        public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
 

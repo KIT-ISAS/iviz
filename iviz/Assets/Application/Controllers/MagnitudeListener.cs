@@ -33,8 +33,8 @@ namespace Iviz.Controllers
 
     public sealed class MagnitudeListener : ListenerController
     {
-        readonly SimpleDisplayNode displayNode;
-        SimpleDisplayNode childNode;
+        readonly FrameNode frameNode;
+        FrameNode childNode;
         AxisFrameResource axis;
         readonly TrailResource trail;
         MeshMarkerResource sphere;
@@ -43,7 +43,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => displayNode.Parent;
+        public override TfFrame Frame => frameNode.Parent;
 
         readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
 
@@ -155,7 +155,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Scale = value;
-                displayNode.transform.localScale = value * Vector3.one;
+                frameNode.transform.localScale = value * Vector3.one;
                 trail.ElementScale = 0.02f * value;
             }
         }
@@ -180,10 +180,10 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            displayNode = SimpleDisplayNode.Instantiate("DisplayNode");
+            frameNode = FrameNode.Instantiate("DisplayNode");
 
             trail = ResourcePool.GetOrCreateDisplay<TrailResource>();
-            trail.DataSource = () => displayNode.transform.position;
+            trail.DataSource = () => frameNode.transform.position;
 
             Config = new MagnitudeConfiguration();
         }
@@ -191,8 +191,8 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             //name = "Magnitude:" + config.Topic;
-            displayNode.name = $"[{config.Topic}]";
-            displayNode.AttachTo("");
+            frameNode.name = $"[{config.Topic}]";
+            frameNode.AttachTo("");
             //displayNode.DisplayData = DisplayData;
 
             switch (config.Type)
@@ -207,7 +207,7 @@ namespace Iviz.Controllers
                         Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(displayNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
                     break;
 
                 case PointStamped.RosMessageType:
@@ -221,7 +221,7 @@ namespace Iviz.Controllers
                     }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        displayNode.transform);
+                        frameNode.transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
@@ -236,14 +236,14 @@ namespace Iviz.Controllers
                         Listener = new Listener<Wrench>(config.Topic, Handler);
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(displayNode.transform);
-                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(displayNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
+                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(displayNode.transform);
+                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        displayNode.transform);
+                        frameNode.transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
@@ -258,29 +258,29 @@ namespace Iviz.Controllers
                         Listener = new Listener<Twist>(config.Topic, Handler);
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(displayNode.transform);
-                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(displayNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
+                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(displayNode.transform);
+                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        displayNode.transform);
+                        frameNode.transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
                 case Odometry.RosMessageType:
                     Listener = new Listener<Odometry>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(displayNode.transform);
-                    childNode = SimpleDisplayNode.Instantiate("ChildNode");
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
+                    childNode = FrameNode.Instantiate("ChildNode");
                     arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(childNode.transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
                     angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(childNode.transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        displayNode.transform);
+                        frameNode.transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
@@ -289,7 +289,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] PoseStamped msg)
         {
-            displayNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Pose);
         }
 
@@ -300,12 +300,12 @@ namespace Iviz.Controllers
                 return;
             }
 
-            displayNode.transform.SetLocalPose(msg.Ros2Unity());
+            frameNode.transform.SetLocalPose(msg.Ros2Unity());
         }
 
         void Handler([NotNull] PointStamped msg)
         {
-            displayNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Point);
         }
 
@@ -316,12 +316,12 @@ namespace Iviz.Controllers
                 return;
             }
 
-            displayNode.transform.localPosition = msg.Ros2Unity();
+            frameNode.transform.localPosition = msg.Ros2Unity();
         }
 
         void Handler([NotNull] WrenchStamped msg)
         {
-            displayNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Wrench);
         }
 
@@ -335,12 +335,12 @@ namespace Iviz.Controllers
             Vector3 dir = msg.Force.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
             angleAxis.Set(msg.Torque.Ros2Unity());
-            trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
         }
 
         void Handler([NotNull] TwistStamped msg)
         {
-            displayNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header.FrameId);
             Handler(msg.Twist);
         }
 
@@ -365,12 +365,12 @@ namespace Iviz.Controllers
             Vector3 dir = msg.Linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
             angleAxis.Set(AngularToQuaternion((float) msg.Angular.X, (float) msg.Angular.Y, (float) msg.Angular.Z));
-            trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
         }
 
         void Handler([NotNull] Odometry msg)
         {
-            displayNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header.FrameId);
             childNode.AttachTo(msg.ChildFrameId);
 
             if (msg.Pose.Pose.HasNaN())
@@ -383,7 +383,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            displayNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
+            frameNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
             Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
@@ -391,7 +391,7 @@ namespace Iviz.Controllers
                 (float) msg.Twist.Twist.Angular.X,
                 (float) msg.Twist.Twist.Angular.Y,
                 (float) msg.Twist.Twist.Angular.Z));
-            trail.DataSource = () => displayNode.transform.TransformPoint(dir * VectorScale);
+            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
         }
 
         public override void ResetController()
@@ -408,8 +408,8 @@ namespace Iviz.Controllers
 
             trail.DataSource = null;
 
-            displayNode.Stop();
-            UnityEngine.Object.Destroy(displayNode.gameObject);
+            frameNode.Stop();
+            UnityEngine.Object.Destroy(frameNode.gameObject);
 
             trail?.DisposeDisplay();
 

@@ -44,27 +44,27 @@ namespace Iviz.Controllers
 
         readonly TfConfiguration config = new TfConfiguration();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
-        readonly InteractiveControl rootMarker;
-        readonly DisplayNode keepAllListener;
-        readonly DisplayNode staticListener;
+        [CanBeNull] readonly InteractiveControl rootMarker;
+        readonly FrameNode keepAllListener;
+        readonly FrameNode staticListener;
 
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Instance = this;
 
-            DisplayNode defaultListener = SimpleDisplayNode.Instantiate("[.]");
+            FrameNode defaultListener = FrameNode.Instantiate("[.]");
 
             UnityFrame = Add(CreateFrameObject("TF", null, null));
             UnityFrame.ForceInvisible = true;
             UnityFrame.Visible = false;
             UnityFrame.AddListener(defaultListener);
 
-            keepAllListener = SimpleDisplayNode.Instantiate("[TFNode]", UnityFrame.transform);
-            staticListener = SimpleDisplayNode.Instantiate("[TFStatic]", UnityFrame.transform);
+            keepAllListener = FrameNode.Instantiate("[TFNode]", UnityFrame.transform);
+            staticListener = FrameNode.Instantiate("[TFStatic]", UnityFrame.transform);
             defaultListener.transform.parent = UnityFrame.transform;
 
-            var mainCameraObj = GameObject.Find("MainCamera");
+            var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
             Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
 
             var mainLight = GameObject.Find("MainLight");
@@ -83,13 +83,16 @@ namespace Iviz.Controllers
             MapFrame.ParentCanChange = false;
             //BaseFrame.ForceInvisible = true;
 
-            rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
-                Resource.Displays.InteractiveControl,
-                RootFrame.transform);
-            rootMarker.name = "[InteractiveController for /]";
-            rootMarker.TargetTransform = RootFrame.transform;
-            rootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
-            rootMarker.BaseScale = 2.5f * FrameSize;
+            if (!Settings.IsHololens)
+            {
+                rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
+                    Resource.Displays.InteractiveControl,
+                    RootFrame.transform);
+                rootMarker.name = "[InteractiveController for /]";
+                rootMarker.TargetTransform = RootFrame.transform;
+                rootMarker.InteractionMode = InteractionModeType.ClickOnly;
+                rootMarker.BaseScale = 2.5f * FrameSize;
+            }
 
             Publisher = new Sender<tfMessage_v2>(DefaultTopic);
         }
@@ -98,13 +101,13 @@ namespace Iviz.Controllers
         [NotNull] public Sender<tfMessage_v2> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
 
-        public static GuiCamera GuiCamera => GuiCamera.Instance;
+        [CanBeNull] public static GuiCamera GuiCamera => GuiCamera.Instance;
         public static Light MainLight { get; set; }
 
         public static TfFrame MapFrame { get; private set; }
         public static TfFrame RootFrame { get; private set; }
         public static TfFrame UnityFrame { get; private set; }
-        public static InteractiveControl RootMarker => Instance.rootMarker;
+        [CanBeNull] public static InteractiveControl RootMarker => Instance.rootMarker;
 
         public static TfFrame ListenersFrame => RootFrame;
 
@@ -329,7 +332,7 @@ namespace Iviz.Controllers
 
 
         [NotNull]
-        public static TfFrame GetOrCreateFrame([NotNull] string id, [CanBeNull] DisplayNode listener = null)
+        public static TfFrame GetOrCreateFrame([NotNull] string id, [CanBeNull] FrameNode listener = null)
         {
             if (id == null)
             {
@@ -408,7 +411,14 @@ namespace Iviz.Controllers
             }
 
             frames.Remove(frame.Id);
-            GuiCamera.Unselect(frame);
+            
+            /*
+            if (GuiCamera != null)
+            {
+                GuiCamera.Unselect(frame);
+            }
+            */
+
             frame.Stop();
             UnityEngine.Object.Destroy(frame);
         }
@@ -420,7 +430,7 @@ namespace Iviz.Controllers
 
         public static Pose RelativePoseToRoot(in Pose unityPose)
         {
-            if (!Settings.IsMobile)
+            if (!Settings.IsRootMovable)
             {
                 return unityPose;
             }
@@ -457,16 +467,22 @@ namespace Iviz.Controllers
 
         public static void UpdateRootMarkerVisibility()
         {
+            var rootMarker = RootMarker;
+            if (rootMarker == null)
+            {
+                return;
+            }
+            
             var arEnabled = ARController.Instance?.Visible ?? false;
             var viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
             if (arEnabled && viewEnabled)
             {
-                RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Frame;
-                MapFrame.Selected = false;
+                rootMarker.InteractionMode = InteractionModeType.Frame;
+                //MapFrame.Selected = false;
             }
             else
             {
-                RootMarker.InteractionMode = InteractiveControl.InteractionModeType.Disabled;
+                rootMarker.InteractionMode = InteractionModeType.ClickOnly;
             }
         }
     }

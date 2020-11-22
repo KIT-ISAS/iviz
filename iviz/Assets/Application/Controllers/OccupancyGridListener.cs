@@ -30,7 +30,7 @@ namespace Iviz.Controllers
 
     public sealed class OccupancyGridListener : ListenerController
     {
-        readonly DisplayClickableNode node;
+        readonly FrameNode node;
         readonly OccupancyGridResource[] grids;
         float lastCellSize;
 
@@ -150,7 +150,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            node = DisplayClickableNode.Instantiate("Node");
+            node = FrameNode.Instantiate("Node");
 
             grids = new OccupancyGridResource[16];
             for (int i = 0; i < grids.Length; i++)
@@ -165,8 +165,6 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             Listener = new Listener<OccupancyGrid>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
-            //name = "OccupancyGrid:" + config.Topic;
-            node.SetName($"[{config.Topic}]");
         }
 
         void Handler(OccupancyGrid msg)

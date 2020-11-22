@@ -5,7 +5,13 @@ using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
-    public abstract class DisplayNode : MonoBehaviour
+    /// <summary>
+    /// Class for displays that want to attach themselves to a TF frame.
+    /// This increases the reference count of the frame, and prevents the TFListener from
+    /// removing it.
+    /// Also used by controllers to have a GameObject they can attach their displays to.
+    /// </summary>
+    public abstract class FrameNode : MonoBehaviour
     {
         TfFrame parent;
 
@@ -22,9 +28,17 @@ namespace Iviz.Controllers
                 return;
             }
 
-            parent?.RemoveListener(this);
+            if (parent != null)
+            {
+                parent.RemoveListener(this);
+            }
+
             parent = newParent;
-            parent?.AddListener(this);
+            if (parent != null)
+            {
+                parent.AddListener(this);
+            }
+
             if (attach)
             {
                 transform.SetParentLocal(newParent == null ? 
@@ -58,7 +72,7 @@ namespace Iviz.Controllers
             AttachTo(parentId, timestamp.ToTimeSpan());
         }
 
-        public void AttachTo([NotNull] string parentId, in TimeSpan timestamp)
+        void AttachTo([NotNull] string parentId, in TimeSpan timestamp)
         {
             if (parentId == null)
             {
@@ -78,26 +92,23 @@ namespace Iviz.Controllers
                     SetParent(frame, false);
                 }
 
-                if (!(Parent is null))
+                if (Parent != null)
                 {
-                    transform.SetLocalPose(Parent.LookupPose(timestamp));
+                    transform.SetLocalPose(TfListener.RelativePoseToRoot(Parent.LookupPose(timestamp)));
                 }
             }
         }
 
-        public event Action Stopped;
-
         public virtual void Stop()
         {
             Parent = null;
-            Stopped?.Invoke();
-            Stopped = null;
         }
-    }
-
-    public sealed class SimpleDisplayNode : DisplayNode
-    {
-        public static SimpleDisplayNode Instantiate([NotNull] string name, [CanBeNull] Transform transform = null)
+        
+        sealed class SimpleFrameNode : FrameNode
+        {
+        }
+        
+        public static FrameNode Instantiate([NotNull] string name, [CanBeNull] Transform transform = null)
         {
             if (name == null)
             {
@@ -105,7 +116,7 @@ namespace Iviz.Controllers
             }
 
             GameObject obj = new GameObject(name);
-            SimpleDisplayNode node = obj.AddComponent<SimpleDisplayNode>();
+            SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
             if (transform != null)
             {
                 obj.transform.parent = transform;
@@ -117,5 +128,7 @@ namespace Iviz.Controllers
 
             return node;
         }
+        
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using System;
+using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
@@ -10,6 +11,8 @@ namespace Iviz.App
 {
     public sealed class JointStateModuleData : ListenerModuleData
     {
+        const string NoneStr = "<none>";
+
         [NotNull] readonly JointStateListener listener;
         [NotNull] readonly JointStatePanelContents panel;
         readonly List<string> robotNames = new List<string>();
@@ -30,13 +33,14 @@ namespace Iviz.App
             listener = new JointStateListener(this);
             if (constructor.Configuration != null)
             {
-                listener.Config = (JointStateConfiguration)constructor.Configuration;
+                listener.Config = (JointStateConfiguration) constructor.Configuration;
                 listener.Robot = GetRobotWithName(listener.RobotName);
             }
             else
             {
                 listener.Config.Topic = Topic;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -45,15 +49,10 @@ namespace Iviz.App
         {
             panel.Listener.Listener = listener.Listener;
 
-            const string NoneStr = "<none>";
-            
             robotNames.Clear();
             robotNames.Add(NoneStr);
             robotNames.AddRange(
-                ModuleListPanel.ModuleDatas.
-                    Select(x => x.Controller).
-                    OfType<IJointProvider>().
-                    Select(x => x.Name)
+                ModuleListPanel.ModuleDatas.Select(x => x.Controller).OfType<IJointProvider>().Select(x => x.Name)
             );
             panel.Robot.Options = robotNames;
             panel.Robot.Value = listener.RobotName.Length != 0 ? listener.RobotName : NoneStr;
@@ -62,18 +61,9 @@ namespace Iviz.App
             panel.JointSuffix.Value = listener.MsgJointSuffix;
             panel.TrimFromEnd.Value = listener.MsgTrimFromEnd;
 
-            panel.JointPrefix.EndEdit += f =>
-            {
-                listener.MsgJointPrefix = f;
-            };
-            panel.JointSuffix.EndEdit += f =>
-            {
-                listener.MsgJointSuffix = f;
-            };
-            panel.TrimFromEnd.ValueChanged += f =>
-            {
-                listener.MsgTrimFromEnd = (int)f;
-            };
+            panel.JointPrefix.EndEdit += f => { listener.MsgJointPrefix = f; };
+            panel.JointSuffix.EndEdit += f => { listener.MsgJointSuffix = f; };
+            panel.TrimFromEnd.ValueChanged += f => { listener.MsgTrimFromEnd = (int) f; };
             panel.Robot.ValueChanged += (i, s) =>
             {
                 listener.Robot = (i == 0) ? null : GetRobotWithName(s);
@@ -88,25 +78,24 @@ namespace Iviz.App
 
         IJointProvider GetRobotWithName(string name)
         {
-            return ModuleListPanel.ModuleDatas.
-                    Select(x => x.Controller).
-                    OfType<IJointProvider>().
-                    FirstOrDefault(x => x.Name == name);
+            return ModuleListPanel.ModuleDatas.Select(x => x.Controller).OfType<IJointProvider>()
+                .FirstOrDefault(x => x.Name == name);
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<JointStateConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(JointStateConfiguration.Visible):
                         listener.Visible = config.Visible;
                         break;
                     case nameof(JointStateConfiguration.RobotName):
-                        listener.RobotName = config.RobotName;
+                        listener.Robot = GetRobotWithId(config.RobotName);
+                        listener.RobotName = listener.Robot.Name;                        
                         break;
                     case nameof(JointStateConfiguration.MsgJointPrefix):
                         listener.MsgJointPrefix = config.MsgJointPrefix;
@@ -119,12 +108,30 @@ namespace Iviz.App
                         break;
                     default:
                         Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
 
             ResetPanel();
-        }            
+        }
+
+        [NotNull]
+        static SimpleRobotController GetRobotWithId(string robotId)
+        {
+            ModuleData robotData = ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
+                data => data.Configuration.Id == robotId);
+            if (robotData == null)
+            {
+                throw new InvalidOperationException($"No robot with id '{robotId}' found");
+            }
+
+            if (robotData.ModuleType != Resource.ModuleType.Robot)
+            {
+                throw new InvalidOperationException($"Module with id '{robotId}' is not a robot");
+            }
+
+            return ((SimpleRobotModuleData) robotData).Robot;
+        }
 
         public override void AddToState(StateConfiguration config)
         {

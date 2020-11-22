@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -112,11 +113,10 @@ namespace Iviz.App
         public DataPanelManager DataPanelManager => dataPanelManager;
         public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public Joystick Joystick => joystick;
-        [NotNull] public IReadOnlyCollection<ModuleData> ModuleDatas { get; }
+        [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
-        HololensManager hololensManager;
         Controllers.ModelService modelService;
 
 
@@ -272,11 +272,6 @@ namespace Iviz.App
 
             initialized = true;
 
-            if (Settings.IsHololens)
-            {
-                hololensManager = new HololensManager();
-            }
-            
             modelService = new Controllers.ModelService();
             
             InitFinished?.Invoke();

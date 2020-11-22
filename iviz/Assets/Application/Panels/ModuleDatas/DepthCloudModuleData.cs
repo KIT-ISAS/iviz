@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using System;
+using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
@@ -10,6 +11,8 @@ namespace Iviz.App
 {
     public sealed class DepthCloudModuleData : ModuleData
     {
+        const string NoneStr = "<none>";
+
         [NotNull] readonly DepthCloudController controller;
         [NotNull] readonly DepthCloudPanelContents panel;
 
@@ -49,28 +52,29 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
 
             depthImageCandidates.Clear();
-            depthImageCandidates.Add("<none>");
+            depthImageCandidates.Add(NoneStr);
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas
+                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Select(data => data.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
-            panel.Depth.Value = controller.DepthName;
+            panel.Depth.Value = controller.DepthName.Length != 0 ? controller.DepthName : NoneStr;
 
             colorImageCandidates.Clear();
-            colorImageCandidates.Add("<none>");
+            colorImageCandidates.Add(NoneStr);
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas
+                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Select(data => data.Topic)
             );
             panel.Color.Options = colorImageCandidates;
-            panel.Color.Value = controller.ColorName;
+            panel.Color.Value = controller.ColorName.Length != 0 ? controller.ColorName : NoneStr;
 
             panel.PointSize.Value = controller.PointSize;
             panel.FOV.Value = controller.FovAngle;
 
-            panel.PointSize.ValueChanged += f =>
-            {
-                controller.PointSize = f;
-            };
+            panel.PointSize.ValueChanged += f => { controller.PointSize = f; };
             panel.Depth.ValueChanged += (i, s) =>
             {
                 controller.DepthImage = (i == 0) ? null : GetImageWithName(s);
@@ -81,10 +85,7 @@ namespace Iviz.App
                 controller.ColorImage = (i == 0) ? null : GetImageWithName(s);
                 controller.ColorName = s;
             };
-            panel.FOV.ValueChanged += f =>
-            {
-                controller.FovAngle = f;
-            };
+            panel.FOV.ValueChanged += f => { controller.FovAngle = f; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -100,7 +101,10 @@ namespace Iviz.App
 
         ImageListener GetImageWithName(string name)
         {
-            return ModuleListPanel.ModuleDatas.OfType<ImageModuleData>().FirstOrDefault(x => x.Topic == name)?.Image;
+            return ModuleListPanel.ModuleDatas
+                .OfType<ImageModuleData>()
+                .FirstOrDefault(data => data.Topic == name)
+                ?.Image;
         }
 
         public override void UpdatePanel()
@@ -108,16 +112,20 @@ namespace Iviz.App
             base.UpdatePanel();
 
             depthImageCandidates.Clear();
-            depthImageCandidates.Add("<none>");
+            depthImageCandidates.Add(NoneStr);
             depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas
+                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Select(data => data.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
 
             colorImageCandidates.Clear();
-            colorImageCandidates.Add("<none>");
+            colorImageCandidates.Add(NoneStr);
             colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas.Where(x => x.ModuleType == Resource.ModuleType.Image).Select(x => x.Topic)
+                ModuleListPanel.ModuleDatas
+                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Select(data => data.Topic)
             );
             panel.Color.Options = colorImageCandidates;
         }
@@ -134,10 +142,14 @@ namespace Iviz.App
                         controller.Visible = config.Visible;
                         break;
                     case nameof(DepthCloudConfiguration.ColorName):
-                        controller.ColorName = config.ColorName;
+                        ImageListener color = GetImageWithId(config.ColorName);
+                        controller.ColorImage = color;
+                        controller.ColorName = color.Config.Topic;
                         break;
                     case nameof(DepthCloudConfiguration.DepthName):
-                        controller.DepthName = config.DepthName;
+                        ImageListener depth = GetImageWithId(config.DepthName);
+                        controller.DepthImage = depth;
+                        controller.DepthName = depth.Config.Topic;
                         break;
                     case nameof(DepthCloudConfiguration.PointSize):
                         controller.PointSize = config.PointSize;
@@ -153,8 +165,26 @@ namespace Iviz.App
             }
 
             ResetPanel();
-        }   
-        
+        }
+
+        [NotNull]
+        static ImageListener GetImageWithId(string imageId)
+        {
+            ModuleData imageData = ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
+                data => data.Configuration.Id == imageId);
+            if (imageData == null)
+            {
+                throw new InvalidOperationException($"No image with id '{imageId}' found");
+            }
+
+            if (imageData.ModuleType != Resource.ModuleType.Image)
+            {
+                throw new InvalidOperationException($"Module with id '{imageId}' is not an image");
+            }
+
+            return ((ImageModuleData) imageData).Image;
+        }
+
         public override void AddToState(StateConfiguration config)
         {
             config.DepthImageProjectors.Add(controller.Config);

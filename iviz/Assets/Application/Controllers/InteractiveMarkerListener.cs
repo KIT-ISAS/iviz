@@ -31,17 +31,17 @@ namespace Iviz.Controllers
     {
         readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
 
-        readonly Dictionary<string, InteractiveMarkerObject> imarkers =
+        readonly Dictionary<string, InteractiveMarkerObject> interactiveMarkers =
             new Dictionary<string, InteractiveMarkerObject>();
 
-        readonly SimpleDisplayNode node;
+        readonly FrameNode node;
 
         uint feedSeq;
 
         public InteractiveMarkerListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            node = SimpleDisplayNode.Instantiate("[InteractiveMarkerListener]");
+            node = FrameNode.Instantiate("[InteractiveMarkerListener]");
         }
 
         public Listener<InteractiveMarkerInit> FullListener { get; private set; }
@@ -71,9 +71,9 @@ namespace Iviz.Controllers
                 }
                 
                 config.DescriptionsVisible = value;
-                foreach (var imarkerObject in imarkers.Values)
+                foreach (var interactiveMarker in interactiveMarkers.Values)
                 {
-                    imarkerObject.DescriptionVisible = value;
+                    interactiveMarker.DescriptionVisible = value;
                 }                
             }
         }
@@ -85,9 +85,10 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(description));
             }
 
-            foreach (var imarker in imarkers.Values)
+            foreach (var interactiveMarker in interactiveMarkers.Values)
             {
-                imarker.GenerateLog(description);
+                interactiveMarker.GenerateLog(description);
+                description.AppendLine();
             }
 
             description.AppendLine().AppendLine();
@@ -97,14 +98,14 @@ namespace Iviz.Controllers
         {
             get
             {
-                switch (imarkers.Count)
+                switch (interactiveMarkers.Count)
                 {
                     case 0:
                         return "<b>No interactive markers →</b>";
                     case 1:
                         return "<b>1 interactive marker →</b>";
                     default:
-                        return $"<b>{imarkers.Values.Count} interactive markers →</b>";
+                        return $"<b>{interactiveMarkers.Values.Count} interactive markers →</b>";
                 }
             }
         }
@@ -135,12 +136,12 @@ namespace Iviz.Controllers
             base.StopController();
             GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            foreach (var markerObject in imarkers.Values)
+            foreach (var markerObject in interactiveMarkers.Values)
             {
                 DeleteMarkerObject(markerObject);
             }
 
-            imarkers.Clear();
+            interactiveMarkers.Clear();
             Publisher.Stop();
 
             node.Stop();
@@ -176,7 +177,7 @@ namespace Iviz.Controllers
         void CreateInteractiveMarker([NotNull] InteractiveMarker msg)
         {
             string id = msg.Name;
-            if (imarkers.TryGetValue(id, out InteractiveMarkerObject existingMarkerObject))
+            if (interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject existingMarkerObject))
             {
                 existingMarkerObject.Set(msg);
                 return;
@@ -186,7 +187,7 @@ namespace Iviz.Controllers
             newMarkerObject.Initialize(this, id);
             newMarkerObject.Parent = TfListener.ListenersFrame;
             newMarkerObject.transform.SetParentLocal(node.transform);
-            imarkers[id] = newMarkerObject;
+            interactiveMarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);
         }
 
@@ -205,26 +206,25 @@ namespace Iviz.Controllers
         void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
         {
             string id = msg.Name;
-            if (!imarkers.TryGetValue(id, out InteractiveMarkerObject im))
+            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject im))
             {
                 return;
             }
 
             im.Set(msg.Pose);
-            //im.transform.SetLocalPose(msg.Pose.Ros2Unity());
             //im.UpdateExpirationTime();
         }
 
         void DestroyInteractiveMarker([NotNull] string id)
         {
-            if (!imarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
+            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
             {
                 return;
             }
 
             imarker.Stop();
             Object.Destroy(imarker.gameObject);
-            imarkers.Remove(id);
+            interactiveMarkers.Remove(id);
         }
 
         internal void OnInteractiveControlObjectMouseEvent(
@@ -301,12 +301,12 @@ namespace Iviz.Controllers
 
         void DestroyAllMarkers()
         {
-            foreach (var markerObject in imarkers.Values)
+            foreach (var markerObject in interactiveMarkers.Values)
             {
                 DeleteMarkerObject(markerObject);
             }
 
-            imarkers.Clear();
+            interactiveMarkers.Clear();
         }
     }
 }

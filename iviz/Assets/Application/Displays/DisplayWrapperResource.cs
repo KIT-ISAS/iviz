@@ -16,10 +16,7 @@ namespace Iviz.Displays
             set => gameObject.name = value;
         }
 
-        public Bounds Bounds => Display?.Bounds ?? throw new NullReferenceException(ErrorNoDisplayMessage);
-        public Bounds WorldBounds => Display?.WorldBounds ?? throw new NullReferenceException(ErrorNoDisplayMessage);
-        public Pose WorldPose => Display?.WorldPose ?? throw new NullReferenceException(ErrorNoDisplayMessage);
-        public Vector3 WorldScale => Display?.WorldScale ?? throw new NullReferenceException(ErrorNoDisplayMessage);
+        public Bounds? Bounds => Display?.Bounds;
         
         public int Layer
         {

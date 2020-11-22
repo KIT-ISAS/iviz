@@ -2,6 +2,7 @@
 using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
+using Iviz.App;
 using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Displays;
@@ -32,7 +33,7 @@ namespace Iviz.Controllers
 
     public sealed class ImageListener : ListenerController
     {
-        public DisplayClickableNode Node { get; }
+        public FrameNode Node { get; }
         ImageResource marker;
 
         public override TfFrame Frame => Node.Parent;
@@ -41,18 +42,20 @@ namespace Iviz.Controllers
         [CanBeNull] Texture2D Texture => ImageTexture.Texture;
         [NotNull] public Material Material => ImageTexture.Material;
 
-        public int ImageWidth => Texture?.width ?? 0;
-        public int ImageHeight => Texture?.height ?? 0;
+        public int ImageWidth => Texture != null ? Texture.width : 0;
+        public int ImageHeight => Texture != null ? Texture.height : 0;
 
         string descriptionOverride;
-        public string Description => descriptionOverride ?? ImageTexture.Description;
+        [NotNull] public string Description => descriptionOverride ?? ImageTexture.Description;
 
         public bool IsMono => ImageTexture.IsMono;
         bool isProcessing;
 
-        public override IModuleData ModuleData => Node.ModuleData;
+        readonly ImageModuleData moduleData;
+        public override IModuleData ModuleData => moduleData;
 
         readonly ImageConfiguration config = new ImageConfiguration();
+
         public ImageConfiguration Config
         {
             get => config;
@@ -171,7 +174,7 @@ namespace Iviz.Controllers
                 config.MaxQueueSize = value;
                 if (Listener != null)
                 {
-                    Listener.MaxQueueSize = (int)value;
+                    Listener.MaxQueueSize = (int) value;
                 }
             }
         }
@@ -179,11 +182,11 @@ namespace Iviz.Controllers
         public ImageListener([NotNull] IModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
-            Node = DisplayClickableNode.Instantiate("[ImageNode]");
-            Node.ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData)); 
+            Node = FrameNode.Instantiate("[ImageNode]");
+            this.moduleData = (ImageModuleData) (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
             marker = ResourcePool.GetOrCreateDisplay<ImageResource>();
             marker.Texture = ImageTexture;
-            Node.Target = marker;
+            marker.Parent = Node.transform;
 
             Config = new ImageConfiguration();
         }
@@ -199,9 +202,8 @@ namespace Iviz.Controllers
                     Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed);
                     break;
             }
-            Listener.MaxQueueSize = (int)MaxQueueSize;
-            //name = "Node:" + config.Topic;
-            Node.SetName($"[{config.Topic}]");
+
+            Listener.MaxQueueSize = (int) MaxQueueSize;
         }
 
         bool HandlerCompressed(CompressedImage msg)
@@ -210,7 +212,7 @@ namespace Iviz.Controllers
             {
                 return false;
             }
-            
+
             isProcessing = true;
 
             void PostProcess()
@@ -230,9 +232,9 @@ namespace Iviz.Controllers
                     ImageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
                 default:
-                    descriptionOverride = msg.Format.Length == 0 ?
-                        $"<b>Desc:</b> <color=red>[empty format](?)</color>" :
-                        $"<b>Desc:</b> <color=red>[{msg.Format}](?)</color>";
+                    descriptionOverride = msg.Format.Length == 0
+                        ? $"<b>Desc:</b> <color=red>[empty format](?)</color>"
+                        : $"<b>Desc:</b> <color=red>[{msg.Format}](?)</color>";
                     break;
             }
 
@@ -243,8 +245,8 @@ namespace Iviz.Controllers
         {
             Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
-            int width = (int)msg.Width;
-            int height = (int)msg.Height;
+            int width = (int) msg.Width;
+            int height = (int) msg.Height;
             ImageTexture.Set(width, height, msg.Encoding, msg.Data);
         }
 
@@ -261,6 +263,5 @@ namespace Iviz.Controllers
             Node.Stop();
             UnityEngine.Object.Destroy(Node.gameObject);
         }
-
     }
 }

@@ -9,7 +9,7 @@ namespace Iviz.App
         event Action PointerDown;
         event Action PointerUp;
         event Action DoubleTap;
-        event InteractiveControl.MovedAction Moved;
+        event MovedAction Moved;
         bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
         void OnStartDragging();

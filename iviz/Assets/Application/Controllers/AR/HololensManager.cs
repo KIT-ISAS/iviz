@@ -1,24 +1,70 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Iviz.App;
 using Iviz.Core;
+using Iviz.Hololens;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Msgs;
-using JetBrains.Annotations;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    class HololensManager : IDisposable
+#if UNITY_WSA
+    class HololensManager : MonoBehaviour
     {
-        readonly DisplayNode node;
-        readonly TfFrame leftPalm;
-        bool disposed;
+        static readonly Pose InfinitePose = new Pose(new Vector3(5000, 5000, 5000), Quaternion.identity);
+
+        [SerializeField] FloorFrameObject floorFrame = null;
+        [SerializeField] GameObject floorHelper = null;
+
+        FrameNode node;
+        TfFrame leftPalm;
 
         float leftHandScale = 1;
-
         Pose leftPalmPose;
-        
-        public HololensManager()
+
+        TfFrame RootFrame => TfListener.RootFrame;
+        static ReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        static string MyId => ConnectionManager.Connection.MyId;
+
+        void Start()
+        {
+            if (ModuleListPanel.Initialized)
+            {
+                Initialize();
+            }
+            else
+            {
+                ModuleListPanel.InitFinished += Initialize;
+            }
+        }
+
+        void Initialize()
+        {
+            Debug.Log("Hololens Manager: Initializing!");
+            ModuleListPanel.InitFinished -= Initialize;
+
+            ModuleData grid = ModuleDatas.FirstOrDefault(data => data.ModuleType == Resource.ModuleType.Grid);
+            if (grid != null)
+            {
+                ModuleListPanel.Instance.RemoveModule(grid);
+            }
+
+            if (!UnityEngine.Application.isEditor)
+            {
+                floorHelper.gameObject.SetActive(false);
+            }
+
+            floorFrame.OkClicked += StartWorld;
+
+
+            StartRosConnection();
+            StartPalms();
+            StartOrigin();
+        }
+
+        void StartRosConnection()
         {
 #if UNITY_EDITOR
             ConnectionManager.Connection.MyUri = new Uri("http://141.3.59.11:7613");
@@ -27,20 +73,17 @@ namespace Iviz.Controllers
 #endif
             ConnectionManager.Connection.MasterUri = new Uri("http://141.3.59.5:11311");
             ConnectionManager.Connection.MyId = "/iviz_hololens";
-
             ConnectionManager.Connection.KeepReconnecting = true;
+        }
 
-            TfListener.RootFrame.SetPose(TimeSpan.Zero, new Pose(new Vector3(0, -1.5f, 2.0f), Quaternion.identity));
-
-
-            leftPalm = TfListener.GetOrCreateFrame("iviz/hololens/left_palm");
+        void StartPalms()
+        {
+            leftPalm = TfListener.GetOrCreateFrame($"{MyId}/controller/left_palm");
             leftPalm.transform.localScale = 0.05f * Vector3.one;
 
-
-            leftPalm = TfListener.GetOrCreateFrame("iviz/controller/left_hand");
-            node = SimpleDisplayNode.Instantiate("Hololens");
+            leftPalm = TfListener.GetOrCreateFrame($"{MyId}/controller/left_hand");
+            node = FrameNode.Instantiate("Hololens");
             node.Parent = leftPalm;
-            GameThread.EverySecond += Update;
 
             leftPalmPose = new Pose(Vector3.up * 1f, Quaternion.identity);
             leftPalm.SetPose(leftPalmPose);
@@ -48,7 +91,19 @@ namespace Iviz.Controllers
 
             LeftHandScale = 0.1f;
         }
-        
+
+        void StartOrigin()
+        {
+            RootFrame.transform.SetPose(InfinitePose);
+            floorFrame.gameObject.SetActive(true);
+        }
+
+        void StartWorld()
+        {
+            floorFrame.gameObject.SetActive(false);
+            RootFrame.transform.SetPose(floorFrame.OriginPose);
+        }
+
         public float LeftHandScale
         {
             get => leftHandScale;
@@ -59,24 +114,18 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Dispose()
+        void OnDestroy()
         {
-            if (disposed)
+            if (node != null)
             {
-                return;
+                node.Parent = null;
+                Destroy(node.gameObject);
             }
-
-            disposed = true;
-            
-            node.Parent = null;
-            UnityEngine.Object.Destroy(node.gameObject);
-            
-            GameThread.EverySecond -= Update;
-        }
-
-        void Update()
-        {
-            //TfListener.Publish(null, leftPalm.Id, leftPalmPose);
         }
     }
+#else
+    class HololensManager : MonoBehaviour
+    {
+    }
+#endif
 }

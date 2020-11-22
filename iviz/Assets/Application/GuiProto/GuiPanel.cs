@@ -37,11 +37,11 @@ namespace Iviz.App.Gui
         [SerializeField] TextMesh titleText = null;
         [SerializeField] TextMesh contentText = null;
         TfFrame attachedFrame;
-        SimpleDisplayNode node;
+        FrameNode node;
 
         void Awake()
         {
-            node = SimpleDisplayNode.Instantiate("GuiPanel Node");
+            node = FrameNode.Instantiate("GuiPanel Node");
 
             PanelData panelData = new PanelData
             {

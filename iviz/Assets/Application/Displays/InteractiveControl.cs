@@ -2,29 +2,48 @@ using System;
 using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class InteractiveControl : MonoBehaviour
+    public delegate void MovedAction(in Pose pose);
+
+    public enum InteractionModeType
     {
-        public delegate void MovedAction(in Pose pose);
+        None,
+        ClickOnly,
 
-        public enum InteractionModeType
-        {
-            Disabled,
+        MoveAxisX,
+        MovePlaneYZ,
+        RotateAxisX,
+        MovePlaneYZ_RotateAxisX,
+        Frame,
 
-            MoveAxisX,
-            MovePlaneYZ,
-            RotateAxisX,
-            MovePlaneYZ_RotateAxisX,
-            Frame,
+        Move3D,
+        Rotate3D,
+        MoveRotate3D
+    }
 
-            Move3D,
-            Rotate3D,
-            MoveRotate3D
-        }
+    public interface IControlMarker
+    {
+        Transform TargetTransform { get; set; }
+        bool Visible { get; set; }
+        bool PointsToCamera { get; set; }
+        bool HandlesPointToCamera { get; set; }
+        bool KeepAbsoluteRotation { get; set; }
+        InteractionModeType InteractionMode { get; set; }
+        Bounds? Bounds { get; set; }
+        void Suspend();
 
+        event MovedAction Moved;
+        event Action PointerUp;
+        event Action PointerDown;
+    }
+
+
+    public sealed class InteractiveControl : MonoBehaviour, IControlMarker
+    {
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
         [SerializeField] GameObject arrowMy = null;
@@ -41,9 +60,9 @@ namespace Iviz.Displays
         [SerializeField] GameObject ringZPlane = null;
 
         [SerializeField] Transform targetTransform;
-        
+
         InteractionModeType interactionMode;
-        bool cameraPivotIsParent;
+        bool handlesPointToCamera;
         bool keepAbsoluteRotation;
         bool pointsToCamera;
 
@@ -81,7 +100,7 @@ namespace Iviz.Displays
                 pointsToCamera = value;
                 if (!value)
                 {
-                    CameraPivotIsParent = false;
+                    HandlesPointToCamera = false;
                     transform.localRotation = Quaternion.identity;
                 }
 
@@ -105,7 +124,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
-                
+
                 keepAbsoluteRotation = value;
                 if (value)
                 {
@@ -128,17 +147,17 @@ namespace Iviz.Displays
             }
         }
 
-        public bool CameraPivotIsParent
+        public bool HandlesPointToCamera
         {
-            get => cameraPivotIsParent;
+            get => handlesPointToCamera;
             set
             {
-                if (cameraPivotIsParent == value)
+                if (handlesPointToCamera == value)
                 {
                     return;
                 }
-                
-                cameraPivotIsParent = value;
+
+                handlesPointToCamera = value;
                 if (!value)
                 {
                     transform.localRotation = Quaternion.identity;
@@ -155,7 +174,7 @@ namespace Iviz.Displays
                 {
                     return;
                 }
-                
+
                 interactionMode = value;
 
                 foreach (var resource in allResources)
@@ -165,7 +184,7 @@ namespace Iviz.Displays
 
                 switch (InteractionMode)
                 {
-                    case InteractionModeType.Disabled:
+                    case InteractionModeType.ClickOnly:
                         break;
                     case InteractionModeType.MoveAxisX:
                         arrowPx.SetActive(true);
@@ -228,13 +247,14 @@ namespace Iviz.Displays
             }
         }
 
+        public Bounds? Bounds { get; set; } // TODO
+
         public event MovedAction Moved;
         public event Action PointerUp;
         public event Action PointerDown;
-        //public event Action DoubleTap;
 
 
-        public void Stop()
+        public void Suspend()
         {
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
@@ -248,6 +268,7 @@ namespace Iviz.Displays
 
             void OnMoved(in Pose pose) => Moved?.Invoke(pose);
             void OnPointerUp() => PointerUp?.Invoke();
+
             void OnPointerDown() => PointerDown?.Invoke();
             //void OnDoubleTap() => DoubleTap?.Invoke();
 
@@ -291,7 +312,7 @@ namespace Iviz.Displays
         {
             var cameraForward = Settings.MainCamera.transform.forward;
             var mTransform = transform;
-            if (CameraPivotIsParent)
+            if (HandlesPointToCamera)
             {
                 mTransform.parent.LookAt(mTransform.parent.position + cameraForward);
             }

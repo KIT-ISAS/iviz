@@ -28,7 +28,7 @@ namespace Iviz.App
 
         public event Action Close;
 
-        SimpleDisplayNode dummy;
+        FrameNode placeHolder;
 
         [CanBeNull] TfFrame selectedFrame;
 
@@ -43,9 +43,9 @@ namespace Iviz.App
                     return;
                 }
 
-                selectedFrame?.RemoveListener(dummy);
+                selectedFrame?.RemoveListener(placeHolder);
                 selectedFrame = value;
-                selectedFrame?.AddListener(dummy);
+                selectedFrame?.AddListener(placeHolder);
 
 
                 bool interactable = selectedFrame != null;
@@ -88,7 +88,7 @@ namespace Iviz.App
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
-            dummy = SimpleDisplayNode.Instantiate("TFLog Dummy", TfListener.ListenersFrame.transform);
+            placeHolder = FrameNode.Instantiate("TFLog Placeholder", TfListener.ListenersFrame.transform);
 
             gotoButton.interactable = false;
             trail.interactable = false;

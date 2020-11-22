@@ -30,7 +30,7 @@ namespace Iviz.Controllers
     {
         const int ProbeRefreshTime = 10;
         
-        readonly DisplayNode node;
+        readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
@@ -187,7 +187,7 @@ namespace Iviz.Controllers
             grid = ResourcePool.GetOrCreateDisplay<GridResource>();
             grid.name = "Grid";
 
-            node = DisplayClickableNode.Instantiate("GridNode");
+            node = FrameNode.Instantiate("GridNode");
             grid.transform.parent = node.transform;
 
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));

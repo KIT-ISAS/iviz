@@ -195,7 +195,7 @@ namespace Iviz.Controllers
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
-            node.Target = resource;
+            resource.Parent = node.transform;
 
             //markerFound = false;
 

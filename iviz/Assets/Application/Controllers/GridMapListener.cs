@@ -35,8 +35,8 @@ namespace Iviz.Controllers
     {
         const int MaxGridSize = 4096;
 
-        readonly DisplayNode node;
-        readonly DisplayNode link;
+        readonly FrameNode node;
+        readonly FrameNode link;
         readonly GridMapResource resource;
 
         public override IModuleData ModuleData { get; }
@@ -162,8 +162,8 @@ namespace Iviz.Controllers
          
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             
-            node = SimpleDisplayNode.Instantiate("[GridMapNode]");
-            link = SimpleDisplayNode.Instantiate("[GridMapLink]", node.transform);
+            node = FrameNode.Instantiate("[GridMapNode]");
+            link = FrameNode.Instantiate("[GridMapLink]", node.transform);
             resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.GridMap, link.transform);
 
             Config = new GridMapConfiguration();

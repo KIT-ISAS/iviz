@@ -1,36 +1,45 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 using Iviz.Core;
-using Iviz.Roslib;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class DepthCloudConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.DepthCloud;
-        [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string ColorName { get; set; } = "";
         [DataMember] public string DepthName { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 1f;
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.DepthCloud;
+        [DataMember] public bool Visible { get; set; } = true;
     }
 
     public sealed class DepthCloudController : IController, IHasFrame
     {
-        readonly DepthCloudResource resource;
-        readonly SimpleDisplayNode node;
-
-        public IModuleData ModuleData { get; }
-
-        public TfFrame Frame => depthImage?.Frame;
-
         readonly DepthCloudConfiguration config = new DepthCloudConfiguration();
+        readonly FrameNode node;
+        readonly DepthCloudResource resource;
+
+        ImageListener colorImage;
+        ImageListener depthImage;
+
+        public DepthCloudController([NotNull] IModuleData moduleData)
+        {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            node = FrameNode.Instantiate("DepthCloud");
+            resource = ResourcePool.GetOrCreateDisplay<DepthCloudResource>(node.transform);
+            Config = new DepthCloudConfiguration();
+        }
+
+        [NotNull]
         public DepthCloudConfiguration Config
         {
             get => config;
@@ -54,6 +63,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         public string ColorName
         {
             get => config.ColorName;
@@ -86,7 +96,7 @@ namespace Iviz.Controllers
             }
         }
 
-        ImageListener colorImage;
+        [CanBeNull]
         public ImageListener ColorImage
         {
             get => colorImage;
@@ -97,42 +107,40 @@ namespace Iviz.Controllers
             }
         }
 
-        ImageListener depthImage;
+        [CanBeNull]
         public ImageListener DepthImage
         {
             get => depthImage;
             set
             {
-                if (!(depthImage is null))
+                if (depthImage != null)
                 {
                     node.transform.SetParentLocal(null);
                 }
+
                 depthImage = value;
-                if (!(depthImage is null))
+                if (depthImage != null)
                 {
                     node.transform.SetParentLocal(depthImage.Node.transform);
                 }
+
                 resource.DepthImage = value?.ImageTexture;
             }
         }
 
-        public DepthCloudController([NotNull] IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            node = SimpleDisplayNode.Instantiate("DepthImage");
-            resource = ResourcePool.GetOrCreateDisplay<DepthCloudResource>(node.transform);
-            Config = new DepthCloudConfiguration();
-        }
+        public IModuleData ModuleData { get; }
 
         public void StopController()
         {
             node.Stop();
             resource.DisposeDisplay();
-            UnityEngine.Object.Destroy(node.gameObject);
+            Object.Destroy(node.gameObject);
         }
 
         public void ResetController()
         {
         }
+
+        public TfFrame Frame => depthImage?.Frame;
     }
 }

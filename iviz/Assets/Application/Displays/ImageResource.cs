@@ -8,21 +8,17 @@ namespace Iviz.Displays
     {
         [SerializeField] GameObject front = null;
         [SerializeField] Billboard billboard = null;
-        Pose billboardStartPose;
-
-        public override Vector3 WorldScale => billboard.transform.lossyScale;
-        public override Pose WorldPose => billboard.transform.AsPose();
+        [SerializeField] float scale = 1;
         
+        Pose billboardStartPose;
         ImageTexture texture;
+
         public ImageTexture Texture
         {
             get => texture;
             set
             {
-                if (texture != null)
-                {
-                    texture.TextureChanged -= OnTextureChanged;
-                }
+                if (texture != null) texture.TextureChanged -= OnTextureChanged;
                 texture = value;
                 if (texture != null)
                 {
@@ -57,7 +53,6 @@ namespace Iviz.Displays
             set => billboard.transform.localPosition = value;
         }
 
-        [SerializeField] float scale = 1;
         public float Scale
         {
             get => scale;
@@ -68,27 +63,22 @@ namespace Iviz.Displays
             }
         }
 
-        public float Width => Scale;
-
-        float AspectRatio => (Texture == null || Texture.Width == 0) ? 1 : (float)Texture.Height / Texture.Width;
-
-        public float Height => Width * AspectRatio;
+        float Width => Scale;
+        float Height => Width * AspectRatio;
+        float AspectRatio => Texture == null || Texture.Width == 0 ? 1 : (float) Texture.Height / Texture.Width;
 
         protected override void Awake()
         {
             BoxCollider = billboard.GetComponent<BoxCollider>();
             base.Awake();
-            
+
             billboard.UseAbsoluteOffset = false;
             billboardStartPose = billboard.transform.AsLocalPose();
         }
 
         public void Set(int width, int height, int bpp, in ArraySegment<byte> data, bool generateMipmaps = false)
         {
-            if (Texture == null)
-            {
-                Texture = new ImageTexture();
-            }
+            if (Texture == null) Texture = new ImageTexture();
 
             switch (bpp)
             {
@@ -125,7 +115,7 @@ namespace Iviz.Displays
         void OnTextureChanged(Texture2D newTexture)
         {
             UpdateSides();
-            
+
             if (newTexture != null)
             {
                 newTexture.wrapMode = TextureWrapMode.Clamp;
@@ -134,5 +124,4 @@ namespace Iviz.Displays
             front.GetComponent<MeshRenderer>().sharedMaterial = Texture.Material;
         }
     }
-
 }

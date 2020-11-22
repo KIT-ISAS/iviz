@@ -10,7 +10,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class TfFrame : ClickableNode
+    public sealed class TfFrame : FrameNode
     {
         const int MaxPoseMagnitude = 1000;
         const int Layer = 9;
@@ -19,7 +19,7 @@ namespace Iviz.Controllers
         [SerializeField] Vector3 rosPosition;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly HashSet<DisplayNode> listeners = new HashSet<DisplayNode>();
+        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
         readonly Timeline timeline = new Timeline();
 
         Pose pose;
@@ -52,6 +52,7 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         public override bool Selected
         {
             get => base.Selected;
@@ -61,7 +62,9 @@ namespace Iviz.Controllers
                 labelObjectText.Visible = value || LabelVisible;
             }
         }
-
+        */
+        const bool Selected = false;
+        
         public float Alpha
         {
             get => alpha;
@@ -74,9 +77,11 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         public override Bounds Bounds => axis.Bounds;
         public override Bounds WorldBounds => axis.WorldBounds;
         public override Vector3 BoundsScale => axis.WorldScale;
+        */
 
         public bool ColliderEnabled
         {
@@ -197,9 +202,11 @@ namespace Iviz.Controllers
 
         bool IsChildless => children.Count == 0;
 
+        /*
         public override string Name => Id;
 
         public override Pose BoundsPose => transform.AsPose();
+        */
 
         public TfFrame()
         {
@@ -241,7 +248,7 @@ namespace Iviz.Controllers
 
             parentConnector.gameObject.SetActive(false);
 
-            UsesBoundaryBox = false;
+            //UsesBoundaryBox = false;
 
             trail = ResourcePool.GetOrCreateDisplay<TrailResource>(mTransform);
             trail.TimeWindowInMs = 5000;
@@ -249,21 +256,21 @@ namespace Iviz.Controllers
             TrailVisible = false;
         }
         
-        public void AddListener([NotNull] DisplayNode display)
+        public void AddListener([NotNull] FrameNode frame)
         {
-            if (display == null)
+            if (frame == null)
             {
-                throw new ArgumentNullException(nameof(display));
+                throw new ArgumentNullException(nameof(frame));
             }
 
-            listeners.Add(display);
+            listeners.Add(frame);
         }
 
-        public void RemoveListener([NotNull] DisplayNode display)
+        public void RemoveListener([NotNull] FrameNode frame)
         {
-            if (display == null)
+            if (frame == null)
             {
-                throw new ArgumentNullException(nameof(display));
+                throw new ArgumentNullException(nameof(frame));
             }
 
             if (HasNoListeners)
@@ -271,7 +278,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            listeners.Remove(display);
+            listeners.Remove(frame);
             CheckIfDead();
         }
 
@@ -401,11 +408,13 @@ namespace Iviz.Controllers
             axis = null;
             trail = null;
         }
-
+        
+        /*
         protected override void OnDoubleClick()
         {
             TfListener.GuiCamera.Select(this);
             ModuleListPanel.Instance.ShowFrame(this);
         }
+        */
     }
 }

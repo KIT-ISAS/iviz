@@ -8,17 +8,11 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Logger = Iviz.Core.Logger;
-using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
-using Iviz.Roslib;
-
-#if UNITY_WSA
-using Microsoft.MixedReality.Toolkit.Input;
-#endif
 
 namespace Iviz.Controllers
 {
@@ -55,61 +49,36 @@ namespace Iviz.Controllers
         Up
     }
 
-    public sealed class MarkerObject : ClickableNode,
-        IPointerDownHandler, IPointerUpHandler
-#if UNITY_WSA
-        , IMixedRealityPointerHandler
-#endif
+    public sealed class MarkerObject : FrameNode
     {
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
-        [CanBeNull] MarkerResource resource;
-        [CanBeNull] Info<GameObject> resourceInfo;
-        readonly MarkerLineHelper lineHelper = new MarkerLineHelper();
-        bool clickable;
+        readonly StringBuilder description = new StringBuilder();
+
         string id;
 
-        readonly StringBuilder description = new StringBuilder();
-        int numWarnings;
         int numErrors;
+        int numWarnings;
 
-        public delegate void MouseEventAction(in Vector3 point, MouseEventType type);
+        [CanBeNull] MarkerResource resource;
+        [CanBeNull] Info<GameObject> resourceInfo;
 
-        public event MouseEventAction MouseEvent;
+        MarkerLineHelper lineHelper;
+        MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
 
-        public override Bounds Bounds => resource != null ? resource.Bounds : new Bounds();
-        public override Bounds WorldBounds => resource != null ? resource.WorldBounds : new Bounds();
-        public override string Name => gameObject.name;
-        public override Pose BoundsPose => resource != null ? resource.WorldPose : Pose.identity;
-        public override Vector3 BoundsScale => resource != null ? resource.WorldScale : Vector3.one;
+        public Bounds? Bounds => resource == null
+            ? (Bounds?) null
+            : UnityUtils.TransformBound(resource.Bounds, resource.transform);
+
         public DateTime ExpirationTime { get; private set; }
-
-
-        public bool Clickable
-        {
-            get => clickable;
-            set
-            {
-                clickable = value;
-                if (resource == null)
-                {
-                    return;
-                }
-
-                resource.Layer = value ? Resource.ClickableLayer : 0;
-            }
-        }
 
         public bool OcclusionOnly
         {
             get => resource is ISupportsAROcclusion r && r.OcclusionOnly;
             set
             {
-                if (resource is ISupportsAROcclusion arResource)
-                {
-                    arResource.OcclusionOnly = value;
-                }
+                if (resource is ISupportsAROcclusion arResource) arResource.OcclusionOnly = value;
             }
         }
 
@@ -118,10 +87,7 @@ namespace Iviz.Controllers
             get => resource is ISupportsTint r ? r.Tint : Color.white;
             set
             {
-                if (resource is ISupportsTint tintResource)
-                {
-                    tintResource.Tint = value;
-                }
+                if (resource is ISupportsTint tintResource) tintResource.Tint = value;
             }
         }
 
@@ -130,19 +96,13 @@ namespace Iviz.Controllers
             get => resource == null || resource.Visible;
             set
             {
-                if (resource != null)
-                {
-                    resource.Visible = value;
-                }
+                if (resource != null) resource.Visible = value;
             }
         }
 
         public void Set([NotNull] Marker msg)
         {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
+            if (msg == null) throw new ArgumentNullException(nameof(msg));
 
             id = MarkerListener.IdFromMessage(msg);
             name = id;
@@ -164,13 +124,19 @@ namespace Iviz.Controllers
             else
             {
                 ExpirationTime = DateTime.Now + msg.Lifetime.ToTimeSpan();
-                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append( " secs").AppendLine();
+                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
             UpdateResource(msg);
 
             if (resource == null)
             {
+                if (msg.Type() == MarkerType.MeshResource)
+                {
+                    description.Append(ErrorStr).Append("Mesh resource not found").AppendLine();
+                    numErrors++;
+                }
+
                 return;
             }
 
@@ -228,10 +194,7 @@ namespace Iviz.Controllers
         [NotNull]
         T ValidateResource<T>() where T : MarkerResource
         {
-            if (!(resource is T result))
-            {
-                throw new InvalidOperationException("Resource is not set!");
-            }
+            if (!(resource is T result)) throw new InvalidOperationException("Resource is not set!");
 
             return result;
         }
@@ -293,17 +256,13 @@ namespace Iviz.Controllers
                 .Append(msg.Color.R).Append(" | ")
                 .Append(msg.Color.G).Append(" | ")
                 .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();            
-            
+                .Append(msg.Color.A).AppendLine();
+
             if (msg.Points.Length == 0)
-            {
                 description.Append("Elements: Empty").AppendLine();
-            }
             else
-            {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
-            }
-            
+
             MeshTrianglesResource meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
@@ -331,21 +290,15 @@ namespace Iviz.Controllers
                 return;
             }
 
-            
+
             meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
-            Vector3[] points = new Vector3[msg.Points.Length];
-            for (int i = 0; i < points.Length; i++)
-            {
-                points[i] = msg.Points[i].Ros2Unity();
-            }
+            var points = new Vector3[msg.Points.Length];
+            for (int i = 0; i < points.Length; i++) points[i] = msg.Points[i].Ros2Unity();
 
             if (msg.Colors.Length != 0)
             {
-                Color[] colors = new Color[msg.Colors.Length];
-                for (int i = 0; i < colors.Length; i++)
-                {
-                    colors[i] = msg.Colors[i].ToUnityColor();
-                }
+                var colors = new Color[msg.Colors.Length];
+                for (int i = 0; i < colors.Length; i++) colors[i] = msg.Colors[i].ToUnityColor();
 
                 meshTriangles.Set(points, colors);
             }
@@ -368,8 +321,8 @@ namespace Iviz.Controllers
                 .Append(msg.Color.G).Append(" | ")
                 .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
-            
-            
+
+
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
@@ -388,14 +341,10 @@ namespace Iviz.Controllers
             }
 
             if (msg.Points.Length == 0)
-            {
                 description.Append("Elements: Empty").AppendLine();
-            }
             else
-            {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
-            }
-            
+
             IEnumerable<PointWithColor> points;
             Color32 color32 = msg.Color.Sanitize().ToUnityColor32();
             if (msg.Colors.Length == 0)
@@ -403,9 +352,7 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     foreach (Point position in msg.Points)
-                    {
                         yield return new PointWithColor(position.Ros2Unity(), color32);
-                    }
                 }
 
                 points = PointEnumerator();
@@ -415,11 +362,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
-                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             msg.Colors[i].ToUnityColor32());
-                    }
                 }
 
                 points = PointEnumerator();
@@ -431,11 +376,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
-                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             color * msg.Colors[i].ToUnityColor());
-                    }
                 }
 
                 points = PointEnumerator();
@@ -458,13 +401,9 @@ namespace Iviz.Controllers
                 .Append(msg.Color.A).AppendLine();
 
             if (msg.Points.Length == 0)
-            {
                 description.Append("Elements: Empty").AppendLine();
-            }
             else
-            {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
-            }
 
             if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
@@ -495,7 +434,7 @@ namespace Iviz.Controllers
 
             lineResource.ElementScale = elementScale;
             LineResource.DirectLineSetter setterCallback =
-                isStrip ? lineHelper.GetLineSetterForStrip(msg) : lineHelper.GetLineSetterForList(msg);
+                isStrip ? LineHelper.GetLineSetterForStrip(msg) : LineHelper.GetLineSetterForList(msg);
             lineResource.SetDirect(setterCallback);
         }
 
@@ -538,9 +477,7 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     foreach (Point position in msg.Points)
-                    {
                         yield return new PointWithColor(position.Ros2Unity(), color32);
-                    }
                 }
 
                 points = PointEnumerator();
@@ -550,11 +487,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
-                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             msg.Colors[i].ToUnityColor32());
-                    }
                 }
 
                 points = PointEnumerator();
@@ -566,11 +501,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
-                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             color * msg.Colors[i].ToUnityColor());
-                    }
                 }
 
                 points = PointEnumerator();
@@ -593,7 +526,7 @@ namespace Iviz.Controllers
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 numWarnings++;
             }
-            
+
             description.Append("Color: ")
                 .Append(msg.Color.R).Append(" | ")
                 .Append(msg.Color.G).Append(" | ")
@@ -603,17 +536,14 @@ namespace Iviz.Controllers
 
         void CrateMeshResource([NotNull] Marker msg)
         {
-            if (resource is MeshMarkerResource meshMarker)
-            {
-                meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
-            }
+            if (resource is MeshMarkerResource meshMarker) meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
 
             description.Append("Scale: [")
                 .Append(msg.Scale.X).Append(" | ")
                 .Append(msg.Scale.Y).Append(" | ")
                 .Append(msg.Scale.Z).Append("]").AppendLine();
-            
-            if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+
+            if (Mathf.Approximately((float) msg.Scale.SquaredNorm, 0))
             {
                 description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                 numWarnings++;
@@ -629,7 +559,7 @@ namespace Iviz.Controllers
                 .Append(msg.Color.G).Append(" | ")
                 .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
-            
+
             transform.localScale = msg.Scale.Ros2Unity().Abs();
         }
 
@@ -642,7 +572,7 @@ namespace Iviz.Controllers
             {
                 case 0:
                 {
-                    if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+                    if (Mathf.Approximately((float) msg.Scale.SquaredNorm, 0))
                     {
                         description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         arrowMarker.Visible = false;
@@ -660,8 +590,8 @@ namespace Iviz.Controllers
 
                     arrowMarker.Visible = true;
                     arrowMarker.Set(msg.Scale.Ros2Unity().Abs());
-                    
-                    
+
+
                     description.Append("Scale: [")
                         .Append(msg.Scale.X).Append(" | ")
                         .Append(msg.Scale.Y).Append(" | ")
@@ -701,11 +631,8 @@ namespace Iviz.Controllers
 
         void UpdateResource([NotNull] Marker msg)
         {
-            Info<GameObject> newResourceInfo = GetRequestedResource(msg);
-            if (newResourceInfo == resourceInfo)
-            {
-                return;
-            }
+            var newResourceInfo = GetRequestedResource(msg);
+            if (newResourceInfo == resourceInfo) return;
 
             if (resource != null && resourceInfo != null)
             {
@@ -737,18 +664,15 @@ namespace Iviz.Controllers
             GameObject resourceGameObject = ResourcePool.GetOrCreate(resourceInfo, transform);
 
             resource = resourceGameObject.GetComponent<MarkerResource>();
-            if (resource == null)
-            {
-                if (msg.Type() != MarkerType.MeshResource)
-                {
-                    // shouldn't happen!
-                    Debug.LogWarning($"Resource '{resourceInfo}' has no MarkerResource!");
-                }
+            if (resource != null) return; // all OK
 
-                resource = resourceGameObject.AddComponent<AssetWrapperResource>();
-            }
+            if (msg.Type() != MarkerType.MeshResource)
+                // shouldn't happen!
+                Debug.LogWarning($"Resource '{resourceInfo}' has no MarkerResource!");
 
-            Clickable = Clickable; // reset value
+            resource = resourceGameObject.AddComponent<AssetWrapperResource>();
+
+            //Clickable = Clickable; // reset value
         }
 
         void UpdateTransform([NotNull] Marker msg)
@@ -860,10 +784,7 @@ namespace Iviz.Controllers
 
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
-            if (baseDescription == null)
-            {
-                throw new ArgumentNullException(nameof(baseDescription));
-            }
+            if (baseDescription == null) throw new ArgumentNullException(nameof(baseDescription));
 
             baseDescription.Append(description);
         }
@@ -878,61 +799,13 @@ namespace Iviz.Controllers
         public override void Stop()
         {
             base.Stop();
-            MouseEvent = null;
 
-            if (resource == null || resourceInfo == null)
-            {
-                return;
-            }
+            if (resource == null || resourceInfo == null) return;
 
             resource.DisposeResource(resourceInfo);
             resource = null;
             resourceInfo = null;
         }
-
-        public override void OnPointerClick(PointerEventData eventData)
-        {
-            base.OnPointerClick(eventData);
-            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Click);
-        }
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Down);
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            MouseEvent?.Invoke(eventData.pointerCurrentRaycast.worldPosition, MouseEventType.Up);
-        }
-
-#if UNITY_WSA
-        public override void OnPointerDown(MixedRealityPointerEventData eventData)
-        {
-            base.OnPointerClicked(eventData);
-            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
-            MouseEvent?.Invoke(pointerPosition, MouseEventType.Down);
-        }
-
-        public override void OnPointerDragged(MixedRealityPointerEventData eventData)
-        {
-            base.OnPointerClicked(eventData);
-        }
-
-        public override void OnPointerUp(MixedRealityPointerEventData eventData)
-        {
-            base.OnPointerClicked(eventData);
-            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
-            MouseEvent?.Invoke(pointerPosition, MouseEventType.Up);
-        }
-
-        public override void OnPointerClicked(MixedRealityPointerEventData eventData)
-        {
-            base.OnPointerClicked(eventData);
-            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
-            MouseEvent?.Invoke(pointerPosition, MouseEventType.Click);
-        }
-#endif
     }
 
 

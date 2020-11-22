@@ -112,7 +112,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
-            material = Resource.Materials.DepthImageProjector.Instantiate();
+            material = Resource.Materials.DepthCloud.Instantiate();
         }
 
         void Update()

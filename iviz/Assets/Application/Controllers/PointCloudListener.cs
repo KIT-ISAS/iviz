@@ -42,7 +42,7 @@ namespace Iviz.Controllers
 
         readonly PointCloudConfiguration config = new PointCloudConfiguration();
         readonly List<string> fieldNames = new List<string> {"x", "y", "z"};
-        readonly DisplayNode node;
+        readonly FrameNode node;
         readonly PointListResource pointCloud;
 
         bool isProcessing;
@@ -53,7 +53,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
-            node = SimpleDisplayNode.Instantiate("[PointCloudNode]");
+            node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
             Config = new PointCloudConfiguration();
         }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
@@ -6,6 +8,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Diagnostics;
 
 namespace Iviz.Controllers
 {
@@ -17,13 +20,15 @@ namespace Iviz.Controllers
         readonly StringBuilder description = new StringBuilder();
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        [CanBeNull] InteractiveControl control;
+        [CanBeNull] IControlMarker control;
         GameObject markerNode;
-        bool markerIsInteractive;
+        //bool markerIsInteractive;
 
         string rosId;
-        
-        [CanBeNull] InteractiveMarkerObject imarkerObject;
+
+        InteractiveMarkerObject interactiveMarkerObject;
+
+        public Bounds? Bounds { get; private set; }
 
         void Awake()
         {
@@ -34,7 +39,7 @@ namespace Iviz.Controllers
 
         internal void Initialize(InteractiveMarkerObject newIMarkerObject, string realId)
         {
-            imarkerObject = newIMarkerObject;
+            interactiveMarkerObject = newIMarkerObject;
             rosId = realId;
         }
 
@@ -43,7 +48,7 @@ namespace Iviz.Controllers
             name = $"[ControlObject '{msg.Name}']";
 
             description.Clear();
-            description.Append("<color=green><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
+            description.Append("<color=navy><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
@@ -58,6 +63,8 @@ namespace Iviz.Controllers
             description.Append("OrientationMode: ").Append(EnumToString(orientationMode)).AppendLine();
 
             UpdateMarkers(msg.Markers);
+            Bounds = RecalculateBounds();
+
             UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
 
             if (markers.Count == 0)
@@ -70,86 +77,126 @@ namespace Iviz.Controllers
             }
         }
 
-        void EnsureControlDisplayExists()
+        [NotNull]
+        IControlMarker EnsureControlDisplayExists()
         {
             if (control != null)
             {
-                return;
+                return control;
             }
 
-            control = ResourcePool.GetOrCreate<InteractiveControl>(Resource.Displays.InteractiveControl, transform);
+            control = ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform)
+                          .GetComponent<IControlMarker>()
+                      ?? throw new InvalidOperationException("Control marker has no control component!");
+
             control.TargetTransform = transform.parent;
 
             control.Moved += (in Pose _) =>
             {
-                if (imarkerObject != null)
+                if (interactiveMarkerObject != null)
                 {
-                    imarkerObject.OnMoved(rosId);
+                    interactiveMarkerObject.OnMoved(rosId);
                 }
             };
 
             // disable external updates while dragging
             control.PointerDown += () =>
             {
-                if (imarkerObject != null)
-                {
-                    imarkerObject.PoseUpdateEnabled = false;
-                    imarkerObject.OnMouseEvent(rosId, null, MouseEventType.Down);
-                }
+                interactiveMarkerObject.PoseUpdateEnabled = false;
+                interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Down);
             };
             control.PointerUp += () =>
             {
-                if (imarkerObject != null)
+                interactiveMarkerObject.PoseUpdateEnabled = true;
+                interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Up);
+
+                if (control.InteractionMode == InteractionModeType.ClickOnly)
                 {
-                    imarkerObject.PoseUpdateEnabled = true;
-                    imarkerObject.OnMouseEvent(rosId, null, MouseEventType.Up);
+                    interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
             };
+
+            return control;
+        }
+
+        void DisposeControlDisplay()
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            control.Suspend();
+            ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) control).gameObject);
+            control = null;
         }
 
         void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
             bool independentMarkerOrientation)
         {
-            bool clickable = interactionMode == InteractionMode.Button;
-            markers.Values.ForEach(marker => marker.Clickable = clickable);
+            //bool clickable = interactionMode == InteractionMode.Button;
+            //markers.Values.ForEach(marker => marker.Clickable = clickable);
 
-            switch (interactionMode)
+            if (interactionMode < 0 || interactionMode > InteractionMode.MoveRotate3D)
             {
-                case InteractionMode.None:
-                    markerIsInteractive = false;
-                    break;
-                case InteractionMode.Menu:
-                case InteractionMode.Button:
-                    markerIsInteractive = true;
-                    break;
-                case InteractionMode.MoveAxis:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.MoveAxisX;
-                    break;
-                case InteractionMode.MovePlane:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ;
-                    break;
-                case InteractionMode.RotateAxis:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.RotateAxisX;
-                    break;
-                case InteractionMode.MoveRotate:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.MovePlaneYZ_RotateAxisX;
-                    break;
-                case InteractionMode.Move3D:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.Move3D;
-                    break;
-                case InteractionMode.Rotate3D:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.Rotate3D;
-                    break;
-                case InteractionMode.MoveRotate3D:
-                    EnsureControlDisplayExists();
-                    control.InteractionMode = InteractiveControl.InteractionModeType.MoveRotate3D;
-                    break;
+                description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int) interactionMode)
+                    .AppendLine();
+                //markerIsInteractive = false;
+                DisposeControlDisplay();
+            }
+            else if (interactionMode == InteractionMode.None)
+            {
+                //markerIsInteractive = false;
+                DisposeControlDisplay();
+            }
+            else
+            {
+                //markerIsInteractive = true;
+                IControlMarker mControl = EnsureControlDisplayExists();
+                switch (interactionMode)
+                {
+                    case InteractionMode.Menu:
+                    case InteractionMode.Button:
+                        mControl.InteractionMode = InteractionModeType.ClickOnly;
+                        break;
+                    case InteractionMode.MoveAxis:
+                        mControl.InteractionMode = InteractionModeType.MoveAxisX;
+                        break;
+                    case InteractionMode.MovePlane:
+                        mControl.InteractionMode = InteractionModeType.MovePlaneYZ;
+                        break;
+                    case InteractionMode.RotateAxis:
+                        mControl.InteractionMode = InteractionModeType.RotateAxisX;
+                        break;
+                    case InteractionMode.MoveRotate:
+                        mControl.InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
+                        break;
+                    case InteractionMode.Move3D:
+                        mControl.InteractionMode = InteractionModeType.Move3D;
+                        break;
+                    case InteractionMode.Rotate3D:
+                        mControl.InteractionMode = InteractionModeType.Rotate3D;
+                        break;
+                    case InteractionMode.MoveRotate3D:
+                        mControl.InteractionMode = InteractionModeType.MoveRotate3D;
+                        break;
+                }
+            }
+            
+            if (orientationMode < 0 || orientationMode > OrientationMode.ViewFacing)
+            {
+                description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int) orientationMode)
+                    .AppendLine();
+                markerNode.GetComponent<Billboard>().enabled = false;
+                markerNode.transform.localRotation = Quaternion.identity;
+
+                if (control != null)
+                {
+                    control.PointsToCamera = false;
+                    control.KeepAbsoluteRotation = false;
+                }
+
+                return;
             }
 
             switch (orientationMode)
@@ -174,7 +221,7 @@ namespace Iviz.Controllers
                 case OrientationMode.ViewFacing:
                     control.KeepAbsoluteRotation = false;
                     control.PointsToCamera = true;
-                    control.CameraPivotIsParent = !independentMarkerOrientation;
+                    control.HandlesPointToCamera = !independentMarkerOrientation;
                     break;
                 case OrientationMode.Inherit:
                     control.PointsToCamera = false;
@@ -207,7 +254,7 @@ namespace Iviz.Controllers
                         else
                         {
                             markerObject = CreateMarkerObject();
-                            markerObject.MouseEvent += OnMarkerClicked;
+                            //markerObject.MouseEvent += OnMarkerClicked;
                             markers[markerId] = markerObject;
                         }
 
@@ -235,16 +282,6 @@ namespace Iviz.Controllers
             }
         }
 
-        void OnMarkerClicked(in Vector3 point, MouseEventType type)
-        {
-            if (!markerIsInteractive)
-            {
-                return;
-            }
-
-            imarkerObject?.OnMouseEvent(rosId, point, type);
-        }
-
         public void Stop()
         {
             markers.Values.ForEach(DeleteMarkerObject);
@@ -252,8 +289,8 @@ namespace Iviz.Controllers
 
             if (control != null)
             {
-                control.Stop();
-                ResourcePool.Dispose(Resource.Displays.InteractiveControl, control.gameObject);
+                control.Suspend();
+                ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) control).gameObject);
             }
         }
 
@@ -262,7 +299,9 @@ namespace Iviz.Controllers
             baseDescription.Append(description);
 
             foreach (var marker in markers.Values)
+            {
                 marker.GenerateLog(baseDescription);
+            }
         }
 
         static void DeleteMarkerObject([NotNull] MarkerObject marker)
@@ -299,11 +338,11 @@ namespace Iviz.Controllers
                 case InteractionMode.Move3D:
                     return "Move3D";
                 case InteractionMode.Rotate3D:
-                    return "Rotat3D";
+                    return "Rotate3D";
                 case InteractionMode.MoveRotate3D:
                     return "MoveRotate3D";
                 default:
-                    return $"Unknown ({(int) mode})";
+                    return $"Unknown";
             }
         }
 
@@ -319,7 +358,21 @@ namespace Iviz.Controllers
                 case OrientationMode.ViewFacing:
                     return "ViewFacing";
                 default:
-                    return $"Unknown ({(int) mode})";
+                    return $"Unknown";
+            }
+        }
+
+        Bounds? RecalculateBounds()
+        {
+            var innerBounds = markers.Values.Select(marker => marker.Bounds);
+            return UnityUtils.CombineBounds(innerBounds);
+        }
+
+        public void UpdateControlBounds(Bounds? bounds)
+        {
+            if (control != null)
+            {
+                control.Bounds = bounds;
             }
         }
 

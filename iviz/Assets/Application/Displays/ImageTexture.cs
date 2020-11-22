@@ -18,7 +18,6 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-        //byte[] rgbaBuffer;
         byte[] pngBuffer;
 
         public event Action<Texture2D> TextureChanged;
@@ -69,10 +68,10 @@ namespace Iviz.Displays
 
         [CanBeNull] public Texture2D Texture { get; private set; }
         [NotNull] public Material Material { get; }
-        public string Description { get; private set; }
+        [NotNull] public string Description { get; private set; } = "";
         public bool IsMono { get; private set; }
-        public int Width => Texture?.width ?? 0;
-        public int Height => Texture?.height ?? 0;
+        public int Width => Texture != null ? Texture.width : 0;
+        public int Height => Texture != null ? Texture.height : 0;
 
         Resource.ColormapId colormap;
 

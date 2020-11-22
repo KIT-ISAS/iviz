@@ -19,22 +19,23 @@ namespace Iviz.App
         const string ParamSuffix = "_description";
 
         [NotNull] readonly SimpleRobotPanelContents panel;
-        [NotNull] readonly SimpleRobotController robot;
 
         public override DataPanelContents Panel => panel;
         public override Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
-        public override IConfiguration Configuration => robot.Config;
-        public override IController Controller => robot;
+        public override IConfiguration Configuration => Robot.Config;
+        public override IController Controller => Robot;
+
+        [NotNull] public SimpleRobotController Robot { get; }
 
         static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
         public SimpleRobotModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.ModuleList, constructor.Topic, constructor.Type)
         {
-            robot = new SimpleRobotController(this);
+            Robot = new SimpleRobotController(this);
             if (constructor.Configuration != null)
             {
-                robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
+                Robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
             }
 
             panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(Resource.ModuleType.Robot);
@@ -50,120 +51,108 @@ namespace Iviz.App
                 return;
             }
 
-            if (!string.IsNullOrEmpty(robot.SourceParameter))
+            if (!string.IsNullOrEmpty(Robot.SourceParameter))
             {
-                robot.TryLoadFromSourceParameter(robot.SourceParameter);
+                Robot.TryLoadFromSourceParameter(Robot.SourceParameter);
             }
 
-            panel.HelpText.Label = robot.HelpText;
+            panel.HelpText.Label = Robot.HelpText;
             UpdateModuleButton();
         }
 
         public override void Stop()
         {
             base.Stop();
-            robot.StopController();
+            Robot.StopController();
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
 
         public override void SetupPanel()
         {
-            panel.Frame.Owner = robot;
-            panel.SourceParam.Value = robot.SourceParameter;
-            panel.HelpText.Label = robot.HelpText;
+            panel.Frame.Owner = Robot;
+            panel.SourceParam.Value = Robot.SourceParameter;
+            panel.HelpText.Label = Robot.HelpText;
 
             panel.SourceParam.Hints = GetParameterHints();
             panel.SavedRobotName.Options = GetSavedRobots();
 
-            panel.FramePrefix.Value = robot.FramePrefix;
-            panel.FrameSuffix.Value = robot.FrameSuffix;
-            panel.AttachToTf.Value = robot.AttachedToTf;
-            panel.HideButton.State = robot.Visible;
+            panel.FramePrefix.Value = Robot.FramePrefix;
+            panel.FrameSuffix.Value = Robot.FrameSuffix;
+            panel.AttachToTf.Value = Robot.AttachedToTf;
+            panel.HideButton.State = Robot.Visible;
 
-            panel.OcclusionOnlyMode.Value = robot.RenderAsOcclusionOnly;
-            panel.Tint.Value = robot.Tint;
-            panel.Alpha.Value = robot.Tint.a;
+            panel.OcclusionOnlyMode.Value = Robot.RenderAsOcclusionOnly;
+            panel.Tint.Value = Robot.Tint;
+            panel.Alpha.Value = Robot.Tint.a;
 
             panel.Save.Value = IsRobotSaved;
-            panel.Save.Interactable = !string.IsNullOrEmpty(robot.Robot?.Name);
+            panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
             {
                 Color color = f;
                 color.a = panel.Alpha.Value;
-                robot.Tint = color;
+                Robot.Tint = color;
             };
             panel.Alpha.ValueChanged += f =>
             {
                 Color color = panel.Tint.Value;
                 color.a = f;
-                robot.Tint = color;
+                Robot.Tint = color;
             };
-            panel.OcclusionOnlyMode.ValueChanged += f =>
-            {
-                robot.RenderAsOcclusionOnly = f;
-            };
+            panel.OcclusionOnlyMode.ValueChanged += f => { Robot.RenderAsOcclusionOnly = f; };
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
-                robot.TryLoadSavedRobot(i == 0 ? null : name);
+                Robot.TryLoadSavedRobot(i == 0 ? null : name);
                 panel.SourceParam.Value = "";
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = robot.HelpText;
+                panel.HelpText.Label = Robot.HelpText;
                 UpdateModuleButton();
 
                 panel.Save.Interactable =
-                    !string.IsNullOrEmpty(robot.Robot?.Name) &&
+                    !string.IsNullOrEmpty(Robot.Robot?.Name) &&
                     !Resource.Internal.ContainsRobot(name);
             };
             panel.SourceParam.EndEdit += f =>
             {
-                robot.TryLoadFromSourceParameter(f);
+                Robot.TryLoadFromSourceParameter(f);
                 panel.SavedRobotName.Index = 0;
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = robot.HelpText;
+                panel.HelpText.Label = Robot.HelpText;
                 UpdateModuleButton();
 
-                panel.Save.Interactable = !string.IsNullOrEmpty(robot.Robot?.Name);
+                panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
             };
-            panel.AttachToTf.ValueChanged += f =>
-            {
-                robot.AttachedToTf = f;
-            };
+            panel.AttachToTf.ValueChanged += f => { Robot.AttachedToTf = f; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
             };
-            panel.FramePrefix.EndEdit += f =>
-            {
-                robot.FramePrefix = f;
-            };
-            panel.FrameSuffix.EndEdit += f =>
-            {
-                robot.FrameSuffix = f;
-            };
+            panel.FramePrefix.EndEdit += f => { Robot.FramePrefix = f; };
+            panel.FrameSuffix.EndEdit += f => { Robot.FrameSuffix = f; };
             panel.HideButton.Clicked += () =>
             {
-                robot.Visible = !robot.Visible;
-                panel.HideButton.State = robot.Visible;
+                Robot.Visible = !Robot.Visible;
+                panel.HideButton.State = Robot.Visible;
                 UpdateModuleButton();
             };
             panel.Save.ValueChanged += f =>
             {
-                if (string.IsNullOrEmpty(robot?.Robot?.Name) || string.IsNullOrEmpty(robot.Robot.Description))
+                if (string.IsNullOrEmpty(Robot?.Robot?.Name) || string.IsNullOrEmpty(Robot.Robot.Description))
                 {
                     return;
                 }
 
                 if (f)
                 {
-                    Resource.External.AddRobot(robot.Robot.Name, robot.Robot.Description);
+                    Resource.External.AddRobot(Robot.Robot.Name, Robot.Robot.Description);
                 }
                 else
                 {
-                    Resource.External.RemoveRobot(robot.Robot.Name);
+                    Resource.External.RemoveRobot(Robot.Robot.Name);
                 }
             };
         }
@@ -181,11 +170,12 @@ namespace Iviz.App
 
         static IEnumerable<string> GetParameterHints() => GetParameterCandidates();
 
-        bool IsRobotSaved => robot.Robot?.Name != null && Resource.ContainsRobot(robot.Robot.Name);
+        bool IsRobotSaved => Robot.Robot?.Name != null && Resource.ContainsRobot(Robot.Robot.Name);
 
         protected override void UpdateModuleButton()
         {
-            ButtonText = $"{Resource.Font.Split(robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
+            ButtonText =
+                $"{Resource.Font.Split(Robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
@@ -199,28 +189,38 @@ namespace Iviz.App
                 switch (field)
                 {
                     case nameof(SimpleRobotConfiguration.Visible):
-                        robot.Visible = config.Visible;
+                        Robot.Visible = config.Visible;
                         break;
                     case nameof(SimpleRobotConfiguration.SourceParameter):
+                        if (config.SourceParameter == Robot.Config.SourceParameter)
+                        {
+                            break;
+                        }
+
                         hasSourceParameter = true;
                         break;
                     case nameof(SimpleRobotConfiguration.SavedRobotName):
+                        if (config.SavedRobotName == Robot.Config.SavedRobotName)
+                        {
+                            break;
+                        }
+
                         hasRobotName = true;
                         break;
                     case nameof(SimpleRobotConfiguration.FramePrefix):
-                        robot.FramePrefix = config.FramePrefix;
+                        Robot.FramePrefix = config.FramePrefix;
                         break;
                     case nameof(SimpleRobotConfiguration.FrameSuffix):
-                        robot.FrameSuffix = config.FrameSuffix;
+                        Robot.FrameSuffix = config.FrameSuffix;
                         break;
                     case nameof(SimpleRobotConfiguration.AttachedToTf):
-                        robot.AttachedToTf = config.AttachedToTf;
+                        Robot.AttachedToTf = config.AttachedToTf;
                         break;
                     case nameof(SimpleRobotConfiguration.RenderAsOcclusionOnly):
-                        robot.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        Robot.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(SimpleRobotConfiguration.Tint):
-                        robot.Tint = config.Tint;
+                        Robot.Tint = config.Tint;
                         break;
                     default:
                         Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
@@ -240,9 +240,13 @@ namespace Iviz.App
                     config.SourceParameter = "";
                 }
 
-                robot.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
+                Robot.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
 
-                panel.HelpText.Label = robot.HelpText;
+                if (IsSelected)
+                {
+                    panel.HelpText.Label = Robot.HelpText;
+                }
+
                 UpdateModuleButton();
             }
 
@@ -251,7 +255,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            config.SimpleRobots.Add(robot.Config);
+            config.SimpleRobots.Add(Robot.Config);
         }
     }
 }

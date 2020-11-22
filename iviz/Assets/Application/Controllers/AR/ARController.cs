@@ -67,7 +67,7 @@ namespace Iviz.Controllers
 
         readonly ARConfiguration config = new ARConfiguration();
         protected Canvas canvas;
-        protected DisplayClickableNode node;
+        protected FrameNode node;
 
         [CanBeNull] public static ARController Instance { get; private set; }
 
@@ -187,7 +187,7 @@ namespace Iviz.Controllers
                 canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             }
 
-            node = DisplayClickableNode.Instantiate("AR Node");
+            node = FrameNode.Instantiate("AR Node");
 
             /*
             if (savedSessionInfo != null)
@@ -230,7 +230,10 @@ namespace Iviz.Controllers
             Visible = false;
             WorldScale = 1;
 
-            TfListener.RootMarker.SetTargetPoseUpdater(pose => TfListener.RootFrame.transform.SetPose(pose));
+            if (TfListener.RootMarker != null)
+            {
+                TfListener.RootMarker.SetTargetPoseUpdater(pose => TfListener.RootFrame.transform.SetPose(pose));
+            }
 
             PinControlButton.Clicked -= OnPinControlButtonClicked;
             ShowRootMarkerButton.Clicked -= OnShowRootMarkerClicked;            
