@@ -122,14 +122,8 @@ namespace Iviz.Roslib
             disposed = true;
 
             signal.Release();
-            try
-            {
-                task.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
-            }
+            
+            Utils.WaitNoThrow(task, this);
 
             foreach (ServiceRequestAsync<T> sender in connections)
             {
@@ -149,10 +143,11 @@ namespace Iviz.Roslib
             disposed = true;
 
             signal.Release();
-            await task.Caf();
+            
+            await Utils.AwaitNoThrow(task, this).Caf();
 
             Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
-            Task.WaitAll(tasks);
+            await Utils.AwaitNoThrow(Task.WhenAll(tasks), this).Caf();
             connections.Clear();
         }
 

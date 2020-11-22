@@ -37,6 +37,16 @@ namespace Iviz.Roslib
         Task<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, IDeserializable<T>, new();
+
+        bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new();
+        Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback) where T : IService, new();
+
+        bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+            where T : IService;
+
+        Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+            CancellationToken token = default)
+            where T : IService;
     }
 
     /// <summary>
@@ -531,8 +541,9 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            Task.Run(async () => await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf())
-                .WaitAndUnwrapException();
+            Task t = Task.Run(async () =>
+                await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf());
+            t.Wait();
 
             return (id, subscription);
         }
@@ -826,7 +837,7 @@ namespace Iviz.Roslib
             {
                 publishersByTopic.TryRemove(topic, out _);
                 throw new RosRpcException("Error registering publisher", e);
-            }            
+            }
 
             if (response.IsValid)
             {
@@ -1127,9 +1138,10 @@ namespace Iviz.Roslib
         /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync()
+        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
+            CancellationToken token = default)
         {
-            var response = await Master.GetPublishedTopicsAsync().Caf();
+            var response = await Master.GetPublishedTopicsAsync(token: token).Caf();
             if (response.IsValid)
             {
                 return response.Topics
@@ -1480,11 +1492,25 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
         public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-            int timeoutInMs = 5000)
-            where T : IService
+            int timeoutInMs = 5000) where T : IService
         {
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
+        }
 
+        /// <summary>
+        /// Calls the given ROS service.
+        /// </summary>
+        /// <param name="serviceName">Name of the ROS service</param>
+        /// <param name="service">Service message. The response will be written in the response field.</param>
+        /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <param name="token">A cancellation token</param>
+        /// <typeparam name="T">Service type.</typeparam>
+        /// <returns>Whether the call succeeded.</returns>
+        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent,
+            CancellationToken token)
+            where T : IService
+        {
             if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
@@ -1496,7 +1522,7 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    return await existingReceiver.ExecuteAsync(service, timeoutTs.Token);
+                    return await existingReceiver.ExecuteAsync(service, token);
                 }
 
                 existingReceiver.Dispose();
@@ -1504,7 +1530,7 @@ namespace Iviz.Roslib
             }
 
 
-            LookupServiceResponse response = await Master.LookupServiceAsync(serviceName).Caf();
+            LookupServiceResponse response = await Master.LookupServiceAsync(serviceName, token).Caf();
             if (!response.IsValid)
             {
                 throw new RosRpcException($"Failed to call service: {response.StatusMessage}");
@@ -1517,15 +1543,15 @@ namespace Iviz.Roslib
                 if (persistent)
                 {
                     var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    await serviceCaller.StartAsync(persistent).Caf();
+                    await serviceCaller.StartAsync(persistent, token).Caf();
                     subscribedServicesByName.TryAdd(serviceName, serviceCaller);
-                    return await serviceCaller.ExecuteAsync(service, timeoutTs.Token).Caf();
+                    return await serviceCaller.ExecuteAsync(service, token).Caf();
                 }
                 else
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    await serviceCaller.StartAsync(persistent).Caf();
-                    return await serviceCaller.ExecuteAsync(service, timeoutTs.Token).Caf();
+                    await serviceCaller.StartAsync(persistent, token).Caf();
+                    return await serviceCaller.ExecuteAsync(service, token).Caf();
                 }
             }
             catch (Exception e)
@@ -1574,7 +1600,16 @@ namespace Iviz.Roslib
 
             advertisedServicesByName.TryAdd(serviceName, advertisedService);
 
-            Master.RegisterService(serviceName, advertisedService.Uri);
+            try
+            {
+                Master.RegisterService(serviceName, advertisedService.Uri);
+            }
+            catch (Exception e)
+            {
+                advertisedServicesByName.TryRemove(serviceName, out _);
+                throw new RosRpcException("Failed to advertise service", e);
+            }
+
             return true;
         }
 
@@ -1597,7 +1632,16 @@ namespace Iviz.Roslib
 
             advertisedServicesByName.TryAdd(serviceName, advertisedService);
 
-            await Master.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
+            try
+            {
+                await Master.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
+            }
+            catch (Exception e)
+            {
+                advertisedServicesByName.TryRemove(serviceName, out _);
+                throw new RosRpcException("Failed to advertise service", e);
+            }
+
             return true;
         }
 

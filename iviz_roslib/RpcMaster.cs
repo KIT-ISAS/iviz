@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -86,10 +87,10 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPublishedTopicsResponse(response);
         }
 
-        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "")
+        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "", CancellationToken token = default)
         {
             Arg[] args = {CallerId, subgraph};
-            object[] response = await MethodCallAsync("getPublishedTopics", args).Caf();
+            object[] response = await MethodCallAsync("getPublishedTopics", args, token).Caf();
             return new GetPublishedTopicsResponse(response);
         }
 
@@ -235,7 +236,7 @@ namespace Iviz.Roslib.XmlRpc
             return new LookupServiceResponse(response);
         }
 
-        public async Task<LookupServiceResponse> LookupServiceAsync(string service)
+        public async Task<LookupServiceResponse> LookupServiceAsync(string service, CancellationToken token = default)
         {
             if (service == null)
             {
@@ -243,7 +244,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service};
-            object[] response = await MethodCallAsync("lookupService", args).Caf();
+            object[] response = await MethodCallAsync("lookupService", args, token).Caf();
             return new LookupServiceResponse(response);
         }
 
@@ -326,9 +327,10 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args)
+        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
         {
-            object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs).Caf();
+            object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
+                .Caf();
             if (tmp is object[] result)
             {
                 return result;
@@ -374,7 +376,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -390,13 +392,13 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!(a[2] is object[] root) || root.Length != 3)
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
 
-            
+
             Publishers = CreateTuple(root[0]);
             Subscribers = CreateTuple(root[1]);
             Services = CreateTuple(root[2]);
@@ -406,7 +408,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (!(root is object[] objTuples))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return Empty;
@@ -420,7 +422,7 @@ namespace Iviz.Roslib.XmlRpc
                     !(tuple[0] is string topic) ||
                     !(tuple[1] is object[] tmp))
                 {
-                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                     Code = StatusCode.Error;
                     hasParseError = true;
                     return Empty;
@@ -453,7 +455,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -469,13 +471,12 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!(a[2] is string uriStr))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
 
-            
 
             if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
@@ -501,7 +502,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -517,13 +518,13 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!(a[2] is string uriStr))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
-            
-            
+
+
             if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
                 Uri = uri;
@@ -550,7 +551,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -566,12 +567,12 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!(a[2] is object[] objTopics))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
-            
+
             List<(string, string)> topics = new List<(string, string)>();
             foreach (var objTopic in objTopics)
             {
@@ -580,7 +581,7 @@ namespace Iviz.Roslib.XmlRpc
                     !(topic[0] is string topicName) ||
                     !(topic[1] is string topicType))
                 {
-                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                     Code = StatusCode.Error;
                     hasParseError = true;
                     return;
@@ -606,7 +607,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -622,13 +623,13 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!(a[2] is object[] objUriStrs))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
-            
-            
+
+
             List<Uri> publishers = new List<Uri>();
             foreach (var objUriStr in objUriStrs)
             {
@@ -659,7 +660,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -671,16 +672,16 @@ namespace Iviz.Roslib.XmlRpc
             if (Code == StatusCode.Error)
             {
                 return;
-            }            
+            }
 
             if (!(a[2] is int numUnsubscribed))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
-            
+
             NumUnsubscribed = numUnsubscribed;
         }
     }
@@ -698,7 +699,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -710,25 +711,25 @@ namespace Iviz.Roslib.XmlRpc
             if (Code == StatusCode.Error)
             {
                 return;
-            }          
-            
+            }
+
             if (!(a[2] is object[] objSubscriberStrs))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
-            }            
-            
+            }
+
             List<string> subscribers = new List<string>();
             foreach (var objSubscriberStr in objSubscriberStrs)
             {
                 if (!(objSubscriberStr is string subscriberStr))
                 {
-                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                    Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                     Code = StatusCode.Error;
                     hasParseError = true;
-                    return;                    
+                    return;
                 }
 
                 subscribers.Add(subscriberStr);
@@ -749,7 +750,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -761,11 +762,11 @@ namespace Iviz.Roslib.XmlRpc
             if (Code == StatusCode.Error)
             {
                 return;
-            }              
+            }
 
             if (!(a[2] is int numUnregistered))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -786,29 +787,29 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
-            }            
-            
+            }
+
             Code = code;
             StatusMessage = statusMessage;
 
             if (Code == StatusCode.Error)
             {
                 return;
-            }                
-            
+            }
+
             if (!(a[2] is string uriStr) ||
                 !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
             }
-            
+
             ServiceUrl = uri;
         }
     }
@@ -824,7 +825,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(a[0] is int code) ||
                 !(a[1] is string statusMessage))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;
@@ -836,11 +837,11 @@ namespace Iviz.Roslib.XmlRpc
             if (Code == StatusCode.Error)
             {
                 return;
-            }              
+            }
 
             if (!(a[2] is int numUnregistered))
             {
-                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");                    
+                Logger.Log($"{this}: Parse error in {MethodBase.GetCurrentMethod()?.Name}");
                 Code = StatusCode.Error;
                 hasParseError = true;
                 return;

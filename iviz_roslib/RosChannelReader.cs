@@ -298,7 +298,7 @@ namespace Iviz.Roslib
             Task<T> task = messageQueue.DequeueAsync(cancelled);
             if (!task.RanToCompletion())
             {
-                t = default!;
+                t = default!; // may be null though
                 return false;
             }
 

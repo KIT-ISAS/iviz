@@ -93,14 +93,7 @@ namespace Iviz.Roslib
 
             runningTs.Cancel();
 
-            try
-            {
-                task?.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat("{0}: {1}", this, e);
-            }
+            Utils.WaitNoThrow(task, this);
 
             runningTs.Dispose();
             Logger.LogDebugFormat("{0}: Disposed!", this);

@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -30,7 +31,7 @@ namespace Iviz.XmlRpc
 
             Task task = client.ConnectAsync(hostname, port);
             
-            if (!WaitAndUnwrapException(task, timeoutInMs) || !task.RanToCompletion())
+            if (!task.Wait(timeoutInMs) || !task.RanToCompletion())
             {
                 if (task.IsFaulted)
                 {
@@ -41,13 +42,13 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs)
+        public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
         {
             string hostname = uri.Host;
             int port = uri.Port;
 
             Task task = client.ConnectAsync(hostname, port);
-            if (!await task.WaitFor(timeoutInMs) || !task.RanToCompletion())
+            if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
             {
                 if (task.IsFaulted)
                 {
@@ -118,7 +119,7 @@ namespace Iviz.XmlRpc
             return ProcessResponse(response);
         }
         
-        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
         {
             string response;
             using (Stream stream = client.GetStream())
@@ -129,7 +130,7 @@ namespace Iviz.XmlRpc
 
                 StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
                 Task<string> readTask = reader.ReadToEndAsync();
-                if (!await readTask.WaitFor(timeoutInMs) || !readTask.RanToCompletion())
+                if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
                     reader.Close();
                     throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
@@ -150,25 +151,7 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
-            client?.Close();
+            client.Close();
         }
-        
-        static bool WaitAndUnwrapException(Task task, int timeoutInMs)
-        {
-            try
-            {
-                return task.Wait(timeoutInMs);
-            }
-            catch (AggregateException ex)
-            {
-                throw PrepareForRethrow(ex.InnerException!);
-            }
-        }
-        
-        static Exception PrepareForRethrow(Exception exception)
-        {
-            ExceptionDispatchInfo.Capture(exception).Throw();
-            return exception;
-        }        
     }
 }

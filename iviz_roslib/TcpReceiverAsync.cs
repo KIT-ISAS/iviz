@@ -72,14 +72,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
 
-            try
-            {
-                task?.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat("{0}: {1}", this, e);
-            }
+            Utils.WaitNoThrow(task, this);
 
             runningTs.Dispose();
             task = null;
@@ -107,14 +100,7 @@ namespace Iviz.Roslib
             stream?.Dispose();
             tcpClient?.Dispose();
 
-            try
-            {
-                sessionTask.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
-            }
+            Utils.WaitNoThrow(sessionTask, this);
         }
 
         async Task<TcpClient?> TryToConnect()

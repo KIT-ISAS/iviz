@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.Republisher
@@ -14,6 +18,12 @@ namespace Iviz.Republisher
 
         readonly RosClient clientA;
         readonly RosClient clientB;
+
+        ReadOnlyCollection<BriefTopicInfo> topicsInA;
+        ReadOnlyCollection<BriefTopicInfo> topicsInB;
+
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        CancellationToken Token => tokenSource.Token;
 
         Republisher(string[] args)
         {
@@ -70,74 +80,105 @@ namespace Iviz.Republisher
         {
             if (clientA == null || clientB == null)
             {
+                Console.WriteLine("EE: Init failed. Quitting.");
                 return;
             }
 
-            var topicsInA = await clientA.GetSystemPublishedTopicsAsync();
-            var topicsInB = await clientB.GetSystemPublishedTopicsAsync();
-
-            string[] topicTypesAtoB = topicsAtoB
-                .Select(topic =>
-                    topicsInA.FirstOrDefault(info => info.Topic == topic)?.Type ??
-                    topicsInB.FirstOrDefault(info => info.Topic == topic)?.Type)
-                .ToArray();
-
-            string[] topicTypesBtoA = topicsBtoA
-                .Select(topic =>
-                    topicsInB.FirstOrDefault(info => info.Topic == topic)?.Type ??
-                    topicsInA.FirstOrDefault(info => info.Topic == topic)?.Type)
-                .ToArray();
-
-            if (topicTypesAtoB.Any(type => type == null))
+            try
             {
-                Console.WriteLine("EE At least one topic type in A->B is missing");
-                return;
+                await CreateModelServiceBridgeAsync(clientA, clientB);
             }
-
-            if (topicTypesBtoA.Any(type => type == null))
+            catch (RoslibException e)
             {
-                Console.WriteLine("EE At least one topic type in B->A is missing");
-                return;
+                Console.WriteLine($"EE: Failed to create model service bridge: {e.Message}");
             }
 
-            Type[] typesAtoB = topicTypesAtoB.Select(type => BuiltIns.TryGetTypeFromMessageName(type)).ToArray();
-            Type[] typesBtoA = topicTypesBtoA.Select(type => BuiltIns.TryGetTypeFromMessageName(type)).ToArray();
+            topicsInA = await clientA.GetSystemPublishedTopicsAsync(Token);
+            topicsInB = await clientB.GetSystemPublishedTopicsAsync(Token);
 
-            if (typesAtoB.Any(type => type == null))
-            {
-                Console.WriteLine("EE At least one C# type in A->B could not be resolved");
-                return;
-            }
+            Task probeTask = ProbeTopicTypes();
 
-            if (typesBtoA.Any(type => type == null))
-            {
-                Console.WriteLine("EE At least one C# type in B->A could not be resolved");
-                return;
-            }
+            Task[] publishersAtoB =
+                topicsAtoB.Select(async topic => await Republish(clientA, clientB, topic)).ToArray();
+            Task[] publishersBtoA =
+                topicsBtoA.Select(async topic => await Republish(clientB, clientA, topic)).ToArray();
 
-            var tasksA = topicsAtoB.Zip(typesAtoB,
-                (topic, type) => Republish(clientA, clientB, topic, type));
+            List<Task> tasks = new List<Task> {probeTask};
+            tasks.AddRange(publishersAtoB);
+            tasks.AddRange(publishersBtoA);
 
-            var tasksB = topicsBtoA.Zip(typesBtoA,
-                (topic, type) => Republish(clientB, clientA, topic, type));
-
-            Task[] tasks = tasksA.Concat(tasksB).ToArray();
             await Task.WhenAll(tasks);
         }
 
-        static async Task Republish(IRosClient sourceClient, IRosClient destClient, string topic, Type msgType)
+        async Task ProbeTopicTypes()
         {
+            while (true)
+            {
+                await Task.Delay(1000, Token);
+
+                try
+                {
+                    topicsInA = await clientA.GetSystemPublishedTopicsAsync(Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
+                try
+                {
+                    topicsInB = await clientB.GetSystemPublishedTopicsAsync(Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+
+        async Task Republish(IRosClient sourceClient, IRosClient destClient, string topic)
+        {
+            Console.WriteLine($"** Starting task for '{topic}'...");
+
+            string topicType;
+            while (true)
+            {
+                topicType = topicsInA.FirstOrDefault(info => info.Topic == topic)?.Type ??
+                            topicsInB.FirstOrDefault(info => info.Topic == topic)?.Type;
+                if (topicType != null)
+                {
+                    break;
+                }
+
+                await Task.Delay(1000, Token);
+            }
+
+            Type msgType = BuiltIns.TryGetTypeFromMessageName(topicType);
+            if (msgType == null)
+            {
+                Console.WriteLine($"EE C# message type '{topicType}' for topic {topic} could not be resolved!");
+                return;
+            }
+
             await using IRosChannelReader reader = RosChannelReader.CreateInstance(msgType);
             await using IRosChannelWriter writer = RosChannelWriter.CreateInstance(msgType);
 
             try
             {
-                Console.WriteLine($"** Starting reader for '{topic}'...");
-                await reader.StartAsync(sourceClient, topic);
-                Console.WriteLine($"** Starting writer for '{topic}'...");
-                await writer.StartAsync(destClient, topic);
                 Console.WriteLine($"** Transferring '{topic}'!");
-                await writer.WriteAllAsync(reader.ReadAllAsync(CancellationToken.None));
+                await reader.StartAsync(sourceClient, topic);
+                //Console.WriteLine($"** Starting writer for '{topic}'...");
+                await writer.StartAsync(destClient, topic);
+                //Console.WriteLine($"** Transferring '{topic}'!");
+                await writer.WriteAllAsync(reader.ReadAllAsync(Token));
                 Console.WriteLine($"** Circuit for '{topic}' closed.");
             }
             catch (Exception e)
@@ -145,6 +186,41 @@ namespace Iviz.Republisher
                 Console.WriteLine($"EE Circuit for topic '{topic}' stopped!");
                 Console.WriteLine(e);
             }
+        }
+
+        static async Task CreateModelServiceBridgeAsync(IRosClient clientWithModels, IRosClient otherClient)
+        {
+            const string modelServiceName = "/iviz/get_model_resource";
+            const string textureServiceName = "/iviz/get_model_texture";
+
+            async Task CreateModelCallback(GetModelResource srv)
+            {
+                try
+                {
+                    await clientWithModels.CallServiceAsync(modelServiceName, srv);
+                }
+                catch (Exception e)
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message = $"Republisher error: {e.Message}";
+                }
+            }
+
+            async Task CreateTextureCallback(GetModelTexture srv)
+            {
+                try
+                {
+                    await clientWithModels.CallServiceAsync(textureServiceName, srv);
+                }
+                catch (Exception e)
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message = $"Republisher error: {e.Message}";
+                }
+            }
+
+            await otherClient.AdvertiseServiceAsync<GetModelResource>(modelServiceName, CreateModelCallback);
+            await otherClient.AdvertiseServiceAsync<GetModelTexture>(textureServiceName, CreateTextureCallback);
         }
 
         public async ValueTask DisposeAsync()

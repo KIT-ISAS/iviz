@@ -56,30 +56,14 @@ namespace Iviz.Roslib
         {
             keepRunning = false;
             tcpClient.Close();
-
-            try
-            {
-                task.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
-            }
+            Utils.WaitNoThrow(task, this);
         }
 
         public async Task StopAsync()
         {
             keepRunning = false;
             tcpClient.Close();
-
-            try
-            {
-                await task.Caf();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
-            }
+            await Utils.AwaitNoThrow(task, this).Caf();
         }
 
         async Task<int> ReceivePacket()

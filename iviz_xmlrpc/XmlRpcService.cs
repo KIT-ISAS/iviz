@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Iviz.Msgs;
@@ -232,10 +233,11 @@ namespace Iviz.XmlRpc
         /// <param name="method">Name of the XML-RPC method.</param>
         /// <param name="args">List of arguments.</param>
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
+        /// <param name="token">An optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
-            IEnumerable<Arg> args, int timeoutInMs = 2000)
+            IEnumerable<Arg> args, int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
 
@@ -248,8 +250,8 @@ namespace Iviz.XmlRpc
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
-                await request.StartAsync(timeoutInMs).Caf();
-                inData = await request.RequestAsync(outData, timeoutInMs).Caf();
+                await request.StartAsync(timeoutInMs, token).Caf();
+                inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
             }
 
             return ProcessResponse(inData);

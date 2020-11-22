@@ -58,7 +58,7 @@ namespace Iviz.Roslib
             tcpClient.Dispose();
         }
 
-        async Task SendHeaderAsync(bool persistent)
+        async Task SendHeaderAsync(bool persistent, CancellationToken token)
         {
             string[] contents =
             {
@@ -70,14 +70,14 @@ namespace Iviz.Roslib
                 persistent ? "persistent=1" : "persistent=0",
             };
 
-            await Utils.WriteHeaderAsync(stream, contents).Caf();
+            await Utils.WriteHeaderAsync(stream, contents, token).Caf();
         }
 
-        async Task ProcessHandshake(bool persistent)
+        async Task ProcessHandshake(bool persistent, CancellationToken token)
         {
-            await SendHeaderAsync(persistent).Caf();
+            await SendHeaderAsync(persistent, token).Caf();
 
-            int receivedLength = await ReceivePacketAsync().Caf();
+            int receivedLength = await ReceivePacketAsync(token).Caf();
             if (receivedLength == -1)
             {
                 throw new IOException("Connection closed during handshake");
@@ -95,20 +95,20 @@ namespace Iviz.Roslib
             }
         }
         
-        public async Task StartAsync(bool persistent)
+        public async Task StartAsync(bool persistent, CancellationToken token = default)
         {
-            await ProcessHandshake(persistent);
+            await ProcessHandshake(persistent, token);
         }
 
         public void Start(bool persistent)
         {
             // just call the async version from sync
-            Task.Run(async () => { await StartAsync(persistent).Caf(); }).WaitAndUnwrapException();
+            Task.Run(async () => { await StartAsync(persistent).Caf(); }).Wait();
         }
 
-        async Task<int> ReceivePacketAsync()
+        async Task<int> ReceivePacketAsync(CancellationToken token)
         {
-            if (!await stream.ReadChunkAsync(readBuffer, 4))
+            if (!await stream.ReadChunkAsync(readBuffer, 4, token))
             {
                 return -1;
             }
@@ -124,7 +124,7 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            if (!await stream.ReadChunkAsync(readBuffer, length))
+            if (!await stream.ReadChunkAsync(readBuffer, length, token))
             {
                 return -1;
             }
@@ -178,7 +178,7 @@ namespace Iviz.Roslib
 
             byte statusByte = readBuffer[0];
 
-            int rcvLength = await ReceivePacketAsync();
+            int rcvLength = await ReceivePacketAsync(token);
             if (rcvLength == -1)
             {
                 throw new IOException("Partner closed the connection");

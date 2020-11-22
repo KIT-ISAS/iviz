@@ -17,7 +17,8 @@ namespace Iviz.XmlRpc
         /// <param name="task">The task to be awaited</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
         /// <param name="token">An optional token to cancel the waiting</param>
-        /// <returns>An awaitable task, with true if the task in the argument finished before the given time.</returns>
+        /// <returns>An awaitable task, with true if the task in the argument finished before the given time</returns>
+        /// <exception cref="TaskCanceledException">If the token expires</exception>
         public static async Task<bool> WaitFor(this Task task, int timeoutInMs, CancellationToken token = default)
         {
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs, token)).Caf();

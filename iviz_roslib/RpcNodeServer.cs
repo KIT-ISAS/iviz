@@ -72,14 +72,7 @@ namespace Iviz.Roslib.XmlRpc
             signal.Release();
             signal.Dispose();
 
-            try
-            {
-                task.WaitAndUnwrapException();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", this, e);
-            }
+            Utils.WaitNoThrow(task, this);
         }
 
         public void Start()

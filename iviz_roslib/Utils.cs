@@ -179,7 +179,7 @@ namespace Iviz.Roslib
             return true;
         }
 
-        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents)
+        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents, CancellationToken token = default)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
@@ -194,7 +194,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length).Caf();
+            await stream.WriteAsync(array, 0, array.Length, token).Caf();
         }
 
 
@@ -225,6 +225,41 @@ namespace Iviz.Roslib
         public static bool IsAlive(this IRosPublisher t)
         {
             return !t.CancellationToken.IsCancellationRequested;
-        }        
+        }
+
+        public static void WaitNoThrow(Task? t, object caller)
+        {
+            if (t == null)
+            {
+                return;
+            }
+            
+            try
+            {
+                t.Wait();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+        }
+        
+        public static async Task AwaitNoThrow(Task? t, object caller)
+        {
+            if (t == null)
+            {
+                return;
+            }
+            
+            try
+            {
+                await t.Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+        }
+        
     }
 }
