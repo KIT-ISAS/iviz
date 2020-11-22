@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DepthImage Material
+  m_Name: DepthCloud
   m_Shader: {fileID: 4800000, guid: 2e6618bfb2b5ad242948b0497a723001, type: 3}
   m_ShaderKeywords: _DISTANCE_ON
   m_LightmapFlags: 4
@@ -27,8 +27,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _IntensityTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Distance: 1
+    - _IntensityAdd: 0
+    - _IntensityCoeff: 1
     - _PointSize: 0.003
     m_Colors:
     - _Tint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
