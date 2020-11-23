@@ -8,7 +8,7 @@ using Iviz.Ros;
 using Iviz.Resources;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Hololens
 {
 #if UNITY_WSA
     class HololensManager : MonoBehaviour
