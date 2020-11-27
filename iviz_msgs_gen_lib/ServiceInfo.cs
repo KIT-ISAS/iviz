@@ -98,6 +98,7 @@ namespace Iviz.MsgsGen
             {
                 return new[]
                 {
+                    "[DataContract]",
                     $"public sealed class {name} : Internal.Empty{strType}",
                     "{",
                     "}"
@@ -105,6 +106,7 @@ namespace Iviz.MsgsGen
             }
 
             List<string> lines = new List<string>();
+            lines.Add("[DataContract]");
             lines.Add($"public sealed class {name} : I{strType}, IDeserializable<{name}>");
             lines.Add("{");
 

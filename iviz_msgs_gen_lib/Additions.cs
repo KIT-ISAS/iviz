@@ -45,6 +45,7 @@ namespace Iviz.MsgsGen
             
             ["geometry_msgs/Quaternion"] = new[]
             {
+                "public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);", 
                 "public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);", 
                 "public static Quaternion operator *(in Quaternion a, in Quaternion b) =>",
                 "    new Quaternion(",
@@ -52,7 +53,13 @@ namespace Iviz.MsgsGen
                 "        a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,",
                 "        a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,",
                 "        a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z",
-                "    );"
+                "    );",
+                "public static Vector3 operator *(in Quaternion q, in Vector3 v)", 
+                "{",
+                "        Vector3 qv = new Vector3(q.X, q.Y, q.Z);",
+                "        return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);",
+                "}",
+                "public static Point operator *(in Quaternion q, in Point v) => q * (Vector3)v;", 
             },
             
             ["geometry_msgs/Transform"] = new[]
