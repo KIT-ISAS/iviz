@@ -74,10 +74,10 @@ namespace Iviz.Roslib
         /// </summary>        
         public event Action<RosPublisher<T>>? NumSubscribersChanged;
 
-        internal RosPublisher(RosClient client, TopicInfo<T> topicInfo, int timeoutInMs)
+        internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;
-            manager = new TcpSenderManager<T>(this, topicInfo) {TimeoutInMs = timeoutInMs};
+            manager = new TcpSenderManager<T>(this, topicInfo);
         }
 
         internal void RaiseNumConnectionsChanged()

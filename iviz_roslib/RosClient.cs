@@ -824,7 +824,8 @@ namespace Iviz.Roslib
             }
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo, (int) TcpRosTimeout.TotalMilliseconds);
+            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
+                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
 
             publishersByTopic[topic] = publisher;
 
@@ -856,7 +857,8 @@ namespace Iviz.Roslib
             }
 
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo, (int) TcpRosTimeout.TotalMilliseconds);
+            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
+                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
 
             publishersByTopic[topic] = publisher;
 
