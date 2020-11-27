@@ -48,10 +48,12 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "18ad0215778d252d8f14959901273e8d";
     }
 
+    [DataContract]
     public sealed class GetUUIDRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class GetUUIDResponse : IResponse, IDeserializable<GetUUIDResponse>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }

@@ -160,14 +160,14 @@ namespace Iviz.Editor
                             triangles[i] + 1, triangles[i + 2] + 1, triangles[i + 1] + 1);
                     }
                 }
-                
+
                 File.WriteAllText($"{absolutePath}/mesh-{meshId}.obj", sb.ToString());
                 AssetDatabase.Refresh();
 
                 string meshPath = $"{innerPath}/mesh-{meshId}.obj";
                 Mesh newMesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
-                filter.sharedMesh = newMesh;                
-                
+                filter.sharedMesh = newMesh;
+
                 meshId++;
             }
 

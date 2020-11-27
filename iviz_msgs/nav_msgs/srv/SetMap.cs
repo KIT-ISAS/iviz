@@ -48,6 +48,7 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = "c36922319011e63ed7784112ad4fdd32";
     }
 
+    [DataContract]
     public sealed class SetMapRequest : IRequest, IDeserializable<SetMapRequest>
     {
         // Set a new map together with an initial pose
@@ -110,6 +111,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     }
 
+    [DataContract]
     public sealed class SetMapResponse : IResponse, IDeserializable<SetMapResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; }

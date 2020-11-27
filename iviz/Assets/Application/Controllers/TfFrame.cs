@@ -175,10 +175,12 @@ namespace Iviz.Controllers
             set
             {
                 parentCanChange = value;
+                /*
                 if (!parentCanChange)
                 {
                     Parent = TfListener.RootFrame;
                 }
+                */
             }
         }
 
@@ -194,7 +196,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Pose WorldPose => TfListener.RelativePoseToRoot(transform.AsPose());
+        public Pose WorldPose => TfListener.RelativePoseToOrigin(transform.AsPose());
 
         public Pose AbsolutePose => transform.AsPose();
 
@@ -345,7 +347,7 @@ namespace Iviz.Controllers
             }
 
             var parent = transform.parent;
-            parentConnector.B = parent != null ? parent : TfListener.RootFrame.transform;
+            parentConnector.B = parent != null ? parent : TfListener.OriginFrame.transform;
 
             return true;
         }
@@ -376,14 +378,14 @@ namespace Iviz.Controllers
             }
 
             transform.SetLocalPose(newPose);
-            LogPose(time);
+            //LogPose(time);
         }
 
         void LogPose(in TimeSpan time)
         {
             if (listeners.Count != 0)
             {
-                timeline.Add(time, transform.AsPose());
+                timeline.Add(time, WorldPose);
             }
 
             foreach (var child in children.Values)

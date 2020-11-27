@@ -50,6 +50,7 @@ namespace Iviz.App
             panel.DescriptionsVisible.Value = listener.DescriptionsVisible;
             panel.Sender.Set(listener.Publisher);
             panel.Marker.MarkerListener = listener;
+            panel.HideButton.State = listener.Visible;
 
             panel.DescriptionsVisible.ValueChanged += f =>
             {
@@ -59,6 +60,12 @@ namespace Iviz.App
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateModuleButton();
             };
         }
 
@@ -76,8 +83,7 @@ namespace Iviz.App
                 switch (field) 
                 {
                     case nameof(InteractiveMarkerConfiguration.Visible):
-                        // TODO!
-                        //listener.Visible = config.Visible;
+                        listener.Visible = config.Visible;
                         break;
                     case nameof(InteractiveMarkerConfiguration.DescriptionsVisible):
                         listener.DescriptionsVisible = config.DescriptionsVisible;

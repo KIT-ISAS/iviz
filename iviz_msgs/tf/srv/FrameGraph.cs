@@ -48,10 +48,12 @@ namespace Iviz.Msgs.Tf
         [Preserve] public const string RosMd5Sum = "c4af9ac907e58e906eb0b6e3c58478c0";
     }
 
+    [DataContract]
     public sealed class FrameGraphRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
     {
         [DataMember (Name = "dot_graph")] public string DotGraph { get; set; }

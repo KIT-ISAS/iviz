@@ -4,6 +4,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 
+#if !NETSTANDARD2_0
+using System.Buffers;
+#endif
+
 namespace Iviz.Msgs
 {
     public static class BuiltIns
@@ -120,4 +124,23 @@ namespace Iviz.Msgs
             return Type.GetType(guessName);
         }
     }
+
+#if !NETSTANDARD2_0
+    public struct Renter : IDisposable
+    {
+        public byte[] Array { get; }
+        public int Size { get; }
+
+        public Renter(int size)
+        {
+            Array = ArrayPool<byte>.Shared.Rent(size);
+            Size = size;
+        }
+
+        public void Dispose()
+        {
+            ArrayPool<byte>.Shared.Return(Array);
+        }
+    }
+#endif
 }

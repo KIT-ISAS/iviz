@@ -42,11 +42,11 @@ namespace Iviz.Republisher
 
             topicsAtoB = new[]
             {
-                //"/PointCloudToROSProvider/point_cloud",
+                "/PointCloudToROSProvider/point_cloud",
                 "/ArVizToRViz/arviz",
                 "/tf",
-                //"/grasping/update",
-                //"/grasping/update_full",
+                "/grasping/update",
+                "/grasping/update_full",
                 //"/exploration/update",
                 //"/exploration/update_full",
             };
@@ -197,7 +197,9 @@ namespace Iviz.Republisher
             {
                 try
                 {
-                    await clientWithModels.CallServiceAsync(modelServiceName, srv);
+                    //await clientWithModels.CallServiceAsync(modelServiceName, srv);
+                    srv.Response.Success = false;
+                    srv.Response.Message = "";
                 }
                 catch (Exception e)
                 {

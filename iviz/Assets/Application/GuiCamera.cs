@@ -32,7 +32,6 @@ namespace Iviz.App
         bool alreadyScaling;
 
         static Camera MainCamera => Settings.MainCamera;
-        BoundaryFrame boundaryFrame;
 
         bool PointerOnGui { get; set; }
 
@@ -132,7 +131,6 @@ namespace Iviz.App
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
-            boundaryFrame = ResourcePool.GetOrCreate<BoundaryFrame>(Resource.Displays.NamedBoundary);
             StartOrbiting();
         }
 

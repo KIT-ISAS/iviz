@@ -48,6 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "d4165053db3e9b1ffe9db49f0702734c";
     }
 
+    [DataContract]
     public sealed class GetLabeledClustersRequest : IRequest, IDeserializable<GetLabeledClustersRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetLabeledClustersResponse : IResponse, IDeserializable<GetLabeledClustersResponse>
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters { get; set; }

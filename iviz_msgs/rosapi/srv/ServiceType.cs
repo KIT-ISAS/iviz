@@ -48,6 +48,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "0e24a2dcdf70e483afc092a35a1f15f7";
     }
 
+    [DataContract]
     public sealed class ServiceTypeRequest : IRequest, IDeserializable<ServiceTypeRequest>
     {
         [DataMember (Name = "service")] public string Service { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.Rosapi
         }
     }
 
+    [DataContract]
     public sealed class ServiceTypeResponse : IResponse, IDeserializable<ServiceTypeResponse>
     {
         [DataMember (Name = "type")] public string Type { get; set; }

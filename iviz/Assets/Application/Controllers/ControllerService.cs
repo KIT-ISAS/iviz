@@ -18,7 +18,7 @@ namespace Iviz.Controllers
     public sealed class ControllerService
     {
         const int DefaultTimeoutInMs = 4500;
-        
+
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
         [NotNull] static ReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
@@ -35,6 +35,7 @@ namespace Iviz.Controllers
             Connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleFromTopicCallback);
             Connection.AdvertiseService<UpdateModule>("update_module", UpdateModuleCallback);
             Connection.AdvertiseService<GetModules>("get_modules", GetModulesCallback);
+            Connection.AdvertiseService<SetFixedFrame>("set_fixed_frame", SetFixedFrameCallback);
         }
 
         static void AddModuleCallback([NotNull] AddModule srv)
@@ -160,12 +161,12 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopics(RequestType.CachedOnly);
+            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemTopicTypes(RequestType.CachedOnly);
 
             string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             if (type == null)
             {
-                topics = Connection.GetSystemPublishedTopics(RequestType.WaitForRequest);
+                topics = Connection.GetSystemTopicTypes(RequestType.WaitForRequest);
                 type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             }
 
@@ -229,7 +230,7 @@ namespace Iviz.Controllers
             GameThread.Post(() =>
             {
                 Debug.Log(Time.time + ": Updating module!");
-                
+
                 try
                 {
                     ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
@@ -274,7 +275,7 @@ namespace Iviz.Controllers
         static string[] GetModules()
         {
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-            string[] result = default;
+            string[] result = Array.Empty<string>();
             GameThread.Post(() =>
             {
                 try
@@ -305,6 +306,39 @@ namespace Iviz.Controllers
             }
 
             return result;
+        }
+
+        static void SetFixedFrameCallback([NotNull] SetFixedFrame srv)
+        {
+            (bool success, string message) = TrySetFixedFrame(srv.Request.Id);
+            srv.Response.Success = success;
+            srv.Response.Message = message;
+        }
+
+        static (bool success, string message) TrySetFixedFrame(string id)
+        {
+            (bool success, string message) result = (false, "");
+
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+            GameThread.Post(() =>
+            {
+                try
+                {
+                    TfListener.SetFixedFrame(id);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+            
+            if (!signal.Wait(DefaultTimeoutInMs))
+            {
+                Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in TrySetFixedFrame");
+                return result;
+            }
+
+            return (true, "");
         }
     }
 }

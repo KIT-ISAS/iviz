@@ -39,20 +39,20 @@ namespace Iviz.Resources
 
         public DisplaysType()
         {
-            Cube = new Info<GameObject>("Displays/Cube");
-            Cylinder = new Info<GameObject>("Displays/Cylinder");
-            Sphere = new Info<GameObject>("Displays/Sphere");
-            Text = new Info<GameObject>("Displays/Text");
+            Cube = new Info<GameObject>("CoreDisplays/Cube");
+            Cylinder = new Info<GameObject>("CoreDisplays/Cylinder");
+            Sphere = new Info<GameObject>("CoreDisplays/Sphere");
+            Text = new Info<GameObject>("CoreDisplays/Text");
             LineConnector = new Info<GameObject>("Displays/LineConnector");
             NamedBoundary = new Info<GameObject>("Displays/NamedBoundary");
             Arrow = new Info<GameObject>("Displays/Arrow");
-            MeshList = new Info<GameObject>("Displays/MeshList");
-            PointList = new Info<GameObject>("Displays/PointList");
-            MeshTriangles = new Info<GameObject>("Displays/MeshTriangles");
+            MeshList = new Info<GameObject>("CoreDisplays/MeshList");
+            PointList = new Info<GameObject>("CoreDisplays/PointList");
+            MeshTriangles = new Info<GameObject>("CoreDisplays/MeshTriangles");
             TfFrame = new Info<GameObject>("Displays/TFFrame");
             Image = new Info<GameObject>("Displays/ImageResource");
-            Square = new Info<GameObject>("Displays/Plane");
-            Line = new Info<GameObject>("Displays/Line");
+            Square = new Info<GameObject>("CoreDisplays/Plane");
+            Line = new Info<GameObject>("CoreDisplays/Line");
             Grid = new Info<GameObject>("Displays/Grid");
             DepthImageResource = new Info<GameObject>("Displays/DepthImageResource");
             OccupancyGridResource = new Info<GameObject>("Displays/OccupancyGridResource");

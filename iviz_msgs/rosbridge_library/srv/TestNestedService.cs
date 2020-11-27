@@ -48,6 +48,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
     }
 
+    [DataContract]
     public sealed class TestNestedServiceRequest : IRequest, IDeserializable<TestNestedServiceRequest>
     {
         //request definition
@@ -95,6 +96,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class TestNestedServiceResponse : IResponse, IDeserializable<TestNestedServiceResponse>
     {
         //response definition

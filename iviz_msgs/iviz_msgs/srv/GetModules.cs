@@ -48,6 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "854d12ba02315a7b73d8ac45d1a68e74";
     }
 
+    [DataContract]
     public sealed class GetModulesRequest : IRequest, IDeserializable<GetModulesRequest>
     {
         // Gets a list of modules
@@ -86,6 +87,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class GetModulesResponse : IResponse, IDeserializable<GetModulesResponse>
     {
         [DataMember (Name = "configs")] public string[] Configs { get; set; } // List of module configurations in JSON encoding

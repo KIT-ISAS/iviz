@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Ros;
@@ -20,8 +21,12 @@ namespace Iviz.App
         [NotNull] readonly ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
+        readonly List<Uri> lastMasterUris = new List<Uri>();
+
         [CanBeNull] Uri masterUri = DefaultMasterUri;
-        [CanBeNull] public Uri MasterUri
+
+        [CanBeNull]
+        public Uri MasterUri
         {
             get => masterUri;
             set
@@ -30,8 +35,11 @@ namespace Iviz.App
                 MasterUriChanged?.Invoke(value);
             }
         }
+
         [CanBeNull] Uri myUri = DefaultMyUri;
-        [CanBeNull] public Uri MyUri
+
+        [CanBeNull]
+        public Uri MyUri
         {
             get => myUri;
             set
@@ -40,8 +48,11 @@ namespace Iviz.App
                 MyUriChanged?.Invoke(value);
             }
         }
+
         [CanBeNull] string myId = DefaultMyId;
-        [CanBeNull] public string MyId
+
+        [CanBeNull]
+        public string MyId
         {
             get => myId;
             set
@@ -50,12 +61,24 @@ namespace Iviz.App
                 MyIdChanged?.Invoke(value);
             }
         }
+        
+        
+        [NotNull, ItemNotNull]
+        public List<Uri> LastMasterUris
+        {
+            get => lastMasterUris;
+            set
+            {
+                lastMasterUris.Clear();
+                lastMasterUris.AddRange(value);
+            }
+        }
 
         public event Action<Uri> MasterUriChanged;
         public event Action<Uri> MyUriChanged;
         public event Action<string> MyIdChanged;
         public event Action<bool> MasterActiveChanged;
-        
+
         public ConnectionDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
@@ -72,6 +95,19 @@ namespace Iviz.App
             });
         }
 
+        public void UpdateLastMasterUris()
+        {
+            if (MasterUri == null)
+            {
+                return;
+            }
+
+            if (!lastMasterUris.Contains(MasterUri))
+            {
+                lastMasterUris.Add(MasterUri);
+            }
+        }
+
         public override void SetupPanel()
         {
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
@@ -80,6 +116,7 @@ namespace Iviz.App
             panel.MyId.Hints = new[] {DefaultMyId};
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosServerManager.IsActive;
+            panel.MasterUri.Hints = LastMasterUris.Select(uri => uri.ToString());
             panel.LineLog.Active = true;
 
             panel.Close.Clicked += Close;
@@ -90,17 +127,26 @@ namespace Iviz.App
             panel.MasterUri.EndEdit += text =>
             {
                 MasterUri = (Uri.TryCreate(text, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
+                if (MasterUri == null)
+                {
+                    return;
+                }
+
+                Uri newCallerUri = RosClient.TryGetCallerUriFor(MasterUri, DefaultPort);
+                if (newCallerUri != null)
+                {
+                    MyUri = newCallerUri;
+                    panel.MyUri.Value = newCallerUri.ToString();
+                }
             };
             panel.MyId.EndEdit += text =>
             {
                 MyId = RosClient.IsValidGlobalResourceName(text) ? text : null;
-                MyIdChanged?.Invoke(MyId);
             };
             panel.RefreshMyId.Clicked += () =>
             {
                 MyId = DefaultMyId;
                 panel.MyId.Value = DefaultMyId;
-                MyIdChanged?.Invoke(MyId);
             };
             panel.RefreshMyUri.Clicked += () =>
             {
@@ -126,10 +172,11 @@ namespace Iviz.App
 
                     if (tmpMyUri.Port == RosServerManager.DefaultPort)
                     {
-                        Logger.Internal($"Master port {RosServerManager.DefaultPort} is already being used by the caller!");
+                        Logger.Internal(
+                            $"Master port {RosServerManager.DefaultPort} is already being used by the caller!");
                         return;
                     }
-                    
+
                     Uri ownMasterUri = new Uri($"http://{tmpMyUri.Host}:{RosServerManager.DefaultPort}/");
                     const string ownMasterId = "/iviz_master";
 
@@ -144,7 +191,6 @@ namespace Iviz.App
                         panel.ServerMode.State = true;
                         Logger.Internal("Created <b>master node</b>. You can connect now!");
                         MasterActiveChanged?.Invoke(true);
-                        MasterUriChanged?.Invoke(MasterUri);
                     }
                 }
                 else
@@ -154,12 +200,11 @@ namespace Iviz.App
                         Logger.Internal("Cannot remove master node while connected!");
                         return;
                     }
-                    
+
                     RosServerManager.Dispose();
                     Logger.Internal("Master node removed.");
                     panel.ServerMode.State = false;
                     MasterActiveChanged?.Invoke(false);
-                    MasterUriChanged?.Invoke(MasterUri);
                 }
 
                 panel.MasterUri.Interactable = !RosServerManager.IsActive;

@@ -55,6 +55,7 @@ namespace Iviz.Controllers
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
+            pointCloud.Layer = 2;
             Config = new PointCloudConfiguration();
         }
 
@@ -333,6 +334,7 @@ namespace Iviz.Controllers
                 }
 
                 node.AttachTo(msgHeader.FrameId, msgHeader.Stamp);
+                //node.AttachTo(msgHeader.FrameId);
 
                 Size = numPoints;
                 pointCloud.UseColormap = !rgbaHint;

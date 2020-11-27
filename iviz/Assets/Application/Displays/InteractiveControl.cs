@@ -4,6 +4,8 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using Vector4 = System.Numerics.Vector4;
 
 namespace Iviz.Displays
 {
@@ -42,7 +44,7 @@ namespace Iviz.Displays
     }
 
 
-    public sealed class InteractiveControl : MonoBehaviour, IControlMarker
+    public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
     {
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
@@ -59,7 +61,11 @@ namespace Iviz.Displays
         [SerializeField] GameObject ringZ = null;
         [SerializeField] GameObject ringZPlane = null;
 
+        [SerializeField] BoxCollider holderCollider = null;
+
         [SerializeField] Transform targetTransform;
+        BoundaryFrame frame;
+
 
         InteractionModeType interactionMode;
         bool handlesPointToCamera;
@@ -182,9 +188,14 @@ namespace Iviz.Displays
                     resource.SetActive(false);
                 }
 
+                holderCollider.enabled = false;
+                frame.Visible = false;
+
                 switch (InteractionMode)
                 {
                     case InteractionModeType.ClickOnly:
+                        holderCollider.enabled = true;
+                        frame.Visible = true;
                         break;
                     case InteractionModeType.MoveAxisX:
                         arrowPx.SetActive(true);
@@ -247,7 +258,22 @@ namespace Iviz.Displays
             }
         }
 
-        public Bounds? Bounds { get; set; } // TODO
+        Bounds? bounds;
+
+        public Bounds? Bounds
+        {
+            get => bounds;
+            set
+            {
+                bounds = value;
+
+                Bounds newBounds = bounds ?? new Bounds(Vector3.zero, 0.5f * Vector3.one);
+
+                GameObject holder = holderCollider.gameObject;
+                holder.transform.localPosition = newBounds.center;
+                holder.transform.localScale = 2 * newBounds.size;
+            }
+        }
 
         public event MovedAction Moved;
         public event Action PointerUp;
@@ -258,6 +284,8 @@ namespace Iviz.Displays
         {
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
+            InteractionMode = InteractionModeType.None;
+            Bounds = new Bounds(Vector3.zero, Vector3.one);
         }
 
         void Awake()
@@ -266,28 +294,23 @@ namespace Iviz.Displays
                 {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
 
-            void OnMoved(in Pose pose) => Moved?.Invoke(pose);
-            void OnPointerUp() => PointerUp?.Invoke();
-
-            void OnPointerDown() => PointerDown?.Invoke();
-            //void OnDoubleTap() => DoubleTap?.Invoke();
+            void Moved(in Pose pose) => this.Moved?.Invoke(pose);
+            void PointerUp() => this.PointerUp?.Invoke();
+            void PointerDown() => this.PointerDown?.Invoke();
 
             foreach (var resource in allResources)
             {
                 var draggable = resource.GetComponent<IDraggable>();
-                draggable.Moved += OnMoved;
-                draggable.PointerUp += OnPointerUp;
-                draggable.PointerDown += OnPointerDown;
-                //draggable.DoubleTap += OnDoubleTap;
+                draggable.Moved += Moved;
+                draggable.PointerUp += PointerUp;
+                draggable.PointerDown += PointerDown;
             }
 
+            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(holderCollider.transform);
+            frame.FrameAxisLength = 0.125f;
+            frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
+
             InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
-            /*
-            if (TargetTransform == null)
-            {
-                TargetTransform = transform.parent ?? transform;
-            }
-            */
         }
 
         void LateUpdate()
@@ -296,16 +319,6 @@ namespace Iviz.Displays
             {
                 RotateToCamera();
             }
-
-            /*
-            const float referenceDistance = 2.0f;
-            Transform cameraTransform = Settings.MainCamera.transform;
-            float distanceToCamera = Vector3.Dot(cameraTransform.forward, transform.position - cameraTransform.position);
-            if (distanceToCamera > referenceDistance)
-            {
-                transform.localScale = BaseScale * distanceToCamera / referenceDistance * Vector3.one;
-            }
-            */
         }
 
         void RotateToCamera()
@@ -324,7 +337,7 @@ namespace Iviz.Displays
 
         void RotateBackToFixed()
         {
-            transform.rotation = TfListener.RootFrame.transform.rotation;
+            transform.rotation = TfListener.OriginFrame.transform.rotation;
         }
 
         public void SetTargetPoseUpdater(Action<Pose> setTargetPose)
@@ -337,6 +350,46 @@ namespace Iviz.Displays
                     draggable.SetTargetPose = setTargetPose;
                 }
             }
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
+            {
+                return;
+            }
+
+            PointerDown?.Invoke();
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
+            {
+                return;
+            }
+
+            PointerUp?.Invoke();
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (interactionMode != InteractionModeType.ClickOnly || eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
+            {
+                return;
+            }
+
+            frame.Color = Color.white;
+        }
+
+        public void OnPointerExit(PointerEventData _)
+        {
+            if (interactionMode != InteractionModeType.ClickOnly)
+            {
+                return;
+            }
+            
+            frame.Color = Color.green;
         }
     }
 }

@@ -48,6 +48,7 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const string RosMd5Sum = "93aa3d73b866f04880927745f4aab303";
     }
 
+    [DataContract]
     public sealed class BoundingBoxQueryRequest : IRequest, IDeserializable<BoundingBoxQueryRequest>
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
@@ -101,6 +102,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class BoundingBoxQueryResponse : IResponse, IDeserializable<BoundingBoxQueryResponse>
     {
     

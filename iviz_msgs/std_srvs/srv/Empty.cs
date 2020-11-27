@@ -48,10 +48,12 @@ namespace Iviz.Msgs.StdSrvs
         [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
     }
 
+    [DataContract]
     public sealed class EmptyRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class EmptyResponse : Internal.EmptyResponse
     {
     }

@@ -48,6 +48,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [Preserve] public const string RosMd5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
     }
 
+    [DataContract]
     public sealed class AddDiagnosticsRequest : IRequest, IDeserializable<AddDiagnosticsRequest>
     {
         // This service is used as part of the process for loading analyzers at runtime,
@@ -115,6 +116,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
     }
 
+    [DataContract]
     public sealed class AddDiagnosticsResponse : IResponse, IDeserializable<AddDiagnosticsResponse>
     {
         // True if diagnostic aggregator was updated with new diagnostics, False

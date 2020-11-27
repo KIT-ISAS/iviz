@@ -8,17 +8,24 @@ namespace Iviz.Displays
 {
     public sealed class GridMapResource : MarkerResourceWithColormap
     {
-        static readonly int PropInputTexture = Shader.PropertyToID("_InputTexture");
-        static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTexture");
+        static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
+        static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
 
-        [SerializeField] Texture squareTexture = null;
+        //[SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
         [SerializeField] Material material;
 
         Mesh mesh;
-        public int CellsX { get; private set; }
-        public int CellsY { get; private set; }
+        int cellsX;
+        int cellsY;
+        
+        [CanBeNull] MeshRenderer meshRenderer;
+
+        [NotNull]
+        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
+        
+        
 
         protected override void Awake()
         {
@@ -27,13 +34,11 @@ namespace Iviz.Displays
 
             base.Awake();
 
-            GetComponent<MeshRenderer>().material = material;
+            MeshRenderer.material = material;
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
-
-            material.SetTexture(PropSquareTexture, squareTexture);
         }
 
         protected override void Rebuild()
@@ -41,20 +46,19 @@ namespace Iviz.Displays
             // not needed
         }
 
-        public void Set(int cellsX, int cellsY, float width, float height, [NotNull] float[] data)
+        public void Set(int newCellsX, int newCellsY, float width, float height, [NotNull] float[] data)
         {
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            EnsureSize(cellsX, cellsY);
+            EnsureSize(newCellsX, newCellsY);
 
             Transform mTransform = transform;
             mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs();
             mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
-            //Debug.Log(CellsX + "  " + CellsY);
             inputTexture.GetRawTextureData<float>().CopyFrom(data);
             inputTexture.Apply();
 
@@ -72,6 +76,7 @@ namespace Iviz.Displays
                 }
             }
 
+            
             BoxCollider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
             BoxCollider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
             IntensityBounds = new Vector2(min, max);
@@ -79,21 +84,21 @@ namespace Iviz.Displays
 
         void EnsureSize(int newWidth, int newHeight)
         {
-            if (newWidth == CellsX && newHeight == CellsY)
+            if (newWidth == cellsX && newHeight == cellsY)
             {
                 return;
             }
 
-            CellsX = newWidth;
-            CellsY = newHeight;
+            cellsX = newWidth;
+            cellsY = newHeight;
 
-            int verticesSize = (CellsX + 1) * (CellsY + 1);
+            int verticesSize = (cellsX + 1) * (cellsY + 1);
             Vector3[] points = new Vector3[verticesSize];
-            float stepX = 1f / CellsX;
-            float stepY = 1f / CellsY;
-            for (int v = 0, off = 0; v <= CellsY; v++)
+            float stepX = 1f / cellsX;
+            float stepY = 1f / cellsY;
+            for (int v = 0, off = 0; v <= cellsY; v++)
             {
-                for (int u = 0; u <= CellsX; u++, off++)
+                for (int u = 0; u <= cellsX; u++, off++)
                 {
                     points[off] = new Vector3(
                         u * stepX,
@@ -103,18 +108,18 @@ namespace Iviz.Displays
                 }
             }
 
-            int indexSize = CellsX * CellsY;
+            int indexSize = cellsX * cellsY;
             int[] indices = new int[indexSize * 4];
-            for (int v = 0; v < CellsY; v++)
+            for (int v = 0; v < cellsY; v++)
             {
-                int iOffset = v * CellsX * 4;
-                int pOffset = v * (CellsX + 1);
-                for (int u = 0; u < CellsX; u++, iOffset += 4, pOffset++)
+                int iOffset = v * cellsX * 4;
+                int pOffset = v * (cellsX + 1);
+                for (int u = 0; u < cellsX; u++, iOffset += 4, pOffset++)
                 {
                     indices[iOffset + 3] = pOffset;
                     indices[iOffset + 2] = pOffset + 1;
-                    indices[iOffset + 1] = pOffset + (CellsX + 1) + 1;
-                    indices[iOffset + 0] = pOffset + (CellsX + 1);
+                    indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
+                    indices[iOffset + 0] = pOffset + (cellsX + 1);
                 }
             }
 
@@ -127,9 +132,9 @@ namespace Iviz.Displays
                 Destroy(inputTexture);
             }
 
-            inputTexture = new Texture2D(CellsX, CellsY, TextureFormat.RFloat, false);
+            inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, false);
             material.SetTexture(PropInputTexture, inputTexture);
-            material.SetVector(PropSquareCoeff, new Vector4(CellsX, CellsY, 1f / CellsX, 1f / CellsY));
+            material.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
 
             /*
             if (intensityTexture != null)
@@ -156,9 +161,13 @@ namespace Iviz.Displays
             Destroy(mesh);
         }
 
+        protected override void UpdateProperties()
+        {
+            MeshRenderer.SetPropertyBlock(Properties);
+        }
 
         [NotNull]
-        static Texture2D GenerateTexture()
+        static Texture2D GenerateSquareTexture()
         {
             const int size = 64;
             const int border = 4;

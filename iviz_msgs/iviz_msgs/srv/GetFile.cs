@@ -48,6 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "08088c7144705ee9cf37b287c931476d";
     }
 
+    [DataContract]
     public sealed class GetFileRequest : IRequest, IDeserializable<GetFileRequest>
     {
         // Retrieves a file
@@ -101,6 +102,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetFileResponse : IResponse, IDeserializable<GetFileResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded

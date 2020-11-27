@@ -21,6 +21,7 @@ namespace Iviz.Controllers
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
         [CanBeNull] IControlMarker control;
+
         GameObject markerNode;
         //bool markerIsInteractive;
 
@@ -29,6 +30,28 @@ namespace Iviz.Controllers
         InteractiveMarkerObject interactiveMarkerObject;
 
         public Bounds? Bounds { get; private set; }
+
+
+        bool visible;
+
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                foreach (var marker in markers.Values)
+                {
+                    marker.Visible = value;
+                }
+
+                if (control != null)
+                {
+                    control.Visible = value;
+                }
+            }
+        }
+
 
         void Awake()
         {
@@ -90,6 +113,7 @@ namespace Iviz.Controllers
                       ?? throw new InvalidOperationException("Control marker has no control component!");
 
             control.TargetTransform = transform.parent;
+            control.Visible = Visible;
 
             control.Moved += (in Pose _) =>
             {
@@ -134,9 +158,6 @@ namespace Iviz.Controllers
         void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
             bool independentMarkerOrientation)
         {
-            //bool clickable = interactionMode == InteractionMode.Button;
-            //markers.Values.ForEach(marker => marker.Clickable = clickable);
-
             if (interactionMode < 0 || interactionMode > InteractionMode.MoveRotate3D)
             {
                 description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int) interactionMode)
@@ -182,7 +203,7 @@ namespace Iviz.Controllers
                         break;
                 }
             }
-            
+
             if (orientationMode < 0 || orientationMode > OrientationMode.ViewFacing)
             {
                 description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int) orientationMode)
@@ -254,7 +275,8 @@ namespace Iviz.Controllers
                         else
                         {
                             markerObject = CreateMarkerObject();
-                            //markerObject.MouseEvent += OnMarkerClicked;
+                            markerObject.Visible = visible;
+                            markerObject.Layer = 2;
                             markers[markerId] = markerObject;
                         }
 
@@ -364,8 +386,15 @@ namespace Iviz.Controllers
 
         Bounds? RecalculateBounds()
         {
-            var innerBounds = markers.Values.Select(marker => marker.Bounds);
-            return UnityUtils.CombineBounds(innerBounds);
+            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = markers.Values
+                .Select(marker => (marker.Bounds, marker.transform));
+
+            Bounds? totalBounds =
+                UnityUtils.CombineBounds(
+                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
+                );
+
+            return totalBounds;
         }
 
         public void UpdateControlBounds(Bounds? bounds)

@@ -1,0 +1,6 @@
+# Sets the fixed frame
+
+string id		# Id of the frame
+---
+bool success		# Whether the operation succeeded
+string message		# An error message if success is false

@@ -31,7 +31,10 @@ namespace Iviz.Displays
             get => gameObject.name;
             set
             {
-                if (value == null) throw new ArgumentNullException(nameof(value));
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
 
                 gameObject.name = value;
             }
@@ -45,7 +48,10 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            if (boxCollider == null) boxCollider = GetComponent<BoxCollider>();
+            if (boxCollider == null)
+            {
+                boxCollider = GetComponent<BoxCollider>();
+            }
 
             ColliderEnabled = ColliderEnabled;
         }
@@ -58,7 +64,10 @@ namespace Iviz.Displays
             set
             {
                 colliderEnabled = value;
-                if (HasBoxCollider) BoxCollider.enabled = value;
+                if (HasBoxCollider)
+                {
+                    BoxCollider.enabled = value;
+                }
             }
         }
 
@@ -77,6 +86,7 @@ namespace Iviz.Displays
         public virtual void Suspend()
         {
             Layer = 0;
+            Visible = true;
         }
 
         protected void DisableBoxCollider()

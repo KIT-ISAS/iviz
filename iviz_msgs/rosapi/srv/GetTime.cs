@@ -48,10 +48,12 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "556a4fb76023a469987922359d08a844";
     }
 
+    [DataContract]
     public sealed class GetTimeRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class GetTimeResponse : IResponse, IDeserializable<GetTimeResponse>
     {
         [DataMember (Name = "time")] public time Time { get; set; }

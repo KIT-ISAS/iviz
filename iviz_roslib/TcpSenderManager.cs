@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.Roslib
@@ -154,6 +155,20 @@ namespace Iviz.Roslib
             }
         }
 
+        public async Task PublishAsync(TMessage msg)
+        {
+            if (Latching)
+            {
+                hasLatchedMessage = true;
+                latchedMessage = msg;
+            }
+
+            foreach (var pair in connectionsByCallerId)
+            {
+                await pair.Value.PublishAsync(msg);
+            }
+        }
+        
         public void Stop()
         {
             foreach (TcpSenderAsync<TMessage> sender in connectionsByCallerId.Values)

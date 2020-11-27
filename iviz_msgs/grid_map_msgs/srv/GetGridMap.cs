@@ -48,6 +48,7 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "802c2cbc7b10fada2d44db75ddb8c738";
     }
 
+    [DataContract]
     public sealed class GetGridMapRequest : IRequest, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
@@ -137,6 +138,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetGridMapResponse : IResponse, IDeserializable<GetGridMapResponse>
     {
         // Submap

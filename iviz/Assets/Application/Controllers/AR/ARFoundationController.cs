@@ -401,7 +401,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose expectedPose = TfListener.RelativePoseToRoot(resource.transform.AsPose());
+            Pose expectedPose = TfListener.RelativePoseToOrigin(resource.transform.AsPose());
             Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
 
             Quaternion corrected =

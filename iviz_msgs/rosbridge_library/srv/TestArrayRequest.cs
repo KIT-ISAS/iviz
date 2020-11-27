@@ -48,6 +48,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "3d7cfb7e4aa0844868966efa8a264398";
     }
 
+    [DataContract]
     public sealed class TestArrayRequestRequest : IRequest, IDeserializable<TestArrayRequestRequest>
     {
         [DataMember (Name = "int")] public int[] @int { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
     }
 
+    [DataContract]
     public sealed class TestArrayRequestResponse : Internal.EmptyResponse
     {
     }

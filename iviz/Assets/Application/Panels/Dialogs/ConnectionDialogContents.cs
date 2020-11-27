@@ -7,7 +7,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
     {
-        [SerializeField] InputFieldWidget masterUri = null;
+        [SerializeField] InputFieldWithHintsWidget masterUri = null;
         [SerializeField] InputFieldWithHintsWidget myUri = null;
         [SerializeField] InputFieldWithHintsWidget myId = null;
         [SerializeField] TrashButtonWidget refreshMyUri = null;
@@ -16,7 +16,7 @@ namespace Iviz.App
         [SerializeField] ToggleButtonWidget serverMode = null;
         [SerializeField] LineLog lineLog = null;
 
-        public InputFieldWidget MasterUri => masterUri;
+        public InputFieldWithHintsWidget MasterUri => masterUri;
         public InputFieldWithHintsWidget MyUri => myUri;
         public InputFieldWithHintsWidget MyId => myId;
         public TrashButtonWidget RefreshMyUri => refreshMyUri;

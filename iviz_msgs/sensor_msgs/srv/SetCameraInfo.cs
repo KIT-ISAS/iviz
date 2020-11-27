@@ -48,6 +48,7 @@ namespace Iviz.Msgs.SensorMsgs
         [Preserve] public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
     }
 
+    [DataContract]
     public sealed class SetCameraInfoRequest : IRequest, IDeserializable<SetCameraInfoRequest>
     {
         // This service requests that a camera stores the given CameraInfo 
@@ -108,6 +109,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
     }
 
+    [DataContract]
     public sealed class SetCameraInfoResponse : IResponse, IDeserializable<SetCameraInfoResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // True if the call succeeded

@@ -10,7 +10,6 @@ using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
-
 #endif
 
 namespace Iviz.Roslib
@@ -258,6 +257,11 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(CancellationToken token = default)
         {
+            if (subscriber == null)
+            {
+                throw new InvalidOperationException("Channel has not been started");
+            }
+           
             return messageQueue.Dequeue(token);
         }
 
@@ -282,6 +286,11 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async Task<T> ReadAsync(CancellationToken token = default)
         {
+            if (subscriber == null)
+            {
+                throw new InvalidOperationException("Channel has not been started");
+            }
+            
             return await messageQueue.DequeueAsync(token);
         }
 

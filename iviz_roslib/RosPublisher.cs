@@ -10,14 +10,13 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
-
     /// <summary>
     /// Manager for a ROS publisher.
     /// </summary>
     /// <typeparam name="T">Topic type</typeparam>
     public class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     {
-        readonly CancellationTokenSource aliveTokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         readonly TcpSenderManager<T> manager;
         readonly List<string> ids = new List<string>();
         readonly RosClient client;
@@ -27,8 +26,8 @@ namespace Iviz.Roslib
         /// <summary>
         /// A cancellation token that gets canceled when the publisher is disposed.
         /// </summary>
-        public CancellationToken CancellationToken => aliveTokenSource.Token; 
-        
+        public CancellationToken CancellationToken => runningTs.Token;
+
         /// <summary>
         /// Whether this publisher is valid.
         /// </summary>
@@ -123,6 +122,24 @@ namespace Iviz.Roslib
             manager.Publish((T) message);
         }
 
+        async Task IRosPublisher.PublishAsync(IMessage message)
+        {
+            if (message is null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            if (!MessageTypeMatches(message.GetType()))
+            {
+                throw new InvalidMessageTypeException("Type does not match publisher.");
+            }
+
+            message.RosValidate();
+            AssertIsAlive();
+            await manager.PublishAsync((T) message);
+        }
+
+
         /// <summary>
         /// Publishes the given message into the topic. 
         /// </summary>
@@ -141,6 +158,18 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
+        public async Task PublishAsync(T message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            AssertIsAlive();
+            message.RosValidate();
+            await manager.PublishAsync(message);
+        }
+
         Endpoint? IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
             Endpoint? localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
@@ -151,7 +180,7 @@ namespace Iviz.Roslib
         {
             Dispose();
         }
-        
+
         void Dispose()
         {
             if (disposed)
@@ -160,7 +189,7 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            aliveTokenSource.Cancel();
+            runningTs.Cancel();
             ids.Clear();
             manager.Stop();
             NumSubscribersChanged = null;
@@ -244,6 +273,43 @@ namespace Iviz.Roslib
         public override string ToString()
         {
             return $"[Publisher {Topic} [{TopicType}] ]";
+        }
+
+        public void WaitForAnySubscriber(int timeoutInMs)
+        {
+            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            try
+            {
+                Task.Run(async () => await WaitForAnySubscriberAsync(timeoutTs.Token), timeoutTs.Token)
+                    .Wait(timeoutTs.Token);
+            }
+            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
+            {
+                throw e.InnerException;
+            }
+        }
+
+        public async Task WaitForAnySubscriberAsync(CancellationToken token)
+        {
+            CancellationTokenSource linkedTs =
+                CancellationTokenSource.CreateLinkedTokenSource(token, CancellationToken);
+            using SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+            void Release(RosPublisher<T> _) => signal.Release();
+            NumSubscribersChanged += Release;
+
+            try
+            {
+                if (NumSubscribers != 0)
+                {
+                    return;
+                }
+
+                await signal.WaitAsync(linkedTs.Token);
+            }
+            finally
+            {
+                NumSubscribersChanged -= Release;
+            }
         }
     }
 }

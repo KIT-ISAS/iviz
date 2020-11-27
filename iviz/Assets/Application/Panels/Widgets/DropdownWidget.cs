@@ -43,7 +43,7 @@ namespace Iviz.App
                 int index = optionDatas.FindIndex(x => x.text == value);
                 if (index == -1)
                 {
-                    throw new ArgumentException("Value does not correspond to any index");
+                    throw new InvalidOperationException("Value does not correspond to any index");
                 }
 
                 Index = index;

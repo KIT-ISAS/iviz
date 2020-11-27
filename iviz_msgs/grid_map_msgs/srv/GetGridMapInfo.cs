@@ -48,10 +48,12 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "a0be1719725f7fd7b490db4d64321ff2";
     }
 
+    [DataContract]
     public sealed class GetGridMapInfoRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class GetGridMapInfoResponse : IResponse, IDeserializable<GetGridMapInfoResponse>
     {
         // Grid map info

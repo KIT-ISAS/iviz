@@ -48,6 +48,7 @@ namespace Iviz.Msgs.GridMapMsgs
         [Preserve] public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
     }
 
+    [DataContract]
     public sealed class ProcessFileRequest : IRequest, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
@@ -109,6 +110,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     }
 
+    [DataContract]
     public sealed class ProcessFileResponse : IResponse, IDeserializable<ProcessFileResponse>
     {
         // True if file processing was successful.

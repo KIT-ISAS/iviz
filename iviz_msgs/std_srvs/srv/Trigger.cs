@@ -48,10 +48,12 @@ namespace Iviz.Msgs.StdSrvs
         [Preserve] public const string RosMd5Sum = "937c9679a518e3a18d831e57125ea522";
     }
 
+    [DataContract]
     public sealed class TriggerRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service

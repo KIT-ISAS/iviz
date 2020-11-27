@@ -28,7 +28,7 @@ namespace Iviz.Msgs
 
         public static time Now()
         {
-            return new time(DateTime.Now);
+            return new time(DateTime.UtcNow);
         }
         
         public DateTime ToDateTime()
