@@ -23,13 +23,13 @@ namespace Iviz.Core
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MagnitudeSq(this float3 v)
         {
             return v.x * v.x + v.y * v.y + v.z * v.z;
-        }        
-        
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Magnitude(this Vector3 v)
         {
@@ -39,15 +39,16 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cross(this Vector3 lhs, in Vector3 rhs)
         {
-            return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x);   
+            return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
+                lhs.x * rhs.y - lhs.y * rhs.x);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Normalized(this Vector3 v)
         {
-            return v / v.Magnitude();   
+            return v / v.Magnitude();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Abs(this Vector3 p)
         {
@@ -59,7 +60,7 @@ namespace Iviz.Core
         {
             return Vector3.Scale(p, o);
         }
-        
+
         public static bool TryParse(string s, out float f)
         {
             if (float.TryParse(s, NumberStyles.Any, Culture, out f))
@@ -182,12 +183,12 @@ namespace Iviz.Core
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset)
         {
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
-        }        
-        
+        }
+
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset, int count)
         {
             return new ArraySegment<T>(ts, offset, count);
-        }        
+        }
 
         static MaterialPropertyBlock propBlock;
         static readonly int ColorPropId = Shader.PropertyToID("_Color");
@@ -231,8 +232,8 @@ namespace Iviz.Core
         static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
 
         public static void SetPropertyMainTexST(
-            [NotNull] this MeshRenderer meshRenderer, 
-            in Vector2 xy, 
+            [NotNull] this MeshRenderer meshRenderer,
+            in Vector2 xy,
             in Vector2 wh,
             int id = 0)
         {
@@ -250,11 +251,11 @@ namespace Iviz.Core
             propBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
-        
+
         struct NativeArrayHelper<T> : IList<T>, IReadOnlyList<T> where T : struct
         {
             NativeArray<T> nArray;
-            
+
             public NativeArrayHelper(in NativeArray<T> array) => nArray = array;
             IEnumerator<T> IEnumerable<T>.GetEnumerator() => nArray.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => nArray.GetEnumerator();
@@ -269,17 +270,18 @@ namespace Iviz.Core
             public int IndexOf(T item) => throw new InvalidOperationException();
             public void Insert(int index, T item) => throw new InvalidOperationException();
             public void RemoveAt(int index) => throw new InvalidOperationException();
-            
-            public T this[int index] {
+
+            public T this[int index]
+            {
                 get => nArray[index];
                 set => nArray[index] = value;
             }
-        }        
+        }
 
-        public static IList<T> AsList<T>(this NativeArray<T> array) where T : struct => 
+        public static IList<T> AsList<T>(this NativeArray<T> array) where T : struct =>
             new NativeArrayHelper<T>(array);
 
-        public static IReadOnlyList<T> AsReadOnlyList<T>(this NativeArray<T> array) where T : struct => 
+        public static IReadOnlyList<T> AsReadOnlyList<T>(this NativeArray<T> array) where T : struct =>
             new NativeArrayHelper<T>(array);
 
         public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
@@ -291,73 +293,100 @@ namespace Iviz.Core
             }
         }
 
-        public static void DisposeResource<T>([CanBeNull] this T resource, [NotNull] Info<GameObject> info) where T : MonoBehaviour, IDisplay
+        public static void DisposeResource([CanBeNull] this IDisplay resource, [NotNull] Info<GameObject> info)
         {
             if (resource != null)
             {
                 resource.Suspend();
-                ResourcePool.Dispose(info, resource.gameObject);
+                ResourcePool.Dispose(info, ((MonoBehaviour) resource).gameObject);
             }
         }
-        
+
+        public static Transform GetTransform([CanBeNull] this IDisplay resource)
+        {
+            return ((MonoBehaviour) resource)?.transform;
+        }
+
+        static readonly Vector3[] CubePoints =
+        {
+            Vector3.right + Vector3.up + Vector3.forward,
+            Vector3.right + Vector3.up - Vector3.forward,
+            Vector3.right - Vector3.up + Vector3.forward,
+            Vector3.right - Vector3.up - Vector3.forward,
+            -Vector3.right + Vector3.up + Vector3.forward,
+            -Vector3.right + Vector3.up - Vector3.forward,
+            -Vector3.right - Vector3.up + Vector3.forward,
+            -Vector3.right - Vector3.up - Vector3.forward,
+        };
+
         public static Bounds TransformBound(Bounds bounds, Pose pose, Vector3 scale)
         {
+            //scale = Vector3.one;
             if (pose == Pose.identity)
             {
-                return scale == Vector3.one 
-                    ? bounds 
-                    : new Bounds(bounds.center, Vector3.Scale(scale, bounds.size));
+                return scale == Vector3.one
+                    ? bounds
+                    : new Bounds(Vector3.Scale(scale, bounds.center), Vector3.Scale(scale, bounds.size));
             }
 
             if (pose.rotation == Quaternion.identity)
             {
-                return scale == Vector3.one 
-                    ? new Bounds(bounds.center + pose.position, bounds.size) 
-                    : new Bounds(bounds.center + pose.position, Vector3.Scale(scale, bounds.size));
+                return scale == Vector3.one
+                    ? new Bounds(bounds.center + pose.position, bounds.size)
+                    : new Bounds(Vector3.Scale(scale, bounds.center) + pose.position,
+                        Vector3.Scale(scale, bounds.size));
             }
-            
-            Vector3[] boundPoints = {
-                 bounds.extents.x * Vector3.right,
-                -bounds.extents.x * Vector3.right,
-                 bounds.extents.y * Vector3.up,
-                -bounds.extents.y * Vector3.up,
-                 bounds.extents.z * Vector3.forward,
-                -bounds.extents.z * Vector3.forward
-            };
+
             Vector3 positionMin = float.MaxValue * Vector3.one;
             Vector3 positionMax = float.MinValue * Vector3.one;
-            foreach (Vector3 point in boundPoints)
+            if (scale == Vector3.one)
             {
-                Vector3 position = pose.rotation * (Vector3.Scale(point, scale) + bounds.center) + pose.position;
+                foreach (Vector3 point in CubePoints)
+                {
+                    Vector3 position = pose.rotation * Vector3.Scale(point, bounds.extents);
+                    positionMin = Vector3.Min(positionMin, position);
+                    positionMax = Vector3.Max(positionMax, position);
+                }
+
+                return new Bounds(
+                    pose.position + pose.rotation * bounds.center + (positionMax + positionMin) / 2,
+                    positionMax - positionMin);
+            }
+
+            foreach (Vector3 point in CubePoints)
+            {
+                Vector3 localPoint = bounds.center + Vector3.Scale(point, bounds.extents);
+                Vector3 position = pose.rotation * Vector3.Scale(localPoint, scale);
                 positionMin = Vector3.Min(positionMin, position);
                 positionMax = Vector3.Max(positionMax, position);
             }
-            return new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+
+            return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
         public static Bounds TransformBound(Bounds bounds, Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
-        
+
         public static Bounds? TransformBound(Bounds? bounds, Pose pose, Vector3 scale)
         {
-            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, pose, scale);
+            return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, pose, scale);
         }
 
         public static Bounds? TransformBound(Bounds? bounds, Transform transform)
         {
-            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, transform);
+            return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, transform);
         }
 
-        
+
         public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds?> enumOfBounds)
         {
             if (enumOfBounds == null)
             {
                 throw new ArgumentNullException(nameof(enumOfBounds));
             }
-            
+
             Bounds? result = null;
             using (IEnumerator<Bounds?> it = enumOfBounds.GetEnumerator())
             {
@@ -382,14 +411,14 @@ namespace Iviz.Core
 
             return result;
         }
-        
+
         public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds> enumOfBounds)
         {
             if (enumOfBounds == null)
             {
                 throw new ArgumentNullException(nameof(enumOfBounds));
             }
-            
+
             Bounds? result = null;
             using (IEnumerator<Bounds> it = enumOfBounds.GetEnumerator())
             {
@@ -408,6 +437,6 @@ namespace Iviz.Core
             }
 
             return result;
-        }        
+        }
     }
 }

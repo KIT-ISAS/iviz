@@ -277,9 +277,12 @@ namespace Iviz.Core
             return new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
         }
 
-        public static Header CreateHeader(uint seq = 0, [CanBeNull] string frameId = null)
+        public static Header CreateHeader(uint seq = 0, [CanBeNull] string frameId = null, time timestamp = default)
         {
-            return new Header(seq, new time(DateTime.Now), frameId ?? BaseFrameId);
+            //return new Header(seq, new time(DateTime.Now.Subtract(TimeSpan.FromHours(1.01))), frameId ?? BaseFrameId);
+            //return new Header(seq, new time(DateTime.Now.Subtract(TimeSpan.FromHours(1))), frameId ?? BaseFrameId);
+            //return new Header(seq, new time(), frameId ?? BaseFrameId);
+            return new Header(seq, timestamp, frameId ?? BaseFrameId);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

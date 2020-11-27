@@ -42,7 +42,7 @@ namespace Iviz.Controllers
             if (attach)
             {
                 transform.SetParentLocal(newParent == null ? 
-                    TfListener.RootFrame.transform : 
+                    TfListener.OriginFrame.transform : 
                     newParent.transform);
             }
         }
@@ -69,7 +69,8 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(parentId));
             }
 
-            AttachTo(parentId, timestamp.ToTimeSpan());
+            //AttachTo(parentId, timestamp.ToTimeSpan());
+            AttachTo(parentId);
         }
 
         void AttachTo([NotNull] string parentId, in TimeSpan timestamp)
@@ -94,7 +95,7 @@ namespace Iviz.Controllers
 
                 if (Parent != null)
                 {
-                    transform.SetLocalPose(TfListener.RelativePoseToRoot(Parent.LookupPose(timestamp)));
+                    transform.SetLocalPose(TfListener.RelativePoseToOrigin(Parent.LookupPose(timestamp)));
                 }
             }
         }

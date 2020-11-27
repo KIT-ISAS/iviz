@@ -174,7 +174,7 @@ namespace Iviz.App
         {
             Initialize();
 
-            TfNode root = new TfNode(TfListener.RootFrame);
+            TfNode root = new TfNode(TfListener.OriginFrame);
 
             StringBuilder str = new StringBuilder();
             root.Write(str);

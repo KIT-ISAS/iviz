@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -23,8 +25,8 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(msg));
             }
 
-            GameObject root = new GameObject("Root:" + uri + " [" + msg.OrientationHint + "]");
-
+            GameObject root = new GameObject($"Root:{uri} [{msg.OrientationHint}]");
+            /*
             switch (msg.OrientationHint.ToUpperInvariant())
             {
                 case "Z_UP":
@@ -34,7 +36,7 @@ namespace Iviz.Displays
                     root.transform.localRotation = Quaternion.Euler(90, 0, 90);
                     break;
             }
-
+            */
             //Debug.Log(JsonConvert.SerializeObject(msg.Nodes, Formatting.Indented));
 
             AggregatedMeshMarkerResource amm = root.AddComponent<AggregatedMeshMarkerResource>();
@@ -146,6 +148,31 @@ namespace Iviz.Displays
 
             amm.Children = children;
 
+            BoxCollider ammCollider = root.AddComponent<BoxCollider>();
+
+            Bounds? TransformNode(Bounds? bounds, Transform transform)
+            {
+                while (true)
+                {
+                    if (transform == null)
+                    {
+                        return bounds;
+                    }
+
+                    bounds = UnityUtils.TransformBound(bounds, transform);
+                    transform = transform.parent;
+                }
+            }
+
+            Bounds? ammBounds =
+                UnityUtils.CombineBounds(amm.Children.Select(resource =>
+                    TransformNode(resource.LocalBounds, resource.transform)));
+            if (ammBounds != null)
+            {
+                ammCollider.center = ammBounds.Value.center;
+                ammCollider.size = ammBounds.Value.size;
+            }
+
             return amm;
         }
 
@@ -163,7 +190,7 @@ namespace Iviz.Displays
                 {
                     throw new InvalidOperationException("Potential buffer overflow!");
                 }
-            
+
                 fixed (TA* a = src)
                 fixed (TB* b = dst)
                 {

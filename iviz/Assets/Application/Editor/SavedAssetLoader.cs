@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using UnityEditor;
 using UnityEngine;
@@ -140,13 +141,13 @@ namespace Iviz.Editor
                 Mesh m = filter.sharedMesh;
                 foreach (Vector3 v in m.vertices)
                 {
-                    sb.AppendFormat("v {0} {1} {2}\n", -v.x, v.y, v.z);
+                    sb.AppendFormat(BuiltIns.Culture, "v {0} {1} {2}\n", -v.x, v.y, v.z);
                 }
 
                 sb.AppendLine();
                 foreach (Vector2 v in m.uv)
                 {
-                    sb.AppendFormat("vt {0} {1}\n", v.x, v.y);
+                    sb.AppendFormat(BuiltIns.Culture, "vt {0} {1}\n", v.x, v.y);
                 }
 
                 for (int subMesh = 0; subMesh < m.subMeshCount; subMesh++)
@@ -155,18 +156,18 @@ namespace Iviz.Editor
                     int[] triangles = m.GetTriangles(subMesh);
                     for (int i = 0; i < triangles.Length; i += 3)
                     {
-                        sb.AppendFormat("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
+                        sb.AppendFormat(BuiltIns.Culture, "f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n",
                             triangles[i] + 1, triangles[i + 2] + 1, triangles[i + 1] + 1);
                     }
                 }
-                
+
                 File.WriteAllText($"{absolutePath}/mesh-{meshId}.obj", sb.ToString());
                 AssetDatabase.Refresh();
 
                 string meshPath = $"{innerPath}/mesh-{meshId}.obj";
                 Mesh newMesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
-                filter.sharedMesh = newMesh;                
-                
+                filter.sharedMesh = newMesh;
+
                 meshId++;
             }
 

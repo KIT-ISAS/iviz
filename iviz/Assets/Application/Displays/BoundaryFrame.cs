@@ -11,16 +11,17 @@ namespace Iviz.Controllers
 {
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {
-        const float FrameAxisLength = 0.015f;
-        const float FrameAxisWidth = FrameAxisLength / 16;
-
         readonly GameObject[] frames = new GameObject[8];
 
-        Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
+        Bounds bounds;
         GameObject holder;
         Billboard labelBillboard;
         GameObject labelObject;
         TextMesh labelObjectText;
+        Color color;
+
+        float frameAxisLength;
+        float frameAxisWidth;
 
         public Vector3 LabelOffset
         {
@@ -30,8 +31,10 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            holder = CreateSelectionFrame(frames);
-            holder.transform.SetParentLocal(transform);
+            Color = Color.green;
+            FrameAxisLength = 0.25f;
+            Bounds = new Bounds(Vector3.zero, Vector3.one);
+            GetComponent<BoxCollider>().enabled = false;
 
             labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
             labelObject.name = "Frame Axis Label";
@@ -42,6 +45,25 @@ namespace Iviz.Controllers
 
             Name = "";
         }
+
+        public float FrameAxisLength
+        {
+            get => frameAxisLength;
+            set
+            {
+                if (Mathf.Approximately(frameAxisLength, value))
+                {
+                    return;
+                }
+
+                frameAxisLength = value;
+                frameAxisWidth = frameAxisLength / 16;
+                DestroySelectionFrame();
+                CreateSelectionFrame();
+                Bounds = Bounds;
+            }
+        }
+
 
         string Name
         {
@@ -64,7 +86,7 @@ namespace Iviz.Controllers
         public Bounds? Bounds
         {
             get => bounds;
-            private set
+            set
             {
                 bounds = value ?? throw new NullReferenceException();
 
@@ -82,6 +104,26 @@ namespace Iviz.Controllers
             }
         }
 
+        public Color Color
+        {
+            get => color;
+            set
+            {
+                color = value;
+
+                if (holder == null)
+                {
+                    return;
+                }
+
+                foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
+                {
+                    meshRenderer.SetPropertyEmissiveColor(value / 2);
+                    meshRenderer.SetPropertyColor(value);
+                }
+            }
+        }
+
         public bool ColliderEnabled
         {
             get => false;
@@ -94,7 +136,21 @@ namespace Iviz.Controllers
 
         public void SplitForRecycle()
         {
-            foreach (MeshRenderer meshRenderer in GetComponentsInChildren<MeshRenderer>())
+            DestroySelectionFrame();
+            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
+            labelObject = null;
+            labelObjectText = null;
+            labelBillboard = null;
+        }
+
+        void DestroySelectionFrame()
+        {
+            if (holder == null)
+            {
+                return;
+            }
+
+            foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
             {
                 meshRenderer.receiveShadows = true;
                 meshRenderer.shadowCastingMode = ShadowCastingMode.On;
@@ -103,31 +159,26 @@ namespace Iviz.Controllers
                 ResourcePool.Dispose(Resource.Displays.Cube, meshRenderer.gameObject);
             }
 
-            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
-            labelObject = null;
-            labelObjectText = null;
-            labelBillboard = null;
-
             Destroy(holder);
+            holder = null;
         }
 
-        static GameObject CreateSelectionFrame(IList<GameObject> frames)
+        void CreateSelectionFrame()
         {
-            GameObject frameHolder = new GameObject("Selection Frame");
+            holder = new GameObject("Selection Frame");
+            holder.transform.SetParentLocal(transform);
 
-            frames[0] = CreateFrame(frameHolder, Quaternion.identity);
-            frames[1] = CreateFrame(frameHolder, Quaternion.Euler(0, 90, 0));
-            frames[2] = CreateFrame(frameHolder, Quaternion.Euler(0, 180, 0));
-            frames[3] = CreateFrame(frameHolder, Quaternion.Euler(0, 270, 0));
-            frames[4] = CreateFrame(frameHolder, Quaternion.Euler(0, 90, 180));
-            frames[5] = CreateFrame(frameHolder, Quaternion.Euler(0, 180, 180));
-            frames[6] = CreateFrame(frameHolder, Quaternion.Euler(0, 270, 180));
-            frames[7] = CreateFrame(frameHolder, Quaternion.Euler(0, 0, 180));
-
-            return frameHolder;
+            frames[0] = CreateFrame(holder, Quaternion.identity);
+            frames[1] = CreateFrame(holder, Quaternion.Euler(0, 90, 0));
+            frames[2] = CreateFrame(holder, Quaternion.Euler(0, 180, 0));
+            frames[3] = CreateFrame(holder, Quaternion.Euler(0, 270, 0));
+            frames[4] = CreateFrame(holder, Quaternion.Euler(0, 90, 180));
+            frames[5] = CreateFrame(holder, Quaternion.Euler(0, 180, 180));
+            frames[6] = CreateFrame(holder, Quaternion.Euler(0, 270, 180));
+            frames[7] = CreateFrame(holder, Quaternion.Euler(0, 0, 180));
         }
 
-        static GameObject CreateFrame(GameObject parent, Quaternion rotation)
+        GameObject CreateFrame(GameObject parent, Quaternion rotation)
         {
             GameObject frameLinkHolder = new GameObject("Frame Corner");
             frameLinkHolder.transform.SetParentLocal(parent.transform);
@@ -140,28 +191,28 @@ namespace Iviz.Controllers
                 CreateFrameLink(frameLinkHolder)
             };
 
-            frameLinks[0].transform.localScale = new Vector3(FrameAxisLength, FrameAxisWidth, FrameAxisWidth);
-            frameLinks[0].transform.localPosition = -0.5f * FrameAxisLength * Vector3.right;
-            frameLinks[1].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisWidth, FrameAxisLength);
-            frameLinks[1].transform.localPosition = -0.5f * FrameAxisLength * Vector3.forward;
-            frameLinks[2].transform.localScale = new Vector3(FrameAxisWidth, FrameAxisLength, FrameAxisWidth);
-            frameLinks[2].transform.localPosition = 0.5f * FrameAxisLength * Vector3.up;
+            frameLinks[0].transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
+            frameLinks[0].transform.localPosition = -0.5f * frameAxisLength * Vector3.right;
+            frameLinks[1].transform.localScale = new Vector3(frameAxisWidth, frameAxisWidth, frameAxisLength);
+            frameLinks[1].transform.localPosition = -0.5f * frameAxisLength * Vector3.forward;
+            frameLinks[2].transform.localScale = new Vector3(frameAxisWidth, frameAxisLength, frameAxisWidth);
+            frameLinks[2].transform.localPosition = 0.5f * frameAxisLength * Vector3.up;
 
             return frameLinkHolder;
         }
 
-        static GameObject CreateFrameLink(GameObject holder)
+        GameObject CreateFrameLink(GameObject frameLinkHolder)
         {
-            GameObject gameObject = ResourcePool.GetOrCreate(Resource.Displays.Cube, holder.transform);
-            gameObject.name = "Cube";
-            MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
-            renderer.sharedMaterial = Resource.Materials.Lit.Object;
-            renderer.receiveShadows = false;
-            renderer.shadowCastingMode = ShadowCastingMode.Off;
-            renderer.SetPropertyEmissiveColor(Color.green / 2);
-            renderer.SetPropertyColor(Color.green);
-            renderer.GetComponent<BoxCollider>().enabled = false;
-            return gameObject;
+            GameObject frameLink = ResourcePool.GetOrCreate(Resource.Displays.Cube, frameLinkHolder.transform);
+            frameLink.name = "Cube";
+            MeshRenderer meshRenderer = frameLink.GetComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = Resource.Materials.Lit.Object;
+            meshRenderer.receiveShadows = false;
+            meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+            meshRenderer.SetPropertyEmissiveColor(color / 2);
+            meshRenderer.SetPropertyColor(color);
+            meshRenderer.GetComponent<BoxCollider>().enabled = false;
+            return frameLink;
         }
     }
 }

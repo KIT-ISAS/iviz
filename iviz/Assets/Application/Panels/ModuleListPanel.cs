@@ -180,13 +180,10 @@ namespace Iviz.App
             showNetwork.onClick.AddListener(networkData.Show);
 
             string MasterUriToString(Uri uri) =>
-                uri.AbsolutePath.Length == 0 ? uri + " →" : $"{uri.Host}:{uri.Port} →";
+                uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
 
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
-            masterUriButton.Clicked += () =>
-            {
-                connectionData.Show();
-            };
+            masterUriButton.Clicked += () => { connectionData.Show(); };
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
@@ -255,10 +252,7 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
-            connectionData.MasterActiveChanged += _ =>
-            {
-                ConnectionManager.Connection.Disconnect();
-            };
+            connectionData.MasterActiveChanged += _ => { ConnectionManager.Connection.Disconnect(); };
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
             ARController.ARModeChanged += OnARModeChanged;
@@ -273,7 +267,7 @@ namespace Iviz.App
             initialized = true;
 
             modelService = new Controllers.ModelService();
-            
+
             InitFinished?.Invoke();
         }
 
@@ -433,6 +427,11 @@ namespace Iviz.App
                 connectionData.MasterUri = config.MasterUri;
                 connectionData.MyUri = config.MyUri;
                 connectionData.MyId = config.MyId;
+
+                if (config.LastMasterUris != null)
+                {
+                    connectionData.LastMasterUris = config.LastMasterUris;
+                }
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -443,13 +442,16 @@ namespace Iviz.App
 
         void SaveSimpleConfiguration()
         {
+            connectionData.UpdateLastMasterUris();
+
             try
             {
                 ConnectionConfiguration config = new ConnectionConfiguration
                 {
                     MasterUri = connectionData.MasterUri,
                     MyUri = connectionData.MyUri,
-                    MyId = connectionData.MyId
+                    MyId = connectionData.MyId,
+                    LastMasterUris = new List<Uri>(connectionData.LastMasterUris)
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);

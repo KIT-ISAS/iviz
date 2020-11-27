@@ -59,7 +59,14 @@ namespace Iviz.App
                     .Select(data => data.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
-            panel.Depth.Value = controller.DepthName.Length != 0 ? controller.DepthName : NoneStr;
+            try
+            {
+                panel.Depth.Value = controller.DepthName.Length != 0 ? controller.DepthName : NoneStr;
+            }
+            catch (InvalidOperationException)
+            {
+                panel.Depth.Index = 0;
+            }
 
             colorImageCandidates.Clear();
             colorImageCandidates.Add(NoneStr);
@@ -69,7 +76,14 @@ namespace Iviz.App
                     .Select(data => data.Topic)
             );
             panel.Color.Options = colorImageCandidates;
-            panel.Color.Value = controller.ColorName.Length != 0 ? controller.ColorName : NoneStr;
+            try
+            {
+                panel.Color.Value = controller.ColorName.Length != 0 ? controller.ColorName : NoneStr;
+            }
+            catch (InvalidOperationException)
+            {
+                panel.Color.Index = 0;
+            }
 
             panel.PointSize.Value = controller.PointSize;
             panel.FOV.Value = controller.FovAngle;

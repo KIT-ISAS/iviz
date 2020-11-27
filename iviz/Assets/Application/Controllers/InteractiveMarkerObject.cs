@@ -67,6 +67,23 @@ namespace Iviz.Controllers
             }
         }
 
+        bool visible;
+
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+
+                foreach (var control in controls.Values)
+                {
+                    control.Visible = value;
+                }
+            }
+        }
+
+
         void Awake()
         {
             controlNode = new GameObject("[ControlNode]");
@@ -137,6 +154,7 @@ namespace Iviz.Controllers
                 InteractiveMarkerControlObject newControl = CreateControlObject();
                 newControl.Initialize(this, controlMsg.Name);
                 newControl.transform.SetParentLocal(controlNode.transform);
+                newControl.Visible = Visible;
                 controls[controlId] = newControl;
 
                 newControl.Set(controlMsg);
@@ -155,7 +173,7 @@ namespace Iviz.Controllers
                 controls.Remove(controlId);
             }
 
-            
+
             // update the dimensions of the controls
             IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = controls.Values
                 .Select(marker => (marker.Bounds, marker.transform));
@@ -165,6 +183,11 @@ namespace Iviz.Controllers
                     innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
                 );
 
+            if (totalBounds == null)
+            {
+                Debug.Log("null!");
+            }
+            
             foreach (var control in controls.Values)
             {
                 control.UpdateControlBounds(totalBounds);

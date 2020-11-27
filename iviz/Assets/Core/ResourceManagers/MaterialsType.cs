@@ -39,48 +39,48 @@ namespace Iviz.Resources
 
         public MaterialsType()
         {
-            FontMaterial = new Info<Material>("Materials/Font Material Normal");
-            FontMaterialZWrite = new Info<Material>("Materials/Font Material ZWrite");
+            FontMaterial = new Info<Material>("CoreMaterials/Font Material Normal");
+            FontMaterialZWrite = new Info<Material>("CoreMaterials/Font Material ZWrite");
 
             Lit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/White")
-                : new Info<Material>("Materials/White");
+                : new Info<Material>("CoreMaterials/White");
             TexturedLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Textured Lit")
-                : new Info<Material>("Materials/Textured Lit");
+                : new Info<Material>("CoreMaterials/Textured Lit");
             TransparentLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Transparent Lit")
-                : new Info<Material>("Materials/Transparent Lit");
+                : new Info<Material>("CoreMaterials/Transparent Lit");
             TransparentTexturedLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Transparent Textured Lit")
-                : new Info<Material>("Materials/Transparent Textured Lit");
+                : new Info<Material>("CoreMaterials/Transparent Textured Lit");
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             Grid = new Info<Material>("Materials/Grid");
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");
 
-            PointCloud = new Info<Material>("Materials/PointCloud");
-            Line = new Info<Material>("Materials/Lines/Line");
-            TransparentLine = new Info<Material>("Materials/Lines/Transparent Line");
-            LineSimple = new Info<Material>("Materials/Lines/LineSimple");
-            TransparentLineSimple = new Info<Material>("Materials/Lines/Transparent LineSimple");
+            PointCloud = new Info<Material>("CoreMaterials/PointCloud");
+            Line = new Info<Material>("CoreMaterials/Lines/Line");
+            TransparentLine = new Info<Material>("CoreMaterials/Lines/Transparent Line");
+            LineSimple = new Info<Material>("CoreMaterials/Lines/LineSimple");
+            TransparentLineSimple = new Info<Material>("CoreMaterials/Lines/Transparent LineSimple");
 
-            PointCloudWithColormap = new Info<Material>("Materials/PointCloud with Colormap");
-            LineWithColormap = new Info<Material>("Materials/Lines/Line with Colormap");
-            TransparentLineWithColormap = new Info<Material>("Materials/Lines/Transparent Line with Colormap");
-            LineSimpleWithColormap = new Info<Material>("Materials/Lines/LineSimple with Colormap");
+            PointCloudWithColormap = new Info<Material>("CoreMaterials/PointCloud with Colormap");
+            LineWithColormap = new Info<Material>("CoreMaterials/Lines/Line with Colormap");
+            TransparentLineWithColormap = new Info<Material>("CoreMaterials/Lines/Transparent Line with Colormap");
+            LineSimpleWithColormap = new Info<Material>("CoreMaterials/Lines/LineSimple with Colormap");
             TransparentLineSimpleWithColormap =
-                new Info<Material>("Materials/Lines/Transparent LineSimple with Colormap");
+                new Info<Material>("CoreMaterials/Lines/Transparent LineSimple with Colormap");
 
-            MeshList = new Info<Material>("Materials/MeshList");
-            MeshListWithColormap = new Info<Material>("Materials/MeshList with Colormap");
-            MeshListWithColormapScaleY = new Info<Material>("Materials/MeshList with Colormap ScaleY");
+            MeshList = new Info<Material>("CoreMaterials/MeshList");
+            MeshListWithColormap = new Info<Material>("CoreMaterials/MeshList with Colormap");
+            MeshListWithColormapScaleY = new Info<Material>("CoreMaterials/MeshList with Colormap ScaleY");
             MeshListWithColormapScaleY.Object.enableInstancing = true;
-            MeshListOcclusionOnly = new Info<Material>("Materials/MeshList OcclusionOnly");
-            MeshListOcclusionOnlyWithScaleY = new Info<Material>("Materials/MeshList OcclusionOnly with ScaleY");
+            MeshListOcclusionOnly = new Info<Material>("CoreMaterials/MeshList OcclusionOnly");
+            MeshListOcclusionOnlyWithScaleY = new Info<Material>("CoreMaterials/MeshList OcclusionOnly with ScaleY");
 
-            LitOcclusionOnly = new Info<Material>("Materials/White OcclusionOnly");
+            LitOcclusionOnly = new Info<Material>("CoreMaterials/White OcclusionOnly");
         }
     }
 }

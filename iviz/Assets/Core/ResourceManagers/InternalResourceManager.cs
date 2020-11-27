@@ -93,7 +93,7 @@ namespace Iviz.Resources
                 return true;
             }
 
-            string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}";
+            string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}".Replace("//", "/");
             T resource = UnityEngine.Resources.Load<T>(path);
             if (resource == null)
             {

@@ -104,7 +104,7 @@ namespace Iviz.Ros
             try
             {
 #if LOG_ENABLED
-                //Logger.LogDebug = Core.Logger.Debug;
+                Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -503,7 +503,7 @@ namespace Iviz.Ros
             }
         }
 
-        public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics(
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedOnly)
@@ -519,7 +519,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync();
+                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemTopicTypesAsync();
                 }
                 catch (Exception e)
                 {

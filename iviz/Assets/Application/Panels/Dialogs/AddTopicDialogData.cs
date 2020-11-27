@@ -50,7 +50,7 @@ namespace Iviz.App
         void GetTopics()
         {
             topics.Clear();
-            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopics();
+            var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
             foreach (var entry in newTopics)
             {
                 string topic = entry.Topic;

@@ -44,9 +44,9 @@ namespace Iviz.Controllers
 
     public enum MouseEventType
     {
-        Click,
-        Down,
-        Up
+        Click = InteractiveMarkerFeedback.BUTTON_CLICK,
+        Down = InteractiveMarkerFeedback.MOUSE_DOWN,
+        Up = InteractiveMarkerFeedback.MOUSE_UP
     }
 
     public sealed class MarkerObject : FrameNode
@@ -61,15 +61,14 @@ namespace Iviz.Controllers
         int numErrors;
         int numWarnings;
 
-        [CanBeNull] MarkerResource resource;
+        [CanBeNull] IDisplay resource;
         [CanBeNull] Info<GameObject> resourceInfo;
 
         MarkerLineHelper lineHelper;
         MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
 
-        public Bounds? Bounds => resource == null
-            ? (Bounds?) null
-            : UnityUtils.TransformBound(resource.Bounds, resource.transform);
+        public Bounds? Bounds =>
+            resource == null ? null : UnityUtils.TransformBound(resource.Bounds, resource.GetTransform());
 
         public DateTime ExpirationTime { get; private set; }
 
@@ -78,7 +77,10 @@ namespace Iviz.Controllers
             get => resource is ISupportsAROcclusion r && r.OcclusionOnly;
             set
             {
-                if (resource is ISupportsAROcclusion arResource) arResource.OcclusionOnly = value;
+                if (resource is ISupportsAROcclusion arResource)
+                {
+                    arResource.OcclusionOnly = value;
+                }
             }
         }
 
@@ -87,7 +89,10 @@ namespace Iviz.Controllers
             get => resource is ISupportsTint r ? r.Tint : Color.white;
             set
             {
-                if (resource is ISupportsTint tintResource) tintResource.Tint = value;
+                if (resource is ISupportsTint tintResource)
+                {
+                    tintResource.Tint = value;
+                }
             }
         }
 
@@ -96,7 +101,22 @@ namespace Iviz.Controllers
             get => resource == null || resource.Visible;
             set
             {
-                if (resource != null) resource.Visible = value;
+                if (resource != null)
+                {
+                    resource.Visible = value;
+                }
+            }
+        }
+
+        public int Layer
+        {
+            get => resource?.Layer ?? 0;
+            set
+            {
+                if (resource != null)
+                {
+                    resource.Layer = value;
+                }
             }
         }
 
@@ -194,7 +214,10 @@ namespace Iviz.Controllers
         [NotNull]
         T ValidateResource<T>() where T : MarkerResource
         {
-            if (!(resource is T result)) throw new InvalidOperationException("Resource is not set!");
+            if (!(resource is T result))
+            {
+                throw new InvalidOperationException("Resource is not set!");
+            }
 
             return result;
         }
@@ -293,12 +316,18 @@ namespace Iviz.Controllers
 
             meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
             var points = new Vector3[msg.Points.Length];
-            for (int i = 0; i < points.Length; i++) points[i] = msg.Points[i].Ros2Unity();
+            for (int i = 0; i < points.Length; i++)
+            {
+                points[i] = msg.Points[i].Ros2Unity();
+            }
 
             if (msg.Colors.Length != 0)
             {
                 var colors = new Color[msg.Colors.Length];
-                for (int i = 0; i < colors.Length; i++) colors[i] = msg.Colors[i].ToUnityColor();
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    colors[i] = msg.Colors[i].ToUnityColor();
+                }
 
                 meshTriangles.Set(points, colors);
             }
@@ -352,7 +381,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     foreach (Point position in msg.Points)
+                    {
                         yield return new PointWithColor(position.Ros2Unity(), color32);
+                    }
                 }
 
                 points = PointEnumerator();
@@ -362,9 +393,11 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
+                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             msg.Colors[i].ToUnityColor32());
+                    }
                 }
 
                 points = PointEnumerator();
@@ -376,9 +409,11 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
+                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             color * msg.Colors[i].ToUnityColor());
+                    }
                 }
 
                 points = PointEnumerator();
@@ -401,9 +436,13 @@ namespace Iviz.Controllers
                 .Append(msg.Color.A).AppendLine();
 
             if (msg.Points.Length == 0)
+            {
                 description.Append("Elements: Empty").AppendLine();
+            }
             else
+            {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+            }
 
             if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
@@ -477,7 +516,9 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     foreach (Point position in msg.Points)
+                    {
                         yield return new PointWithColor(position.Ros2Unity(), color32);
+                    }
                 }
 
                 points = PointEnumerator();
@@ -487,9 +528,11 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
+                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             msg.Colors[i].ToUnityColor32());
+                    }
                 }
 
                 points = PointEnumerator();
@@ -501,9 +544,11 @@ namespace Iviz.Controllers
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
                     for (int i = 0; i < msg.Points.Length; i++)
+                    {
                         yield return new PointWithColor(
                             msg.Points[i].Ros2Unity(),
                             color * msg.Colors[i].ToUnityColor());
+                    }
                 }
 
                 points = PointEnumerator();
@@ -663,16 +708,19 @@ namespace Iviz.Controllers
 
             GameObject resourceGameObject = ResourcePool.GetOrCreate(resourceInfo, transform);
 
-            resource = resourceGameObject.GetComponent<MarkerResource>();
-            if (resource != null) return; // all OK
+            resource = resourceGameObject.GetComponent<IDisplay>();
+            if (resource != null)
+            {
+                return; // all OK
+            }
 
             if (msg.Type() != MarkerType.MeshResource)
+            {
                 // shouldn't happen!
                 Debug.LogWarning($"Resource '{resourceInfo}' has no MarkerResource!");
+            }
 
             resource = resourceGameObject.AddComponent<AssetWrapperResource>();
-
-            //Clickable = Clickable; // reset value
         }
 
         void UpdateTransform([NotNull] Marker msg)
@@ -784,7 +832,10 @@ namespace Iviz.Controllers
 
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
-            if (baseDescription == null) throw new ArgumentNullException(nameof(baseDescription));
+            if (baseDescription == null)
+            {
+                throw new ArgumentNullException(nameof(baseDescription));
+            }
 
             baseDescription.Append(description);
         }
@@ -800,7 +851,10 @@ namespace Iviz.Controllers
         {
             base.Stop();
 
-            if (resource == null || resourceInfo == null) return;
+            if (resource == null || resourceInfo == null)
+            {
+                return;
+            }
 
             resource.DisposeResource(resourceInfo);
             resource = null;

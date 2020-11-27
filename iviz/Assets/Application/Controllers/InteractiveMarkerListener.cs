@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -49,7 +50,7 @@ namespace Iviz.Controllers
         public override TfFrame Frame => TfListener.MapFrame;
         public override IModuleData ModuleData { get; }
         public string Topic => config.Topic;
-        
+
         public InteractiveMarkerConfiguration Config
         {
             get => config;
@@ -69,12 +70,12 @@ namespace Iviz.Controllers
                 {
                     return;
                 }
-                
+
                 config.DescriptionsVisible = value;
                 foreach (var interactiveMarker in interactiveMarkers.Values)
                 {
                     interactiveMarker.DescriptionVisible = value;
-                }                
+                }
             }
         }
 
@@ -186,6 +187,7 @@ namespace Iviz.Controllers
             InteractiveMarkerObject newMarkerObject = CreateInteractiveMarkerObject();
             newMarkerObject.Initialize(this, id);
             newMarkerObject.Parent = TfListener.ListenersFrame;
+            newMarkerObject.Visible = Visible;
             newMarkerObject.transform.SetParentLocal(node.transform);
             interactiveMarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);
@@ -197,10 +199,10 @@ namespace Iviz.Controllers
             return gameObject.AddComponent<InteractiveMarkerObject>();
         }
 
-        static void DeleteMarkerObject([NotNull] InteractiveMarkerObject imarker)
+        static void DeleteMarkerObject([NotNull] InteractiveMarkerObject marker)
         {
-            imarker.Stop();
-            Object.Destroy(imarker.gameObject);
+            marker.Stop();
+            Object.Destroy(marker.gameObject);
         }
 
         void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
@@ -217,63 +219,49 @@ namespace Iviz.Controllers
 
         void DestroyInteractiveMarker([NotNull] string id)
         {
-            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject imarker))
+            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject interactiveMarker))
             {
                 return;
             }
 
-            imarker.Stop();
-            Object.Destroy(imarker.gameObject);
+            interactiveMarker.Stop();
+            Object.Destroy(interactiveMarker.gameObject);
             interactiveMarkers.Remove(id);
         }
 
         internal void OnInteractiveControlObjectMouseEvent(
-            string imarkerId, string controlId,
+            string interactiveMarkerId, string controlId,
             in Pose controlPose, in Vector3? position,
-            MouseEventType type)
+            MouseEventType eventType)
         {
-            byte eventType;
-            switch (type)
-            {
-                case MouseEventType.Click:
-                    eventType = InteractiveMarkerFeedback.BUTTON_CLICK;
-                    break;
-                case MouseEventType.Down:
-                    eventType = InteractiveMarkerFeedback.MOUSE_DOWN;
-                    break;
-                case MouseEventType.Up:
-                    eventType = InteractiveMarkerFeedback.MOUSE_UP;
-                    break;
-                default:
-                    return; // shouldn't happen
-            }
-
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++),
+                RosUtils.CreateHeader(feedSeq++, "e2/world"),
                 ConnectionManager.MyId ?? "",
-                imarkerId,
+                interactiveMarkerId,
                 controlId,
-                eventType,
-                TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                (byte) eventType,
+                TfListener.RelativePoseToOrigin(controlPose).Unity2RosPose(),
                 0,
-                position?.Unity2RosPoint() ?? Point.Zero, 
+                position?.Unity2RosPoint() ?? Point.Zero,
                 position != null
             );
             Publisher.Publish(msg);
         }
 
-        internal void OnInteractiveControlObjectMoved([NotNull] string imarkerId, [NotNull] string controlId, in Pose controlPose)
+        internal void OnInteractiveControlObjectMoved(
+            [NotNull] string interactiveMarkerId, [NotNull] string controlId,
+            in Pose controlPose)
         {
-            //Debug.Log("--> " + controlPose);
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++),
+                RosUtils.CreateHeader(feedSeq++, "map"),
                 ConnectionManager.MyId ?? "",
-                imarkerId,
+                interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
-                TfListener.RelativePoseToRoot(controlPose).Unity2RosPose(),
+                //TfListener.RelativePoseToOrigin(controlPose).Unity2RosPose(),
+                controlPose.Unity2RosPose(),
                 0,
                 Vector3.zero.Unity2RosPoint(),
                 false
@@ -296,8 +284,23 @@ namespace Iviz.Controllers
                 .ToArray();
 
             foreach (string key in deadMarkers) DestroyInteractiveMarker(key);
-            */    
+            */
         }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+
+                foreach (var marker in interactiveMarkers.Values)
+                {
+                    marker.Visible = value;
+                }
+            }
+        }
+
 
         void DestroyAllMarkers()
         {

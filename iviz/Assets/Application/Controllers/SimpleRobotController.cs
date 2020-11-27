@@ -404,7 +404,7 @@ namespace Iviz.Controllers
             foreach (var entry in Robot.LinkParents)
             {
                 TfFrame frame = TfListener.GetOrCreateFrame(Decorate(entry.Key), node);
-                if (frame.Parent == TfListener.RootFrame)
+                if (frame.Parent == TfListener.OriginFrame)
                 {
                     TfFrame parentFrame = TfListener.GetOrCreateFrame(Decorate(entry.Value), node);
                     frame.Parent = parentFrame;

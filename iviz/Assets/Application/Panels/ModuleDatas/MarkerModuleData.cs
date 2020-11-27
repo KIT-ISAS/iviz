@@ -52,6 +52,7 @@ namespace Iviz.App
             panel.Tint.Value = listener.Tint;
             panel.Alpha.Value = listener.Tint.a;
             panel.Marker.MarkerListener = listener;
+            panel.HideButton.State = listener.Visible;
 
             panel.Tint.ValueChanged += f =>
             {
