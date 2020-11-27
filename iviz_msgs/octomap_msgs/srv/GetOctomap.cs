@@ -48,6 +48,7 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const string RosMd5Sum = "be9d2869d24fe40d6bc21ac21f6bb2c5";
     }
 
+    [DataContract]
     public sealed class GetOctomapRequest : IRequest, IDeserializable<GetOctomapRequest>
     {
         // Get the map as a octomap
@@ -86,6 +87,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class GetOctomapResponse : IResponse, IDeserializable<GetOctomapResponse>
     {
         [DataMember (Name = "map")] public OctomapMsgs.Octomap Map { get; set; }

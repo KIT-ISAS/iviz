@@ -2,157 +2,150 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetSdf")]
-    public sealed class GetSdf : IService
+    [DataContract (Name = "iviz_msgs/SetFixedFrame")]
+    public sealed class SetFixedFrame : IService
     {
         /// <summary> Request message. </summary>
-        [DataMember] public GetSdfRequest Request { get; set; }
+        [DataMember] public SetFixedFrameRequest Request { get; set; }
         
         /// <summary> Response message. </summary>
-        [DataMember] public GetSdfResponse Response { get; set; }
+        [DataMember] public SetFixedFrameResponse Response { get; set; }
         
         /// <summary> Empty constructor. </summary>
-        public GetSdf()
+        public SetFixedFrame()
         {
-            Request = new GetSdfRequest();
-            Response = new GetSdfResponse();
+            Request = new SetFixedFrameRequest();
+            Response = new SetFixedFrameResponse();
         }
         
         /// <summary> Setter constructor. </summary>
-        public GetSdf(GetSdfRequest request)
+        public SetFixedFrame(SetFixedFrameRequest request)
         {
             Request = request;
-            Response = new GetSdfResponse();
+            Response = new SetFixedFrameResponse();
         }
         
-        IService IService.Create() => new GetSdf();
+        IService IService.Create() => new SetFixedFrame();
         
         IRequest IService.Request
         {
             get => Request;
-            set => Request = (GetSdfRequest)value;
+            set => Request = (SetFixedFrameRequest)value;
         }
         
         IResponse IService.Response
         {
             get => Response;
-            set => Response = (GetSdfResponse)value;
+            set => Response = (SetFixedFrameResponse)value;
         }
         
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
-        [Preserve] public const string RosServiceType = "iviz_msgs/GetSdf";
+        [Preserve] public const string RosServiceType = "iviz_msgs/SetFixedFrame";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "920692c7a5a3dd3789f2d8f444a0bf8f";
+        [Preserve] public const string RosMd5Sum = "7b2e77c05fb1342786184d949a9f06ed";
     }
 
     [DataContract]
-    public sealed class GetSdfRequest : IRequest, IDeserializable<GetSdfRequest>
+    public sealed class SetFixedFrameRequest : IRequest, IDeserializable<SetFixedFrameRequest>
     {
-        // Retrieves a scene, which can contain one or multiple 3D models and lights
-        [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.world
+        // Sets the fixed frame
+        [DataMember (Name = "id")] public string Id { get; set; } // Id of the frame
     
         /// <summary> Constructor for empty message. </summary>
-        public GetSdfRequest()
+        public SetFixedFrameRequest()
         {
-            Uri = "";
+            Id = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetSdfRequest(string Uri)
+        public SetFixedFrameRequest(string Id)
         {
-            this.Uri = Uri;
+            this.Id = Id;
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetSdfRequest(ref Buffer b)
+        public SetFixedFrameRequest(ref Buffer b)
         {
-            Uri = b.DeserializeString();
+            Id = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetSdfRequest(ref b);
+            return new SetFixedFrameRequest(ref b);
         }
         
-        GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b)
+        SetFixedFrameRequest IDeserializable<SetFixedFrameRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetSdfRequest(ref b);
+            return new SetFixedFrameRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(Uri);
+            b.Serialize(Id);
         }
         
         public void RosValidate()
         {
-            if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
+            if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
         public int RosMessageLength
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uri);
+                size += BuiltIns.UTF8.GetByteCount(Id);
                 return size;
             }
         }
     }
 
     [DataContract]
-    public sealed class GetSdfResponse : IResponse, IDeserializable<GetSdfResponse>
+    public sealed class SetFixedFrameResponse : IResponse, IDeserializable<SetFixedFrameResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
-        [DataMember (Name = "scene")] public Scene Scene { get; set; } // The scene
+        [DataMember (Name = "success")] public bool Success { get; set; } // Whether the operation succeeded
         [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
     
         /// <summary> Constructor for empty message. </summary>
-        public GetSdfResponse()
+        public SetFixedFrameResponse()
         {
-            Scene = new Scene();
             Message = "";
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetSdfResponse(bool Success, Scene Scene, string Message)
+        public SetFixedFrameResponse(bool Success, string Message)
         {
             this.Success = Success;
-            this.Scene = Scene;
             this.Message = Message;
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetSdfResponse(ref Buffer b)
+        public SetFixedFrameResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
-            Scene = new Scene(ref b);
             Message = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetSdfResponse(ref b);
+            return new SetFixedFrameResponse(ref b);
         }
         
-        GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b)
+        SetFixedFrameResponse IDeserializable<SetFixedFrameResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetSdfResponse(ref b);
+            return new SetFixedFrameResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
-            Scene.RosSerialize(ref b);
             b.Serialize(Message);
         }
         
         public void RosValidate()
         {
-            if (Scene is null) throw new System.NullReferenceException(nameof(Scene));
-            Scene.RosValidate();
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
@@ -160,7 +153,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 5;
-                size += Scene.RosMessageLength;
                 size += BuiltIns.UTF8.GetByteCount(Message);
                 return size;
             }

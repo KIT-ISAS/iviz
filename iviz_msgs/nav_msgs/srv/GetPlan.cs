@@ -48,6 +48,7 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = "421c8ea4d21c6c9db7054b4bbdf1e024";
     }
 
+    [DataContract]
     public sealed class GetPlanRequest : IRequest, IDeserializable<GetPlanRequest>
     {
         // Get a plan from the current position to the goal Pose 
@@ -118,6 +119,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetPlanResponse : IResponse, IDeserializable<GetPlanResponse>
     {
         [DataMember (Name = "plan")] public NavMsgs.Path Plan { get; set; }

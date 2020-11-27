@@ -48,6 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "02c42b3fdf08f126e5fad7a629a839e0";
     }
 
+    [DataContract]
     public sealed class GetModelResourceRequest : IRequest, IDeserializable<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
@@ -101,6 +102,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetModelResourceResponse : IResponse, IDeserializable<GetModelResourceResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded

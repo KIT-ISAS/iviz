@@ -48,6 +48,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "c1f3d28f1b044c871e6eff2e9fc3c667";
     }
 
+    [DataContract]
     public sealed class DeleteParamRequest : IRequest, IDeserializable<DeleteParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.Rosapi
         }
     }
 
+    [DataContract]
     public sealed class DeleteParamResponse : Internal.EmptyResponse
     {
     }

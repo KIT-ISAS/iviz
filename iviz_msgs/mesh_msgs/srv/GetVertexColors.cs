@@ -48,6 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "f9925939094ed9c8a413184db9bca5b3";
     }
 
+    [DataContract]
     public sealed class GetVertexColorsRequest : IRequest, IDeserializable<GetVertexColorsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetVertexColorsResponse : IResponse, IDeserializable<GetVertexColorsResponse>
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped { get; set; }

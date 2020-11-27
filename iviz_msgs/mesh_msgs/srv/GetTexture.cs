@@ -48,6 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "48823554c65f6c317f12f79207ce78ac";
     }
 
+    [DataContract]
     public sealed class GetTextureRequest : IRequest, IDeserializable<GetTextureRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -104,6 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetTextureResponse : IResponse, IDeserializable<GetTextureResponse>
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture { get; set; }

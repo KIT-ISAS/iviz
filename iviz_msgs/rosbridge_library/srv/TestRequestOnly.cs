@@ -48,6 +48,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
     }
 
+    [DataContract]
     public sealed class TestRequestOnlyRequest : IRequest, IDeserializable<TestRequestOnlyRequest>
     {
         [DataMember (Name = "data")] public int Data { get; set; }
@@ -94,6 +95,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class TestRequestOnlyResponse : Internal.EmptyResponse
     {
     }

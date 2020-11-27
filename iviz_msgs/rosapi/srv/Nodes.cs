@@ -48,6 +48,7 @@ namespace Iviz.Msgs.Rosapi
         [Preserve] public const string RosMd5Sum = "3d07bfda1268b4f76b16b7ba8a82665d";
     }
 
+    [DataContract]
     public sealed class NodesRequest : IRequest, IDeserializable<NodesRequest>
     {
     
@@ -85,6 +86,7 @@ namespace Iviz.Msgs.Rosapi
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class NodesResponse : IResponse, IDeserializable<NodesResponse>
     {
         [DataMember (Name = "nodes")] public string[] Nodes_ { get; set; }

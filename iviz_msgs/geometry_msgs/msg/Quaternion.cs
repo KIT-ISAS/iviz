@@ -78,6 +78,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "BVggGxF4wYVqHScGmdQtq+1D6lKXN8WYRrgbn8a38arvD49cC4B0AAAA";
                 
         /// Custom iviz code
+        public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
         public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
         public static Quaternion operator *(in Quaternion a, in Quaternion b) =>
             new Quaternion(
@@ -86,5 +87,11 @@ namespace Iviz.Msgs.GeometryMsgs
                 a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
                 a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z
             );
+        public static Vector3 operator *(in Quaternion q, in Vector3 v)
+        {
+                Vector3 qv = new Vector3(q.X, q.Y, q.Z);
+                return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);
+        }
+        public static Point operator *(in Quaternion q, in Point v) => q * (Vector3)v;
     }
 }

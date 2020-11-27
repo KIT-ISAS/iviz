@@ -48,6 +48,7 @@ namespace Iviz.Msgs.StdSrvs
         [Preserve] public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
     }
 
+    [DataContract]
     public sealed class SetBoolRequest : IRequest, IDeserializable<SetBoolRequest>
     {
         [DataMember (Name = "data")] public bool Data { get; set; } // e.g. for hardware enabling / disabling
@@ -94,6 +95,7 @@ namespace Iviz.Msgs.StdSrvs
         public int RosMessageLength => RosFixedMessageLength;
     }
 
+    [DataContract]
     public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service

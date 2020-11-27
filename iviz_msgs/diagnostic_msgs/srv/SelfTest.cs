@@ -48,10 +48,12 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [Preserve] public const string RosMd5Sum = "ac21b1bab7ab17546986536c22eb34e9";
     }
 
+    [DataContract]
     public sealed class SelfTestRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class SelfTestResponse : IResponse, IDeserializable<SelfTestResponse>
     {
         [DataMember (Name = "id")] public string Id { get; set; }

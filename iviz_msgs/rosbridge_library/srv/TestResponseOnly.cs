@@ -48,10 +48,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
     }
 
+    [DataContract]
     public sealed class TestResponseOnlyRequest : Internal.EmptyRequest
     {
     }
 
+    [DataContract]
     public sealed class TestResponseOnlyResponse : IResponse, IDeserializable<TestResponseOnlyResponse>
     {
         [DataMember (Name = "data")] public int Data { get; set; }

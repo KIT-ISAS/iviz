@@ -48,6 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "d0fc06ce39b58884e8cdf147765b9d6b";
     }
 
+    [DataContract]
     public sealed class GetVertexCostsRequest : IRequest, IDeserializable<GetVertexCostsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetVertexCostsResponse : IResponse, IDeserializable<GetVertexCostsResponse>
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped { get; set; }

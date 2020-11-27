@@ -48,6 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "9c05ee8917d1e268371f79ef13584f64";
     }
 
+    [DataContract]
     public sealed class AddModuleRequest : IRequest, IDeserializable<AddModuleRequest>
     {
         // Adds a module by type
@@ -108,6 +109,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
+    [DataContract]
     public sealed class AddModuleResponse : IResponse, IDeserializable<AddModuleResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded

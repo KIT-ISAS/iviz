@@ -48,6 +48,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMd5Sum = "0d382728fb593e7fac7232b27f8a271f";
     }
 
+    [DataContract]
     public sealed class GetModelTextureRequest : IRequest, IDeserializable<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetModelTextureResponse : IResponse, IDeserializable<GetModelTextureResponse>
     {
         [DataMember (Name = "success")] public bool Success { get; set; }

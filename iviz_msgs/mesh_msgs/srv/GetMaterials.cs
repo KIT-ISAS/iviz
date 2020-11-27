@@ -48,6 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         [Preserve] public const string RosMd5Sum = "f9e04e76772e6c10688525f021cfc500";
     }
 
+    [DataContract]
     public sealed class GetMaterialsRequest : IRequest, IDeserializable<GetMaterialsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
@@ -100,6 +101,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     }
 
+    [DataContract]
     public sealed class GetMaterialsResponse : IResponse, IDeserializable<GetMaterialsResponse>
     {
         [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped { get; set; }
