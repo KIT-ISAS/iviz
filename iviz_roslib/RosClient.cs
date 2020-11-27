@@ -16,7 +16,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib
 {
@@ -96,14 +95,14 @@ namespace Iviz.Roslib
         /// <summary>
         /// Wrapper for XML-RPC calls to the master.
         /// </summary>
-        public Master Master { get; }
+        public RosMasterApi RosMasterApi { get; }
 
         /// <summary>
         /// Timeout in milliseconds for XML-RPC communications with the master.
         /// </summary>
         public TimeSpan RpcMasterTimeout
         {
-            get => TimeSpan.FromMilliseconds(Master.TimeoutInMs);
+            get => TimeSpan.FromMilliseconds(RosMasterApi.TimeoutInMs);
             set
             {
                 if (value.TotalMilliseconds <= 0)
@@ -111,7 +110,7 @@ namespace Iviz.Roslib
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
-                Master.TimeoutInMs = (int) value.TotalMilliseconds;
+                RosMasterApi.TimeoutInMs = (int) value.TotalMilliseconds;
             }
         }
 
@@ -172,7 +171,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// URI of the master node.
         /// </summary>
-        public Uri MasterUri => Master.MasterUri;
+        public Uri MasterUri => RosMasterApi.MasterUri;
 
         /// <summary>
         /// URI of this node.
@@ -212,7 +211,7 @@ namespace Iviz.Roslib
                 throw new ArgumentException("URI scheme must be http", nameof(masterUri));
             }
 
-            callerUri ??= TryGetCallerUri();
+            callerUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
 
             if (callerUri.Scheme != "http")
             {
@@ -245,13 +244,13 @@ namespace Iviz.Roslib
                 CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort}{absolutePath}");
             }
 
-            Master = new Master(masterUri, CallerId, CallerUri);
+            RosMasterApi = new RosMasterApi(masterUri, CallerId, CallerUri);
             Parameters = new ParameterClient(masterUri, CallerId, CallerUri);
 
             try
             {
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
-                Master.GetUri();
+                RosMasterApi.GetUri();
             }
             catch (Exception e)
             {
@@ -320,7 +319,7 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Tries to create a unique id based on the project and computer name
+        /// Creates a unique id based on the project and computer name
         /// </summary>
         /// <returns>A more or less unique id</returns>
         public static string CreateCallerId()
@@ -338,10 +337,11 @@ namespace Iviz.Roslib
             Environment.GetEnvironmentVariable("ROS_IP");
 
         /// <summary>
-        /// Try to retrieve a valid caller uri with the given port.
-        /// Other clients will connect to this node using this address.
-        /// If the port is 0, uses a random free port.
+        /// Tries to retrieve a valid caller uri for this node, by checking the local addresses
+        /// of the wireless and ethernet interfaces. 
         /// </summary>
+        /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
+        /// <returns>A caller uri</returns>
         public static Uri TryGetCallerUri(int usingPort = AnyPort)
         {
             string? envHostname = EnvironmentCallerHostname;
@@ -350,20 +350,55 @@ namespace Iviz.Roslib
                 return new Uri($"http://{envHostname}:{usingPort}/");
             }
 
-            return GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
-                   GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
+            return Utils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
+                   Utils.GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
                    new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
         }
 
-        static IEnumerable<UnicastIPAddressInformation> GetInterfaceCandidates(NetworkInterfaceType type)
+
+        /// <summary>
+        /// Tries to retrieve a valid caller uri for this node given a master address, by checking
+        /// the active interfaces and searching for one in the same subnet.
+        /// </summary>
+        /// <param name="masterUri">The uri of the ROS master</param>
+        /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
+        /// <returns>A caller uri, or null if none found.</returns>
+        public static Uri? TryGetCallerUriFor(Uri masterUri, int usingPort = AnyPort)
         {
-            return NetworkInterface.GetAllNetworkInterfaces()
-                .Where(@interface => @interface.NetworkInterfaceType == type &&
-                                     @interface.OperationalStatus == OperationalStatus.Up)
+            string? envHostname = EnvironmentCallerHostname;
+            if (envHostname != null)
+            {
+                return new Uri($"http://{envHostname}:{usingPort}/");
+            }
+
+            IPAddress masterAddress =
+                IPAddress.TryParse(masterUri.Host, out IPAddress parsedAddress)
+                    ? parsedAddress
+                    : Dns.GetHostEntry(masterUri.Host).AddressList[0];
+
+            var candidates = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
                 .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
+
+            bool CanAccessMaster(UnicastIPAddressInformation info) =>
+                Utils.IsInSameSubnet(info.Address, masterAddress, info.IPv4Mask);
+
+            IPAddress? myAddress = candidates
+                .Select(info => (info, success: CanAccessMaster(info)))
+                .FirstOrDefault(tuple => tuple.success)
+                .info?.Address;
+
+            return myAddress == null ? null : new Uri($"http://{myAddress}:{usingPort}/");
         }
 
+        /// <summary>
+        /// Retrieves a list of possible valid caller uri with the given port.
+        /// Other clients will connect to this node using this address.
+        /// If the port is 0, uses a random free port.
+        /// </summary>
+        /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
+        /// <returns>A list of possible caller uris.</returns>
         public static ReadOnlyCollection<Uri> GetCallerUriCandidates(int usingPort = AnyPort)
         {
             List<Uri> candidates = new List<Uri>();
@@ -373,21 +408,18 @@ namespace Iviz.Roslib
                 candidates.Add(new Uri($"http://{envHostname}:{usingPort}/"));
             }
 
-            IEnumerable<Uri> GetInfosAsUri(NetworkInterfaceType type) =>
-                GetInterfaceCandidates(type)
-                    .Select(info => new Uri($"http://{info.Address}:{usingPort}/")).ToArray();
-
-            candidates.AddRange(GetInfosAsUri(NetworkInterfaceType.Wireless80211));
-            candidates.AddRange(GetInfosAsUri(NetworkInterfaceType.Ethernet));
             candidates.Add(new Uri($"http://{Dns.GetHostName()}:{usingPort}/"));
 
-            return candidates.AsReadOnly();
-        }
+            IEnumerable<Uri> GetInfosAsUri() =>
+                NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                    .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(info => new Uri($"http://{info.Address}:{usingPort}/")).ToArray();
 
-        static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
-        {
-            UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
-            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+            candidates.AddRange(GetInfosAsUri());
+
+            return candidates.AsReadOnly();
         }
 
         /// <summary>
@@ -467,12 +499,12 @@ namespace Iviz.Roslib
                 SystemState state = GetSystemState();
                 foreach (TopicTuple tuple in state.Subscribers.Where(tuple => tuple.Members.Contains(CallerId)))
                 {
-                    Master.UnregisterSubscriber(tuple.Topic);
+                    RosMasterApi.UnregisterSubscriber(tuple.Topic);
                 }
 
                 foreach (TopicTuple tuple in state.Publishers.Where(tuple => tuple.Members.Contains(CallerId)))
                 {
-                    Master.UnregisterPublisher(tuple.Topic);
+                    RosMasterApi.UnregisterPublisher(tuple.Topic);
                 }
             }
             catch (Exception e)
@@ -492,13 +524,13 @@ namespace Iviz.Roslib
             tasks.AddRange(
                 state.Subscribers
                     .Where(tuple => tuple.Members.Contains(CallerId))
-                    .Select(tuple => (Task) Master.UnregisterSubscriberAsync(tuple.Topic))
+                    .Select(tuple => (Task) RosMasterApi.UnregisterSubscriberAsync(tuple.Topic))
             );
 
             tasks.AddRange(
                 state.Publishers
                     .Where(tuple => tuple.Members.Contains(CallerId))
-                    .Select(tuple => Master.UnregisterPublisherAsync(tuple.Topic))
+                    .Select(tuple => RosMasterApi.UnregisterPublisherAsync(tuple.Topic))
             );
 
             try
@@ -533,7 +565,7 @@ namespace Iviz.Roslib
 
             subscribersByTopic[topic] = subscription;
 
-            var masterResponse = Master.RegisterSubscriber(topic, topicInfo.Type);
+            var masterResponse = RosMasterApi.RegisterSubscriber(topic, topicInfo.Type);
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
@@ -565,7 +597,7 @@ namespace Iviz.Roslib
 
             subscribersByTopic[topic] = subscription;
 
-            var masterResponse = await Master.RegisterSubscriberAsync(topic, topicInfo.Type).Caf();
+            var masterResponse = await RosMasterApi.RegisterSubscriberAsync(topic, topicInfo.Type).Caf();
             if (!masterResponse.IsValid)
             {
                 subscribersByTopic.TryRemove(topic, out _);
@@ -771,13 +803,13 @@ namespace Iviz.Roslib
         internal void RemoveSubscriber(IRosSubscriber subscriber)
         {
             subscribersByTopic.TryRemove(subscriber.Topic, out _);
-            Master.UnregisterSubscriber(subscriber.Topic);
+            RosMasterApi.UnregisterSubscriber(subscriber.Topic);
         }
 
         internal async Task RemoveSubscriberAsync(IRosSubscriber subscriber)
         {
             subscribersByTopic.TryRemove(subscriber.Topic, out _);
-            await Master.UnregisterSubscriberAsync(subscriber.Topic).Caf();
+            await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
         }
 
         /// <summary>
@@ -831,7 +863,7 @@ namespace Iviz.Roslib
             RegisterPublisherResponse? response;
             try
             {
-                response = Master.RegisterPublisher(topic, topicInfo.Type);
+                response = RosMasterApi.RegisterPublisher(topic, topicInfo.Type);
             }
             catch (Exception e)
             {
@@ -863,7 +895,7 @@ namespace Iviz.Roslib
             RegisterPublisherResponse? response;
             try
             {
-                response = await Master.RegisterPublisherAsync(topic, topicInfo.Type).Caf();
+                response = await RosMasterApi.RegisterPublisherAsync(topic, topicInfo.Type).Caf();
             }
             catch (Exception e)
             {
@@ -1075,13 +1107,13 @@ namespace Iviz.Roslib
         internal void RemovePublisher(IRosPublisher publisher)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            Master.UnregisterPublisher(publisher.Topic);
+            RosMasterApi.UnregisterPublisher(publisher.Topic);
         }
 
         internal async Task RemovePublisherAsync(IRosPublisher publisher)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            await Master.UnregisterPublisherAsync(publisher.Topic).Caf();
+            await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
         }
 
         /// <summary>
@@ -1116,13 +1148,13 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Asks the master for all the published nodes in the system.
+        /// Asks the master for all the published topics in the system with at least one publisher.
         /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
         public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
-            var response = Master.GetPublishedTopics();
+            var response = RosMasterApi.GetPublishedTopics();
             if (response.IsValid)
             {
                 return response.Topics
@@ -1134,14 +1166,14 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Asks the master for all the published nodes in the system.
+        /// Asks the master for all the published topics in the system with at least one publisher.
         /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
         public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
             CancellationToken token = default)
         {
-            var response = await Master.GetPublishedTopicsAsync(token: token).Caf();
+            var response = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
             if (response.IsValid)
             {
                 return response.Topics
@@ -1152,6 +1184,44 @@ namespace Iviz.Roslib
             throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
         }
 
+        /// <summary>
+        /// Asks the master for all the topics in the system.
+        /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
+        /// </summary>
+        /// <returns>List of topic names and message types.</returns>
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes()
+        {
+            var response = RosMasterApi.GetTopicTypes();
+            if (response.IsValid)
+            {
+                return response.Topics
+                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                    .ToArray().AsReadOnly();
+            }
+
+            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+        }
+
+        /// <summary>
+        /// Asks the master for all the topics in the system.
+        /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
+        /// </summary>
+        /// <returns>List of topic names and message types.</returns>
+        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
+            CancellationToken token = default)
+        {
+            var response = await RosMasterApi.GetTopicTypesAsync(token: token).Caf();
+            if (response.IsValid)
+            {
+                return response.Topics
+                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                    .ToArray().AsReadOnly();
+            }
+
+            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+        }
+        
+        
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
@@ -1164,7 +1234,7 @@ namespace Iviz.Roslib
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public SystemState GetSystemState()
         {
-            var response = Master.GetSystemState();
+            var response = RosMasterApi.GetSystemState();
             if (response.IsValid)
             {
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
@@ -1180,7 +1250,7 @@ namespace Iviz.Roslib
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public async Task<SystemState> GetSystemStateAsync()
         {
-            var response = await Master.GetSystemStateAsync().Caf();
+            var response = await RosMasterApi.GetSystemStateAsync().Caf();
             if (response.IsValid)
             {
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
@@ -1261,7 +1331,7 @@ namespace Iviz.Roslib
                 try
                 {
                     publisher.Dispose();
-                    Master.UnregisterPublisher(publisher.Topic);
+                    RosMasterApi.UnregisterPublisher(publisher.Topic);
                 }
                 catch (Exception e)
                 {
@@ -1277,7 +1347,7 @@ namespace Iviz.Roslib
                 try
                 {
                     subscriber.Dispose();
-                    Master.UnregisterSubscriber(subscriber.Topic);
+                    RosMasterApi.UnregisterSubscriber(subscriber.Topic);
                 }
                 catch (Exception e)
                 {
@@ -1301,7 +1371,7 @@ namespace Iviz.Roslib
                 try
                 {
                     serviceSender.Dispose();
-                    Master.UnregisterService(serviceSender.Service, serviceSender.Uri);
+                    RosMasterApi.UnregisterService(serviceSender.Service, serviceSender.Uri);
                 }
                 catch (Exception e)
                 {
@@ -1324,7 +1394,7 @@ namespace Iviz.Roslib
             tasks.AddRange(publishers.Select(async publisher =>
             {
                 publisher.Dispose();
-                await Master.UnregisterPublisherAsync(publisher.Topic).Caf();
+                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
             }));
 
             var subscribers = subscribersByTopic.Values.ToArray();
@@ -1333,7 +1403,7 @@ namespace Iviz.Roslib
             tasks.AddRange(subscribers.Select(async subscriber =>
             {
                 subscriber.Dispose();
-                await Master.UnregisterSubscriberAsync(subscriber.Topic).Caf();
+                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
             }));
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
@@ -1350,7 +1420,7 @@ namespace Iviz.Roslib
             tasks.AddRange(serviceManagers.Select(async senderManager =>
             {
                 await senderManager.DisposeAsync().Caf();
-                await Master.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
+                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
             }));
 
             await Task.WhenAll(tasks).Caf();
@@ -1389,7 +1459,7 @@ namespace Iviz.Roslib
                         LookupNodeResponse response;
                         try
                         {
-                            response = Master.LookupNode(sender.RemoteId);
+                            response = RosMasterApi.LookupNode(sender.RemoteId);
                         }
                         catch (Exception e)
                         {
@@ -1434,7 +1504,8 @@ namespace Iviz.Roslib
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing connection with service type {baseExistingReceiver.ServiceType} does not match the given type.");
+                        $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
+                        $"does not match the new given type.");
                 }
 
                 // is there a persistent connection? use it
@@ -1448,10 +1519,10 @@ namespace Iviz.Roslib
             }
 
             // otherwise, create a new transient one
-            LookupServiceResponse response = Master.LookupService(serviceName);
+            LookupServiceResponse response = RosMasterApi.LookupService(serviceName);
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service: {response.StatusMessage}");
+                throw new RosRpcException($"Failed to call service {serviceName}: {response.StatusMessage}");
             }
 
             Uri serviceUri = response.ServiceUrl!;
@@ -1474,11 +1545,11 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Service call to uri '{serviceUri}' timed out");
+                throw new TimeoutException($"Service call {serviceName} to uri '{serviceUri}' timed out");
             }
             catch (Exception e)
             {
-                throw new RoslibException($"Service uri '{serviceUri}' is not reachable", e);
+                throw new RoslibException($"Service call {serviceName} to uri '{serviceUri}' failed", e);
             }
         }
 
@@ -1516,7 +1587,8 @@ namespace Iviz.Roslib
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing connection with service type {baseExistingReceiver.ServiceType} does not match the given type.");
+                        $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
+                        $"does not match the new given type.");
                 }
 
                 // is there a persistent connection? use it
@@ -1530,10 +1602,10 @@ namespace Iviz.Roslib
             }
 
 
-            LookupServiceResponse response = await Master.LookupServiceAsync(serviceName, token).Caf();
+            LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(serviceName, token).Caf();
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service: {response.StatusMessage}");
+                throw new RosRpcException($"Failed to call service {serviceName}: {response.StatusMessage}");
             }
 
             Uri serviceUri = response.ServiceUrl!;
@@ -1554,9 +1626,13 @@ namespace Iviz.Roslib
                     return await serviceCaller.ExecuteAsync(service, token).Caf();
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Service call {serviceName} to uri '{serviceUri}' timed out");
+            }
             catch (Exception e)
             {
-                throw new RoslibException($"Service uri '{serviceUri}' is not reachable", e);
+                throw new RoslibException($"Service call {serviceName} to uri '{serviceUri}' failed", e);
             }
         }
 
@@ -1570,7 +1646,7 @@ namespace Iviz.Roslib
             if (!(existingSender is ServiceRequestManager<T>))
             {
                 throw new InvalidMessageTypeException(
-                    $"Existing advertised service type {existingSender.ServiceType} does not match the given type.");
+                    $"Existing advertised service type {existingSender.ServiceType} for {serviceName} does not match the given type.");
             }
 
             return true;
@@ -1602,7 +1678,7 @@ namespace Iviz.Roslib
 
             try
             {
-                Master.RegisterService(serviceName, advertisedService.Uri);
+                RosMasterApi.RegisterService(serviceName, advertisedService.Uri);
             }
             catch (Exception e)
             {
@@ -1634,7 +1710,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await Master.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
+                await RosMasterApi.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
             }
             catch (Exception e)
             {
@@ -1660,7 +1736,7 @@ namespace Iviz.Roslib
             advertisedServicesByName.TryRemove(name, out _);
 
             advertisedService.Dispose();
-            Master.UnregisterService(name, advertisedService.Uri);
+            RosMasterApi.UnregisterService(name, advertisedService.Uri);
         }
 
         /// <summary>
@@ -1678,7 +1754,7 @@ namespace Iviz.Roslib
             advertisedServicesByName.TryRemove(name, out _);
 
             await advertisedService.DisposeAsync();
-            await Master.UnregisterServiceAsync(name, advertisedService.Uri);
+            await RosMasterApi.UnregisterServiceAsync(name, advertisedService.Uri);
         }
 
         public void Dispose()

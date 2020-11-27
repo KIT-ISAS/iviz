@@ -14,7 +14,7 @@ namespace Iviz.Roslib
     public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
-        readonly CancellationTokenSource aliveTokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         readonly RosClient client;
         Action<T>[] callbacks = Array.Empty<Action<T>>(); // cache to iterate through callbacks quickly
         int totalSubscribers;
@@ -22,7 +22,7 @@ namespace Iviz.Roslib
 
         internal TcpReceiverManager<T> Manager { get; }
         
-        public CancellationToken CancellationToken => aliveTokenSource.Token; 
+        public CancellationToken CancellationToken => runningTs.Token; 
 
         /// <summary>
         /// Whether this subscriber is valid.
@@ -130,7 +130,7 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            aliveTokenSource.Cancel();
+            runningTs.Cancel();
             callbacksById.Clear();
             Manager.Stop();
             callbacks = Array.Empty<Action<T>>();

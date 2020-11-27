@@ -34,7 +34,7 @@ namespace Iviz.Roslib
         bool KeepRunning => !runningTs.IsCancellationRequested;
         bool IsConnected => tcpClient?.Connected ?? false;
 
-        byte[] readBuffer = new byte[BufferSizeIncrease];
+        byte[] readBuffer = new byte[4];
         NetworkStream? stream;
         Task? task;
         TcpClient? tcpClient;

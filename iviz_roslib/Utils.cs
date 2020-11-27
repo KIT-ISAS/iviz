@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -95,7 +98,7 @@ namespace Iviz.Roslib
 
         public static string ToJsonString(object o)
         {
-            return JsonConvert.SerializeObject(o);
+            return JsonConvert.SerializeObject(o, Formatting.Indented);
         }
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
@@ -260,6 +263,31 @@ namespace Iviz.Roslib
                 Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
             }
         }
+
+        public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
+        {
+            static byte And(byte b1, byte b2) => (byte) (b1 & b2);
+            byte[] addressABytes = addressA.GetAddressBytes();
+            byte[] addressBBytes = addressB.GetAddressBytes();
+            byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
+            var broadcastABytes = addressABytes.Zip(subnetMaskBytes, And);
+            var broadcastBBytes = addressBBytes.Zip(subnetMaskBytes, And);
+            return broadcastABytes.SequenceEqual(broadcastBBytes);
+        }
+
+        public static IEnumerable<UnicastIPAddressInformation> GetInterfaceCandidates(NetworkInterfaceType type)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                .Where(@interface => @interface.NetworkInterfaceType == type &&
+                                     @interface.OperationalStatus == OperationalStatus.Up)
+                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
+        }        
         
+        public static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
+        {
+            UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+        }
     }
 }

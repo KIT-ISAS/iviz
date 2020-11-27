@@ -23,14 +23,14 @@ namespace Iviz.Roslib.XmlRpc
     /// <summary>
     /// Implements communication to the ROS master API.
     /// </summary>
-    public sealed class Master
+    public sealed class RosMasterApi
     {
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
         public string CallerId { get; }
         public int TimeoutInMs { get; set; } = 2000;
 
-        public Master(Uri masterUri, string callerId, Uri callerUri)
+        public RosMasterApi(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
@@ -91,6 +91,20 @@ namespace Iviz.Roslib.XmlRpc
         {
             Arg[] args = {CallerId, subgraph};
             object[] response = await MethodCallAsync("getPublishedTopics", args, token).Caf();
+            return new GetPublishedTopicsResponse(response);
+        }
+
+        public GetPublishedTopicsResponse GetTopicTypes()
+        {
+            Arg[] args = {CallerId};
+            object[] response = MethodCall("getTopicTypes", args);
+            return new GetPublishedTopicsResponse(response);
+        }
+
+        public async Task<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
+        {
+            Arg[] args = {CallerId};
+            object[] response = await MethodCallAsync("getTopicTypes", args, token).Caf();
             return new GetPublishedTopicsResponse(response);
         }
 

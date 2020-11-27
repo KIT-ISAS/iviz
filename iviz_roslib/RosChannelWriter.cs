@@ -12,6 +12,9 @@ namespace Iviz.Roslib
         string? publisherId;
         bool disposed;
 
+        public IRosPublisher<T> Publisher =>
+            publisher ?? throw new InvalidOperationException("Channel has not been started!");
+
         public RosChannelWriter()
         {
         }
@@ -28,7 +31,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(client));
             }
 
-            publisherId = client.Advertise(topic, out publisher);
+            publisherId = client.Advertise<T>(topic, out publisher);
         }
 
         public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
@@ -41,80 +44,91 @@ namespace Iviz.Roslib
             (publisherId, publisher) = await client.AdvertiseAsync<T>(topic);
         }
 
-        void ThrowIfNotStarted()
-        {
-            if (publisher == null)
-            {
-                throw new InvalidOperationException("Writer has not been started");
-            }
-        }
-
         public void Write(T msg)
         {
-            ThrowIfNotStarted();
-            publisher!.Publish(msg);
+            Publisher.Publish(msg);
+        }
+
+        public async Task WriteAsync(T msg)
+        {
+            await Publisher.PublishAsync(msg);
         }
 
         void IRosChannelWriter.Write(IMessage msg)
         {
-            ThrowIfNotStarted();
-            publisher!.Publish(msg);
+            Publisher.Publish(msg);
         }
 
         public void WriteAll(IEnumerable<T> msgs)
         {
-            ThrowIfNotStarted();
+            if (msgs == null)
+            {
+                throw new ArgumentNullException(nameof(msgs));
+            }
+
             foreach (T msg in msgs)
             {
-                if (!publisher!.IsAlive())
+                if (!Publisher.IsAlive())
                 {
                     break;
                 }
 
-                publisher!.Publish(msg);
+                Publisher.Publish(msg);
             }
         }
 
         void IRosChannelWriter.WriteAll(IEnumerable<IMessage> msgs)
         {
-            ThrowIfNotStarted();
+            if (msgs == null)
+            {
+                throw new ArgumentNullException(nameof(msgs));
+            }
+
             foreach (IMessage msg in msgs)
             {
-                if (!publisher!.IsAlive())
+                if (!Publisher.IsAlive())
                 {
                     break;
                 }
-                
-                publisher!.Publish(msg);
+
+                Publisher.Publish(msg);
             }
         }
 
 #if !NETSTANDARD2_0
-        public async Task WriteAllAsync(IAsyncEnumerable<T> msgs)
+        public async ValueTask WriteAllAsync(IAsyncEnumerable<T> msgs)
         {
-            ThrowIfNotStarted();
+            if (msgs == null)
+            {
+                throw new ArgumentNullException(nameof(msgs));
+            }
+            
             await foreach (T msg in msgs)
             {
-                if (!publisher!.IsAlive())
+                if (!Publisher.IsAlive())
                 {
                     break;
                 }
-                
-                publisher!.Publish(msg);
+
+                await Publisher.PublishAsync(msg);
             }
         }
 
         async ValueTask IRosChannelWriter.WriteAllAsync(IAsyncEnumerable<IMessage> msgs)
         {
-            ThrowIfNotStarted();
+            if (msgs == null)
+            {
+                throw new ArgumentNullException(nameof(msgs));
+            }
+            
             await foreach (IMessage msg in msgs)
             {
-                if (!publisher!.IsAlive())
+                if (!Publisher.IsAlive())
                 {
                     break;
                 }
-                
-                publisher!.Publish(msg);
+
+                await Publisher.PublishAsync(msg);
             }
         }
 #endif
@@ -128,7 +142,7 @@ namespace Iviz.Roslib
 
             return disposed
                 ? "[RosChannelWriter (disposed)]"
-                : $"[RosChannelWriter {publisher.Topic} [{publisher.TopicType}]]";
+                : $"[RosChannelWriter {Publisher.Topic} [{Publisher.TopicType}]]";
         }
 
         public void Dispose()
@@ -147,7 +161,7 @@ namespace Iviz.Roslib
 
             try
             {
-                publisher.Unadvertise(publisherId!);
+                Publisher.Unadvertise(publisherId!);
             }
             catch (Exception e)
             {
@@ -172,7 +186,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await publisher.UnadvertiseAsync(publisherId!);
+                await Publisher.UnadvertiseAsync(publisherId!);
             }
             catch (Exception e)
             {
@@ -181,7 +195,7 @@ namespace Iviz.Roslib
         }
 #endif
     }
-    
+
     public static class RosChannelWriter
     {
         public static IRosChannelWriter CreateInstance(Type msgType)
@@ -194,5 +208,5 @@ namespace Iviz.Roslib
             Type writerType = typeof(RosChannelWriter<>).MakeGenericType(msgType);
             return (IRosChannelWriter) Activator.CreateInstance(writerType)!;
         }
-    }    
+    }
 }

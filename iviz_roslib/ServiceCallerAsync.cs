@@ -64,8 +64,8 @@ namespace Iviz.Roslib
             {
                 $"callerid={serviceInfo.CallerId}",
                 $"service={serviceInfo.Service}",
-                $"md5sum={serviceInfo.Md5Sum}",
                 $"type={serviceInfo.Type}",
+                $"md5sum={serviceInfo.Md5Sum}",
                 requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0",
                 persistent ? "persistent=1" : "persistent=0",
             };

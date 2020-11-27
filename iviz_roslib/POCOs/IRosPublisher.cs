@@ -42,6 +42,14 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(IMessage message);
+        
+        /// <summary>
+        /// Publishes the given message into the topic. 
+        /// </summary>
+        /// <param name="message">The message to be published.</param>
+        /// <exception cref="ArgumentNullException">The message is null</exception>
+        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
+        public Task PublishAsync(IMessage message);        
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
@@ -82,12 +90,17 @@ namespace Iviz.Roslib
         /// </summary>        
         public PublisherTopicState GetState();
 
+        public void WaitForAnySubscriber(int timeoutInMs);
+
+        public Task WaitForAnySubscriberAsync(CancellationToken token);
+
         internal Endpoint? RequestTopicRpc(string remoteCallerId);
     }
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage
     {
         public void Publish(T message);
+        public Task PublishAsync(T message);
     }
 
 }

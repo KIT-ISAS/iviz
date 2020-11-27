@@ -57,7 +57,7 @@ namespace Iviz.Roslib
         TcpClient? tcpClient;
         TcpListener? listener;
 
-        byte[] writeBuffer = new byte[BufferSizeIncrease];
+        byte[] writeBuffer = Array.Empty<byte>();
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
@@ -385,6 +385,17 @@ namespace Iviz.Roslib
             }
 
             messageQueue.Enqueue(message);
+        }
+
+        public async Task PublishAsync(T message)
+        {
+            if (!IsAlive)
+            {
+                numDropped++;
+                return;
+            }
+
+            await messageQueue.EnqueueAsync(message);
         }
 
         async Task<int> ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength)> result)
