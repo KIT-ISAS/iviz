@@ -6,7 +6,7 @@ namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        [SerializeField] [CanBeNull] BoxCollider boxCollider;
+        [SerializeField, CanBeNull] BoxCollider boxCollider;
 
         bool colliderEnabled = true;
 
@@ -26,6 +26,7 @@ namespace Iviz.Displays
 
         protected Bounds WorldBounds => BoxCollider.bounds;
 
+        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -89,7 +90,7 @@ namespace Iviz.Displays
             Visible = true;
         }
 
-        protected void DisableBoxCollider()
+        protected void IgnoreBoxCollider()
         {
             boxCollider = null;
         }
