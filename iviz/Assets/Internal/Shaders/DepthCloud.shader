@@ -34,7 +34,7 @@ Shader "iviz/DepthCloud"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 
-			float _PointSize;
+			//float _PointSize;
 			sampler2D _ColorTexture;
 			sampler2D _DepthTexture;
 
@@ -53,7 +53,8 @@ Shader "iviz/DepthCloud"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				half3 color : COLOR;
+				//fixed3 color : COLOR;
+				float2 uv : TEXCOORD0;
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
@@ -81,7 +82,8 @@ Shader "iviz/DepthCloud"
 				float2 center = _Points[inst];
 
 				float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r * 65.535;
-				float2 size = extent * z * _PointSize;
+				//float2 size = z * _PointSize * extent;
+				float2 size = z * extent;
 
 				float4 pos;
 				pos.xy = (center * _Pos_ST.xy + _Pos_ST.zw) * z;
@@ -91,17 +93,29 @@ Shader "iviz/DepthCloud"
 
 				// Set vertex output.
 				o.position = UnityObjectToClipPos(pos) + float4(quadVertex * size, 0, 0);
+				 
+				/*
 #if USE_INTENSITY
 				o.color = tex2Dlod(_IntensityTexture, float4(z * _IntensityCoeff + _IntensityAdd, 0, 0, 0));
 #else
 				o.color = tex2Dlod(_ColorTexture, float4(center, 0, 0));
 #endif
+*/
+#if USE_INTENSITY
+                o.uv = float2(z * _IntensityCoeff + _IntensityAdd, 0);
+#else
+                o.uv = float2(center);
+#endif
 				return o;
 			}
 
-			half4 frag(v2f i) : SV_Target
+			fixed4 frag(v2f i) : SV_Target
 			{
-				return half4(i.color, 1);
+#if USE_INTENSITY
+				return tex2D(_IntensityTexture, i.uv);
+#else
+				return tex2D(_ColorTexture, i.uv);
+#endif
 			}
 
 			ENDCG

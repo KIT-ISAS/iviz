@@ -31,13 +31,7 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
             panel.TfLog.Flush();
-        }
-
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
         }
         
         public void Show([NotNull] TfFrame frame)

@@ -38,17 +38,16 @@ namespace Iviz.Controllers
     {
         public const string DefaultTopic = "/tf";
         public const string BaseFrameId = "map";
-        static string FixedFrameId { get; set; } = "root";
-
         const string DefaultTopicStatic = "/tf_static";
 
-        static uint tfSeq;
+        static string FixedFrameId { get; set; } = "root";
+        static uint TfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
-        [CanBeNull] readonly InteractiveControl rootMarker;
         readonly FrameNode keepAllListener;
         readonly FrameNode staticListener;
+        [CanBeNull] readonly InteractiveControl rootMarker;
 
         public static void SetFixedFrame(string id)
         {
@@ -71,12 +70,6 @@ namespace Iviz.Controllers
             keepAllListener = FrameNode.Instantiate("[TFNode]", UnityFrame.transform);
             staticListener = FrameNode.Instantiate("[TFStatic]", UnityFrame.transform);
             defaultListener.transform.parent = UnityFrame.transform;
-
-            var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
-            Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
-
-            var mainLight = GameObject.Find("MainLight");
-            MainLight = mainLight.GetComponent<Light>();
 
             Config = new TfConfiguration();
 
@@ -116,7 +109,6 @@ namespace Iviz.Controllers
         public IListener ListenerStatic { get; private set; }
 
         [CanBeNull] public static GuiCamera GuiCamera => GuiCamera.Instance;
-        public static Light MainLight { get; set; }
 
         public static TfFrame MapFrame { get; private set; }
         public static TfFrame RootFrame { get; private set; }
@@ -472,7 +464,7 @@ namespace Iviz.Controllers
                 {
                     new TransformStamped
                     (
-                        RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
+                        RosUtils.CreateHeader(TfSeq++, parentFrame ?? BaseFrameId),
                         childFrame ?? "",
                         RelativePoseToOrigin(unityPose).Unity2RosTransform()
                     )

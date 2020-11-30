@@ -67,8 +67,6 @@ namespace Iviz.Resources
         }
 
 
-        public const int ClickableLayer = 8;
-
         static MaterialsType materials;
         static ColormapsType colormaps;
         static DisplaysType displays;

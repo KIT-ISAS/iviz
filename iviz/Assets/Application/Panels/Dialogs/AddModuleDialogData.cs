@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 
@@ -35,22 +36,19 @@ namespace Iviz.App
             itemList.Title = "Available Modules";
             itemList.Items = Modules.Select(entry => entry.Caption);
             itemList.ItemClicked += OnItemClicked;
-            itemList.CloseClicked += OnCloseClicked;
+            itemList.CloseClicked += Close;
 
             foreach (Resource.ModuleType module in UniqueModules)
             {
                 bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module);
                 if (hasModule)
                 {
-                    int moduleEntry = Modules.FindIndex(entry => entry.Module == module);
-                    itemList[moduleEntry].Interactable = false;
+                    //int moduleEntry = Modules.FindIndex(entry => entry.Module == module);
+                    //itemList[moduleEntry].Interactable = false;
+                    var entry = Modules.Zip(itemList).FirstOrDefault(tuple => tuple.First.Module == module).Second;
+                    entry.Interactable = false;
                 }
             }
-        }
-
-        void OnCloseClicked()
-        {
-            Close();
         }
 
         void OnItemClicked(int index, string _)
@@ -60,16 +58,9 @@ namespace Iviz.App
             moduleData.ShowPanel();
         }
 
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
-        }
-
         public override void CleanupPanel()
         {
-            base.CleanupPanel();
-
-            foreach (var entry in itemList.ItemEntries)
+            foreach (var entry in itemList)
             {
                 entry.Interactable = true;
             }

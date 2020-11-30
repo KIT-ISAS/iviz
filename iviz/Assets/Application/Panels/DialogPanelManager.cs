@@ -16,7 +16,8 @@ namespace Iviz.App
         Tf,
         SaveAs,
         Marker,
-        Network
+        Network,
+        Console
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -28,7 +29,7 @@ namespace Iviz.App
         Canvas parentCanvas;
         bool started;
 
-        public bool Active
+        bool Active
         {
             get => parentCanvas.enabled;
             set => parentCanvas.enabled = value;
@@ -39,29 +40,35 @@ namespace Iviz.App
             parentCanvas = GetComponentInParent<Canvas>();
 
             gameObject.SetActive(false);
-            PanelByType[DialogPanelType.ItemList] = Resource.Widgets.ItemListPanel.Instantiate(transform)
-                .GetComponent<ItemListDialogContents>();
-            PanelByType[DialogPanelType.Connection] = Resource.Widgets.ConnectionPanel.Instantiate(transform)
-                .GetComponent<ConnectionDialogContents>();
-            PanelByType[DialogPanelType.Image] =
-                Resource.Widgets.ImagePanel.Instantiate(transform).GetComponent<ImageDialogContents>();
-            PanelByType[DialogPanelType.Tf] =
-                Resource.Widgets.TfPanel.Instantiate(transform).GetComponent<TFDialogContents>();
-            PanelByType[DialogPanelType.SaveAs] = Resource.Widgets.SaveAsPanel.Instantiate(transform)
-                .GetComponent<SaveConfigDialogContents>();
-            PanelByType[DialogPanelType.AddTopic] = Resource.Widgets.AddTopicPanel.Instantiate(transform)
-                .GetComponent<AddTopicDialogContents>();
-            PanelByType[DialogPanelType.Marker] = Resource.Widgets.MarkerPanel.Instantiate(transform)
-                .GetComponent<MarkerDialogContents>();
-            PanelByType[DialogPanelType.Network] = Resource.Widgets.NetworkPanel.Instantiate(transform)
-                .GetComponent<NetworkDialogContents>();
+            (DialogPanelType type, IDialogPanelContents panel)[] list =
+            {
+                (DialogPanelType.ItemList, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
+                (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
+                (DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
+                (DialogPanelType.Tf, CreatePanel<TFDialogContents>(Resource.Widgets.TfPanel)),
+                (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogContents>(Resource.Widgets.SaveAsPanel)),
+                (DialogPanelType.AddTopic, CreatePanel<AddTopicDialogContents>(Resource.Widgets.AddTopicPanel)),
+                (DialogPanelType.Marker, CreatePanel<MarkerDialogContents>(Resource.Widgets.MarkerPanel)),
+                (DialogPanelType.Network, CreatePanel<NetworkDialogContents>(Resource.Widgets.NetworkPanel)),
+                (DialogPanelType.Console, CreatePanel<ConsoleDialogContents>(Resource.Widgets.ConsolePanel)),
+            };
 
-            PanelByType.Values.ForEach(x => x.Active = false);
+            foreach (var (type, panel) in list)
+            {
+                PanelByType.Add(type, panel);
+                panel.Active = false;
+            }
+
             Active = false;
             gameObject.SetActive(true);
             started = true;
 
             GameThread.EverySecond += UpdateSelected;
+        }
+
+        T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanelContents
+        {
+            return source.Instantiate(transform).GetComponent<T>();
         }
 
         void OnDestroy()
@@ -82,12 +89,7 @@ namespace Iviz.App
                 throw new InvalidOperationException("There is no panel for this type!");
             }
 
-            if (!(cm is T contents))
-            {
-                throw new InvalidOperationException("Panel type does not match!");
-            }
-
-            return contents;
+            return cm is T contents ? contents : throw new InvalidOperationException("Panel type does not match!");
         }
 
         void SelectPanelFor(DialogData newSelected)

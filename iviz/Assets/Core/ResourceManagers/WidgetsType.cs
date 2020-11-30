@@ -14,6 +14,7 @@ namespace Iviz.Resources
         public Info<GameObject> AddTopicPanel { get; }
         public Info<GameObject> MarkerPanel { get; }
         public Info<GameObject> NetworkPanel { get; }
+        public Info<GameObject> ConsolePanel { get; }
 
         public Info<GameObject> HeadTitle { get; }
         public Info<GameObject> SectionTitle { get; }
@@ -49,6 +50,7 @@ namespace Iviz.Resources
             AddTopicPanel = new Info<GameObject>("Widgets/Add Topic Panel");
             MarkerPanel = new Info<GameObject>("Widgets/Markers Panel");
             NetworkPanel = new Info<GameObject>("Widgets/Network Panel");
+            ConsolePanel = new Info<GameObject>("Widgets/Console Panel");
 
             HeadTitle = new Info<GameObject>("Widgets/Head Title");
             SectionTitle = new Info<GameObject>("Widgets/Section Title");

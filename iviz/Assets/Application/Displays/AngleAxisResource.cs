@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -34,6 +35,7 @@ namespace Iviz.Displays
             resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.ElementScale = 0.01f;
             Color = Color.yellow;
+            Layer = LayerType.Unclickable;
         }
 
         public void Reset()

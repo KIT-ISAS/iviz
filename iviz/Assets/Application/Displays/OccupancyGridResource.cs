@@ -108,6 +108,8 @@ namespace Iviz.Displays
             resource.UseColormap = true;
             resource.UseIntensityForScaleY = true;
             resource.CastShadows = false; // fix weird shadow bug
+
+            Layer = LayerType.Unclickable;
         }
 
         public Color Tint

@@ -392,11 +392,9 @@ namespace Iviz.Controllers
             {
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
-                    for (int i = 0; i < msg.Points.Length; i++)
+                    foreach (var (position, color) in msg.Points.Zip(msg.Colors))
                     {
-                        yield return new PointWithColor(
-                            msg.Points[i].Ros2Unity(),
-                            msg.Colors[i].ToUnityColor32());
+                        yield return new PointWithColor(position.Ros2Unity(), color.ToUnityColor32());
                     }
                 }
 
@@ -404,15 +402,13 @@ namespace Iviz.Controllers
             }
             else
             {
-                Color color = color32;
+                Color mColor = color32;
 
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
-                    for (int i = 0; i < msg.Points.Length; i++)
+                    foreach (var (position, color) in msg.Points.Zip(msg.Colors))
                     {
-                        yield return new PointWithColor(
-                            msg.Points[i].Ros2Unity(),
-                            color * msg.Colors[i].ToUnityColor());
+                        yield return new PointWithColor(position.Ros2Unity(), mColor * color.ToUnityColor32());
                     }
                 }
 
@@ -527,11 +523,9 @@ namespace Iviz.Controllers
             {
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
-                    for (int i = 0; i < msg.Points.Length; i++)
+                    foreach (var (position, color) in msg.Points.Zip(msg.Colors))
                     {
-                        yield return new PointWithColor(
-                            msg.Points[i].Ros2Unity(),
-                            msg.Colors[i].ToUnityColor32());
+                        yield return new PointWithColor(position.Ros2Unity(), color.ToUnityColor32());
                     }
                 }
 
@@ -539,15 +533,13 @@ namespace Iviz.Controllers
             }
             else
             {
-                Color color = color32;
+                Color mColor = color32;
 
                 IEnumerable<PointWithColor> PointEnumerator()
                 {
-                    for (int i = 0; i < msg.Points.Length; i++)
+                    foreach (var (position, color) in msg.Points.Zip(msg.Colors))
                     {
-                        yield return new PointWithColor(
-                            msg.Points[i].Ros2Unity(),
-                            color * msg.Colors[i].ToUnityColor());
+                        yield return new PointWithColor(position.Ros2Unity(), mColor * color.ToUnityColor32());
                     }
                 }
 

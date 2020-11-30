@@ -29,7 +29,7 @@ namespace Iviz.App
             itemList.Title = "Load Config File";
             itemList.Items = files;
             itemList.ItemClicked += OnItemClicked;
-            itemList.CloseClicked += OnCloseClicked;
+            itemList.CloseClicked += Close;
             itemList.EmptyText = "No Config Files Found";
         }
 
@@ -40,20 +40,10 @@ namespace Iviz.App
             return fs.Substring(0, fs.Length - Suffix.Length);
         }
 
-        void OnCloseClicked()
-        {
-            Close();
-        }
-
         void OnItemClicked(int index, string _)
         {
             ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
             Close();
-        }
-
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
         }
     }
 }

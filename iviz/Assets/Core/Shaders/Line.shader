@@ -112,7 +112,7 @@ Shader "iviz/Line"
                 float3 up = normalize(cross(front, right));
 
                 float3 p = right * V.x + up * V.y + BA * V.z + A;
-
+ 
 				o.position = UnityObjectToClipPos(p);
 
 	#if USE_TEXTURE

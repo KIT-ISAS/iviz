@@ -90,11 +90,8 @@ Shader "iviz/PointCloud2"
 				o.color = tex2Dlod(_AtlasTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
 #else
 				int centerIntensity = centerPoint.intensity;
-				fixed3 rgb = fixed3(
-					(centerIntensity >>  0) & 0xff,
-					(centerIntensity >>  8) & 0xff,
-					(centerIntensity >> 16) & 0xff
-					) / 255.0;
+				int3 rgbi = (centerIntensity >> int3(0, 8, 16)) & 255;
+				float3 rgb = float3(rgbi) / 255; 
 				o.color = rgb;
 #endif
 				o.color *= _Tint;

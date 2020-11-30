@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     /// <summary>
-    /// Marker resource that does nothing. Attached as a last resort to a loaded asset.
+    /// Marker resource that does nothing. Attached as a last resort to wrap an unknown loaded asset.
     /// </summary>
     public sealed class AssetWrapperResource : MarkerResource
     {

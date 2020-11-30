@@ -123,73 +123,19 @@ namespace Iviz.App
             
             UnityEngine.Application.targetFrameRate = 60;
             
+            
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
             canvas.referenceResolution = Settings.IsMobile ? 
                 new Vector2(800, 600) :
                 new Vector2(800, 800);
+                
             QualitySettings.antiAliasing = Settings.IsMobile ? 0 : 2;
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
             StartOrbiting();
         }
-
-        /*
-        public void Unselect([CanBeNull] ClickableNode display)
-        {
-            if (SelectedDisplay != display)
-            {
-                return;
-            }
-
-            SelectedDisplay.Selected = false;
-            SelectedDisplay = null;
-            boundaryFrame.Target = null;
-        }
-
-        public void Select([CanBeNull] ClickableNode display)
-        {
-            if (SelectedDisplay == display)
-            {
-                return;
-            }
-
-            if (!(SelectedDisplay is null))
-            {
-                SelectedDisplay.Selected = false;
-            }
-
-            SelectedDisplay = display;
-            if (!(SelectedDisplay is null))
-            {
-                SelectedDisplay.Selected = true;
-                boundaryFrame.Target = display;
-            }
-        }
-
-        public void ToggleSelect([CanBeNull] ClickableNode display)
-        {
-            if (SelectedDisplay != display)
-            {
-                Select(display);
-            }
-            else
-            {
-                Unselect(display);
-            }
-        }
-
-        public void ShowBoundary([CanBeNull] ClickableNode display)
-        {
-            if (display != SelectedDisplay)
-            {
-                return;
-            }
-
-            boundaryFrame.Target = display;
-        }
-        */
-
+        
         void OnEnable()
         {
             GameThread.EveryFrame -= UpdateEvenIfInactive;
@@ -199,8 +145,7 @@ namespace Iviz.App
         {
             GameThread.EveryFrame += UpdateEvenIfInactive;
         }
-
-        //float tmpAltDistance;
+        
         void UpdateEvenIfInactive()
         {
             bool prevPointerDown = PointerDown;
@@ -285,7 +230,7 @@ namespace Iviz.App
                 
             if (Settings.IsMobile)
             {
-                if (!(OrbitCenterOverride is null))
+                if (OrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
                     ProcessScaling(false);
@@ -303,7 +248,7 @@ namespace Iviz.App
             }
             else
             {
-                if (!(OrbitCenterOverride is null))
+                if (OrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
                     Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
@@ -352,7 +297,6 @@ namespace Iviz.App
             {
                 return;
             }
-            //Debug.Log(alreadyMoving);
 
             Vector2 pointerDiff;
             if (alreadyMoving)

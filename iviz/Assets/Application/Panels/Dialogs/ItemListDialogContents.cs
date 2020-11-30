@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,13 +11,14 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents
+    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents, IEnumerable<ItemListDialogContents.ItemEntry>
     {
-        const float yOffset = 5;
+        static float BaseButtonHeight;
+
+        protected float YOffset { get; set; } = 5;
+        protected float ButtonHeight { get; set; }
 
         readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
-
-        public ReadOnlyCollection<ItemEntry> ItemEntries { get; }
 
         [SerializeField] GameObject contentObject = null;
         [SerializeField] Text emptyText = null;
@@ -44,9 +46,14 @@ namespace Iviz.App
             readonly GameObject buttonObject;
             readonly Text text;
             readonly Button button;
-            public float ButtonHeight { get; }
 
-            public ItemEntry(int index, [NotNull] GameObject parent, [NotNull] Action<int, string> callback)
+            readonly float buttonHeight;
+            readonly float yOffset;
+
+            RectTransform ButtonTransform => (RectTransform) buttonObject.transform;
+
+            public ItemEntry(int index, [NotNull] GameObject parent, float buttonHeight, float yOffset,
+                [NotNull] Action<int, string> callback)
             {
                 if (parent == null)
                 {
@@ -58,8 +65,13 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(callback));
                 }
 
+                this.buttonHeight = buttonHeight;
+                this.yOffset = yOffset;
                 buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.TopicsButton, parent.transform, false);
-                ButtonHeight = ((RectTransform) buttonObject.transform).rect.height;
+                
+                RectTransform mTransform = ButtonTransform;
+                Vector2 sizeDelta = mTransform.sizeDelta;
+                mTransform.sizeDelta = new Vector2(sizeDelta.x, buttonHeight);
 
                 text = buttonObject.GetComponentInChildren<Text>();
                 button = buttonObject.GetComponentInChildren<Button>();
@@ -83,8 +95,8 @@ namespace Iviz.App
                     }
 
                     index = value;
-                    float y = yOffset + index * (yOffset + ButtonHeight);
-                    ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
+                    float y = yOffset + index * (yOffset + buttonHeight);
+                    ButtonTransform.anchoredPosition = new Vector2(0, -y);
                 }
             }
 
@@ -169,7 +181,7 @@ namespace Iviz.App
                     {
                         if (i >= itemEntries.Count)
                         {
-                            itemEntries.Add(new ItemEntry(i, contentObject, RaiseClicked));
+                            itemEntries.Add(new ItemEntry(i, contentObject, ButtonHeight, YOffset, RaiseClicked));
                         }
 
                         itemEntries[i++].Text = str;
@@ -181,21 +193,20 @@ namespace Iviz.App
             }
         }
 
-        [NotNull] public ItemEntry this[int i] => itemEntries[i];
-
-        public bool Empty => itemEntries.Count == 0;
-
-        public int Count => itemEntries.Count;
-
         public bool Active
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
-        public ItemListDialogContents()
+        void Awake()
         {
-            ItemEntries = itemEntries.AsReadOnly();
+            if (BaseButtonHeight == 0)
+            {
+                BaseButtonHeight = ((RectTransform) Resource.Widgets.TopicsButton.Object.transform).rect.height;
+            }
+
+            ButtonHeight = BaseButtonHeight;
         }
 
         // Use this for initialization
@@ -214,55 +225,47 @@ namespace Iviz.App
             CloseClicked?.Invoke();
         }
 
-        public int Add(string str)
-        {
-            int i = itemEntries.Count;
-            itemEntries.Add(new ItemEntry(i, contentObject, RaiseClicked));
-            itemEntries[i].Text = str;
-            return i;
-        }
-
-        public bool Remove(int index)
-        {
-            if (index < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            if (index >= itemEntries.Count)
-            {
-                return false;
-            }
-
-            canvas.enabled = false;
-            itemEntries[index].Invalidate();
-            itemEntries.RemoveAt(index);
-            for (int i = index; i < itemEntries.Count; i++)
-            {
-                itemEntries[i].Index = i;
-            }
-
-            UpdateSize();
-            canvas.enabled = true;
-            return true;
-        }
-
         void UpdateSize()
         {
             RectTransform rectTransform = ((RectTransform) contentObject.transform);
             rectTransform.sizeDelta =
                 (itemEntries.Count == 0)
-                    ? new Vector2(0, 2 * yOffset)
-                    : new Vector2(0, 2 * yOffset + itemEntries.Count * (itemEntries[0].ButtonHeight + yOffset));
+                    ? new Vector2(0, 2 * YOffset)
+                    : new Vector2(0, 2 * YOffset + itemEntries.Count * (ButtonHeight + YOffset));
 
             emptyText.gameObject.SetActive(itemEntries.Count == 0);
-            itemEntries.ForEach(x => x.Interactable = true);
+            foreach (var x in itemEntries)
+            {
+                x.Interactable = true;
+            }
+        }
+
+        protected void TrimPanelSize()
+        {
+            RectTransform rectTransform = ((RectTransform) contentObject.transform);
+            var t = (RectTransform) transform;
+            t.sizeDelta = new Vector2(t.sizeDelta.x, rectTransform.sizeDelta.y + 45);
         }
 
         public virtual void ClearSubscribers()
         {
             ItemClicked = null;
             CloseClicked = null;
+        }
+
+        public List<ItemEntry>.Enumerator GetEnumerator()
+        {
+            return itemEntries.GetEnumerator();
+        }        
+        
+        IEnumerator<ItemEntry> IEnumerable<ItemEntry>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -150,23 +150,9 @@ namespace Iviz.Displays
 
             BoxCollider ammCollider = root.AddComponent<BoxCollider>();
 
-            Bounds? TransformNode(Bounds? bounds, Transform transform)
-            {
-                while (true)
-                {
-                    if (transform == null)
-                    {
-                        return bounds;
-                    }
-
-                    bounds = UnityUtils.TransformBound(bounds, transform);
-                    transform = transform.parent;
-                }
-            }
-
             Bounds? ammBounds =
                 UnityUtils.CombineBounds(amm.Children.Select(resource =>
-                    TransformNode(resource.LocalBounds, resource.transform)));
+                    TransformBoundsUntil(resource.LocalBounds, resource.transform, root.transform)));
             if (ammBounds != null)
             {
                 ammCollider.center = ammBounds.Value.center;
@@ -176,6 +162,17 @@ namespace Iviz.Displays
             return amm;
         }
 
+        static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)
+        {
+            while (transform != endTransform)
+            {
+                bounds = UnityUtils.TransformBound(bounds, transform);
+                transform = transform.parent;
+            }
+
+            return bounds;
+        }        
+        
 
         static Vector3 Assimp2Unity(in Msgs.IvizMsgs.Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);

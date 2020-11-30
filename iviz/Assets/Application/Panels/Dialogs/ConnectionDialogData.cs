@@ -210,10 +210,5 @@ namespace Iviz.App
                 panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
         }
-
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
-        }
     }
 }

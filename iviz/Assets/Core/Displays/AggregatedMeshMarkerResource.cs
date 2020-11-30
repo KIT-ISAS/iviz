@@ -1,30 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iviz.Core;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
+    [RequireComponent(typeof(BoxCollider))]
     public sealed class AggregatedMeshMarkerResource : MonoBehaviour, ISupportsTintAndAROcclusion
     {
-        [SerializeField] BoxCollider markerCollider;
         [SerializeField] MeshTrianglesResource[] children = Array.Empty<MeshTrianglesResource>();
+        [SerializeField] bool occlusionOnly;
+        [SerializeField] Color tint = Color.white;
 
-        public Bounds? Bounds => new Bounds(markerCollider.center, markerCollider.size);
+        BoxCollider boxCollider;
+        [NotNull] BoxCollider Collider => boxCollider != null ? boxCollider : boxCollider = GetComponent<BoxCollider>();
 
+        [NotNull]
         public IReadOnlyCollection<MeshTrianglesResource> Children
         {
             get => children;
-            set => children = value.ToArray();
-        } 
-        
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                children = value.ToArray();
+                Layer = Layer;
+            }
         }
+
+        [NotNull] public Bounds? Bounds => new Bounds(Collider.center, Collider.size);
 
         public int Layer
         {
@@ -43,76 +52,51 @@ namespace Iviz.Displays
             }
         }
 
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
         public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
-        public bool ColliderEnabled
-        {
-            get => markerCollider.enabled;
-            set
-            {
-                markerCollider.enabled = value;
-
-                foreach (var child in children)
-                {
-                    if (child != null)
-                    {
-                        child.ColliderEnabled = value;
-                    }
-                }
-            }
-        }
-
-        [SerializeField] bool occlusionOnly;
         public bool OcclusionOnly
         {
             get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
-                foreach (MeshMarkerResource resource in children)
+                foreach (var child in children)
                 {
-                    if (resource != null) // do not use 'is' here
+                    if (child != null)
                     {
-                        resource.OcclusionOnly = value;
+                        child.OcclusionOnly = value;
                     }
                 }
             }
         }
 
-        [SerializeField] Color tint = Color.white;
         public Color Tint
         {
             get => tint;
             set
             {
                 tint = value;
-                foreach (MeshMarkerResource resource in children)
+                foreach (var child in children)
                 {
-                    if (resource != null) // do not use 'is' here
+                    if (child != null)
                     {
-                        resource.Tint = value;
+                        child.Tint = value;
                     }
                 }
             }
         }
 
-        void Awake()
-        {
-            markerCollider = GetComponent<BoxCollider>();
-        }
-
         public void Suspend()
         {
+        }
+
+        void Awake()
+        {
+            Layer = LayerType.Unclickable;
         }
     }
 }

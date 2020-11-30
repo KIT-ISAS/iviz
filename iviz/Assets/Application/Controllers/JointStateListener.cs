@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -17,7 +18,7 @@ namespace Iviz.Controllers
         bool TryWriteJoint(string joint, float value);
         bool AttachedToTf { get; }
     }
-    
+
     [DataContract]
     public sealed class JointStateConfiguration : JsonToString, IConfiguration
     {
@@ -38,6 +39,7 @@ namespace Iviz.Controllers
         public override TfFrame Frame => TfListener.MapFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
+
         public JointStateConfiguration Config
         {
             get => config;
@@ -64,18 +66,20 @@ namespace Iviz.Controllers
         }
 
         IJointProvider robot;
+
         public IJointProvider Robot
         {
             get => robot;
             set
             {
-                if (!(robot is null))
+                if (robot != null)
                 {
                     robot.Stopped -= OnRobotStopped;
                 }
+
                 robot = value;
                 warnNotFound.Clear();
-                if (!(robot is null))
+                if (robot != null)
                 {
                     robot.Stopped += OnRobotStopped;
                 }
@@ -131,30 +135,39 @@ namespace Iviz.Controllers
                 return;
             }
 
-            for (int i = 0; i < msg.Name.Length; i++)
+            if (msg.Name.Length != msg.Position.Length)
             {
-                if (double.IsNaN(msg.Position[i]))
+                Debug.Log($"{this}: Names and positions have different lengths!");
+                return;
+            }
+
+            foreach (var (name, position) in msg.Name.Zip(msg.Position))
+            {
+                if (double.IsNaN(position))
                 {
-                    Debug.Log($"JointStateListener: Joint {i} is NaN!");
+                    Debug.Log($"JointStateListener: Joint for '{name}' is NaN!");
                     continue;
                 }
-                string msgJoint = msg.Name[i];
+
+                string msgJoint = name;
                 if (MsgTrimFromEnd != 0 && msgJoint.Length >= MsgTrimFromEnd)
                 {
                     msgJoint = msgJoint.Substring(0, msgJoint.Length - MsgTrimFromEnd);
                 }
+
                 msgJoint = $"{MsgJointPrefix}{msgJoint}{MsgJointSuffix}";
-                if (Robot.TryWriteJoint(msgJoint, (float) msg.Position[i]))
+                if (Robot.TryWriteJoint(msgJoint, (float) position))
                 {
                     continue;
                 }
+
                 if (!warnNotFound.Contains(msgJoint))
                 {
-                    Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint + "' (original: '" + msg.Name[i] + "')");
+                    Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint +
+                              "' (original: '" + name + "')");
                     warnNotFound.Add(msgJoint);
                 }
             }
         }
     }
-
 }
