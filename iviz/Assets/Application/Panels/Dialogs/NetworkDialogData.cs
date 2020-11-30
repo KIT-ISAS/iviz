@@ -18,18 +18,12 @@ namespace Iviz.App
         
         public override void SetupPanel()
         {
-            panel.Close.Clicked += () =>
-            {
-                DialogPanelManager.HidePanelFor(this);
-            };
-            
+            panel.Close.Clicked += Close;
             UpdatePanel();
         }
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
-
             description.Length = 0;
             if (!ConnectionManager.IsConnected)
             {

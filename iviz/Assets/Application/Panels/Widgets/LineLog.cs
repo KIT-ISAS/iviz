@@ -13,7 +13,7 @@ namespace Iviz.App
         [SerializeField] GameObject content = null;
 
         readonly List<string> lines = new List<string>();
-        const int maxLines = 100;
+        const int MaxLines = 100;
 
         bool active = true;
         public bool Active
@@ -47,14 +47,17 @@ namespace Iviz.App
                 return;
             }
 
-            int overflow = lines.Count - maxLines;
+            int overflow = lines.Count - MaxLines;
             if (overflow > 0)
             {
                 lines.RemoveRange(0, overflow);
             }
 
             StringBuilder str = new StringBuilder();
-            lines.ForEach(x => str.AppendLine(x));
+            foreach (string x in lines)
+            {
+                str.AppendLine(x);
+            }
 
             text.text = str.ToString();
             float y = text.preferredHeight;

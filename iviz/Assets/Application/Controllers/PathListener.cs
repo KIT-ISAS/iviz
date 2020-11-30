@@ -145,7 +145,7 @@ namespace Iviz.Controllers
         public PathListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            
+
             node = FrameNode.Instantiate("PathNode");
             resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
             resource.ElementScale = 0.005f;
@@ -192,7 +192,7 @@ namespace Iviz.Controllers
                 // shouldn't happen
                 return;
             }
-            
+
             Pose topPoseInv = node.Parent.WorldPose.Inverse();
 
             savedPoses.Clear();
@@ -240,6 +240,7 @@ namespace Iviz.Controllers
                 {
                     continue;
                 }
+
                 savedPoses.Add(ps.Ros2Unity());
             }
 
@@ -250,7 +251,7 @@ namespace Iviz.Controllers
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
             Handler(msg.Polygon);
-        }        
+        }
 
         void Handler([NotNull] Msgs.GeometryMsgs.Polygon msg)
         {
@@ -260,13 +261,15 @@ namespace Iviz.Controllers
                 if (p.HasNaN())
                 {
                     continue;
-                }                
+                }
+
                 savedPoses.Add(new Pose(p.Ros2Unity(), Quaternion.identity));
             }
+
             savedPoses.Add(savedPoses[0]);
 
             ProcessPoses();
-        }        
+        }
 
         void ProcessPoses()
         {
@@ -289,10 +292,10 @@ namespace Iviz.Controllers
                 Vector3 xDir = Vector3.right.Ros2Unity() * FrameSize;
                 Vector3 yDir = Vector3.up.Ros2Unity() * FrameSize;
                 Vector3 zDir = Vector3.forward.Ros2Unity() * FrameSize;
-                for (int i = 0; i < savedPoses.Count; i++)
+                foreach (Pose savedPose in savedPoses)
                 {
-                    Vector3 p = savedPoses[i].position;
-                    Quaternion q = savedPoses[i].rotation;
+                    Vector3 p = savedPose.position;
+                    Quaternion q = savedPose.rotation;
                     lines.Add(new LineWithColor(p, p + q * xDir, Color.red));
                     lines.Add(new LineWithColor(p, p + q * yDir, Color.green));
                     lines.Add(new LineWithColor(p, p + q * zDir, Color.blue));

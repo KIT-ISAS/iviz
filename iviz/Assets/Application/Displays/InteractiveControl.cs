@@ -9,41 +9,6 @@ using Vector4 = System.Numerics.Vector4;
 
 namespace Iviz.Displays
 {
-    public delegate void MovedAction(in Pose pose);
-
-    public enum InteractionModeType
-    {
-        None,
-        ClickOnly,
-
-        MoveAxisX,
-        MovePlaneYZ,
-        RotateAxisX,
-        MovePlaneYZ_RotateAxisX,
-        Frame,
-
-        Move3D,
-        Rotate3D,
-        MoveRotate3D
-    }
-
-    public interface IControlMarker
-    {
-        Transform TargetTransform { get; set; }
-        bool Visible { get; set; }
-        bool PointsToCamera { get; set; }
-        bool HandlesPointToCamera { get; set; }
-        bool KeepAbsoluteRotation { get; set; }
-        InteractionModeType InteractionMode { get; set; }
-        Bounds? Bounds { get; set; }
-        void Suspend();
-
-        event MovedAction Moved;
-        event Action PointerUp;
-        event Action PointerDown;
-    }
-
-
     public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
     {
         GameObject[] allResources;
@@ -66,12 +31,13 @@ namespace Iviz.Displays
         [SerializeField] Transform targetTransform;
         BoundaryFrame frame;
 
-
         InteractionModeType interactionMode;
         bool handlesPointToCamera;
         bool keepAbsoluteRotation;
         bool pointsToCamera;
-
+        
+        Bounds? bounds;
+        
         public Transform TargetTransform
         {
             get => targetTransform;
@@ -258,8 +224,6 @@ namespace Iviz.Displays
             }
         }
 
-        Bounds? bounds;
-
         public Bounds? Bounds
         {
             get => bounds;
@@ -272,6 +236,18 @@ namespace Iviz.Displays
                 GameObject holder = holderCollider.gameObject;
                 holder.transform.localPosition = newBounds.center;
                 holder.transform.localScale = 2 * newBounds.size;
+            }
+        }
+        
+        public int Layer
+        {
+            get => LayerType.Clickable;
+            set
+            {
+                if (value != LayerType.Clickable)
+                {
+                    throw new InvalidOperationException("This display cannot change layers");                    
+                }
             }
         }
 
@@ -293,7 +269,6 @@ namespace Iviz.Displays
             allResources = new[]
                 {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
-
             void Moved(in Pose pose) => this.Moved?.Invoke(pose);
             void PointerUp() => this.PointerUp?.Invoke();
             void PointerDown() => this.PointerDown?.Invoke();
@@ -309,6 +284,7 @@ namespace Iviz.Displays
             frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(holderCollider.transform);
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
+            frame.Layer = LayerType.Unclickable;
 
             InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
         }

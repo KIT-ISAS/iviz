@@ -30,7 +30,7 @@ namespace Iviz.App
                 throw new InvalidOperationException("Cannot setup panel without a listener!");
             }
             
-            panel.CloseButton.Clicked += Close;
+            panel.CloseButton.Clicked += OnCloseClicked;
             panel.Material = Listener.Material;
             panel.ImageSize = Listener.ImageSize;
         }
@@ -41,10 +41,10 @@ namespace Iviz.App
             Show();
         }
 
-        void Close()
+        void OnCloseClicked()
         {
             Listener?.OnDialogClosed();
-            DialogPanelManager.HidePanelFor(this);
+            Close();
         }
     }
 }

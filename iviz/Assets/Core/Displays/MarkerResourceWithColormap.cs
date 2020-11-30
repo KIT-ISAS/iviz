@@ -13,12 +13,12 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
-        static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
-        static readonly int LocalToWorldID = Shader.PropertyToID("_LocalToWorld");
-        static readonly int WorldToLocalID = Shader.PropertyToID("_WorldToLocal");
-        static readonly int TintID = Shader.PropertyToID("_Tint");
-        static readonly int AtlasRowID = Shader.PropertyToID("_AtlasRow");
+        static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
+        static readonly int LocalToWorldId = Shader.PropertyToID("_LocalToWorld");
+        static readonly int WorldToLocalId = Shader.PropertyToID("_WorldToLocal");
+        static readonly int TintId = Shader.PropertyToID("_Tint");
+        static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
 
         [SerializeField] Resource.ColormapId colormap;
         [SerializeField] Vector2 intensityBounds;
@@ -43,7 +43,7 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-                Properties.SetFloat(AtlasRowID,
+                Properties.SetFloat(AtlasRowId,
                     (ColormapsType.AtlasSize -0.5f - (float) value) / ColormapsType.AtlasSize);
                 UpdateProperties();
             }
@@ -77,8 +77,8 @@ namespace Iviz.Displays
                     add = intensityBounds.y / intensitySpan;
                 }
 
-                Properties.SetFloat(IntensityCoeffID, coeff);
-                Properties.SetFloat(IntensityAddID, add);
+                Properties.SetFloat(IntensityCoeffId, coeff);
+                Properties.SetFloat(IntensityAddId, add);
                 UpdateProperties();
             }
         }
@@ -154,15 +154,15 @@ namespace Iviz.Displays
             set
             {
                 tint = value;
-                Properties.SetColor(TintID, value);
+                Properties.SetColor(TintId, value);
                 UpdateProperties();
             }
         }
 
         protected void UpdateTransform()
         {
-            Properties.SetMatrix(LocalToWorldID, transform.localToWorldMatrix);
-            Properties.SetMatrix(WorldToLocalID, transform.worldToLocalMatrix);
+            Properties.SetMatrix(LocalToWorldId, transform.localToWorldMatrix);
+            Properties.SetMatrix(WorldToLocalId, transform.worldToLocalMatrix);
             UpdateProperties();
         }
 

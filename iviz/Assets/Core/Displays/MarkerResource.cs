@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -86,7 +87,7 @@ namespace Iviz.Displays
 
         public virtual void Suspend()
         {
-            Layer = 0;
+            Layer = LayerType.Unclickable;
             Visible = true;
         }
 

@@ -37,20 +37,6 @@ namespace Iviz.Displays
             get => transform.parent;
             set => transform.parent = value;
         }
-
-        public bool ColliderEnabled
-        {
-            get => Display?.ColliderEnabled ?? throw new NullReferenceException(ErrorNoDisplayMessage);
-            set
-            {
-                if (Display == null)
-                {
-                    throw new NullReferenceException(ErrorNoDisplayMessage);
-                }
-
-                Display.ColliderEnabled = value;
-            }
-        }        
         
         public virtual void Suspend()
         {

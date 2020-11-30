@@ -8,6 +8,19 @@ using UnityEngine;
 
 namespace Iviz.Resources
 {
+    public static class LayerType
+    {
+        /// <summary>
+        /// Maps to the 'Ignore Raycast' layer, should be invisible to raycasts in any scene 
+        /// </summary>
+        public const int Unclickable = 2;
+        
+        /// <summary>
+        /// Maps to the 'Clickable' layer, should be visible to raycasts in any scene 
+        /// </summary>
+        public const int Clickable = 8;
+    }
+    
     public sealed class DisplaysType
     {
         readonly Dictionary<Type, Info<GameObject>> resourceByType;

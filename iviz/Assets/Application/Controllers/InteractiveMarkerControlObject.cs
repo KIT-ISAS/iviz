@@ -8,7 +8,6 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 namespace Iviz.Controllers
 {
@@ -21,19 +20,14 @@ namespace Iviz.Controllers
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
         [CanBeNull] IControlMarker control;
-
         GameObject markerNode;
-        //bool markerIsInteractive;
-
         string rosId;
+        bool visible;
 
         InteractiveMarkerObject interactiveMarkerObject;
 
-        public Bounds? Bounds { get; private set; }
-
-
-        bool visible;
-
+        [CanBeNull] public Bounds? Bounds { get; private set; }
+        
         public bool Visible
         {
             get => visible;
@@ -51,8 +45,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-
-
+        
         void Awake()
         {
             markerNode = new GameObject("[MarkerNode]");
@@ -162,17 +155,14 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int) interactionMode)
                     .AppendLine();
-                //markerIsInteractive = false;
                 DisposeControlDisplay();
             }
             else if (interactionMode == InteractionMode.None)
             {
-                //markerIsInteractive = false;
                 DisposeControlDisplay();
             }
             else
             {
-                //markerIsInteractive = true;
                 IControlMarker mControl = EnsureControlDisplayExists();
                 switch (interactionMode)
                 {
@@ -306,7 +296,11 @@ namespace Iviz.Controllers
 
         public void Stop()
         {
-            markers.Values.ForEach(DeleteMarkerObject);
+            foreach (var markerObject in markers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
+
             markers.Clear();
 
             if (control != null)
@@ -319,7 +313,6 @@ namespace Iviz.Controllers
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
             baseDescription.Append(description);
-
             foreach (var marker in markers.Values)
             {
                 marker.GenerateLog(baseDescription);
@@ -380,10 +373,11 @@ namespace Iviz.Controllers
                 case OrientationMode.ViewFacing:
                     return "ViewFacing";
                 default:
-                    return $"Unknown";
+                    return "Unknown";
             }
         }
 
+        [CanBeNull]
         Bounds? RecalculateBounds()
         {
             IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = markers.Values

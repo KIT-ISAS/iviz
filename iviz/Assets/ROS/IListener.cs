@@ -208,30 +208,9 @@ namespace Iviz.Ros
                 return;
             }
 
-            float jitterMin = float.MaxValue;
-            float jitterMax = float.MinValue;
-
-            for (int i = 0; i < timesOfArrival.Count - 1; i++)
-            {
-                float jitter = timesOfArrival[i + 1] - timesOfArrival[i];
-                if (jitter < jitterMin)
-                {
-                    jitterMin = jitter;
-                }
-
-                if (jitter > jitterMax)
-                {
-                    jitterMax = jitter;
-                }
-            }
 
             Stats = new RosListenerStats(
                 totalMsgCounter,
-                jitterMin,
-                jitterMax,
-                timesOfArrival.Count == 0
-                    ? 0
-                    : (timesOfArrival.Last() - timesOfArrival.First()) / timesOfArrival.Count,
                 timesOfArrival.Count,
                 lastMsgBytes,
                 msgsInQueue,

@@ -29,7 +29,7 @@ namespace Iviz.App
                 Select(GetFileName));
             panel.Items = files;
             panel.ItemClicked += OnItemClicked;
-            panel.CloseClicked += OnCloseClicked;
+            panel.CloseClicked += Close;
             panel.EmptyText = "No Config Files Found";
             panel.Input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
 
@@ -40,11 +40,6 @@ namespace Iviz.App
         {
             string fs = Path.GetFileName(s);
             return fs.Substring(0, fs.Length - Suffix.Length);
-        }
-
-        void OnCloseClicked()
-        {
-            Close();
         }
 
         void OnItemClicked(int index, string _)
@@ -58,11 +53,5 @@ namespace Iviz.App
             ModuleListPanel.SaveStateConfiguration(panel.Input.Value + Suffix);
             Close();
         }
-
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
-        }
-
     }
 }

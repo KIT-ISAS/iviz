@@ -46,6 +46,7 @@ namespace Iviz.App
         [SerializeField] Button showTfTree = null;
         [SerializeField] Button resetAll = null;
         [SerializeField] Button showNetwork = null;
+        [SerializeField] Button showConsole = null;
 
         [SerializeField] Sprite connectedSprite = null;
         [SerializeField] Sprite connectingSprite = null;
@@ -76,6 +77,7 @@ namespace Iviz.App
         TfDialogData tfTreeData;
         MarkerDialogData markerData;
         NetworkDialogData networkData;
+        ConsoleDialogData consoleData;
 
         ControllerService controllerService;
 
@@ -143,10 +145,13 @@ namespace Iviz.App
 
         void Start()
         {
-            parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
+            var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
+            Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
 
+            
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
-
+            
+            parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData(this);
             availableTopics = new AddTopicDialogData(this);
 
@@ -156,8 +161,8 @@ namespace Iviz.App
             saveConfigData = new SaveConfigDialogData(this);
             markerData = new MarkerDialogData(this);
             networkData = new NetworkDialogData(this);
-
             connectionData = new ConnectionDialogData(this);
+            consoleData = new ConsoleDialogData(this);
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -178,6 +183,7 @@ namespace Iviz.App
             showTfTree.onClick.AddListener(tfTreeData.Show);
             resetAll.onClick.AddListener(ResetAllModules);
             showNetwork.onClick.AddListener(networkData.Show);
+            showConsole.onClick.AddListener(consoleData.Show);
 
             string MasterUriToString(Uri uri) =>
                 uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";

@@ -55,7 +55,6 @@ namespace Iviz.Controllers
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
-            pointCloud.Layer = 2;
             Config = new PointCloudConfiguration();
         }
 
@@ -257,9 +256,9 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            for (int i = 0; i < fieldNames.Count; i++)
+            foreach (var (field, fieldName) in fields.Zip(fieldNames))
             {
-                if (fieldNames[i] != fields[i].Name)
+                if (field.Name != fieldName)
                 {
                     return false;
                 }

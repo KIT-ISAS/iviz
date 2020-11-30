@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Iviz.App.Gui;
+using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -9,10 +11,10 @@ namespace Iviz.App
     public sealed class AddTopicDialogData : DialogData
     {
         const int MaxLineWidth = 250;
+        const bool SortByType = false;
 
         readonly AddTopicDialogContents panel;
         public override IDialogPanelContents Panel => panel;
-        bool sortByType = false;
 
         class TopicWithResource
         {
@@ -88,12 +90,10 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
-
             GetTopics();
 
             topics.Sort((x, y) => string.CompareOrdinal(x.Topic, y.Topic));
-            if (sortByType)
+            if (SortByType)
             {
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
@@ -102,11 +102,11 @@ namespace Iviz.App
 
             if (panel.ShowAll.Value)
             {
-                for (int i = 0; i < topics.Count; i++)
+                foreach (var (item, topic) in panel.Zip(topics))
                 {
-                    if (topics[i].ResourceType == Resource.ModuleType.Invalid)
+                    if (topic.ResourceType == Resource.ModuleType.Invalid)
                     {
-                        panel[i].Interactable = false;
+                        item.Interactable = false;
                     }
                 }
             }
@@ -119,11 +119,6 @@ namespace Iviz.App
             var moduleData = ModuleListPanel.CreateModuleForTopic(topics[index].Topic, topics[index].Type);
             Close();
             moduleData.ShowPanel();
-        }
-
-        void Close()
-        {
-            DialogPanelManager.HidePanelFor(this);
         }
     }
 }

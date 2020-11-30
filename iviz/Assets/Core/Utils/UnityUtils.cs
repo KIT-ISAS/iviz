@@ -319,9 +319,8 @@ namespace Iviz.Core
             -Vector3.right - Vector3.up - Vector3.forward,
         };
 
-        public static Bounds TransformBound(Bounds bounds, Pose pose, Vector3 scale)
+        static Bounds TransformBound(Bounds bounds, Pose pose, Vector3 scale)
         {
-            //scale = Vector3.one;
             if (pose == Pose.identity)
             {
                 return scale == Vector3.one
@@ -339,23 +338,26 @@ namespace Iviz.Core
 
             Vector3 positionMin = float.MaxValue * Vector3.one;
             Vector3 positionMax = float.MinValue * Vector3.one;
+            Vector3 boundsCenter = bounds.center;
+            Vector3 boundsExtents = bounds.extents;
+
             if (scale == Vector3.one)
             {
                 foreach (Vector3 point in CubePoints)
                 {
-                    Vector3 position = pose.rotation * Vector3.Scale(point, bounds.extents);
+                    Vector3 position = pose.rotation * Vector3.Scale(point, boundsExtents);
                     positionMin = Vector3.Min(positionMin, position);
                     positionMax = Vector3.Max(positionMax, position);
                 }
 
                 return new Bounds(
-                    pose.position + pose.rotation * bounds.center + (positionMax + positionMin) / 2,
+                    pose.position + pose.rotation * boundsCenter + (positionMax + positionMin) / 2,
                     positionMax - positionMin);
             }
 
             foreach (Vector3 point in CubePoints)
             {
-                Vector3 localPoint = bounds.center + Vector3.Scale(point, bounds.extents);
+                Vector3 localPoint = boundsCenter + Vector3.Scale(point, boundsExtents);
                 Vector3 position = pose.rotation * Vector3.Scale(localPoint, scale);
                 positionMin = Vector3.Min(positionMin, position);
                 positionMax = Vector3.Max(positionMax, position);
@@ -364,7 +366,7 @@ namespace Iviz.Core
             return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
-        public static Bounds TransformBound(Bounds bounds, Transform transform)
+        static Bounds TransformBound(Bounds bounds, Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
@@ -437,6 +439,88 @@ namespace Iviz.Core
             }
 
             return result;
+        }
+
+        public static IEnumerable<(TA First, TB Second)> Zip<TA, TB>(this IEnumerable<TA> a, IEnumerable<TB> b)
+        {
+            using (var enumA = a.GetEnumerator())
+            using (var enumB = b.GetEnumerator())
+            {
+                while (enumA.MoveNext() && enumB.MoveNext())
+                {
+                    yield return (enumA.Current, enumB.Current);
+                }
+            }
+        }
+
+        public readonly struct ZipEnumerable<TA, TB> : IEnumerable<(TA First, TB Second)>
+        {
+            readonly IReadOnlyList<TA> a;
+            readonly IReadOnlyList<TB> b;
+
+            public struct ZipEnumerator : IEnumerator<(TA First, TB Second)>
+            {
+                readonly IReadOnlyList<TA> a;
+                readonly IReadOnlyList<TB> b;
+                int currentIndex;
+
+                public ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+                {
+                    this.a = a;
+                    this.b = b;
+                    currentIndex = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    bool canMoveNext = currentIndex != Math.Min(a.Count, b.Count);
+                    if (canMoveNext)
+                    {
+                        currentIndex++;
+                    }
+
+                    return canMoveNext;
+                }
+
+                public void Reset()
+                {
+                    currentIndex = -1;
+                }
+
+                public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose()
+                {
+                }
+            }
+
+            public ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+            {
+                this.a = a;
+                this.b = b;
+            }
+
+            public ZipEnumerator GetEnumerator()
+            {
+                return new ZipEnumerator(a, b);
+            }
+
+            IEnumerator<(TA, TB)> IEnumerable<(TA First, TB Second)>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+        {
+            return new ZipEnumerable<TA, TB>(a, b);
         }
     }
 }

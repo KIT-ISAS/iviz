@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
+using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -72,6 +73,7 @@ namespace Iviz.Displays
             TimeWindowInMs = TimeWindowInMs;
 
             transform.parent = TfListener.UnityFrame?.transform;
+            Layer = LayerType.Unclickable;
         }
 
         public void Reset()
