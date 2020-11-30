@@ -38,7 +38,7 @@ namespace Iviz.Controllers
     {
         public const string DefaultTopic = "/tf";
         public const string BaseFrameId = "map";
-        static string FixedFrameId { get; set; } = "root";
+        [CanBeNull] public static string FixedFrameId { get; private set; }
 
         const string DefaultTopicStatic = "/tf_static";
 
@@ -50,7 +50,7 @@ namespace Iviz.Controllers
         readonly FrameNode keepAllListener;
         readonly FrameNode staticListener;
 
-        public static void SetFixedFrame(string id)
+        public static void SetFixedFrame([CanBeNull] string id)
         {
             OriginFrame.transform.SetLocalPose(Pose.identity);
             FixedFrameId = string.IsNullOrEmpty(id) ? null : id; 
@@ -433,13 +433,6 @@ namespace Iviz.Controllers
 
             frames.Remove(frame.Id);
             
-            /*
-            if (GuiCamera != null)
-            {
-                GuiCamera.Unselect(frame);
-            }
-            */
-
             frame.Stop();
             UnityEngine.Object.Destroy(frame);
         }
@@ -499,7 +492,6 @@ namespace Iviz.Controllers
             if (arEnabled && viewEnabled)
             {
                 rootMarker.InteractionMode = InteractionModeType.Frame;
-                //MapFrame.Selected = false;
             }
             else
             {
