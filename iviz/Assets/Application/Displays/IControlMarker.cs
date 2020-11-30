@@ -29,9 +29,11 @@ namespace Iviz.Displays
         bool KeepAbsoluteRotation { get; set; }
         InteractionModeType InteractionMode { get; set; }
         new Bounds? Bounds { set; }
+        bool EnableMenu { get; set; }
 
         event MovedAction Moved;
         event Action PointerUp;
         event Action PointerDown;
+        event Action MenuClicked;
     }
 }

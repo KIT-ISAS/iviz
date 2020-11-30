@@ -302,6 +302,7 @@ namespace Iviz.Core
             }
         }
 
+        [CanBeNull]
         public static Transform GetTransform([CanBeNull] this IDisplay resource)
         {
             return ((MonoBehaviour) resource)?.transform;
@@ -366,7 +367,7 @@ namespace Iviz.Core
             return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
-        static Bounds TransformBound(Bounds bounds, Transform transform)
+        static Bounds TransformBound(Bounds bounds, [NotNull] Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
@@ -376,8 +377,13 @@ namespace Iviz.Core
             return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, pose, scale);
         }
 
-        public static Bounds? TransformBound(Bounds? bounds, Transform transform)
+        public static Bounds? TransformBound(Bounds? bounds, [NotNull] Transform transform)
         {
+            if (transform == null)
+            {
+                throw new ArgumentNullException(nameof(transform));
+            }
+
             return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, transform);
         }
 
@@ -441,8 +447,20 @@ namespace Iviz.Core
             return result;
         }
 
-        public static IEnumerable<(TA First, TB Second)> Zip<TA, TB>(this IEnumerable<TA> a, IEnumerable<TB> b)
+        public static IEnumerable<(TA First, TB Second)> Zip<TA, TB>(
+            [NotNull] this IEnumerable<TA> a,
+            [NotNull] IEnumerable<TB> b)
         {
+            if (a == null)
+            {
+                throw new ArgumentNullException(nameof(a));
+            }
+
+            if (b == null)
+            {
+                throw new ArgumentNullException(nameof(b));
+            }
+
             using (var enumA = a.GetEnumerator())
             using (var enumB = b.GetEnumerator())
             {
@@ -464,7 +482,7 @@ namespace Iviz.Core
                 readonly IReadOnlyList<TB> b;
                 int currentIndex;
 
-                public ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
                 {
                     this.a = a;
                     this.b = b;
@@ -489,14 +507,14 @@ namespace Iviz.Core
 
                 public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
 
-                object IEnumerator.Current => Current;
+                [NotNull] object IEnumerator.Current => Current;
 
                 public void Dispose()
                 {
                 }
             }
 
-            public ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+            internal ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
             {
                 this.a = a;
                 this.b = b;
@@ -518,8 +536,19 @@ namespace Iviz.Core
             }
         }
 
-        public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+        public static ZipEnumerable<TA, TB> Zip<TA, TB>([NotNull] this IReadOnlyList<TA> a,
+            [NotNull] IReadOnlyList<TB> b)
         {
+            if (a == null)
+            {
+                throw new ArgumentNullException(nameof(a));
+            }
+
+            if (b == null)
+            {
+                throw new ArgumentNullException(nameof(b));
+            }
+
             return new ZipEnumerable<TA, TB>(a, b);
         }
     }

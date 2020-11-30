@@ -116,7 +116,7 @@ namespace Iviz.Ros
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
                 {
-                    Core.Logger.Internal("Resubscribing and republishing...");
+                    Core.Logger.Internal("Resubscribing and readvertising...");
                 }
 
                 await Task.WhenAll(publishersByTopic.Values.Select(Readvertise));

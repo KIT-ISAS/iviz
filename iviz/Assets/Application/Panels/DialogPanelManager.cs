@@ -17,7 +17,7 @@ namespace Iviz.App
         SaveAs,
         Marker,
         Network,
-        Console
+        Console,
     }
 
     public class DialogPanelManager : MonoBehaviour

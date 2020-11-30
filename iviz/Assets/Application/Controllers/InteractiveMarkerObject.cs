@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
@@ -21,6 +22,10 @@ namespace Iviz.Controllers
 
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
         readonly StringBuilder description = new StringBuilder();
+        int numWarnings;
+        int numErrors;
+
+        MenuEntryList menuEntries;
 
         InteractiveMarkerListener listener;
         TextMarkerResource text;
@@ -106,6 +111,8 @@ namespace Iviz.Controllers
         public void Set([NotNull] InteractiveMarker msg)
         {
             name = msg.Name;
+            numWarnings = 0;
+            numErrors = 0;
 
             description.Clear();
             description.Append("<color=blue><b>**** InteractiveMarker '").Append(msg.Name).Append("'</b></color>")
@@ -164,6 +171,7 @@ namespace Iviz.Controllers
             if (numUnnamed > 1)
             {
                 description.Append(WarnStr).Append(numUnnamed).Append(" controls have empty ids").AppendLine();
+                numWarnings++;
             }
 
             foreach (string controlId in controlsToDelete)
@@ -183,15 +191,29 @@ namespace Iviz.Controllers
                     innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
                 );
 
-            if (totalBounds == null)
-            {
-                Debug.Log("null!");
-            }
-            
             foreach (var control in controls.Values)
             {
                 control.UpdateControlBounds(totalBounds);
             }
+
+            if (msg.MenuEntries.Length != 0)
+            {
+                //Debug.Log("new menu entries! " + rosId);
+                menuEntries = new MenuEntryList(msg.MenuEntries, description, ref numErrors);
+                description.Append("+ ").Append(menuEntries.Count).Append(" menu entries").AppendLine();
+
+                IControlMarker controlMarker =
+                    controls.Values.FirstOrDefault(control => control.Control != null)?.Control;
+                if (controlMarker != null)
+                {
+                    controlMarker.EnableMenu = true;
+                }
+            }
+        }
+
+        internal void ShowMenu()
+        {
+            ModuleListPanel.Instance.ShowMenu(menuEntries, OnMenuClick);
         }
 
         public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
@@ -211,6 +233,12 @@ namespace Iviz.Controllers
             listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, controlNode.transform.AsLocalPose());
         }
 
+        void OnMenuClick(uint entryId)
+        {
+            Debug.Log("publishing!");
+            listener?.OnInteractiveControlObjectMenuSelect(rosId, "", entryId, controlNode.transform.AsLocalPose());
+        }
+
         public override void Stop()
         {
             base.Stop();
@@ -227,13 +255,6 @@ namespace Iviz.Controllers
             Destroy(controlNode.gameObject);
         }
 
-        /*
-        public void UpdateExpirationTime()
-        {
-            ExpirationTime = DateTime.Now.AddSeconds(LifetimeInSec);
-        }
-        */
-
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
             baseDescription.Append(description);
@@ -241,6 +262,19 @@ namespace Iviz.Controllers
             foreach (var control in controls.Values)
             {
                 control.GenerateLog(baseDescription);
+            }
+        }
+
+        public void GetErrorCount(out int totalErrors, out int totalWarnings)
+        {
+            totalErrors = numErrors;
+            totalWarnings = numWarnings;
+
+            foreach (var control in controls.Values)
+            {
+                control.GetErrorCount(out int newNumErrors, out int newNumWarnings);
+                totalErrors += newNumErrors;
+                totalWarnings += newNumWarnings;
             }
         }
 

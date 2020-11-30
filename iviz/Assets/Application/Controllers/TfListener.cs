@@ -38,8 +38,7 @@ namespace Iviz.Controllers
     {
         public const string DefaultTopic = "/tf";
         public const string BaseFrameId = "map";
-        [CanBeNull] public static string FixedFrameId { get; private set; }
-
+        
         const string DefaultTopicStatic = "/tf_static";
 
         static uint tfSeq;
@@ -50,10 +49,28 @@ namespace Iviz.Controllers
         readonly FrameNode staticListener;
         [CanBeNull] readonly InteractiveControl rootMarker;
 
+
+        string fixedFrameId;
+
+        [CanBeNull]
+        public static string FixedFrameId
+        {
+            get => Instance.fixedFrameId;
+            set
+            {
+                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? null : value;
+                Pose originPose =
+                    value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
+                        ? frame.WorldPose.Inverse()
+                        : Pose.identity;
+                OriginFrame.transform.SetLocalPose(originPose);
+            }
+        }
+
+
         public static void SetFixedFrame([CanBeNull] string id)
         {
             OriginFrame.transform.SetLocalPose(Pose.identity);
-            FixedFrameId = string.IsNullOrEmpty(id) ? null : id; 
         }
         
         public TfListener([NotNull] IModuleData moduleData)
@@ -467,7 +484,7 @@ namespace Iviz.Controllers
             Publish(msg);
         }
 
-        public void OnARModeChanged(bool _)
+        public static void OnARModeChanged(bool _)
         {
             UpdateRootMarkerVisibility();
         }
@@ -482,14 +499,9 @@ namespace Iviz.Controllers
             
             var arEnabled = ARController.Instance?.Visible ?? false;
             var viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
-            if (arEnabled && viewEnabled)
-            {
-                rootMarker.InteractionMode = InteractionModeType.Frame;
-            }
-            else
-            {
-                rootMarker.InteractionMode = InteractionModeType.ClickOnly;
-            }
+            rootMarker.InteractionMode = arEnabled && viewEnabled 
+                ? InteractionModeType.Frame 
+                : InteractionModeType.ClickOnly;
         }
     }
 }

@@ -11,14 +11,19 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents, IEnumerable<ItemListDialogContents.ItemEntry>
+    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents,
+        IEnumerable<ItemListDialogContents.ItemEntry>
     {
-        static float BaseButtonHeight;
+        static float baseButtonHeight;
 
-        protected float YOffset { get; set; } = 5;
-        protected float ButtonHeight { get; set; }
+        static float BaseButtonHeight => baseButtonHeight != 0
+            ? baseButtonHeight
+            : baseButtonHeight = ((RectTransform) Resource.Widgets.TopicsButton.Object.transform).rect.height;
+
 
         readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
+        protected float yOffset = 5;
+        protected float buttonHeight;
 
         [SerializeField] GameObject contentObject = null;
         [SerializeField] Text emptyText = null;
@@ -49,8 +54,9 @@ namespace Iviz.App
 
             readonly float buttonHeight;
             readonly float yOffset;
+            int index;
 
-            RectTransform ButtonTransform => (RectTransform) buttonObject.transform;
+            [NotNull] RectTransform ButtonTransform => (RectTransform) buttonObject.transform;
 
             public ItemEntry(int index, [NotNull] GameObject parent, float buttonHeight, float yOffset,
                 [NotNull] Action<int, string> callback)
@@ -65,10 +71,15 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(callback));
                 }
 
+                if (index < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
                 this.buttonHeight = buttonHeight;
                 this.yOffset = yOffset;
                 buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.TopicsButton, parent.transform, false);
-                
+
                 RectTransform mTransform = ButtonTransform;
                 Vector2 sizeDelta = mTransform.sizeDelta;
                 mTransform.sizeDelta = new Vector2(sizeDelta.x, buttonHeight);
@@ -78,22 +89,14 @@ namespace Iviz.App
                 button.onClick.AddListener(() => callback(Index, Text));
 
                 Index = index;
-
                 buttonObject.SetActive(true);
             }
 
-            int index;
-
-            public int Index
+            int Index
             {
                 get => index;
                 set
                 {
-                    if (index < 0)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(value));
-                    }
-
                     index = value;
                     float y = yOffset + index * (yOffset + buttonHeight);
                     ButtonTransform.anchoredPosition = new Vector2(0, -y);
@@ -132,6 +135,14 @@ namespace Iviz.App
             {
                 button.onClick.RemoveAllListeners();
                 button.interactable = true;
+                
+                if (!Mathf.Approximately(buttonHeight, BaseButtonHeight))
+                {
+                    RectTransform mTransform = ButtonTransform;
+                    Vector2 sizeDelta = mTransform.sizeDelta;
+                    mTransform.sizeDelta = new Vector2(sizeDelta.x, BaseButtonHeight);
+                }
+
                 ResourcePool.Dispose(Resource.Widgets.TopicsButton, buttonObject);
             }
         }
@@ -145,6 +156,11 @@ namespace Iviz.App
                 if (value == null)
                 {
                     throw new ArgumentNullException(nameof(value));
+                }
+
+                if (buttonHeight == 0)
+                {
+                    buttonHeight = BaseButtonHeight;
                 }
 
                 if (value.Count() == itemEntries.Count)
@@ -181,7 +197,7 @@ namespace Iviz.App
                     {
                         if (i >= itemEntries.Count)
                         {
-                            itemEntries.Add(new ItemEntry(i, contentObject, ButtonHeight, YOffset, RaiseClicked));
+                            itemEntries.Add(new ItemEntry(i, contentObject, buttonHeight, yOffset, RaiseClicked));
                         }
 
                         itemEntries[i++].Text = str;
@@ -197,16 +213,6 @@ namespace Iviz.App
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
-        }
-
-        void Awake()
-        {
-            if (BaseButtonHeight == 0)
-            {
-                BaseButtonHeight = ((RectTransform) Resource.Widgets.TopicsButton.Object.transform).rect.height;
-            }
-
-            ButtonHeight = BaseButtonHeight;
         }
 
         // Use this for initialization
@@ -230,8 +236,8 @@ namespace Iviz.App
             RectTransform rectTransform = ((RectTransform) contentObject.transform);
             rectTransform.sizeDelta =
                 (itemEntries.Count == 0)
-                    ? new Vector2(0, 2 * YOffset)
-                    : new Vector2(0, 2 * YOffset + itemEntries.Count * (ButtonHeight + YOffset));
+                    ? new Vector2(0, 2 * yOffset)
+                    : new Vector2(0, 2 * yOffset + itemEntries.Count * (buttonHeight + yOffset));
 
             emptyText.gameObject.SetActive(itemEntries.Count == 0);
             foreach (var x in itemEntries)
@@ -256,8 +262,8 @@ namespace Iviz.App
         public List<ItemEntry>.Enumerator GetEnumerator()
         {
             return itemEntries.GetEnumerator();
-        }        
-        
+        }
+
         IEnumerator<ItemEntry> IEnumerable<ItemEntry>.GetEnumerator()
         {
             return GetEnumerator();

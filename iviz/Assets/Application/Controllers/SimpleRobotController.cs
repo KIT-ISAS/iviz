@@ -344,7 +344,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.LogError($"SimpleRobotController: Error parsing description': {e}");
+                Debug.LogWarning($"SimpleRobotController: Error parsing description': {e}");
                 HelpText = "[Failed to Parse Specification]";
                 Robot = null;
                 return false;

@@ -97,10 +97,18 @@ namespace Iviz.Core
             Warn(str);
         }
 
+        public static void External([CanBeNull] string msg, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            LogExternal?.Invoke(new LogMessage(LogLevel.Debug, msg ?? NullMessage, file, line));
+            UnityEngine.Debug.Log(msg);
+        }
+
         public static void External(LogLevel level, [CanBeNull] string msg, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
+            UnityEngine.Debug.Log(msg);
         }
 
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",

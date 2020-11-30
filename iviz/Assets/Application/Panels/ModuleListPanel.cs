@@ -81,6 +81,9 @@ namespace Iviz.App
 
         ControllerService controllerService;
 
+        [SerializeField] GameObject menuObject; 
+        IMenuDialogContents menuDialog;
+
         bool initialized;
         public static event Action InitFinished;
 
@@ -267,13 +270,14 @@ namespace Iviz.App
             UpdateFpsStats();
 
             controllerService = new ControllerService();
+            modelService = new Controllers.ModelService();
+            
+            menuDialog = menuObject.GetComponent<IMenuDialogContents>();
+            menuObject.SetActive(false);
 
             AllGuiVisible = AllGuiVisible; // initialize value
 
             initialized = true;
-
-            modelService = new Controllers.ModelService();
-
             InitFinished?.Invoke();
         }
 
@@ -686,6 +690,17 @@ namespace Iviz.App
             {
                 module.OnARModeChanged(value);
             }
+        }
+
+        public void ShowMenu([NotNull] MenuEntryList menuEntries, Action<uint> callback)
+        {
+            if (menuEntries == null)
+            {
+                throw new ArgumentNullException(nameof(menuEntries));
+            }
+
+            menuDialog.MenuClicked += callback;
+            menuDialog.Set(menuEntries);
         }
     }
 }

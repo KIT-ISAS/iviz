@@ -6,6 +6,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
 using LightType = Iviz.Sdf.LightType;
@@ -56,7 +57,7 @@ namespace Iviz.Editor
         */
 
 
-        static void CreateRobots(ExternalResourceManager manager)
+        static void CreateRobots([NotNull] ExternalResourceManager manager)
         {
             string unityDirectory = "Resources/Package/iviz/robots";
             string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";

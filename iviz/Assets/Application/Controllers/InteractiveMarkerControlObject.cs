@@ -17,9 +17,12 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         readonly StringBuilder description = new StringBuilder();
+        int numWarnings;
+        int numErrors;
+        
         readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
 
-        [CanBeNull] IControlMarker control;
+        [CanBeNull] internal IControlMarker Control { get; private set; }
         GameObject markerNode;
         string rosId;
         bool visible;
@@ -27,7 +30,7 @@ namespace Iviz.Controllers
         InteractiveMarkerObject interactiveMarkerObject;
 
         [CanBeNull] public Bounds? Bounds { get; private set; }
-        
+
         public bool Visible
         {
             get => visible;
@@ -39,13 +42,13 @@ namespace Iviz.Controllers
                     marker.Visible = value;
                 }
 
-                if (control != null)
+                if (Control != null)
                 {
-                    control.Visible = value;
+                    Control.Visible = value;
                 }
             }
         }
-        
+
         void Awake()
         {
             markerNode = new GameObject("[MarkerNode]");
@@ -63,6 +66,9 @@ namespace Iviz.Controllers
         {
             name = $"[ControlObject '{msg.Name}']";
 
+            numErrors = 0;
+            numWarnings = 0;
+            
             description.Clear();
             description.Append("<color=navy><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
 
@@ -96,19 +102,19 @@ namespace Iviz.Controllers
         [NotNull]
         IControlMarker EnsureControlDisplayExists()
         {
-            if (control != null)
+            if (Control != null)
             {
-                return control;
+                return Control;
             }
 
-            control = ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform)
+            Control = ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform)
                           .GetComponent<IControlMarker>()
                       ?? throw new InvalidOperationException("Control marker has no control component!");
 
-            control.TargetTransform = transform.parent;
-            control.Visible = Visible;
+            Control.TargetTransform = transform.parent;
+            Control.Visible = Visible;
 
-            control.Moved += (in Pose _) =>
+            Control.Moved += (in Pose _) =>
             {
                 if (interactiveMarkerObject != null)
                 {
@@ -117,35 +123,40 @@ namespace Iviz.Controllers
             };
 
             // disable external updates while dragging
-            control.PointerDown += () =>
+            Control.PointerDown += () =>
             {
                 interactiveMarkerObject.PoseUpdateEnabled = false;
                 interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Down);
             };
-            control.PointerUp += () =>
+            Control.PointerUp += () =>
             {
                 interactiveMarkerObject.PoseUpdateEnabled = true;
                 interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Up);
 
-                if (control.InteractionMode == InteractionModeType.ClickOnly)
+                if (Control.InteractionMode == InteractionModeType.ClickOnly)
                 {
                     interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
             };
 
-            return control;
+            Control.MenuClicked += () =>
+            {
+                interactiveMarkerObject.ShowMenu();
+            };
+
+            return Control;
         }
 
         void DisposeControlDisplay()
         {
-            if (control == null)
+            if (Control == null)
             {
                 return;
             }
 
-            control.Suspend();
-            ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) control).gameObject);
-            control = null;
+            Control.Suspend();
+            ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
+            Control = null;
         }
 
         void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
@@ -155,6 +166,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int) interactionMode)
                     .AppendLine();
+                numErrors++;
                 DisposeControlDisplay();
             }
             else if (interactionMode == InteractionMode.None)
@@ -164,6 +176,8 @@ namespace Iviz.Controllers
             else
             {
                 IControlMarker mControl = EnsureControlDisplayExists();
+                mControl.EnableMenu = false;
+
                 switch (interactionMode)
                 {
                     case InteractionMode.Menu:
@@ -198,13 +212,15 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int) orientationMode)
                     .AppendLine();
+                numErrors++;
+                
                 markerNode.GetComponent<Billboard>().enabled = false;
                 markerNode.transform.localRotation = Quaternion.identity;
 
-                if (control != null)
+                if (Control != null)
                 {
-                    control.PointsToCamera = false;
-                    control.KeepAbsoluteRotation = false;
+                    Control.PointsToCamera = false;
+                    Control.KeepAbsoluteRotation = false;
                 }
 
                 return;
@@ -222,7 +238,7 @@ namespace Iviz.Controllers
                     break;
             }
 
-            if (control is null)
+            if (Control is null)
             {
                 return;
             }
@@ -230,17 +246,17 @@ namespace Iviz.Controllers
             switch (orientationMode)
             {
                 case OrientationMode.ViewFacing:
-                    control.KeepAbsoluteRotation = false;
-                    control.PointsToCamera = true;
-                    control.HandlesPointToCamera = !independentMarkerOrientation;
+                    Control.KeepAbsoluteRotation = false;
+                    Control.PointsToCamera = true;
+                    Control.HandlesPointToCamera = !independentMarkerOrientation;
                     break;
                 case OrientationMode.Inherit:
-                    control.PointsToCamera = false;
-                    control.KeepAbsoluteRotation = false;
+                    Control.PointsToCamera = false;
+                    Control.KeepAbsoluteRotation = false;
                     break;
                 case OrientationMode.Fixed:
-                    control.PointsToCamera = false;
-                    control.KeepAbsoluteRotation = true;
+                    Control.PointsToCamera = false;
+                    Control.KeepAbsoluteRotation = true;
                     break;
             }
         }
@@ -290,6 +306,7 @@ namespace Iviz.Controllers
                 if (numUnnamed > 1)
                 {
                     description.Append(WarnStr).Append(numUnnamed).Append(" imarkers have empty ids").AppendLine();
+                    numWarnings++;
                 }
             }
         }
@@ -303,10 +320,10 @@ namespace Iviz.Controllers
 
             markers.Clear();
 
-            if (control != null)
+            if (Control != null)
             {
-                control.Suspend();
-                ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) control).gameObject);
+                Control.Suspend();
+                ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
             }
         }
 
@@ -318,6 +335,19 @@ namespace Iviz.Controllers
                 marker.GenerateLog(baseDescription);
             }
         }
+        
+        public void GetErrorCount(out int totalErrors, out int totalWarnings)
+        {
+            totalErrors = numErrors;
+            totalWarnings = numWarnings;
+            
+            foreach (var marker in markers.Values)
+            {
+                marker.GetErrorCount(out int newNumErrors, out int newNumWarnings);
+                totalErrors += newNumErrors;
+                totalWarnings += newNumWarnings;
+            }                
+        }        
 
         static void DeleteMarkerObject([NotNull] MarkerObject marker)
         {
@@ -393,9 +423,9 @@ namespace Iviz.Controllers
 
         public void UpdateControlBounds(Bounds? bounds)
         {
-            if (control != null)
+            if (Control != null)
             {
-                control.Bounds = bounds;
+                Control.Bounds = bounds;
             }
         }
 

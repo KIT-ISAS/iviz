@@ -34,7 +34,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             itemList.Title = "Available Modules";
-            itemList.Items = Modules.Select(entry => entry.Caption);
+            itemList.Items = Modules.Select(tuple => tuple.Caption);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;
 

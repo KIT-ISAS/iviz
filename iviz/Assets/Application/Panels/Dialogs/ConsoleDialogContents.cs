@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Iviz.App
@@ -8,14 +9,14 @@ namespace Iviz.App
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] InputFieldWithHintsWidget fromField = null;
-        [SerializeField] DropdownWidget logFormat = null;
+        [FormerlySerializedAs("logFormat")] [SerializeField] DropdownWidget logLevel = null;
         [SerializeField] DropdownWidget timeFormat = null;
         [SerializeField] DropdownWidget messageFormat = null;
         [SerializeField] Text text = null;
 
         public TrashButtonWidget Close => close;
         public InputFieldWithHintsWidget FromField => fromField;
-        public DropdownWidget LogFormat => logFormat;
+        public DropdownWidget LogLevel => logLevel;
         public DropdownWidget TimeFormat => timeFormat;
         public DropdownWidget MessageFormat => messageFormat;
         public Text Text => text;
@@ -30,7 +31,7 @@ namespace Iviz.App
         {
             Close.ClearSubscribers();
             FromField.ClearSubscribers();
-            LogFormat.ClearSubscribers();
+            LogLevel.ClearSubscribers();
             TimeFormat.ClearSubscribers();
             MessageFormat.ClearSubscribers();
         }

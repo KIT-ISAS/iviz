@@ -14,7 +14,16 @@ namespace Iviz.App
     {
         const int MaxMessages = 100;
 
-        static readonly string[] ExtraFields = {"All", "None"}; 
+        static readonly string[] ExtraFields = {"All", "None"};
+
+        static readonly string[] LogLevelFields =
+        {
+            "Debug or Higher",
+            "<color=navy>Info or Higher</color>",
+            "<color=orange>Warn or Higher</color>",
+            "<color=brown>Error or Higher</color>",
+            "<color=red>Fatal Only</color>"
+        };
 
         [NotNull] readonly ConsoleDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
@@ -24,6 +33,7 @@ namespace Iviz.App
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
+        LogLevel minLogLevel = LogLevel.Debug;
 
         public ConsoleDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
         {
@@ -36,6 +46,13 @@ namespace Iviz.App
             dialog.Close.Clicked += Close;
             ProcessLog();
             dialog.FromField.Hints = ids;
+            dialog.LogLevel.Options = LogLevelFields;
+            dialog.LogLevel.Index = IndexFromLevel(minLogLevel);
+            dialog.LogLevel.ValueChanged += (f, _) =>
+            {
+                minLogLevel = LevelFromIndex(f);
+                ProcessLog();
+            };
         }
 
         public override void UpdatePanel()
@@ -55,20 +72,55 @@ namespace Iviz.App
             queueIsDirty = true;
         }
 
+        [NotNull]
         static string ColorFromLevel(LogLevel level)
+        {
+            if (level >= LogLevel.Fatal)
+            {
+                return "red";
+            }
+
+            if (level >= LogLevel.Error)
+            {
+                return "red";
+            }
+
+            if (level >= LogLevel.Warn)
+            {
+                return "orange";
+            }
+
+            if (level >= LogLevel.Info)
+            {
+                return "navy";
+            }
+
+            return "black";
+        }
+
+        static int IndexFromLevel(LogLevel level)
         {
             switch (level)
             {
-                case LogLevel.Error:
-                    return "brown";
-                case LogLevel.Warn:
-                    return "orange";
-                case LogLevel.Fatal:
-                    return "red";
-                case LogLevel.Info:
-                    return "navy";
-                default:
-                    return "black";
+                case LogLevel.Debug: return 0; 
+                case LogLevel.Info: return 1; 
+                case LogLevel.Warn: return 2; 
+                case LogLevel.Error: return 3; 
+                case LogLevel.Fatal: return 4; 
+                default: throw new ArgumentException("Invalid level", nameof(level));
+            }
+        }
+        
+        static LogLevel LevelFromIndex(int index)
+        {
+            switch (index)
+            {
+                case 0: return LogLevel.Debug; 
+                case 1: return LogLevel.Info; 
+                case 2: return LogLevel.Warn; 
+                case 3: return LogLevel.Error; 
+                case 4: return LogLevel.Fatal; 
+                default: throw new ArgumentException("Invalid index", nameof(index));
             }
         }
 
@@ -85,16 +137,23 @@ namespace Iviz.App
             Log[] messages = messageQueue.ToArray();
             foreach (var message in messages)
             {
+                var messageLevel = (LogLevel) message.Level;
+                if (messageLevel < minLogLevel)
+                {
+                    continue;
+                }
+
                 if (message.Header.Stamp == default)
                 {
                     description.Append("<b>[] ");
                 }
                 else
                 {
-                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", message.Header.Stamp.ToDateTime());
+                    DateTime t = message.Header.Stamp.ToDateTime().ToLocalTime();
+                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", t);
                 }
 
-                string levelColor = ColorFromLevel((LogLevel) message.Level);
+                string levelColor = ColorFromLevel(messageLevel);
 
                 description
                     .Append("<color=").Append(levelColor).Append(">")
