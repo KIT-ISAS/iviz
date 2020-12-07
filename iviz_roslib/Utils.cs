@@ -283,7 +283,6 @@ namespace Iviz.Roslib
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {
-
             byte[] addressABytes = addressA.GetAddressBytes();
             byte[] addressBBytes = addressB.GetAddressBytes();
             byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
@@ -306,7 +305,7 @@ namespace Iviz.Roslib
             UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
         }
-        
+
 
         public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Second)>
         {
@@ -376,7 +375,7 @@ namespace Iviz.Roslib
             public int Count => Math.Min(a.Count, b.Count);
 
             public (TA First, TB Second) this[int index] => (a[index], b[index]);
-            
+
             public (TA First, TB Second)[] ToArray()
             {
                 (TA, TB)[] array = new (TA, TB)[Count];
@@ -483,9 +482,9 @@ namespace Iviz.Roslib
             public List<TB> ToList()
             {
                 List<TB> array = new List<TB>(a.Count);
-                for (int i = 0; i < array.Count; i++)
+                foreach (var ta in a)
                 {
-                    array.Add(this[i]);
+                    array.Add(f(ta));
                 }
 
                 return array;
@@ -521,7 +520,5 @@ namespace Iviz.Roslib
                 list.Add(b);
             }
         }
-        
-        
     }
 }
