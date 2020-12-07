@@ -428,6 +428,20 @@ namespace Iviz.Hololens
 #else
     class HololensManager : MonoBehaviour
     {
+        public class MarkerResourcePool
+        {
+            public GameObject GetOrCreate(Transform parent = null)
+            {
+                throw new NotSupportedException();
+            }
+
+            public void Dispose(GameObject obj)
+            {
+                throw new NotSupportedException();
+            }
+        }    
+        
+        public static MarkerResourcePool ResourcePool => throw new NotSupportedException();
     }
 #endif
 }
