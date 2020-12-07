@@ -1,22 +1,34 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using Iviz.App;
+using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Hololens;
+using Iviz.Msgs;
 using Iviz.Ros;
 using Iviz.Resources;
+using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Hololens
 {
 #if UNITY_WSA
-    class HololensManager : MonoBehaviour
+    sealed class HololensManager : MonoBehaviour
     {
         static readonly Pose InfinitePose = new Pose(new Vector3(5000, 5000, 5000), Quaternion.identity);
 
+        static MarkerResourcePool resourcePool;
+        public static MarkerResourcePool ResourcePool => resourcePool ?? (resourcePool = new MarkerResourcePool());
+
         [SerializeField] FloorFrameObject floorFrame = null;
         [SerializeField] GameObject floorHelper = null;
+        [SerializeField] HololensHandMenuObject hololensHandMenu = null;
+        [SerializeField] GameObject consoleLog = null;
+        [SerializeField] TMP_Text consoleText = null;
 
         FrameNode node;
         TfFrame leftPalm;
@@ -24,8 +36,8 @@ namespace Iviz.Hololens
         float leftHandScale = 1;
         Pose leftPalmPose;
 
-        TfFrame RootFrame => TfListener.RootFrame;
-        static ReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        static TfFrame RootFrame => TfListener.RootFrame;
+        static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
         static string MyId => ConnectionManager.Connection.MyId;
 
         void Start()
@@ -42,14 +54,8 @@ namespace Iviz.Hololens
 
         void Initialize()
         {
-            Debug.Log("Hololens Manager: Initializing!");
+            Logger.Debug("Hololens Manager: Initializing!");
             ModuleListPanel.InitFinished -= Initialize;
-
-            ModuleData grid = ModuleDatas.FirstOrDefault(data => data.ModuleType == Resource.ModuleType.Grid);
-            if (grid != null)
-            {
-                ModuleListPanel.Instance.RemoveModule(grid);
-            }
 
             if (!UnityEngine.Application.isEditor)
             {
@@ -59,20 +65,122 @@ namespace Iviz.Hololens
             floorFrame.OkClicked += StartWorld;
 
 
+            if (resourcePool == null)
+            {
+                resourcePool = new MarkerResourcePool();
+            }
+
+            StartLog();
             StartRosConnection();
-            StartPalms();
-            StartOrigin();
+            StartHandMenu();
+            //StartPalms();
+            StartOriginPlaceMode();
+        }
+
+        readonly Queue<string> messageQueue = new Queue<string>();
+        readonly StringBuilder builder = new StringBuilder();
+        bool queueHasChanged;
+
+        void StartLog()
+        {
+            void AddToQueue(string s)
+            {
+                messageQueue.Enqueue(s);
+                queueHasChanged = true;
+                if (messageQueue.Count > 100)
+                {
+                    messageQueue.Dequeue();
+                }
+            }
+
+            Logger.LogInternal += AddToQueue;
+            ConnectionManager.LogMessageArrived += message =>
+            {
+                if (message == null)
+                {
+                    Logger.Debug("HololensManager: Got null log message!");
+                    return;
+                }
+
+                string messageTime = message.Header.Stamp == default
+                    ? ""
+                    : message.Header.Stamp.ToDateTime().ToLocalTime().ToString("HH:mm:ss");
+
+                string messageLevel;
+                switch ((LogLevel) message.Level)
+                {
+                    case LogLevel.Debug:
+                        messageLevel = "[DEBUG]";
+                        break;
+                    case LogLevel.Error:
+                        messageLevel = "[ERROR]";
+                        break;
+                    case LogLevel.Fatal:
+                        messageLevel = "[FATAL]";
+                        break;
+                    case LogLevel.Info:
+                        messageLevel = "[INFO]";
+                        break;
+                    case LogLevel.Warn:
+                        messageLevel = "[WARN]";
+                        break;
+                    default:
+                        messageLevel = "[?]";
+                        break;
+                }
+
+                string messageString = $"<b>[{messageTime}] {messageLevel} [{message.Name}]:</b> {message.Msg}";
+                AddToQueue(messageString);
+            };
+
+            GameThread.EverySecond += () =>
+            {
+                if (!consoleLog.activeSelf)
+                {
+                    return;
+                }
+
+                if (!queueHasChanged)
+                {
+                    return;
+                }
+
+                builder.Length = 0;
+                foreach (string msg in messageQueue)
+                {
+                    if (msg == null)
+                    {
+                        Logger.Debug("HololensManager: Got null message!");
+                        continue;
+                    }
+
+                    const int maxSize = 300;
+                    if (msg.Length > maxSize)
+                    {
+                        builder.Append(msg.Substring(0, maxSize)).Append(" ... +").Append(msg.Length - maxSize)
+                            .AppendLine(" chars");
+                    }
+                    else
+                    {
+                        builder.AppendLine(msg);
+                    }
+                }
+
+                consoleText.text = builder.ToString();
+                queueHasChanged = false;
+            };
         }
 
         void StartRosConnection()
         {
 #if UNITY_EDITOR
             ConnectionManager.Connection.MyUri = new Uri("http://141.3.59.11:7613");
+            ConnectionManager.Connection.MyId = "/iviz_win_hololens";
 #else
             ConnectionManager.Connection.MyUri = new Uri("http://141.3.59.45:7613");
+            ConnectionManager.Connection.MyId = "/iviz_hololens";
 #endif
             ConnectionManager.Connection.MasterUri = new Uri("http://141.3.59.5:11311");
-            ConnectionManager.Connection.MyId = "/iviz_hololens";
             ConnectionManager.Connection.KeepReconnecting = true;
         }
 
@@ -92,10 +200,157 @@ namespace Iviz.Hololens
             LeftHandScale = 0.1f;
         }
 
-        void StartOrigin()
+        void StartHandMenu()
+        {
+            hololensHandMenu.SetSide(new[]
+            {
+                new HololensMenuEntry("Add Robot", OnHandMenuAddRobot),
+                new HololensMenuEntry("Add Topic", OnHandMenuAddTopic),
+                new HololensMenuEntry("Remove Module", OnHandMenuRemoveModule),
+                new HololensMenuEntry("Extras", OnExtras),
+            });
+        }
+
+        void OnHandMenuAddRobot()
+        {
+            void MenuListClick(string robotName)
+            {
+                var config = new SimpleRobotConfiguration
+                {
+                    SavedRobotName = robotName,
+                    AttachedToTf = true
+                };
+                ModuleListPanel.Instance.CreateModule(Resource.ModuleType.Robot, configuration: config);
+            }
+
+            hololensHandMenu.SetPalm(Resource.GetRobotNames().Select(
+                robotName => new HololensMenuEntry(robotName, () => MenuListClick(robotName))));
+        }
+
+        void OnHandMenuAddTopic()
+        {
+            void MenuListClick(string topic, string type)
+            {
+                ModuleData data = ModuleListPanel.Instance.CreateModuleForTopic(topic, type);
+                if (data.ModuleType == Resource.ModuleType.PointCloud)
+                {
+                    PointCloudConfiguration config = new PointCloudConfiguration
+                    {
+                        IntensityChannel = "rgba",
+                        PointSize = 0.01f
+                    };
+                    data.UpdateConfiguration(JsonConvert.SerializeObject(config),
+                        new[] {nameof(config.IntensityChannel), nameof(config.PointSize)});
+                }
+            }
+
+            hololensHandMenu.SetPalm(AddTopicDialogData.GetTopicCandidates().Select(
+                topic => new HololensMenuEntry(topic.Topic, () => MenuListClick(topic.Topic, topic.Type))));
+        }
+
+        void OnHandMenuRemoveModule()
+        {
+            void MenuListClick(ModuleData data)
+            {
+                ModuleListPanel.Instance.RemoveModule(data);
+            }
+
+            hololensHandMenu.SetPalm(
+                ModuleDatas
+                    .Where(data => data.ModuleType != Resource.ModuleType.TF)
+                    .Select(data => new HololensMenuEntry(data.Description, () => MenuListClick(data))));
+        }
+
+        void OnExtras()
+        {
+            HololensMenuEntry[] entries =
+            {
+                new HololensMenuEntry("Set Fixed Frame", SetFixedFrame),
+                new HololensMenuEntry("Set World Scale", SetWorldScale),
+                new HololensMenuEntry("Reposition Origin", StartOriginPlaceMode),
+                new HololensMenuEntry("Toggle TF Visibility", ToggleTfVisibility),
+                new HololensMenuEntry("Reset All", ResetAll),
+                new HololensMenuEntry("Show Console", ShowConsoleLog),
+                new HololensMenuEntry("Print Listener Status", PrintListenerStatus),
+                new HololensMenuEntry("Reconnect", Reconnect),
+            };
+            hololensHandMenu.SetPalm(entries);
+        }
+
+        void SetFixedFrame()
+        {
+            void MenuListClick(string frameId)
+            {
+                TfListener.FixedFrameId = frameId;
+            }
+
+            List<TfFrame> candidates = new List<TfFrame>();
+            candidates.AddRange(TfListener.OriginFrame.Children);
+            candidates.AddRange(TfListener.OriginFrame.Children.SelectMany(child => child.Children));
+
+            hololensHandMenu.SetPalm(candidates.Select(
+                frame => new HololensMenuEntry(frame.Id, () => MenuListClick(frame.Id))));
+        }
+
+        void SetWorldScale()
+        {
+            float[] scales = {1, 0.5f, 0.25f, 0.1f, 0.05f, 0.025f, 0.01f};
+
+            void MenuListClick(float scale)
+            {
+                TfListener.RootFrame.transform.localScale = scale * Vector3.one;
+            }
+
+            hololensHandMenu.SetPalm(scales.Select(
+                scale => new HololensMenuEntry(scale.ToString(BuiltIns.Culture), () => MenuListClick(scale))));
+        }
+
+        void StartOriginPlaceMode()
         {
             RootFrame.transform.SetPose(InfinitePose);
             floorFrame.gameObject.SetActive(true);
+        }
+
+        static void ToggleTfVisibility()
+        {
+            TfListener.Instance.FramesVisible = !TfListener.Instance.FramesVisible;
+        }
+
+        static void ResetAll()
+        {
+            ModuleListPanel.Instance.ResetAllModules();
+        }
+
+        void ShowConsoleLog()
+        {
+            Vector3 cameraPosition = Settings.MainCamera.transform.position;
+            Vector3 cameraForward = Settings.MainCamera.transform.forward;
+            Vector3 position = cameraPosition + cameraForward * 2;
+            position.y = cameraPosition.y - 0.4f;
+
+            consoleLog.transform.SetPositionAndRotation(position,
+                Quaternion.LookRotation(new Vector3(cameraForward.x, 0, cameraForward.z)));
+            consoleLog.SetActive(true);
+        }
+
+        void PrintListenerStatus()
+        {
+            StringBuilder str = new StringBuilder();
+            var modules = ModuleDatas.OfType<ListenerModuleData>();
+            foreach (var data in modules)
+            {
+                ListenerController controller = (ListenerController) data.Controller;
+                var listener = controller.Listener;
+                str.Append(listener.Topic).Append(listener.Subscribed ? " (On): " : " (Off): ")
+                    .Append(listener.NumPublishers).Append(" publishers").AppendLine();
+            }
+
+            Logger.External(str.ToString());
+        }
+
+        void Reconnect()
+        {
+            ConnectionManager.Connection.Disconnect();
         }
 
         void StartWorld()
@@ -122,7 +377,54 @@ namespace Iviz.Hololens
                 Destroy(node.gameObject);
             }
         }
+
+
+        public class MarkerResourcePool
+        {
+            static readonly Info<GameObject> ControlAsset =
+                new Info<GameObject>("Hololens Assets/HololensControl");
+
+            readonly Queue<GameObject> markers = new Queue<GameObject>();
+            readonly GameObject root = GameObject.Find("HololensResourcePool");
+
+            public MarkerResourcePool()
+            {
+                root.SetActive(false);
+                CreateMarkerPool();
+            }
+
+            void CreateMarkerPool()
+            {
+                for (int i = 0; i < root.transform.childCount; i++)
+                {
+                    markers.Enqueue(root.transform.GetChild(i).gameObject);
+                }
+            }
+
+            public GameObject GetOrCreate(Transform parent = null)
+            {
+                if (markers.Count == 0)
+                {
+                    Debug.Log("NEW!!");
+                    return ControlAsset.Instantiate(parent);
+                }
+
+                GameObject obj = markers.Dequeue();
+                //obj.SetActive(true);
+                obj.transform.SetParentLocal(parent);
+                return obj;
+            }
+
+            public void Dispose(GameObject obj)
+            {
+                //obj.SetActive(false);
+                obj.transform.parent = root.transform;
+                obj.transform.SetPose(Pose.identity);
+                markers.Enqueue(obj);
+            }
+        }
     }
+
 #else
     class HololensManager : MonoBehaviour
     {

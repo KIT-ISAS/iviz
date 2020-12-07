@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
@@ -144,19 +145,20 @@ namespace Iviz.Resources
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public static bool TryGetResource([NotNull] Uri uri, out GameObjectInfo info,
+        public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            return Internal.TryGet(uri, out info) ||
-                   External.TryGet(uri, out info, provider);
+            //
+            return Internal.TryGet(uriString, out info) ||
+                   External.TryGet(uriString, out info, null);
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public static bool TryGetResource([NotNull] Uri uri, out Info<Texture2D> info,
+        public static bool TryGetResource([NotNull] string uriString, out Info<Texture2D> info,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            return Internal.TryGet(uri, out info) ||
-                   External.TryGet(uri, out info, provider);
+            return Internal.TryGet(uriString, out info) ||
+                   External.TryGet(uriString, out info, Settings.IsHololens ? null : provider);
         }
     }
 }

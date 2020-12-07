@@ -1,10 +1,16 @@
 using JetBrains.Annotations;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Utilities;
 using UnityEngine;
 
 namespace Iviz.Core
 {
     public static class Settings
     {
+        static Settings()
+        {
+            AotHelper.EnsureType<StringEnumConverter>();
+        }
 
         /// <summary>
         /// Does this device support a way to move the root node?
@@ -41,12 +47,14 @@ namespace Iviz.Core
         /// </summary>
         public const bool IsHololens =
 #if UNITY_WSA
-            // bug: this will activate with any UWP device, not only Hololens! but what else? 
+#if UNITY_EDITOR
             true;
 #else
+            true;
+#endif
+#else
             false;
-#endif                
-        
+#endif
         [NotNull] public static string PlatformName => UnityEngine.Application.platform.ToString().ToLower();
         [NotNull] public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
         [NotNull] public static string SavedFolder => PersistentDataPath + "/saved";

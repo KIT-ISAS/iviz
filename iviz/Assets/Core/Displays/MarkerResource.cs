@@ -87,7 +87,6 @@ namespace Iviz.Displays
 
         public virtual void Suspend()
         {
-            Layer = LayerType.Unclickable;
             Visible = true;
         }
 

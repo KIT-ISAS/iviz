@@ -12,6 +12,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
@@ -293,6 +294,7 @@ namespace Iviz.Controllers
                 position != null
             );
             Publisher.Publish(msg);
+            Logger.Info($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnInteractiveControlObjectMoved(
@@ -312,6 +314,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
+            Logger.Info($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{controlPose}");
         }
 
         internal void OnInteractiveControlObjectMenuSelect(
@@ -331,6 +334,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
+            Logger.Info($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 
         void CheckForExpiredMarkers()
@@ -365,7 +369,6 @@ namespace Iviz.Controllers
             }
         }
 
-
         void DestroyAllMarkers()
         {
             foreach (var markerObject in interactiveMarkers.Values)
@@ -374,6 +377,11 @@ namespace Iviz.Controllers
             }
 
             interactiveMarkers.Clear();
+        }
+
+        public override string ToString()
+        {
+            return $"[InteractiveMarkerListener '{Topic}']";
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Iviz.App
 
         readonly List<string> files = new List<string>();
 
-        public LoadConfigDialogData([NotNull] ModuleListPanel panel) : base(panel)
+        public LoadConfigDialogData()
         {
             itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
         }

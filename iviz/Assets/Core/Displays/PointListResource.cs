@@ -84,6 +84,30 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
 
+        public static bool IsElementValid(PointWithColor t)
+        {
+            return !(t.Position.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq);
+        }
+        
+        public delegate void DirectPointSetter(ref NativeList<float4> pointBuffer);
+        
+        public void SetDirect([NotNull] DirectPointSetter callback, int reserve = 0)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (reserve != 0)
+            {
+                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
+            }
+
+            pointBuffer.Clear();
+            callback(ref pointBuffer);
+            UpdateBuffer();
+        }
+
         void UpdateBuffer()
         {
             if (Size == 0)

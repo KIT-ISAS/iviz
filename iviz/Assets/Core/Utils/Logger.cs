@@ -37,24 +37,41 @@ namespace Iviz.Core
         public static void Info(object t)
         {
             UnityEngine.Debug.Log(t);
-            Console.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke( t.ToString());
+            }
         }
 
         public static void Error(object t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Console.Error.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Warn(object t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Console.Error.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Debug(object t)
         {
             UnityEngine.Debug.Log(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Internal([CanBeNull] string msg)

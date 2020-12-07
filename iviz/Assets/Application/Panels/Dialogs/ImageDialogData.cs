@@ -18,7 +18,7 @@ namespace Iviz.App
 
         [CanBeNull] IImageDialogListener Listener { get; set; }
 
-        public ImageDialogData([NotNull] ModuleListPanel panel) : base(panel)
+        public ImageDialogData()
         {
             this.panel = DialogPanelManager.GetPanelByType<ImageDialogContents>(DialogPanelType.Image);
         }

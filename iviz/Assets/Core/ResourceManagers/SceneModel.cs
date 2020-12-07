@@ -12,12 +12,12 @@ namespace Iviz.Displays
     public static class SceneModel
     {
         [NotNull]
-        public static AggregatedMeshMarkerResource Create([NotNull] Uri uri, [NotNull] Msgs.IvizMsgs.Model msg,
+        public static AggregatedMeshMarkerResource Create([NotNull] string uriString, [NotNull] Msgs.IvizMsgs.Model msg,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            if (uri is null)
+            if (uriString is null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(uriString));
             }
 
             if (msg is null)
@@ -25,7 +25,7 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(msg));
             }
 
-            GameObject root = new GameObject($"Root:{uri} [{msg.OrientationHint}]");
+            GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
             /*
             switch (msg.OrientationHint.ToUpperInvariant())
             {
@@ -80,6 +80,7 @@ namespace Iviz.Displays
 
                 if (material.DiffuseTexture.Path.Length != 0)
                 {
+                    Uri uri = new Uri(uriString);
                     string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
                     string directoryName = Path.GetDirectoryName(uriPath);
                     if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
@@ -88,7 +89,7 @@ namespace Iviz.Displays
                     }
 
                     string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
-                    Uri textureUri = new Uri($"{uri.Scheme}://{uri.Host}{texturePath}");
+                    string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
                     if (Resource.TryGetResource(textureUri, out Info<Texture2D> info, provider))
                     {
                         r.Texture = info.Object;

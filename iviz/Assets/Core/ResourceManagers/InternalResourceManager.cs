@@ -4,19 +4,24 @@ using System.Collections.ObjectModel;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Resources
 {
     public class InternalResourceManager
     {
-        readonly Dictionary<Uri, Info<GameObject>> gameObjects = new Dictionary<Uri, Info<GameObject>>
+        readonly Dictionary<string, Info<GameObject>> gameObjects = new Dictionary<string, Info<GameObject>>
         {
-            [new Uri("package://iviz_internal/cube")] = Resource.Displays.Cube,
-            [new Uri("package://iviz_internal/cylinder")] = Resource.Displays.Cylinder,
-            [new Uri("package://iviz_internal/sphere")] = Resource.Displays.Sphere,
+            ["package://iviz_internal/cube"] = Resource.Displays.Cube,
+            ["package://iviz_internal/cylinder"] = Resource.Displays.Cylinder,
+            ["package://iviz_internal/sphere"] = Resource.Displays.Sphere,
         };
 
-        readonly Dictionary<Uri, Info<Texture2D>> textures = new Dictionary<Uri, Info<Texture2D>>();
+        readonly Dictionary<string, Info<Texture2D>> textures = new Dictionary<string, Info<Texture2D>>();
+
+        readonly HashSet<string> negGameObjects = new HashSet<string>();
+        readonly HashSet<string> negTextures = new HashSet<string>();
+
         readonly ReadOnlyDictionary<string, string> robotDescriptions;
 
         public IEnumerable<string> GetRobotNames() => robotDescriptions.Keys;
@@ -26,7 +31,7 @@ namespace Iviz.Resources
             string robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
             if (string.IsNullOrEmpty(robotsFile))
             {
-                Debug.Log("InternalResourceManager: Empty resource file!");
+                Logger.Debug("InternalResourceManager: Empty resource file!");
                 robotDescriptions = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
                 return;
             }
@@ -35,19 +40,20 @@ namespace Iviz.Resources
             Dictionary<string, string> tmpRobotDescriptions = new Dictionary<string, string>();
             foreach (var pair in robots)
             {
-                string robotDescription = UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + pair.Value)?.text;
+                string robotDescription =
+                    UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + pair.Value)?.text;
                 if (string.IsNullOrEmpty(robotDescription))
                 {
-                    Debug.Log("InternalResourceManager: Empty or null description file " + pair.Value + "!");
+                    Logger.Debug("InternalResourceManager: Empty or null description file " + pair.Value + "!");
                     continue;
                 }
 
                 tmpRobotDescriptions[pair.Key] = robotDescription;
             }
-            
+
             robotDescriptions = new ReadOnlyDictionary<string, string>(tmpRobotDescriptions);
         }
-        
+
         public bool ContainsRobot([NotNull] string robotName)
         {
             if (robotName == null)
@@ -68,41 +74,63 @@ namespace Iviz.Resources
 
             return robotDescriptions.TryGetValue(robotName, out robotDescription);
         }
-        
+
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public bool TryGet([NotNull] Uri uri, out Info<GameObject> info)
+        public bool TryGet([NotNull] string uriString, out Info<GameObject> info)
         {
-            return TryGet(uri, gameObjects, out info);
+            return TryGet(uriString, gameObjects, negGameObjects, out info);
         }
-        
+
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public bool TryGet([NotNull] Uri uri, out Info<Texture2D> info)
+        public bool TryGet([NotNull] string uriString, out Info<Texture2D> info)
         {
-            return TryGet(uri, textures, out info);
-        } 
-        
-        static bool TryGet<T>([NotNull] Uri uri, [NotNull] Dictionary<Uri, Info<T>> repository, out Info<T> info) where T : UnityEngine.Object
+            return TryGet(uriString, textures, negTextures, out info);
+        }
+
+        static bool TryGet<T>([NotNull] string uriString,
+            [NotNull] Dictionary<string, Info<T>> repository,
+            [NotNull] HashSet<string> negRepository,
+            out Info<T> info)
+            where T : UnityEngine.Object
         {
-            if (uri is null)
+            if (uriString is null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(uriString));
             }
-                
-            if (repository.TryGetValue(uri, out info))
+
+            if (repository.TryGetValue(uriString, out info))
             {
                 return true;
+            }
+
+            if (negRepository.Contains(uriString))
+            {
+                return false;
+            }
+
+            if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
+            {
+                Logger.Warn($"[InternalResourceManager]: Uri '{uriString}' is not a valid uri!");
+                negRepository.Add(uriString);
+                return false;
             }
 
             string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}".Replace("//", "/");
             T resource = UnityEngine.Resources.Load<T>(path);
             if (resource == null)
             {
+                negRepository.Add(uriString);
                 return false;
             }
 
             info = new Info<T>(path, resource);
-            repository[uri] = info;
+            repository[uriString] = info;
             return true;
-        } 
+        }
+
+        public override string ToString()
+        {
+            return "[InternalResourceManager]";
+        }
     }
 }

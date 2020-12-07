@@ -18,7 +18,7 @@ namespace Iviz.App
         readonly StringBuilder description = new StringBuilder();
         public override IDialogPanelContents Panel => panel;
 
-        public MarkerDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
+        public MarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<MarkerDialogContents>(DialogPanelType.Marker);
         }

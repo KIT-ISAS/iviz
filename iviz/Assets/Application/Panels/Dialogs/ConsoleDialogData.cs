@@ -20,7 +20,7 @@ namespace Iviz.App
         {
             "Debug or Higher",
             "<color=navy>Info or Higher</color>",
-            "<color=orange>Warn or Higher</color>",
+            "<color=#7F5200>Warn or Higher</color>",
             "<color=brown>Error or Higher</color>",
             "<color=red>Fatal Only</color>"
         };
@@ -28,17 +28,16 @@ namespace Iviz.App
         [NotNull] readonly ConsoleDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
 
-        Listener<Log> listener;
         readonly Queue<Log> messageQueue = new Queue<Log>();
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
-        LogLevel minLogLevel = LogLevel.Debug;
+        LogLevel minLogLevel = LogLevel.Warn;
 
-        public ConsoleDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
+        public ConsoleDialogData()
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogContents>(DialogPanelType.Console);
-            listener = new Listener<Log>("/rosout_agg", HandleMessage);
+            ConnectionManager.LogMessageArrived += HandleMessage;
         }
 
         public override void SetupPanel()
@@ -63,6 +62,12 @@ namespace Iviz.App
 
         void HandleMessage(Log log)
         {
+            var messageLevel = (LogLevel) log.Level;
+            if (messageLevel < minLogLevel)
+            {
+                return;
+            }
+
             messageQueue.Enqueue(log);
             if (messageQueue.Count > MaxMessages)
             {
@@ -87,7 +92,7 @@ namespace Iviz.App
 
             if (level >= LogLevel.Warn)
             {
-                return "orange";
+                return "#7F5200";
             }
 
             if (level >= LogLevel.Info)

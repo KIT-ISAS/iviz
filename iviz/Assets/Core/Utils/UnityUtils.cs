@@ -252,6 +252,16 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
 
+        public static Color32 MultiplyFast(Color32 c1, Color32 c2)
+        {
+            return new Color32(
+                (byte)(c1.r * c2.r >> 16),
+                (byte)(c1.g * c2.g >> 16),
+                (byte)(c1.b * c2.b >> 16),
+                (byte)(c1.a * c2.a >> 16)
+                );
+        }
+
         struct NativeArrayHelper<T> : IList<T>, IReadOnlyList<T> where T : struct
         {
             NativeArray<T> nArray;
@@ -302,6 +312,7 @@ namespace Iviz.Core
             }
         }
 
+        [ContractAnnotation("null => null; notnull => notnull")]
         [CanBeNull]
         public static Transform GetTransform([CanBeNull] this IDisplay resource)
         {
@@ -469,87 +480,6 @@ namespace Iviz.Core
                     yield return (enumA.Current, enumB.Current);
                 }
             }
-        }
-
-        public readonly struct ZipEnumerable<TA, TB> : IEnumerable<(TA First, TB Second)>
-        {
-            readonly IReadOnlyList<TA> a;
-            readonly IReadOnlyList<TB> b;
-
-            public struct ZipEnumerator : IEnumerator<(TA First, TB Second)>
-            {
-                readonly IReadOnlyList<TA> a;
-                readonly IReadOnlyList<TB> b;
-                int currentIndex;
-
-                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
-                {
-                    this.a = a;
-                    this.b = b;
-                    currentIndex = -1;
-                }
-
-                public bool MoveNext()
-                {
-                    bool canMoveNext = currentIndex != Math.Min(a.Count, b.Count);
-                    if (canMoveNext)
-                    {
-                        currentIndex++;
-                    }
-
-                    return canMoveNext;
-                }
-
-                public void Reset()
-                {
-                    currentIndex = -1;
-                }
-
-                public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
-
-                [NotNull] object IEnumerator.Current => Current;
-
-                public void Dispose()
-                {
-                }
-            }
-
-            internal ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
-            {
-                this.a = a;
-                this.b = b;
-            }
-
-            public ZipEnumerator GetEnumerator()
-            {
-                return new ZipEnumerator(a, b);
-            }
-
-            IEnumerator<(TA, TB)> IEnumerable<(TA First, TB Second)>.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-        }
-
-        public static ZipEnumerable<TA, TB> Zip<TA, TB>([NotNull] this IReadOnlyList<TA> a,
-            [NotNull] IReadOnlyList<TB> b)
-        {
-            if (a == null)
-            {
-                throw new ArgumentNullException(nameof(a));
-            }
-
-            if (b == null)
-            {
-                throw new ArgumentNullException(nameof(b));
-            }
-
-            return new ZipEnumerable<TA, TB>(a, b);
         }
     }
 }

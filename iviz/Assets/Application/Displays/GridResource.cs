@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Iviz.Roslib;
+using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using Iviz.Core;
@@ -236,7 +237,7 @@ namespace Iviz.Displays
                 gridVertSize = vertices.Count();
                 offset = new Vector3(offsetX + i * GridCellSize, offsetY, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                vertices.AddRange(verticesHorizontal.Select(x => x + offset));
+                vertices.AddAll(verticesHorizontal.Select(x => x + offset));
                 normals.AddRange(squareNormals);
             }
 
@@ -249,7 +250,7 @@ namespace Iviz.Displays
                 gridVertSize = vertices.Count();
                 offset = new Vector3(offsetX, offsetY + i * GridCellSize, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                vertices.AddRange(verticesVertical.Select(x => x + offset));
+                vertices.AddAll(verticesVertical.Select(x => x + offset));
                 normals.AddRange(squareNormals);
             }
 

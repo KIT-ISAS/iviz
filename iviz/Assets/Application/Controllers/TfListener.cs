@@ -38,7 +38,7 @@ namespace Iviz.Controllers
     {
         public const string DefaultTopic = "/tf";
         public const string BaseFrameId = "map";
-        
+
         const string DefaultTopicStatic = "/tf_static";
 
         static uint tfSeq;
@@ -63,16 +63,16 @@ namespace Iviz.Controllers
                     value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
                         ? frame.WorldPose.Inverse()
                         : Pose.identity;
-                OriginFrame.transform.SetLocalPose(originPose);
+                OriginFrame.Transform.SetLocalPose(originPose);
             }
         }
 
 
         public static void SetFixedFrame([CanBeNull] string id)
         {
-            OriginFrame.transform.SetLocalPose(Pose.identity);
+            OriginFrame.Transform.SetLocalPose(Pose.identity);
         }
-        
+
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
@@ -85,25 +85,25 @@ namespace Iviz.Controllers
             UnityFrame.Visible = false;
             UnityFrame.AddListener(defaultListener);
 
-            keepAllListener = FrameNode.Instantiate("[TFNode]", UnityFrame.transform);
-            staticListener = FrameNode.Instantiate("[TFStatic]", UnityFrame.transform);
-            defaultListener.transform.parent = UnityFrame.transform;
+            keepAllListener = FrameNode.Instantiate("[TFNode]", UnityFrame.Transform);
+            staticListener = FrameNode.Instantiate("[TFStatic]", UnityFrame.Transform);
+            defaultListener.transform.parent = UnityFrame.Transform;
 
             Config = new TfConfiguration();
 
-            RootFrame = Add(CreateFrameObject("/", UnityFrame.transform, UnityFrame));
+            RootFrame = Add(CreateFrameObject("/", UnityFrame.Transform, UnityFrame));
             RootFrame.ForceInvisible = true;
             RootFrame.Visible = false;
             RootFrame.AddListener(defaultListener);
 
-            OriginFrame = Add(CreateFrameObject("/_origin_", RootFrame.transform, RootFrame));
+            OriginFrame = Add(CreateFrameObject("/_origin_", RootFrame.Transform, RootFrame));
             OriginFrame.Parent = RootFrame;
             OriginFrame.ForceInvisible = true;
             OriginFrame.Visible = false;
             OriginFrame.AddListener(defaultListener);
             OriginFrame.ParentCanChange = false;
-            
-            MapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.transform, OriginFrame));
+
+            MapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.Transform, OriginFrame));
             MapFrame.Parent = OriginFrame;
             MapFrame.AddListener(defaultListener);
             MapFrame.ParentCanChange = false;
@@ -112,14 +112,16 @@ namespace Iviz.Controllers
             {
                 rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
                     Resource.Displays.InteractiveControl,
-                    RootFrame.transform);
+                    RootFrame.Transform);
                 rootMarker.name = "[InteractiveController for /]";
-                rootMarker.TargetTransform = RootFrame.transform;
+                rootMarker.TargetTransform = RootFrame.Transform;
                 rootMarker.InteractionMode = InteractionModeType.None;
                 rootMarker.BaseScale = 2.5f * FrameSize;
             }
 
             Publisher = new Sender<tfMessage_v2>(DefaultTopic);
+
+            GameThread.LateEveryFrame += LateUpdate;
         }
 
         public static TfListener Instance { get; private set; }
@@ -132,7 +134,7 @@ namespace Iviz.Controllers
         public static TfFrame RootFrame { get; private set; }
         public static TfFrame OriginFrame { get; private set; }
         public static TfFrame UnityFrame { get; private set; }
-        
+
 
         [CanBeNull] public static InteractiveControl RootMarker => Instance.rootMarker;
 
@@ -272,12 +274,15 @@ namespace Iviz.Controllers
                     continue;
                 }
 
-                var timestamp = t.Header.Stamp == default 
-                    ? TimeSpan.MaxValue 
-                    : t.Header.Stamp.ToTimeSpan();
+                const int maxPoseMagnitude = 10000;
+                if (t.Transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
+                {
+                    continue; // TODO: Find better way to handle this
+                }
 
-                string childId = t.ChildFrameId[0] != '/' 
-                    ? t.ChildFrameId 
+                // remove starting '/' from tf v1
+                string childId = t.ChildFrameId[0] != '/'
+                    ? t.ChildFrameId
                     : t.ChildFrameId.Substring(1);
 
                 TfFrame child;
@@ -298,30 +303,26 @@ namespace Iviz.Controllers
                     continue;
                 }
 
-                TfFrame parent;
-                string parentId = t.Header.FrameId;
+                string parentId = t.Header.FrameId.Length == 0 || t.Header.FrameId[0] != '/'
+                    ? t.Header.FrameId
+                    : t.Header.FrameId.Substring(1);
+
                 if (parentId.Length == 0)
                 {
-                    parent = OriginFrame;
+                    child.SetParent(OriginFrame);
+                    child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
                 }
-                else if (parentId[0] == '/')
+                else if (!(child.Parent is null) && parentId == child.Parent.Id)
                 {
-                    // remove starting '/' from tf v1
-                    parent = GetOrCreateFrame(parentId.Substring(1));
+                    child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
                 }
                 else
                 {
-                    parent = GetOrCreateFrame(parentId);
-                }
-
-                if (child.SetParent(parent))
-                {
-                    child.SetPose(timestamp, t.Transform.Ros2Unity());
-                }
-
-                if (FixedFrameId != null && childId == FixedFrameId)
-                {
-                    OriginFrame.transform.SetLocalPose(child.WorldPose.Inverse());
+                    TfFrame parent = GetOrCreateFrame(parentId);
+                    if (child.SetParent(parent))
+                    {
+                        child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
+                    }
                 }
             }
         }
@@ -381,7 +382,7 @@ namespace Iviz.Controllers
                 Debug.LogWarning($"Error: Broken resource pool! Requested {frameId}, received {frame.Id}");
             }
 
-            if (listener != null)
+            if (!(listener is null))
             {
                 frame.AddListener(listener);
             }
@@ -392,13 +393,15 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame GetOrCreateFrameImpl([NotNull] string id)
         {
-            return TryGetFrameImpl(id, out var t) ? t : Add(CreateFrameObject(id, OriginFrame.transform, OriginFrame));
+            return TryGetFrameImpl(id, out var frame)
+                ? frame
+                : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
         }
 
         [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
-            var frame = ResourcePool.GetOrCreate<TfFrame>(Resource.Displays.TfFrame, parent);
+            var frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
             frame.name = $"{{{id}}}";
             frame.Id = id;
             frame.Visible = config.Visible;
@@ -442,9 +445,25 @@ namespace Iviz.Controllers
             }
 
             frames.Remove(frame.Id);
-            
+
             frame.Stop();
             UnityEngine.Object.Destroy(frame);
+        }
+
+        void LateUpdate()
+        {
+            if (FixedFrameId != null && TryGetFrameImpl(FixedFrameId, out TfFrame child))
+            {
+                OriginFrame.Transform.SetLocalPose(child.WorldPose.Inverse());
+            }
+        }
+
+        public override void StopController()
+        {
+            base.StopController();
+            staticListener.Stop();
+            Publisher.Stop();
+            GameThread.LateEveryFrame -= LateUpdate;
         }
 
         static void Publish([NotNull] tfMessage_v2 msg)
@@ -459,7 +478,7 @@ namespace Iviz.Controllers
                 return unityPose;
             }
 
-            var originFrame = OriginFrame.transform;
+            var originFrame = OriginFrame.Transform;
             return new Pose(
                 originFrame.InverseTransformPoint(unityPose.position),
                 Quaternion.Inverse(originFrame.rotation) * unityPose.rotation
@@ -496,11 +515,11 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             var arEnabled = ARController.Instance?.Visible ?? false;
             var viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
-            rootMarker.InteractionMode = arEnabled && viewEnabled 
-                ? InteractionModeType.Frame 
+            rootMarker.InteractionMode = arEnabled && viewEnabled
+                ? InteractionModeType.Frame
                 : InteractionModeType.ClickOnly;
         }
     }

@@ -110,22 +110,47 @@ namespace Iviz.Ros
 #endif
                 Core.Logger.Internal("Connecting...");
 
-                client = new RosClient(MasterUri, MyId, MyUri, false);
+                RosClient newClient = new RosClient(MasterUri, MyId, MyUri, false);
+                client = newClient;
 
-                await client.EnsureCleanSlateAsync();
+                await newClient.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
                 {
                     Core.Logger.Internal("Resubscribing and readvertising...");
                 }
 
-                await Task.WhenAll(publishersByTopic.Values.Select(Readvertise));
-                await Task.WhenAll(subscribersByTopic.Values.Select(Resubscribe));
+                Core.Logger.Debug("*** ReAdvertising...");
+                await Task.WhenAll(publishersByTopic.Values.Select(ReAdvertise));
+                /*
+                foreach (var publisher in publishersByTopic.Values)
+                {
+                    await ReAdvertise(publisher);
+                }
+                */
+                Core.Logger.Debug("*** Done ReAdvertising");
+                Core.Logger.Debug("*** Resubscribing...");
+                await Task.WhenAll(subscribersByTopic.Values.Select(ReSubscribe));
+                /*
+                foreach (var subscriber in subscribersByTopic.Values)
+                {
+                    await ReSubscribe(subscriber);
+                }
+                */
+                Core.Logger.Debug("*** Done Resubscribing");
+                Core.Logger.Debug("*** Requesting topics...");
+                cachedTopics = await newClient.GetSystemPublishedTopicsAsync();
+                Core.Logger.Debug("*** Done Requesting topics");
 
+                Core.Logger.Debug("*** Advertising services...");
+                /*
                 foreach (var entry in servicesByTopic.Values)
                 {
-                    await entry.AdvertiseAsync(client);
+                    await entry.AdvertiseAsync(newClient);
                 }
+                */
+                await Task.WhenAll(servicesByTopic.Values.Select(ReAdvertiseService));
+                Core.Logger.Debug("*** Done Advertising services!");
 
                 Core.Logger.Internal("<b>Connected.</b>");
 
@@ -149,20 +174,32 @@ namespace Iviz.Ros
                 Core.Logger.Warn(e);
             }
 
-            await DisposeClient();
+            //Core.Logger.Debug("*** Disconnecting!");
+            await DisconnectImpl();
             return false;
         }
 
-        async Task Readvertise([NotNull] IAdvertisedTopic topic)
+        async Task ReAdvertise([NotNull] IAdvertisedTopic topic)
         {
+            //Core.Logger.Debug("Advertising " + topic);
             await topic.AdvertiseAsync(client);
             topic.Id = publishers.Count;
             publishers.Add(topic.Publisher);
+            //Core.Logger.Debug("Done Advertising " + topic);
         }
 
-        async Task Resubscribe([NotNull] ISubscribedTopic topic)
+        async Task ReSubscribe([NotNull] ISubscribedTopic topic)
         {
+            //Core.Logger.Debug("Subscribing to " + topic);
             await topic.SubscribeAsync(client);
+            //Core.Logger.Debug("Done Subscribing to " + topic);
+        }
+
+        async Task ReAdvertiseService([NotNull] IAdvertisedService service)
+        {
+            //Core.Logger.Debug("Subscribing to " + topic);
+            await service.AdvertiseAsync(client);
+            //Core.Logger.Debug("Done Subscribing to " + topic);
         }
 
         public override void Disconnect()
@@ -173,26 +210,27 @@ namespace Iviz.Ros
                 return;
             }
 
-            AddTask(async () =>
-                {
-                    Core.Logger.Internal("Disconnecting...");
-                    await DisposeClient();
-                    Core.Logger.Internal("<b>Disconnected.</b>");
+            AddTask(DisconnectImpl);
+        }
 
-                    foreach (var entry in publishersByTopic.Values)
-                    {
-                        entry.Invalidate();
-                    }
+        async Task DisconnectImpl()
+        {
+            Core.Logger.Internal("Disconnecting...");
+            await DisposeClient();
+            Core.Logger.Internal("<b>Disconnected.</b>");
 
-                    foreach (var entry in subscribersByTopic.Values)
-                    {
-                        entry.Invalidate();
-                    }
+            foreach (var entry in publishersByTopic.Values)
+            {
+                entry.Invalidate();
+            }
 
-                    publishers.Clear();
-                    base.Disconnect();
-                }
-            );
+            foreach (var entry in subscribersByTopic.Values)
+            {
+                entry.Invalidate();
+            }
+
+            publishers.Clear();
+            base.Disconnect();
         }
 
         internal void Advertise<T>([NotNull] Sender<T> advertiser) where T : IMessage
@@ -519,7 +557,7 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemTopicTypesAsync();
+                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync();
                 }
                 catch (Exception e)
                 {
@@ -804,6 +842,11 @@ namespace Iviz.Ros
                 Id = -1;
                 Publisher = null;
             }
+
+            public override string ToString()
+            {
+                return $"[AdvertisedTopic '{topic}']";
+            }
         }
 
         interface ISubscribedTopic
@@ -850,6 +893,7 @@ namespace Iviz.Ros
 
                 if (client != null)
                 {
+                    //Core.Logger.Debug(this + ": Calling SubscribeAsync");
                     (_, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback);
                 }
                 else
@@ -883,6 +927,11 @@ namespace Iviz.Ros
                 {
                     listener.EnqueueMessage(msg);
                 }
+            }
+
+            public override string ToString()
+            {
+                return $"[SubscribedTopic '{topic}']";
             }
         }
 
@@ -926,6 +975,11 @@ namespace Iviz.Ros
                 {
                     await client.AdvertiseServiceAsync(fullService, callback);
                 }
+            }
+
+            public override string ToString()
+            {
+                return $"[AdvertisedService '{service}']";
             }
         }
     }

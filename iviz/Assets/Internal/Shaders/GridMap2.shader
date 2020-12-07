@@ -30,13 +30,13 @@
 
         struct Input
         {
-            float2 squareTextureUV;
-            float intensity;
+            float2 squareTextureUV : TEXCOORD0;
+            float2 intensityUV : TEXCOORD1;
         };
 
-        half4 LightingNoLighting(SurfaceOutput s, half3 _, half __)
+        fixed4 LightingNoLighting(SurfaceOutput s, half3 _, half __)
         {
-            half4 c;
+            fixed4 c;
             c.rgb = s.Albedo;
             c.a = 1;
             return c;
@@ -48,22 +48,18 @@
 
             float2 uv = v.vertex.xz * float2(1, 1); // ros transform
             uv = uv.yx * float2(-1, 1); // row major
-            //uv = uv * float2(1, -1); // flipped transform
-            //float2 uv = float2(v.vertex.x, -v.vertex.z);
             float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
             v.vertex.y = input;
-            v.normal = float3(0, 1, 0);
-
-            o.intensity = input * _IntensityCoeff + _IntensityAdd;
+            o.intensityUV = float2(input * _IntensityCoeff + _IntensityAdd, _AtlasRow);
             o.squareTextureUV = uv * _SquareCoeff.xy;
         }
 
         void surf(Input IN, inout SurfaceOutput o)
         {
             o.Albedo =
-                tex2D(_IntensityTex, float2(IN.intensity, _AtlasRow)) *
-                tex2D(_SquareTex, IN.squareTextureUV).rgb *
-                _Tint.rgb;
+                tex2D(_IntensityTex, IN.intensityUV) *
+                tex2D(_SquareTex, IN.squareTextureUV) *
+                _Tint;
         }
         ENDCG
     }

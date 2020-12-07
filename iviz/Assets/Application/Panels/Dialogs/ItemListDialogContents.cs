@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 namespace Iviz.App
 {
     public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents,
-        IEnumerable<ItemListDialogContents.ItemEntry>
+        IReadOnlyList<ItemListDialogContents.ItemEntry>
     {
         static float baseButtonHeight;
 
@@ -135,7 +135,7 @@ namespace Iviz.App
             {
                 button.onClick.RemoveAllListeners();
                 button.interactable = true;
-                
+
                 if (!Mathf.Approximately(buttonHeight, BaseButtonHeight))
                 {
                     RectTransform mTransform = ButtonTransform;
@@ -234,10 +234,7 @@ namespace Iviz.App
         void UpdateSize()
         {
             RectTransform rectTransform = ((RectTransform) contentObject.transform);
-            rectTransform.sizeDelta =
-                (itemEntries.Count == 0)
-                    ? new Vector2(0, 2 * yOffset)
-                    : new Vector2(0, 2 * yOffset + itemEntries.Count * (buttonHeight + yOffset));
+            rectTransform.sizeDelta = new Vector2(0, 2 * yOffset + itemEntries.Count * (buttonHeight + yOffset));
 
             emptyText.gameObject.SetActive(itemEntries.Count == 0);
             foreach (var x in itemEntries)
@@ -246,11 +243,13 @@ namespace Iviz.App
             }
         }
 
-        protected void TrimPanelSize()
+        protected void TrimPanelSize(int maxSizeInEntries)
         {
-            RectTransform rectTransform = ((RectTransform) contentObject.transform);
+            int entriesCount = Math.Min(itemEntries.Count, maxSizeInEntries);
+            float sizeDelta = 2 * yOffset + entriesCount * (buttonHeight + yOffset);
+
             var t = (RectTransform) transform;
-            t.sizeDelta = new Vector2(t.sizeDelta.x, rectTransform.sizeDelta.y + 45);
+            t.sizeDelta = new Vector2(t.sizeDelta.x, sizeDelta + 45);
         }
 
         public virtual void ClearSubscribers()
@@ -273,5 +272,9 @@ namespace Iviz.App
         {
             return GetEnumerator();
         }
+
+        public int Count => itemEntries.Count;
+
+        public ItemEntry this[int index] => itemEntries[index];
     }
 }

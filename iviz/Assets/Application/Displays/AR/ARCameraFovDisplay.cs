@@ -20,7 +20,7 @@ namespace Iviz.Displays
                 resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             }
 
-            transform.SetParentLocal(TfListener.OriginFrame.transform);
+            transform.SetParentLocal(TfListener.OriginFrame.Transform);
             ARController.ARModeChanged += OnARModeChanged;
             gameObject.SetActive(false);
         }

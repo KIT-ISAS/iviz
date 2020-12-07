@@ -32,9 +32,10 @@ namespace Iviz.Displays
         [SerializeField] GameObject menuObject = null;
 
         [SerializeField] Transform targetTransform;
+        [SerializeField] InteractionModeType interactionMode;
+
         BoundaryFrame frame;
 
-        InteractionModeType interactionMode;
         bool handlesPointToCamera;
         bool keepAbsoluteRotation;
         bool pointsToCamera;
@@ -247,10 +248,13 @@ namespace Iviz.Displays
                 GameObject holder = holderCollider.gameObject;
                 holder.transform.localPosition = newBounds.center;
                 holder.transform.localScale = 2 * maxScale * Vector3.one;
+                holderCollider.size = newBounds.size / (2 * maxScale);
 
-                menuObject.transform.localScale = 0.25f * maxScale * Vector3.one;
+                menuObject.transform.localScale = 0.5f * maxScale * Vector3.one;
                 menuObject.GetComponent<Billboard>().offset =
-                    new Vector3(0, 0.75f * maxScale + newBounds.center.y, 0.05f * maxScale);
+                    new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale);
+
+                frame.Bounds = newBounds;
             }
         }
 
@@ -269,7 +273,7 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerUp;
         public event Action PointerDown;
-        public event Action MenuClicked;
+        public event Action<Vector3> MenuClicked;
 
 
         public void Suspend()
@@ -277,7 +281,13 @@ namespace Iviz.Displays
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
             InteractionMode = InteractionModeType.None;
+            EnableMenu = false;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
+
+            Moved = null;
+            PointerUp = null;
+            PointerDown = null;
+            MenuClicked = null;
         }
 
         void Awake()
@@ -297,7 +307,7 @@ namespace Iviz.Displays
                 draggable.PointerDown += PointerDown;
             }
 
-            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(holderCollider.transform);
+            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(transform);
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
             frame.Layer = LayerType.Unclickable;
@@ -358,7 +368,7 @@ namespace Iviz.Displays
         {
             if (eventData.pointerCurrentRaycast.gameObject == menuObject)
             {
-                MenuClicked?.Invoke();
+                MenuClicked?.Invoke(menuObject.transform.position);
                 return;
             }
 

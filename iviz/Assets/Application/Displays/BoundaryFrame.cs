@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 
 namespace Iviz.Controllers
 {
+    [RequireComponent(typeof(BoxCollider))]
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {
         readonly GameObject[] frames = new GameObject[8];
@@ -32,7 +33,7 @@ namespace Iviz.Controllers
         void Awake()
         {
             Color = Color.green;
-            FrameAxisLength = 0.25f;
+            FrameAxisLength = 0.33f;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
 
@@ -57,7 +58,7 @@ namespace Iviz.Controllers
                 }
 
                 frameAxisLength = value;
-                frameAxisWidth = frameAxisLength / 16;
+                frameAxisWidth = frameAxisLength / 8;
                 DestroySelectionFrame();
                 CreateSelectionFrame();
                 Bounds = Bounds;
@@ -93,6 +94,8 @@ namespace Iviz.Controllers
                 Vector3 center = bounds.center;
                 Vector3 size = bounds.size;
 
+                float minAxisLength = Mathf.Min(Mathf.Min(bounds.size.x, bounds.size.y), bounds.size.z);
+                FrameAxisLength = minAxisLength * 0.33f;
                 frames[0].transform.localPosition = center + new Vector3(size.x, -size.y, size.z) / 2;
                 frames[1].transform.localPosition = center + new Vector3(size.x, -size.y, -size.z) / 2;
                 frames[2].transform.localPosition = center + new Vector3(-size.x, -size.y, -size.z) / 2;

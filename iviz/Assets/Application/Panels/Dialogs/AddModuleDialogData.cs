@@ -26,7 +26,7 @@ namespace Iviz.App
         [NotNull] readonly ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
-        public AddModuleDialogData([NotNull] ModuleListPanel panel) : base(panel)
+        public AddModuleDialogData()
         {
             itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
         }
@@ -43,8 +43,6 @@ namespace Iviz.App
                 bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module);
                 if (hasModule)
                 {
-                    //int moduleEntry = Modules.FindIndex(entry => entry.Module == module);
-                    //itemList[moduleEntry].Interactable = false;
                     var entry = Modules.Zip(itemList).FirstOrDefault(tuple => tuple.First.Module == module).Second;
                     entry.Interactable = false;
                 }

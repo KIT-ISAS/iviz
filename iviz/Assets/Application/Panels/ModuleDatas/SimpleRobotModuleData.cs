@@ -148,11 +148,11 @@ namespace Iviz.App
 
                 if (f)
                 {
-                    Resource.External.AddRobot(Robot.Robot.Name, Robot.Robot.Description);
+                    Resource.External.AddRobotResource(Robot.Robot.Name, Robot.Robot.Description);
                 }
                 else
                 {
-                    Resource.External.RemoveRobot(Robot.Robot.Name);
+                    Resource.External.RemoveRobotResource(Robot.Robot.Name);
                 }
             };
         }

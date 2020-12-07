@@ -1,8 +1,8 @@
-﻿//#define PUBLISH_LOG
-
+﻿using System;
 using System.IO;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -19,14 +19,18 @@ namespace Iviz.Ros
 
     public class ConnectionManager : MonoBehaviour
     {
-        static ConnectionManager Instance;
+        static ConnectionManager instance;
         static RoslibConnection connection;
+
+        Listener<Log> logListener;
+        public static event Action<Log> LogMessageArrived;
+
         
         int frameBandwidthDown;
         int frameBandwidthUp;
         uint logSeq;
 
-        Sender<Log> sender;
+        Sender<Log> logSender;
 
         [NotNull] public static IExternalServiceProvider ServiceProvider => Connection;
         [NotNull] public static RoslibConnection Connection => connection ?? (connection = new RoslibConnection());
@@ -36,10 +40,12 @@ namespace Iviz.Ros
 
         void Awake()
         {
-            Instance = this;
+            instance = this;
 
-            sender = new Sender<Log>("/rosout");
+            logSender = new Sender<Log>("/rosout");
             Logger.LogExternal += LogMessage;
+            
+            logListener = new Listener<Log>("/rosout_agg", msg => LogMessageArrived?.Invoke(msg));
         }
 
         void OnDestroy()
@@ -51,32 +57,37 @@ namespace Iviz.Ros
 
         void LogMessage(in LogMessage msg)
         {
-            sender.Publish(new Log
+            logSender.Publish(new Log
             {
-                Header = RosUtils.CreateHeader(logSeq++),
+                Header = RosUtils.CreateHeader(logSeq++, timestamp: time.Now()),
                 Level = (byte) msg.Level,
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message,
                 File = Path.GetFileName(msg.File),
                 Line = (uint) msg.Line
             });
+
+            if (Settings.IsHololens && logSender.NumSubscribers == 0)
+            {
+                Logger.Internal(msg.Message);
+            }
         }
 
         internal static void ReportBandwidthUp(int size)
         {
-            Instance.frameBandwidthUp += size;
+            instance.frameBandwidthUp += size;
         }
 
         internal static void ReportBandwidthDown(int size)
         {
-            Instance.frameBandwidthDown += size;
+            instance.frameBandwidthDown += size;
         }
 
         public static (int, int) CollectBandwidthReport()
         {
-            (int, int) result = (Instance.frameBandwidthDown, Instance.frameBandwidthUp);
-            Instance.frameBandwidthDown = 0;
-            Instance.frameBandwidthUp = 0;
+            (int, int) result = (instance.frameBandwidthDown, instance.frameBandwidthUp);
+            instance.frameBandwidthDown = 0;
+            instance.frameBandwidthUp = 0;
             return result;
         }
     }

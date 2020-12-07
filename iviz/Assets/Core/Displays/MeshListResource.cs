@@ -263,6 +263,23 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
         
+        public void SetDirect([NotNull] PointListResource.DirectPointSetter callback, int reserve = 0)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (reserve != 0)
+            {
+                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
+            }
+
+            pointBuffer.Clear();
+            callback(ref pointBuffer);
+            UpdateBuffer();
+        }        
+        
         void UpdateScale()
         {
             var realScale = new Vector4(

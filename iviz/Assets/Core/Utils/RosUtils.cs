@@ -305,6 +305,10 @@ namespace Iviz.Core
         public static bool HasNaN(this Vector3 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool HasNaN(this ColorRGBA v) =>
+            float.IsNaN(v.R) || float.IsNaN(v.G) || float.IsNaN(v.B) || float.IsNaN(v.A);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this Msgs.GeometryMsgs.Vector3 v)
         {
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);

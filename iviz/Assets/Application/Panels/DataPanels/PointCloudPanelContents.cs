@@ -32,7 +32,7 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
-            PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
+            PointSize = p.AddSlider("Point Size").SetMinValue(0.005f).SetMaxValue(0.1f);
             //p.AddToggle("Calculate Min/Max");
             IntensityChannel = p.AddDropdown("Intensity Channel")
                         .SetOptions(DefaultChannels);

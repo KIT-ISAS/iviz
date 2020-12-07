@@ -34,30 +34,32 @@ namespace Iviz.Displays
         public class ResourceFiles
         {
             [DataMember] int Version { get; set; }
-            [DataMember] public Dictionary<Uri, string> Models { get; set; }
-            [DataMember] public Dictionary<Uri, string> Textures { get; set; }
-            [DataMember] public Dictionary<Uri, string> Scenes { get; set; }
+            [DataMember] public Dictionary<string, string> Models { get; set; }
+            [DataMember] public Dictionary<string, string> Textures { get; set; }
+            [DataMember] public Dictionary<string, string> Scenes { get; set; }
             [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; }
 
             public ResourceFiles()
             {
-                Models = new Dictionary<Uri, string>();
-                Textures = new Dictionary<Uri, string>();
-                Scenes = new Dictionary<Uri, string>();
+                Models = new Dictionary<string, string>();
+                Textures = new Dictionary<string, string>();
+                Scenes = new Dictionary<string, string>();
                 RobotDescriptions = new Dictionary<string, string>();
             }
         }
 
         readonly ResourceFiles resourceFiles = new ResourceFiles();
 
-        readonly Dictionary<Uri, Info<GameObject>> loadedModels =
-            new Dictionary<Uri, Info<GameObject>>();
+        readonly Dictionary<string, Info<GameObject>> loadedModels =
+            new Dictionary<string, Info<GameObject>>();
 
-        readonly Dictionary<Uri, Info<Texture2D>> loadedTextures =
-            new Dictionary<Uri, Info<Texture2D>>();
+        readonly Dictionary<string, Info<Texture2D>> loadedTextures =
+            new Dictionary<string, Info<Texture2D>>();
 
-        readonly Dictionary<Uri, Info<GameObject>> loadedScenes =
-            new Dictionary<Uri, Info<GameObject>>();
+        readonly Dictionary<string, Info<GameObject>> loadedScenes =
+            new Dictionary<string, Info<GameObject>>();
+
+        readonly Dictionary<string, float> temporaryBlacklist = new Dictionary<string, float>();
 
         public GameObject Node { get; }
 
@@ -65,8 +67,8 @@ namespace Iviz.Displays
         readonly Scene sceneGenerator = new Scene();
 
         [NotNull]
-        public ReadOnlyCollection<Uri> GetListOfModels() =>
-            new ReadOnlyCollection<Uri>(resourceFiles.Models.Keys.ToList());
+        public ReadOnlyCollection<string> GetListOfModels() =>
+            new ReadOnlyCollection<string>(resourceFiles.Models.Keys.ToList());
 
         public ExternalResourceManager(bool createNode = true)
         {
@@ -88,11 +90,11 @@ namespace Iviz.Displays
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                Debug.Log("ExternalResourceManager: Failed to find file " + Settings.ResourcesFilePath);
+                Logger.Debug("ExternalResourceManager: Failed to find file " + Settings.ResourcesFilePath);
                 return;
             }
 
-            Debug.Log("ExternalResourceManager: Using resource file " + Settings.ResourcesFilePath);
+            Logger.Debug("ExternalResourceManager: Using resource file " + Settings.ResourcesFilePath);
 
             try
             {
@@ -150,9 +152,9 @@ namespace Iviz.Displays
                 throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
             }
 
-            robotDescription = null;
             if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
             {
+                robotDescription = null;
                 return false;
             }
 
@@ -162,6 +164,7 @@ namespace Iviz.Displays
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.RobotDescriptions.Remove(robotName);
                 WriteResourceFile();
+                robotDescription = null;
                 return false;
             }
 
@@ -172,12 +175,13 @@ namespace Iviz.Displays
             }
             catch (IOException e)
             {
-                Debug.Log("ExternalResourceManager: Failed to read robot '" + robotName + "' : " + e);
+                Logger.Debug("ExternalResourceManager: Failed to read robot '" + robotName + "' : " + e);
+                robotDescription = null;
                 return false;
             }
         }
 
-        public void AddRobot([NotNull] string robotName, [NotNull] string robotDescription)
+        public void AddRobotResource([NotNull] string robotName, [NotNull] string robotDescription)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -192,14 +196,13 @@ namespace Iviz.Displays
             string localPath = SanitizeForFilename(robotName);
 
             File.WriteAllText($"{Settings.SavedRobotsPath}/{localPath}", robotDescription);
-            Debug.Log($"Saving to {Settings.SavedRobotsPath}/{localPath}");
-            //Logger.Internal($"Added robot <i>{robotName}</i> to cache");
+            Logger.Debug($"Saving to {Settings.SavedRobotsPath}/{localPath}");
 
             resourceFiles.RobotDescriptions[robotName] = localPath;
             WriteResourceFile();
         }
 
-        public void RemoveRobot([NotNull] string robotName)
+        public void RemoveRobotResource([NotNull] string robotName)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -222,58 +225,79 @@ namespace Iviz.Displays
                 Logger.Warn("ExternalResourceManager: Failed to delete robot file '" + localPath + "'");
             }
 
-            //Logger.Internal($"Removed robot <i>{robotName}</i> from cache");
             resourceFiles.RobotDescriptions.Remove(robotName);
             WriteResourceFile();
         }
 
         [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
-        public bool TryGet([NotNull] Uri uri, out Info<GameObject> resource,
+        public bool TryGet([NotNull] string uriString, out Info<GameObject> resource,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            if (uri is null)
+            if (uriString is null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(uriString));
             }
 
-            Debug.Log("ExternalResourceManager: Requesting " + uri);
+            float currentTime = Time.time;
+            if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
+            {
+                if (currentTime < insertionTime + 30)
+                {
+                    resource = null;
+                    return false;
+                }
+
+                temporaryBlacklist.Remove(uriString);
+            }
+
+            
+            if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
+            {
+                Logger.Warn($"[ExternalResourceManager]: Uri '{uriString}' is not a valid uri!");
+                temporaryBlacklist.Add(uriString, float.MaxValue);
+                resource = null;
+                return false;
+            }            
+            
+            //Logger.Debug("ExternalResourceManager: Requesting " + uri);
 
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
 
             if (fileType == ".SDF" || fileType == ".WORLD")
             {
-                resource = TryGetScene(uri, provider);
+                resource = TryGetScene(uriString, provider);
             }
             else
             {
-                resource = TryGetModel(uri, provider);
+                resource = TryGetModel(uriString, provider);
             }
 
-            if (resource is null)
+            if (resource == null)
             {
-                Debug.Log("ExternalResourceManager: Resource is null!");
+                temporaryBlacklist.Add(uriString, currentTime);
+                //Logger.Debug("ExternalResourceManager: Resource is null!");
             }
 
             return resource != null;
         }
 
-        Info<GameObject> TryGetModel([NotNull] Uri uri, [CanBeNull] IExternalServiceProvider provider)
+        Info<GameObject> TryGetModel([NotNull] string uriString, [CanBeNull] IExternalServiceProvider provider)
         {
-            if (loadedModels.TryGetValue(uri, out Info<GameObject> resource))
+            if (loadedModels.TryGetValue(uriString, out Info<GameObject> resource))
             {
                 return resource;
             }
 
-            if (resourceFiles.Models.TryGetValue(uri, out string localPath))
+            if (resourceFiles.Models.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
-                    return LoadLocalModel(uri, localPath, provider);
+                    return LoadLocalModel(uriString, localPath, provider);
                 }
 
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
-                resourceFiles.Models.Remove(uri);
+                resourceFiles.Models.Remove(uriString);
                 WriteResourceFile();
             }
 
@@ -281,7 +305,7 @@ namespace Iviz.Displays
             {
                 Request =
                 {
-                    Uri = uri.ToString()
+                    Uri = uriString
                 }
             };
 
@@ -289,37 +313,37 @@ namespace Iviz.Displays
                 provider.CallService(ModelServiceName, msg) &&
                 msg.Response.Success)
             {
-                return ProcessModelResponse(uri, msg.Response, provider);
+                return ProcessModelResponse(uriString, msg.Response, provider);
             }
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
-                Debug.LogWarningFormat(StrServiceFailedWithMessage, msg.Response.Message);
+                //Debug.LogWarningFormat(StrServiceFailedWithMessage, msg.Response.Message);
             }
             else
             {
-                Debug.Log(StrCallServiceFailed);
+                //Logger.Debug(StrCallServiceFailed);
             }
 
             return null;
         }
 
-        Info<GameObject> TryGetScene([NotNull] Uri uri, [CanBeNull] IExternalServiceProvider provider)
+        Info<GameObject> TryGetScene([NotNull] string uriString, [CanBeNull] IExternalServiceProvider provider)
         {
-            if (loadedScenes.TryGetValue(uri, out Info<GameObject> resource))
+            if (loadedScenes.TryGetValue(uriString, out Info<GameObject> resource))
             {
                 return resource;
             }
 
-            if (resourceFiles.Scenes.TryGetValue(uri, out string localPath))
+            if (resourceFiles.Scenes.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
-                    return LoadLocalScene(uri, localPath, provider);
+                    return LoadLocalScene(uriString, localPath, provider);
                 }
 
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
-                resourceFiles.Scenes.Remove(uri);
+                resourceFiles.Scenes.Remove(uriString);
                 WriteResourceFile();
             }
 
@@ -327,7 +351,7 @@ namespace Iviz.Displays
             {
                 Request =
                 {
-                    Uri = uri.ToString()
+                    Uri = uriString
                 }
             };
 
@@ -335,7 +359,7 @@ namespace Iviz.Displays
                 provider.CallService(SceneServiceName, msg) &&
                 msg.Response.Success)
             {
-                return ProcessSceneResponse(uri, msg.Response, provider);
+                return ProcessSceneResponse(uriString, msg.Response, provider);
             }
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
@@ -344,36 +368,48 @@ namespace Iviz.Displays
             }
             else
             {
-                Debug.Log(StrCallServiceFailed);
+                Logger.Debug(StrCallServiceFailed);
             }
 
             return null;
         }
 
         [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
-        public bool TryGet([NotNull] Uri uri, out Info<Texture2D> resource,
+        public bool TryGet([NotNull] string uriString, out Info<Texture2D> resource,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            if (uri is null)
+            if (uriString is null)
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(uriString));
             }
 
-            if (loadedTextures.TryGetValue(uri, out resource))
+            float currentTime = Time.time;
+            if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
+            {
+                if (currentTime < insertionTime + 30)
+                {
+                    resource = null;
+                    return false;
+                }
+
+                temporaryBlacklist.Remove(uriString);
+            }            
+            
+            if (loadedTextures.TryGetValue(uriString, out resource))
             {
                 return true;
             }
 
-            if (resourceFiles.Textures.TryGetValue(uri, out string localPath))
+            if (resourceFiles.Textures.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
-                    resource = LoadLocalTexture(uri, localPath);
+                    resource = LoadLocalTexture(uriString, localPath);
                     return resource != null;
                 }
 
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
-                resourceFiles.Textures.Remove(uri);
+                resourceFiles.Textures.Remove(uriString);
                 WriteResourceFile();
             }
 
@@ -381,7 +417,7 @@ namespace Iviz.Displays
             {
                 Request =
                 {
-                    Uri = uri.ToString()
+                    Uri = uriString
                 }
             };
 
@@ -389,7 +425,7 @@ namespace Iviz.Displays
                 provider.CallService(TextureServiceName, msg) &&
                 msg.Response.Success)
             {
-                resource = ProcessTextureResponse(uri, msg.Response);
+                resource = ProcessTextureResponse(uriString, msg.Response);
                 return resource != null;
             }
 
@@ -399,14 +435,15 @@ namespace Iviz.Displays
             }
             else
             {
-                Debug.Log(StrCallServiceFailed);
+                Logger.Debug(StrCallServiceFailed);
             }
 
+            temporaryBlacklist.Add(uriString, currentTime);
             return false;
         }
 
         [CanBeNull]
-        Info<GameObject> LoadLocalModel([NotNull] Uri uri, [NotNull] string localPath,
+        Info<GameObject> LoadLocalModel([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider)
         {
             byte[] buffer;
@@ -417,21 +454,21 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrResourceFailedWithError, uri, e);
+                Debug.LogWarningFormat(StrResourceFailedWithError, uriString, e);
                 return null;
             }
 
             Model msg = Msgs.Buffer.Deserialize(modelGenerator, buffer, buffer.Length);
-            GameObject obj = CreateModelObject(uri, msg, provider);
+            GameObject obj = CreateModelObject(uriString, msg, provider);
 
-            Info<GameObject> resource = new Info<GameObject>(uri.ToString(), obj);
-            loadedModels[uri] = resource;
+            Info<GameObject> resource = new Info<GameObject>(uriString, obj);
+            loadedModels[uriString] = resource;
 
             return resource;
         }
 
         [CanBeNull]
-        Info<Texture2D> LoadLocalTexture([NotNull] Uri uri, [NotNull] string localPath)
+        Info<Texture2D> LoadLocalTexture([NotNull] string uriString, [NotNull] string localPath)
         {
             byte[] buffer;
 
@@ -441,7 +478,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Logger.Debug(e);
                 return null;
             }
 
@@ -452,16 +489,16 @@ namespace Iviz.Displays
                 texture.Compress(true);
             }
 
-            texture.name = uri.ToString();
+            texture.name = uriString;
 
-            Info<Texture2D> resource = new Info<Texture2D>(uri.ToString(), texture);
-            loadedTextures[uri] = resource;
+            Info<Texture2D> resource = new Info<Texture2D>(uriString, texture);
+            loadedTextures[uriString] = resource;
 
             return resource;
         }
 
         [CanBeNull]
-        Info<GameObject> LoadLocalScene([NotNull] Uri uri, [NotNull] string localPath,
+        Info<GameObject> LoadLocalScene([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider)
         {
             byte[] buffer;
@@ -472,39 +509,39 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrResourceFailedWithError, uri, e);
+                Debug.LogWarningFormat(StrResourceFailedWithError, uriString, e);
                 return null;
             }
 
             Scene msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer, buffer.Length);
             GameObject obj = CreateSceneNode(msg, provider);
 
-            Info<GameObject> resource = new Info<GameObject>(uri.ToString(), obj);
-            loadedScenes[uri] = resource;
+            Info<GameObject> resource = new Info<GameObject>(uriString, obj);
+            loadedScenes[uriString] = resource;
 
             return resource;
         }
 
         [CanBeNull]
-        Info<GameObject> ProcessModelResponse([NotNull] Uri uri, [NotNull] GetModelResourceResponse msg,
+        Info<GameObject> ProcessModelResponse([NotNull] string uriString, [NotNull] GetModelResourceResponse msg,
             [CanBeNull] IExternalServiceProvider provider)
         {
             try
             {
-                GameObject obj = CreateModelObject(uri, msg.Model, provider);
+                GameObject obj = CreateModelObject(uriString, msg.Model, provider);
 
-                Info<GameObject> info = new Info<GameObject>(uri.ToString(), obj);
-                loadedModels[uri] = info;
+                Info<GameObject> info = new Info<GameObject>(uriString, obj);
+                loadedModels[uriString] = info;
 
-                string localPath = SanitizeForFilename(uri.ToString());
+                string localPath = SanitizeForFilename(uriString);
 
                 byte[] buffer = new byte[msg.Model.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Model, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
-                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
+                Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 //Logger.Internal($"Added external model <i>{uri}</i>");
 
-                resourceFiles.Models[uri] = localPath;
+                resourceFiles.Models[uriString] = localPath;
                 WriteResourceFile();
 
                 return info;
@@ -517,25 +554,25 @@ namespace Iviz.Displays
         }
 
         [CanBeNull]
-        Info<Texture2D> ProcessTextureResponse([NotNull] Uri uri, [NotNull] GetModelTextureResponse msg)
+        Info<Texture2D> ProcessTextureResponse([NotNull] string uriString, [NotNull] GetModelTextureResponse msg)
         {
             try
             {
                 Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
                 texture.LoadImage(msg.Image.Data);
-                texture.name = uri.ToString();
+                texture.name = uriString;
 
-                Info<Texture2D> info = new Info<Texture2D>(uri.ToString(), texture);
-                loadedTextures[uri] = info;
+                Info<Texture2D> info = new Info<Texture2D>(uriString, texture);
+                loadedTextures[uriString] = info;
 
-                string localPath = SanitizeForFilename(uri.ToString());
+                string localPath = SanitizeForFilename(uriString);
 
                 byte[] buffer = msg.Image.Data;
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
-                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
+                Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 //Logger.Internal($"Added external texture <i>{uri}</i>");
 
-                resourceFiles.Textures[uri] = localPath;
+                resourceFiles.Textures[uriString] = localPath;
                 WriteResourceFile();
 
                 return info;
@@ -548,26 +585,26 @@ namespace Iviz.Displays
         }
 
         [CanBeNull]
-        Info<GameObject> ProcessSceneResponse([NotNull] Uri uri, [NotNull] GetSdfResponse msg,
+        Info<GameObject> ProcessSceneResponse([NotNull] string uriString, [NotNull] GetSdfResponse msg,
             [CanBeNull] IExternalServiceProvider provider)
         {
             try
             {
                 GameObject node = CreateSceneNode(msg.Scene, provider);
 
-                Info<GameObject> info = new Info<GameObject>(uri.ToString(), node);
+                Info<GameObject> info = new Info<GameObject>(uriString, node);
 
-                loadedScenes[uri] = info;
+                loadedScenes[uriString] = info;
 
-                string localPath = SanitizeForFilename(uri.ToString());
+                string localPath = SanitizeForFilename(uriString);
 
                 byte[] buffer = new byte[msg.Scene.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Scene, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
-                Debug.Log($"Saving to {Settings.ResourcesPath}/{localPath}");
+                Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 //Logger.Internal($"Added external scene <i>{uri}</i>");
 
-                resourceFiles.Scenes[uri] = localPath;
+                resourceFiles.Scenes[uriString] = localPath;
                 WriteResourceFile();
 
                 return info;
@@ -580,10 +617,10 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        GameObject CreateModelObject([NotNull] Uri uri, [NotNull] Model msg,
+        GameObject CreateModelObject([NotNull] string uriString, [NotNull] Model msg,
             [CanBeNull] IExternalServiceProvider provider)
         {
-            GameObject model = SceneModel.Create(uri, msg, provider).gameObject;
+            GameObject model = SceneModel.Create(uriString, msg, provider).gameObject;
             if (Node != null)
             {
                 model.transform.SetParent(Node.transform, false);
@@ -601,7 +638,7 @@ namespace Iviz.Displays
                 node.transform.SetParent(Node?.transform, false);
             }
 
-            Debug.Log(scene.ToJsonString());
+            //Logger.Debug(scene.ToJsonString());
 
             foreach (Include include in scene.Includes)
             {
@@ -618,10 +655,9 @@ namespace Iviz.Displays
                 child.transform.localPosition = ((UnityEngine.Vector3) m.GetColumn(3)).Ros2Unity();
                 child.transform.localScale = m.lossyScale;
 
-                Uri includeUri = new Uri(include.Uri);
-                if (!Resource.TryGetResource(includeUri, out Info<GameObject> includeResource, provider))
+                if (!Resource.TryGetResource(include.Uri, out Info<GameObject> includeResource, provider))
                 {
-                    Debug.Log("ExternalResourceManager: Failed to retrieve resource '" + includeUri + "'");
+                    Logger.Debug("ExternalResourceManager: Failed to retrieve resource '" + include.Uri + "'");
                     continue;
                 }
 

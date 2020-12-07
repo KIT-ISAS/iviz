@@ -10,16 +10,26 @@ namespace Iviz.App
     public class MenuEntryList
     {
         readonly Entry root;
-        
+
         public int Count { get; }
+
+        public enum EntryType
+        {
+            Default,
+            On,
+            Off,
+            Forward,
+            Back
+        }
 
         public class Entry
         {
-            readonly string title;
+            [NotNull] readonly string title;
             public uint Id { get; }
             [CanBeNull] public Entry Parent { get; set; }
             public List<Entry> Children { get; } = new List<Entry>();
             public string Description { get; private set; }
+            public EntryType Type { get; private set; }
 
             public Entry([CanBeNull] MenuEntry entry)
             {
@@ -32,22 +42,42 @@ namespace Iviz.App
                 switch (IsCheckbox(title))
                 {
                     case null when Children.Count != 0:
-                        Description = $"<b>{title} →</b>";
+                        Type = EntryType.Forward;
+                        Description = title;
                         break;
                     case true:
-                        Description = $"<b>{title.Substring(4)}</b>\nOn";
+                        Type = EntryType.On;
+                        Description = title.Substring(4);
                         break;
                     case false:
-                        Description = $"<b>{title.Substring(4)}</b>\nOff";
+                        Type = EntryType.Off;
+                        Description = title.Substring(4);
                         break;
                     default:
-                        Description = $"<b>{title}</b>";
+                        Type = EntryType.Default;
+                        Description = title;
                         break;
                 }
             }
         }
 
-        public MenuEntryList([NotNull] MenuEntry[] menu, [NotNull] StringBuilder description, ref int numErrors)
+        public class EntryDescription
+        {
+            public Entry LinkedEntry { get; }
+            public string Title { get; }
+            public uint Id { get; }
+            public EntryType Type { get; }
+
+            internal EntryDescription(Entry linkedEntry, string title, uint id, EntryType type)
+            {
+                LinkedEntry = linkedEntry;
+                Title = title;
+                Id = id;
+                Type = type;
+            }
+        }
+
+        public MenuEntryList([NotNull] MenuEntry[] menu, [NotNull] StringBuilder description, out int numErrors)
         {
             if (menu == null)
             {
@@ -59,8 +89,9 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(description));
             }
 
+            numErrors = 0;
             root = new Entry(null);
-            var entries = new Dictionary<uint, Entry> { [0] = root };
+            var entries = new Dictionary<uint, Entry> {[0] = root};
             foreach (var menuEntry in menu)
             {
                 if (menuEntry.Id == 0)
@@ -103,22 +134,29 @@ namespace Iviz.App
         }
 
         [NotNull]
-        static IEnumerable<(Entry, string, uint)> BackDescription(Entry parent) => new[] {(parent, "<b>← Back</b>", 0u)};
+        static IEnumerable<EntryDescription> BackDescription(Entry parent) =>
+            new[] {new EntryDescription(parent, "Back", 0u, EntryType.Back)};
 
         [NotNull]
-        public IEnumerable<(Entry LinkedEntry, string EntryDescription, uint EntryId)> GetDescriptionsFor([CanBeNull] Entry currentLevel)
+        public IEnumerable<EntryDescription> GetDescriptionsFor([CanBeNull] Entry currentLevel,
+            bool backEntryOnTop = true)
         {
             var children = currentLevel != null
                 ? currentLevel.Children
                 : root.Children;
 
             var childDescriptions = children.Select(child =>
-                (child.Children.Count != 0 ? child : null, child.Description, child.Id)
+                new EntryDescription(child.Children.Count != 0 ? child : null, child.Description, child.Id, child.Type)
             );
 
-            return currentLevel == null || currentLevel == root 
-                ? childDescriptions 
-                : BackDescription(currentLevel.Parent).Concat(childDescriptions);
+            if (currentLevel == null || currentLevel == root)
+            {
+                return childDescriptions;
+            }
+
+            return backEntryOnTop
+                ? BackDescription(currentLevel.Parent).Concat(childDescriptions)
+                : childDescriptions.Concat(BackDescription(currentLevel.Parent));
         }
 
         static bool? IsCheckbox([NotNull] string name)

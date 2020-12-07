@@ -48,7 +48,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Logger.Debug(e);
             }
         }
 
@@ -98,8 +98,8 @@ namespace Iviz.Ros
                         }
                         catch (Exception e)
                         {
-                            Logger.Error("XXX Error in Connect!: " + e);
-                            connectionResult = false;
+                            Logger.Error("Unexpected error in Connect: " + e);
+                            continue;
                         }
 
                         SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
@@ -113,7 +113,7 @@ namespace Iviz.Ros
                     }
                     catch (Exception e)
                     {
-                        Logger.Error("XXX Error in ExecuteTask!: " + e);
+                        Logger.Error("Unexpected error in ExecuteTask: " + e);
                     }
                 }
 
@@ -138,7 +138,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Logger.Error(e);
                 }
             }
         }

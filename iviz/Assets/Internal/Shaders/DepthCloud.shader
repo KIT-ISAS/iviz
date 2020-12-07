@@ -53,7 +53,6 @@ Shader "iviz/DepthCloud"
 			struct v2f
 			{
 				float4 position : SV_POSITION;
-				//fixed3 color : COLOR;
 				float2 uv : TEXCOORD0;
 				UNITY_VERTEX_OUTPUT_STEREO
 			};

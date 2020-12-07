@@ -198,8 +198,9 @@ namespace Iviz.Controllers
 
             if (msg.MenuEntries.Length != 0)
             {
-                //Debug.Log("new menu entries! " + rosId);
-                menuEntries = new MenuEntryList(msg.MenuEntries, description, ref numErrors);
+                menuEntries = new MenuEntryList(msg.MenuEntries, description, out int newNumErrors);
+                numErrors += newNumErrors;
+
                 description.Append("+ ").Append(menuEntries.Count).Append(" menu entries").AppendLine();
 
                 IControlMarker controlMarker =
@@ -211,9 +212,9 @@ namespace Iviz.Controllers
             }
         }
 
-        internal void ShowMenu()
+        internal void ShowMenu(Vector3 unityPositionHint)
         {
-            ModuleListPanel.Instance.ShowMenu(menuEntries, OnMenuClick);
+            ModuleListPanel.Instance.ShowMenu(menuEntries, OnMenuClick, unityPositionHint);
         }
 
         public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
@@ -224,18 +225,32 @@ namespace Iviz.Controllers
 
         internal void OnMouseEvent(string rosControlId, in Vector3? point, MouseEventType type)
         {
+            if (this == null)
+            {
+                return; // destroyed while interacting
+            }
+
             listener?.OnInteractiveControlObjectMouseEvent(rosId, rosControlId, controlNode.transform.AsLocalPose(),
                 point, type);
         }
 
         internal void OnMoved(string rosControlId)
         {
+            if (this == null)
+            {
+                return; // destroyed while interacting
+            }
+
             listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, controlNode.transform.AsLocalPose());
         }
 
         void OnMenuClick(uint entryId)
         {
-            Debug.Log("publishing!");
+            if (this == null)
+            {
+                return; // destroyed while interacting
+            }
+
             listener?.OnInteractiveControlObjectMenuSelect(rosId, "", entryId, controlNode.transform.AsLocalPose());
         }
 

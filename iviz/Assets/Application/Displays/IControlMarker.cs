@@ -34,6 +34,6 @@ namespace Iviz.Displays
         event MovedAction Moved;
         event Action PointerUp;
         event Action PointerDown;
-        event Action MenuClicked;
+        event Action<Vector3> MenuClicked;
     }
 }

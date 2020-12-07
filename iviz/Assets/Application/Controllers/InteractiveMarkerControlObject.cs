@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Hololens;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -16,11 +17,12 @@ namespace Iviz.Controllers
         const string WarnStr = "<b>Warning:</b> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
-        readonly StringBuilder description = new StringBuilder();
+        readonly StringBuilder description = new StringBuilder(250);
         int numWarnings;
         int numErrors;
-        
-        readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
+
+        readonly Dictionary<(string Ns, int Id), MarkerObject> markers =
+            new Dictionary<(string Ns, int Id), MarkerObject>();
 
         [CanBeNull] internal IControlMarker Control { get; private set; }
         GameObject markerNode;
@@ -68,7 +70,7 @@ namespace Iviz.Controllers
 
             numErrors = 0;
             numWarnings = 0;
-            
+
             description.Clear();
             description.Append("<color=navy><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
 
@@ -107,8 +109,11 @@ namespace Iviz.Controllers
                 return Control;
             }
 
-            Control = ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform)
-                          .GetComponent<IControlMarker>()
+            GameObject controlObject = Settings.IsHololens
+                ? HololensManager.ResourcePool.GetOrCreate(transform)
+                : ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform);
+
+            Control = controlObject.GetComponent<IControlMarker>()
                       ?? throw new InvalidOperationException("Control marker has no control component!");
 
             Control.TargetTransform = transform.parent;
@@ -139,10 +144,7 @@ namespace Iviz.Controllers
                 }
             };
 
-            Control.MenuClicked += () =>
-            {
-                interactiveMarkerObject.ShowMenu();
-            };
+            Control.MenuClicked += unityPositionHint => { interactiveMarkerObject.ShowMenu(unityPositionHint); };
 
             return Control;
         }
@@ -213,7 +215,7 @@ namespace Iviz.Controllers
                 description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int) orientationMode)
                     .AppendLine();
                 numErrors++;
-                
+
                 markerNode.GetComponent<Billboard>().enabled = false;
                 markerNode.transform.localRotation = Quaternion.identity;
 
@@ -267,8 +269,8 @@ namespace Iviz.Controllers
 
             foreach (Marker marker in msg)
             {
-                string markerId = marker.Ns.Length == 0 && marker.Id == 0
-                    ? $"[Unnamed-{(numUnnamed++)}]"
+                var markerId = marker.Ns.Length == 0 && marker.Id == 0
+                    ? ("Unnamed-", numUnnamed++)
                     : MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
@@ -323,7 +325,17 @@ namespace Iviz.Controllers
             if (Control != null)
             {
                 Control.Suspend();
-                ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
+                GameObject controlObject = ((MonoBehaviour) Control).gameObject;
+                if (Settings.IsHololens)
+                {
+                    HololensManager.ResourcePool.Dispose(controlObject);
+                }
+                else
+                {
+                    ResourcePool.Dispose(Resource.Displays.InteractiveControl, controlObject);
+                }
+
+                Control = null;
             }
         }
 
@@ -335,19 +347,19 @@ namespace Iviz.Controllers
                 marker.GenerateLog(baseDescription);
             }
         }
-        
+
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
             totalErrors = numErrors;
             totalWarnings = numWarnings;
-            
+
             foreach (var marker in markers.Values)
             {
                 marker.GetErrorCount(out int newNumErrors, out int newNumWarnings);
                 totalErrors += newNumErrors;
                 totalWarnings += newNumWarnings;
-            }                
-        }        
+            }
+        }
 
         static void DeleteMarkerObject([NotNull] MarkerObject marker)
         {
@@ -410,12 +422,12 @@ namespace Iviz.Controllers
         [CanBeNull]
         Bounds? RecalculateBounds()
         {
-            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = markers.Values
-                .Select(marker => (marker.Bounds, marker.transform));
+            IEnumerable<(Bounds? Bounds, Transform Transform)> innerBounds = markers.Values
+                .Select(marker => (marker.Bounds, marker.Transform));
 
             Bounds? totalBounds =
                 UnityUtils.CombineBounds(
-                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
+                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.Bounds, tuple.Transform))
                 );
 
             return totalBounds;

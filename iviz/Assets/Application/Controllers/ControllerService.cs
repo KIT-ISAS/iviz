@@ -22,7 +22,7 @@ namespace Iviz.Controllers
         const int DefaultTimeoutInMs = 4500;
 
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
-        [NotNull] static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        [NotNull] static IReadOnlyList<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly (Resource.ModuleType module, string name)[] ModuleNames =
             typeof(Resource.ModuleType).GetEnumValues()
@@ -186,16 +186,16 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    Debug.Log(Time.time + ": Adding topic " + topic);
+                    Logger.Debug(Time.time + ": Adding topic " + topic);
                     result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
                         requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
                     result.success = true;
-                    Debug.Log(Time.time + ": Done!");
+                    Logger.Debug(Time.time + ": Done!");
                 }
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    Debug.LogWarning(e);
+                    Logger.Warn(e);
                 }
                 finally
                 {
@@ -231,7 +231,7 @@ namespace Iviz.Controllers
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             GameThread.Post(() =>
             {
-                Debug.Log(Time.time + ": Updating module!");
+                Logger.Debug(Time.time + ": Updating module!");
 
                 try
                 {
@@ -260,7 +260,7 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    Debug.Log(Time.time + ": Done!");
+                    Logger.Debug(Time.time + ": Done!");
                     signal.Release();
                 }
             });

@@ -257,12 +257,10 @@ namespace Iviz.App
                 List<PointWithColor> points = new List<PointWithColor>();
                 for (int i = 0; i < 40; i++)
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z), 0.025f * i));
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), Color.magenta));
                 }
 
                 resource.ElementScale = 0.5f;
-                resource.UseColormap = true;
-                resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
             }
             {
@@ -270,10 +268,12 @@ namespace Iviz.App
                 List<PointWithColor> points = new List<PointWithColor>();
                 for (int i = 0; i < 40; i++)
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), Color.green));
+                    points.Add(new PointWithColor(new Vector3(i, 0, z), 0.025f * i));
                 }
 
                 resource.ElementScale = 0.5f;
+                resource.UseColormap = true;
+                resource.Colormap = Resource.ColormapId.hsv;
                 resource.PointsWithColor = points;
             }
         }

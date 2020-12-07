@@ -19,12 +19,12 @@ namespace Iviz.Editor
         public static void CreateAllAssets()
         {
             ExternalResourceManager manager = Resource.External;
-            IReadOnlyList<Uri> resourceUris = manager.GetListOfModels();
+            IReadOnlyList<string> resourceUris = manager.GetListOfModels();
 
             Debug.Log("SavedAssetLoader: Transferring " + resourceUris.Count + " assets...");
-            foreach (Uri uri in resourceUris)
+            foreach (string uri in resourceUris)
             {
-                CreateAsset(uri, manager);
+                CreateAsset(new Uri(uri), manager);
             }
 
             CreateRobots(manager);
@@ -109,7 +109,7 @@ namespace Iviz.Editor
 
             Directory.CreateDirectory(absolutePath);
 
-            if (!manager.TryGet(assetUri, out Info<GameObject> resourceInfo, null))
+            if (!manager.TryGet(assetUri.ToString(), out Info<GameObject> resourceInfo, null))
             {
                 throw new FileNotFoundException(assetUri.ToString());
             }

@@ -30,7 +30,7 @@ namespace Iviz.Resources
         public Info<GameObject> Sphere { get; }
         public Info<GameObject> Text { get; }
         public Info<GameObject> LineConnector { get; }
-        public Info<GameObject> NamedBoundary { get; }
+        public Info<GameObject> BoundaryFrame { get; }
         public Info<GameObject> Arrow { get; }
         public Info<GameObject> MeshList { get; }
         public Info<GameObject> PointList { get; }
@@ -57,7 +57,7 @@ namespace Iviz.Resources
             Sphere = new Info<GameObject>("CoreDisplays/Sphere");
             Text = new Info<GameObject>("CoreDisplays/Text");
             LineConnector = new Info<GameObject>("Displays/LineConnector");
-            NamedBoundary = new Info<GameObject>("Displays/NamedBoundary");
+            BoundaryFrame = new Info<GameObject>("Displays/BoundaryFrame");
             Arrow = new Info<GameObject>("Displays/Arrow");
             MeshList = new Info<GameObject>("CoreDisplays/MeshList");
             PointList = new Info<GameObject>("CoreDisplays/PointList");
@@ -74,9 +74,7 @@ namespace Iviz.Resources
             AxisFrame = new Info<GameObject>("Displays/AxisFrameResource");
             AngleAxis = new Info<GameObject>("Displays/AngleAxis");
             Trail = new Info<GameObject>("Displays/Trail");
-            InteractiveControl = Settings.IsHololens
-                ? new Info<GameObject>("Hololens Assets/HololensControl")
-                : new Info<GameObject>("Displays/InteractiveControl");
+            InteractiveControl = new Info<GameObject>("Displays/InteractiveControl");
             GridMap = new Info<GameObject>("Displays/GridMap");
 
             resourceByType = CreateTypeDictionary();

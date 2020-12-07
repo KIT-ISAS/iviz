@@ -9,7 +9,7 @@ namespace Iviz.App
         [NotNull] readonly TFDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public TfDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
+        public TfDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<TFDialogContents>(DialogPanelType.Tf);
         }
