@@ -61,7 +61,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public Arg(IEnumerable<string[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+        public Arg(string[][] f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
         {
         }
 
