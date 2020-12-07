@@ -194,6 +194,20 @@ namespace Iviz.Roslib
             manager.Stop();
             NumSubscribersChanged = null;
         }
+        
+        public async Task DisposeAsync()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            runningTs.Cancel();
+            ids.Clear();
+            await manager.StopAsync();
+            NumSubscribersChanged = null;
+        }        
 
         public string Advertise()
         {

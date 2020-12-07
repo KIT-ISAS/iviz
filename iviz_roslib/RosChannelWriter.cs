@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -15,6 +16,24 @@ namespace Iviz.Roslib
         public IRosPublisher<T> Publisher =>
             publisher ?? throw new InvalidOperationException("Channel has not been started!");
 
+        IRosPublisher IRosChannelWriter.Publisher => Publisher;
+
+        bool latchingEnabled;
+        public bool LatchingEnabled
+        {
+            get => latchingEnabled;
+            set
+            {
+                latchingEnabled = value;
+                if (publisher != null)
+                {
+                    Publisher.LatchingEnabled = value;
+                }
+            }
+        }
+
+        public string Topic => Publisher.Topic;
+        
         public RosChannelWriter()
         {
         }
@@ -32,6 +51,7 @@ namespace Iviz.Roslib
             }
 
             publisherId = client.Advertise<T>(topic, out publisher);
+            publisher.LatchingEnabled = LatchingEnabled;
         }
 
         public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
@@ -42,6 +62,7 @@ namespace Iviz.Roslib
             }
 
             (publisherId, publisher) = await client.AdvertiseAsync<T>(topic);
+            publisher.LatchingEnabled = LatchingEnabled;
         }
 
         public void Write(T msg)
@@ -68,11 +89,6 @@ namespace Iviz.Roslib
 
             foreach (T msg in msgs)
             {
-                if (!Publisher.IsAlive())
-                {
-                    break;
-                }
-
                 Publisher.Publish(msg);
             }
         }
@@ -86,30 +102,20 @@ namespace Iviz.Roslib
 
             foreach (IMessage msg in msgs)
             {
-                if (!Publisher.IsAlive())
-                {
-                    break;
-                }
-
                 Publisher.Publish(msg);
             }
         }
 
 #if !NETSTANDARD2_0
-        public async ValueTask WriteAllAsync(IAsyncEnumerable<T> msgs)
+        public async ValueTask WriteAllAsync(IAsyncEnumerable<T> messages)
         {
-            if (msgs == null)
+            if (messages == null)
             {
-                throw new ArgumentNullException(nameof(msgs));
+                throw new ArgumentNullException(nameof(messages));
             }
             
-            await foreach (T msg in msgs)
+            await foreach (T msg in messages)
             {
-                if (!Publisher.IsAlive())
-                {
-                    break;
-                }
-
                 await Publisher.PublishAsync(msg);
             }
         }
@@ -123,11 +129,6 @@ namespace Iviz.Roslib
             
             await foreach (IMessage msg in msgs)
             {
-                if (!Publisher.IsAlive())
-                {
-                    break;
-                }
-
                 await Publisher.PublishAsync(msg);
             }
         }

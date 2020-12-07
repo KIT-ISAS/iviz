@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpReceiverAsync<T> : IDisposable where T : IMessage
+    internal sealed class TcpReceiverAsync<T> where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
@@ -62,7 +64,7 @@ namespace Iviz.Roslib
             errorDescription
         );
 
-        public void Dispose()
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -71,36 +73,22 @@ namespace Iviz.Roslib
 
             disposed = true;
             runningTs.Cancel();
+            tcpClient?.Dispose();
 
-            Utils.WaitNoThrow(task, this);
+            if (task != null)
+            {
+                await task.WaitForWithTimeout(5000).AwaitNoThrow(this);
+            }
 
-            runningTs.Dispose();
+            readBuffer = Array.Empty<byte>();
             task = null;
         }
+
 
         public void Start(int timeoutInMs)
         {
             connectionTimeoutInMs = timeoutInMs;
-            task = Task.Run(Run);
-        }
-
-        async Task Run()
-        {
-            Task sessionTask = StartSession();
-
-            // HACK! sometimes sessionTask gets stuck, and the only way to get it
-            // out is by disposing the tcpClient
-            // so we wait for the cancel, dispose everything, then wait for the task
-            try
-            {
-                await Task.Delay(-1, runningTs.Token);
-            }
-            catch (OperationCanceledException) { }
-
-            stream?.Dispose();
-            tcpClient?.Dispose();
-
-            Utils.WaitNoThrow(sessionTask, this);
+            task = Task.Run(StartSession, runningTs.Token);
         }
 
         async Task<TcpClient?> TryToConnect()
@@ -146,7 +134,8 @@ namespace Iviz.Roslib
                     return null;
                 }
 
-                Endpoint? newEndpoint = await manager.RequestConnectionFromPublisherAsync(RemoteUri).Caf();
+                Endpoint? newEndpoint =
+                    await manager.RequestConnectionFromPublisherAsync(RemoteUri, runningTs.Token).Caf();
                 if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
                 {
                     continue;
@@ -171,7 +160,7 @@ namespace Iviz.Roslib
                 requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0"
             };
 
-            await Utils.WriteHeaderAsync(stream!, contents).Caf();
+            await Utils.WriteHeaderAsync(stream!, contents, runningTs.Token).Caf();
         }
 
 
@@ -224,7 +213,7 @@ namespace Iviz.Roslib
             int index = responses[0].IndexOf('=');
             string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
             errorDescription = errorMsg;
-            throw new RosRpcException($"Failed handshake: {errorMsg}");
+            throw new RosHandshakeException($"Failed handshake: {errorMsg}");
         }
 
         async Task StartSession()
@@ -239,8 +228,10 @@ namespace Iviz.Roslib
                 if (newTcpClient == null
                     || (newEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
                 {
-                    Logger.LogDebugFormat(
-                        KeepRunning ? "{0}: Ran out of retries. Leaving!" : "{0}: Disposed! Getting out.", this);
+                    Logger.LogDebugFormat(KeepRunning
+                            ? "{0}: Ran out of retries. Leaving!"
+                            : "{0}: Disposed! Getting out.",
+                        this);
                     break;
                 }
 
@@ -251,8 +242,8 @@ namespace Iviz.Roslib
                 try
                 {
                     using (tcpClient = newTcpClient)
-                    using (stream = tcpClient.GetStream())
                     {
+                        stream = tcpClient.GetStream();
                         await ProcessLoop().Caf();
                     }
                 }
@@ -263,6 +254,10 @@ namespace Iviz.Roslib
                 {
                     Logger.LogDebugFormat("{0}: {1}", this, e);
                 }
+                catch (Exception e) when (e is RosHandshakeException)
+                {
+                    Logger.LogErrorFormat("{0}: {1}", this, e);
+                }
                 catch (Exception e)
                 {
                     Logger.LogFormat("{0}: {1}", this, e);
@@ -272,7 +267,7 @@ namespace Iviz.Roslib
             errorDescription = null;
             tcpClient = null;
             stream = null;
-            Logger.LogFormat("{0}: Stopped!", this);
+            Logger.LogDebugFormat("{0}: Stopped!", this);
         }
 
         async Task ProcessLoop()
@@ -298,7 +293,8 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpReceiver Uri={RemoteUri} {remoteEndpoint.Hostname}:{remoteEndpoint.Port} '{Topic}']";
+            return
+                $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} PartnerSocket={remoteEndpoint.Hostname}:{remoteEndpoint.Port}]";
         }
     }
 }

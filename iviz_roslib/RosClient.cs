@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -261,6 +262,7 @@ namespace Iviz.Roslib
             // Start the XmlRpc server.
             listener.Start();
 
+            /*
             NodeClient.GetPidResponse response;
             try
             {
@@ -281,6 +283,7 @@ namespace Iviz.Roslib
                 listener.Dispose();
                 throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
             }
+            */
 
             Logger.LogFormat("{0}: Initialized.", this);
 
@@ -589,14 +592,20 @@ namespace Iviz.Roslib
                 throw new ArgumentException($"'{topic}' is not a valid resource name");
             }
 
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Entering");
+
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Creating subsciber");
             RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
+
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling subscribe");
             string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
 
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling register subscribe async");
             var masterResponse = await RosMasterApi.RegisterSubscriberAsync(topic, topicInfo.Type).Caf();
             if (!masterResponse.IsValid)
             {
@@ -605,8 +614,10 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling publisher update rpc async");
             await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf();
 
+            //Logger.LogDebug("CreateSubscriber " + topic + ": Done!");
             return (id, subscription);
         }
 
@@ -1222,8 +1233,8 @@ namespace Iviz.Roslib
 
             throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
         }
-        
-        
+
+
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
@@ -1250,9 +1261,9 @@ namespace Iviz.Roslib
         /// Corresponds to the function 'getSystemState' in the ROS Master API.
         /// </summary>
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
-        public async Task<SystemState> GetSystemStateAsync()
+        public async Task<SystemState> GetSystemStateAsync(CancellationToken token = default)
         {
-            var response = await RosMasterApi.GetSystemStateAsync().Caf();
+            var response = await RosMasterApi.GetSystemStateAsync(token).Caf();
             if (response.IsValid)
             {
                 return new SystemState(response.Publishers, response.Subscribers, response.Services);
@@ -1387,45 +1398,97 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task CloseAsync()
         {
-            listener.Dispose();
+            //Logger.LogDebug("1) Disposing listener");
+            await listener.DisposeAsync();
+            //Logger.LogDebug("1) Done");
 
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
+
             List<Task> tasks = new List<Task>();
-            tasks.AddRange(publishers.Select(async publisher =>
+            tasks.AddAll(publishers.Select(async publisher =>
             {
-                publisher.Dispose();
+                //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
+                await publisher.DisposeAsync().Caf();
+                //Logger.LogDebug("2) Unregistering publisher " + publisher.Topic);
                 await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
+                //Logger.LogDebug("2) Done publisher " + publisher.Topic);
             }));
+
+            /*
+            foreach(var publisher in publishers)
+            {
+                //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
+                publisher.Dispose();
+                //Logger.LogDebug("2) Unregistering publisher " + publisher.Topic);
+                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
+                //Logger.LogDebug("2) Done publisher " + publisher.Topic);
+            }
+            */
 
             var subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
-            tasks.AddRange(subscribers.Select(async subscriber =>
+
+            tasks.AddAll(subscribers.Select(async subscriber =>
             {
-                subscriber.Dispose();
+                //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
+                await subscriber.DisposeAsync().Caf();
+                //Logger.LogDebug("3) Unregistering subscriber " + subscriber.Topic);
                 await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
+                //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
             }));
+
+            /*
+            foreach (var subscriber in subscribers)
+            {
+                //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
+                subscriber.Dispose();
+                //Logger.LogDebug("3) Unregistering subscriber " + subscriber.Topic);
+                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
+                //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
+            }
+            */
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
 
+
             foreach (IServiceCaller receiver in receivers)
             {
+                //Logger.LogDebug("4) Disposing service receiver " + receiver.ServiceType);
                 receiver.Dispose();
+                //Logger.LogDebug("4) Done service receiver " + receiver.ServiceType);
             }
+
 
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
-            tasks.AddRange(serviceManagers.Select(async senderManager =>
+
+            tasks.AddAll(serviceManagers.Select(async senderManager =>
             {
+                //Logger.LogDebug("5) Disposing service " + senderManager.Service);
                 await senderManager.DisposeAsync().Caf();
+                //Logger.LogDebug("5) Unregistering service " + senderManager.Service);
                 await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
+                //Logger.LogDebug("5) Done service " + senderManager.Service);
             }));
 
             await Task.WhenAll(tasks).Caf();
+
+            /*
+            foreach(var senderManager in serviceManagers)
+            {
+                //Logger.LogDebug("5) Disposing service " + senderManager.Service);
+                await senderManager.DisposeAsync().Caf();
+                //Logger.LogDebug("5) Unregistering service " + senderManager.Service);
+                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
+                //Logger.LogDebug("5) Done service " + senderManager.Service);
+            }
+            */
+            //Logger.LogDebug("6) Done closing!");
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1453,8 +1516,8 @@ namespace Iviz.Roslib
 
             try
             {
-                PublisherState pstate = GetPublisherStatistics();
-                foreach (var topic in pstate.Topics)
+                PublisherState publisherState = GetPublisherStatistics();
+                foreach (var topic in publisherState.Topics)
                 {
                     foreach (var sender in topic.Senders)
                     {
@@ -1488,6 +1551,62 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
+        /// Waits for the service to appear.
+        /// </summary>
+        /// <param name="serviceName">The name of the service</param>
+        /// <param name="timeoutInMs">Time to wait in milliseconds, or -1 for infinite</param>
+        /// <exception cref="TaskCanceledException">The operation timed out.</exception>
+        public void WaitForServiceExistence(string serviceName, int timeoutInMs)
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            CancellationToken token = tokenSource.Token;
+            try
+            {
+                Task.Run(async () => await WaitForServiceExistenceAsync(serviceName, token), token).Wait(token);
+            }
+            catch (AggregateException e) when (e.InnerExceptions.Count == 1)
+            {
+                throw e.InnerExceptions[0];
+            }
+        }
+
+        /// <summary>
+        /// Waits for the service to appear.
+        /// </summary>
+        /// <param name="serviceName">The name of the service</param>
+        /// <param name="token">A cancellation token, or default for infinite</param>
+        /// <exception cref="TaskCanceledException">The token was cancelled.</exception>
+        public async Task WaitForServiceExistenceAsync(string serviceName, CancellationToken token = default)
+        {
+            // polling isn't optimal, but what else? 
+            while (true)
+            {
+                var systemState = await GetSystemStateAsync(token);
+                if (systemState.Services.Any(tuple => tuple.Topic == serviceName && tuple.Members.Count != 0))
+                {
+                    break;
+                }
+
+                await Task.Delay(100, token);
+            }
+        }
+        
+        public async Task WaitForTopicExistenceAsync(string topicName, CancellationToken token = default)
+        {
+            // polling isn't optimal, but what else? 
+            while (true)
+            {
+                var systemState = await GetSystemStateAsync(token);
+                if (systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Count != 0))
+                {
+                    break;
+                }
+
+                await Task.Delay(100, token);
+            }
+        }
+
+        /// <summary>
         /// Calls the given ROS service.
         /// </summary>
         /// <param name="serviceName">Name of the ROS service</param>
@@ -1496,6 +1615,7 @@ namespace Iviz.Roslib
         /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
+        /// <exception cref="TaskCanceledException">The operation timed out.</exception>
         public bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService
         {
@@ -1638,7 +1758,7 @@ namespace Iviz.Roslib
             }
         }
 
-        bool ServiceAlreadyExists<T>(string serviceName) where T : IService
+        bool ServiceAlreadyAdvertised<T>(string serviceName) where T : IService
         {
             if (!advertisedServicesByName.TryGetValue(serviceName, out var existingSender))
             {
@@ -1662,7 +1782,7 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         public bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
         {
-            if (ServiceAlreadyExists<T>(serviceName))
+            if (ServiceAlreadyAdvertised<T>(serviceName))
             {
                 return false;
             }
@@ -1700,19 +1820,25 @@ namespace Iviz.Roslib
         public async Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback)
             where T : IService, new()
         {
-            if (ServiceAlreadyExists<T>(serviceName))
+            //Logger.LogDebug("Entering advertise async...");
+            if (ServiceAlreadyAdvertised<T>(serviceName))
             {
                 return false;
             }
 
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName, new T());
+
+            //Logger.LogDebug("Creating request manager...");
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
+            //Logger.LogDebug("Created request manager!");
 
             advertisedServicesByName.TryAdd(serviceName, advertisedService);
 
             try
             {
+                //Logger.LogDebug("Calling register service...");
                 await RosMasterApi.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
+                //Logger.LogDebug("Register service returned!");
             }
             catch (Exception e)
             {
@@ -1720,6 +1846,7 @@ namespace Iviz.Roslib
                 throw new RosRpcException("Failed to advertise service", e);
             }
 
+            //Logger.LogDebug("Register service out!");
             return true;
         }
 

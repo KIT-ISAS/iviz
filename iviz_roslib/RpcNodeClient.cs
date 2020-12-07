@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -31,10 +32,10 @@ namespace Iviz.Roslib.XmlRpc
             return new RequestTopicResponse(response);
         }
 
-        public async Task<RequestTopicResponse> RequestTopicAsync(string topic)
+        public async Task<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
         {
             Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[]? response = await MethodCallAsync("requestTopic", args).Caf();
+            object[]? response = await MethodCallAsync("requestTopic", args, token).Caf();
             return new RequestTopicResponse(response);
         }
 
@@ -78,9 +79,9 @@ namespace Iviz.Roslib.XmlRpc
             return null;
         }
 
-        async Task<object[]?> MethodCallAsync(string function, IEnumerable<Arg> args)
+        async Task<object[]?> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
         {
-            object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs).Caf();
+            object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs, token).Caf();
             if (tmp is object[] result)
             {
                 return result;

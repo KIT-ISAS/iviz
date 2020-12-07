@@ -91,4 +91,19 @@ namespace Iviz.Roslib
         {
         }
     }
+    
+    public class RosHandshakeException : RosRpcException
+    {
+        public RosHandshakeException(string message) : base(message)
+        {
+        }
+
+        public RosHandshakeException()
+        {
+        }
+
+        public RosHandshakeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }    
 }

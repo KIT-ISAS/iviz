@@ -79,6 +79,8 @@ namespace Iviz.Roslib
         public Task<bool> UnsubscribeAsync(string id);
 
         internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris);
+
+        public Task DisposeAsync();
     }
     
     public interface IRosSubscriber<out T> : IRosSubscriber where T : IMessage

@@ -51,44 +51,53 @@ namespace Iviz.Roslib
 
         void TryToCleanup()
         {
-            IDisposable @lock;
-            using (CancellationTokenSource tokenSource = new CancellationTokenSource(100))
+            if (!NeedsCleanup())
             {
-                try
-                {
-                    @lock = mutex.Lock(tokenSource.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
+                return;
             }
 
-            bool numConnectionsChanged;
-            using (@lock)
+            Task.Run(async () =>
             {
-                numConnectionsChanged = Cleanup();
-            }
+                IDisposable @lock;
+                using (CancellationTokenSource tokenSource = new CancellationTokenSource(100))
+                {
+                    try
+                    {
+                        @lock = await mutex.LockAsync(tokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+                }
 
-            if (numConnectionsChanged)
-            {
-                subscriber.RaiseNumPublishersChanged();
-            }
+                bool numConnectionsChanged;
+                using (@lock)
+                {
+                    numConnectionsChanged = await CleanupAsync();
+                }
+
+                if (numConnectionsChanged)
+                {
+                    subscriber.RaiseNumPublishersChanged();
+                }
+            }).WaitNoThrow(this);
         }
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
-        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri)
+        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri,
+            CancellationToken token = default)
         {
             NodeClient.RequestTopicResponse response;
             try
             {
-                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic).Caf();
+                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic, token).Caf();
             }
             catch (Exception e) when (
-                e is TimeoutException || 
-                e is XmlRpcException || 
+                e is TimeoutException ||
+                e is XmlRpcException ||
                 e is SocketException ||
                 e is IOException)
             {
@@ -112,7 +121,7 @@ namespace Iviz.Roslib
 
             if (response.Protocol.Port == 0)
             {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} returned an uninitialized address!",
+                Logger.LogErrorFormat("{0}: Connection request to publisher {1} returned an uninitialized address!",
                     this, remoteUri);
                 return null;
             }
@@ -158,30 +167,21 @@ namespace Iviz.Roslib
         public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris)
         {
             bool numConnectionsChanged;
+
             using (await mutex.LockAsync())
             {
                 HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
                 IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
 
-                // if an uri is not registered as a publisher anymore,
-                // we kill existing receivers only if they are still trying to reconnect
-                // existing sessions should continue
                 TcpReceiverAsync<T>[] toDelete = connectionsByUri
-                    .Where(pair => !newPublishers.Contains(pair.Key) /*&& !pair.Value.IsConnected*/)
+                    .Where(pair => !newPublishers.Contains(pair.Key))
                     .Select(pair => pair.Value).ToArray();
 
-                //Logger.Log(this + " old: " + string.Join(",", connectionsByUri.Keys) + " new: " +
-                //           string.Join(",", newPublishers) + " toDie: " + string.Join<TcpReceiverAsync<T>>(",", toDelete));
+                var tasks = toDelete.Select(receiver => receiver.DisposeAsync());
+                await Task.WhenAll(tasks).Caf();
 
-                foreach (TcpReceiverAsync<T> receiver in toDelete)
-                {
-                    //Logger.Log(this + " disposing: " + receiver);
-                    receiver.Dispose();
-                }
-
-                // these will run concurrently!
                 bool[] results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).Caf();
-                numConnectionsChanged = results.Any(b => b) | Cleanup();
+                numConnectionsChanged = results.Any(b => b) | await CleanupAsync();
             }
 
             if (numConnectionsChanged)
@@ -190,29 +190,42 @@ namespace Iviz.Roslib
             }
         }
 
+        bool NeedsCleanup()
+        {
+            return connectionsByUri.Values.Any(receiver => !receiver.IsAlive);
+        }
 
-        bool Cleanup()
+        async Task<bool> CleanupAsync()
         {
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
-            foreach (TcpReceiverAsync<T> receiver in toDelete)
+
+            if (toDelete.Length == 0)
             {
-                connectionsByUri.TryRemove(receiver.RemoteUri, out _);
-                Logger.LogFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
-                receiver.Dispose();
+                return false;
             }
 
-            return toDelete.Length != 0;
+            var tasks = toDelete.Select(async receiver =>
+            {
+                connectionsByUri.TryRemove(receiver.RemoteUri, out _);
+                await receiver.DisposeAsync().Caf();
+                Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
+            });
+
+            await Task.WhenAll(tasks).Caf();
+
+            return true;
         }
 
         public void Stop()
         {
-            using (mutex.Lock())
-            {
-                foreach (TcpReceiverAsync<T> receiver in connectionsByUri.Values)
-                {
-                    receiver.Dispose();
-                }
+            Task.Run(StopAsync).WaitNoThrow(this);
+        }
 
+        public async Task StopAsync()
+        {
+            using (await mutex.LockAsync())
+            {
+                await Task.WhenAll(connectionsByUri.Values.Select(receiver => receiver.DisposeAsync()));
                 connectionsByUri.Clear();
                 subscriber.RaiseNumPublishersChanged();
             }

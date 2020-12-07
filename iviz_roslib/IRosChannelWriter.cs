@@ -10,6 +10,7 @@ namespace Iviz.Roslib
         , IAsyncDisposable
 #endif
     {
+        public IRosPublisher Publisher { get; } 
         public Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false);
         public void Start(IRosClient client, string topic, bool requestNoDelay = false);
         public void Write(IMessage msg);
