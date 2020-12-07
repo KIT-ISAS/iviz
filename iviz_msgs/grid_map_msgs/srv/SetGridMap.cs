@@ -15,14 +15,14 @@ namespace Iviz.Msgs.GridMapMsgs
         public SetGridMap()
         {
             Request = new SetGridMapRequest();
-            Response = new SetGridMapResponse();
+            Response = SetGridMapResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public SetGridMap(SetGridMapRequest request)
         {
             Request = request;
-            Response = new SetGridMapResponse();
+            Response = SetGridMapResponse.Singleton;
         }
         
         IService IService.Create() => new SetGridMap();
@@ -104,7 +104,42 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class SetGridMapResponse : Internal.EmptyResponse
+    public sealed class SetGridMapResponse : IResponse, IDeserializable<SetGridMapResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public SetGridMapResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public SetGridMapResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        SetGridMapResponse IDeserializable<SetGridMapResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

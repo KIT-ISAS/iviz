@@ -86,5 +86,6 @@ namespace Iviz.Msgs.StdMsgs
         public static readonly ColorRGBA Magenta = new ColorRGBA(1, 0, 1, 1);
         public static readonly ColorRGBA Grey = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
         public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);
+        public static implicit operator ColorRGBA((float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);
     }
 }

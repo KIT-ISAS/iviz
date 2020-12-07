@@ -14,7 +14,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Empty constructor. </summary>
         public SelfTest()
         {
-            Request = new SelfTestRequest();
+            Request = SelfTestRequest.Singleton;
             Response = new SelfTestResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class SelfTestRequest : Internal.EmptyRequest
+    public sealed class SelfTestRequest : IRequest, IDeserializable<SelfTestRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public SelfTestRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public SelfTestRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        SelfTestRequest IDeserializable<SelfTestRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly SelfTestRequest Singleton = new SelfTestRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

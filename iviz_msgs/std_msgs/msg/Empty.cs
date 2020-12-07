@@ -19,13 +19,15 @@ namespace Iviz.Msgs.StdMsgs
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new Empty(ref b);
+            return Singleton;
         }
         
         Empty IDeserializable<Empty>.RosDeserialize(ref Buffer b)
         {
-            return new Empty(ref b);
+            return Singleton;
         }
+        
+        public static readonly Empty Singleton = new Empty();
     
         public void RosSerialize(ref Buffer b)
         {

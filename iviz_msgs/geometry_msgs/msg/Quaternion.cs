@@ -93,5 +93,6 @@ namespace Iviz.Msgs.GeometryMsgs
                 return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);
         }
         public static Point operator *(in Quaternion q, in Point v) => q * (Vector3)v;
+        public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
     }
 }

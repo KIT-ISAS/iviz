@@ -14,7 +14,7 @@ namespace Iviz.Msgs.GridMapMsgs
         /// <summary> Empty constructor. </summary>
         public GetGridMapInfo()
         {
-            Request = new GetGridMapInfoRequest();
+            Request = GetGridMapInfoRequest.Singleton;
             Response = new GetGridMapInfoResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapInfoRequest : Internal.EmptyRequest
+    public sealed class GetGridMapInfoRequest : IRequest, IDeserializable<GetGridMapInfoRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public GetGridMapInfoRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public GetGridMapInfoRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        GetGridMapInfoRequest IDeserializable<GetGridMapInfoRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly GetGridMapInfoRequest Singleton = new GetGridMapInfoRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

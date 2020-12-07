@@ -15,14 +15,14 @@ namespace Iviz.Msgs.Rosapi
         public DeleteParam()
         {
             Request = new DeleteParamRequest();
-            Response = new DeleteParamResponse();
+            Response = DeleteParamResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public DeleteParam(DeleteParamRequest request)
         {
             Request = request;
-            Response = new DeleteParamResponse();
+            Response = DeleteParamResponse.Singleton;
         }
         
         IService IService.Create() => new DeleteParam();
@@ -102,7 +102,42 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class DeleteParamResponse : Internal.EmptyResponse
+    public sealed class DeleteParamResponse : IResponse, IDeserializable<DeleteParamResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public DeleteParamResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public DeleteParamResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        DeleteParamResponse IDeserializable<DeleteParamResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

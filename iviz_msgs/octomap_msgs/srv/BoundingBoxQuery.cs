@@ -15,14 +15,14 @@ namespace Iviz.Msgs.OctomapMsgs
         public BoundingBoxQuery()
         {
             Request = new BoundingBoxQueryRequest();
-            Response = new BoundingBoxQueryResponse();
+            Response = BoundingBoxQueryResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public BoundingBoxQuery(BoundingBoxQueryRequest request)
         {
             Request = request;
-            Response = new BoundingBoxQueryResponse();
+            Response = BoundingBoxQueryResponse.Singleton;
         }
         
         IService IService.Create() => new BoundingBoxQuery();
@@ -118,13 +118,15 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new BoundingBoxQueryResponse(ref b);
+            return Singleton;
         }
         
         BoundingBoxQueryResponse IDeserializable<BoundingBoxQueryResponse>.RosDeserialize(ref Buffer b)
         {
-            return new BoundingBoxQueryResponse(ref b);
+            return Singleton;
         }
+        
+        public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
     
         public void RosSerialize(ref Buffer b)
         {

@@ -319,8 +319,9 @@ namespace Iviz.Msgs
         /// </summary>
         /// <param name="message">The ROS message.</param>
         /// <param name="buffer">The destination byte array.</param>
+        /// <param name="offset">Optional offset at which to start writing</param>
         /// <returns>The number of bytes written.</returns>
-        public static uint Serialize<T>(in T message, byte[] buffer) where T : ISerializable
+        public static uint Serialize<T>(in T message, byte[] buffer, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {
@@ -334,9 +335,9 @@ namespace Iviz.Msgs
 
             fixed (byte* bPtr = buffer)
             {
-                Buffer b = new Buffer(bPtr, bPtr + buffer.Length);
+                Buffer b = new Buffer(bPtr + offset, bPtr + buffer.Length - offset);
                 message.RosSerialize(ref b);
-                return (uint) (b.ptr - bPtr);
+                return (uint) (b.ptr - bPtr - offset);
             }
         }
     }

@@ -115,11 +115,6 @@ namespace Iviz.Msgs
 
         public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
         {
-            if (fullRosMessageName == "Header")
-            {
-                return typeof(StdMsgs.Header);
-            }
-
             string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
             return Type.GetType(guessName);
         }

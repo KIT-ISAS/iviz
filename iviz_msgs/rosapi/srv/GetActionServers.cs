@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Empty constructor. </summary>
         public GetActionServers()
         {
-            Request = new GetActionServersRequest();
+            Request = GetActionServersRequest.Singleton;
             Response = new GetActionServersResponse();
         }
         
@@ -64,13 +64,15 @@ namespace Iviz.Msgs.Rosapi
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetActionServersRequest(ref b);
+            return Singleton;
         }
         
         GetActionServersRequest IDeserializable<GetActionServersRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetActionServersRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly GetActionServersRequest Singleton = new GetActionServersRequest();
     
         public void RosSerialize(ref Buffer b)
         {

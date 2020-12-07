@@ -15,14 +15,14 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public TestMultipleRequestFields()
         {
             Request = new TestMultipleRequestFieldsRequest();
-            Response = new TestMultipleRequestFieldsResponse();
+            Response = TestMultipleRequestFieldsResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public TestMultipleRequestFields(TestMultipleRequestFieldsRequest request)
         {
             Request = request;
-            Response = new TestMultipleRequestFieldsResponse();
+            Response = TestMultipleRequestFieldsResponse.Singleton;
         }
         
         IService IService.Create() => new TestMultipleRequestFields();
@@ -114,7 +114,42 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestMultipleRequestFieldsResponse : Internal.EmptyResponse
+    public sealed class TestMultipleRequestFieldsResponse : IResponse, IDeserializable<TestMultipleRequestFieldsResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestMultipleRequestFieldsResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public TestMultipleRequestFieldsResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        TestMultipleRequestFieldsResponse IDeserializable<TestMultipleRequestFieldsResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

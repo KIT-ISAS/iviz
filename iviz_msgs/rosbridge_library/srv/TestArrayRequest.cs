@@ -15,14 +15,14 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public TestArrayRequest()
         {
             Request = new TestArrayRequestRequest();
-            Response = new TestArrayRequestResponse();
+            Response = TestArrayRequestResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public TestArrayRequest(TestArrayRequestRequest request)
         {
             Request = request;
-            Response = new TestArrayRequestResponse();
+            Response = TestArrayRequestResponse.Singleton;
         }
         
         IService IService.Create() => new TestArrayRequest();
@@ -102,7 +102,42 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestArrayRequestResponse : Internal.EmptyResponse
+    public sealed class TestArrayRequestResponse : IResponse, IDeserializable<TestArrayRequestResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestArrayRequestResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public TestArrayRequestResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        TestArrayRequestResponse IDeserializable<TestArrayRequestResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly TestArrayRequestResponse Singleton = new TestArrayRequestResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

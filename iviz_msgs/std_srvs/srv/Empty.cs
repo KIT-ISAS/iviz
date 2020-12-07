@@ -14,15 +14,15 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Empty constructor. </summary>
         public Empty()
         {
-            Request = new EmptyRequest();
-            Response = new EmptyResponse();
+            Request = EmptyRequest.Singleton;
+            Response = EmptyResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public Empty(EmptyRequest request)
         {
             Request = request;
-            Response = new EmptyResponse();
+            Response = EmptyResponse.Singleton;
         }
         
         IService IService.Create() => new Empty();
@@ -49,12 +49,82 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class EmptyRequest : Internal.EmptyRequest
+    public sealed class EmptyRequest : IRequest, IDeserializable<EmptyRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public EmptyRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public EmptyRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly EmptyRequest Singleton = new EmptyRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]
-    public sealed class EmptyResponse : Internal.EmptyResponse
+    public sealed class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public EmptyResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public EmptyResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly EmptyResponse Singleton = new EmptyResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

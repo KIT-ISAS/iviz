@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Empty constructor. </summary>
         public GetParamNames()
         {
-            Request = new GetParamNamesRequest();
+            Request = GetParamNamesRequest.Singleton;
             Response = new GetParamNamesResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetParamNamesRequest : Internal.EmptyRequest
+    public sealed class GetParamNamesRequest : IRequest, IDeserializable<GetParamNamesRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public GetParamNamesRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public GetParamNamesRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        GetParamNamesRequest IDeserializable<GetParamNamesRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly GetParamNamesRequest Singleton = new GetParamNamesRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]
