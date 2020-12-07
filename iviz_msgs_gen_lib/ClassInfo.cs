@@ -100,7 +100,7 @@ namespace Iviz.MsgsGen
             "iviz_msgs/Vector2f",
             "iviz_msgs/Vector3f",
             "iviz_msgs/Triangle",
-            "iviz_msgs/BoundingBox"
+            "iviz_msgs/BoundingBox",
         };
 
         internal static bool IsClassForceStruct(string f) => ForceStructs.Contains(f);
@@ -283,7 +283,7 @@ namespace Iviz.MsgsGen
             {
                 return new[]
                 {
-                    $"public {readOnlyId}int RosMessageLength => 0;"
+                    $"public {readOnlyId}int RosMessageLength => 0;",
                 };
             }
 
@@ -442,7 +442,14 @@ namespace Iviz.MsgsGen
                         }
                         else if (!variable.ClassIsStruct)
                         {
-                            lines.Add($"    {variable.CsFieldName} = new {variable.CsClassName}();");
+                            if (variable.ClassInfo != null && variable.ClassInfo.FixedSize == 0)
+                            {
+                                lines.Add($"    {variable.CsFieldName} = {variable.CsClassName}.Singleton;");
+                            }
+                            else
+                            {
+                                lines.Add($"    {variable.CsFieldName} = new {variable.CsClassName}();");
+                            }
                         }
                     }
                 }
@@ -484,7 +491,10 @@ namespace Iviz.MsgsGen
             lines.Add("{");
             if (forceStruct)
             {
-                lines.Add("    b.Deserialize(out this);");
+                if (variables.Any())
+                {
+                    lines.Add("    b.Deserialize(out this);");
+                }
             }
             else
             {
@@ -517,7 +527,15 @@ namespace Iviz.MsgsGen
                         switch (variable.ArraySize)
                         {
                             case VariableElement.NotAnArray:
-                                lines.Add($"    {variable.CsFieldName} = new {variable.CsClassName}(ref b);");
+                                if (variable.ClassInfo != null && variable.ClassInfo.FixedSize == 0)
+                                {
+                                    lines.Add($"    {variable.CsFieldName} = {variable.CsClassName}.Singleton;");
+                                }
+                                else
+                                {
+                                    lines.Add($"    {variable.CsFieldName} = new {variable.CsClassName}(ref b);");
+                                }
+
                                 break;
                             case VariableElement.DynamicSizeArray when variable.ClassIsStruct:
                                 lines.Add(
@@ -559,35 +577,75 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
+
             var readOnlyId = forceStruct ? "readonly " : "";
             lines.Add($"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b)");
             lines.Add("{");
-            lines.Add($"    return new {name}(ref b);");
+            if (variables.Any())
+            {
+                lines.Add($"    return new {name}(ref b);");
+            }
+            else
+            {
+                lines.Add($"    return Singleton;");
+            }
+
             lines.Add("}");
             lines.Add("");
 
             lines.Add($"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b)");
             lines.Add("{");
-            lines.Add($"    return new {name}(ref b);");
+            if (variables.Any())
+            {
+                lines.Add($"    return new {name}(ref b);");
+            }
+            else
+            {
+                lines.Add($"    return Singleton;");
+            }
+
             lines.Add("}");
 
             if (forceStruct)
             {
                 var myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
 
-                lines.Add("");
-                lines.Add($"public override readonly int GetHashCode() => ({myVars}).GetHashCode();");
-                lines.Add("");
-                lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
-                lines.Add("");
+                if (myVars.Length == 0)
+                {
+                    lines.Add("");
+                    lines.Add($"public override readonly int GetHashCode() => 0;");
+                    lines.Add("");
+                    lines.Add($"public override readonly bool Equals(object? o) => o is {name};");
+                    lines.Add("");
 
-                var oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
+                    lines.Add($"public readonly bool Equals({name} o) => true;");
+                    lines.Add("");
+                    lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
+                    lines.Add("");
+                    lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
+                }
+                else
+                {
+                    lines.Add("");
+                    lines.Add($"public override readonly int GetHashCode() => ({myVars}).GetHashCode();");
+                    lines.Add("");
+                    lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
+                    lines.Add("");
 
-                lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
+                    var oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
+
+                    lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
+                    lines.Add("");
+                    lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
+                    lines.Add("");
+                    lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
+                }
+            }
+
+            if (!variables.Any())
+            {
                 lines.Add("");
-                lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
-                lines.Add("");
-                lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
+                lines.Add($"public static readonly {name} Singleton = new {name}();");
             }
 
             return lines;
@@ -851,7 +909,8 @@ namespace Iviz.MsgsGen
 
             string md5Property = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add($"    [Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};");
+            lines.Add(
+                $"    [Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};");
 
             lines.Add("");
 
@@ -952,7 +1011,7 @@ namespace Iviz.MsgsGen
                 md5 = "";
                 return md5;
             }
-            
+
             str.Append(string.Join("\n", md5Variables));
 
             md5File = str.ToString();

@@ -94,17 +94,6 @@ namespace Iviz.MsgsGen
             string strType = isRequest ? "Request" : "Response";
             string name = service + strType;
 
-            if (elements.Count == 0)
-            {
-                return new[]
-                {
-                    "[DataContract]",
-                    $"public sealed class {name} : Internal.Empty{strType}",
-                    "{",
-                    "}"
-                };
-            }
-
             List<string> lines = new List<string>();
             lines.Add("[DataContract]");
             lines.Add($"public sealed class {name} : I{strType}, IDeserializable<{name}>");
@@ -165,7 +154,7 @@ namespace Iviz.MsgsGen
             {
                 return md5;
             }
-            
+
             StringBuilder str = new StringBuilder();
 
             string[] constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
@@ -233,15 +222,21 @@ namespace Iviz.MsgsGen
                 "/// <summary> Empty constructor. </summary>",
                 $"public {Name}()",
                 "{",
-                $"    Request = new {Name}Request();",
-                $"    Response = new {Name}Response();",
+                fixedSizeReq == 0
+                    ? $"    Request = {Name}Request.Singleton;"
+                    : $"    Request = new {Name}Request();",
+                fixedSizeResp == 0
+                    ? $"    Response = {Name}Response.Singleton;"
+                    : $"    Response = new {Name}Response();",
                 "}",
                 "",
                 "/// <summary> Setter constructor. </summary>",
                 $"public {Name}({Name}Request request)",
                 "{",
                 "    Request = request;",
-                $"    Response = new {Name}Response();",
+                fixedSizeResp == 0
+                    ? $"    Response = {Name}Response.Singleton;"
+                    : $"    Response = new {Name}Response();",
                 "}",
                 "",
                 $"IService IService.Create() => new {Name}();",
