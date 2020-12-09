@@ -1112,7 +1112,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topicId));
             }
 
-            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
+            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(publ => publ.ContainsId(topicId));
 
             return publisher != null && await publisher.UnadvertiseAsync(topicId).Caf();
         }

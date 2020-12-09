@@ -96,7 +96,11 @@ namespace Iviz.Roslib
             TcpClient client = new TcpClient();
             try
             {
+#if !NET5_0
                 Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
+#else
+                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port, runningTs.Token);
+#endif
                 if (await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() &&
                     connectionTask.RanToCompletion())
                 {

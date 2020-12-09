@@ -123,7 +123,7 @@ namespace Iviz.Roslib
 
             signal.Release();
             
-            Utils.WaitNoThrow(task, this);
+            task.WaitNoThrow(this);
 
             foreach (ServiceRequestAsync<T> sender in connections)
             {
@@ -144,10 +144,10 @@ namespace Iviz.Roslib
 
             signal.Release();
             
-            await Utils.AwaitNoThrow(task, this).Caf();
+            await task.AwaitNoThrow(this).Caf();
 
             Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
-            await Utils.AwaitNoThrow(Task.WhenAll(tasks), this).Caf();
+            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
             connections.Clear();
         }
 

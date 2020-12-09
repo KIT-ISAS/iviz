@@ -261,15 +261,8 @@ namespace Iviz.Roslib
                 try
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
-
-                    try
-                    {
-                        managerSignal?.Release();
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                    }
-
+                    
+                    TryRelease(managerSignal);
                     managerSignal = null;
 
                     if (!KeepRunning)
@@ -394,31 +387,26 @@ namespace Iviz.Roslib
             }
 
             messageQueue.Enqueue(message);
-            if (signal.CurrentCount != 0)
-            {
-                return;
-            }
-
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
-
-            //Console.WriteLine("1: " + signal.CurrentCount + " " + messageQueue.Count);
+            Signal();
         }
 
-        public async Task PublishAsync(T message)
+        public Task PublishAsync(T message)
         {
             if (!IsAlive)
             {
                 numDropped++;
-                return;
+            }
+            else
+            {
+                messageQueue.Enqueue(message);
+                Signal();
             }
 
-            messageQueue.Enqueue(message);
+            return Task.CompletedTask; // TODO: implement policies!
+        }
+
+        void Signal()
+        {
             if (signal.CurrentCount != 0)
             {
                 return;
@@ -430,10 +418,18 @@ namespace Iviz.Roslib
             }
             catch (SemaphoreFullException)
             {
-            }
+            }            
+        }
 
-            await Task.CompletedTask;
-            //Console.WriteLine("1: " + signal.CurrentCount + " " + messageQueue.Count);
+        static void TryRelease(SemaphoreSlim? s)
+        {
+            try
+            {
+                s?.Release();
+            }
+            catch (ObjectDisposedException)
+            {
+            }            
         }
 
         int ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength)> result)
@@ -447,27 +443,6 @@ namespace Iviz.Roslib
                 result.Add((msg, msgLength));
                 totalQueueSizeInBytes += msgLength;
             }
-
-            /*
-            //Console.WriteLine("In!");
-            result.Clear();
-            while (true)
-            {
-                //Console.WriteLine("0: " + signal.CurrentCount + " " + messageQueue.Count);
-                messageQueue.TryDequeue(out T msg);
-                int msgLength = msg!.RosMessageLength;
-                result.Add((msg, msgLength));
-                totalQueueSizeInBytes += msgLength;
-                
-                if (signal.CurrentCount == 0)
-                {
-                    break;
-                }
-
-                signal.Wait();
-            }
-            */
-            //Console.WriteLine("Out: " + signal.CurrentCount + " " + messageQueue.Count);
 
             return totalQueueSizeInBytes;
         }

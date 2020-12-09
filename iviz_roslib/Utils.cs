@@ -278,6 +278,25 @@ namespace Iviz.Roslib
                 Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
             }
         }
+        
+        public static async Task<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
+        {
+            if (t == null)
+            {
+                return default;
+            }
+
+            try
+            {
+                return await t.Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+
+            return default;
+        }
 
         static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 

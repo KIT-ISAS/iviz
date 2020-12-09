@@ -178,10 +178,10 @@ namespace Iviz.Roslib
                     .Select(pair => pair.Value).ToArray();
 
                 var tasks = toDelete.Select(receiver => receiver.DisposeAsync());
-                await Task.WhenAll(tasks).Caf();
+                await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
 
-                bool[] results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).Caf();
-                numConnectionsChanged = results.Any(b => b) | await CleanupAsync();
+                bool[]? results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).AwaitNoThrow(this).Caf();
+                numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync();
             }
 
             if (numConnectionsChanged)
@@ -211,7 +211,7 @@ namespace Iviz.Roslib
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
             });
 
-            await Task.WhenAll(tasks).Caf();
+            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
 
             return true;
         }

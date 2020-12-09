@@ -142,7 +142,7 @@ namespace Iviz.Roslib
                         Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
                     }
                 });
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).AwaitNoThrow(this);
 
                 publisher.RaiseNumConnectionsChanged();
             });
@@ -170,7 +170,7 @@ namespace Iviz.Roslib
                 latchedMessage = msg;
             }
 
-            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAsync(msg)));
+            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAsync(msg))).AwaitNoThrow(this);
         }
 
         public void Stop()
@@ -180,7 +180,7 @@ namespace Iviz.Roslib
 
         public async Task StopAsync()
         {
-            await Task.WhenAll(connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()));
+            await Task.WhenAll(connectionsByCallerId.Values.Select(sender => sender.DisposeAsync())).AwaitNoThrow(this);
             connectionsByCallerId.Clear();
         }
 
