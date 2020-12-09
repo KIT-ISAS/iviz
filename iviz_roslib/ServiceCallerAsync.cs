@@ -191,7 +191,7 @@ namespace Iviz.Roslib
 
             if (statusByte == ErrorByte)
             {
-                Logger.LogFormat("{0}: {1}", this, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
+                Logger.LogFormat(Utils.GenericExceptionFormat, this, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
                 return false;
             }
 

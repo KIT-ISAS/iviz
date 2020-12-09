@@ -145,6 +145,11 @@ namespace Iviz.Editor
                     sb.AppendFormat(BuiltIns.Culture, "v {0} {1} {2}\n", -v.x, v.y, v.z);
                 }
 
+                foreach (Vector3 v in m.normals)
+                {
+                    sb.AppendFormat(BuiltIns.Culture, "vn {0} {1} {2}\n", -v.x, v.y, v.z);
+                }
+
                 sb.AppendLine();
                 foreach (Vector2 v in m.uv)
                 {

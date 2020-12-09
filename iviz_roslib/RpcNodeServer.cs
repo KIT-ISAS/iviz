@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
 
 namespace Iviz.Roslib.XmlRpc
 {
@@ -152,7 +151,7 @@ namespace Iviz.Roslib.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: {1}", this, e);
+                Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
             }
         }
 
