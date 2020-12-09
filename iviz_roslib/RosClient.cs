@@ -32,10 +32,10 @@ namespace Iviz.Roslib
         Task<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType);
 
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay = false) where T : IMessage, IDeserializable<T>, new();
+            bool requestNoDelay = true) where T : IMessage, IDeserializable<T>, new();
 
         Task<(string id, IRosSubscriber<T> subscriber)>
-            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
+            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new();
 
         bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new();
@@ -629,7 +629,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Function to be called when a message arrives.</param>
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
-        public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = false)
+        public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new()
         {
             return Subscribe(topic, callback, out RosSubscriber<T> _, requestNoDelay);
@@ -647,7 +647,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber<T> subscriber,
-            bool requestNoDelay = false)
+            bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (topic is null)

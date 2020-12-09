@@ -106,4 +106,21 @@ namespace Iviz.Roslib
         {
         }
     }    
+    
+    public class RosInvalidPackageSizeException : RoslibException
+    {
+        public RosInvalidPackageSizeException(string message) : base(message)
+        {
+        }
+
+        public RosInvalidPackageSizeException()
+        {
+        }
+
+        public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }    
+    
+    
 }

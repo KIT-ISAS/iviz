@@ -30,6 +30,8 @@ namespace Iviz.Roslib
 
     public static class Utils
     {
+        public const string GenericExceptionFormat = "{0}: {1}";
+        
         public static bool HasPrefix(this string check, string prefix)
         {
             if (check is null)

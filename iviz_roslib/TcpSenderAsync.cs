@@ -33,7 +33,6 @@ namespace Iviz.Roslib
         const int BufferSizeIncrease = 1024;
         const int MaxSizeInPacketsWithoutConstraint = 2;
         const int MaxConnectionRetries = 3;
-        const int WaitBetweenRetriesInMs = 1000;
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
@@ -61,6 +60,22 @@ namespace Iviz.Roslib
         byte[] writeBuffer = Array.Empty<byte>();
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
+
+        bool tcpNoDelay;
+
+        public bool TcpNoDelay
+        {
+            get => tcpNoDelay;
+            set
+            {
+                tcpNoDelay = value;
+                if (tcpClient != null)
+                {
+                    tcpClient.NoDelay = true;
+                }
+            }
+        }
+
 
         public TcpSenderAsync(string remoteCallerId, TopicInfo<T> topicInfo, bool latching)
         {
@@ -224,10 +239,11 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
+            if (TcpNoDelay || values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
-                tcpClient!.NoDelay = true;
+                TcpNoDelay = true;
                 Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
+                Console.WriteLine("tcp no delay!");
             }
 
             return null;
@@ -261,7 +277,7 @@ namespace Iviz.Roslib
                 try
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
-                    
+
                     TryRelease(managerSignal);
                     managerSignal = null;
 
@@ -299,11 +315,11 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e) when (e is IOException || e is TimeoutException || e is SocketException)
                 {
-                    Logger.LogDebugFormat("{0}: {1}", this, e);
+                    Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormat("{0}: {1}", this, e);
+                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
                 }
             }
 
@@ -418,7 +434,7 @@ namespace Iviz.Roslib
             }
             catch (SemaphoreFullException)
             {
-            }            
+            }
         }
 
         static void TryRelease(SemaphoreSlim? s)
@@ -429,7 +445,7 @@ namespace Iviz.Roslib
             }
             catch (ObjectDisposedException)
             {
-            }            
+            }
         }
 
         int ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength)> result)
@@ -439,7 +455,7 @@ namespace Iviz.Roslib
             result.Clear();
             while (messageQueue.TryDequeue(out T msg))
             {
-                int msgLength = msg!.RosMessageLength;
+                int msgLength = msg.RosMessageLength;
                 result.Add((msg, msgLength));
                 totalQueueSizeInBytes += msgLength;
             }

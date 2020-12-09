@@ -42,9 +42,6 @@ namespace Iviz.Roslib
         /// </summary>
         public int NumIds => ids.Count;
 
-        /// <summary>
-        /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
-        /// </summary>
         public bool LatchingEnabled
         {
             get => manager.Latching;
@@ -68,6 +65,12 @@ namespace Iviz.Roslib
             set => manager.TimeoutInMs = value;
         }
 
+        public bool ForceTcpNoDelay
+        {
+            get => manager.ForceTcpNoDelay;
+            set => manager.ForceTcpNoDelay = value;
+        }
+        
         /// <summary>
         /// Called when the number of subscribers has changed.
         /// </summary>        

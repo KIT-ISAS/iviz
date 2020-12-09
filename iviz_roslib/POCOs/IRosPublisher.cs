@@ -96,7 +96,16 @@ namespace Iviz.Roslib
 
         internal Endpoint? RequestTopicRpc(string remoteCallerId);
         
+        /// <summary>
+        /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
+        /// </summary>
         public bool LatchingEnabled { get; set; }
+        
+        /// <summary>
+        /// Whether to force TCP_NODELAY. Usually, it is the job of the subscriber to request this flag.
+        /// When enabling this, the flag is always set regardless of the subscriber request.
+        /// </summary>
+        public bool ForceTcpNoDelay { get; set; }
 
         Task DisposeAsync();
     }

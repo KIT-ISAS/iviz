@@ -296,7 +296,7 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormat("{0}: {1}", this, e);
+                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
                 }
             }
 
