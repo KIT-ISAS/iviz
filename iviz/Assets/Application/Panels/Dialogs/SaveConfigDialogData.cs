@@ -16,7 +16,7 @@ namespace Iviz.App
 
         readonly List<string> files = new List<string>();
 
-        public SaveConfigDialogData([NotNull] ModuleListPanel panel) : base(panel)
+        public SaveConfigDialogData()
         {
             this.panel = DialogPanelManager.GetPanelByType<SaveConfigDialogContents>(DialogPanelType.SaveAs);
         }

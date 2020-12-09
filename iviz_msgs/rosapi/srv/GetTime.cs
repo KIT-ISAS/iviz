@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Empty constructor. </summary>
         public GetTime()
         {
-            Request = new GetTimeRequest();
+            Request = GetTimeRequest.Singleton;
             Response = new GetTimeResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetTimeRequest : Internal.EmptyRequest
+    public sealed class GetTimeRequest : IRequest, IDeserializable<GetTimeRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public GetTimeRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public GetTimeRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        GetTimeRequest IDeserializable<GetTimeRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly GetTimeRequest Singleton = new GetTimeRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

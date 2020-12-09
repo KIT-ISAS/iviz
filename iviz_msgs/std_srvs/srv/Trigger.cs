@@ -14,7 +14,7 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Empty constructor. </summary>
         public Trigger()
         {
-            Request = new TriggerRequest();
+            Request = TriggerRequest.Singleton;
             Response = new TriggerResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerRequest : Internal.EmptyRequest
+    public sealed class TriggerRequest : IRequest, IDeserializable<TriggerRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TriggerRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public TriggerRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        TriggerRequest IDeserializable<TriggerRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly TriggerRequest Singleton = new TriggerRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

@@ -231,10 +231,10 @@ namespace Iviz.Roslib.XmlRpc
             return new GetSystemStateResponse(response);
         }
 
-        public async Task<GetSystemStateResponse> GetSystemStateAsync()
+        public async Task<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
             Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getSystemState", args).Caf();
+            object[] response = await MethodCallAsync("getSystemState", args, token).Caf();
             return new GetSystemStateResponse(response);
         }
 
@@ -372,6 +372,11 @@ namespace Iviz.Roslib.XmlRpc
         {
             Topic = topic;
             Members = members.AsReadOnly();
+        }
+
+        public override string ToString()
+        {
+            return $"[{Topic} [{string.Join(", ", Members)}]]";
         }
     }
 

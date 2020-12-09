@@ -137,6 +137,21 @@ namespace Iviz.Roslib
             NumPublishersChanged = null;
         }
 
+        public async Task DisposeAsync()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            runningTs.Cancel();
+            callbacksById.Clear();
+            await Manager.StopAsync();
+            callbacks = Array.Empty<Action<T>>();
+            NumPublishersChanged = null;
+        }
+
         public bool MessageTypeMatches(Type type)
         {
             return type == typeof(T);

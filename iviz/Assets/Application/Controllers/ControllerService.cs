@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -20,7 +22,7 @@ namespace Iviz.Controllers
         const int DefaultTimeoutInMs = 4500;
 
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
-        [NotNull] static ReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        [NotNull] static IReadOnlyList<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly (Resource.ModuleType module, string name)[] ModuleNames =
             typeof(Resource.ModuleType).GetEnumValues()
@@ -106,17 +108,16 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    Debug.Log(Time.time + ": Creating module of type " + moduleType);
+                    Logger.External(Time.time + ": Creating module of type " + moduleType);
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    Debug.Log(Time.time + ": Done!");
+                    Logger.External(Time.time + ": Done!");
                 }
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    Debug.LogWarning(e);
                 }
                 finally
                 {
@@ -185,22 +186,23 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    Debug.Log(Time.time + ": Adding topic " + topic);
+                    Logger.Debug(Time.time + ": Adding topic " + topic);
                     result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
                         requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
                     result.success = true;
-                    Debug.Log(Time.time + ": Done!");
+                    Logger.Debug(Time.time + ": Done!");
                 }
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    Debug.LogWarning(e);
+                    Logger.Warn(e);
                 }
                 finally
                 {
                     signal.Release();
                 }
             });
+
             return signal.Wait(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
         }
 
@@ -229,7 +231,7 @@ namespace Iviz.Controllers
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             GameThread.Post(() =>
             {
-                Debug.Log(Time.time + ": Updating module!");
+                Logger.Debug(Time.time + ": Updating module!");
 
                 try
                 {
@@ -248,17 +250,17 @@ namespace Iviz.Controllers
                 {
                     result.success = false;
                     result.message = $"EE Error parsing JSON config: {e.Message}";
-                    Debug.LogWarning(e);
+                    Logger.External("Error:", e);
                 }
                 catch (Exception e)
                 {
                     result.success = false;
                     result.message = $"EE An exception was raised: {e.Message}";
-                    Debug.LogWarning(e);
+                    Logger.External("Error:", e);
                 }
                 finally
                 {
-                    Debug.Log(Time.time + ": Done!");
+                    Logger.Debug(Time.time + ": Done!");
                     signal.Release();
                 }
             });
@@ -287,13 +289,11 @@ namespace Iviz.Controllers
                 {
                     Logger.External(LogLevel.Error,
                         $"ControllerService: Unexpected JSON exception in GetModules: {e.Message}");
-                    Debug.LogWarning(e);
                 }
                 catch (Exception e)
                 {
                     Logger.External(LogLevel.Error,
                         $"ControllerService: Unexpected exception in GetModules: {e.Message}");
-                    Debug.LogWarning(e);
                 }
                 finally
                 {
@@ -302,7 +302,7 @@ namespace Iviz.Controllers
             });
             if (!signal.Wait(DefaultTimeoutInMs))
             {
-                Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in GetModules");
+                Logger.External(LogLevel.Error, "Timeout in GetModules");
             }
 
             return result;

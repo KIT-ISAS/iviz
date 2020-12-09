@@ -11,7 +11,7 @@ namespace Iviz.App
         readonly StringBuilder description = new StringBuilder();
         public override IDialogPanelContents Panel => panel;
 
-        public NetworkDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
+        public NetworkDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<NetworkDialogContents>(DialogPanelType.Network);
         }

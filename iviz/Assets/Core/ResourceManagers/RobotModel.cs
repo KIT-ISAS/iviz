@@ -166,11 +166,11 @@ namespace Iviz.Displays
 
 
                 GameObject resourceObject = null;
-                var isSynthetic = false;
+                bool isSynthetic = false;
                 if (geometry.Mesh != null)
                 {
-                    var uri = new Uri(geometry.Mesh.Filename);
-                    if (!Resource.TryGetResource(uri, out Info<GameObject> info, provider))
+                    string uri = geometry.Mesh.Filename;
+                    if (!Resource.TryGetResource(geometry.Mesh.Filename, out Info<GameObject> info, provider))
                     {
                         Debug.Log("Robot: Failed to retrieve " + uri);
                         continue;

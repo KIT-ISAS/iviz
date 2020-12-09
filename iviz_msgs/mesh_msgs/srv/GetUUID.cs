@@ -14,7 +14,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Empty constructor. </summary>
         public GetUUID()
         {
-            Request = new GetUUIDRequest();
+            Request = GetUUIDRequest.Singleton;
             Response = new GetUUIDResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetUUIDRequest : Internal.EmptyRequest
+    public sealed class GetUUIDRequest : IRequest, IDeserializable<GetUUIDRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public GetUUIDRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public GetUUIDRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        GetUUIDRequest IDeserializable<GetUUIDRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

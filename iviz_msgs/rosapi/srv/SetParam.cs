@@ -15,14 +15,14 @@ namespace Iviz.Msgs.Rosapi
         public SetParam()
         {
             Request = new SetParamRequest();
-            Response = new SetParamResponse();
+            Response = SetParamResponse.Singleton;
         }
         
         /// <summary> Setter constructor. </summary>
         public SetParam(SetParamRequest request)
         {
             Request = request;
-            Response = new SetParamResponse();
+            Response = SetParamResponse.Singleton;
         }
         
         IService IService.Create() => new SetParam();
@@ -109,7 +109,42 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class SetParamResponse : Internal.EmptyResponse
+    public sealed class SetParamResponse : IResponse, IDeserializable<SetParamResponse>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public SetParamResponse()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public SetParamResponse(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        SetParamResponse IDeserializable<SetParamResponse>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly SetParamResponse Singleton = new SetParamResponse();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 }

@@ -12,6 +12,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
@@ -99,15 +100,61 @@ namespace Iviz.Controllers
         {
             get
             {
+                string markerStr;
                 switch (interactiveMarkers.Count)
                 {
                     case 0:
-                        return "<b>No interactive markers →</b>";
+                        markerStr = "<b>No interactive markers →</b>";
+                        break;
                     case 1:
-                        return "<b>1 interactive marker →</b>";
+                        markerStr = "<b>1 interactive marker →</b>";
+                        break;
                     default:
-                        return $"<b>{interactiveMarkers.Values.Count} interactive markers →</b>";
+                        markerStr = $"<b>{interactiveMarkers.Values.Count} interactive markers →</b>";
+                        break;
                 }
+
+                int totalErrors = 0, totalWarnings = 0;
+                foreach (var marker in interactiveMarkers.Values)
+                {
+                    marker.GetErrorCount(out int numErrors, out int numWarnings);
+                    totalErrors += numErrors;
+                    totalWarnings += numWarnings;
+                }
+
+                if (totalErrors == 0 && totalWarnings == 0)
+                {
+                    return $"{markerStr}\nNo errors";
+                }
+
+                string errorStr, warnStr;
+                switch (totalErrors)
+                {
+                    case 0:
+                        errorStr = "No errors";
+                        break;
+                    case 1:
+                        errorStr = "1 error";
+                        break;
+                    default:
+                        errorStr = $"{totalErrors} errors";
+                        break;
+                }
+
+                switch (totalWarnings)
+                {
+                    case 0:
+                        warnStr = "No warnings";
+                        break;
+                    case 1:
+                        warnStr = "1 warning";
+                        break;
+                    default:
+                        warnStr = $"{totalErrors} warnings";
+                        break;
+                }
+
+                return $"{markerStr}\n{errorStr}, {warnStr}";
             }
         }
 
@@ -247,6 +294,7 @@ namespace Iviz.Controllers
                 position != null
             );
             Publisher.Publish(msg);
+            Logger.Info($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnInteractiveControlObjectMoved(
@@ -255,18 +303,38 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, "map"),
+                RosUtils.CreateHeader(feedSeq++, TfListener.FixedFrameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
-                //TfListener.RelativePoseToOrigin(controlPose).Unity2RosPose(),
                 controlPose.Unity2RosPose(),
                 0,
                 Vector3.zero.Unity2RosPoint(),
                 false
             );
             Publisher.Publish(msg);
+            Logger.Info($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{controlPose}");
+        }
+
+        internal void OnInteractiveControlObjectMenuSelect(
+            [NotNull] string interactiveMarkerId, [NotNull] string controlId,
+            uint menuEntryId, in Pose controlPose)
+        {
+            InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
+            (
+                RosUtils.CreateHeader(feedSeq++, TfListener.FixedFrameId),
+                ConnectionManager.MyId ?? "",
+                interactiveMarkerId,
+                controlId,
+                InteractiveMarkerFeedback.MENU_SELECT,
+                controlPose.Unity2RosPose(),
+                menuEntryId,
+                Vector3.zero.Unity2RosPoint(),
+                false
+            );
+            Publisher.Publish(msg);
+            Logger.Info($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 
         void CheckForExpiredMarkers()
@@ -301,7 +369,6 @@ namespace Iviz.Controllers
             }
         }
 
-
         void DestroyAllMarkers()
         {
             foreach (var markerObject in interactiveMarkers.Values)
@@ -310,6 +377,11 @@ namespace Iviz.Controllers
             }
 
             interactiveMarkers.Clear();
+        }
+
+        public override string ToString()
+        {
+            return $"[InteractiveMarkerListener '{Topic}']";
         }
     }
 }

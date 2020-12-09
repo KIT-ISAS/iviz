@@ -28,6 +28,11 @@ namespace Iviz.Roslib
         string? subscriberId;
         IRosSubscriber<T>? subscriber;
 
+        public IRosSubscriber<T> Subscriber =>
+            subscriber ?? throw new InvalidOperationException("Channel has not been started!");
+        
+        public string Topic => Subscriber.Topic;
+        
         public RosChannelReader()
         {
         }
@@ -59,15 +64,9 @@ namespace Iviz.Roslib
                 return; // not started
             }
 
-            try
-            {
-                await subscriberToken.DisposeAsync();
-                await subscriber.UnsubscribeAsync(subscriberId!);
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"{this}: {e}");
-            }
+
+            await subscriberToken.DisposeAsync();
+            await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
         }
 #endif
 
@@ -152,6 +151,11 @@ namespace Iviz.Roslib
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
+            }
+
+            if (subscriber != null)
+            {
+                throw new InvalidOperationException("Channel has already been started!");
             }
 
             var (newId, newSubscriber) = await client.SubscribeAsync<T>(topic, Callback, requestNoDelay);
@@ -248,6 +252,14 @@ namespace Iviz.Roslib
             return Read(ts.Token);
         }
 
+        void ThrowIfNotStarted()
+        {
+            if (subscriber == null)
+            {
+                throw new InvalidOperationException("Channel has not been started");
+            }
+        }
+
         /// <summary>
         /// Waits until a message arrives, and pulls it from the queue.
         /// </summary>
@@ -257,11 +269,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(CancellationToken token = default)
         {
-            if (subscriber == null)
-            {
-                throw new InvalidOperationException("Channel has not been started");
-            }
-           
+            ThrowIfNotStarted();
             return messageQueue.Dequeue(token);
         }
 
@@ -286,11 +294,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async Task<T> ReadAsync(CancellationToken token = default)
         {
-            if (subscriber == null)
-            {
-                throw new InvalidOperationException("Channel has not been started");
-            }
-            
+            ThrowIfNotStarted();
             return await messageQueue.DequeueAsync(token);
         }
 

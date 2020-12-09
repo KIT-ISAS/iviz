@@ -101,5 +101,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
         public readonly Vector3 Normalized => this / Norm;
         public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+        public static implicit operator Vector3((double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);
     }
 }

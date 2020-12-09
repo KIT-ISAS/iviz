@@ -14,7 +14,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Empty constructor. </summary>
         public TestResponseOnly()
         {
-            Request = new TestResponseOnlyRequest();
+            Request = TestResponseOnlyRequest.Singleton;
             Response = new TestResponseOnlyResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestResponseOnlyRequest : Internal.EmptyRequest
+    public sealed class TestResponseOnlyRequest : IRequest, IDeserializable<TestResponseOnlyRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestResponseOnlyRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public TestResponseOnlyRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        TestResponseOnlyRequest IDeserializable<TestResponseOnlyRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly TestResponseOnlyRequest Singleton = new TestResponseOnlyRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

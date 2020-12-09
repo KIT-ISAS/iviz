@@ -23,7 +23,7 @@ namespace Iviz.Controllers
     public class PointCloudConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string IntensityChannel { get; set; } = "y";
+        [DataMember] public string IntensityChannel { get; set; } = "z";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; }

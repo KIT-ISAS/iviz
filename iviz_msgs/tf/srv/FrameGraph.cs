@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Tf
         /// <summary> Empty constructor. </summary>
         public FrameGraph()
         {
-            Request = new FrameGraphRequest();
+            Request = FrameGraphRequest.Singleton;
             Response = new FrameGraphResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.Tf
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : Internal.EmptyRequest
+    public sealed class FrameGraphRequest : IRequest, IDeserializable<FrameGraphRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public FrameGraphRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public FrameGraphRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        FrameGraphRequest IDeserializable<FrameGraphRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

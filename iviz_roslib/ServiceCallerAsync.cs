@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -94,7 +92,7 @@ namespace Iviz.Roslib
                     : $"Failed handshake: {responses[0]}");
             }
         }
-        
+
         public async Task StartAsync(bool persistent, CancellationToken token = default)
         {
             await ProcessHandshake(persistent, token);
@@ -103,7 +101,14 @@ namespace Iviz.Roslib
         public void Start(bool persistent)
         {
             // just call the async version from sync
-            Task.Run(async () => { await StartAsync(persistent).Caf(); }).Wait();
+            try
+            {
+                Task.Run(async () => { await StartAsync(persistent).Caf(); }).Wait();
+            }
+            catch (AggregateException e) when (e.InnerExceptions.Count == 1)
+            {
+                throw e.InnerExceptions[0];
+            }
         }
 
         async Task<int> ReceivePacketAsync(CancellationToken token)
@@ -112,13 +117,13 @@ namespace Iviz.Roslib
             {
                 return -1;
             }
-            
+
             int length = BitConverter.ToInt32(readBuffer, 0);
             if (length == 0)
             {
                 return 0;
             }
-            
+
             if (readBuffer.Length < length)
             {
                 readBuffer = new byte[length + BufferSizeIncrease];

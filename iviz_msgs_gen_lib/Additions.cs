@@ -20,6 +20,7 @@ namespace Iviz.MsgsGen
                 "public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);",
                 "public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);",
                 "public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);",
+                "public static implicit operator Point((double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);",
             },
 
             ["geometry_msgs/Vector3"] = new[]
@@ -41,6 +42,7 @@ namespace Iviz.MsgsGen
                 "public readonly double Norm => System.Math.Sqrt(SquaredNorm);",
                 "public readonly Vector3 Normalized => this / Norm;",
                 "public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
+                "public static implicit operator Vector3((double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);",
             },
             
             ["geometry_msgs/Quaternion"] = new[]
@@ -60,6 +62,7 @@ namespace Iviz.MsgsGen
                 "        return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);",
                 "}",
                 "public static Point operator *(in Quaternion q, in Point v) => q * (Vector3)v;", 
+                "public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);",
             },
             
             ["geometry_msgs/Transform"] = new[]
@@ -86,6 +89,7 @@ namespace Iviz.MsgsGen
                 "public static readonly ColorRGBA Magenta = new ColorRGBA(1, 0, 1, 1);", 
                 "public static readonly ColorRGBA Grey = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);", 
                 "public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);",
+                "public static implicit operator ColorRGBA((float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);",
             },      
             
             ["iviz_msgs/Vector3f"] = new[]

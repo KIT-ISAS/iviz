@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Empty constructor. </summary>
         public Topics()
         {
-            Request = new TopicsRequest();
+            Request = TopicsRequest.Singleton;
             Response = new TopicsResponse();
         }
         
@@ -64,13 +64,15 @@ namespace Iviz.Msgs.Rosapi
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new TopicsRequest(ref b);
+            return Singleton;
         }
         
         TopicsRequest IDeserializable<TopicsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TopicsRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly TopicsRequest Singleton = new TopicsRequest();
     
         public void RosSerialize(ref Buffer b)
         {

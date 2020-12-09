@@ -73,10 +73,10 @@ namespace Iviz.Roslib
         /// </summary>        
         public event Action<RosPublisher<T>>? NumSubscribersChanged;
 
-        internal RosPublisher(RosClient client, TopicInfo<T> topicInfo, int timeoutInMs)
+        internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;
-            manager = new TcpSenderManager<T>(this, topicInfo) {TimeoutInMs = timeoutInMs};
+            manager = new TcpSenderManager<T>(this, topicInfo);
         }
 
         internal void RaiseNumConnectionsChanged()
@@ -194,6 +194,20 @@ namespace Iviz.Roslib
             manager.Stop();
             NumSubscribersChanged = null;
         }
+        
+        public async Task DisposeAsync()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            runningTs.Cancel();
+            ids.Clear();
+            await manager.StopAsync();
+            NumSubscribersChanged = null;
+        }        
 
         public string Advertise()
         {

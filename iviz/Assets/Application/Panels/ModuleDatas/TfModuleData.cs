@@ -119,7 +119,7 @@ namespace Iviz.App
 
         public override void OnARModeChanged(bool value)
         {
-            listener.OnARModeChanged(value);
+            TfListener.OnARModeChanged(value);
         }
     }
 }

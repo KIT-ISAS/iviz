@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
+using Iviz.Core;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -42,6 +43,11 @@ namespace Iviz.App
 
         public void Flush()
         {
+            if (Settings.IsHololens)
+            {
+                return;
+            }
+
             if (!Active)
             {
                 return;

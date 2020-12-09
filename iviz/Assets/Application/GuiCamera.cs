@@ -35,8 +35,6 @@ namespace Iviz.App
 
         bool PointerOnGui { get; set; }
 
-        Transform Transform { get; set; }
-        
         Vector3 orbitCenter;
 
         TfFrame orbitCenterOverride;
@@ -119,11 +117,11 @@ namespace Iviz.App
         
         void Start()
         {
-            Transform = transform;
-            
+#if UNITY_EDITOR
+            QualitySettings.vSyncCount = 0;  // VSync must be disabled
             UnityEngine.Application.targetFrameRate = 60;
-            
-            
+#endif
+
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
             canvas.referenceResolution = Settings.IsMobile ? 
                 new Vector2(800, 600) :

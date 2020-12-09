@@ -307,6 +307,7 @@ namespace Iviz.Displays
             UpdateMeshMaterial();
         }
 
+        [NotNull]
         Material GetMeshMaterial()
         {
             switch (UseColormap)

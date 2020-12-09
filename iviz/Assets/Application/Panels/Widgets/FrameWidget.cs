@@ -34,10 +34,10 @@ namespace Iviz.App
         }
 
         [CanBeNull]
-        public TfFrame Frame
+        TfFrame Frame
         {
             get => frame;
-            private set
+            set
             {
                 if (frame == value)
                 {
@@ -47,12 +47,12 @@ namespace Iviz.App
                 frame = value;
                 if (frame != null)
                 {
-                    text.text = "<b>⮑" + frame.Id + "</b>";
+                    text.text = "<b>➤" + frame.Id + "</b>";
                     UpdateStats();
                 }
                 else
                 {
-                    text.text = "<i>⮑ (none)</i>";
+                    text.text = "<i>➤ (none)</i>";
                 }
             }
         }
@@ -75,7 +75,7 @@ namespace Iviz.App
 
         public void OnGotoClick()
         {
-            if (Frame != null)
+            if (Frame != null && TfListener.GuiCamera != null)
             {
                 TfListener.GuiCamera.LookAt(Frame.WorldPose.position);
             }

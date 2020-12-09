@@ -14,7 +14,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Empty constructor. </summary>
         public TestMultipleResponseFields()
         {
-            Request = new TestMultipleResponseFieldsRequest();
+            Request = TestMultipleResponseFieldsRequest.Singleton;
             Response = new TestMultipleResponseFieldsResponse();
         }
         
@@ -49,8 +49,43 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestMultipleResponseFieldsRequest : Internal.EmptyRequest
+    public sealed class TestMultipleResponseFieldsRequest : IRequest, IDeserializable<TestMultipleResponseFieldsRequest>
     {
+    
+        /// <summary> Constructor for empty message. </summary>
+        public TestMultipleResponseFieldsRequest()
+        {
+        }
+        
+        /// <summary> Constructor with buffer. </summary>
+        public TestMultipleResponseFieldsRequest(ref Buffer b)
+        {
+        }
+        
+        public ISerializable RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        TestMultipleResponseFieldsRequest IDeserializable<TestMultipleResponseFieldsRequest>.RosDeserialize(ref Buffer b)
+        {
+            return Singleton;
+        }
+        
+        public static readonly TestMultipleResponseFieldsRequest Singleton = new TestMultipleResponseFieldsRequest();
+    
+        public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void RosValidate()
+        {
+        }
+    
+        /// <summary> Constant size of this message. </summary>
+        public const int RosFixedMessageLength = 0;
+        
+        public int RosMessageLength => RosFixedMessageLength;
     }
 
     [DataContract]

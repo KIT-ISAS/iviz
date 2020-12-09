@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Empty constructor. </summary>
         public Nodes()
         {
-            Request = new NodesRequest();
+            Request = NodesRequest.Singleton;
             Response = new NodesResponse();
         }
         
@@ -64,13 +64,15 @@ namespace Iviz.Msgs.Rosapi
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new NodesRequest(ref b);
+            return Singleton;
         }
         
         NodesRequest IDeserializable<NodesRequest>.RosDeserialize(ref Buffer b)
         {
-            return new NodesRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly NodesRequest Singleton = new NodesRequest();
     
         public void RosSerialize(ref Buffer b)
         {

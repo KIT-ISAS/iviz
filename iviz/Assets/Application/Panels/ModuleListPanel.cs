@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Iviz.Roslib;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -81,6 +82,9 @@ namespace Iviz.App
 
         ControllerService controllerService;
 
+        [SerializeField] GameObject menuObject;
+        IMenuDialogContents menuDialog;
+
         bool initialized;
         public static event Action InitFinished;
 
@@ -105,7 +109,10 @@ namespace Iviz.App
             }
         }
 
-        public static ModuleListPanel Instance { get; private set; }
+        static ModuleListPanel instance;
+        public static ModuleListPanel Instance =>
+            instance != null ? instance : throw new InvalidOperationException("Module list panel has not been set!");
+
         public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
@@ -113,7 +120,7 @@ namespace Iviz.App
         public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
-        public DialogPanelManager DialogPanelManager => dialogPanelManager;
+        [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public Joystick Joystick => joystick;
         [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
@@ -140,29 +147,28 @@ namespace Iviz.App
 
         void Awake()
         {
-            Instance = this;
+            instance = this;
         }
 
         void Start()
         {
             var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
             Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
-
             
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
-            
-            parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
-            availableModules = new AddModuleDialogData(this);
-            availableTopics = new AddTopicDialogData(this);
 
-            imageData = new ImageDialogData(this);
-            tfTreeData = new TfDialogData(this);
-            loadConfigData = new LoadConfigDialogData(this);
-            saveConfigData = new SaveConfigDialogData(this);
-            markerData = new MarkerDialogData(this);
-            networkData = new NetworkDialogData(this);
-            connectionData = new ConnectionDialogData(this);
-            consoleData = new ConsoleDialogData(this);
+            parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
+            availableModules = new AddModuleDialogData();
+            availableTopics = new AddTopicDialogData();
+
+            imageData = new ImageDialogData();
+            tfTreeData = new TfDialogData();
+            loadConfigData = new LoadConfigDialogData();
+            saveConfigData = new SaveConfigDialogData();
+            markerData = new MarkerDialogData();
+            networkData = new NetworkDialogData();
+            connectionData = new ConnectionDialogData();
+            consoleData = new ConsoleDialogData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -170,7 +176,11 @@ namespace Iviz.App
             Logger.Internal("<b>Welcome to iviz</b>");
 
             CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
-            CreateModule(Resource.ModuleType.Grid);
+
+            if (!Settings.IsHololens)
+            {
+                CreateModule(Resource.ModuleType.Grid);
+            }
 
             save.onClick.AddListener(saveConfigData.Show);
             load.onClick.AddListener(loadConfigData.Show);
@@ -267,13 +277,14 @@ namespace Iviz.App
             UpdateFpsStats();
 
             controllerService = new ControllerService();
+            modelService = new Controllers.ModelService();
+
+            menuDialog = menuObject.GetComponent<IMenuDialogContents>();
+            menuObject.SetActive(false);
 
             AllGuiVisible = AllGuiVisible; // initialize value
 
             initialized = true;
-
-            modelService = new Controllers.ModelService();
-
             InitFinished?.Invoke();
         }
 
@@ -470,7 +481,7 @@ namespace Iviz.App
             }
         }
 
-        void ResetAllModules()
+        public void ResetAllModules()
         {
             foreach (ModuleData m in moduleDatas)
             {
@@ -686,6 +697,17 @@ namespace Iviz.App
             {
                 module.OnARModeChanged(value);
             }
+        }
+
+        public void ShowMenu([NotNull] MenuEntryList menuEntries, Action<uint> callback, Vector3 unityPositionHint)
+        {
+            if (menuEntries == null)
+            {
+                throw new ArgumentNullException(nameof(menuEntries));
+            }
+
+            menuDialog.MenuClicked += callback;
+            menuDialog.Set(menuEntries, unityPositionHint);
         }
     }
 }

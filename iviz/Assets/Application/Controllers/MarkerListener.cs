@@ -31,7 +31,7 @@ namespace Iviz.Controllers
     public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
         readonly MarkerConfiguration config = new MarkerConfiguration();
-        readonly Dictionary<string, MarkerObject> markers = new Dictionary<string, MarkerObject>();
+        readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new Dictionary<(string Ns, int Id), MarkerObject>();
 
         public MarkerListener([NotNull] IModuleData moduleData)
         {
@@ -101,10 +101,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Marker.RosMessageType:
-                    Listener = new Listener<Marker>(config.Topic, Handler);
+                    Listener = new Listener<Marker>(config.Topic, Handler) {MaxQueueSize = 500};
                     break;
                 case MarkerArray.RosMessageType:
-                    Listener = new Listener<MarkerArray>(config.Topic, Handler);
+                    Listener = new Listener<MarkerArray>(config.Topic, Handler) {MaxQueueSize = 500};
                     break;
             }
 
@@ -138,7 +138,7 @@ namespace Iviz.Controllers
         public void GenerateLog(StringBuilder description)
         {
             const int maxToDisplay = 50;
-            
+
             if (description == null)
             {
                 throw new ArgumentNullException(nameof(description));
@@ -151,9 +151,10 @@ namespace Iviz.Controllers
 
             if (markers.Count > maxToDisplay)
             {
-                description.Append("<i>... and ").Append(markers.Count - maxToDisplay).Append(" more.</i>").AppendLine();
+                description.Append("<i>... and ").Append(markers.Count - maxToDisplay).Append(" more.</i>")
+                    .AppendLine();
             }
-            
+
             description.AppendLine().AppendLine();
         }
 
@@ -174,7 +175,7 @@ namespace Iviz.Controllers
                         markerStr = $"<b>{markers.Count} markers →</b>";
                         break;
                 }
-                
+
                 int totalErrors = 0, totalWarnings = 0;
                 foreach (var marker in markers.Values)
                 {
@@ -201,7 +202,7 @@ namespace Iviz.Controllers
                         errorStr = $"{totalErrors} errors";
                         break;
                 }
-            
+
                 switch (totalWarnings)
                 {
                     case 0:
@@ -217,7 +218,7 @@ namespace Iviz.Controllers
 
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
-        } 
+        }
 
         public void Reset()
         {
@@ -291,10 +292,9 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
-        public static string IdFromMessage([NotNull] Marker marker)
+        public static (string Ns, int Id) IdFromMessage([NotNull] Marker marker)
         {
-            return $"[{marker.Ns}] {marker.Id}";
+            return (marker.Ns, marker.Id);
         }
 
         static void DeleteMarkerObject([NotNull] MarkerObject markerToDelete)

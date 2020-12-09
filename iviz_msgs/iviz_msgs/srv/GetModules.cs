@@ -14,7 +14,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Empty constructor. </summary>
         public GetModules()
         {
-            Request = new GetModulesRequest();
+            Request = GetModulesRequest.Singleton;
             Response = new GetModulesResponse();
         }
         
@@ -65,13 +65,15 @@ namespace Iviz.Msgs.IvizMsgs
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetModulesRequest(ref b);
+            return Singleton;
         }
         
         GetModulesRequest IDeserializable<GetModulesRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetModulesRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly GetModulesRequest Singleton = new GetModulesRequest();
     
         public void RosSerialize(ref Buffer b)
         {

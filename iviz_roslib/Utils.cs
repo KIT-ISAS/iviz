@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -30,9 +32,15 @@ namespace Iviz.Roslib
     {
         public static bool HasPrefix(this string check, string prefix)
         {
-            if (check is null) { throw new ArgumentNullException(nameof(check)); }
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
 
-            if (prefix is null) { throw new ArgumentNullException(nameof(prefix)); }
+            if (prefix is null)
+            {
+                throw new ArgumentNullException(nameof(prefix));
+            }
 
             if (check.Length < prefix.Length)
             {
@@ -52,9 +60,15 @@ namespace Iviz.Roslib
 
         public static bool HasSuffix(this string check, string suffix)
         {
-            if (check is null) { throw new ArgumentNullException(nameof(check)); }
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
 
-            if (suffix is null) { throw new ArgumentNullException(nameof(suffix)); }
+            if (suffix is null)
+            {
+                throw new ArgumentNullException(nameof(suffix));
+            }
 
             if (check.Length < suffix.Length)
             {
@@ -182,7 +196,8 @@ namespace Iviz.Roslib
             return true;
         }
 
-        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents, CancellationToken token = default)
+        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents,
+            CancellationToken token = default)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
@@ -224,19 +239,19 @@ namespace Iviz.Roslib
                 return hash1 + (hash2 * 1566083941);
             }
         }
-        
+
         public static bool IsAlive(this IRosPublisher t)
         {
             return !t.CancellationToken.IsCancellationRequested;
         }
 
-        public static void WaitNoThrow(Task? t, object caller)
+        public static void WaitNoThrow(this Task? t, object caller)
         {
             if (t == null)
             {
                 return;
             }
-            
+
             try
             {
                 t.Wait();
@@ -246,14 +261,14 @@ namespace Iviz.Roslib
                 Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
             }
         }
-        
-        public static async Task AwaitNoThrow(Task? t, object caller)
+
+        public static async Task AwaitNoThrow(this Task? t, object caller)
         {
             if (t == null)
             {
                 return;
             }
-            
+
             try
             {
                 await t.Caf();
@@ -264,14 +279,15 @@ namespace Iviz.Roslib
             }
         }
 
+        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
+
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {
-            static byte And(byte b1, byte b2) => (byte) (b1 & b2);
             byte[] addressABytes = addressA.GetAddressBytes();
             byte[] addressBBytes = addressB.GetAddressBytes();
             byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
-            var broadcastABytes = addressABytes.Zip(subnetMaskBytes, And);
-            var broadcastBBytes = addressBBytes.Zip(subnetMaskBytes, And);
+            var broadcastABytes = addressABytes.Zip(subnetMaskBytes).Select(And);
+            var broadcastBBytes = addressBBytes.Zip(subnetMaskBytes).Select(And);
             return broadcastABytes.SequenceEqual(broadcastBBytes);
         }
 
@@ -282,12 +298,227 @@ namespace Iviz.Roslib
                                      @interface.OperationalStatus == OperationalStatus.Up)
                 .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
-        }        
-        
+        }
+
         public static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
         {
             UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+        }
+
+
+        public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Second)>
+        {
+            readonly IReadOnlyList<TA> a;
+            readonly IReadOnlyList<TB> b;
+
+            public struct ZipEnumerator : IEnumerator<(TA First, TB Second)>
+            {
+                readonly IReadOnlyList<TA> a;
+                readonly IReadOnlyList<TB> b;
+                int currentIndex;
+
+                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+                {
+                    this.a = a;
+                    this.b = b;
+                    currentIndex = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    bool isLastIndex = currentIndex == Math.Min(a.Count, b.Count) - 1;
+                    if (isLastIndex)
+                    {
+                        return false;
+                    }
+
+                    currentIndex++;
+                    return true;
+                }
+
+                public void Reset()
+                {
+                    currentIndex = -1;
+                }
+
+                public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
+
+                object IEnumerator.Current => Current;
+
+                public void Dispose()
+                {
+                }
+            }
+
+            internal ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+            {
+                this.a = a;
+                this.b = b;
+            }
+
+            public ZipEnumerator GetEnumerator()
+            {
+                return new ZipEnumerator(a, b);
+            }
+
+            IEnumerator<(TA, TB)> IEnumerable<(TA First, TB Second)>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public int Count => Math.Min(a.Count, b.Count);
+
+            public (TA First, TB Second) this[int index] => (a[index], b[index]);
+
+            public (TA First, TB Second)[] ToArray()
+            {
+                (TA, TB)[] array = new (TA, TB)[Count];
+                for (int i = 0; i < array.Length; i++)
+                {
+                    array[i] = this[i];
+                }
+
+                return array;
+            }
+        }
+
+        public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+        {
+            if (a == null)
+            {
+                throw new ArgumentNullException(nameof(a));
+            }
+
+            if (b == null)
+            {
+                throw new ArgumentNullException(nameof(b));
+            }
+
+            return new ZipEnumerable<TA, TB>(a, b);
+        }
+
+        public readonly struct SelectEnumerable<TA, TB> : IReadOnlyList<TB>
+        {
+            readonly IReadOnlyList<TA> a;
+            readonly Func<TA, TB> f;
+
+            public struct SelectEnumerator : IEnumerator<TB>
+            {
+                readonly IReadOnlyList<TA> a;
+                readonly Func<TA, TB> f;
+                int currentIndex;
+
+                internal SelectEnumerator(IReadOnlyList<TA> a, Func<TA, TB> f)
+                {
+                    this.a = a;
+                    this.f = f;
+                    currentIndex = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    bool isLastIndex = currentIndex == a.Count - 1;
+                    if (isLastIndex)
+                    {
+                        return false;
+                    }
+
+                    currentIndex++;
+                    return true;
+                }
+
+                public void Reset()
+                {
+                    currentIndex = -1;
+                }
+
+                public TB Current => f(a[currentIndex]);
+
+                object? IEnumerator.Current => Current;
+
+                public void Dispose()
+                {
+                }
+            }
+
+            internal SelectEnumerable(IReadOnlyList<TA> a, Func<TA, TB> f)
+            {
+                this.a = a;
+                this.f = f;
+            }
+
+            public SelectEnumerator GetEnumerator()
+            {
+                return new SelectEnumerator(a, f);
+            }
+
+            IEnumerator<TB> IEnumerable<TB>.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public TB[] ToArray()
+            {
+                TB[] array = new TB[a.Count];
+                for (int i = 0; i < a.Count; i++)
+                {
+                    array[i] = this[i];
+                }
+
+                return array;
+            }
+
+            public List<TB> ToList()
+            {
+                List<TB> array = new List<TB>(a.Count);
+                foreach (var ta in a)
+                {
+                    array.Add(f(ta));
+                }
+
+                return array;
+            }
+
+            public int Count => a.Count;
+
+            public TB this[int index] => f(a[index]);
+        }
+
+        public static SelectEnumerable<TA, TB> Select<TA, TB>(
+            this IReadOnlyList<TA> a,
+            Func<TA, TB> f)
+        {
+            if (a == null)
+            {
+                throw new ArgumentNullException(nameof(a));
+            }
+
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
+
+            return new SelectEnumerable<TA, TB>(a, f);
+        }
+
+        public static void AddAll<TA, TB>(this List<TB> list, SelectEnumerable<TA, TB> tb)
+        {
+            list.Capacity = list.Count + tb.Count;
+            foreach (TB b in tb)
+            {
+                list.Add(b);
+            }
         }
     }
 }

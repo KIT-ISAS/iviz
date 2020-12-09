@@ -88,5 +88,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);
         public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);
         public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);
+        public static implicit operator Point((double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);
     }
 }

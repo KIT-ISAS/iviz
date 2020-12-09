@@ -38,7 +38,7 @@ namespace Iviz.Roslib
         {
             get
             {
-                Cleanup();
+                TryToCleanup().WaitNoThrow(this);
                 return connectionsByCallerId.Count;
             }
         }
@@ -78,6 +78,9 @@ namespace Iviz.Roslib
 
         public Endpoint? CreateConnectionRpc(string remoteCallerId)
         {
+            // while we're here
+            Task cleanupTask = TryToCleanup();
+
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
             TcpSenderAsync<TMessage> newSender = new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching);
 
@@ -97,9 +100,6 @@ namespace Iviz.Roslib
                     return newSender;
                 });
 
-                // while we're here
-                Cleanup();
-
                 // wait until newSender is ready to accept
                 // should last only a couple of ms
                 if (!managerSignal.Wait(NewSenderTimeoutInMs))
@@ -118,27 +118,34 @@ namespace Iviz.Roslib
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
             publisher.RaiseNumConnectionsChanged();
 
+            cleanupTask.WaitNoThrow(this);
+
             // return null if this connection got killed, which gets translated later as an error response
             return !newSender.IsAlive ? null : endPoint;
         }
 
-        void Cleanup()
+        Task TryToCleanup()
         {
-            TcpSenderAsync<TMessage>[] toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
-            foreach (TcpSenderAsync<TMessage> sender in toDelete)
+            var toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
+            if (toDelete.Length == 0)
             {
-                sender.Dispose();
-                if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
-                {
-                    Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
-                }
+                return Task.CompletedTask;
             }
 
-            var subscribersChanged = toDelete.Length != 0;
-            if (subscribersChanged)
+            return Task.Run(async () =>
             {
+                var tasks = toDelete.Select(async sender =>
+                {
+                    await sender.DisposeAsync();
+                    if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
+                    {
+                        Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
+                    }
+                });
+                await Task.WhenAll(tasks);
+
                 publisher.RaiseNumConnectionsChanged();
-            }
+            });
         }
 
         public void Publish(in TMessage msg)
@@ -163,19 +170,17 @@ namespace Iviz.Roslib
                 latchedMessage = msg;
             }
 
-            foreach (var pair in connectionsByCallerId)
-            {
-                await pair.Value.PublishAsync(msg);
-            }
+            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAsync(msg)));
         }
-        
+
         public void Stop()
         {
-            foreach (TcpSenderAsync<TMessage> sender in connectionsByCallerId.Values)
-            {
-                sender.Dispose();
-            }
+            Task.Run(StopAsync).WaitNoThrow(this);
+        }
 
+        public async Task StopAsync()
+        {
+            await Task.WhenAll(connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()));
             connectionsByCallerId.Clear();
         }
 

@@ -4,8 +4,9 @@
     "com.unity.collab-proxy": "1.2.16",
     "com.unity.collections": "0.9.0-preview.6",
     "com.unity.ext.nunit": "1.0.0",
-    "com.unity.ide.rider": "3.0.1",
+    "com.unity.ide.rider": "3.0.3",
     "com.unity.mathematics": "1.2.1",
+    "com.unity.nuget.newtonsoft-json": "2.0.0",
     "com.unity.postprocessing": "2.2.2",
     "com.unity.test-framework": "1.1.18",
     "com.unity.textmeshpro": "2.0.1",
@@ -14,6 +15,7 @@
     "com.unity.xr.arcore": "4.0.3",
     "com.unity.xr.arfoundation": "4.0.2",
     "com.unity.xr.arkit": "4.0.1",
+    "com.unity.xr.windowsmr.metro": "4.2.3",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -44,7 +46,6 @@
     "com.unity.modules.video": "1.0.0",
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
-    "com.unity.modules.xr": "1.0.0",
-    "com.unity.nuget.newtonsoft-json": "2.0.0"
+    "com.unity.modules.xr": "1.0.0"
   }
 }

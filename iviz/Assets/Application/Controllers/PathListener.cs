@@ -147,7 +147,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             node = FrameNode.Instantiate("PathNode");
-            resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.transform);
+            resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;
             Config = new PathConfiguration();

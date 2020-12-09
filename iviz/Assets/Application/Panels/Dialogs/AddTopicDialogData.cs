@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Iviz.Roslib;
+using System.Collections.Generic;
 using System.Linq;
-using Iviz.App.Gui;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -16,7 +17,7 @@ namespace Iviz.App
         readonly AddTopicDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        class TopicWithResource
+        public class TopicWithResource
         {
             public string Topic { get; }
             public string Type { get; }
@@ -43,35 +44,41 @@ namespace Iviz.App
 
         readonly List<TopicWithResource> topics = new List<TopicWithResource>();
 
-        public AddTopicDialogData([NotNull] ModuleListPanel newModuleListPanel) : base(newModuleListPanel)
+        public AddTopicDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<AddTopicDialogContents>(DialogPanelType.AddTopic);
             panel.ShowAll.Value = false;
         }
 
-        void GetTopics()
+        public static IEnumerable<TopicWithResource> GetTopicCandidates()
         {
-            topics.Clear();
             var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
             foreach (var entry in newTopics)
             {
                 string topic = entry.Topic;
                 string msgType = entry.Type;
 
-                if (ModuleListPanel.DisplayedTopics.Contains(topic))
+                if (ModuleListPanel.Instance.DisplayedTopics.Contains(topic))
                 {
                     continue;
                 }
 
                 bool resourceFound =
                     Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.ModuleType resource);
-                if (!resourceFound && !panel.ShowAll.Value)
+                if (!resourceFound)
                 {
                     continue;
                 }
 
-                topics.Add(new TopicWithResource(topic, msgType, resource));
+                yield return new TopicWithResource(topic, msgType, resource);
             }
+            
+        }
+
+        void GetTopics()
+        {
+            topics.Clear();
+            topics.AddRange(GetTopicCandidates());
         }
 
         public override void SetupPanel()
@@ -98,7 +105,7 @@ namespace Iviz.App
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
 
-            panel.Items = topics.Select(x => x.ToString());
+            panel.Items =  topics.Select(x => x.ToString());
 
             if (panel.ShowAll.Value)
             {

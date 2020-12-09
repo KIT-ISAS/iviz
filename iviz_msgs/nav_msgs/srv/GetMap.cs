@@ -14,7 +14,7 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Empty constructor. </summary>
         public GetMap()
         {
-            Request = new GetMapRequest();
+            Request = GetMapRequest.Singleton;
             Response = new GetMapResponse();
         }
         
@@ -65,13 +65,15 @@ namespace Iviz.Msgs.NavMsgs
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetMapRequest(ref b);
+            return Singleton;
         }
         
         GetMapRequest IDeserializable<GetMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetMapRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly GetMapRequest Singleton = new GetMapRequest();
     
         public void RosSerialize(ref Buffer b)
         {

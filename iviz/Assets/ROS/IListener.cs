@@ -152,7 +152,10 @@ namespace Iviz.Ros
         void CallHandlerDelayed()
         {
             tmpMessageBag.Clear();
-            while (messageQueue.TryDequeue(out T t)) tmpMessageBag.Add(t);
+            while (messageQueue.TryDequeue(out T t))
+            {
+                tmpMessageBag.Add(t);
+            }
 
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
             for (int i = start; i < tmpMessageBag.Count; i++)

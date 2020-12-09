@@ -33,7 +33,7 @@ namespace Iviz.Msgs
         
         public DateTime ToDateTime()
         {
-            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);
+            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100).ToLocalTime();
         }
 
         public TimeSpan ToTimeSpan()

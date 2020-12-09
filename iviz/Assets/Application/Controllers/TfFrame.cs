@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -12,14 +13,12 @@ namespace Iviz.Controllers
 {
     public sealed class TfFrame : FrameNode
     {
-        const int MaxPoseMagnitude = 1000;
-        const int Layer = 9;
+        //const int Layer = 9;
 
         [SerializeField] string id;
-        [SerializeField] Vector3 rosPosition;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
+        readonly List<FrameNode> listeners = new List<FrameNode>();
         readonly Timeline timeline = new Timeline();
 
         Pose pose;
@@ -36,9 +35,29 @@ namespace Iviz.Controllers
         AxisFrameResource axis;
         TextMarkerResource labelObjectText;
         LineConnector parentConnector;
-        TrailResource trail;
 
-        [NotNull] public ReadOnlyDictionary<string, TfFrame> Children { get; }
+        [CanBeNull] TrailResource trail;
+
+        [NotNull]
+        TrailResource Trail
+        {
+            get
+            {
+                if (trail == null)
+                {
+                    trail = ResourcePool.GetOrCreateDisplay<TrailResource>(Transform);
+                    trail.TimeWindowInMs = 5000;
+                    trail.Color = Color.yellow;
+                    trail.Name = "[Trail:" + id + "]";
+                }
+
+                return trail;
+            }
+        }
+
+        bool HasTrail => trail != null;
+
+        [NotNull] public IEnumerable<TfFrame> Children => children.Values;
 
         [NotNull]
         public string Id
@@ -48,7 +67,10 @@ namespace Iviz.Controllers
             {
                 id = value ?? throw new ArgumentNullException(nameof(value));
                 labelObjectText.Text = id;
-                trail.Name = "[Trail:" + id + "]";
+                if (HasTrail)
+                {
+                    Trail.Name = "[Trail:" + id + "]";
+                }
             }
         }
 
@@ -64,7 +86,7 @@ namespace Iviz.Controllers
         }
         */
         const bool Selected = false;
-        
+
         public float Alpha
         {
             get => alpha;
@@ -157,14 +179,19 @@ namespace Iviz.Controllers
             set
             {
                 trailVisible = value;
-                trail.Visible = value && (Visible || ForceVisible);
+                if (!HasTrail && !value)
+                {
+                    return;
+                }
+
+                Trail.Visible = value && (Visible || ForceVisible);
                 if (value)
                 {
-                    trail.DataSource = () => transform.position;
+                    Trail.DataSource = () => Transform.position;
                 }
                 else
                 {
-                    trail.DataSource = null;
+                    Trail.DataSource = null;
                 }
             }
         }
@@ -196,9 +223,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public Pose WorldPose => TfListener.RelativePoseToOrigin(transform.AsPose());
+        public Pose WorldPose => TfListener.RelativePoseToOrigin(Transform.AsPose());
 
-        public Pose AbsolutePose => transform.AsPose();
+        public Pose AbsolutePose => Transform.AsPose();
 
         bool HasNoListeners => listeners.Count == 0;
 
@@ -210,31 +237,26 @@ namespace Iviz.Controllers
         public override Pose BoundsPose => transform.AsPose();
         */
 
-        public TfFrame()
-        {
-            Children = new ReadOnlyDictionary<string, TfFrame>(children);
-        }
-
         void Awake()
         {
-            Transform mTransform = transform;
-            
-            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(mTransform);
+            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
             labelObjectText.Visible = false;
             labelObjectText.Name = "[Label]";
             labelObjectText.transform.localScale = 0.5f * Vector3.one;
 
-            parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(mTransform);
-            parentConnector.A = mTransform;
+            parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
+            parentConnector.A = Transform;
 
 
             // TFListener.BaseFrame may not exist yet
-            var parent = mTransform.parent;
-            parentConnector.B = parent != null ? parent : TfListener.RootFrame?.transform;
+            var parent = Transform.parent;
+            parentConnector.B = parent != null
+                ? parent
+                : (TfListener.RootFrame != null ? TfListener.RootFrame.Transform : null);
 
             parentConnector.name = "[Connector]";
 
-            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(mTransform);
+            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(Transform);
 
             if (Settings.IsHololens)
             {
@@ -242,7 +264,7 @@ namespace Iviz.Controllers
             }
 
             axis.ColliderEnabled = true;
-            axis.Layer = Layer;
+            axis.Layer = LayerType.Unclickable;
 
             axis.name = "[Axis]";
 
@@ -252,12 +274,14 @@ namespace Iviz.Controllers
 
             //UsesBoundaryBox = false;
 
+            /*
             trail = ResourcePool.GetOrCreateDisplay<TrailResource>(mTransform);
             trail.TimeWindowInMs = 5000;
             trail.Color = Color.yellow;
+            */
             TrailVisible = false;
         }
-        
+
         public void AddListener([NotNull] FrameNode frame)
         {
             if (frame == null)
@@ -311,17 +335,17 @@ namespace Iviz.Controllers
 
         public bool SetParent([CanBeNull] TfFrame newParent)
         {
+            if (newParent == Parent)
+            {
+                return true;
+            }
+
             if (!ParentCanChange &&
                 newParent != TfListener.RootFrame &&
                 newParent != TfListener.UnityFrame &&
                 newParent != null)
             {
                 return false;
-            }
-
-            if (newParent == Parent)
-            {
-                return true;
             }
 
             if (newParent == this)
@@ -346,8 +370,8 @@ namespace Iviz.Controllers
                 Parent.AddChild(this);
             }
 
-            var parent = transform.parent;
-            parentConnector.B = parent != null ? parent : TfListener.OriginFrame.transform;
+            var parent = Transform.parent;
+            parentConnector.B = parent != null ? parent : TfListener.OriginFrame.Transform;
 
             return true;
         }
@@ -364,21 +388,33 @@ namespace Iviz.Controllers
 
         public void SetPose(in Pose newPose)
         {
-            SetPose(TimeSpan.Zero, newPose);
+            SetPose(default(TimeSpan), newPose);
         }
 
-        public void SetPose(in TimeSpan time, in Pose newPose)
+        public void SetPose(in Msgs.time time, in Pose newPose)
         {
-            pose = newPose;
-            rosPosition = pose.position.Unity2Ros();
+            /*
+            var timestamp = time == default 
+                ? TimeSpan.MaxValue 
+                : time.ToTimeSpan();
+            SetPose(timestamp, newPose);
+                */
 
-            if (newPose.position.MagnitudeSq() > MaxPoseMagnitude * MaxPoseMagnitude)
+            SetPose(default(TimeSpan), newPose);
+        }
+
+        void SetPose(in TimeSpan time, in Pose newPose)
+        {
+            if (pose == newPose)
             {
-                return; // lel
+                return;
             }
 
-            transform.SetLocalPose(newPose);
-            //LogPose(time);
+            pose = newPose;
+            Transform.SetLocalPose(newPose);
+            /*
+            LogPose(time);
+            */
         }
 
         void LogPose(in TimeSpan time)
@@ -403,20 +439,17 @@ namespace Iviz.Controllers
         {
             base.Stop();
             Id = "";
-            trail.Name = "[Trail:In Trash]";
             timeline.Clear();
             axis.DisposeDisplay();
-            trail.DisposeDisplay();
+
+            if (trail != null)
+            {
+                trail.Name = "[Trail:In Trash]";
+                trail.DisposeDisplay();
+                trail = null;
+            }
+
             axis = null;
-            trail = null;
         }
-        
-        /*
-        protected override void OnDoubleClick()
-        {
-            TfListener.GuiCamera.Select(this);
-            ModuleListPanel.Instance.ShowFrame(this);
-        }
-        */
     }
 }

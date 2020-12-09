@@ -62,6 +62,7 @@ namespace Iviz.XmlRpc
                 return;
             }
 
+            Logger.LogDebugFormat("{0}: Disposing listener...", this);
             runningTs.Cancel();
 
             // now we throw everything at the listener to try to leave AcceptTcpClientAsync()
@@ -74,7 +75,7 @@ namespace Iviz.XmlRpc
             }
 
             // now we close the listener
-            Logger.LogDebugFormat("{0}: Stopping listener", this);
+            //Logger.LogDebugFormat("{0}: Stopping listener", this);
             listener.Stop();
 
             // now we close the underlying socket
@@ -120,12 +121,12 @@ namespace Iviz.XmlRpc
                     async Task CreateContextTask()
                     {
                         using var context = new HttpListenerContext(client);
-                        await handler(context);
+                        await handler(context).Caf();
                     }
 
                     if (runInBackground)
                     {
-                        AddToBackgroundTasks(CreateContextTask());
+                        AddToBackgroundTasks(Task.Run(CreateContextTask));
                     }
                     else
                     {

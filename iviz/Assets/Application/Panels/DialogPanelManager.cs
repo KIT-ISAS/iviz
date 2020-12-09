@@ -17,7 +17,7 @@ namespace Iviz.App
         SaveAs,
         Marker,
         Network,
-        Console
+        Console,
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -71,13 +71,25 @@ namespace Iviz.App
             return source.Instantiate(transform).GetComponent<T>();
         }
 
+
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
         }
 
+        int round = 0;
+
         void UpdateSelected()
         {
+            if (Settings.IsHololens)
+            {
+                round++;
+                if (round % 5 != 0)
+                {
+                    return;
+                }
+            }
+
             selectedDialogData?.UpdatePanel();
         }
 

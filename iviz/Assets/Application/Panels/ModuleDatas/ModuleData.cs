@@ -24,6 +24,22 @@ namespace Iviz.App
             }
         }
 
+        public string Description
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(Topic))
+                {
+                    return $"<b>{ModuleType}</b>";
+                }
+
+                string type = string.IsNullOrEmpty(Type) ? ModuleType.ToString() : Type;
+                int lastSlash = type.LastIndexOf('/');
+                string shortType = (lastSlash == -1) ? type : type.Substring(lastSlash + 1);
+                return $"{Topic}\n<b>{shortType}</b>";
+            }
+        }
+
         [NotNull] public string Topic { get; }
         [NotNull] public string Type { get; }
         public abstract Resource.ModuleType ModuleType { get; }

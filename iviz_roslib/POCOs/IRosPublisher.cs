@@ -95,6 +95,10 @@ namespace Iviz.Roslib
         public Task WaitForAnySubscriberAsync(CancellationToken token);
 
         internal Endpoint? RequestTopicRpc(string remoteCallerId);
+        
+        public bool LatchingEnabled { get; set; }
+
+        Task DisposeAsync();
     }
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage

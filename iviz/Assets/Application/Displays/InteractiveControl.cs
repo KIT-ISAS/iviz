@@ -3,13 +3,15 @@ using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Vector4 = System.Numerics.Vector4;
 
 namespace Iviz.Displays
 {
-    public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
+    public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler,
+        IPointerEnterHandler, IPointerExitHandler
     {
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
@@ -27,17 +29,25 @@ namespace Iviz.Displays
         [SerializeField] GameObject ringZPlane = null;
 
         [SerializeField] BoxCollider holderCollider = null;
+        [SerializeField] GameObject menuObject = null;
 
         [SerializeField] Transform targetTransform;
+        [SerializeField] InteractionModeType interactionMode;
+
         BoundaryFrame frame;
 
-        InteractionModeType interactionMode;
         bool handlesPointToCamera;
         bool keepAbsoluteRotation;
         bool pointsToCamera;
-        
+
         Bounds? bounds;
-        
+
+        public bool EnableMenu
+        {
+            get => menuObject.activeSelf;
+            set => menuObject.SetActive(value);
+        }
+
         public Transform TargetTransform
         {
             get => targetTransform;
@@ -233,12 +243,21 @@ namespace Iviz.Displays
 
                 Bounds newBounds = bounds ?? new Bounds(Vector3.zero, 0.5f * Vector3.one);
 
+                float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
+
                 GameObject holder = holderCollider.gameObject;
                 holder.transform.localPosition = newBounds.center;
-                holder.transform.localScale = 2 * newBounds.size;
+                holder.transform.localScale = 2 * maxScale * Vector3.one;
+                holderCollider.size = newBounds.size / (2 * maxScale);
+
+                menuObject.transform.localScale = 0.5f * maxScale * Vector3.one;
+                menuObject.GetComponent<Billboard>().offset =
+                    new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale);
+
+                frame.Bounds = newBounds;
             }
         }
-        
+
         public int Layer
         {
             get => LayerType.Clickable;
@@ -246,7 +265,7 @@ namespace Iviz.Displays
             {
                 if (value != LayerType.Clickable)
                 {
-                    throw new InvalidOperationException("This display cannot change layers");                    
+                    throw new InvalidOperationException("This display cannot change layers");
                 }
             }
         }
@@ -254,6 +273,7 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerUp;
         public event Action PointerDown;
+        public event Action<Vector3> MenuClicked;
 
 
         public void Suspend()
@@ -261,7 +281,13 @@ namespace Iviz.Displays
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
             InteractionMode = InteractionModeType.None;
+            EnableMenu = false;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
+
+            Moved = null;
+            PointerUp = null;
+            PointerDown = null;
+            MenuClicked = null;
         }
 
         void Awake()
@@ -281,7 +307,7 @@ namespace Iviz.Displays
                 draggable.PointerDown += PointerDown;
             }
 
-            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(holderCollider.transform);
+            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(transform);
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
             frame.Layer = LayerType.Unclickable;
@@ -328,7 +354,7 @@ namespace Iviz.Displays
             }
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public void OnPointerDown([NotNull] PointerEventData eventData)
         {
             if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
             {
@@ -338,8 +364,14 @@ namespace Iviz.Displays
             PointerDown?.Invoke();
         }
 
-        public void OnPointerUp(PointerEventData eventData)
+        public void OnPointerUp([NotNull] PointerEventData eventData)
         {
+            if (eventData.pointerCurrentRaycast.gameObject == menuObject)
+            {
+                MenuClicked?.Invoke(menuObject.transform.position);
+                return;
+            }
+
             if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
             {
                 return;
@@ -350,7 +382,9 @@ namespace Iviz.Displays
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (interactionMode != InteractionModeType.ClickOnly || eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
+            if (interactionMode != InteractionModeType.ClickOnly ||
+                (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject &&
+                 eventData.pointerCurrentRaycast.gameObject != menuObject))
             {
                 return;
             }
@@ -364,7 +398,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             frame.Color = Color.green;
         }
     }

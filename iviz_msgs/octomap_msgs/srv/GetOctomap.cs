@@ -14,7 +14,7 @@ namespace Iviz.Msgs.OctomapMsgs
         /// <summary> Empty constructor. </summary>
         public GetOctomap()
         {
-            Request = new GetOctomapRequest();
+            Request = GetOctomapRequest.Singleton;
             Response = new GetOctomapResponse();
         }
         
@@ -65,13 +65,15 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public ISerializable RosDeserialize(ref Buffer b)
         {
-            return new GetOctomapRequest(ref b);
+            return Singleton;
         }
         
         GetOctomapRequest IDeserializable<GetOctomapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetOctomapRequest(ref b);
+            return Singleton;
         }
+        
+        public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
     
         public void RosSerialize(ref Buffer b)
         {

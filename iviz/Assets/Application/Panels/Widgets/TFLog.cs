@@ -17,10 +17,15 @@ namespace Iviz.App
         [SerializeField] GameObject content = null;
         [SerializeField] Button gotoButton = null;
         [SerializeField] Button trail = null;
+
         [SerializeField] Button lockPivot = null;
+        [SerializeField] Button fixedFrame = null;
+
         //[SerializeField] Button lock1PV = null;
         [SerializeField] Text trailText = null;
+
         [SerializeField] Text lockPivotText = null;
+
         //[SerializeField] Text lock1PVText = null;
         [SerializeField] TFLink tfLink = null;
 
@@ -43,15 +48,24 @@ namespace Iviz.App
                     return;
                 }
 
-                selectedFrame?.RemoveListener(placeHolder);
+                if (selectedFrame != null)
+                {
+                    selectedFrame.RemoveListener(placeHolder);
+                }
+
                 selectedFrame = value;
-                selectedFrame?.AddListener(placeHolder);
+
+                if (selectedFrame != null)
+                {
+                    selectedFrame.AddListener(placeHolder);
+                }
 
 
                 bool interactable = selectedFrame != null;
                 gotoButton.interactable = interactable;
                 trail.interactable = interactable;
                 lockPivot.interactable = interactable;
+                fixedFrame.interactable = interactable;
                 //lock1PV.interactable = interactable;
 
                 if (value == null)
@@ -93,6 +107,7 @@ namespace Iviz.App
             gotoButton.interactable = false;
             trail.interactable = false;
             lockPivot.interactable = false;
+            fixedFrame.interactable = false;
             //lock1PV.interactable = false;
             tfName.text = "<color=grey>[ ⮑none ]</color>";
 
@@ -124,7 +139,7 @@ namespace Iviz.App
                 Selected = (frame == Instance.SelectedFrame);
 
                 var childrenList = frame.Children;
-                foreach (TfFrame child in childrenList.Values)
+                foreach (TfFrame child in childrenList)
                 {
                     Children.Add(new TfNode(child));
                 }
@@ -137,9 +152,9 @@ namespace Iviz.App
                 string tabs = new string(' ', level * 4);
 
                 Vector3 position = Pose.position.Unity2Ros();
-                string x = position.x.ToString("#,0.#", UnityUtils.Culture);
-                string y = position.y.ToString("#,0.#", UnityUtils.Culture);
-                string z = position.z.ToString("#,0.#", UnityUtils.Culture);
+                string x = position.x.ToString("#,0.###", UnityUtils.Culture);
+                string y = position.y.ToString("#,0.###", UnityUtils.Culture);
+                string z = position.z.ToString("#,0.###", UnityUtils.Culture);
 
                 string decoratedName = Name;
                 if (HasTrail)
@@ -151,6 +166,11 @@ namespace Iviz.App
                 {
                     decoratedName = $"<color=blue>{decoratedName}</color>";
                 }
+                else if (Name == TfListener.FixedFrameId)
+                {
+                    decoratedName = $"<color=green>{decoratedName}</color>";
+                }
+
 
                 str.Append(tabs)
                     .AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
@@ -172,6 +192,11 @@ namespace Iviz.App
 
         public void Flush()
         {
+            if (Settings.IsHololens)
+            {
+                return;
+            }
+            
             Initialize();
 
             TfNode root = new TfNode(TfListener.OriginFrame);
@@ -204,6 +229,16 @@ namespace Iviz.App
             if (SelectedFrame != null)
             {
                 SelectedFrame.TrailVisible = !SelectedFrame.TrailVisible;
+            }
+
+            UpdateFrameTexts();
+        }
+
+        public void OnFixedFrameClicked()
+        {
+            if (SelectedFrame != null)
+            {
+                TfListener.FixedFrameId = SelectedFrame.Id;
             }
 
             UpdateFrameTexts();

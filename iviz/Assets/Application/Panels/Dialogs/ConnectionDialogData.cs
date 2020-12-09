@@ -79,7 +79,7 @@ namespace Iviz.App
         public event Action<string> MyIdChanged;
         public event Action<bool> MasterActiveChanged;
 
-        public ConnectionDialogData([NotNull] ModuleListPanel newPanel) : base(newPanel)
+        public ConnectionDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
 

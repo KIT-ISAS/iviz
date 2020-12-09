@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Iviz.XmlRpc
     public static class TaskUtils
     {
         /// <summary>
-        /// Waits for the task to complete, or throw a timeout if this is not achieved in the given time.
+        /// Waits for the task to complete.
         /// Only use this if the async function that generated the task does not support a cancellation token.
         /// Note: A timeout doesn't cancel the task in the argument. You need to cancel that task through other means.
         /// </summary>
@@ -25,6 +26,22 @@ namespace Iviz.XmlRpc
             return result == task;
         }
         
+        /// <summary>
+        /// Waits for the task to complete, and throws a timeout exception if it doesn't.
+        /// Only use this if the async function that generated the task does not support a cancellation token.
+        /// Note: A timeout doesn't cancel the task in the argument. You need to cancel that task through other means.
+        /// </summary>
+        /// <param name="task">The task to be awaited</param>
+        /// <param name="timeoutInMs">The maximal amount to wait</param>
+        /// <exception cref="TimeoutException">If the task did not complete in time</exception>
+        public static async Task WaitForWithTimeout(this Task task, int timeoutInMs)
+        {
+            Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs)).Caf();
+            if (result != task)
+            {
+                throw new TimeoutException();
+            }
+        }
         
         
         /// <summary>

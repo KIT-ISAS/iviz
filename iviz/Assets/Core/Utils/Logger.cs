@@ -37,24 +37,41 @@ namespace Iviz.Core
         public static void Info(object t)
         {
             UnityEngine.Debug.Log(t);
-            Console.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke( t.ToString());
+            }
         }
 
         public static void Error(object t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Console.Error.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Warn(object t)
         {
             UnityEngine.Debug.LogWarning(t);
-            Console.Error.WriteLine(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Debug(object t)
         {
             UnityEngine.Debug.Log(t);
+
+            if (Settings.IsHololens)
+            {
+                LogInternal?.Invoke(t.ToString());
+            }
         }
 
         public static void Internal([CanBeNull] string msg)
@@ -97,10 +114,18 @@ namespace Iviz.Core
             Warn(str);
         }
 
+        public static void External([CanBeNull] string msg, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            LogExternal?.Invoke(new LogMessage(LogLevel.Debug, msg ?? NullMessage, file, line));
+            UnityEngine.Debug.Log(msg);
+        }
+
         public static void External(LogLevel level, [CanBeNull] string msg, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
+            UnityEngine.Debug.Log(msg);
         }
 
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",

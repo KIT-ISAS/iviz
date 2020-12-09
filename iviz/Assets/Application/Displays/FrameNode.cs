@@ -15,6 +15,10 @@ namespace Iviz.Controllers
     {
         TfFrame parent;
 
+        Transform mTransform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
+
         [CanBeNull] public virtual TfFrame Parent
         {
             get => parent;
@@ -41,9 +45,9 @@ namespace Iviz.Controllers
 
             if (attach)
             {
-                transform.SetParentLocal(newParent == null ? 
-                    TfListener.OriginFrame.transform : 
-                    newParent.transform);
+                Transform.SetParentLocal(newParent == null ? 
+                    TfListener.OriginFrame.Transform : 
+                    newParent.Transform);
             }
         }
 
@@ -80,7 +84,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(parentId));
             }
 
-            transform.SetParentLocal(TfListener.MapFrame.transform);
+            transform.SetParentLocal(TfListener.MapFrame.Transform);
             if (parentId.Length == 0)
             {
                 transform.SetLocalPose(Pose.identity);
@@ -95,7 +99,7 @@ namespace Iviz.Controllers
 
                 if (Parent != null)
                 {
-                    transform.SetLocalPose(TfListener.RelativePoseToOrigin(Parent.LookupPose(timestamp)));
+                    Transform.SetLocalPose(TfListener.RelativePoseToOrigin(Parent.LookupPose(timestamp)));
                 }
             }
         }
@@ -120,7 +124,7 @@ namespace Iviz.Controllers
             SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
             if (transform != null)
             {
-                obj.transform.parent = transform;
+                node.Transform.parent = transform;
             }
             else
             {
