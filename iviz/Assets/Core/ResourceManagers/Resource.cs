@@ -150,7 +150,7 @@ namespace Iviz.Resources
         {
             //
             return Internal.TryGet(uriString, out info) ||
-                   External.TryGet(uriString, out info, null);
+                   External.TryGet(uriString, out info, Settings.IsHololens ? null : provider);
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
