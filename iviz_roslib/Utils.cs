@@ -531,7 +531,7 @@ namespace Iviz.Roslib
             return new SelectEnumerable<TA, TB>(a, f);
         }
 
-        public static void AddAll<TA, TB>(this List<TB> list, SelectEnumerable<TA, TB> tb)
+        public static void AddRange<TA, TB>(this List<TB> list, SelectEnumerable<TA, TB> tb)
         {
             list.Capacity = list.Count + tb.Count;
             foreach (TB b in tb)

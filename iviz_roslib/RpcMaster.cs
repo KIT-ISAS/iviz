@@ -30,11 +30,14 @@ namespace Iviz.Roslib.XmlRpc
         public string CallerId { get; }
         public int TimeoutInMs { get; set; } = 2000;
 
+        readonly Arg[] callerIdArgCache;
+
         public RosMasterApi(Uri masterUri, string callerId, Uri callerUri)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
+            callerIdArgCache = new Arg[] {CallerId};
         }
 
         public override string ToString()
@@ -44,14 +47,14 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetUriResponse GetUri()
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = MethodCall("getUri", args);
             return new GetUriResponse(response);
         }
 
         public async Task<GetUriResponse> GetUriAsync()
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getUri", args).Caf();
             return new GetUriResponse(response);
         }
@@ -87,7 +90,8 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPublishedTopicsResponse(response);
         }
 
-        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "", CancellationToken token = default)
+        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "",
+            CancellationToken token = default)
         {
             Arg[] args = {CallerId, subgraph};
             object[] response = await MethodCallAsync("getPublishedTopics", args, token).Caf();
@@ -96,14 +100,14 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetPublishedTopicsResponse GetTopicTypes()
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = MethodCall("getTopicTypes", args);
             return new GetPublishedTopicsResponse(response);
         }
 
         public async Task<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getTopicTypes", args, token).Caf();
             return new GetPublishedTopicsResponse(response);
         }
@@ -226,14 +230,14 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetSystemStateResponse GetSystemState()
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
         }
 
         public async Task<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
-            Arg[] args = {CallerId};
+            Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getSystemState", args, token).Caf();
             return new GetSystemStateResponse(response);
         }

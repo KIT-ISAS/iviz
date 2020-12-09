@@ -32,7 +32,6 @@ namespace Iviz.Roslib
         /// Whether this publisher is valid.
         /// </summary>
         public bool IsAlive => !CancellationToken.IsCancellationRequested;
-
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
         public int NumSubscribers => manager.NumConnections;
@@ -205,7 +204,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
-            await manager.StopAsync();
+            await manager.StopAsync().AwaitNoThrow(this);
             NumSubscribersChanged = null;
         }        
 
@@ -262,8 +261,8 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Dispose();
-                await client.RemovePublisherAsync(this).Caf();
+                await DisposeAsync().AwaitNoThrow(this);
+                await client.RemovePublisherAsync(this).AwaitNoThrow(this);
             }
 
             return removed;
