@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -46,10 +47,10 @@ namespace Iviz.XmlRpc
         public ParseException(string message) : base(message)
         {
         }
-        
+
         public ParseException(string message, Exception inner) : base(message, inner)
         {
-        }        
+        }
     }
 
     /// <summary>
@@ -72,22 +73,29 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static object Parse(XmlNode value)
+        static object Parse(XmlNode? value)
         {
+            if (value == null)
+            {
+                throw new ParseException("Expected child node but received null!");
+            }            
+            
             Assert(value.Name, "value");
             if (!value.HasChildNodes)
             {
-                return value.InnerText;
+                return value.InnerText ?? throw new ParseException("Expected text node but received null!");
             }
 
-            XmlNode primitive = value.FirstChild;
+            XmlNode? primitive = value.FirstChild;
             if (primitive is XmlText)
             {
-                return primitive.InnerText;
+                return primitive.InnerText ?? throw new ParseException("Expected text node but received null!");
             }
 
-            switch (primitive.Name)
+            switch (primitive?.Name)
             {
+                case null:
+                    throw new ParseException("Expected node name but received null!");
                 case "double":
                     return double.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture,
                         out double @double)
@@ -105,13 +113,15 @@ namespace Iviz.XmlRpc
                 case "array":
                     XmlNode data = primitive.FirstChild;
                     Assert(data.Name, "data");
-                    object?[] children = new object[data.ChildNodes.Count];
-                    for (int i = 0; i < data.ChildNodes.Count; i++)
-                    {
-                        children[i] = Parse(data.ChildNodes[i]);
-                    }
+                    return data.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray();
+                /*
+                object?[] children = new object[data.ChildNodes.Count];
+                for (int i = 0; i < data.ChildNodes.Count; i++)
+                {
+                    children[i] = Parse(data.ChildNodes[i]);
+                }
+                */
 
-                    return children;
                 case "dateTime.iso8601":
                     return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
@@ -122,27 +132,27 @@ namespace Iviz.XmlRpc
                     {
                         return Convert.FromBase64String(primitive.InnerText);
                     }
-                    catch (FormatException e) 
+                    catch (FormatException e)
                     {
                         throw new ParseException($"Could not parse '{primitive.InnerText}' as base64!", e);
                     }
                 case "struct":
                     List<(string, object)> structValue = new List<(string, object)>();
-                    for (int i = 0; i < primitive.ChildNodes.Count; i++)
+                    foreach (XmlNode? member in primitive.ChildNodes)
                     {
-                        XmlNode member = primitive.ChildNodes[i];
-                        if (member.Name != "member")
+                        if (member == null || member.Name != "member")
                         {
                             continue;
                         }
 
                         string? entryName = null;
                         object? entryValue = null;
-                        for (int j = 0; j < member.ChildNodes.Count; j++)
+                        foreach (XmlNode? entry in member.ChildNodes)
                         {
-                            XmlNode entry = member.ChildNodes[j];
-                            switch (entry.Name)
+                            switch (entry?.Name)
                             {
+                                case null:
+                                    break;
                                 case "name":
                                     entryName = entry.InnerText;
                                     break;
@@ -402,7 +412,7 @@ namespace Iviz.XmlRpc
                             XmlNode param = child.ChildNodes[i];
                             Assert(param.Name, "param");
                             object? arg = Parse(param.FirstChild);
-                            args[i] = arg ?? 
+                            args[i] = arg ??
                                       throw new ParseException(
                                           $"Could not parse argument '{param.FirstChild.InnerText}'");
                         }

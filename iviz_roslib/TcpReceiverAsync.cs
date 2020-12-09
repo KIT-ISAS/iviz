@@ -288,7 +288,7 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator!, readBuffer, rcvLength);
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
                 manager.MessageCallback(message);
 
                 numReceived++;
