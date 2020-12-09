@@ -249,7 +249,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
             });
         }
@@ -318,7 +317,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
             });
         }
@@ -398,7 +396,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
 
                 await Task.CompletedTask;
@@ -436,7 +433,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
             });
         }
@@ -470,7 +466,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
             });
         }
@@ -517,7 +512,6 @@ namespace Iviz.Ros
                 catch (Exception e)
                 {
                     Core.Logger.Error(e);
-                    Disconnect();
                 }
             });
         }
@@ -953,10 +947,10 @@ namespace Iviz.Ros
                     throw new ArgumentNullException(nameof(callback));
                 }
 
-                this.callback = async t =>
+                this.callback = t =>
                 {
                     callback(t);
-                    await Task.CompletedTask;
+                    return Task.CompletedTask;
                 };
             }
 
