@@ -58,6 +58,24 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosMd5Sum");
         }
 
+        public static bool TryGetFixedSize(Type type, out int size)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }            
+            
+            int? constant = (int?) type.GetField("RosFixedMessageLength")?.GetRawConstantValue();
+            if (constant == null)
+            {
+                size = default;
+                return false;
+            }
+
+            size = constant.Value;
+            return true;
+        }
+
         static string GetDependenciesBase64(Type type)
         {
             return GetClassStringConstant(type, "RosDependenciesBase64");
