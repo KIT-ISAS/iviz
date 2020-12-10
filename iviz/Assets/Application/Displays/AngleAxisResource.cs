@@ -26,7 +26,7 @@ namespace Iviz.Displays
                     lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
                 }
 
-                resource.Set(lines, lines.Count, color.a < 1);
+                resource.Set(lines, color.a < 1);
             }
         }
 
@@ -121,7 +121,7 @@ namespace Iviz.Displays
             }
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
-            resource.Set(lines, lines.Count, Color.a < 1);
+            resource.Set(lines, Color.a < 1);
         }
     }
 }

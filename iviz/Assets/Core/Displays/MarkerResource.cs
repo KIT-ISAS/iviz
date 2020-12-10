@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -93,6 +94,19 @@ namespace Iviz.Displays
         protected void IgnoreBoxCollider()
         {
             boxCollider = null;
+        }
+
+        public bool TryRaycast(Vector2 cameraPoint, out Vector3 hit)
+        {
+            var ray = Settings.MainCamera.ScreenPointToRay(cameraPoint);
+            if (BoxCollider.Raycast(ray, out var hitInfo, 1000f))
+            {
+                hit = hitInfo.point;
+                return true;
+            }
+
+            hit = default;
+            return false;
         }
     }
 }

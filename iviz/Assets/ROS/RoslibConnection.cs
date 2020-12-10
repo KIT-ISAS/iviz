@@ -662,9 +662,21 @@ namespace Iviz.Ros
 
             foreach (var stat in subscriberStats.Topics)
             {
-                builder.Append("<b>** Subscribed to ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<color=navy><b>** Subscribed to ").Append(stat.Topic).Append("</b></color>")
+                    .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
-                builder.Append("<b>Connections:</b>").AppendLine();
+
+                int totalMessages = 0;
+                int totalBytes = 0;
+                foreach (var receiver in stat.Receivers)
+                {
+                    totalMessages += receiver.NumReceived;
+                    totalBytes += receiver.BytesReceived;
+                }
+
+                int totalKbytes = totalBytes / 1000;
+                builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs ↓")
+                    .Append(totalKbytes.ToString("N0")).Append("kB</b>").AppendLine();
 
                 if (stat.Receivers.Count == 0)
                 {
@@ -675,11 +687,16 @@ namespace Iviz.Ros
 
                 foreach (var receiver in stat.Receivers)
                 {
-                    var isConnected = receiver.IsConnected;
-                    var isAlive = receiver.IsAlive;
-                    builder.Append("<b>→</b> ")
-                        .Append(receiver.RemoteUri == mClient.CallerUri ? "[Me]" : receiver.RemoteUri.Host);
-                    builder.Append(":").Append(receiver.RemoteUri.Port);
+                    bool isConnected = receiver.IsConnected;
+                    bool isAlive = receiver.IsAlive;
+                    builder.Append("<b>←</b> [");
+                    if (receiver.RemoteUri == mClient.CallerUri)
+                    {
+                        builder.Append("<i>Me</i>] [");
+                    }
+
+                    builder.Append(receiver.RemoteUri.Host);
+                    builder.Append(":").Append(receiver.RemoteUri.Port).Append("]");
                     if (isAlive && isConnected)
                     {
                         int kbytes = receiver.BytesReceived / 1000;
@@ -706,13 +723,23 @@ namespace Iviz.Ros
                 builder.AppendLine();
             }
 
-            builder.AppendLine();
-
             foreach (var stat in publisherStats.Topics)
             {
-                builder.Append("<b>** Publishing to ").Append(stat.Topic).Append("</b>").AppendLine();
+                builder.Append("<color=maroon><b>** Publishing to ").Append(stat.Topic).Append("</b></color>")
+                    .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
-                builder.Append("<b>Connections:</b>").AppendLine();
+
+                int totalMessages = 0;
+                int totalBytes = 0;
+                foreach (var sender in stat.Senders)
+                {
+                    totalMessages += sender.NumSent;
+                    totalBytes += sender.BytesSent;
+                }
+
+                int totalKbytes = totalBytes / 1000;
+                builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs ↑")
+                    .Append(totalKbytes.ToString("N0")).Append("kB</b>").AppendLine();
 
                 if (stat.Senders.Count == 0)
                 {
@@ -722,17 +749,20 @@ namespace Iviz.Ros
 
                 foreach (var receiver in stat.Senders)
                 {
-                    var isAlive = receiver.IsAlive;
+                    bool isAlive = receiver.IsAlive;
                     builder.Append("<b>→</b> ");
                     if (receiver.RemoteId == mClient.CallerId)
                     {
-                        builder.Append("[Me]");
+                        builder.Append("[<i>Me</i>] ");
                     }
                     else
                     {
-                        builder.Append("[").Append(receiver.RemoteId).Append("] ")
-                            .Append(receiver.RemoteEndpoint?.Hostname ?? "(Unknown address)");
+                        builder.Append("[").Append(receiver.RemoteId).Append("] ");
                     }
+
+                    builder.Append(receiver.RemoteEndpoint != null
+                        ? receiver.RemoteEndpoint.Hostname
+                        : "(Unknown address)");
 
                     if (isAlive)
                     {

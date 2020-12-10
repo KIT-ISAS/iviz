@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Iviz.Displays
 {
@@ -72,13 +73,13 @@ namespace Iviz.Displays
             Vector3 b = new Vector3(-1, 0, 1) / 2;
             Vector3 c = new Vector3(-1, 0, -1) / 2;
             Vector3 d = new Vector3(1, 0, -1) / 2;
-            resource.LinesWithColor = new []
+            resource.Set(new List<LineWithColor>
             {
                 new LineWithColor(a, b, Color.green), 
                 new LineWithColor(b,  c, Color.green), 
                 new LineWithColor(c, d, Color.green), 
                 new LineWithColor(d, a, Color.green), 
-            };
+            });
         }
     }
 }

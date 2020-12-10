@@ -481,5 +481,12 @@ namespace Iviz.Core
                 }
             }
         }
+
+        static readonly Plane[] PlaneCache = new Plane[6];
+        public static Plane[] CalculateCameraPlanes()
+        {
+            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
+            return PlaneCache;
+        }
     }
 }

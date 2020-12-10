@@ -18,6 +18,7 @@ using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -471,13 +472,14 @@ namespace Iviz.Controllers
             Instance.Publisher.Publish(msg);
         }
 
+        public static Vector3 RelativePositionToOrigin(in Vector3 unityPosition)
+        {
+            var originFrame = OriginFrame.Transform;
+            return originFrame.InverseTransformPoint(unityPosition);
+        }
+
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
-            if (!Settings.IsRootMovable)
-            {
-                return unityPose;
-            }
-
             var originFrame = OriginFrame.Transform;
             return new Pose(
                 originFrame.InverseTransformPoint(unityPose.position),

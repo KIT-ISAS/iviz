@@ -28,7 +28,7 @@ namespace Iviz.Displays
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         readonly CapsuleLinesHelper capsuleHelper = new CapsuleLinesHelper();
-        
+
         NativeList<float4x2> lineBuffer;
         [CanBeNull] ComputeBuffer lineComputeBuffer;
 
@@ -66,32 +66,18 @@ namespace Iviz.Displays
                                                                  t.B.MagnitudeSq() < MaxPositionMagnitudeSq;
 
         /// <summary>
-        /// Sets the lines with the given collection.
+        /// Sets the lines with the given list.
         /// </summary>
-        [NotNull]
-        public IReadOnlyCollection<LineWithColor> LinesWithColor
-        {
-            //get => lineBuffer.Select(f => new LineWithColor(f)).ToArray();
-            set => Set(value, value.Count);
-        }
-
-        /// <summary>
-        /// Sets the lines with the given enumeration.
-        /// </summary>
-        /// <param name="lines">The line enumerator.</param>
-        /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
+        /// <param name="lines">The line list.</param>
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
-        public void Set([NotNull] IEnumerable<LineWithColor> lines, int reserve = 0, bool? overrideNeedsAlpha = null)
+        public void Set([NotNull] List<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            if (reserve != 0)
-            {
-                lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, reserve);
-            }
+            lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, lines.Count);
 
             lineBuffer.Clear();
             foreach (LineWithColor t in lines)
@@ -114,6 +100,13 @@ namespace Iviz.Displays
             {
                 UpdateLineBuffer();
             }
+        }
+
+        public void Reset()
+        {
+            lineBuffer.Clear();
+            linesNeedAlpha = false;
+            UpdateLineMesh();
         }
 
         /// <summary>

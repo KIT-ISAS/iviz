@@ -129,7 +129,7 @@ namespace Iviz.App
             };
 
             lines.ElementScale = 0.015f; // 5 mm width
-            lines.LinesWithColor = linesToDraw;
+            lines.Set(linesToDraw);
         }
     }
 }

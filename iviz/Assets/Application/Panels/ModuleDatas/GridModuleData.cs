@@ -58,6 +58,9 @@ namespace Iviz.App
             panel.Offset.Value = controller.Offset;
             panel.FollowCamera.Value = controller.FollowCamera;
             panel.HideInARMode.Value = controller.HideInARMode;
+            panel.PublishLongTapPosition.Value = controller.PublishLongTapPosition;
+            panel.Sender.Set(controller.SenderPoint);
+            panel.LastTapPosition.Label = controller.LastTapPositionString;
 
             panel.LineWidth.ValueChanged += f =>
             {
@@ -110,6 +113,11 @@ namespace Iviz.App
             panel.HideInARMode.ValueChanged += f =>
             {
                 controller.HideInARMode = f;
+            };
+            panel.PublishLongTapPosition.ValueChanged += f =>
+            {
+                controller.PublishLongTapPosition = f;
+                panel.Sender.Set(controller.SenderPoint);
             };
         }
 

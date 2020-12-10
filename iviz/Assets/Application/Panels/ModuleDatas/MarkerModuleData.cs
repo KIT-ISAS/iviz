@@ -53,6 +53,7 @@ namespace Iviz.App
             panel.Alpha.Value = listener.Tint.a;
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
+            panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
 
             panel.Tint.ValueChanged += f =>
             {
@@ -69,6 +70,10 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.ValueChanged += f =>
             {
                 listener.RenderAsOcclusionOnly = f;
+            };
+            panel.TriangleListFlipWinding.ValueChanged += f =>
+            {
+                listener.TriangleListFlipWinding = f;
             };
 
             panel.CloseButton.Clicked += () =>
@@ -100,6 +105,9 @@ namespace Iviz.App
                         break;
                     case nameof(MarkerConfiguration.Tint):
                         listener.Tint = config.Tint;
+                        break;
+                    case nameof(MarkerConfiguration.TriangleListFlipWinding):
+                        listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
                         break;
                     default:
                         Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");

@@ -200,7 +200,7 @@ namespace Iviz.Controllers
         void RebuildTwist()
         {
             string twistType = UseTwistStamped
-                ? Msgs.GeometryMsgs.TwistStamped.RosMessageType
+                ? TwistStamped.RosMessageType
                 : Twist.RosMessageType;
 
             if (SenderTwist != null &&

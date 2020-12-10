@@ -82,7 +82,7 @@ namespace Iviz.App
 
         ControllerService controllerService;
 
-        [SerializeField] GameObject menuObject;
+        [SerializeField] GameObject menuObject = null;
         IMenuDialogContents menuDialog;
 
         bool initialized;
@@ -127,7 +127,6 @@ namespace Iviz.App
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         Controllers.ModelService modelService;
-
 
         public bool UnlockButtonVisible
         {

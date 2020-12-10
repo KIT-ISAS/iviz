@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using System;
+using Iviz.Resources;
 using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -80,9 +81,16 @@ namespace Iviz.App
             OrbitCenterOverride = null;
         }
 
-        //ClickableNode SelectedDisplay { get; set; }
+        float pointerDownTime;
+        Vector2 pointerDownStart;
+        
+        bool PointerDown
+        {
+            get;
+            set;
+        }
 
-        bool PointerDown { get; set; }
+        public event Action<Vector2> LongClick; 
 
         bool PointerAltDown { get; set; }
 
@@ -143,14 +151,17 @@ namespace Iviz.App
         {
             GameThread.EveryFrame += UpdateEvenIfInactive;
         }
-        
+
         void UpdateEvenIfInactive()
         {
+            const float longClickTime = 0.5f;
+            const float maxDistanceForLongClick = 20;
+
             bool prevPointerDown = PointerDown;
 
             QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
             //Debug.Log(QualitySettings.shadowDistance);
-            
+
             if (Settings.IsMobile)
             {
                 prevPointerDown |= PointerAltDown;
@@ -174,7 +185,18 @@ namespace Iviz.App
                     {
                         PointerOnGui = IsPointerOnGui(PointerPosition) || 
                                        (PointerAltDown && IsPointerOnGui(PointerAltPosition));
+                        pointerDownTime = Time.time;
+                        pointerDownStart = Input.GetTouch(0).position;
                     }                    
+                }
+                else
+                {
+                    if (prevPointerDown 
+                        && Time.time - pointerDownTime > longClickTime 
+                        && Vector2.Distance(PointerPosition, pointerDownStart) < maxDistanceForLongClick)
+                    {
+                        LongClick?.Invoke(PointerPosition);
+                    }
                 }
             }
             else
@@ -188,11 +210,19 @@ namespace Iviz.App
                     if (!prevPointerDown)
                     {
                         PointerOnGui = IsPointerOnGui(PointerPosition);
+                        pointerDownTime = Time.time;
+                        pointerDownStart = Input.mousePosition;
                     }
                 }
                 else
                 {
                     PointerOnGui = false;
+                    if (prevPointerDown 
+                        && Time.time - pointerDownTime > longClickTime 
+                        && Vector2.Distance(PointerPosition, pointerDownStart) < maxDistanceForLongClick)
+                    {
+                        LongClick?.Invoke(PointerPosition);
+                    }
                 }
             }
 

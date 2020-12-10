@@ -47,20 +47,20 @@ namespace Iviz.App
         int MessagesPerSecond => Sender?.Stats.MessagesPerSecond ?? 0;
         int BytesPerSecond => Sender?.Stats.BytesPerSecond ?? 0;
 
-        public void Set([CanBeNull] ISender sender)
+        public void Set([CanBeNull] ISender newSender)
         {
-            Sender = sender;
-            if (sender == null)
+            Sender = newSender;
+            if (newSender == null)
             {
                 text.text = $"<i>Empty</i>\n" +
                             $"<b>(?)</b>";
             }
         }
 
-        public void Set<T>([CanBeNull] Sender<T> sender) where T : IMessage, new()
+        public void Set<T>([CanBeNull] Sender<T> newSender) where T : IMessage, new()
         {
-            Sender = sender;
-            if (sender == null)
+            Sender = newSender;
+            if (newSender == null)
             {
                 string messageType = BuiltIns.GetMessageType(typeof(T));
                 text.text = "<i>Empty</i>\n" +

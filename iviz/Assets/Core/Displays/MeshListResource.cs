@@ -101,16 +101,6 @@ namespace Iviz.Displays
         /// </summary>
         public bool CastShadows { get; set; } = true;
 
-        /// <summary>
-        /// Sets the instance positions and colors with the given collection.
-        /// </summary>
-        [NotNull]
-        public IReadOnlyCollection<PointWithColor> PointsWithColor
-        {
-            //get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
-            set => Set(value, value.Count);
-        }
-
         public override float ElementScale
         {
             get => base.ElementScale;
@@ -220,24 +210,10 @@ namespace Iviz.Displays
         /// Sets the instance positions and colors with the given enumeration.
         /// </summary>
         /// <param name="points">The list of positions and colors.</param>
-        /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
-        public void Set([NotNull] IEnumerable<PointWithColor> points, int reserve = 0)
+        public void Set([NotNull] List<PointWithColor> points)
         {
-            if (reserve < 0)
-            {
-                throw new ArgumentException($"Invalid reserve {reserve}", nameof(reserve));
-            }
-
-            if (reserve > 0)
-            {
-                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
-            }
-
-            if (points == null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
-
+            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, points.Count);
+            
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
@@ -249,6 +225,13 @@ namespace Iviz.Displays
                 pointBuffer.Add(t);
             }
 
+            UpdateBuffer();
+        }
+
+        
+        public void Reset()
+        {
+            pointBuffer.Clear();
             UpdateBuffer();
         }
 

@@ -5,4 +5,5 @@
   "[Fraunhofer IOSB] BoB": "e1_oilquick_bucket_raedlinger",
   "[UR] UR16e": "ur",
   "[Niryo] Niryo One": "niryo_one",
+  "[Fraunhofer IOSB] e2": "e2",
 }

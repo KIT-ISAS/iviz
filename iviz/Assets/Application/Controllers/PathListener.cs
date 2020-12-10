@@ -302,7 +302,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            resource.Set(lines, lines.Count, LineColor.a < 1);
+            resource.Set(lines, LineColor.a < 1);
         }
 
         public override void StopController()

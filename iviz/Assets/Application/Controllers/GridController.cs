@@ -1,10 +1,16 @@
 ﻿using UnityEngine;
 using System;
 using System.Runtime.Serialization;
+using Iviz.App;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -22,6 +28,7 @@ namespace Iviz.Controllers
         [DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
+        [DataMember] public bool PublishLongTapPosition { get; set; } = false;
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
@@ -29,14 +36,20 @@ namespace Iviz.Controllers
     public sealed class GridController : IController
     {
         const int ProbeRefreshTimeInSec = 5;
-        
+
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
+        Point? lastTapPosition;
+        uint clickedSeq;
+
         public IModuleData ModuleData { get; }
 
         readonly GridConfiguration config = new GridConfiguration();
+
+        public Sender<PointStamped> SenderPoint { get; private set; }
+
         public GridConfiguration Config
         {
             get => config;
@@ -52,6 +65,7 @@ namespace Iviz.Controllers
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
+                PublishLongTapPosition = value.PublishLongTapPosition;
                 Offset = value.Offset;
             }
         }
@@ -84,6 +98,7 @@ namespace Iviz.Controllers
                     grid.Visible = true;
                     reflectionProbe.transform.parent = grid.transform;
                 }
+
                 reflectionProbe.RenderProbe();
             }
         }
@@ -163,12 +178,12 @@ namespace Iviz.Controllers
                 grid.FollowCamera = value;
             }
         }
-        
+
         public bool HideInARMode
         {
             get => config.HideInARMode;
             set => config.HideInARMode = value;
-        }        
+        }
 
         public SerializableVector3 Offset
         {
@@ -176,10 +191,37 @@ namespace Iviz.Controllers
             set
             {
                 config.Offset = value;
-                node.transform.localPosition = ((Vector3)value).Ros2Unity();
+                node.transform.localPosition = ((Vector3) value).Ros2Unity();
                 UpdateMesh();
             }
         }
+
+        public bool PublishLongTapPosition
+        {
+            get => config.PublishLongTapPosition;
+            set
+            {
+                if (value && SenderPoint == null)
+                {
+                    SenderPoint = new Sender<PointStamped>("clicked_point");
+                    GuiCamera.Instance.LongClick += OnLongClick;
+                }
+                else if (!value && SenderPoint != null)
+                {
+                    SenderPoint.Stop();
+                    SenderPoint = null;
+                    GuiCamera.Instance.LongClick -= OnLongClick;
+                }
+
+                config.PublishLongTapPosition = value;
+            }
+        }
+
+        public string LastTapPositionString =>
+            lastTapPosition == null
+                ? "<b>Last Tap Position:</b>\n<i>None</i>"
+                : $"<b>Last Tap Position:</b>\n[X:{lastTapPosition.Value.X:N3} Y:{lastTapPosition.Value.Y:N3} Z:{lastTapPosition.Value.Z:N3}]";
+
 
         //void Awake()
         public GridController([NotNull] IModuleData moduleData)
@@ -198,17 +240,31 @@ namespace Iviz.Controllers
             reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
-            
+
             reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
-            
+
             reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
             reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
             reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
             UpdateMesh();
 
             GameThread.EverySecond += CheckProbeUpdate;
-            
+
             Config = new GridConfiguration();
+        }
+
+        void OnLongClick(Vector2 cameraPoint)
+        {
+            if (SenderPoint != null && grid.TryRaycast(cameraPoint, out Vector3 hit))
+            {
+                lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
+                SenderPoint.Publish(new PointStamped
+                {
+                    Header = RosUtils.CreateHeader(clickedSeq++, "map", time.Now()),
+                    Point = lastTapPosition.Value
+                });
+                ModuleData.ResetPanel();
+            }
         }
 
         void UpdateMesh()
@@ -225,16 +281,21 @@ namespace Iviz.Controllers
             UnityEngine.Object.Destroy(node.gameObject);
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
 
+            GuiCamera.Instance.LongClick -= OnLongClick;
             GameThread.EverySecond -= CheckProbeUpdate;
         }
 
         public void ResetController()
         {
-            reflectionProbe?.RenderProbe();
+            if (reflectionProbe)
+            {
+                reflectionProbe.RenderProbe();
+            }
         }
 
 
         int ticks = 0;
+
         void CheckProbeUpdate()
         {
             ticks++;
@@ -243,6 +304,6 @@ namespace Iviz.Controllers
                 reflectionProbe?.RenderProbe();
                 ticks = 0;
             }
-        } 
+        }
     }
 }

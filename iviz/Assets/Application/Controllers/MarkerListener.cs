@@ -22,6 +22,7 @@ namespace Iviz.Controllers
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
+        [DataMember] public bool TriangleListFlipWinding { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Marker;
@@ -51,6 +52,7 @@ namespace Iviz.Controllers
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
                 Visible = value.Visible;
+                TriangleListFlipWinding = value.TriangleListFlipWinding;
             }
         }
 
@@ -92,6 +94,20 @@ namespace Iviz.Controllers
                 foreach (var marker in markers.Values)
                 {
                     marker.Visible = value;
+                }
+            }
+        }
+        
+        public bool TriangleListFlipWinding
+        {
+            get => config.TriangleListFlipWinding;
+            set
+            {
+                config.TriangleListFlipWinding = value;
+
+                foreach (var marker in markers.Values)
+                {
+                    marker.TriangleListFlipWinding = value;
                 }
             }
         }

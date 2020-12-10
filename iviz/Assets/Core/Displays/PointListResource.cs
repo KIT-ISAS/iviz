@@ -4,11 +4,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Sdf;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Material = UnityEngine.Material;
 
 namespace Iviz.Displays
 {
@@ -24,41 +26,22 @@ namespace Iviz.Displays
 
         NativeList<float4> pointBuffer;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
+        bool isDirty;
 
         int Size => pointBuffer.Length;
 
         /// <summary>
-        /// Sets the points with the given collection.
+        /// Sets the list of points.
         /// </summary>
-        [NotNull]
-        public IReadOnlyCollection<PointWithColor> PointsWithColor
+        /// <param name="points">The list of points.</param>
+        public void Set([NotNull] List<PointWithColor> points)
         {
-            get => pointBuffer.Select(f => new PointWithColor(f)).ToArray();
-            set => Set(value, value.Count);
-        }
-
-        /// <summary>
-        /// Sets the list of points with the given enumerator.
-        /// </summary>
-        /// <param name="points">The point enumerator.</param>
-        /// <param name="reserve">The number of points to reserve, or 0 if unknown.</param>
-        public void Set([NotNull] IEnumerable<PointWithColor> points, int reserve = 0)
-        {
-            if (reserve < 0)
-            {
-                throw new ArgumentException($"Invalid reserve size {reserve}", nameof(reserve));
-            }
-
-            if (reserve > 0)
-            {
-                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
-            }
-
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
 
+            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, points.Count);
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
@@ -70,27 +53,37 @@ namespace Iviz.Displays
                 pointBuffer.Add(t);
             }
 
-            UpdateBuffer();
+            isDirty = true;
         }
 
         /// <summary>
-        /// Copies the array directly without checking.
+        /// Sets the list of points to empty.
+        /// </summary>
+        public void Reset()
+        {
+            pointBuffer.Clear();
+            isDirty = true;
+        }
+
+
+        /// <summary>
+        /// Copies the array of points directly without checking.
         /// </summary>
         /// <param name="points">A native array with the points.</param>
         public void SetDirect(in NativeArray<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
-            UpdateBuffer();
+            isDirty = true;
         }
 
         public static bool IsElementValid(PointWithColor t)
         {
             return !(t.Position.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq);
         }
-        
+
         public delegate void DirectPointSetter(ref NativeList<float4> pointBuffer);
-        
+
         public void SetDirect([NotNull] DirectPointSetter callback, int reserve = 0)
         {
             if (callback == null)
@@ -105,7 +98,7 @@ namespace Iviz.Displays
 
             pointBuffer.Clear();
             callback(ref pointBuffer);
-            UpdateBuffer();
+            isDirty = true;
         }
 
         void UpdateBuffer()
@@ -138,6 +131,18 @@ namespace Iviz.Displays
 
         void Update()
         {
+            bool isCurrentlyVisible = GeometryUtility.TestPlanesAABB(UnityUtils.CalculateCameraPlanes(), WorldBounds);
+            if (!isCurrentlyVisible)
+            {
+                return;
+            }
+
+            if (isDirty)
+            {
+                UpdateBuffer();
+                isDirty = false;
+            }
+
             if (Size == 0)
             {
                 return;

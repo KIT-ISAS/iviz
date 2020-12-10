@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
 using UnityEngine;
@@ -67,7 +68,7 @@ namespace Iviz.Displays
             Vector3 d = new Vector3(minX, maxY, farClip);
             Vector3 o = Vector3.zero;
 
-            LineWithColor[] lines =
+            List<LineWithColor> lines = new List<LineWithColor>
             {
                 new LineWithColor(o, a),
                 new LineWithColor(o, b),
@@ -79,7 +80,7 @@ namespace Iviz.Displays
                 new LineWithColor(d, a),
             };
 
-            resource.LinesWithColor = lines;
+            resource.Set(lines);
             resource.Tint = Color.yellow;
             resource.ElementScale = 0.005f;
         }

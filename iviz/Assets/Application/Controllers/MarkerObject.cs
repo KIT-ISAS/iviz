@@ -132,6 +132,19 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool TriangleListFlipWinding
+        {
+            get => resource is MeshTrianglesResource r && r.FlipWinding;
+            set
+            {
+                if (resource is MeshTrianglesResource r && r.FlipWinding != value)
+                {
+                    r.FlipWinding = value;
+                    previousHash = null;
+                }
+            }
+        }
+
         public void Set([NotNull] Marker msg)
         {
             if (msg == null) throw new ArgumentNullException(nameof(msg));
@@ -407,7 +420,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                     .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
-                pointList.PointsWithColor = Array.Empty<PointWithColor>();
+                pointList.Reset();
                 numErrors++;
                 return;
             }
@@ -415,7 +428,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
             {
                 description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
-                pointList.PointsWithColor = Array.Empty<PointWithColor>();
+                pointList.Reset();
                 numWarnings++;
                 return;
             }
@@ -464,7 +477,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
-                lineResource.LinesWithColor = Array.Empty<LineWithColor>();
+                lineResource.Reset();
                 numWarnings++;
                 return;
             }
@@ -475,7 +488,7 @@ namespace Iviz.Controllers
                     .Append("Color array length ").Append(msg.Colors.Length)
                     .Append(" does not match point array length ").Append(msg.Points.Length)
                     .AppendLine();
-                lineResource.LinesWithColor = Array.Empty<LineWithColor>();
+                lineResource.Reset();
                 numErrors++;
                 return;
             }
@@ -483,7 +496,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
             {
                 description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
-                lineResource.LinesWithColor = Array.Empty<LineWithColor>();
+                lineResource.Reset();
                 numWarnings++;
                 return;
             }
@@ -519,7 +532,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                     .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
-                meshList.PointsWithColor = Array.Empty<PointWithColor>();
+                meshList.Reset();
                 numErrors++;
                 return;
             }
@@ -527,7 +540,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(msg.Color.A, 0))
             {
                 description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
-                meshList.PointsWithColor = Array.Empty<PointWithColor>();
+                meshList.Reset();
                 numWarnings++;
                 return;
             }
@@ -535,7 +548,7 @@ namespace Iviz.Controllers
             if (msg.Color.HasNaN())
             {
                 description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
-                meshList.PointsWithColor = Array.Empty<PointWithColor>();
+                meshList.Reset();
                 numErrors++;
                 return;
             }

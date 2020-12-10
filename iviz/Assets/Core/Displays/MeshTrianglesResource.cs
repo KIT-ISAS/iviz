@@ -11,8 +11,12 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
+        const int MaxVerticesShort = 65000;
+        
+        public bool FlipWinding { get; set; }
+
         [CanBeNull] Mesh mesh;
-        [SerializeField] Bounds localBounds;
+        Bounds localBounds;
 
         public Bounds LocalBounds
         {
@@ -48,16 +52,23 @@ namespace Iviz.Displays
         [NotNull]
         Mesh EnsureOwnMesh(int numPointsNeeded)
         {
+            var indexFormat = numPointsNeeded >= MaxVerticesShort
+                ? UnityEngine.Rendering.IndexFormat.UInt32
+                : UnityEngine.Rendering.IndexFormat.UInt16;
+
             if (mesh != null)
             {
+                if (mesh.indexFormat != indexFormat)
+                {
+                    mesh.indexFormat = indexFormat;
+                }
+
                 return mesh;
             }
 
-            Mesh tmpMesh = new Mesh()
+            Mesh tmpMesh = new Mesh
             {
-                indexFormat = numPointsNeeded > ushort.MaxValue
-                    ? UnityEngine.Rendering.IndexFormat.UInt32
-                    : UnityEngine.Rendering.IndexFormat.UInt16,
+                indexFormat = indexFormat,
                 name = "MeshTrianglesResource Mesh"
             };
 
@@ -164,33 +175,49 @@ namespace Iviz.Displays
         }
 
 
-        public void Set([NotNull] IReadOnlyCollection<Vector3> points,
-            [CanBeNull] IReadOnlyCollection<Color> colors = null)
+        public void Set([NotNull] Vector3[] points, [CanBeNull] Color[] colors = null)
         {
             if (points is null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
 
-            if (points.Count % 3 != 0)
+            if (points.Length % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Count}", nameof(points));
+                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (colors != null && colors.Count != 0 && colors.Count != points.Count)
+            if (colors != null && colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            int[] triangles = Enumerable.Range(0, points.Count).ToArray();
+            int[] triangles = Enumerable.Range(0, points.Length).ToArray();
 
-            Mesh ownMesh = EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             SetVertices(points, ownMesh);
-            if (colors != null && colors.Count != 0)
+            if (colors != null && colors.Length != 0)
             {
                 SetColors(colors, ownMesh);
+            }
+
+            if (FlipWinding)
+            {
+                unsafe
+                {
+                    fixed (int* tPtr = triangles)
+                    {
+                        int* endPtr = tPtr + triangles.Length;
+                        for (int* ptr = tPtr; ptr != endPtr; ptr += 3)
+                        {
+                            int t = ptr[1];
+                            ptr[1] = ptr[2];
+                            ptr[2] = t;
+                        }
+                    }
+                }
             }
 
             SetTriangles(triangles, ownMesh, 0);
@@ -233,8 +260,8 @@ namespace Iviz.Displays
 
             Mesh ownMesh = EnsureOwnMesh(points.Length);
             bool hasNormals = normals != null && normals.Length != 0;
-            
-            
+
+
             ownMesh.Clear();
             SetVertices(points, ownMesh);
             if (hasNormals)

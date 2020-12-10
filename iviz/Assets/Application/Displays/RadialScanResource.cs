@@ -312,7 +312,7 @@ namespace Iviz.Displays
 
         void SetPoints()
         {
-            pointCloud.PointsWithColor = pointBuffer;
+            pointCloud.Set(pointBuffer);
             MeasuredIntensityBounds = pointCloud.IntensityBounds;
             if (ForceMinMax)
             {
@@ -346,7 +346,7 @@ namespace Iviz.Displays
                 }
             }
 
-            lines.Set(lineBuffer, lineBuffer.Count, false);
+            lines.Set(lineBuffer, false);
             MeasuredIntensityBounds = lines.IntensityBounds;
             if (ForceMinMax)
             {
