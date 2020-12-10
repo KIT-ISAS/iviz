@@ -185,7 +185,7 @@ namespace Iviz.Roslib
 #if !NETSTANDARD2_0
                 int readNow = await stream.ReadAsync(new Memory<byte>(buffer, numRead, toRead - numRead), token);
 #else
-                int readNow = await stream!.ReadAsync(buffer, numRead, toRead - numRead, token).Caf();
+                int readNow = await stream.ReadAsync(buffer, numRead, toRead - numRead, token).Caf();
 #endif
                 if (readNow == 0)
                 {

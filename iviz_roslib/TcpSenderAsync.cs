@@ -36,9 +36,7 @@ namespace Iviz.Roslib
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
-
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
-
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
 
@@ -351,11 +349,14 @@ namespace Iviz.Roslib
 
             List<(T msg, int msgLength)> tmpQueue = new List<(T, int)>();
 
+            if (BuiltIns.TryGetFixedSize(typeof(T), out int fixedSize))
+            {
+                writeBuffer = new byte[4 + fixedSize];                
+            }
+
             while (KeepRunning)
             {
-                //Console.WriteLine("waiting...");
                 await signal.WaitAsync(runningTs.Token);
-                //Console.WriteLine("2: " + signal.CurrentCount + " " + messageQueue.Count);
 
                 int totalQueueSizeInBytes = ReadFromQueueWithoutBlocking(tmpQueue);
 
@@ -381,7 +382,7 @@ namespace Iviz.Roslib
                     int msgLength = tmpQueue[i].msgLength;
                     if (writeBuffer.Length < msgLength + 4)
                     {
-                        writeBuffer = new byte[msgLength + BufferSizeIncrease];
+                        writeBuffer = new byte[msgLength + 4 + BufferSizeIncrease];
                     }
 
                     uint sendLength = Buffer.Serialize(message, writeBuffer, 4);
