@@ -83,16 +83,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1TTWvbQBC9C/QfBnJwUnAKTenB0Jtp6kMgEN9CMRPtSFpY7aq7K8fqr+8buf4gpKWH" +
-                "pkZGWunNmzfzZi7oTlJLtxI6yXHUU+JGyiJls+lSk95/FTYSqZ1u+j5a39AwWFMWHWL3KGU5kkyvm1+n" +
-                "siiLz//4VxZ3D7cLeqGxLC7oIbM3HA00ZDacmeoA8bZpJc6dbMUhirteDE1f89hLutbIdWsT4WrES2Tn" +
-                "RhoSUDlQFbpu8LbiLJQtijsn0FDriannmG01OI4ICNFYr/g6cicTv/6TfB/EV0Kr5QIon6QasoWoERxV" +
-                "FE7a29US4MH6fPNBIxC4fg5znKWBEUcFlFvOqlh2fYRtUMRpoWne7Wu8Bj2aJEhkEl1O7zY4pitCHqiQ" +
-                "PlQtXUL+/Zjb4MEotOVo+cmJMlfoA2hnGjS7OqdW6Qvy7MOBf095SvI3vP5ErGXNW5jntAVpaNBHIPsY" +
-                "ttYA+zROLJWz4jM5+xRZZ0vD9klB8kWbDRjiJm9w55RCZeGEoWeb2+P8Tr5sdIbfbDpfXw6t9Tcrd9iY" +
-                "fdB9gOOP32grOleS/vRddhsfYscOqFPaNRruGycrb5QA2Jonojcr+RWFx9XClGS2Pk029iHZbDEZodbV" +
-                "UaBuUR0FbvZQWRa1C5w/faTd6RHNOzz++C/Gveig1rKU2voz7RinCTJLZ07tl/fx5uiOPRCUxU8qHNfr" +
-                "cgUAAA==";
+                "H4sIAAAAAAAAE7VTTWvbQBC9768Y8MFJwSk0pQdDb6apD4FAfAvFjLUjaWG1q+6uHKu/vm8lWzHBhB5q" +
+                "IZBWeu/Nx5uZ0aPEmh7EN5JCn0+RK1Ex6W0Tq/j5p7CWQPXwwOdgXEVdZ7RqQBwxWWJSGD5Xx5NS3//z" +
+                "pR6fH5b0Lj01o+fETnPQiJ9Yc2IqPdI2VS1hYWUvFiRuWtE0/E19K/EOxE1tIuGuxElga3vqIkDJU+Gb" +
+                "pnOm4CSUDOo654NpHDG1HJIpOssBeB+0cRleBm4kq+OO8rsTVwitV0tgXJSiSwYJ9VAognDMLV2vSHXG" +
+                "pfsvmaBmm1e/wFEqNH8KTqnmlJOVQxvgFJLhuESMT2Nxd9BGcwRRdKSb4dsWx3hLCIIUpPVFTTfI/KlP" +
+                "tXcQFNpzMLyzkoULdACq80ya354pu0HasfMn+VHxLca/yLpJN9e0qOGZzdXHrkIDAWyD3xsN6K4fRApr" +
+                "xCWyZhcY45RZY0g1+5F7DBBYgyN4coy+MDBA06tJ9WlcBze2GNkrTePlTUCRl3frtBwj5cnD5pdftJc8" +
+                "SBI/+C2HrfOhYRvPlm+DLrvKytrpTAe05CxzpVovZHdaIoxFYuPiYFzro0kGo+DLvCUZlxemDAIDW2So" +
+                "Sus5fftKh+mtn97+XN+qd31DESspjTtLOh0R8/hmzriiL/eTIeZIV38BEc3WNkoFAAA=";
                 
     }
 }
