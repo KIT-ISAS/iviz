@@ -2,19 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Iviz.Msgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 
@@ -32,10 +27,10 @@ namespace Iviz.Roslib
         Task<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType);
 
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay = false) where T : IMessage, IDeserializable<T>, new();
+            bool requestNoDelay = true) where T : IMessage, IDeserializable<T>, new();
 
         Task<(string id, IRosSubscriber<T> subscriber)>
-            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
+            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new();
 
         bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new();
@@ -629,7 +624,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Function to be called when a message arrives.</param>
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
-        public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = false)
+        public string Subscribe<T>(string topic, Action<T> callback, bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new()
         {
             return Subscribe(topic, callback, out RosSubscriber<T> _, requestNoDelay);
@@ -647,7 +642,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber<T> subscriber,
-            bool requestNoDelay = false)
+            bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (topic is null)
@@ -1399,15 +1394,14 @@ namespace Iviz.Roslib
         public async Task CloseAsync()
         {
             //Logger.LogDebug("1) Disposing listener");
-            await listener.DisposeAsync();
+            await listener.DisposeAsync().AwaitNoThrow(this);
             //Logger.LogDebug("1) Done");
 
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
-
             List<Task> tasks = new List<Task>();
-            tasks.AddAll(publishers.Select(async publisher =>
+            Utils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
                 await publisher.DisposeAsync().Caf();
@@ -1416,22 +1410,10 @@ namespace Iviz.Roslib
                 //Logger.LogDebug("2) Done publisher " + publisher.Topic);
             }));
 
-            /*
-            foreach(var publisher in publishers)
-            {
-                //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
-                publisher.Dispose();
-                //Logger.LogDebug("2) Unregistering publisher " + publisher.Topic);
-                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
-                //Logger.LogDebug("2) Done publisher " + publisher.Topic);
-            }
-            */
-
             var subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
-
-            tasks.AddAll(subscribers.Select(async subscriber =>
+            Utils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
                 //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
                 await subscriber.DisposeAsync().Caf();
@@ -1440,20 +1422,8 @@ namespace Iviz.Roslib
                 //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
             }));
 
-            /*
-            foreach (var subscriber in subscribers)
-            {
-                //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
-                subscriber.Dispose();
-                //Logger.LogDebug("3) Unregistering subscriber " + subscriber.Topic);
-                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
-                //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
-            }
-            */
-
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
-
 
             foreach (IServiceCaller receiver in receivers)
             {
@@ -1462,12 +1432,10 @@ namespace Iviz.Roslib
                 //Logger.LogDebug("4) Done service receiver " + receiver.ServiceType);
             }
 
-
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
-
-            tasks.AddAll(serviceManagers.Select(async senderManager =>
+            Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
                 //Logger.LogDebug("5) Disposing service " + senderManager.Service);
                 await senderManager.DisposeAsync().Caf();
@@ -1476,19 +1444,7 @@ namespace Iviz.Roslib
                 //Logger.LogDebug("5) Done service " + senderManager.Service);
             }));
 
-            await Task.WhenAll(tasks).Caf();
-
-            /*
-            foreach(var senderManager in serviceManagers)
-            {
-                //Logger.LogDebug("5) Disposing service " + senderManager.Service);
-                await senderManager.DisposeAsync().Caf();
-                //Logger.LogDebug("5) Unregistering service " + senderManager.Service);
-                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
-                //Logger.LogDebug("5) Done service " + senderManager.Service);
-            }
-            */
-            //Logger.LogDebug("6) Done closing!");
+            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1575,34 +1531,42 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="serviceName">The name of the service</param>
         /// <param name="token">A cancellation token, or default for infinite</param>
-        /// <exception cref="TaskCanceledException">The token was cancelled.</exception>
-        public async Task WaitForServiceExistenceAsync(string serviceName, CancellationToken token = default)
+        /// <param name="pollingPeriodInMs">Time in milliseconds for the polling</param>
+        /// <exception cref="TaskCanceledException">Thrown if the token was cancelled</exception>
+        public async Task WaitForServiceExistenceAsync(string serviceName, CancellationToken token = default,
+            int pollingPeriodInMs = 100)
         {
-            // polling isn't optimal, but what else? 
             while (true)
             {
-                var systemState = await GetSystemStateAsync(token);
-                if (systemState.Services.Any(tuple => tuple.Topic == serviceName && tuple.Members.Count != 0))
+                var serviceResponse = await RosMasterApi.LookupServiceAsync(serviceName, token);
+                if (serviceResponse.IsValid)
                 {
                     break;
                 }
 
-                await Task.Delay(100, token);
+                await Task.Delay(pollingPeriodInMs, token);
             }
         }
-        
-        public async Task WaitForTopicExistenceAsync(string topicName, CancellationToken token = default)
+
+        /// <summary>
+        /// Waits for the topic to appear and have at least one publisher.
+        /// </summary>
+        /// <param name="topicName">The name of the topic</param>
+        /// <param name="token">A cancellation token, or default for infinite</param>
+        /// <param name="pollingPeriodInMs">Time in milliseconds for the polling</param>
+        /// <exception cref="TaskCanceledException">Thrown if the token was cancelled</exception>
+        public async Task WaitForTopicExistenceAsync(string topicName, CancellationToken token = default,
+            int pollingPeriodInMs = 100)
         {
-            // polling isn't optimal, but what else? 
             while (true)
             {
-                var systemState = await GetSystemStateAsync(token);
-                if (systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Count != 0))
+                var systemState = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
+                if (systemState.IsValid && systemState.Topics.Any(tuple => tuple.name == topicName))
                 {
                     break;
                 }
 
-                await Task.Delay(100, token);
+                await Task.Delay(pollingPeriodInMs, token);
             }
         }
 

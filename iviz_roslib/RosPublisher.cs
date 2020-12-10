@@ -32,7 +32,6 @@ namespace Iviz.Roslib
         /// Whether this publisher is valid.
         /// </summary>
         public bool IsAlive => !CancellationToken.IsCancellationRequested;
-
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
         public int NumSubscribers => manager.NumConnections;
@@ -42,9 +41,6 @@ namespace Iviz.Roslib
         /// </summary>
         public int NumIds => ids.Count;
 
-        /// <summary>
-        /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
-        /// </summary>
         public bool LatchingEnabled
         {
             get => manager.Latching;
@@ -68,6 +64,12 @@ namespace Iviz.Roslib
             set => manager.TimeoutInMs = value;
         }
 
+        public bool ForceTcpNoDelay
+        {
+            get => manager.ForceTcpNoDelay;
+            set => manager.ForceTcpNoDelay = value;
+        }
+        
         /// <summary>
         /// Called when the number of subscribers has changed.
         /// </summary>        
@@ -205,7 +207,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
-            await manager.StopAsync();
+            await manager.StopAsync().AwaitNoThrow(this);
             NumSubscribersChanged = null;
         }        
 
@@ -262,8 +264,8 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Dispose();
-                await client.RemovePublisherAsync(this).Caf();
+                await DisposeAsync().AwaitNoThrow(this);
+                await client.RemovePublisherAsync(this).AwaitNoThrow(this);
             }
 
             return removed;

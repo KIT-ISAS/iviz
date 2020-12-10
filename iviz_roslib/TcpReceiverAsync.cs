@@ -99,7 +99,8 @@ namespace Iviz.Roslib
 #if !NET5_0
                 Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
 #else
-                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port, runningTs.Token);
+                Task connectionTask =
+ client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port, runningTs.Token);
 #endif
                 if (await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() &&
                     connectionTask.RanToCompletion())
@@ -112,7 +113,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: {1}", this, e);
+                Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
             }
 
             client.Dispose();
@@ -183,6 +184,12 @@ namespace Iviz.Roslib
             if (length == 0)
             {
                 return 0;
+            }
+
+            const int maxMessageLength = 64 * 1024 * 1024;
+            if (length < 0 || length > maxMessageLength)
+            {
+                throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
             }
 
             if (readBuffer.Length < length)
@@ -256,15 +263,15 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e) when (e is IOException || e is SocketException || e is TimeoutException)
                 {
-                    Logger.LogDebugFormat("{0}: {1}", this, e);
+                    Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
                 }
-                catch (Exception e) when (e is RosHandshakeException)
+                catch (Exception e) when (e is RoslibException)
                 {
-                    Logger.LogErrorFormat("{0}: {1}", this, e);
+                    Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormat("{0}: {1}", this, e);
+                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
                 }
             }
 
@@ -288,8 +295,8 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-                manager.MessageCallback(message);
 
+                manager.MessageCallback(message);
                 numReceived++;
                 bytesReceived += rcvLength + 4;
             }

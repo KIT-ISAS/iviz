@@ -237,7 +237,7 @@ namespace Iviz.Displays
                 gridVertSize = vertices.Count();
                 offset = new Vector3(offsetX + i * GridCellSize, offsetY, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                vertices.AddAll(verticesHorizontal.Select(x => x + offset));
+                Utils.AddRange(vertices, verticesHorizontal.Select(x => x + offset));
                 normals.AddRange(squareNormals);
             }
 
@@ -250,7 +250,7 @@ namespace Iviz.Displays
                 gridVertSize = vertices.Count();
                 offset = new Vector3(offsetX, offsetY + i * GridCellSize, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                vertices.AddAll(verticesVertical.Select(x => x + offset));
+                Utils.AddRange(vertices, verticesVertical.Select(x => x + offset));
                 normals.AddRange(squareNormals);
             }
 

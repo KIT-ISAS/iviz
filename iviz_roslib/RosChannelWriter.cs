@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -32,6 +31,20 @@ namespace Iviz.Roslib
             }
         }
 
+        bool forceTcpNoDelay;
+        public bool ForceTcpNoDelay
+        {
+            get => forceTcpNoDelay;
+            set
+            {
+                forceTcpNoDelay = value;
+                if (publisher != null)
+                {
+                    Publisher.ForceTcpNoDelay = value;
+                }
+            }
+        }
+
         public string Topic => Publisher.Topic;
         
         public RosChannelWriter()
@@ -50,8 +63,9 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(client));
             }
 
-            publisherId = client.Advertise<T>(topic, out publisher);
+            publisherId = client.Advertise(topic, out publisher);
             publisher.LatchingEnabled = LatchingEnabled;
+            publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
         public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
@@ -63,6 +77,7 @@ namespace Iviz.Roslib
 
             (publisherId, publisher) = await client.AdvertiseAsync<T>(topic);
             publisher.LatchingEnabled = LatchingEnabled;
+            publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
         public void Write(T msg)

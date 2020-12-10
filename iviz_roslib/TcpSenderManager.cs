@@ -25,6 +25,26 @@ namespace Iviz.Roslib
         bool hasLatchedMessage;
         TMessage latchedMessage = default!;
 
+        bool forceTcpNoDelay;
+
+        public bool ForceTcpNoDelay
+        {
+            get => forceTcpNoDelay;
+            set
+            {
+                forceTcpNoDelay = value;
+                if (!value)
+                {
+                    return;
+                }
+
+                foreach (var pair in connectionsByCallerId)
+                {
+                    pair.Value.TcpNoDelay = true;
+                }
+            }
+        }
+
         public TcpSenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
         {
             this.publisher = publisher;
@@ -136,7 +156,7 @@ namespace Iviz.Roslib
             {
                 var tasks = toDelete.Select(async sender =>
                 {
-                    await sender.DisposeAsync();
+                    await sender.DisposeAsync().AwaitNoThrow(this);
                     if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
                     {
                         Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);

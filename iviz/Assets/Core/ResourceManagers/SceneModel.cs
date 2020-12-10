@@ -26,7 +26,7 @@ namespace Iviz.Displays
             }
 
             GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
-            /*
+            
             switch (msg.OrientationHint.ToUpperInvariant())
             {
                 case "Z_UP":
@@ -36,7 +36,7 @@ namespace Iviz.Displays
                     root.transform.localRotation = Quaternion.Euler(90, 0, 90);
                     break;
             }
-            */
+            
             //Debug.Log(JsonConvert.SerializeObject(msg.Nodes, Formatting.Indented));
 
             AggregatedMeshMarkerResource amm = root.AddComponent<AggregatedMeshMarkerResource>();

@@ -245,8 +245,8 @@ namespace Iviz.Roslib
 
             if (callbacksById.Count == 0)
             {
-                Dispose();
-                await client.RemoveSubscriberAsync(this).Caf();
+                await DisposeAsync().AwaitNoThrow(this);
+                await client.RemoveSubscriberAsync(this).AwaitNoThrow(this);
             }
 
             return removed;

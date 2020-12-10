@@ -57,7 +57,7 @@ namespace Iviz.Msgs
 
             if (array.Length != size)
             {
-                throw new InvalidOperationException($"Cannot write {array.Length} values into array of fixed size {size}.");
+                throw new IndexOutOfRangeException($"Cannot write {array.Length} values into array of fixed size {size}.");
             }
         }
 

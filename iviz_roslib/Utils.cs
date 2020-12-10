@@ -30,6 +30,8 @@ namespace Iviz.Roslib
 
     public static class Utils
     {
+        public const string GenericExceptionFormat = "{0}: {1}";
+        
         public static bool HasPrefix(this string check, string prefix)
         {
             if (check is null)
@@ -531,7 +533,7 @@ namespace Iviz.Roslib
             return new SelectEnumerable<TA, TB>(a, f);
         }
 
-        public static void AddAll<TA, TB>(this List<TB> list, SelectEnumerable<TA, TB> tb)
+        public static void AddRange<TA, TB>(this List<TB> list, SelectEnumerable<TA, TB> tb)
         {
             list.Capacity = list.Count + tb.Count;
             foreach (TB b in tb)
