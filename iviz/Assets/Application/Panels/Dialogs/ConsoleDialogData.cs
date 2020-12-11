@@ -7,6 +7,8 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -28,7 +30,7 @@ namespace Iviz.App
         [NotNull] readonly ConsoleDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
 
-        readonly Queue<Log> messageQueue = new Queue<Log>();
+        readonly Queue<LogMessage> messageQueue = new Queue<LogMessage>();
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
@@ -38,6 +40,7 @@ namespace Iviz.App
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogContents>(DialogPanelType.Console);
             ConnectionManager.LogMessageArrived += HandleMessage;
+            Logger.LogExternal += HandleMessage;
         }
 
         public override void SetupPanel()
@@ -60,10 +63,9 @@ namespace Iviz.App
             dialog.FromField.Hints = ExtraFields.Concat(ids);
         }
 
-        void HandleMessage(Log log)
+        void HandleMessage(in LogMessage log)
         {
-            var messageLevel = (LogLevel) log.Level;
-            if (messageLevel < minLogLevel)
+            if (log.Level < minLogLevel)
             {
                 return;
             }
@@ -75,6 +77,16 @@ namespace Iviz.App
             }
 
             queueIsDirty = true;
+        }
+
+        void HandleMessage([NotNull] Log log)
+        {
+            if (log.Name == ConnectionManager.MyId)
+            {
+                return;
+            }
+
+            HandleMessage(new LogMessage(log));
         }
 
         [NotNull]
@@ -107,24 +119,24 @@ namespace Iviz.App
         {
             switch (level)
             {
-                case LogLevel.Debug: return 0; 
-                case LogLevel.Info: return 1; 
-                case LogLevel.Warn: return 2; 
-                case LogLevel.Error: return 3; 
-                case LogLevel.Fatal: return 4; 
+                case LogLevel.Debug: return 0;
+                case LogLevel.Info: return 1;
+                case LogLevel.Warn: return 2;
+                case LogLevel.Error: return 3;
+                case LogLevel.Fatal: return 4;
                 default: throw new ArgumentException("Invalid level", nameof(level));
             }
         }
-        
+
         static LogLevel LevelFromIndex(int index)
         {
             switch (index)
             {
-                case 0: return LogLevel.Debug; 
-                case 1: return LogLevel.Info; 
-                case 2: return LogLevel.Warn; 
-                case 3: return LogLevel.Error; 
-                case 4: return LogLevel.Fatal; 
+                case 0: return LogLevel.Debug;
+                case 1: return LogLevel.Info;
+                case 2: return LogLevel.Warn;
+                case 3: return LogLevel.Error;
+                case 4: return LogLevel.Fatal;
                 default: throw new ArgumentException("Invalid index", nameof(index));
             }
         }
@@ -139,33 +151,32 @@ namespace Iviz.App
             description.Length = 0;
             ids.Clear();
 
-            Log[] messages = messageQueue.ToArray();
+            LogMessage[] messages = messageQueue.ToArray();
             foreach (var message in messages)
             {
-                var messageLevel = (LogLevel) message.Level;
+                var messageLevel = message.Level;
                 if (messageLevel < minLogLevel)
                 {
                     continue;
                 }
 
-                if (message.Header.Stamp == default)
+                if (message.Stamp == default)
                 {
                     description.Append("<b>[] ");
                 }
                 else
                 {
-                    DateTime t = message.Header.Stamp.ToDateTime().ToLocalTime();
-                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", t);
+                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", message.Stamp);
                 }
 
                 string levelColor = ColorFromLevel(messageLevel);
 
                 description
                     .Append("<color=").Append(levelColor).Append(">")
-                    .Append(message.Name).Append(": </color></b>");
-                description.Append(message.Msg).AppendLine();
+                    .Append(message.SourceId ?? "Me").Append(": </color></b>");
+                description.Append(message.Message).AppendLine();
 
-                ids.Add(message.Name);
+                ids.Add(message.SourceId);
             }
 
             dialog.Text.text = description.ToString();

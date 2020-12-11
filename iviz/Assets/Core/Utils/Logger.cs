@@ -10,6 +10,8 @@ namespace Iviz.Core
     [DataContract]
     public readonly struct LogMessage
     {
+        [CanBeNull, DataMember] public string SourceId { get; }
+        [DataMember] public DateTime Stamp { get; }
         [DataMember] public LogLevel Level { get; }
         [NotNull] [DataMember] public string Message { get; }
         [NotNull] [DataMember] public string File { get; }
@@ -17,10 +19,22 @@ namespace Iviz.Core
 
         public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
         {
+            SourceId = null;
+            Stamp = DateTime.Now;
             Level = level;
             Message = message;
             File = file;
             Line = line;
+        }
+
+        public LogMessage([NotNull] Log msg)
+        {
+            SourceId = msg.Name;
+            Stamp = msg.Header.Stamp.ToDateTime();
+            Level = (LogLevel) msg.Level;
+            Message = msg.Msg;
+            File = msg.File;
+            Line = (int) msg.Line;
         }
     }
 
@@ -40,7 +54,7 @@ namespace Iviz.Core
 
             if (Settings.IsHololens)
             {
-                LogInternal?.Invoke( t.ToString());
+                LogInternal?.Invoke(t.ToString());
             }
         }
 
