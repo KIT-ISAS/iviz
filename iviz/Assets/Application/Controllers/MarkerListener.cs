@@ -291,7 +291,7 @@ namespace Iviz.Controllers
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;
                         markerToAdd.Visible = Visible;
-                        markerToAdd.Layer = 2;
+                        markerToAdd.Layer = LayerType.IgnoreRaycast;
                         markers[id] = markerToAdd;
                     }
 

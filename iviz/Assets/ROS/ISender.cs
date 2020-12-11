@@ -99,5 +99,10 @@ namespace Iviz.Ros
             lastMsgBytes = 0;
             lastMsgCounter = 0;
         }
+
+        public bool TryGetResolvedTopicName(out string topicName)
+        {
+            return ConnectionManager.Connection.TryGetResolvedTopicName(this, out topicName);
+        }
     }
 }

@@ -415,7 +415,6 @@ namespace Iviz.Controllers
                 .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
 
-
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
@@ -727,7 +726,7 @@ namespace Iviz.Controllers
             resource = resourceGameObject.GetComponent<IDisplay>();
             if (resource != null)
             {
-                resource.Layer = LayerType.Unclickable;
+                resource.Layer = LayerType.IgnoreRaycast;
                 return; // all OK
             }
 
@@ -738,7 +737,7 @@ namespace Iviz.Controllers
             }
 
             AssetWrapperResource wrapper = resourceGameObject.AddComponent<AssetWrapperResource>();
-            wrapper.Layer = LayerType.Unclickable;
+            wrapper.Layer = LayerType.IgnoreRaycast;
             resource = wrapper;
         }
 

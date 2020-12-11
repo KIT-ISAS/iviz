@@ -496,7 +496,7 @@ namespace Iviz.Controllers
                 {
                     new TransformStamped
                     (
-                        RosUtils.CreateHeader(tfSeq++, parentFrame ?? BaseFrameId),
+                        RosUtils.CreateHeader(tfSeq++, parentFrame),
                         childFrame ?? "",
                         RelativePoseToOrigin(unityPose).Unity2RosTransform()
                     )

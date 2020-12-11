@@ -10,6 +10,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
@@ -29,6 +30,7 @@ namespace Iviz.Controllers
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool PublishLongTapPosition { get; set; } = false;
+        [DataMember] public string TapTopic { get; set; } = "clicked_point";
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
@@ -203,7 +205,7 @@ namespace Iviz.Controllers
             {
                 if (value && SenderPoint == null)
                 {
-                    SenderPoint = new Sender<PointStamped>("clicked_point");
+                    SenderPoint = new Sender<PointStamped>(TapTopic);
                     GuiCamera.Instance.LongClick += OnLongClick;
                 }
                 else if (!value && SenderPoint != null)
@@ -214,6 +216,20 @@ namespace Iviz.Controllers
                 }
 
                 config.PublishLongTapPosition = value;
+            }
+        }
+
+        public string TapTopic
+        {
+            get => config.TapTopic;
+            set
+            {
+                config.TapTopic = value;
+                if (SenderPoint != null && SenderPoint.Topic != value)
+                {
+                    SenderPoint.Stop();
+                    SenderPoint = new Sender<PointStamped>(value);
+                }
             }
         }
 
@@ -260,7 +276,7 @@ namespace Iviz.Controllers
                 lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
                 SenderPoint.Publish(new PointStamped
                 {
-                    Header = RosUtils.CreateHeader(clickedSeq++, "map", time.Now()),
+                    Header = RosUtils.CreateHeader(clickedSeq++, timestamp: time.Now()),
                     Point = lastTapPosition.Value
                 });
                 ModuleData.ResetPanel();

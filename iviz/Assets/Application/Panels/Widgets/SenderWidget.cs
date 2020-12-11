@@ -78,7 +78,7 @@ namespace Iviz.App
             }
             else
             {
-                publisherStatus = numSubscribers + "↑ ";
+                publisherStatus = numSubscribers.ToString() + "↑ ";
             }
 
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);

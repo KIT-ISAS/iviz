@@ -73,7 +73,7 @@ namespace Iviz.Displays
             TimeWindowInMs = TimeWindowInMs;
 
             transform.parent = TfListener.UnityFrame?.transform;
-            Layer = LayerType.Unclickable;
+            Layer = LayerType.IgnoreRaycast;
         }
 
         public void Reset()

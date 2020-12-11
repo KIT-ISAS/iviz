@@ -185,10 +185,7 @@ namespace Iviz.Displays
         {
             pointComputeBuffer?.Release();
             argsComputeBuffer?.Release();
-            if (pointBuffer.Length > 0)
-            {
-                pointBuffer.Dispose();
-            }
+            pointBuffer.Dispose();
         }
 
         public bool OcclusionOnly { get; set; }

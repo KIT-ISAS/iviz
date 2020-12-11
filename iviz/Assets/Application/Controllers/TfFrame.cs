@@ -264,7 +264,7 @@ namespace Iviz.Controllers
             }
 
             axis.ColliderEnabled = true;
-            axis.Layer = LayerType.Unclickable;
+            axis.Layer = LayerType.IgnoreRaycast;
 
             axis.name = "[Axis]";
 

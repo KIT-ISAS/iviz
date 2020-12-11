@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -49,7 +52,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.LineWidth.Value = controller.GridLineWidth;
-            panel.NumberOfCells.Value = controller.NumberOfGridCells;
+            //panel.NumberOfCells.Value = controller.NumberOfGridCells;
             //panel.CellSize.Value = controller.GridCellSize;
             //panel.Orientation.Index = (int)controller.Orientation;
             panel.ColorPicker.Value = controller.InteriorColor;
@@ -61,15 +64,20 @@ namespace Iviz.App
             panel.PublishLongTapPosition.Value = controller.PublishLongTapPosition;
             panel.Sender.Set(controller.SenderPoint);
             panel.LastTapPosition.Label = controller.LastTapPositionString;
+            panel.TapTopic.Value = controller.TapTopic;
+            panel.TapTopic.Interactable = controller.PublishLongTapPosition;
+            panel.TapTopic.Hints = GetTopicHints();
 
             panel.LineWidth.ValueChanged += f =>
             {
                 controller.GridLineWidth = f;
             };
+            /*
             panel.NumberOfCells.ValueChanged += f =>
             {
                 controller.NumberOfGridCells = (int)f;
             };
+            */
             /*
             panel.CellSize.ValueChanged += f =>
             {
@@ -118,6 +126,12 @@ namespace Iviz.App
             {
                 controller.PublishLongTapPosition = f;
                 panel.Sender.Set(controller.SenderPoint);
+                panel.TapTopic.Interactable = f;
+            };
+            panel.TapTopic.EndEdit += f =>
+            {
+                controller.TapTopic = f;
+                panel.Sender.Set(controller.SenderPoint);
             };
         }
 
@@ -133,6 +147,26 @@ namespace Iviz.App
             {
                 controller.GridColor = f;
             }
+        }
+
+        public override void UpdatePanel()
+        {
+            panel.TapTopic.Hints = GetTopicHints();
+        }
+
+        static readonly string[] OwnPublishedTopicName = {"clicked_point"};
+        
+        IEnumerable<string> GetTopicHints()
+        {
+            string ownResolvedTopic =
+                (controller.SenderPoint != null &&
+                 controller.SenderPoint.TryGetResolvedTopicName(out string topicName))
+                    ? topicName
+                    : OwnPublishedTopicName[0];
+            return ConnectionManager.Connection.GetSystemTopicTypes()
+                .Where(tuple => tuple.Type == PointStamped.RosMessageType && tuple.Topic != ownResolvedTopic)
+                .Select(tuple => tuple.Topic)
+                .Concat(OwnPublishedTopicName);
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

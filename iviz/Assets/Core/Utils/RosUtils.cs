@@ -72,7 +72,7 @@ namespace Iviz.Core
 
     public static class RosUtils
     {
-        public const string BaseFrameId = "map";
+        const string BaseFrameId = "map";
         
         public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
         public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);

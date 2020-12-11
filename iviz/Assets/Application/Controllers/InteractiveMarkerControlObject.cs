@@ -284,7 +284,6 @@ namespace Iviz.Controllers
                         {
                             markerObject = CreateMarkerObject();
                             markerObject.Visible = visible;
-                            markerObject.Layer = 2;
                             markers[markerId] = markerObject;
                         }
 

@@ -417,6 +417,19 @@ namespace Iviz.Ros
             }
         }
 
+        internal bool TryGetResolvedTopicName(ISender advertiser, out string topicName)
+        {
+            if (advertiser.Id == -1)
+            {
+                topicName = default;
+                return false;
+            } 
+            
+            var basePublisher = publishers[advertiser.Id];
+            topicName = basePublisher.Topic;
+            return true;
+        }
+
         internal void Subscribe<T>([NotNull] Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (listener == null)

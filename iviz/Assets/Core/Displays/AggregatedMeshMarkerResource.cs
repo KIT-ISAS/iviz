@@ -96,7 +96,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            Layer = LayerType.Unclickable;
+            Layer = LayerType.IgnoreRaycast;
         }
     }
 }

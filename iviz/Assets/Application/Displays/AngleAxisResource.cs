@@ -35,7 +35,7 @@ namespace Iviz.Displays
             resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.ElementScale = 0.01f;
             Color = Color.yellow;
-            Layer = LayerType.Unclickable;
+            Layer = LayerType.IgnoreRaycast;
         }
 
         public void Reset()

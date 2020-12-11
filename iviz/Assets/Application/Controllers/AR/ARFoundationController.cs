@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Iviz.Roslib;
 using System.Linq;
 using Iviz.App;
 using Iviz.Core;
@@ -15,7 +16,6 @@ namespace Iviz.Controllers
     public sealed class ARFoundationController : ARController
     {
         const float AnchorPauseTimeInSec = 2;
-        const int SetupModeLayer = 14;
 
         //static ARSessionInfo savedSessionInfo;
 
@@ -64,7 +64,7 @@ namespace Iviz.Controllers
                 setupModeEnabled = value;
                 if (value)
                 {
-                    arCamera.cullingMask = 1 << SetupModeLayer;
+                    arCamera.cullingMask = 1 << LayerType.ARSetupMode;
                     ArSet.Visible = false;
                     ArSet.State = true;
                     ArInfoPanel.SetActive(true);   
@@ -204,7 +204,7 @@ namespace Iviz.Controllers
             if (setupModeFrame == null)
             {
                 setupModeFrame = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(arCamera.transform);
-                setupModeFrame.Layer = SetupModeLayer;
+                setupModeFrame.Layer = LayerType.ARSetupMode;
             }
 
             SetupModeEnabled = true;

@@ -283,7 +283,7 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, "e2/world"),
+                RosUtils.CreateHeader(feedSeq++),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -303,7 +303,7 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, TfListener.FixedFrameId),
+                RosUtils.CreateHeader(feedSeq++),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -323,7 +323,7 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, TfListener.FixedFrameId),
+                RosUtils.CreateHeader(feedSeq++),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,

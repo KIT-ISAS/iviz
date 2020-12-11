@@ -40,6 +40,7 @@ namespace Iviz.Displays
             };
 
         GridOrientation orientation;
+
         public GridOrientation Orientation
         {
             get => orientation;
@@ -51,6 +52,7 @@ namespace Iviz.Displays
         }
 
         Color gridColor;
+
         public Color GridColor
         {
             get => gridColor;
@@ -62,6 +64,7 @@ namespace Iviz.Displays
         }
 
         Color interiorColor;
+
         public Color InteriorColor
         {
             get => interiorColor;
@@ -74,6 +77,7 @@ namespace Iviz.Displays
         }
 
         float gridLineWidth;
+
         public float GridLineWidth
         {
             get => gridLineWidth;
@@ -88,6 +92,7 @@ namespace Iviz.Displays
         }
 
         float gridCellSize;
+
         public float GridCellSize
         {
             get => gridCellSize;
@@ -102,6 +107,7 @@ namespace Iviz.Displays
         }
 
         int numberOfGridCells;
+
         public int NumberOfGridCells
         {
             get => numberOfGridCells;
@@ -116,6 +122,7 @@ namespace Iviz.Displays
         }
 
         bool showInterior;
+
         public bool ShowInterior
         {
             get => showInterior;
@@ -132,7 +139,7 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            mesh = new Mesh { name = "Grid Mesh" };
+            mesh = new Mesh {name = "Grid Mesh"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = Resource.Materials.Grid.Object;
@@ -142,6 +149,7 @@ namespace Iviz.Displays
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
+            interiorObject.layer = LayerType.IgnoreRaycast;
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
             interiorRenderer.sharedMaterial = Resource.Materials.GridInterior.Object;
             interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -149,7 +157,7 @@ namespace Iviz.Displays
             //interiorRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
             Orientation = GridOrientation.XY;
-            GridColor = new Color(1, 1, 1,0.25f);
+            GridColor = new Color(1, 1, 1, 0.25f);
             InteriorColor = Color.white * 0.5f;
             GridLineWidth = 0.02f;
             GridCellSize = 1;
@@ -227,7 +235,6 @@ namespace Iviz.Displays
 
             float offsetX = -totalSize / 2;
             float offsetY = -totalSize / 2;
-            Vector3 offset;
 
             Vector3 scaleHorizontal = new Vector3(GridLineWidth, totalSize, GridLineWidth / 8);
             List<Vector3> verticesHorizontal = squareVertices.Select(x => x.CwiseProduct(scaleHorizontal)).ToList();
@@ -235,7 +242,7 @@ namespace Iviz.Displays
             for (int i = 0; i <= NumberOfGridCells; i++)
             {
                 gridVertSize = vertices.Count();
-                offset = new Vector3(offsetX + i * GridCellSize, offsetY, 0);
+                Vector3 offset = new Vector3(offsetX + i * GridCellSize, offsetY, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
                 Utils.AddRange(vertices, verticesHorizontal.Select(x => x + offset));
                 normals.AddRange(squareNormals);
@@ -248,7 +255,7 @@ namespace Iviz.Displays
             for (int i = 0; i <= NumberOfGridCells; i++)
             {
                 gridVertSize = vertices.Count();
-                offset = new Vector3(offsetX, offsetY + i * GridCellSize, 0);
+                Vector3 offset = new Vector3(offsetX, offsetY + i * GridCellSize, 0);
                 indices.AddRange(squareIndices.Select(x => x + gridVertSize));
                 Utils.AddRange(vertices, verticesVertical.Select(x => x + offset));
                 normals.AddRange(squareNormals);
@@ -260,11 +267,12 @@ namespace Iviz.Displays
             mesh.SetIndices(indices.ToArray(), squareMesh.GetTopology(0), 0);
             mesh.Optimize();
 
-            float interiorHeight = GridLineWidth / 8f;
+            const float interiorHeight = 1 / 512f;
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
             interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
             BoxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
+            BoxCollider.center = new Vector3(0, 0, interiorHeight / 2);
 
 
             int size = NumberOfGridCells / 10;
@@ -284,10 +292,12 @@ namespace Iviz.Displays
                 {
                     var hResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
                     hResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    hResource.Layer = LayerType.IgnoreRaycast;
                     horizontals.Add(hResource);
 
                     var vResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
                     vResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    vResource.Layer = LayerType.IgnoreRaycast;
                     verticals.Add(vResource);
                 }
             }

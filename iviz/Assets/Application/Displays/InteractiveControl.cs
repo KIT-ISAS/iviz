@@ -310,7 +310,7 @@ namespace Iviz.Displays
             frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(transform);
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
-            frame.Layer = LayerType.Unclickable;
+            frame.Layer = LayerType.IgnoreRaycast;
 
             InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
         }

@@ -623,7 +623,10 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            pointCloud?.DisposeDisplay();
+            if (pointCloud != null)
+            {
+                pointCloud.DisposeDisplay();  
+            } 
 
             node.Stop();
             Object.Destroy(node.gameObject);

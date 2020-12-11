@@ -119,7 +119,7 @@ namespace Iviz.Displays
             base.Awake();
             Tint = Color.white;
             IntensityBounds = new Vector2(0, 1);
-            Layer = LayerType.Unclickable;
+            Layer = LayerType.IgnoreRaycast;
         }
 
         protected virtual void OnApplicationFocus(bool hasFocus)

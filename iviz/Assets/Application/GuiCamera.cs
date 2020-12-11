@@ -239,7 +239,7 @@ namespace Iviz.App
             var eventSystem = EventSystem.current;
             List<RaycastResult> results = new List<RaycastResult>();
             eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = pointerPosition},  results);
-            return results.Any(result => result.gameObject.layer == 5);            
+            return results.Any(result => result.gameObject.layer == LayerType.UI);            
         }
         
         void LateUpdate()

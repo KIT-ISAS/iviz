@@ -13,14 +13,18 @@ namespace Iviz.Resources
         /// <summary>
         /// Maps to the 'Ignore Raycast' layer, should be invisible to raycasts in any scene 
         /// </summary>
-        public const int Unclickable = 2;
-        
+        public const int IgnoreRaycast = 2;
+
+        public const int UI = 5;
+
         /// <summary>
         /// Maps to the 'Clickable' layer, should be visible to raycasts in any scene 
         /// </summary>
         public const int Clickable = 8;
+        
+        public const int ARSetupMode = 14;
     }
-    
+
     public sealed class DisplaysType
     {
         readonly Dictionary<Type, Info<GameObject>> resourceByType;
