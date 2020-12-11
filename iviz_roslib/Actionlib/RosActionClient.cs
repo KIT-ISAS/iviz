@@ -137,8 +137,14 @@ namespace Iviz.Roslib.Actionlib
         public void Start(RosClient client, string newActionName)
         {
             ValidateStart(client, newActionName);
+            if (newActionName[0] == '/')
+            {
+                newActionName = newActionName.Substring(1);
+            }
 
             goalPublisherId = client.Advertise($"/{newActionName}/goal", out goalPublisher);
+            goalPublisher.LatchingEnabled = true;
+            
             cancelPublisherId = client.Advertise($"/{newActionName}/cancel", out cancelPublisher);
             feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
             resultSubscriber = new RosChannelReader<TAResult>(client, $"/{newActionName}/result");
@@ -148,8 +154,14 @@ namespace Iviz.Roslib.Actionlib
         public async Task StartAsync(RosClient client, string newActionName)
         {
             ValidateStart(client, newActionName);
+            if (newActionName[0] == '/')
+            {
+                newActionName = newActionName.Substring(1);
+            }
 
             (goalPublisherId, goalPublisher) = await client.AdvertiseAsync<TAGoal>($"/{newActionName}/goal");
+            goalPublisher.LatchingEnabled = true;
+
             (cancelPublisherId, cancelPublisher) = await client.AdvertiseAsync<GoalID>($"/{newActionName}/cancel");
 
             feedbackSubscriber = new RosChannelReader<TAFeedback>();
@@ -514,7 +526,7 @@ namespace Iviz.Roslib.Actionlib
         #endregion
     }
 
-    public static class ActionClient
+    public static class RosActionClient
     {
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
@@ -528,6 +540,18 @@ namespace Iviz.Roslib.Actionlib
             where TActionResult : IActionResult, IDeserializable<TActionResult>, new()
         {
             return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>(client, actionName);
+        }
+        
+        public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
+            Create<TActionGoal, TActionFeedback, TActionResult>
+            (
+                IAction<TActionGoal, TActionFeedback, TActionResult>? _
+            )
+            where TActionGoal : IActionGoal, new()
+            where TActionFeedback : IActionFeedback, IDeserializable<TActionFeedback>, new()
+            where TActionResult : IActionResult, IDeserializable<TActionResult>, new()
+        {
+            return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
         }
     }
 }

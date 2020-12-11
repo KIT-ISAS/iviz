@@ -68,7 +68,7 @@ namespace Iviz.Roslib
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
-        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
+        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = true)
         {
             if (client == null)
             {

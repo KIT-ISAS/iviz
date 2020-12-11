@@ -73,9 +73,9 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Logger.LogDebugFormat("{0}: Waiting for task...", this);
+            //Logger.LogDebugFormat("{0}: Waiting for task...", this);
             task.WaitNoThrow(this);
-            Logger.LogDebugFormat("{0}: Task done!", this);
+            //Logger.LogDebugFormat("{0}: Task done!", this);
         }
 
         public async Task DisposeAsync()
