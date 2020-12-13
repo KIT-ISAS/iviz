@@ -44,7 +44,7 @@ namespace Iviz.Controllers
         {
             var (id, success, message) = TryAddModule(srv.Request.ModuleType, srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message;
+            srv.Response.Message = message ?? "";
             srv.Response.Id = id ?? "";
         }
 
@@ -56,7 +56,7 @@ namespace Iviz.Controllers
         static (string id, bool success, string message) TryAddModule([NotNull] string moduleTypeStr,
             [NotNull] string requestedId)
         {
-            (string id, bool success, string message) result = ("", false, "");
+            (string id, bool success, string message) result = default;
 
             if (string.IsNullOrWhiteSpace(moduleTypeStr))
             {
@@ -108,12 +108,12 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    Logger.External(Time.time + ": Creating module of type " + moduleType);
+                    Logger.External("Creating module of type " + moduleType);
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    Logger.External(Time.time + ": Done!");
+                    Logger.External("Done!");
                 }
                 catch (Exception e)
                 {
@@ -131,14 +131,14 @@ namespace Iviz.Controllers
         {
             var (id, success, message) = TryAddModuleFromTopic(srv.Request.Topic, srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message;
+            srv.Response.Message = message ?? "";
             srv.Response.Id = id ?? "";
         }
 
         static (string id, bool success, string message) TryAddModuleFromTopic([NotNull] string topic,
             [NotNull] string requestedId)
         {
-            (string id, bool success, string message) result = ("", false, "");
+            (string id, bool success, string message) result = default;
             if (string.IsNullOrWhiteSpace(topic))
             {
                 result.message = "EE Invalid topic name";
@@ -210,12 +210,12 @@ namespace Iviz.Controllers
         {
             var (success, message) = TryUpdateModule(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
             srv.Response.Success = success;
-            srv.Response.Message = message;
+            srv.Response.Message = message ?? "";
         }
 
         static (bool success, string message) TryUpdateModule([NotNull] string id, string[] fields, string config)
         {
-            (bool success, string message) result = (false, "");
+            (bool success, string message) result = default;
             if (string.IsNullOrWhiteSpace(id))
             {
                 result.message = "EE Empty configuration id!";
@@ -287,13 +287,11 @@ namespace Iviz.Controllers
                 }
                 catch (JsonException e)
                 {
-                    Logger.External(LogLevel.Error,
-                        $"ControllerService: Unexpected JSON exception in GetModules: {e.Message}");
+                    Logger.External($"ControllerService: Unexpected JSON exception in GetModules", e);
                 }
                 catch (Exception e)
                 {
-                    Logger.External(LogLevel.Error,
-                        $"ControllerService: Unexpected exception in GetModules: {e.Message}");
+                    Logger.External($"ControllerService: Unexpected exception in GetModules", e);
                 }
                 finally
                 {
@@ -302,7 +300,7 @@ namespace Iviz.Controllers
             });
             if (!signal.Wait(DefaultTimeoutInMs))
             {
-                Logger.External(LogLevel.Error, "Timeout in GetModules");
+                Logger.External("Timeout in GetModules", LogLevel.Error);
             }
 
             return result;
@@ -312,29 +310,29 @@ namespace Iviz.Controllers
         {
             (bool success, string message) = TrySetFixedFrame(srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message;
+            srv.Response.Message = message ?? "";
         }
 
         static (bool success, string message) TrySetFixedFrame(string id)
         {
-            (bool success, string message) result = (false, "");
+            (bool success, string message) result = default;
 
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
             GameThread.Post(() =>
             {
                 try
                 {
-                    TfListener.SetFixedFrame(id);
+                    TfListener.FixedFrameId = id;
                 }
                 finally
                 {
                     signal.Release();
                 }
             });
-            
+
             if (!signal.Wait(DefaultTimeoutInMs))
             {
-                Logger.External(LogLevel.Error, "ControllerService: Unexpected timeout in TrySetFixedFrame");
+                Logger.External("ControllerService: Unexpected timeout in TrySetFixedFrame", LogLevel.Error);
                 return result;
             }
 

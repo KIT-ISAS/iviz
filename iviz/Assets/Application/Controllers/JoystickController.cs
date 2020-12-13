@@ -34,13 +34,12 @@ namespace Iviz.Controllers
         uint joySeq;
         uint twistSeq;
 
-        Joystick joystick;
-        
+        TwistJoystick joystick;
+
         public JoystickController(IModuleData moduleData)
         {
             ModuleData = moduleData;
             Config = new JoystickConfiguration();
-            GameThread.EveryFrame += PublishData;
         }
 
         public JoystickConfiguration Config
@@ -89,13 +88,28 @@ namespace Iviz.Controllers
             }
         }
 
-        public Joystick Joystick
+        public TwistJoystick Joystick
         {
             get => joystick;
             set
             {
+                if (joystick == value)
+                {
+                    return;
+                }
+
+                if (joystick != null)
+                {
+                    joystick.Changed -= PublishData;
+                }
+
                 joystick = value;
-                Joystick.Visible = Visible;
+
+                if (joystick != null)
+                {
+                    joystick.Changed += PublishData;
+                    Joystick.Visible = Visible;
+                }
             }
         }
 
@@ -108,7 +122,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (!(Joystick is null))
+                if (Joystick != null)
                 {
                     Joystick.Visible = value;
                 }
@@ -173,7 +187,6 @@ namespace Iviz.Controllers
 
         public void StopController()
         {
-            GameThread.EveryFrame -= PublishData;
             SenderJoy?.Stop();
             SenderTwist?.Stop();
             Visible = false;
@@ -218,14 +231,14 @@ namespace Iviz.Controllers
             }
         }
 
-        void PublishData()
+        void PublishData(TwistJoystick.Source _, Vector2 __)
         {
-            if (Joystick is null)
+            if (!Visible)
             {
                 return;
             }
-
-            if (SenderTwist != null && Visible)
+            
+            if (SenderTwist != null)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
@@ -253,7 +266,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            if (SenderJoy != null && Visible)
+            if (SenderJoy != null)
             {
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;

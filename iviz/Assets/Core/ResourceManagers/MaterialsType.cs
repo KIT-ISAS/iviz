@@ -19,6 +19,7 @@ namespace Iviz.Resources
         public Info<Material> Grid { get; }
         public Info<Material> GridInterior { get; }
         public Info<Material> GridMap { get; }
+        public Info<Material> OccupancyGridTexture { get; }
 
         public Info<Material> Line { get; }
         public Info<Material> TransparentLine { get; }
@@ -59,6 +60,7 @@ namespace Iviz.Resources
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");
+            OccupancyGridTexture = new Info<Material>("Materials/OccupancyGrid");
 
             PointCloud = new Info<Material>("CoreMaterials/PointCloud");
             Line = new Info<Material>("CoreMaterials/Lines/Line");

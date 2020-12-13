@@ -21,7 +21,7 @@ namespace Iviz.App
         public override IController Controller => controller;
 
         public JoystickModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList, constructor.Topic, constructor.Type)
+            base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(Resource.ModuleType.Joystick);
 
@@ -30,7 +30,7 @@ namespace Iviz.App
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
             }
-            controller.Joystick = ModuleListPanel.Joystick;
+            controller.Joystick = ModuleListPanel.TwistJoystick;
 
             UpdateModuleButton();
         }
@@ -156,9 +156,8 @@ namespace Iviz.App
                     case nameof(JoystickConfiguration.XIsFront):
                         controller.XIsFront = config.XIsFront;
                         break;
-
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

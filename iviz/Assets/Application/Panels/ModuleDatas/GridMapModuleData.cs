@@ -24,8 +24,7 @@ namespace Iviz.App
 
 
         public GridMapModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.ModuleList,
-            constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(Resource.ModuleType.GridMap);
             listener = new GridMapListener(this);
@@ -150,7 +149,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

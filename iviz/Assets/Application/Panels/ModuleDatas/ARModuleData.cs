@@ -24,7 +24,7 @@ namespace Iviz.App
         public override IController Controller => controller;
 
         public ARModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList, constructor.Topic, constructor.Type)
+            base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.ModuleType.AugmentedReality);
 
@@ -52,11 +52,8 @@ namespace Iviz.App
             panel.HideButton.State = controller.Visible;
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
-            panel.WorldOffset.Mean = controller.WorldPosition;
-            panel.WorldAngle.Value = controller.WorldAngle;
 
             panel.SearchMarker.Value = controller.UseMarker;
-            //panel.MarkerSize.Value = controller.MarkerSize;
             panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
@@ -67,21 +64,9 @@ namespace Iviz.App
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
-            //TFListener.RootMarker.PointerUp += CopyControlMarkerPoseToPanel;
-            controller.WorldPoseChanged += OnWorldPoseChanged;
-
-            
             CheckInteractable();
 
             panel.WorldScale.ValueChanged += f => { controller.WorldScale = f; };
-            panel.WorldOffset.ValueChanged += f =>
-            {
-                controller.SetWorldPosition(f.Ros2Unity(), ARController.RootMover.ModuleData);
-            };
-            panel.WorldAngle.ValueChanged += f =>
-            {
-                controller.SetWorldAngle(f, ARController.RootMover.ModuleData);
-            };
             panel.SearchMarker.ValueChanged += f =>
             {
                 controller.UseMarker = f;
@@ -116,23 +101,6 @@ namespace Iviz.App
                 panel.HideButton.State = controller.Visible;
                 UpdateModuleButton();
             };
-        }
-
-        void OnWorldPoseChanged(ARController.RootMover mover)
-        {
-            if (mover == ARController.RootMover.ModuleData)
-            {
-                return;
-            }
-            
-            panel.WorldOffset.Mean = controller.WorldPosition.Unity2Ros();
-            panel.WorldAngle.Value = controller.WorldAngle;
-        }
-
-        public override void CleanupPanel()
-        {
-            base.CleanupPanel();
-            controller.WorldPoseChanged -= OnWorldPoseChanged;            
         }
 
         void CheckInteractable()
@@ -171,7 +139,7 @@ namespace Iviz.App
                         break;
                     
                     default:
-                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

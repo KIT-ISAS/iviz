@@ -23,8 +23,7 @@ namespace Iviz.App
 
 
         public LaserScanModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(Resource.ModuleType.LaserScan);
@@ -161,7 +160,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

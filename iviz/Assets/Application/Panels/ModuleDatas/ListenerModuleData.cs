@@ -8,8 +8,7 @@ namespace Iviz.App
         [NotNull] protected abstract ListenerController Listener { get; }
         public override IController Controller => Listener;
 
-        protected ListenerModuleData([NotNull] ModuleListPanel moduleList, [NotNull] string topic, [NotNull] string type) :
-            base(moduleList, topic, type)
+        protected ListenerModuleData([NotNull] string topic, [NotNull] string type) : base(topic, type)
         {
             ModuleListPanel.RegisterDisplayedTopic(Topic);
         }

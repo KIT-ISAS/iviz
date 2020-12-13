@@ -6,7 +6,6 @@ using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Vector4 = System.Numerics.Vector4;
 
 namespace Iviz.Displays
 {
@@ -340,18 +339,6 @@ namespace Iviz.Displays
         void RotateBackToFixed()
         {
             transform.rotation = TfListener.OriginFrame.transform.rotation;
-        }
-
-        public void SetTargetPoseUpdater(Action<Pose> setTargetPose)
-        {
-            foreach (var resource in allResources)
-            {
-                var draggable = resource.GetComponent<IDraggable>();
-                if (draggable != null)
-                {
-                    draggable.SetTargetPose = setTargetPose;
-                }
-            }
         }
 
         public void OnPointerDown([NotNull] PointerEventData eventData)

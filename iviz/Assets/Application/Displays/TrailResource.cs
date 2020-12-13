@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -15,11 +16,11 @@ namespace Iviz.Displays
         [SerializeField] int timeWindowInMs = 5000;
         [SerializeField] Color color = UnityEngine.Color.red;
 
-        readonly Queue<LineWithColor> measurements = new Queue<LineWithColor>(5 * MeasurementsPerSecond);
+        readonly Queue<(Vector3 A, Vector3 B)> measurements = new Queue<(Vector3 A, Vector3 B)>(5 * MeasurementsPerSecond);
         Vector3? lastMeasurement;
         float lastTick;
         int maxMeasurements = 160;
-        
+
         LineResource resource;
 
         protected override IDisplay Display => resource;
@@ -31,7 +32,7 @@ namespace Iviz.Displays
         {
             lineSetterDelegate = LineSetter;
         }
-        
+
         public int TimeWindowInMs
         {
             get => timeWindowInMs;
@@ -39,9 +40,9 @@ namespace Iviz.Displays
             {
                 if (value <= 0)
                 {
-                    throw new ArgumentException("Invalid value " + value, nameof(value));    
+                    throw new ArgumentException("Invalid value " + value, nameof(value));
                 }
-                
+
                 if (timeWindowInMs == value)
                 {
                     return;
@@ -67,12 +68,11 @@ namespace Iviz.Displays
 
         void Awake()
         {
+            transform.SetPose(Pose.identity);
             resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
             resource.Name = "[Line for Trail]";
             resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
-
-            transform.parent = TfListener.UnityFrame?.transform;
             Layer = LayerType.IgnoreRaycast;
         }
 
@@ -104,27 +104,32 @@ namespace Iviz.Displays
                 return;
             }
 
-            measurements.Enqueue(new LineWithColor(lastMeasurement.Value, newMeasurement));
+            measurements.Enqueue((lastMeasurement.Value, newMeasurement));
             if (measurements.Count > maxMeasurements)
             {
                 measurements.Dequeue();
             }
 
             lastMeasurement = newMeasurement;
-            
+
             resource.SetDirect(lineSetterDelegate, measurements.Count);
         }
-        
+
         bool? LineSetter(ref NativeList<float4x2> lineBuffer)
         {
             int i = 1;
             Color32 colorA = new Color32(Color.r, Color.g, Color.b, 0);
             float scale = 255f / measurements.Count;
 
-            foreach (LineWithColor line in measurements)
+            foreach ((Vector3 a, Vector3 b) in measurements)
             {
                 Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (i * scale));
-                lineBuffer.Add(new LineWithColor(line.A, colorA, line.B, colorB));
+                LineWithColor line = new LineWithColor(a, colorA, b, colorB);
+                if (LineResource.IsElementValid(line))
+                {
+                    lineBuffer.Add(line);
+                }
+
                 colorA = colorB;
                 i++;
             }

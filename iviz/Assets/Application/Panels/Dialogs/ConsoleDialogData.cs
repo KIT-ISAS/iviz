@@ -65,7 +65,7 @@ namespace Iviz.App
 
         void HandleMessage(in LogMessage log)
         {
-            if (log.Level < minLogLevel)
+            if (log.SourceId != null && log.Level < minLogLevel)
             {
                 return;
             }
@@ -154,8 +154,9 @@ namespace Iviz.App
             LogMessage[] messages = messageQueue.ToArray();
             foreach (var message in messages)
             {
+                Debug.Log(message.Message);
                 var messageLevel = message.Level;
-                if (messageLevel < minLogLevel)
+                if (message.SourceId != null && messageLevel < minLogLevel)
                 {
                     continue;
                 }

@@ -62,15 +62,21 @@ namespace Iviz.Controllers
             if (modelServer.NumPackages == 0)
             {
                 IsEnabled = false;
-                Logger.External(
-                    "Cannot start embedded Iviz.Model.Service instance. ROS_PACKAGE_PATH not found, or it resolved to an empty value. You will need to start it as an external node.");
 
                 if (isRosInstalled && rosPackagePathExtras == null)
                 {
-                    Logger.External(LogLevel.Warn,
+                    Logger.External(
                         "Iviz.Model.Service could not be started because ROS_PACKAGE_PATH could not be read.\n" +
                         "However, a ROS distro has been detected. You can try creating the folder $HOME/.iviz/ " +
-                        "and then calling \"echo $ROS_PACKAGE_PATH > ros_package_path\" in there.");
+                        "and then calling \"echo $ROS_PACKAGE_PATH > ros_package_path\" in there.", 
+                        LogLevel.Info);
+                }
+                else
+                {
+                    Logger.External(
+                        "Cannot start embedded Iviz.Model.Service instance. ROS_PACKAGE_PATH not found, or it " +
+                        "resolved to an empty value. You will need to start it as an external node.",
+                        LogLevel.Info);
                 }
 
                 return;

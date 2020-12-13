@@ -26,8 +26,8 @@ namespace Iviz.App
 
 
         public OccupancyGridModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.ModuleList,
-            constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, 
+            constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(Resource.ModuleType.OccupancyGrid);
             listener = new OccupancyGridListener(this);
@@ -123,7 +123,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }

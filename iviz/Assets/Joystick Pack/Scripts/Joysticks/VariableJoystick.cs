@@ -54,7 +54,7 @@ namespace External
             base.OnPointerUp(eventData);
         }
 
-        protected override void HandleInput(float magnitude, Vector2 normalised, Vector2 radius, Camera cam)
+        protected override void HandleInput(float magnitude, Vector2 normalised, Vector2 radius)
         {
             if (joystickType == JoystickType.Dynamic && magnitude > moveThreshold)
             {
@@ -62,7 +62,7 @@ namespace External
                 background.anchoredPosition += difference;
             }
 
-            base.HandleInput(magnitude, normalised, radius, cam);
+            base.HandleInput(magnitude, normalised, radius);
         }
     }
 

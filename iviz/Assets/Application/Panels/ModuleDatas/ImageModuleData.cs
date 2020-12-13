@@ -30,8 +30,7 @@ namespace Iviz.App
         Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
 
         public ImageModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(Resource.ModuleType.Image);
@@ -182,9 +181,8 @@ namespace Iviz.App
                     case nameof(ImageConfiguration.BillboardOffset):
                         listener.Visible = config.Visible;
                         break;
-
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }

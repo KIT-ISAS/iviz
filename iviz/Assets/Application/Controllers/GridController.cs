@@ -206,13 +206,13 @@ namespace Iviz.Controllers
                 if (value && SenderPoint == null)
                 {
                     SenderPoint = new Sender<PointStamped>(TapTopic);
-                    GuiCamera.Instance.LongClick += OnLongClick;
+                    GuiInputModule.Instance.LongClick += OnLongClick;
                 }
                 else if (!value && SenderPoint != null)
                 {
                     SenderPoint.Stop();
                     SenderPoint = null;
-                    GuiCamera.Instance.LongClick -= OnLongClick;
+                    GuiInputModule.Instance.LongClick -= OnLongClick;
                 }
 
                 config.PublishLongTapPosition = value;
@@ -297,7 +297,7 @@ namespace Iviz.Controllers
             UnityEngine.Object.Destroy(node.gameObject);
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
 
-            GuiCamera.Instance.LongClick -= OnLongClick;
+            GuiInputModule.Instance.LongClick -= OnLongClick;
             GameThread.EverySecond -= CheckProbeUpdate;
         }
 

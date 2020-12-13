@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Iviz.Roslib;
 using System.Linq;
@@ -10,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -31,7 +33,7 @@ namespace Iviz.Controllers
         ARRaycastManager raycaster;
         ARMarkerResource resource;
         ARAnchorManager anchorManager;
-        ARAnchorResource worldAnchor;
+        [CanBeNull] ARAnchorResource worldAnchor;
 
         int defaultCullingMask;
 
@@ -147,10 +149,10 @@ namespace Iviz.Controllers
             }
         }
 
-        public override bool PinRootMarker
+        protected override bool PinRootMarker
         {
             get => base.PinRootMarker;
-            protected set
+            set
             {
                 //Debug.Log("pin changed");
                 if (value && !base.PinRootMarker)
@@ -245,6 +247,7 @@ namespace Iviz.Controllers
         {
             if (worldAnchor != null)
             {
+                //Destroy(worldAnchor.Anchor);
                 anchorManager.RemoveAnchor(worldAnchor.Anchor);
                 worldAnchor = null;
             }
@@ -262,7 +265,7 @@ namespace Iviz.Controllers
                 Transform cameraTransform = arCamera.transform;
                 setupModeFrame.transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
                 Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-                if (TryGetClosestPlane(ray, out ARRaycastHit hit, out _))
+                if (TryGetClosestPlane(ray, out ARRaycastHit hit))
                 {
                     setupModeFrame.transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
@@ -292,12 +295,10 @@ namespace Iviz.Controllers
                 
                 Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
-                if (TryGetClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+                if (TryGetClosestPlane(ray, out ARRaycastHit hit))
                 {
                     Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
-                    worldAnchor = anchorManager.AttachAnchor(plane, pose).GetComponent<ARAnchorResource>();
-                    worldAnchor.Moved += OnWorldAnchorMoved;
-
+                    InitializeWorldAnchor();
                     SetWorldPose(pose, RootMover.Anchor);
                 }
                 else
@@ -307,9 +308,21 @@ namespace Iviz.Controllers
             }
             else
             {
+                InitializeWorldAnchor();
+            }
+        }
+
+        void InitializeWorldAnchor()
+        {
+            try
+            {
                 worldAnchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
                 worldAnchor.Moved += OnWorldAnchorMoved;
             }
+            catch (InvalidOperationException e)
+            {
+                Logger.External("Failed to initialize AR world anchor", e);
+            }            
         }
 
         void OnWorldAnchorMoved(Pose newPose)
@@ -319,34 +332,33 @@ namespace Iviz.Controllers
 
         protected override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
         {
-            if (!TryGetClosestPlane(ray, out ARRaycastHit hit, out ARPlane plane))
+            if (!TryGetClosestPlane(ray, out ARRaycastHit hit))
             {
                 anchor = ray.origin;
-                normal = Vector3.zero;
+                normal = default;
                 return false;
             }
 
             anchor = hit.pose.position;
-            normal = plane.normal;
+            normal = (hit.hitType & TrackableType.Planes) != 0 
+                ? planeManager.trackables[hit.trackableId].normal 
+                : default;
             return true;
         }
 
-        [ContractAnnotation("=> false, plane:null; => true, plane:notnull")]
-        bool TryGetClosestPlane(in Ray ray, out ARRaycastHit hit, out ARPlane plane)
+        bool TryGetClosestPlane(in Ray ray, out ARRaycastHit hit)
         {
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
-                plane = default;
                 hit = default;
                 return false;
             }
 
             List<ARRaycastHit> results = new List<ARRaycastHit>();
-            raycaster.Raycast(ray, results, TrackableType.PlaneWithinBounds);
+            raycaster.Raycast(ray, results);
             if (results.Count == 0)
             {
-                plane = default;
                 hit = default;
                 return false;
             }
@@ -355,7 +367,6 @@ namespace Iviz.Controllers
             hit = results.Count == 1
                 ? results[0]
                 : results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit;
-            plane = planeManager.GetPlane(hit.trackableId);
             return true;
         }
 

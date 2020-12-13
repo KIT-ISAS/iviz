@@ -25,8 +25,7 @@ namespace Iviz.App
 
 
         public PathModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.ModuleList,
-            constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
+        base(constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
             constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(Resource.ModuleType.Path);
@@ -134,7 +133,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }

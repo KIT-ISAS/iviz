@@ -8,7 +8,7 @@ namespace Iviz.App
 {
     public abstract class ModuleData : IModuleData
     {
-        [NotNull] protected ModuleListPanel ModuleListPanel { get; }
+        [NotNull] protected ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
         string buttonText = "";
@@ -49,9 +49,8 @@ namespace Iviz.App
         bool Visible => Configuration?.Visible ?? true;
         protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
-        protected ModuleData([NotNull] ModuleListPanel moduleList, [NotNull] string topic, [NotNull] string type)
+        protected ModuleData([NotNull] string topic, [NotNull] string type)
         {
-            ModuleListPanel = moduleList ? moduleList : throw new ArgumentNullException(nameof(moduleList));
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             Type = type ?? throw new ArgumentNullException(nameof(type));
         }

@@ -8,6 +8,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf;
+using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -16,7 +17,6 @@ using UnityEngine;
 using Object = System.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
-using tfMessage_v2 = Iviz.Msgs.Tf2Msgs.TFMessage;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -37,10 +37,9 @@ namespace Iviz.Controllers
 
     public sealed class TfListener : ListenerController
     {
+        const string DefaultTopicStatic = "/tf_static";
         public const string DefaultTopic = "/tf";
         public const string BaseFrameId = "map";
-
-        const string DefaultTopicStatic = "/tf_static";
 
         static uint tfSeq;
 
@@ -48,8 +47,6 @@ namespace Iviz.Controllers
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         readonly FrameNode keepAllListener;
         readonly FrameNode staticListener;
-        [CanBeNull] readonly InteractiveControl rootMarker;
-
 
         string fixedFrameId;
 
@@ -66,12 +63,6 @@ namespace Iviz.Controllers
                         : Pose.identity;
                 OriginFrame.Transform.SetLocalPose(originPose);
             }
-        }
-
-
-        public static void SetFixedFrame([CanBeNull] string id)
-        {
-            OriginFrame.Transform.SetLocalPose(Pose.identity);
         }
 
         public TfListener([NotNull] IModuleData moduleData)
@@ -109,38 +100,20 @@ namespace Iviz.Controllers
             MapFrame.AddListener(defaultListener);
             MapFrame.ParentCanChange = false;
 
-            if (!Settings.IsHololens)
-            {
-                rootMarker = ResourcePool.GetOrCreate<InteractiveControl>(
-                    Resource.Displays.InteractiveControl,
-                    RootFrame.Transform);
-                rootMarker.name = "[InteractiveController for /]";
-                rootMarker.TargetTransform = RootFrame.Transform;
-                rootMarker.InteractionMode = InteractionModeType.None;
-                rootMarker.BaseScale = 2.5f * FrameSize;
-            }
-
-            Publisher = new Sender<tfMessage_v2>(DefaultTopic);
+            Publisher = new Sender<TFMessage>(DefaultTopic);
 
             GameThread.LateEveryFrame += LateUpdate;
         }
 
         public static TfListener Instance { get; private set; }
-        [NotNull] public Sender<tfMessage_v2> Publisher { get; }
+        [NotNull] public Sender<TFMessage> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
-
-        [CanBeNull] public static GuiCamera GuiCamera => GuiCamera.Instance;
-
+        [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
         public static TfFrame MapFrame { get; private set; }
         public static TfFrame RootFrame { get; private set; }
         public static TfFrame OriginFrame { get; private set; }
         public static TfFrame UnityFrame { get; private set; }
-
-
-        [CanBeNull] public static InteractiveControl RootMarker => Instance.rootMarker;
-
         public static TfFrame ListenersFrame => OriginFrame;
-
         public override TfFrame Frame => MapFrame;
 
         [NotNull]
@@ -174,11 +147,6 @@ namespace Iviz.Controllers
                 {
                     frame.Visible = value;
                 }
-
-                if (rootMarker != null)
-                {
-                    rootMarker.Visible = value;
-                }
             }
         }
 
@@ -205,15 +173,8 @@ namespace Iviz.Controllers
                 {
                     frame.FrameSize = value;
                 }
-
-                if (rootMarker != null)
-                {
-                    rootMarker.BaseScale = 2.5f * FrameSize;
-                }
             }
         }
-
-        public float FrameLabelSize => 0.5f * FrameSize;
 
         public bool ParentConnectorVisible
         {
@@ -261,8 +222,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<tfMessage_v2>(DefaultTopic, SubscriptionHandler_v2) {MaxQueueSize = 200};
-            ListenerStatic = new Listener<tfMessage_v2>(DefaultTopicStatic, SubscriptionHandlerStatic)
+            Listener = new Listener<TFMessage>(DefaultTopic, SubscriptionHandler_v2) {MaxQueueSize = 200};
+            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, SubscriptionHandlerStatic)
                 {MaxQueueSize = 200};
         }
 
@@ -428,12 +389,12 @@ namespace Iviz.Controllers
             ProcessMessages(msg.Transforms, false);
         }
 
-        void SubscriptionHandler_v2([NotNull] tfMessage_v2 msg)
+        void SubscriptionHandler_v2([NotNull] TFMessage msg)
         {
             ProcessMessages(msg.Transforms, false);
         }
 
-        void SubscriptionHandlerStatic([NotNull] tfMessage_v2 msg)
+        void SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
             ProcessMessages(msg.Transforms, true);
         }
@@ -467,7 +428,7 @@ namespace Iviz.Controllers
             GameThread.LateEveryFrame -= LateUpdate;
         }
 
-        static void Publish([NotNull] tfMessage_v2 msg)
+        static void Publish([NotNull] TFMessage msg)
         {
             Instance.Publisher.Publish(msg);
         }
@@ -490,7 +451,7 @@ namespace Iviz.Controllers
         public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
             in Pose unityPose)
         {
-            var msg = new tfMessage_v2
+            var msg = new TFMessage
             (
                 new[]
                 {
@@ -503,26 +464,6 @@ namespace Iviz.Controllers
                 }
             );
             Publish(msg);
-        }
-
-        public static void OnARModeChanged(bool _)
-        {
-            UpdateRootMarkerVisibility();
-        }
-
-        public static void UpdateRootMarkerVisibility()
-        {
-            var rootMarker = RootMarker;
-            if (rootMarker == null)
-            {
-                return;
-            }
-
-            var arEnabled = ARController.Instance?.Visible ?? false;
-            var viewEnabled = ARController.Instance?.ShowRootMarker ?? false;
-            rootMarker.InteractionMode = arEnabled && viewEnabled
-                ? InteractionModeType.Frame
-                : InteractionModeType.ClickOnly;
         }
     }
 }

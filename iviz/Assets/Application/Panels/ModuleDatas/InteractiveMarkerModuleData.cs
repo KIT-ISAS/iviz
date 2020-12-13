@@ -23,8 +23,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public InteractiveMarkerModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(Resource.ModuleType
@@ -89,7 +88,7 @@ namespace Iviz.App
                         listener.DescriptionsVisible = config.DescriptionsVisible;
                         break;
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

@@ -30,7 +30,7 @@ namespace Iviz.App
         static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
         public SimpleRobotModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList, constructor.Topic, constructor.Type)
+            base(constructor.Topic, constructor.Type)
         {
             Robot = new SimpleRobotController(this);
             if (constructor.Configuration != null)
@@ -223,7 +223,7 @@ namespace Iviz.App
                         Robot.Tint = config.Tint;
                         break;
                     default:
-                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

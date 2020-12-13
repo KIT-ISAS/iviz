@@ -24,8 +24,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public MarkerModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(Resource.ModuleType.Marker);
@@ -110,7 +109,7 @@ namespace Iviz.App
                         listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
                         break;
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

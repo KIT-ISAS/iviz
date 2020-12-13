@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.XmlRpc;
@@ -329,8 +330,9 @@ namespace Iviz.Ros
                 return;
             }
 
-            Core.Logger.Internal(
-                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
+            Core.Logger.External(
+                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.", 
+                LogLevel.Info);
 
             var newAdvertisedService = new AdvertisedService<T>(service, callback);
 

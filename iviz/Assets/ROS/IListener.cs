@@ -32,10 +32,8 @@ namespace Iviz.Ros
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
         
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
-
         readonly Action<T> delayedHandler;
         readonly Func<T, bool> directHandler;
-
         readonly List<float> timesOfArrival = new List<float>();
         readonly List<T> tmpMessageBag = new List<T>();
         readonly bool callbackInGameThread = true;
@@ -65,7 +63,7 @@ namespace Iviz.Ros
         {
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
-            GameThread.EveryFrame += CallHandlerDelayed;
+            GameThread.ListenerTick += CallHandlerDelayed;
 
             Connection.Subscribe(this);
             Subscribed = true;
@@ -92,7 +90,7 @@ namespace Iviz.Ros
             GameThread.EverySecond -= UpdateStats;
             if (callbackInGameThread)
             {
-                GameThread.EveryFrame -= CallHandlerDelayed;
+                GameThread.ListenerTick -= CallHandlerDelayed;
             }
 
             Logger.Internal($"Unsubscribing from {Topic}.");

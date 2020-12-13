@@ -85,7 +85,7 @@ namespace Iviz.Displays
 
         public override string ToString()
         {
-            return $"[x={PA.x} y={PA.y} z={PA.y} i={PA.w} c={ColorA} ---- x={PB.x} y={PB.y} z={PB.y} i={PB.w} c={ColorB}]";
+            return $"[x={PA.x} y={PA.y} z={PA.z} i={PA.w} c={ColorA} ---- x={PB.x} y={PB.y} z={PB.z} i={PB.w} c={ColorB}]";
         }
     };
 }

@@ -131,8 +131,13 @@ namespace Iviz.Displays
 
         void Update()
         {
-            bool isCurrentlyVisible = GeometryUtility.TestPlanesAABB(UnityUtils.CalculateCameraPlanes(), WorldBounds);
-            if (!isCurrentlyVisible)
+            if (Size == 0)
+            {
+                return;
+            }
+
+            Bounds worldBounds = WorldBounds;
+            if (!worldBounds.IsVisibleFromMainCamera())
             {
                 return;
             }
@@ -143,19 +148,12 @@ namespace Iviz.Displays
                 isDirty = false;
             }
 
-            if (Size == 0)
-            {
-                return;
-            }
-
             UpdateTransform();
             Properties.SetFloat(ScaleId, ElementScale * transform.lossyScale.x);
 
             Material material = UseColormap
                 ? Resource.Materials.PointCloudWithColormap.Object
                 : Resource.Materials.PointCloud.Object;
-
-            Bounds worldBounds = BoxCollider.bounds;
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 4, Size, null, Properties,
                 ShadowCastingMode.Off, false, gameObject.layer);

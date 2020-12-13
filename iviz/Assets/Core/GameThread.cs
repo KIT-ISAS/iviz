@@ -12,7 +12,8 @@ namespace Iviz.Core
     public class GameThread : MonoBehaviour
     {
         static GameThread Instance;
-        readonly ConcurrentQueue<Action> actionsOnlyOnce = new ConcurrentQueue<Action>();
+        readonly ConcurrentQueue<Action> actionsQueue = new ConcurrentQueue<Action>();
+        readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
         float lastRunTime;
         Thread gameThread;
         
@@ -27,6 +28,7 @@ namespace Iviz.Core
         void Update()
         {
             EveryFrame?.Invoke();
+            ListenerTick?.Invoke();
 
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
@@ -36,7 +38,7 @@ namespace Iviz.Core
                 lastRunTime = GameTime;
             }
 
-            while (actionsOnlyOnce.TryDequeue(out Action action))
+            while (actionsQueue.TryDequeue(out Action action))
             {
                 action();
             }
@@ -56,6 +58,8 @@ namespace Iviz.Core
         /// Run every frame.
         /// </summary>
         public static event Action EveryFrame;
+        
+        public static event Action ListenerTick;
 
         /// <summary>
         /// Run every frame after the rest.
@@ -90,7 +94,22 @@ namespace Iviz.Core
                 return;
             }
 
-            Instance.actionsOnlyOnce.Enqueue(action);
+            Instance.actionsQueue.Enqueue(action);
+        }
+
+        public static void PostInListenerQueue([NotNull] Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.listenerQueue.Enqueue(action);
         }
 
         /// <summary>
@@ -117,7 +136,7 @@ namespace Iviz.Core
                 return;
             }
 
-            Instance.actionsOnlyOnce.Enqueue(action);
+            Instance.actionsQueue.Enqueue(action);
         }
 
         static bool IsGameThread => Thread.CurrentThread == Instance.gameThread;

@@ -26,8 +26,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public GridModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList, constructor.Topic, constructor.Type)
+        public GridModuleData([NotNull] ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(Resource.ModuleType.Grid);
 
@@ -208,7 +207,7 @@ namespace Iviz.App
                         controller.Offset = config.Offset;
                         break;
                     default:
-                        Core.Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }

@@ -183,7 +183,7 @@ namespace Iviz.Displays
                         newData = png.Data;
                     }
 
-                    GameThread.Post(() =>
+                    GameThread.PostInListenerQueue(() =>
                     {
                         Set(png.Width, png.Height, EncodingFromPng(png), newData);
                         onFinished();
@@ -192,7 +192,7 @@ namespace Iviz.Displays
                 catch (Exception e)
                 {
                     Logger.Error(e);
-                    GameThread.Post(onFinished);                    
+                    GameThread.PostInListenerQueue(onFinished);                    
                 }
             });
         }
@@ -265,7 +265,7 @@ namespace Iviz.Displays
 
                     Stream outStream = new MemoryStream(pngBuffer);
                     image.WriteBitmap(outStream);
-                    GameThread.Post(() =>
+                    GameThread.PostInListenerQueue(() =>
                     {
                         Set(image.Width, image.Height, encoding, pngBuffer.AsSegment(bmpHeaderLength));
                         onFinished();
@@ -274,7 +274,7 @@ namespace Iviz.Displays
                 catch (Exception e)
                 {
                     Logger.Error(e);
-                    GameThread.Post(onFinished);                    
+                    GameThread.PostInListenerQueue(onFinished);                    
                 }
             });
         }

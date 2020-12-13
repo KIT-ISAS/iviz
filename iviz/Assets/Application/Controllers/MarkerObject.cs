@@ -613,10 +613,9 @@ namespace Iviz.Controllers
                 .Append(msg.Color.A).AppendLine();
 
             Vector3 newScale = msg.Scale.Ros2Unity().Abs();
-            if (newScale != currentScale)
+            if (!Mathf.Approximately((newScale - currentScale).sqrMagnitude, 0))
             {
-                currentScale = newScale;
-                transform.localScale = newScale;
+                transform.localScale = currentScale = newScale;
             }
         }
 
@@ -767,8 +766,7 @@ namespace Iviz.Controllers
             UnityEngine.Pose newPose = msg.Pose.Ros2Unity();
             if (newPose != currentPose)
             {
-                currentPose = newPose;
-                transform.SetLocalPose(newPose);
+                transform.SetLocalPose(currentPose = newPose);
             }
         }
 

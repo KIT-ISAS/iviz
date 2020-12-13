@@ -133,10 +133,10 @@ namespace Iviz.Displays
 
             float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
 
-            for (int v = bounds.Ymin; v < bounds.Ymax; v++)
+            for (int v = bounds.YMin; v < bounds.YMax; v++)
             {
-                int i = v * numCellsX + bounds.Xmin;
-                for (int u = bounds.Xmin; u < bounds.Xmax; u++, i++)
+                int i = v * numCellsX + bounds.XMin;
+                for (int u = bounds.XMin; u < bounds.XMax; u++, i++)
                 {
                     sbyte val = values[i];
                     if (val <= 0)
@@ -164,17 +164,17 @@ namespace Iviz.Displays
 
         public readonly struct Rect
         {
-            public int Xmin { get; }
-            public int Xmax { get; }
-            public int Ymin { get; }
-            public int Ymax { get; }
+            public int XMin { get; }
+            public int XMax { get; }
+            public int YMin { get; }
+            public int YMax { get; }
 
-            public Rect(int xmin, int xmax, int ymin, int ymax)
+            public Rect(int xMin, int xMax, int yMin, int yMax)
             {
-                Xmin = xmin;
-                Xmax = xmax;
-                Ymin = ymin;
-                Ymax = ymax;
+                XMin = xMin;
+                XMax = xMax;
+                YMin = yMin;
+                YMax = yMax;
             }
         }        
     }

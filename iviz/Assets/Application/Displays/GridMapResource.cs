@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
     public sealed class GridMapResource : MarkerResourceWithColormap
     {
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
@@ -24,8 +26,6 @@ namespace Iviz.Displays
 
         [NotNull]
         MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
-        
-        
 
         protected override void Awake()
         {
@@ -132,7 +132,7 @@ namespace Iviz.Displays
                 Destroy(inputTexture);
             }
 
-            inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, false);
+            inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
             material.SetTexture(PropInputTexture, inputTexture);
             material.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
 

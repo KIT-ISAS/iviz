@@ -124,19 +124,14 @@ namespace Iviz.Core
                 }
             }
 
-            LogInternal?.Invoke(str.ToString());
-            Warn(str);
+            string message = str.ToString();
+            LogInternal?.Invoke(message);
+            Warn(message);
         }
 
-        public static void External([CanBeNull] string msg, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
-        {
-            LogExternal?.Invoke(new LogMessage(LogLevel.Debug, msg ?? NullMessage, file, line));
-            UnityEngine.Debug.Log(msg);
-        }
 
-        public static void External(LogLevel level, [CanBeNull] string msg, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
+        public static void External([CanBeNull] string msg, LogLevel level = LogLevel.Debug,
+            [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
             UnityEngine.Debug.Log(msg);
@@ -159,15 +154,17 @@ namespace Iviz.Core
                 {
                     if (!(childException is AggregateException))
                     {
-                        str.AppendLine().Append(childException.GetType()).Append(" ").Append(childException.Message);
+                        str.AppendLine();
+                        str.Append("[").Append(childException.GetType()).Append("] ").Append(childException.Message);
                     }
 
                     childException = childException.InnerException;
                 }
             }
 
-            LogExternal?.Invoke(new LogMessage(LogLevel.Error, str.ToString(), file, line));
-            UnityEngine.Debug.Log(str.ToString());
+            string message = str.ToString();
+            LogExternal?.Invoke(new LogMessage(LogLevel.Error, message, file, line));
+            UnityEngine.Debug.Log(message);
         }
     }
 

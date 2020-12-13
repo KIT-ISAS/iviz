@@ -53,6 +53,7 @@ namespace Iviz.Resources
         public Info<GameObject> Trail { get; }
         public Info<GameObject> InteractiveControl { get; }
         public Info<GameObject> GridMap { get; }
+        public Info<GameObject> OccupancyGridTextureResource { get; }
 
         public DisplaysType()
         {
@@ -80,6 +81,7 @@ namespace Iviz.Resources
             Trail = new Info<GameObject>("Displays/Trail");
             InteractiveControl = new Info<GameObject>("Displays/InteractiveControl");
             GridMap = new Info<GameObject>("Displays/GridMap");
+            OccupancyGridTextureResource = new Info<GameObject>("Displays/OccupancyGridTextureResource");
 
             resourceByType = CreateTypeDictionary();
         }

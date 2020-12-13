@@ -324,7 +324,7 @@ namespace Iviz.Controllers
 
             var msgHeader = msg.Header;
 
-            GameThread.Post(() =>
+            GameThread.PostInListenerQueue(() =>
             {
                 if (node.gameObject == null)
                 {

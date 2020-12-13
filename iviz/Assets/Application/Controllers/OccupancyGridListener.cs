@@ -220,10 +220,10 @@ namespace Iviz.Controllers
 
                     var rect = new OccupancyGridResource.Rect
                     (
-                        xmin: u * numCellsX / 4,
-                        xmax: (u + 1) * numCellsX / 4,
-                        ymin: v * numCellsY / 4,
-                        ymax: (v + 1) * numCellsY / 4
+                        xMin: u * numCellsX / 4,
+                        xMax: (u + 1) * numCellsX / 4,
+                        yMin: v * numCellsY / 4,
+                        yMax: (v + 1) * numCellsY / 4
                     );
                     Task.Run(() => grid.SetOccupancy(msg.Data, rect));
                 }

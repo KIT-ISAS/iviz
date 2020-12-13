@@ -22,8 +22,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public TfModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(Resource.ModuleType.TF);
@@ -104,7 +103,7 @@ namespace Iviz.App
                         listener.KeepAllFrames = config.KeepAllFrames;
                         break;
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }
@@ -115,11 +114,6 @@ namespace Iviz.App
         public override void AddToState(StateConfiguration config)
         {
             config.Tf = listener.Config;
-        }
-
-        public override void OnARModeChanged(bool value)
-        {
-            TfListener.OnARModeChanged(value);
         }
     }
 }

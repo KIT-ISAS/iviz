@@ -24,8 +24,8 @@ namespace Iviz.App
         readonly List<string> depthImageCandidates = new List<string>();
         readonly List<string> colorImageCandidates = new List<string>();
 
-        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList, constructor.Topic, constructor.Type)
+        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) : 
+            base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(Resource.ModuleType.DepthCloud);
 
@@ -173,7 +173,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }

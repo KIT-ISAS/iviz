@@ -13,7 +13,7 @@ namespace Iviz.Controllers
 {
     public sealed class TfFrame : FrameNode
     {
-        //const int Layer = 9;
+        const int TrailTimeWindowInMs = 5000;
 
         [SerializeField] string id;
 
@@ -23,8 +23,6 @@ namespace Iviz.Controllers
 
         Pose pose;
 
-        bool parentCanChange = true;
-        float alpha = 1;
         float labelSize = 1.0f;
         bool labelVisible;
         bool trailVisible;
@@ -45,10 +43,10 @@ namespace Iviz.Controllers
             {
                 if (trail == null)
                 {
-                    trail = ResourcePool.GetOrCreateDisplay<TrailResource>(Transform);
-                    trail.TimeWindowInMs = 5000;
+                    trail = ResourcePool.GetOrCreateDisplay<TrailResource>(TfListener.UnityFrame.Transform);
+                    trail.TimeWindowInMs = TrailTimeWindowInMs;
                     trail.Color = Color.yellow;
-                    trail.Name = "[Trail:" + id + "]";
+                    trail.Name = $"[Trail:{id}]";
                 }
 
                 return trail;
@@ -69,47 +67,12 @@ namespace Iviz.Controllers
                 labelObjectText.Text = id;
                 if (HasTrail)
                 {
-                    Trail.Name = "[Trail:" + id + "]";
+                    Trail.Name = $"[Trail:{id}]";
                 }
             }
         }
 
-        /*
-        public override bool Selected
-        {
-            get => base.Selected;
-            set
-            {
-                base.Selected = value;
-                labelObjectText.Visible = value || LabelVisible;
-            }
-        }
-        */
         const bool Selected = false;
-
-        public float Alpha
-        {
-            get => alpha;
-            set
-            {
-                alpha = value;
-                axis.ColorX = new Color(axis.ColorX.r, axis.ColorX.g, axis.ColorX.b, alpha);
-                axis.ColorY = new Color(axis.ColorY.r, axis.ColorY.g, axis.ColorY.b, alpha);
-                axis.ColorZ = new Color(axis.ColorZ.r, axis.ColorZ.g, axis.ColorZ.b, alpha);
-            }
-        }
-
-        /*
-        public override Bounds Bounds => axis.Bounds;
-        public override Bounds WorldBounds => axis.WorldBounds;
-        public override Vector3 BoundsScale => axis.WorldScale;
-        */
-
-        public bool ColliderEnabled
-        {
-            get => axis.ColliderEnabled;
-            set => axis.ColliderEnabled = value;
-        }
 
         bool ForceVisible
         {
@@ -196,20 +159,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ParentCanChange
-        {
-            get => parentCanChange;
-            set
-            {
-                parentCanChange = value;
-                /*
-                if (!parentCanChange)
-                {
-                    Parent = TfListener.RootFrame;
-                }
-                */
-            }
-        }
+        public bool ParentCanChange { get; set; } = true;
 
         public override TfFrame Parent
         {
@@ -231,12 +181,6 @@ namespace Iviz.Controllers
 
         bool IsChildless => children.Count == 0;
 
-        /*
-        public override string Name => Id;
-
-        public override Pose BoundsPose => transform.AsPose();
-        */
-
         void Awake()
         {
             labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
@@ -246,9 +190,7 @@ namespace Iviz.Controllers
 
             parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
             parentConnector.A = Transform;
-
-
-            // TFListener.BaseFrame may not exist yet
+            
             var parent = Transform.parent;
             parentConnector.B = parent != null
                 ? parent
@@ -272,13 +214,6 @@ namespace Iviz.Controllers
 
             parentConnector.gameObject.SetActive(false);
 
-            //UsesBoundaryBox = false;
-
-            /*
-            trail = ResourcePool.GetOrCreateDisplay<TrailResource>(mTransform);
-            trail.TimeWindowInMs = 5000;
-            trail.Color = Color.yellow;
-            */
             TrailVisible = false;
         }
 
@@ -310,7 +245,6 @@ namespace Iviz.Controllers
 
         void AddChild([NotNull] TfFrame frame)
         {
-            //Debug.Log(Id + " has new child " + frame);
             children.Add(frame.Id, frame);
         }
 
@@ -321,7 +255,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //Debug.Log(Id + " loses child " + frame);
             children.Remove(frame.Id);
         }
 
@@ -438,17 +371,11 @@ namespace Iviz.Controllers
         public override void Stop()
         {
             base.Stop();
-            Id = "";
             timeline.Clear();
             axis.DisposeDisplay();
+            trail.DisposeDisplay();
 
-            if (trail != null)
-            {
-                trail.Name = "[Trail:In Trash]";
-                trail.DisposeDisplay();
-                trail = null;
-            }
-
+            trail = null;
             axis = null;
         }
     }

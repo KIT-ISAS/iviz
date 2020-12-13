@@ -16,11 +16,11 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class GuiCamera : FrameNode
+    public sealed class GuiInputModule : FrameNode
     {
         const float MinShadowDistance = 4;
 
-        public static GuiCamera Instance { get; private set; }
+        public static GuiInputModule Instance { get; private set; }
         
         Vector2 lastPointer;
         Vector2 lastPointerAlt;

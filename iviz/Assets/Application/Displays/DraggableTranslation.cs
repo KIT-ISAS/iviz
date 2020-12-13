@@ -5,45 +5,62 @@ using Iviz.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-#if UNITY_WSA
-using Microsoft.MixedReality.Toolkit.Input;
-#endif
-
 namespace Iviz.Displays
 {
-    public sealed class DraggableTranslation : MonoBehaviour, 
-        IPointerDownHandler, IPointerUpHandler, IDraggable, IPointerClickHandler
-#if UNITY_WSA
-        , IMixedRealityPointerHandler
-#endif
+    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
-        [SerializeField] Vector3 line = default;
-        public Transform TargetTransform { get; set; }
-        
+        [SerializeField] Vector3 line;
+
         bool needsStart;
         Vector3 startOffset;
+        
+        public Transform TargetTransform { get; set; }
 
-        public event Action DoubleTap;
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
 
-        public Action<Pose> SetTargetPose { get; set; }
-        
-        void Awake()
-        {
-            SetTargetPose = pose =>
-            {
-                TargetTransform.SetPose(pose);
-            };            
-        }
-        
         public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
-        
+
+        public void OnPointerMove(in Vector2 cursorPos)
+        {
+            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
+            OnPointerMove(pointerRay);
+        }
+
+        public void OnStartDragging()
+        {
+            needsStart = true;
+        }
+
+        public void OnEndDragging()
+        {
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (TfListener.GuiInputModule != null)
+            {
+                TfListener.GuiInputModule.DraggedObject = this;
+            }
+
+            PointerDown?.Invoke();
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            PointerUp?.Invoke();
+        }
+
+        void SetTargetPose(in Pose pose)
+        {
+            TargetTransform.SetPose(pose);
+        }
+
         static (float, float) ClosestPointDelta(in Ray ray, in Ray other)
         {
             Matrix4x4 m = Matrix4x4.identity;
@@ -56,23 +73,6 @@ namespace Iviz.Displays
             Vector3 t = mInv * (other.origin - ray.origin);
 
             return (t.x, t.z);
-        }
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            TfListener.GuiCamera.DraggedObject = this;
-            PointerDown?.Invoke();
-        }
-        
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            PointerUp?.Invoke();
-        }
-
-        public void OnPointerMove(in Vector2 cursorPos)
-        {
-            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
-            OnPointerMove(pointerRay);
         }
 
         void OnPointerMove(in Ray pointerRay)
@@ -88,6 +88,7 @@ namespace Iviz.Displays
             {
                 return;
             }
+
             deltaDistance = Mathf.Max(Mathf.Min(deltaDistance, 0.5f), -0.5f);
             Vector3 deltaPosition = deltaDistance * forwardRay.direction;
             if (needsStart)
@@ -101,57 +102,5 @@ namespace Iviz.Displays
                 Moved?.Invoke(mTarget.AsPose());
             }
         }
-
-        public void OnStartDragging()
-        {
-            needsStart = true;
-        }
-
-        public void OnEndDragging()
-        {
-        }
-
-        static int GetClickCount(PointerEventData eventData)
-        {
-            return Settings.IsMobile ? Input.GetTouch(0).tapCount : eventData.clickCount;
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            if (GetClickCount(eventData) == 2)
-            {
-                DoubleTap?.Invoke();
-            }
-        }
-
-#if UNITY_WSA
-        public void OnPointerDown(MixedRealityPointerEventData _)
-        {
-            TfListener.GuiCamera.DraggedObject = this;
-            PointerDown?.Invoke();
-        }
-
-        public void OnPointerDragged(MixedRealityPointerEventData eventData)
-        {
-            Vector3 cameraPosition = Settings.MainCamera.transform.position;
-            Vector3 pointerPosition = ((GGVPointer)eventData.Pointer).Position;
-
-            Ray pointerRay = new Ray(cameraPosition, pointerPosition - cameraPosition);
-            OnPointerMove(pointerRay);
-        }
-
-        public void OnPointerUp(MixedRealityPointerEventData _)
-        {
-            PointerUp?.Invoke();
-        }
-
-        public void OnPointerClicked(MixedRealityPointerEventData eventData)
-        {
-            if (eventData.Count == 2)
-            {
-                DoubleTap?.Invoke();
-            }
-        }
-#endif
     }
 }

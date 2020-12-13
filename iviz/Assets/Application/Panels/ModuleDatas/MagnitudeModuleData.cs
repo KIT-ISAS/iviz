@@ -11,7 +11,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="MagnitudePanelContents"/> 
     /// </summary>
-
     public sealed class MagnitudeModuleData : ListenerModuleData
     {
         [NotNull] readonly MagnitudeListener listener;
@@ -24,8 +23,7 @@ namespace Iviz.App
 
 
         public MagnitudeModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {
             //GameObject listenerObject = new GameObject("Magnitude:" + Topic);
@@ -39,8 +37,9 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (MagnitudeConfiguration)constructor.Configuration;
+                listener.Config = (MagnitudeConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -57,34 +56,13 @@ namespace Iviz.App
             panel.VectorScale.Value = listener.VectorScale;
             panel.HideButton.State = listener.Visible;
 
-            panel.ShowTrail.ValueChanged += f =>
-            {
-                listener.TrailVisible = f;
-            };
-            panel.Color.ValueChanged += f =>
-            {
-                listener.Color = f;
-            };
-            panel.TrailTime.ValueChanged += f =>
-            {
-                listener.TrailTime = f;
-            };
-            panel.Scale.ValueChanged += f =>
-            {
-                listener.Scale = f;
-            };
-            panel.ShowAxis.ValueChanged += f =>
-            {
-                listener.FrameVisible = f;
-            };
-            panel.ShowVector.ValueChanged += f =>
-            {
-                listener.VectorVisible = f;
-            };
-            panel.VectorScale.ValueChanged += f =>
-            {
-                listener.VectorScale = f;
-            };
+            panel.ShowTrail.ValueChanged += f => { listener.TrailVisible = f; };
+            panel.Color.ValueChanged += f => { listener.Color = f; };
+            panel.TrailTime.ValueChanged += f => { listener.TrailTime = f; };
+            panel.Scale.ValueChanged += f => { listener.Scale = f; };
+            panel.ShowAxis.ValueChanged += f => { listener.FrameVisible = f; };
+            panel.ShowVector.ValueChanged += f => { listener.VectorVisible = f; };
+            panel.VectorScale.ValueChanged += f => { listener.VectorScale = f; };
 
             switch (listener.Config.Type)
             {
@@ -113,14 +91,14 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<MagnitudeConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(MagnitudeConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -146,15 +124,14 @@ namespace Iviz.App
                     case nameof(MagnitudeConfiguration.TrailTime):
                         listener.TrailTime = config.TrailTime;
                         break;
-
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
-                        break;                    
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        break;
                 }
             }
 
             ResetPanel();
-        }            
+        }
 
         public override void AddToState(StateConfiguration config)
         {

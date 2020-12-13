@@ -24,8 +24,7 @@ namespace Iviz.App
 
 
         public PointCloudModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.ModuleList,
-            constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+        base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(Resource.ModuleType.PointCloud);
             listener = new PointCloudListener(this);
@@ -157,7 +156,7 @@ namespace Iviz.App
                         listener.FlipMinMax = config.FlipMinMax;
                         break;
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;                    
                 }
             }

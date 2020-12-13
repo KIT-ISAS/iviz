@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Logger = Iviz.Core.Logger;
 
@@ -58,7 +59,8 @@ namespace Iviz.App
         [SerializeField] Text bottomFps = null;
         [SerializeField] Text bottomBandwidth = null;
 
-        [SerializeField] Joystick joystick = null;
+        [FormerlySerializedAs("joystick")] [SerializeField] TwistJoystick twistJoystick = null;
+        [SerializeField] ARJoystick arJoystick = null;
 
         [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
@@ -110,18 +112,20 @@ namespace Iviz.App
         }
 
         static ModuleListPanel instance;
+
         public static ModuleListPanel Instance =>
             instance != null ? instance : throw new InvalidOperationException("Module list panel has not been set!");
 
         public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
-        public AnchorToggleButton ShowRootMarkerButton => anchorCanvas.ShowMarker;
+        public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
         public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
         [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
-        public Joystick Joystick => joystick;
+        public TwistJoystick TwistJoystick => twistJoystick;
+        public ARJoystick ARJoystick => arJoystick;
         [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
@@ -153,7 +157,7 @@ namespace Iviz.App
         {
             var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
             Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
-            
+
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
@@ -173,6 +177,8 @@ namespace Iviz.App
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
+            Logger.External("Welcome to iviz! This is the log console. Here you will see messages from /rosout_agg" +
+                            " when a ROS connection is established.");
 
             CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
 
@@ -506,7 +512,7 @@ namespace Iviz.App
             }
 
             ModuleDataConstructor constructor =
-                new ModuleDataConstructor(resource, this, topic, type, configuration);
+                new ModuleDataConstructor(resource, topic, type, configuration);
 
             ModuleData moduleData = ModuleData.CreateFromResource(constructor);
 
@@ -660,7 +666,7 @@ namespace Iviz.App
             markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
 
-        public void ShowFrame([NotNull] TfFrame frame)
+        void ShowFrame([NotNull] TfFrame frame)
         {
             if (frame == null)
             {
@@ -689,9 +695,6 @@ namespace Iviz.App
 
         void OnARModeChanged(bool value)
         {
-            PinControlButton.Visible = value;
-            ShowRootMarkerButton.Visible = value;
-
             foreach (var module in ModuleDatas)
             {
                 module.OnARModeChanged(value);

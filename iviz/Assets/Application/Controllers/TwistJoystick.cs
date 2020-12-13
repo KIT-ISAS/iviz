@@ -1,14 +1,23 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using External;
 
 namespace Iviz.Controllers
 {
-    public sealed class Joystick : MonoBehaviour
+    public sealed class TwistJoystick : MonoBehaviour
     {
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;
         [SerializeField] Canvas canvas = null;
 
+        public enum Source
+        {
+            Left,
+            Right
+        }
+
+        public event Action<Source, Vector2> Changed;
+        
         bool visible;
         public bool Visible
         {
@@ -27,6 +36,8 @@ namespace Iviz.Controllers
         void Awake()
         {
             Visible = false;
+            left.Changed += direction => Changed?.Invoke(Source.Left, direction);
+            right.Changed += direction => Changed?.Invoke(Source.Right, direction);
         }
     }
 }

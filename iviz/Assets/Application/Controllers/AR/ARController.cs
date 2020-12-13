@@ -28,23 +28,13 @@ namespace Iviz.Controllers
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
 
         /* NonSerializable */
-        public bool ShowRootMarker { get; set; }
+        public bool ShowARJoystick { get; set; }
 
         /* NonSerializable */
         public bool PinRootMarker { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.AugmentedReality;
         [DataMember] public bool Visible { get; set; } = true;
-    }
-
-    [DataContract]
-    public sealed class ARSessionInfo : JsonToString
-    {
-        [DataMember] public float WorldScale { get; set; } = 1.0f;
-        [DataMember] public SerializableVector3 WorldOffset { get; set; } = Vector3.zero;
-        [DataMember] public float WorldAngle { get; set; }
-        [DataMember] public bool ShowRootMarker { get; set; }
-        [DataMember] public bool PinRootMarker { get; set; }
     }
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
@@ -63,9 +53,12 @@ namespace Iviz.Controllers
 
         //static ARSessionInfo savedSessionInfo;
         static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
-        static AnchorToggleButton ShowRootMarkerButton => ModuleListPanel.Instance.ShowRootMarkerButton;        
+        static AnchorToggleButton ShowARJoystickButton => ModuleListPanel.Instance.ShowARJoystickButton;
+        static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
         readonly ARConfiguration config = new ARConfiguration();
+        IModuleData moduleData;
+
         protected Canvas canvas;
         protected FrameNode node;
 
@@ -116,7 +109,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                GuiCamera.Instance.DisableCameraLock();
+                GuiInputModule.Instance.DisableCameraLock();
                 TfListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
                 ARModeChanged?.Invoke(value);
             }
@@ -157,23 +150,24 @@ namespace Iviz.Controllers
             set => TfListener.RootFrame.transform.localScale = value * Vector3.one;
         }
 
-        public virtual bool PinRootMarker
+        protected virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
-            protected set
+            set
             {
                 config.PinRootMarker = value;
                 PinControlButton.State = value;
             }
         }
 
-        public bool ShowRootMarker
+        bool ShowARJoystick
         {
-            get => config.ShowRootMarker;
-            private set
+            get => config.ShowARJoystick;
+            set
             {
-                config.ShowRootMarker = value;
-                ShowRootMarkerButton.State = value;
+                config.ShowARJoystick = value;
+                ShowARJoystickButton.State = value;
+                ARJoystick.Visible = value;
             }
         }
 
@@ -189,54 +183,57 @@ namespace Iviz.Controllers
 
             node = FrameNode.Instantiate("AR Node");
 
-            /*
-            if (savedSessionInfo != null)
-            {
-                SetWorldPose(savedSessionInfo.WorldOffset, savedSessionInfo.WorldAngle, RootMover.Configuration);
-                WorldScale = savedSessionInfo.WorldScale;
-            }
-            */
-
-            TfListener.RootMarker.SetTargetPoseUpdater(pose => SetWorldPose(pose, RootMover.ControlMarker));
+            PinControlButton.Visible = true;
+            ShowARJoystickButton.Visible = true;
 
             PinControlButton.Clicked += OnPinControlButtonClicked;
-            ShowRootMarkerButton.Clicked += OnShowRootMarkerClicked;
+            ShowARJoystickButton.Clicked += OnShowARJoystickClicked;
+            
+            ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
+            ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
+        }
+
+        void OnARJoystickChangedAngle(float dA)
+        {
+            float deltaAngle = 0.1f * dA;
+            SetWorldAngle(WorldAngle + deltaAngle, RootMover.ControlMarker);
+        }
+
+        void OnARJoystickChangedPosition(Vector3 dPos)
+        {
+            Vector3 deltaPosition = 0.1f * dPos;
+            SetWorldPosition(WorldPosition + deltaPosition, RootMover.ControlMarker);
         }
 
         void OnPinControlButtonClicked()
         {
-            PinRootMarker = PinControlButton.State;            
-        }
-        
-        void OnShowRootMarkerClicked()
-        {
-            ShowRootMarker = ShowRootMarkerButton.State;
-            TfListener.UpdateRootMarkerVisibility();
+            PinRootMarker = PinControlButton.State;
         }
 
-        public IModuleData ModuleData { get; set; }
+        void OnShowARJoystickClicked()
+        {
+            ShowARJoystick = ShowARJoystickButton.State;
+        }
+
+        public IModuleData ModuleData
+        {
+            get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
+            set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
+        }
 
         public virtual void StopController()
         {
-            /*
-            savedSessionInfo = new ARSessionInfo
-            {
-                WorldAngle = WorldAngle,
-                WorldOffset = WorldPosition,
-                WorldScale = WorldScale
-            };
-            */
-
             Visible = false;
             WorldScale = 1;
 
-            if (TfListener.RootMarker != null)
-            {
-                TfListener.RootMarker.SetTargetPoseUpdater(pose => TfListener.RootFrame.transform.SetPose(pose));
-            }
+            PinControlButton.Visible = false;
+            ShowARJoystickButton.Visible = false;
 
+            ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
+            ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
             PinControlButton.Clicked -= OnPinControlButtonClicked;
-            ShowRootMarkerButton.Clicked -= OnShowRootMarkerClicked;            
+            ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
+            ShowARJoystick = false;
             Instance = null;
         }
 
@@ -280,6 +277,7 @@ namespace Iviz.Controllers
             UpdateWorldPose(unityPose, mover);
         }
 
+        /*
         void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
         {
             WorldPosition = unityPosition;
@@ -287,6 +285,7 @@ namespace Iviz.Controllers
             Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
             UpdateWorldPose(new Pose(unityPosition, rotation), mover);
         }
+        */
 
         public void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
         {

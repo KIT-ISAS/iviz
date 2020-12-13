@@ -25,8 +25,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.ModuleList,
-                constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(Resource.ModuleType.JointState);
@@ -107,7 +106,7 @@ namespace Iviz.App
                         listener.MsgTrimFromEnd = config.MsgTrimFromEnd;
                         break;
                     default:
-                        Logger.External(LogLevel.Warn, $"{this}: Unknown field '{field}'");
+                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
                 }
             }
