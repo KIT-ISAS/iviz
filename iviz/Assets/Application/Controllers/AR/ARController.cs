@@ -168,6 +168,11 @@ namespace Iviz.Controllers
                 config.ShowARJoystick = value;
                 ShowARJoystickButton.State = value;
                 ARJoystick.Visible = value;
+
+                if (value)
+                {
+                    ModuleListPanel.Instance.AllGuiVisible = false;
+                }
             }
         }
 
@@ -188,21 +193,63 @@ namespace Iviz.Controllers
 
             PinControlButton.Clicked += OnPinControlButtonClicked;
             ShowARJoystickButton.Clicked += OnShowARJoystickClicked;
-            
+
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
+            ARJoystick.PointerUp += OnARJoystickPointerUp;
         }
+
+        float? velocityAngle;
 
         void OnARJoystickChangedAngle(float dA)
         {
-            float deltaAngle = 0.1f * dA;
-            SetWorldAngle(WorldAngle + deltaAngle, RootMover.ControlMarker);
+            if (velocityAngle == null)
+            {
+                velocityAngle = 0;
+            }
+            else
+            {
+                velocityAngle += 0.04f * dA;
+            }
+
+            SetWorldAngle(WorldAngle + velocityAngle.Value, RootMover.ControlMarker);
         }
+
+        Vector3? velocityPos;
 
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
-            Vector3 deltaPosition = 0.1f * dPos;
-            SetWorldPosition(WorldPosition + deltaPosition, RootMover.ControlMarker);
+            Vector3 deltaPosition = 0.0005f * dPos;
+            if (velocityPos == null)
+            {
+                velocityPos = Vector3.zero;
+            }
+            else
+            {
+                velocityPos += deltaPosition;
+            }
+
+            Vector3 deltaWorldPosition;
+            if (ARJoystick.IsGlobal)
+            {
+                deltaWorldPosition = WorldPose.rotation * velocityPos.Value.Ros2Unity();
+            }
+            else
+            {
+                Transform mTransform = Settings.MainCamera.transform;
+                Vector3 lateralToCamera =
+                    mTransform.rotation * new Vector3(velocityPos.Value.x, velocityPos.Value.y, 0);
+                Vector3 awayFromCamera = (WorldPosition - mTransform.position).normalized * velocityPos.Value.z;
+                deltaWorldPosition = lateralToCamera + awayFromCamera;
+            }
+
+            SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
+        }
+
+        void OnARJoystickPointerUp()
+        {
+            velocityPos = null;
+            velocityAngle = null;
         }
 
         void OnPinControlButtonClicked()

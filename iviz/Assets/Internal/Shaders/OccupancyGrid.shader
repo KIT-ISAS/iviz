@@ -10,8 +10,8 @@
     {
         Tags
         {
-            //"Queue"="Transparent" "RenderType"="Transparent"
-            "RenderType"="Opaque"
+            "Queue"="Transparent" "RenderType"="Transparent"
+            //"RenderType"="Opaque"
         }
 
         CGPROGRAM
@@ -33,25 +33,10 @@
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            
-            //float2 value = tex2D(_MainTex, IN.uv_MainTex).rg;
             float value = tex2D(_MainTex, IN.uv_MainTex).r;
-            //clip(0.5 - value);
-            
-            if (value >= 0.4)
-            {
-                o.Albedo = 0.1;
-                //o.Alpha = 0;
-            }
-            else
-            {
-                o.Albedo = tex2D(_AtlasTex, float2(value * 2, _AtlasRow));
-                //o.Alpha = 1;
-            }
-
-            o.Alpha = 1;
-            //o.Albedo = tex2D(_AtlasTex, float2(value.r * 2, _AtlasRow));
-            //o.Alpha = value.g;
+            fixed4 color = tex2D(_AtlasTex, float2(value, _AtlasRow));
+            o.Albedo = color.rgb;
+            o.Alpha = color.a;
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }

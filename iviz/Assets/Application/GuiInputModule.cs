@@ -135,7 +135,7 @@ namespace Iviz.App
                 new Vector2(800, 600) :
                 new Vector2(800, 800);
                 
-            QualitySettings.antiAliasing = Settings.IsMobile ? 0 : 2;
+            //QualitySettings.antiAliasing = Settings.IsMobile ? 0 : 2;
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 

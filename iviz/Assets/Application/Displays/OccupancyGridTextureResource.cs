@@ -2,6 +2,7 @@ using System;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -67,7 +68,7 @@ namespace Iviz.Displays
                 Destroy(texture);
             }
 
-            texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, false)
+            texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, true)
             {
                 name = "OccupancyGrid Texture",
                 filterMode = FilterMode.Point,
@@ -89,8 +90,12 @@ namespace Iviz.Displays
             mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs() * 0.1f;
             mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
-            texture.GetRawTextureData<sbyte>().CopyFrom(values);
-            texture.Apply(false);
+            //Debug.Log(texture.GetRawTextureData<sbyte>().Length);
+            //Debug.Log(texture.mipmapCount);
+            //texture.GetRawTextureData<sbyte>().CopyFrom(values);
+            texture.SetPixelData(values, 0);
+            //NativeArray<sbyte>.Copy(values, 0, texture.GetRawTextureData<sbyte>(), 0, 256 * 256);
+            texture.Apply(true);
         }
         
         void OnDestroy()

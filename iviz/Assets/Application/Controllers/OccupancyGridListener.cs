@@ -32,6 +32,7 @@ namespace Iviz.Controllers
     {
         readonly FrameNode node;
         readonly OccupancyGridResource[] grids;
+        readonly OccupancyGridTextureResource texture;
         float lastCellSize;
 
         public override IModuleData ModuleData { get; }
@@ -79,6 +80,8 @@ namespace Iviz.Controllers
                 {
                     grid.Colormap = value;
                 }
+
+                texture.Colormap = value;
             }
         }
 
@@ -159,6 +162,12 @@ namespace Iviz.Controllers
                     node.transform);
             }
 
+            /*
+            texture = ResourcePool.GetOrCreate<OccupancyGridTextureResource>(
+                Resource.Displays.OccupancyGridTextureResource,
+                node.transform);
+                */
+
             Config = new OccupancyGridConfiguration();
         }
 
@@ -230,6 +239,9 @@ namespace Iviz.Controllers
             }
 
             ScaleZ = ScaleZ;
+
+            //texture.transform.SetLocalPose(origin);
+            //texture.Set(numCellsX, numCellsY, numCellsX * cellSize, numCellsY * cellSize, msg.Data);
         }
 
 

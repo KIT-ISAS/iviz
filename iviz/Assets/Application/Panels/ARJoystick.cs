@@ -1,5 +1,6 @@
 using System;
 using External;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ namespace Iviz.App
         public bool IsGlobal { get; private set; }
         public event Action<Vector3> ChangedPosition;
         public event Action<float> ChangedAngle;
+        public event Action PointerUp;
 
         public bool Visible
         {
@@ -32,22 +34,34 @@ namespace Iviz.App
             joystickY.Changed += OnChangedPosition;
             joystickZ.Changed += OnChangedPosition;
             joystickA.Changed += OnChangedAngle;
+            
+            joystickX.PointerUp += OnPointerUp;
+            joystickY.PointerUp += OnPointerUp;
+            joystickZ.PointerUp += OnPointerUp;
+            joystickA.PointerUp += OnPointerUp;
+            
         }
 
         void OnButtonClick()
         {
             IsGlobal = !IsGlobal;
-            button.GetComponent<Text>().text = IsGlobal ? "Global" : "Screen";
+            button.GetComponentInChildren<Text>().text = IsGlobal ? "Global" : "Screen";
         }
 
         void OnChangedPosition(Vector2 _)
         {
-            ChangedPosition?.Invoke(new Vector3(joystickX.Direction.x, joystickY.Direction.x, joystickZ.Direction.x));
+            var deltaPosition = new Vector3(joystickX.Direction.x, joystickY.Direction.x, joystickZ.Direction.x);
+            ChangedPosition?.Invoke(deltaPosition);
         }
 
         void OnChangedAngle(Vector2 _)
         {
             ChangedAngle?.Invoke(joystickA.Direction.x);
+        }
+
+        void OnPointerUp()
+        {
+            PointerUp?.Invoke();
         }
     }
 }

@@ -113,6 +113,7 @@ namespace Iviz.App
 
         static ModuleListPanel instance;
 
+        [NotNull]
         public static ModuleListPanel Instance =>
             instance != null ? instance : throw new InvalidOperationException("Module list panel has not been set!");
 
