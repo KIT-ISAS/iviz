@@ -125,7 +125,13 @@ namespace Iviz.XmlRpc
             using (Stream stream = client.GetStream())
             {
                 StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
-                await writer.WriteAsync(CreateRequest(msgIn)).Caf();
+                Task writeTask = writer.WriteAsync(CreateRequest(msgIn));
+                if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
+                {
+                    writer.Close();
+                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);
+                }
+
                 await writer.FlushAsync().Caf();
 
                 StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);

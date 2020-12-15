@@ -1404,9 +1404,9 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
-                await publisher.DisposeAsync().Caf();
+                await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
                 //Logger.LogDebug("2) Unregistering publisher " + publisher.Topic);
-                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).Caf();
+                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).AwaitNoThrow(this).Caf();
                 //Logger.LogDebug("2) Done publisher " + publisher.Topic);
             }));
 
@@ -1416,9 +1416,9 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
                 //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
-                await subscriber.DisposeAsync().Caf();
+                await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
                 //Logger.LogDebug("3) Unregistering subscriber " + subscriber.Topic);
-                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).Caf();
+                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).AwaitNoThrow(this).Caf();
                 //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
             }));
 
@@ -1438,13 +1438,14 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
                 //Logger.LogDebug("5) Disposing service " + senderManager.Service);
-                await senderManager.DisposeAsync().Caf();
+                await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
                 //Logger.LogDebug("5) Unregistering service " + senderManager.Service);
-                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).Caf();
+                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).AwaitNoThrow(this)
+                    .Caf();
                 //Logger.LogDebug("5) Done service " + senderManager.Service);
             }));
 
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await Task.WhenAll(tasks).WaitForWithTimeout(5000, "Close() tasks timed out").AwaitNoThrow(this).Caf();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1591,7 +1592,7 @@ namespace Iviz.Roslib
                 {
                     throw new InvalidMessageTypeException(
                         $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
-                        $"does not match the new given type.");
+                        "does not match the new given type.");
                 }
 
                 // is there a persistent connection? use it
@@ -1674,7 +1675,7 @@ namespace Iviz.Roslib
                 {
                     throw new InvalidMessageTypeException(
                         $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
-                        $"does not match the new given type.");
+                        "does not match the new given type.");
                 }
 
                 // is there a persistent connection? use it

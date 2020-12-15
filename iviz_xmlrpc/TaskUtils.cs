@@ -25,7 +25,7 @@ namespace Iviz.XmlRpc
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs, token)).Caf();
             return result == task;
         }
-        
+
         /// <summary>
         /// Waits for the task to complete, and throws a timeout exception if it doesn't.
         /// Only use this if the async function that generated the task does not support a cancellation token.
@@ -33,13 +33,14 @@ namespace Iviz.XmlRpc
         /// </summary>
         /// <param name="task">The task to be awaited</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
+        /// <param name="errorMessage">Optional error message to appear in the timeout exception</param>
         /// <exception cref="TimeoutException">If the task did not complete in time</exception>
-        public static async Task WaitForWithTimeout(this Task task, int timeoutInMs)
+        public static async Task WaitForWithTimeout(this Task task, int timeoutInMs, string? errorMessage = null)
         {
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs)).Caf();
             if (result != task)
             {
-                throw new TimeoutException();
+                throw new TimeoutException(errorMessage);
             }
         }
         

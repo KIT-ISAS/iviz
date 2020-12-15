@@ -71,7 +71,7 @@ namespace Iviz.Roslib.XmlRpc
             return new LookupNodeResponse(response);
         }
 
-        public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId)
+        public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId, CancellationToken token = default)
         {
             if (nodeId == null)
             {
@@ -79,7 +79,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, nodeId};
-            object[] response = await MethodCallAsync("lookupNode", args).Caf();
+            object[] response = await MethodCallAsync("lookupNode", args, token).Caf();
             return new LookupNodeResponse(response);
         }
 

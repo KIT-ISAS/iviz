@@ -109,7 +109,7 @@ namespace Iviz.Roslib
 
             if (task != null)
             {
-                await task.WaitForWithTimeout(5000).AwaitNoThrow(this);
+                await task.WaitForWithTimeout(5000, "Sender task dispose timed out.").AwaitNoThrow(this);
             }
 
             runningTs.Dispose();

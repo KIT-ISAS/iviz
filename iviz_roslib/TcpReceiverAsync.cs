@@ -77,7 +77,7 @@ namespace Iviz.Roslib
 
             if (task != null)
             {
-                await task.WaitForWithTimeout(5000).AwaitNoThrow(this);
+                await task.WaitForWithTimeout(5000, "Receiver task dispose timed out.").AwaitNoThrow(this);
             }
 
             readBuffer = Array.Empty<byte>();
