@@ -3,6 +3,7 @@ using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -11,7 +12,7 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
-        [SerializeField] Texture2D texture;
+        [SerializeField] Texture2D texture = null;
         Material material;
         
         [CanBeNull] MeshRenderer meshRenderer;
@@ -93,9 +94,13 @@ namespace Iviz.Displays
             //Debug.Log(texture.GetRawTextureData<sbyte>().Length);
             //Debug.Log(texture.mipmapCount);
             //texture.GetRawTextureData<sbyte>().CopyFrom(values);
-            texture.SetPixelData(values, 0);
-            //NativeArray<sbyte>.Copy(values, 0, texture.GetRawTextureData<sbyte>(), 0, 256 * 256);
-            texture.Apply(true);
+            //texture.SetPixelData(values, 0);
+            
+            var textureData = texture.GetRawTextureData<sbyte>();
+            NativeArray<sbyte>.Copy(values, 0, textureData, 0, newCellsX * newCellsY);
+            Reduce(textureData, newCellsX, newCellsY);
+
+            texture.Apply(false);
         }
         
         void OnDestroy()
@@ -119,6 +124,63 @@ namespace Iviz.Displays
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
-        }        
+        }
+
+        static unsafe void Reduce(NativeArray<sbyte> array, int width, int height)
+        {
+            sbyte* src = (sbyte*) array.GetUnsafePtr();
+            while (width > 0 && height > 0)
+            {
+                Reduce(src, width, height, src + width * height);
+                src += width * height;
+                width /= 2;
+                height /= 2;
+            }
+        }
+
+        static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
+        {
+            sbyte* dst0 = dst;
+            for (int v = 0; v < height; v += 2)
+            {
+                sbyte* row0 = src + width * v;
+                sbyte* row1 = row0 + width;
+                for (int u = 0; u < width; u += 2, row0 += 2, row1 += 2, dst++)
+                {
+                    int a = row0[0];
+                    int b = row0[1];
+                    int c = row1[0];
+                    int d = row1[1];
+                    *dst = (sbyte) Fuse(a, b, c, d);
+                }
+            }
+            
+            //Debug.Log((dst - dst0) + " " + width*height/4);
+        }
+
+        static int Fuse(int a, int b, int c, int d)
+        {
+            int signA = ~a >> 8;
+            int signB = ~b >> 8;
+            int signC = ~c >> 8;
+            int signD = ~d >> 8;
+
+            int valueA = a & signA;
+            int valueB = b & signB;
+            int valueC = c & signC;
+            int valueD = d & signD;
+
+            int sum1 = signA + signB + signC + signD;
+            int sum2 = valueA + valueB + valueC + valueD;
+
+            int tmpA = (sum2 * 21845) >> 16;
+            int tmpB = sum2 >> 2;
+
+            return sum1 >= -2 
+                ? -1 
+                : sum1 == -3 
+                    ? tmpA 
+                    : tmpB;
+        }
     }
 }

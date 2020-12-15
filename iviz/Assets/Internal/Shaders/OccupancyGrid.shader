@@ -11,7 +11,6 @@
         Tags
         {
             "Queue"="Transparent" "RenderType"="Transparent"
-            //"RenderType"="Opaque"
         }
 
         CGPROGRAM
