@@ -29,6 +29,7 @@ namespace Iviz.App
         static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
         static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
         static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
+        static readonly Color ConnectedWarningColor = new Color(1f, 0.8f, 0.3f, 0.4f);
 
         [SerializeField] DataLabelWidget masterUriStr = null;
         [SerializeField] TrashButtonWidget masterUriButton = null;
@@ -277,6 +278,7 @@ namespace Iviz.App
             connectionData.MasterActiveChanged += _ => { ConnectionManager.Connection.Disconnect(); };
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
+            ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             ARController.ARModeChanged += OnARModeChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
@@ -324,6 +326,12 @@ namespace Iviz.App
                     GameThread.EverySecond += RotateSprite;
                     break;
             }
+        }
+
+        void OnConnectionWarningChanged(bool value)
+        {
+            topPanel.color = value ? ConnectedWarningColor :
+                RosServerManager.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
         }
 
         void RotateSprite()

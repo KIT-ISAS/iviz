@@ -10,7 +10,7 @@ namespace Iviz.Displays
 {
     public sealed class DraggablePlane : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
-        [SerializeField] Vector3 normal;
+        [SerializeField] Vector3 normal = default;
 
         bool needsStart;
         Vector3 startIntersection;

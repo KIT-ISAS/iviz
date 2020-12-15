@@ -50,48 +50,29 @@ namespace Iviz.Core
 
         public static void Info(object t)
         {
-            UnityEngine.Debug.Log(t);
-
-            if (Settings.IsHololens)
-            {
-                LogInternal?.Invoke(t.ToString());
-            }
+            External(t.ToString(), LogLevel.Info);
         }
 
         public static void Error(object t)
         {
-            UnityEngine.Debug.LogWarning(t);
-
-            if (Settings.IsHololens)
-            {
-                LogInternal?.Invoke(t.ToString());
-            }
+            External(t.ToString(), LogLevel.Error);
         }
 
         public static void Warn(object t)
         {
-            UnityEngine.Debug.LogWarning(t);
-
-            if (Settings.IsHololens)
-            {
-                LogInternal?.Invoke(t.ToString());
-            }
+            External(t.ToString(), LogLevel.Warn);
         }
 
         public static void Debug(object t)
         {
-            UnityEngine.Debug.Log(t);
-
-            if (Settings.IsHololens)
-            {
-                LogInternal?.Invoke(t.ToString());
-            }
+            External(t.ToString());
         }
 
         public static void Internal([CanBeNull] string msg)
         {
             var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
+            UnityEngine.Debug.Log(msgTxt);
         }
 
         public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
@@ -126,7 +107,7 @@ namespace Iviz.Core
 
             string message = str.ToString();
             LogInternal?.Invoke(message);
-            Warn(message);
+            UnityEngine.Debug.LogWarning(message);
         }
 
 
@@ -134,7 +115,20 @@ namespace Iviz.Core
             [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
-            UnityEngine.Debug.Log(msg);
+            switch (level)
+            {
+                case LogLevel.Debug:
+                case LogLevel.Info:
+                    UnityEngine.Debug.Log(msg);
+                    break;
+                case LogLevel.Warn:
+                case LogLevel.Error:
+                    UnityEngine.Debug.LogWarning(msg);
+                    break;
+                case LogLevel.Fatal:
+                    UnityEngine.Debug.LogError(msg);
+                    break;
+            }
         }
 
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
@@ -164,7 +158,7 @@ namespace Iviz.Core
 
             string message = str.ToString();
             LogExternal?.Invoke(new LogMessage(LogLevel.Error, message, file, line));
-            UnityEngine.Debug.Log(message);
+            UnityEngine.Debug.LogWarning(message);
         }
     }
 

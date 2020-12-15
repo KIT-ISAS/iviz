@@ -37,6 +37,7 @@ namespace Iviz.Ros
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
         public abstract bool CallService<T>(string service, T srv) where T : IService;
         public event Action<ConnectionState> ConnectionStateChanged;
+        public event Action<bool> ConnectionWarningStateChanged;
 
         internal virtual void Stop()
         {
@@ -61,6 +62,11 @@ namespace Iviz.Ros
 
             ConnectionState = newState;
             GameThread.Post(() => ConnectionStateChanged?.Invoke(newState));
+        }
+
+        protected void SetConnectionWarningState(bool value)
+        {
+            GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
         }
 
         protected void AddTask(Func<Task> a)

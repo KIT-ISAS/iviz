@@ -16,6 +16,8 @@ namespace Iviz.Core
         readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
         float lastRunTime;
         Thread gameThread;
+
+        bool skip; 
         
         public static float GameTime { get; private set; }
 
@@ -28,7 +30,6 @@ namespace Iviz.Core
         void Update()
         {
             EveryFrame?.Invoke();
-            ListenerTick?.Invoke();
 
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
@@ -42,6 +43,22 @@ namespace Iviz.Core
             {
                 action();
             }
+
+            if (Settings.IsHololens)
+            {
+                skip = !skip;
+                if (skip)
+                {
+                    return;
+                }
+            }
+
+            ListenersEveryFrame?.Invoke();
+            while (listenerQueue.TryDequeue(out Action action))
+            {
+                action();
+            }
+            
         }
 
         void LateUpdate()
@@ -55,24 +72,28 @@ namespace Iviz.Core
         }
 
         /// <summary>
-        /// Run every frame.
+        /// Runs every frame on the Unity thread.
         /// </summary>
         public static event Action EveryFrame;
         
-        public static event Action ListenerTick;
+        /// <summary>
+        /// Runs every frame on the Unity thread, but may be slowed down if the CPU load is too high.
+        /// Used by the ROS listeners.
+        /// </summary>
+        public static event Action ListenersEveryFrame;
 
         /// <summary>
-        /// Run every frame after the rest.
+        /// Runs every frame on the Unity thread, but after EveryFrame has finished.
         /// </summary>
         public static event Action LateEveryFrame;
 
         /// <summary>
-        /// Run once per second.
+        /// Runs once per second.
         /// </summary>
         public static event Action EverySecond;
 
         /// <summary>
-        /// Run once per second after the others.
+        /// Runs once per second, but after EverySecond has finished.
         /// </summary>
         public static event Action LateEverySecond;
 

@@ -278,7 +278,7 @@ namespace Iviz.Controllers
 
         internal void OnInteractiveControlObjectMouseEvent(
             string interactiveMarkerId, string controlId,
-            in Pose controlPose, in Vector3? position,
+            in Pose relativeControlPose, in Vector3? position,
             MouseEventType eventType)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
@@ -288,7 +288,7 @@ namespace Iviz.Controllers
                 interactiveMarkerId,
                 controlId,
                 (byte) eventType,
-                TfListener.RelativePoseToOrigin(controlPose).Unity2RosPose(),
+                relativeControlPose.Unity2RosPose(),
                 0,
                 position?.Unity2RosPoint() ?? Point.Zero,
                 position != null
@@ -299,7 +299,7 @@ namespace Iviz.Controllers
 
         internal void OnInteractiveControlObjectMoved(
             [NotNull] string interactiveMarkerId, [NotNull] string controlId,
-            in Pose controlPose)
+            in Pose relativeControlPose)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
@@ -308,18 +308,18 @@ namespace Iviz.Controllers
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
-                controlPose.Unity2RosPose(),
+                relativeControlPose.Unity2RosPose(),
                 0,
                 Vector3.zero.Unity2RosPoint(),
                 false
             );
             Publisher.Publish(msg);
-            Logger.Info($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{controlPose}");
+            Logger.Info($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
         }
 
         internal void OnInteractiveControlObjectMenuSelect(
             [NotNull] string interactiveMarkerId, [NotNull] string controlId,
-            uint menuEntryId, in Pose controlPose)
+            uint menuEntryId, in Pose relativeControlPose)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
@@ -328,7 +328,7 @@ namespace Iviz.Controllers
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.MENU_SELECT,
-                controlPose.Unity2RosPose(),
+                relativeControlPose.Unity2RosPose(),
                 menuEntryId,
                 Vector3.zero.Unity2RosPoint(),
                 false

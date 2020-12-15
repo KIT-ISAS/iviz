@@ -9,7 +9,7 @@ namespace Iviz.Displays
 {
     public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
-        [SerializeField] Vector3 line;
+        [SerializeField] Vector3 line = default;
 
         bool needsStart;
         Vector3 startOffset;

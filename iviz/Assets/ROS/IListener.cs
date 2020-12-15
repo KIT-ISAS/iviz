@@ -63,7 +63,7 @@ namespace Iviz.Ros
         {
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
-            GameThread.ListenerTick += CallHandlerDelayed;
+            GameThread.ListenersEveryFrame += CallHandlerDelayed;
 
             Connection.Subscribe(this);
             Subscribed = true;
@@ -90,7 +90,7 @@ namespace Iviz.Ros
             GameThread.EverySecond -= UpdateStats;
             if (callbackInGameThread)
             {
-                GameThread.ListenerTick -= CallHandlerDelayed;
+                GameThread.ListenersEveryFrame -= CallHandlerDelayed;
             }
 
             Logger.Internal($"Unsubscribing from {Topic}.");

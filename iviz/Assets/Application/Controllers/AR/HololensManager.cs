@@ -9,6 +9,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
 using Iviz.Resources;
+using Microsoft.MixedReality.Toolkit;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
@@ -305,12 +306,6 @@ namespace Iviz.Hololens
                 scale => new HololensMenuEntry(scale.ToString(BuiltIns.Culture), () => MenuListClick(scale))));
         }
 
-        void StartOriginPlaceMode()
-        {
-            RootFrame.transform.SetPose(InfinitePose);
-            floorFrame.gameObject.SetActive(true);
-        }
-
         static void ToggleTfVisibility()
         {
             TfListener.Instance.FramesVisible = !TfListener.Instance.FramesVisible;
@@ -353,10 +348,18 @@ namespace Iviz.Hololens
             ConnectionManager.Connection.Disconnect();
         }
 
+        void StartOriginPlaceMode()
+        {
+            RootFrame.transform.SetPose(InfinitePose);
+            floorFrame.gameObject.SetActive(true);
+            CoreServices.SpatialAwarenessSystem.Enable();
+        }
+
         void StartWorld()
         {
             floorFrame.gameObject.SetActive(false);
             RootFrame.transform.SetPose(floorFrame.OriginPose);
+            CoreServices.SpatialAwarenessSystem.Disable();
         }
 
         public float LeftHandScale

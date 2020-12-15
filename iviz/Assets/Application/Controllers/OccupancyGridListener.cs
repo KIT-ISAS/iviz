@@ -30,14 +30,15 @@ namespace Iviz.Controllers
 
     public sealed class OccupancyGridListener : ListenerController
     {
-        readonly FrameNode node;
+        readonly FrameNode cubeNode;
+        readonly FrameNode textureNode;
         readonly OccupancyGridResource[] grids;
-        readonly OccupancyGridTextureResource texture;
+        readonly OccupancyGridTextureResource texture = null;
         float lastCellSize;
 
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => node.Parent;
+        public override TfFrame Frame => cubeNode.Parent;
 
         readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
 
@@ -106,7 +107,7 @@ namespace Iviz.Controllers
                 config.ScaleZ = value;
 
                 float yScale = Mathf.Approximately(lastCellSize, 0) ? 1 : value / lastCellSize;
-                node.transform.localScale = new Vector3(1, yScale, 1);
+                cubeNode.transform.localScale = new Vector3(1, yScale, 1);
             }
         }
 
@@ -153,20 +154,21 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            node = FrameNode.Instantiate("Node");
+            cubeNode = FrameNode.Instantiate("Node");
 
             grids = new OccupancyGridResource[16];
             for (int i = 0; i < grids.Length; i++)
             {
                 grids[i] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource,
-                    node.transform);
+                    cubeNode.transform);
+                grids[i].transform.SetLocalPose(Pose.identity);
             }
 
-            /*
+            
             texture = ResourcePool.GetOrCreate<OccupancyGridTextureResource>(
                 Resource.Displays.OccupancyGridTextureResource,
-                node.transform);
-                */
+                cubeNode.transform);
+                
 
             Config = new OccupancyGridConfiguration();
         }
@@ -202,9 +204,10 @@ namespace Iviz.Controllers
                 return;
             }
 
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            cubeNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
+            cubeNode.Transform.SetLocalPose(origin);
 
             int numCellsX = (int) msg.Info.Width;
             int numCellsY = (int) msg.Info.Height;
@@ -225,7 +228,7 @@ namespace Iviz.Controllers
                     grid.NumCellsX = numCellsX;
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
-                    grid.transform.SetLocalPose(origin);
+                    //grid.transform.SetLocalPose(Pose.identity);
 
                     var rect = new OccupancyGridResource.Rect
                     (
@@ -241,7 +244,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
 
             //texture.transform.SetLocalPose(origin);
-            //texture.Set(numCellsX, numCellsY, numCellsX * cellSize, numCellsY * cellSize, msg.Data);
+            texture.Set(numCellsX, numCellsY, cellSize, msg.Data);
         }
 
 
@@ -256,8 +259,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.Stop();
-            UnityEngine.Object.Destroy(node.gameObject);
+            cubeNode.Stop();
+            UnityEngine.Object.Destroy(cubeNode.gameObject);
         }
     }
 }

@@ -10,8 +10,10 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Msgs.Logger;
 
@@ -28,6 +30,9 @@ namespace Iviz.Ros
         [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
         [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
         [CanBeNull] RosClient client;
+
+        CancellationTokenSource watchdogSource;
+        Task watchdogTask;
 
         Uri masterUri;
         string myId;
@@ -73,15 +78,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            try
-            {
-                await client.CloseAsync();
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
+            await client.CloseAsync().AwaitNoThrow(this);
             client = null;
         }
 
@@ -122,7 +119,8 @@ namespace Iviz.Ros
                 }
 
                 Core.Logger.Debug("*** ReAdvertising...");
-                await Task.WhenAll(publishersByTopic.Values.Select(ReAdvertise));
+                await Task.WhenAll(publishersByTopic.Values.Select(ReAdvertise))
+                    .WaitForWithTimeout(5000, "ReAdvertise task timed out");
                 /*
                 foreach (var publisher in publishersByTopic.Values)
                 {
@@ -131,7 +129,8 @@ namespace Iviz.Ros
                 */
                 Core.Logger.Debug("*** Done ReAdvertising");
                 Core.Logger.Debug("*** Resubscribing...");
-                await Task.WhenAll(subscribersByTopic.Values.Select(ReSubscribe));
+                await Task.WhenAll(subscribersByTopic.Values.Select(ReSubscribe))
+                    .WaitForWithTimeout(5000, "ReSubscribe task timed out");
                 /*
                 foreach (var subscriber in subscribersByTopic.Values)
                 {
@@ -150,10 +149,15 @@ namespace Iviz.Ros
                     await entry.AdvertiseAsync(newClient);
                 }
                 */
-                await Task.WhenAll(servicesByTopic.Values.Select(ReAdvertiseService));
+                await Task.WhenAll(servicesByTopic.Values.Select(ReAdvertiseService))
+                    .WaitForWithTimeout(5000, "ReAdvertiseService task timed out");
                 Core.Logger.Debug("*** Done Advertising services!");
+                Core.Logger.Debug("*** Connected!");
 
-                Core.Logger.Internal("<b>Connected.</b>");
+                Core.Logger.Internal("<b>Connected!</b>");
+
+                watchdogSource = new CancellationTokenSource();
+                watchdogTask = Task.Run(async () => await WatchdogAsync(MasterUri, MyId, MyUri, watchdogSource.Token));
 
                 return true;
             }
@@ -161,6 +165,7 @@ namespace Iviz.Ros
             (e is UnreachableUriException ||
              e is ConnectionException ||
              e is RosRpcException ||
+             e is TimeoutException ||
              e is XmlRpcException)
             {
                 Core.Logger.Internal("Error:", e);
@@ -178,6 +183,66 @@ namespace Iviz.Ros
             //Core.Logger.Debug("*** Disconnecting!");
             await DisconnectImpl();
             return false;
+        }
+
+        static async Task WatchdogAsync(Uri masterUri, string callerId, Uri callerUri, CancellationToken token)
+        {
+            RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
+            DateTime lastMasterAccess = DateTime.Now;
+            bool warningSet = false;
+            Uri lastRosOutUri = null;
+            var instance = ConnectionManager.Connection;
+            instance.SetConnectionWarningState(false);
+
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    DateTime now = DateTime.Now;
+                    try
+                    {
+                        LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);
+
+                        lastMasterAccess = now;
+                        if (warningSet)
+                        {
+                            Core.Logger.Internal("The master is visible again, but we may be out of sync. Restarting!");
+                            instance.Disconnect();
+                            break;
+                        }
+
+                        if (response.IsValid)
+                        {
+                            if (lastRosOutUri == null)
+                            {
+                                lastRosOutUri = response.Uri;
+                            }
+                            else if (lastRosOutUri != response.Uri)
+                            {
+                                Core.Logger.Internal("<b>Warning:</b> The master appears to have changed. Restarting!");
+                                instance.Disconnect();
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        //TimeSpan diff = now - lastMasterAccess;
+                        if (!warningSet)
+                        {
+                            Core.Logger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
+                                                 $" [{lastMasterAccess:HH:mm:ss}].");
+                            instance.SetConnectionWarningState(true);
+                            warningSet = true;
+                        }
+                    }
+
+                    await Task.Delay(5000, token);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic)
@@ -219,6 +284,14 @@ namespace Iviz.Ros
             Core.Logger.Internal("Disconnecting...");
             await DisposeClient();
             Core.Logger.Internal("<b>Disconnected.</b>");
+
+            if (watchdogTask != null)
+            {
+                watchdogSource.Cancel();
+                await watchdogTask.AwaitNoThrow(this);
+                watchdogSource = null;
+                watchdogTask = null;
+            }
 
             foreach (var entry in publishersByTopic.Values)
             {
@@ -331,7 +404,7 @@ namespace Iviz.Ros
             }
 
             Core.Logger.External(
-                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.", 
+                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.",
                 LogLevel.Info);
 
             var newAdvertisedService = new AdvertisedService<T>(service, callback);
@@ -425,8 +498,8 @@ namespace Iviz.Ros
             {
                 topicName = default;
                 return false;
-            } 
-            
+            }
+
             var basePublisher = publishers[advertiser.Id];
             topicName = basePublisher.Topic;
             return true;

@@ -14,21 +14,22 @@ namespace Iviz.Displays
     {
         [SerializeField] Texture2D texture = null;
         Material material;
-        
+
         [CanBeNull] MeshRenderer meshRenderer;
 
         [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();        
+        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
 
         protected override void Awake()
         {
             material = Resource.Materials.OccupancyGridTexture.Instantiate();
             MeshRenderer.sharedMaterial = material;
-            
+
             base.Awake();
             Colormap = Resource.ColormapId.hsv;
         }
 
+        /*
         void Start()
         {
             const int n = 256;
@@ -56,6 +57,7 @@ namespace Iviz.Displays
 
             Set(n, n, 10, 10, values);
         }
+        */
 
         void EnsureSize(int sizeX, int sizeY)
         {
@@ -69,16 +71,16 @@ namespace Iviz.Displays
                 Destroy(texture);
             }
 
-            texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, true)
+            //texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, true)
+            texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, false)
             {
                 name = "OccupancyGrid Texture",
                 filterMode = FilterMode.Point,
-                
             };
             material.mainTexture = texture;
         }
 
-        public void Set(int newCellsX, int newCellsY, float width, float height, [NotNull] sbyte[] values)
+        public void Set(int newCellsX, int newCellsY, float cellSize, [NotNull] sbyte[] values)
         {
             if (values == null)
             {
@@ -87,22 +89,30 @@ namespace Iviz.Displays
 
             EnsureSize(newCellsX, newCellsY);
 
+            float width = newCellsX * cellSize;
+            float height = newCellsY * cellSize;
+
             Transform mTransform = transform;
-            mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs() * 0.1f;
-            mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
+            Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
+            mTransform.localPosition = rosCenter.Ros2Unity();
+            mTransform.localRotation = Quaternion.Euler(0, 90, 0);
+            mTransform.localScale = new Vector3(height, width, 1).Ros2Unity().Abs() * 0.1f;
 
             //Debug.Log(texture.GetRawTextureData<sbyte>().Length);
             //Debug.Log(texture.mipmapCount);
             //texture.GetRawTextureData<sbyte>().CopyFrom(values);
             //texture.SetPixelData(values, 0);
-            
+
             var textureData = texture.GetRawTextureData<sbyte>();
-            NativeArray<sbyte>.Copy(values, 0, textureData, 0, newCellsX * newCellsY);
-            Reduce(textureData, newCellsX, newCellsY);
+            //Debug.Log("Expected: " + textureData.Length);
+            textureData.CopyFrom(values);
+
+            //NativeArray<sbyte>.Copy(values, 0, textureData, 0, newCellsX * newCellsY);
+            //Reduce(textureData, newCellsX, newCellsY);
 
             texture.Apply(false);
         }
-        
+
         void OnDestroy()
         {
             if (texture != null)
@@ -114,13 +124,13 @@ namespace Iviz.Displays
             {
                 Destroy(material);
             }
-        }        
-        
+        }
+
         protected override void Rebuild()
         {
             // not needed
-        }        
-        
+        }
+
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
@@ -136,6 +146,8 @@ namespace Iviz.Displays
                 width /= 2;
                 height /= 2;
             }
+
+            //Debug.Log("Used: " + (src - (sbyte*)array.GetUnsafePtr()));
         }
 
         static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
@@ -154,7 +166,7 @@ namespace Iviz.Displays
                     *dst = (sbyte) Fuse(a, b, c, d);
                 }
             }
-            
+
             //Debug.Log((dst - dst0) + " " + width*height/4);
         }
 
@@ -176,10 +188,10 @@ namespace Iviz.Displays
             int tmpA = (sum2 * 21845) >> 16;
             int tmpB = sum2 >> 2;
 
-            return sum1 >= -2 
-                ? -1 
-                : sum1 == -3 
-                    ? tmpA 
+            return sum1 >= -2
+                ? -1
+                : sum1 == -3
+                    ? tmpA
                     : tmpB;
         }
     }
