@@ -124,10 +124,10 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void SetOccupancy(sbyte[] values, Rect? tbounds = null)
+        public void SetOccupancy(sbyte[] values, Rect? inBounds = null)
         {
             IsProcessing = true;
-            Rect bounds = tbounds ?? new Rect(0, numCellsX, 0, numCellsY);
+            Rect bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
 
             pointBuffer.Clear();
 
@@ -168,6 +168,9 @@ namespace Iviz.Displays
             public int XMax { get; }
             public int YMin { get; }
             public int YMax { get; }
+
+            public int Width => XMax - XMin;
+            public int Height => YMax - YMin;
 
             public Rect(int xMin, int xMax, int yMin, int yMax)
             {

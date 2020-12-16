@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -30,15 +31,14 @@ namespace Iviz.Controllers
 
     public sealed class OccupancyGridListener : ListenerController
     {
-        readonly FrameNode cubeNode;
-        readonly FrameNode textureNode;
+        readonly FrameNode node;
         readonly OccupancyGridResource[] grids;
-        readonly OccupancyGridTextureResource texture = null;
+        readonly List<OccupancyGridTextureResource> textures = new List<OccupancyGridTextureResource>();
         float lastCellSize;
 
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => cubeNode.Parent;
+        public override TfFrame Frame => node.Parent;
 
         readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
 
@@ -82,7 +82,10 @@ namespace Iviz.Controllers
                     grid.Colormap = value;
                 }
 
-                texture.Colormap = value;
+                foreach (var texture in textures)
+                {
+                    texture.Colormap = value;
+                }
             }
         }
 
@@ -96,6 +99,11 @@ namespace Iviz.Controllers
                 {
                     grid.FlipMinMax = value;
                 }
+
+                foreach (var texture in textures)
+                {
+                    texture.FlipMinMax = value;
+                }
             }
         }
 
@@ -107,7 +115,7 @@ namespace Iviz.Controllers
                 config.ScaleZ = value;
 
                 float yScale = Mathf.Approximately(lastCellSize, 0) ? 1 : value / lastCellSize;
-                cubeNode.transform.localScale = new Vector3(1, yScale, 1);
+                node.transform.localScale = new Vector3(1, yScale, 1);
             }
         }
 
@@ -147,6 +155,11 @@ namespace Iviz.Controllers
                 {
                     grid.Tint = value;
                 }
+
+                foreach (var texture in textures)
+                {
+                    texture.Tint = value;
+                }
             }
         }
 
@@ -154,21 +167,15 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            cubeNode = FrameNode.Instantiate("Node");
+            node = FrameNode.Instantiate("Node");
 
             grids = new OccupancyGridResource[16];
             for (int i = 0; i < grids.Length; i++)
             {
                 grids[i] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource,
-                    cubeNode.transform);
+                    node.transform);
                 grids[i].transform.SetLocalPose(Pose.identity);
             }
-
-            
-            texture = ResourcePool.GetOrCreate<OccupancyGridTextureResource>(
-                Resource.Displays.OccupancyGridTextureResource,
-                cubeNode.transform);
-                
 
             Config = new OccupancyGridConfiguration();
         }
@@ -180,7 +187,7 @@ namespace Iviz.Controllers
 
         void Handler(OccupancyGrid msg)
         {
-            if (grids.Any(x => x.IsProcessing))
+            if (grids != null && grids.Any(grid => grid.IsProcessing))
             {
                 return;
             }
@@ -204,21 +211,21 @@ namespace Iviz.Controllers
                 return;
             }
 
-            cubeNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
-            cubeNode.Transform.SetLocalPose(origin);
+            node.Transform.SetLocalPose(origin);
 
+            //SetCubes(msg);
+            SetTextures(msg);
+        }
+
+        void SetCubes(OccupancyGrid msg)
+        {
             int numCellsX = (int) msg.Info.Width;
             int numCellsY = (int) msg.Info.Height;
             float cellSize = msg.Info.Resolution;
-            lastCellSize = cellSize;
-
-            //float totalWidth = numCellsX * cellSize;
-            //float totalHeight = numCellsY * cellSize;
-
-            //origin.position += new Vector3(numCellsX, numCellsY, 0).Ros2Unity() * (cellSize / 2f);
-
+            
             int i = 0;
             for (int v = 0; v < 4; v++)
             {
@@ -228,7 +235,6 @@ namespace Iviz.Controllers
                     grid.NumCellsX = numCellsX;
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
-                    //grid.transform.SetLocalPose(Pose.identity);
 
                     var rect = new OccupancyGridResource.Rect
                     (
@@ -241,10 +247,56 @@ namespace Iviz.Controllers
                 }
             }
 
-            ScaleZ = ScaleZ;
+            ScaleZ = ScaleZ;            
+        }
 
-            //texture.transform.SetLocalPose(origin);
-            texture.Set(numCellsX, numCellsY, cellSize, msg.Data);
+        void SetTextures(OccupancyGrid msg)
+        {
+            int numCellsX = (int) msg.Info.Width;
+            int numCellsY = (int) msg.Info.Height;
+            float cellSize = msg.Info.Resolution;
+            lastCellSize = cellSize;
+            
+            int expectedWidth = numCellsX / 256 + 1;
+            int expectedHeight = numCellsY / 256 + 1;
+            int expectedSize = expectedHeight * expectedWidth;
+
+            if (expectedSize != textures.Count)
+            {
+                if (expectedSize > textures.Count)
+                {
+                    for (int j = textures.Count; j < expectedSize; j++)
+                    {
+                        textures.Add(ResourcePool.GetOrCreateDisplay<OccupancyGridTextureResource>(node.transform));
+                    }
+
+                    Colormap = Colormap;
+                }
+                else
+                {
+                    for (int j = expectedSize; j < textures.Count; j++)
+                    {
+                        ResourcePool.DisposeDisplay(textures[j]);
+                        textures[j] = null;
+                    }
+                    
+                    textures.RemoveRange(expectedSize, textures.Count - expectedSize);
+                }
+            }
+
+            int i = 0;
+            for (int v = 0; v < expectedHeight; v++)
+            {
+                for (int u = 0; u < expectedWidth; u++, i++)
+                {
+                    int xMin = u * 256;
+                    int xMax = Math.Min(xMin + 256, numCellsX);
+                    int yMin = v * 256;
+                    int yMax = Math.Min(yMin + 256, numCellsY);
+                    OccupancyGridResource.Rect rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
+                    textures[i].Set(msg.Data, cellSize, numCellsX, numCellsY, rect);
+                }
+            }            
         }
 
 
@@ -259,8 +311,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            cubeNode.Stop();
-            UnityEngine.Object.Destroy(cubeNode.gameObject);
+            node.Stop();
+            UnityEngine.Object.Destroy(node.gameObject);
         }
     }
 }

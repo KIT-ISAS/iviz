@@ -55,7 +55,7 @@ namespace Iviz.Controllers
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
-        static readonly Crc32Calculator Crc32 = new Crc32Calculator();
+        static Crc32Calculator Crc32 => Crc32Calculator.Instance;
 
         readonly StringBuilder description = new StringBuilder(250);
 

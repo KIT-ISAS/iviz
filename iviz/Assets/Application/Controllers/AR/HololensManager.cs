@@ -9,11 +9,14 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
 using Iviz.Resources;
-using Microsoft.MixedReality.Toolkit;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
+
+#if UNITY_WSA
+using Microsoft.MixedReality.Toolkit;
+#endif
 
 namespace Iviz.Hololens
 {

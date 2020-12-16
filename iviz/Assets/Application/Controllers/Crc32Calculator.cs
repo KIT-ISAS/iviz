@@ -1,9 +1,13 @@
-﻿namespace Iviz.Controllers
+﻿using System.Runtime.CompilerServices;
+
+namespace Iviz.Controllers
 {
     public sealed class Crc32Calculator
     {
+        public static Crc32Calculator Instance { get; } = new Crc32Calculator();
+
         const uint DefaultPolynomial = 0xedb88320u;
-        const uint DefaultSeed = 0xffffffffu;
+        public const uint DefaultSeed = 0xffffffffu;
 
         readonly uint[] table;
 
@@ -60,5 +64,11 @@
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
             }
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public uint Update(uint hash, byte val)    
+        {
+            return (hash >> 8) ^ table[val ^ hash & 0xff];
+        } 
     }
 }
