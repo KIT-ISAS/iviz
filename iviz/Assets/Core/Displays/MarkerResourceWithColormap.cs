@@ -13,8 +13,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
-        static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
+        protected static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
+        protected static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
         static readonly int LocalToWorldId = Shader.PropertyToID("_LocalToWorld");
         static readonly int WorldToLocalId = Shader.PropertyToID("_WorldToLocal");
         static readonly int TintId = Shader.PropertyToID("_Tint");
@@ -52,7 +52,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Gets or sets the bounds for the colormap. Min intensity is mapped to colormap position 0, max to 1. 
         /// </summary>
-        public Vector2 IntensityBounds
+        public virtual Vector2 IntensityBounds
         {
             get => intensityBounds;
             set
@@ -86,7 +86,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Whether to use a flipped version of IntensityBounds.
         /// </summary>
-        public bool FlipMinMax
+        public virtual bool FlipMinMax
         {
             get => flipMinMax;
             set

@@ -32,7 +32,7 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            Color = Color.green;
+            Color = new Color(0, 1, 0, 0.3f);
             FrameAxisLength = 0.33f;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
@@ -92,10 +92,10 @@ namespace Iviz.Controllers
                 bounds = value ?? throw new NullReferenceException();
 
                 Vector3 center = bounds.center;
-                Vector3 size = bounds.size;
+                Vector3 size = bounds.size / 4;
 
                 float minAxisLength = Mathf.Min(Mathf.Min(bounds.size.x, bounds.size.y), bounds.size.z);
-                FrameAxisLength = minAxisLength * 0.33f;
+                FrameAxisLength = minAxisLength * 0.05f;
                 frames[0].transform.localPosition = center + new Vector3(size.x, -size.y, size.z) / 2;
                 frames[1].transform.localPosition = center + new Vector3(size.x, -size.y, -size.z) / 2;
                 frames[2].transform.localPosition = center + new Vector3(-size.x, -size.y, -size.z) / 2;

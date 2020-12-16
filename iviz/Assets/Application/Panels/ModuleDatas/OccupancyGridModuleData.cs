@@ -52,9 +52,12 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
             panel.FlipColors.Value = listener.FlipMinMax;
             panel.ScaleZ.Value = listener.ScaleZ;
+            panel.ShowCubes.Value = listener.CubesVisible;
+            panel.ShowTexture.Value = listener.TextureVisible;
 
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
+            panel.Description.Label = listener.Description;
             //panel.Alpha.Value = listener.Tint.a;
 
             panel.Tint.ValueChanged += f =>
@@ -77,6 +80,14 @@ namespace Iviz.App
             {
                 listener.ScaleZ = f;
             };
+            panel.ShowTexture.ValueChanged += f =>
+            {
+                listener.TextureVisible = f;
+            };
+            panel.ShowCubes.ValueChanged += f =>
+            {
+                listener.CubesVisible = f;
+            };
 
             panel.Colormap.ValueChanged += (i, _) =>
             {
@@ -94,7 +105,12 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
-        
+
+        public override void UpdatePanel()
+        {
+            panel.Description.Label = listener.Description;
+        }
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<OccupancyGridConfiguration>(configAsJson);

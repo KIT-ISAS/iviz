@@ -78,7 +78,7 @@ namespace Iviz.Displays
             EmissiveColor = emissiveColor;
             Tint = tint;
 
-            MainRenderer.SetPropertyMainTexST(Vector2.zero, Vector2.one);
+            MainRenderer.SetPropertyMainTexSt(Vector2.zero, Vector2.one);
         }
 
         public bool OcclusionOnly

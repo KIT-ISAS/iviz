@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -231,7 +228,7 @@ namespace Iviz.Core
 
         static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
 
-        public static void SetPropertyMainTexST(
+        public static void SetPropertyMainTexSt(
             [NotNull] this MeshRenderer meshRenderer,
             in Vector2 xy,
             in Vector2 wh,
@@ -251,48 +248,6 @@ namespace Iviz.Core
             propBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
             meshRenderer.SetPropertyBlock(propBlock, id);
         }
-
-        public static Color32 MultiplyFast(Color32 c1, Color32 c2)
-        {
-            return new Color32(
-                (byte)(c1.r * c2.r >> 16),
-                (byte)(c1.g * c2.g >> 16),
-                (byte)(c1.b * c2.b >> 16),
-                (byte)(c1.a * c2.a >> 16)
-                );
-        }
-
-        struct NativeArrayHelper<T> : IList<T>, IReadOnlyList<T> where T : struct
-        {
-            NativeArray<T> nArray;
-
-            public NativeArrayHelper(in NativeArray<T> array) => nArray = array;
-            IEnumerator<T> IEnumerable<T>.GetEnumerator() => nArray.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => nArray.GetEnumerator();
-            public NativeArray<T>.Enumerator GetEnumerator() => nArray.GetEnumerator();
-            public void Add(T item) => throw new InvalidOperationException();
-            public void Clear() => throw new InvalidOperationException();
-            public bool Contains(T item) => nArray.Contains(item);
-            public void CopyTo(T[] array, int arrayIndex) => array.CopyTo(array, arrayIndex);
-            public bool Remove(T item) => throw new InvalidOperationException();
-            public int Count => nArray.Length;
-            public bool IsReadOnly => false;
-            public int IndexOf(T item) => throw new InvalidOperationException();
-            public void Insert(int index, T item) => throw new InvalidOperationException();
-            public void RemoveAt(int index) => throw new InvalidOperationException();
-
-            public T this[int index]
-            {
-                get => nArray[index];
-                set => nArray[index] = value;
-            }
-        }
-
-        public static IList<T> AsList<T>(this NativeArray<T> array) where T : struct =>
-            new NativeArrayHelper<T>(array);
-
-        public static IReadOnlyList<T> AsReadOnlyList<T>(this NativeArray<T> array) where T : struct =>
-            new NativeArrayHelper<T>(array);
 
         public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {

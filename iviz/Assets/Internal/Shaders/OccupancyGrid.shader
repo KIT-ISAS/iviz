@@ -32,10 +32,10 @@
 
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
-            float value = tex2D(_MainTex, IN.uv_MainTex).r;
+            float value = tex2D(_MainTex, IN.uv_MainTex).r * (127 / 100.);
             fixed4 color = tex2D(_AtlasTex, float2(value, _AtlasRow));
-            o.Albedo = color.rgb;
-            o.Alpha = color.a;
+            o.Albedo = _Tint.rgb * color.rgb;
+            o.Alpha = _Tint.a * color.a;
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }

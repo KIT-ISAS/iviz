@@ -93,6 +93,8 @@ namespace Iviz.Displays
 
         public bool IsProcessing { get; private set; }
 
+        public int NumValidValues => resource != null ? resource.Size : 0;
+
         void Awake()
         {
             pointBuffer = new NativeList<float4>(Allocator.Persistent);

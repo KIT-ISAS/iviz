@@ -94,7 +94,7 @@ namespace Iviz.Displays
             }
         }
 
-        int Size => pointBuffer.Length;
+        public int Size => pointBuffer.Length;
 
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.

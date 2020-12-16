@@ -1,4 +1,5 @@
 ﻿using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -13,10 +14,13 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public ToggleWidget FlipColors { get; private set; }
+        public ToggleWidget ShowTexture { get; private set; }
+        public ToggleWidget ShowCubes { get; private set; }
         public SliderWidget ScaleZ { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         //public SliderWidget Alpha { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
+        public DataLabelWidget Description { get; private set; }
 
         void Awake()
         {
@@ -24,10 +28,13 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Occupancy\nGrid");
             Listener = p.AddListener();
             Frame = p.AddFrame();
+            Description = p.AddDataLabel("").SetAlignment(TextAnchor.MiddleCenter);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Colormap Flip Min/Max");
+            ShowTexture = p.AddToggle("Show As Textured Plane");
+            ShowCubes = p.AddToggle("Show As Bars");
             ScaleZ = p.AddSlider("Height").SetMinValue(0.01f).SetMaxValue(5.0f).SetNumberOfSteps(49);
 
             Tint = p.AddColorPicker("Tint");

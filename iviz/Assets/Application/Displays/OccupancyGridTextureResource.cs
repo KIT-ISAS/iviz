@@ -14,54 +14,62 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
+        static Texture2D atlasLarge;
+
+        static Texture2D AtlasLarge => (atlasLarge != null)
+            ? atlasLarge
+            : atlasLarge = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large");
+        
+        static Texture2D atlasLargeFlipped;
+
+        static Texture2D AtlasLargeFlipped => (atlasLargeFlipped != null)
+            ? atlasLargeFlipped
+            : atlasLargeFlipped = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large-flip");
+
+        static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
+
         [SerializeField] Texture2D texture = null;
         Material material;
+        [NotNull] sbyte[] buffer = Array.Empty<sbyte>();
+        uint? previousHash;
 
         [CanBeNull] MeshRenderer meshRenderer;
 
         [NotNull]
         MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
 
-        uint? previousHash;
+        public bool IsProcessing { get; private set; }
+        
+        public int NumValidValues { get; private set; }
 
+        public override Vector2 IntensityBounds
+        {
+            get => default;
+            set { }
+        }
+
+        bool newFlipMinMax;
+
+        public override bool FlipMinMax
+        {
+            get => newFlipMinMax;
+            set
+            {
+                newFlipMinMax = value;
+                material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
+            }
+        }
+        
         protected override void Awake()
         {
             material = Resource.Materials.OccupancyGridTexture.Instantiate();
+            
             MeshRenderer.sharedMaterial = material;
 
             base.Awake();
             Colormap = Resource.ColormapId.hsv;
+            FlipMinMax = false;
         }
-
-        /*
-        void Start()
-        {
-            const int n = 256;
-            sbyte[] values = new sbyte[n * n];
-            int i = 0;
-            for (int v = 0; v < n; v++)
-            {
-                for (int u = 0; u < n; u++, i++)
-                {
-                    float dist = (new Vector2(u, v) - new Vector2(n / 2f, n / 2f)).magnitude;
-                    if (dist > n/2f)
-                    {
-                        values[i] = -1;
-                    }
-                    else if (i % 3 == 0)
-                    {
-                        values[i] = -1;
-                    }
-                    else
-                    {
-                        values[i] = (sbyte)(dist / (n/2f) * 127);                        
-                    }
-                }
-            }
-
-            Set(n, n, 10, 10, values);
-        }
-        */
 
         void EnsureSize(int sizeX, int sizeY)
         {
@@ -75,11 +83,11 @@ namespace Iviz.Displays
                 Destroy(texture);
             }
 
-            //texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, true)
             texture = new Texture2D(sizeX, sizeY, TextureFormat.R8, true)
             {
                 name = "OccupancyGrid Texture",
                 filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Clamp,
             };
             material.mainTexture = texture;
         }
@@ -92,73 +100,78 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(values));
             }
 
+            IsProcessing = true;
+
             var bounds = inBounds ?? new OccupancyGridResource.Rect(0, numCellsX, 0, numCellsY);
             int segmentWidth = bounds.Width;
             int segmentHeight = bounds.Height;
 
-            EnsureSize(segmentWidth, segmentHeight);
-
             float totalWidth = segmentWidth * cellSize;
             float totalHeight = segmentHeight * cellSize;
 
-            Transform mTransform = transform;
-            //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
-            Vector3 rosCenter =
-                new Vector3(bounds.XMax + bounds.XMin - 1, bounds.YMax + bounds.YMin - 1, 0) * (cellSize / 2);
-            mTransform.localPosition = rosCenter.Ros2Unity();
-            mTransform.localRotation = Quaternion.Euler(0, 90, 0);
-            mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs() * 0.1f;
 
-            var textureData = texture.GetRawTextureData<sbyte>();
+            int totalTextureSize = CalculateAllMipmapsSize(segmentWidth, segmentHeight);
+            if (buffer.Length != totalTextureSize)
+            {
+                buffer = new sbyte[totalTextureSize];
+            }
 
-            (uint hash, int numValidValues) = Copy(values, bounds, numCellsX, textureData);
+            (uint hash, int numValidValues) = Process(values, bounds, numCellsX, buffer);
+            NumValidValues = numValidValues;
+
             if (previousHash == null)
             {
                 previousHash = hash;
             }
             else if (hash == previousHash)
             {
+                IsProcessing = false;
                 return;
             }
 
             previousHash = hash;
             if (numValidValues == 0)
             {
-                Visible = false;
+                GameThread.PostImmediate(() =>
+                {
+                    Visible = false;
+                    IsProcessing = false;
+                });
+                
                 return;
             }
 
-            Visible = true;
-            Reduce(textureData, segmentWidth, segmentHeight);
-            texture.Apply(false);
+            CreateMipmaps(buffer, segmentWidth, segmentHeight);
+
+            GameThread.PostImmediate(() =>
+            {
+                Visible = true;
+
+                Transform mTransform = transform;
+                //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
+                Vector3 rosCenter =
+                    new Vector3(bounds.XMax + bounds.XMin - 1, bounds.YMax + bounds.YMin - 1, 0) * (cellSize / 2);
+                mTransform.localPosition = rosCenter.Ros2Unity();
+                mTransform.localRotation = Quaternion.Euler(0, 90, 0);
+                mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs() * 0.1f;
+
+                EnsureSize(segmentWidth, segmentHeight);
+                texture.GetRawTextureData<sbyte>().CopyFrom(buffer);
+                texture.Apply(false);
+                IsProcessing = false;
+            });
         }
 
-        static unsafe (uint hash, int numValidValues) Copy(sbyte[] src, OccupancyGridResource.Rect bounds, int pitch,
-            NativeArray<sbyte> dest)
+        static unsafe (uint hash, int numValidValues)
+            Process(sbyte[] src, OccupancyGridResource.Rect bounds, int pitch, sbyte[] dest)
         {
             Crc32Calculator crc32 = Crc32Calculator.Instance;
             uint hash = Crc32Calculator.DefaultSeed;
-            sbyte* dstPtr = (sbyte*) dest.GetUnsafePtr();
-            //int dstPtr = 0;
             long numValidValues = 0;
 
-
-            /*
-            for (int v = bounds.YMin; v < bounds.YMax; v++)
+            fixed (sbyte* dstPtr0 = dest, srcPtr0 = src)
             {
-                int srcPtr = bounds.YMin * pitch + bounds.XMin;
-                for (int u = bounds.XMin; u < bounds.XMax; u++, srcPtr++, dstPtr++)
-                {
-                    hash = crc32.Update(hash, (byte) src[srcPtr]);
-                    dest[dstPtr] = src[srcPtr];
-                    numValidValues += (src[srcPtr] >> 8) + 1;
-                }
-            }
-            */
-
-
-            fixed (sbyte* srcPtr0 = src)
-            {
+                sbyte* dstPtr = dstPtr0;
                 for (int v = bounds.YMin; v < bounds.YMax; v++)
                 {
                     sbyte* srcPtr = srcPtr0 + v * pitch + bounds.XMin;
@@ -170,7 +183,6 @@ namespace Iviz.Displays
                     }
                 }
             }
-
 
             return (hash, (int) numValidValues);
         }
@@ -198,33 +210,35 @@ namespace Iviz.Displays
             MeshRenderer.SetPropertyBlock(Properties);
         }
 
-        static unsafe void Reduce(NativeArray<sbyte> array, int width, int height)
+        static unsafe void CreateMipmaps(sbyte[] array, int width, int height)
         {
-            sbyte* src = (sbyte*) array.GetUnsafePtr();
-            while (width > 1 && height > 1)
+            fixed (sbyte* srcPtr = array)
             {
-                Reduce(src, width, height, src + width * height);
-                src += width * height;
-                width /= 2;
-                height /= 2;
+                sbyte* srcMipmap = srcPtr;
+                while (width > 1 && height > 1)
+                {
+                    Reduce(srcMipmap, width, height, srcMipmap + width * height);
+                    srcMipmap += width * height;
+                    width /= 2;
+                    height /= 2;
+                }
             }
-
-
-            /*
-            int src = 0;
-            while (width > 1 && height > 1)
-            {
-                Debug.Log(width + "x" + height + " offset " + src);
-                Reduce(array, src, width, height, src + width * height);
-                src += width * height;
-                width /= 2;
-                height /= 2;
-            }
-            */
-
-            //Debug.Log("Used: " + (src - (sbyte*)array.GetUnsafePtr()));
         }
 
+        static int CalculateAllMipmapsSize(int width, int height)
+        {
+            int size = 0;
+            while (width > 0 && height > 0)
+            {
+                size += width * height;
+                width /= 2;
+                height /= 2;
+            }
+
+            return size;
+        }
+
+        
         static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
         {
             for (int v = 0; v < height; v += 2)
@@ -240,56 +254,35 @@ namespace Iviz.Displays
                     *dst = (sbyte) Fuse(a, b, c, d);
                 }
             }
-
-            //Debug.Log((dst - dst0) + " " + width*height/4);
-        }
-
-        static void Reduce(NativeArray<sbyte> array, int src, int width, int height, int dst)
-        {
-            for (int v = 0; v < height; v += 2)
-            {
-                int row0 = src + width * v;
-                int row1 = row0 + width;
-                for (int u = 0; u < width; u += 2, row0 += 2, row1 += 2, dst++)
-                {
-                    int a = array[row0 + 0];
-                    int b = array[row0 + 1];
-                    int c = array[row1 + 0];
-                    int d = array[row1 + 1];
-                    array[dst] = (sbyte) Fuse(a, b, c, d);
-                }
-            }
-
-            //Debug.Log((dst - dst0) + " " + width*height/4);
         }
 
         static int Fuse(int a, int b, int c, int d)
         {
-            int signA = ~a >> 8;
-            int signB = ~b >> 8;
-            int signC = ~c >> 8;
-            int signD = ~d >> 8;
+            int signA = ~a >> 8; // a >= 0 ? -1 : 0
+            int signB = ~b >> 8; // b >= 0 ? -1 : 0
+            int signC = ~c >> 8; // c >= 0 ? -1 : 0
+            int signD = ~d >> 8; // d >= 0 ? -1 : 0
 
-            int sum1 = signA + signB + signC + signD;
-            if (sum1 >= -1)
+            int numValid = -(signA + signB + signC + signD);
+            if (numValid <= 1)
             {
                 return -1;
             }
 
-            int valueA = a & signA;
-            int valueB = b & signB;
-            int valueC = c & signC;
-            int valueD = d & signD;
+            int valueA = a & signA; // a >= 0 ? a : 0
+            int valueB = b & signB; // b >= 0 ? b : 0
+            int valueC = c & signC; // c >= 0 ? c : 0
+            int valueD = d & signD; // d >= 0 ? d : 0
 
-            int sum2 = valueA + valueB + valueC + valueD;
-            switch (sum1)
+            int sum = valueA + valueB + valueC + valueD;
+            switch (numValid)
             {
-                case -2:
-                    return sum2 / 2;
-                case -3:
-                    return (sum2 * 21845) >> 16;
+                case 2:
+                    return sum >> 1; // sum / 2
+                case 3:
+                    return (sum * 21845) >> 16; // sum * (65536/3) / 65536
                 default:
-                    return sum2 / 4;
+                    return sum >> 2; // sum / 4
             }
         }
     }

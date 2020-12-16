@@ -185,7 +185,11 @@ namespace Iviz.Ros
             return false;
         }
 
-        static async Task WatchdogAsync(Uri masterUri, string callerId, Uri callerUri, CancellationToken token)
+        static async Task WatchdogAsync(
+            [NotNull] Uri masterUri, 
+            [NotNull] string callerId, 
+            [NotNull] Uri callerUri,
+            CancellationToken token)
         {
             RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
             DateTime lastMasterAccess = DateTime.Now;
@@ -203,10 +207,20 @@ namespace Iviz.Ros
                     {
                         LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);
 
+                        TimeSpan timeSinceLastAccess = now - lastMasterAccess;
                         lastMasterAccess = now;
                         if (warningSet)
                         {
                             Core.Logger.Internal("The master is visible again, but we may be out of sync. Restarting!");
+                            instance.Disconnect();
+                            break;
+                        }
+
+                        if (timeSinceLastAccess.TotalMilliseconds > 10000)
+                        {
+                            // we haven't seen the master in a while, but no error has been thrown
+                            // by the routine that checks every 5 seconds. maybe the app was suspended?
+                            Core.Logger.Internal("Haven't seen the master in a while. We may be out of sync. Restarting!");
                             instance.Disconnect();
                             break;
                         }
