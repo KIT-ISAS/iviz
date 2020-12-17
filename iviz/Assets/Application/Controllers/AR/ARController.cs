@@ -62,7 +62,7 @@ namespace Iviz.Controllers
         protected Canvas canvas;
         protected FrameNode node;
 
-        [CanBeNull] public static ARController Instance { get; private set; }
+        [CanBeNull] public static ARFoundationController Instance { get; protected set; }
 
         public ARConfiguration Config
         {
@@ -178,7 +178,6 @@ namespace Iviz.Controllers
 
         protected virtual void Awake()
         {
-            Instance = this;
             gameObject.name = "AR";
 
             if (canvas == null)
@@ -212,7 +211,18 @@ namespace Iviz.Controllers
                 velocityAngle += 0.04f * dA;
             }
 
-            SetWorldAngle(WorldAngle + velocityAngle.Value, RootMover.ControlMarker);
+            if (ARJoystick.IsGlobal)
+            {
+                SetWorldAngle(WorldAngle + velocityAngle.Value, RootMover.ControlMarker);
+            }
+            else
+            {
+                Vector3 cameraPosition = Settings.MainCamera.transform.position;
+                var q1 = new Pose(cameraPosition, Quaternion.identity);
+                var q2 = new Pose(Vector3.zero, Quaternion.AngleAxis(velocityAngle.Value, Vector3.up));
+                var q3 = new Pose(-cameraPosition, Quaternion.identity);
+                SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
+            }
         }
 
         Vector3? velocityPos;
@@ -236,11 +246,8 @@ namespace Iviz.Controllers
             }
             else
             {
-                Transform mTransform = Settings.MainCamera.transform;
-                Vector3 lateralToCamera =
-                    mTransform.rotation * new Vector3(velocityPos.Value.x, velocityPos.Value.y, 0);
-                Vector3 awayFromCamera = (WorldPosition - mTransform.position).normalized * velocityPos.Value.z;
-                deltaWorldPosition = lateralToCamera + awayFromCamera;
+                Quaternion cameraRotation = Settings.MainCamera.transform.rotation;
+                deltaWorldPosition = cameraRotation * velocityPos.Value;
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
@@ -334,31 +341,27 @@ namespace Iviz.Controllers
         }
         */
 
-        public void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
+        void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
         {
             WorldPosition = unityPosition;
             UpdateWorldPose(new Pose(unityPosition, WorldPose.rotation), mover);
         }
 
-        public void SetWorldAngle(float angle, RootMover mover)
+        void SetWorldAngle(float angle, RootMover mover)
         {
             WorldAngle = angle;
             Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
             UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
         }
 
-        public virtual bool FindClosest(in Vector3 position, out Vector3 anchor, out Vector3 normal)
-        {
-            Vector3 origin = position + 0.05f * Vector3.up;
-            Ray ray = new Ray(origin, Vector3.down);
-            return FindRayHit(ray, out anchor, out normal);
-        }
-
-        protected abstract bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal);
-
         public static Pose RelativePoseToWorld(in Pose unityPose)
         {
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
+        }
+
+        void OnDestroy()
+        {
+            Debug.Log("AR Controller Destroyed!");
         }
     }
 }

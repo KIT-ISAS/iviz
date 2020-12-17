@@ -50,6 +50,7 @@ MonoBehaviour:
   arLight: {fileID: 978464836206565950}
   fovDisplay: {fileID: 749892901891460485}
   setupModeFrame: {fileID: 0}
+  occlusionManager: {fileID: 6350551399145372016}
 --- !u!1 &2024736478269814889
 GameObject:
   m_ObjectHideFlags: 0

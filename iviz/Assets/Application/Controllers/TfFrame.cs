@@ -18,7 +18,7 @@ namespace Iviz.Controllers
         [SerializeField] string id;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly List<FrameNode> listeners = new List<FrameNode>();
+        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
         readonly Timeline timeline = new Timeline();
 
         Pose pose;

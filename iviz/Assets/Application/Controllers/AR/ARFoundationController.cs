@@ -28,11 +28,13 @@ namespace Iviz.Controllers
         [SerializeField] AxisFrameResource setupModeFrame = null;
 
         Camera mainCamera;
+        ARSession arSession;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
         ARMarkerResource resource;
         ARAnchorManager anchorManager;
+        AROcclusionManager occlusionManager;
         [CanBeNull] ARAnchorResource worldAnchor;
 
         int defaultCullingMask;
@@ -40,6 +42,76 @@ namespace Iviz.Controllers
         static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
         static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
 
+        public enum OcclusionQualityType
+        {
+            Off,
+            Fast,
+            Medium,
+            Best
+        }
+
+        [NotNull]
+        public string Description
+        {
+            get
+            {
+                string trackingState;
+                switch (arSession.subsystem.trackingState)
+                {
+                    case TrackingState.Limited:
+                        trackingState = "Tracking: Limited";
+                        break;
+                    case TrackingState.None:
+                        trackingState = "Tracking: None";
+                        break;
+                    default:
+                        trackingState = "Tracking: OK";
+                        break;
+                }
+
+                string numPlanes =
+                    planeManager.trackables.count == 0 
+                        ? "Planes: None" 
+                        : "Planes: " + planeManager.trackables.count;
+
+                return trackingState + "\n" + numPlanes;
+            }
+        }
+        
+        OcclusionQualityType occlusionQuality;
+        public OcclusionQualityType OcclusionQuality
+        {
+            get => occlusionQuality;
+            set
+            {
+                occlusionQuality = value;
+                switch (value)
+                {
+                    case OcclusionQualityType.Off:
+                        occlusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Disabled;
+                        occlusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Disabled;
+                        occlusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Disabled;
+                        break;
+                    case OcclusionQualityType.Fast:
+                        occlusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;
+                        occlusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        occlusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Fastest;
+                        break;
+                    case OcclusionQualityType.Medium:
+                        occlusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Medium;
+                        occlusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        occlusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Medium;
+                        break;
+                    case OcclusionQualityType.Best:
+                        occlusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Best;
+                        occlusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Best;
+                        occlusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Best;
+                        break;
+                }
+            }
+        }
+        
+        
         public override bool Visible
         {
             get => base.Visible;
@@ -69,7 +141,7 @@ namespace Iviz.Controllers
                     arCamera.cullingMask = 1 << LayerType.ARSetupMode;
                     ArSet.Visible = false;
                     ArSet.State = true;
-                    ArInfoPanel.SetActive(true);   
+                    ArInfoPanel.SetActive(true);
                 }
                 else
                 {
@@ -168,6 +240,7 @@ namespace Iviz.Controllers
         protected override void Awake()
         {
             base.Awake();
+            Instance = this;
 
             if (mainCamera == null)
             {
@@ -184,8 +257,9 @@ namespace Iviz.Controllers
                 arSessionOrigin = GameObject.Find("AR Session Origin").GetComponent<ARSessionOrigin>();
             }
 
+            arSession = GetComponentInChildren<ARSession>();
+            occlusionManager = GetComponentInChildren<AROcclusionManager>();
             planeManager = arSessionOrigin.GetComponent<ARPlaneManager>();
-
             tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = arSessionOrigin.GetComponent<ARRaycastManager>();
             anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
@@ -193,7 +267,7 @@ namespace Iviz.Controllers
 
             defaultCullingMask = arCamera.cullingMask;
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
-            
+
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
@@ -211,20 +285,22 @@ namespace Iviz.Controllers
 
             SetupModeEnabled = true;
             setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
-            
+
             ArSet.Clicked += ArSetOnClicked;
             ArSet.State = true;
             ArSet.Visible = false;
-            ArInfoPanel.SetActive(true);   
-            
+            ArInfoPanel.SetActive(true);
+
             WorldPoseChanged += OnWorldPoseChanged;
+
+            OcclusionQuality = OcclusionQualityType.Off;
         }
 
         void ArSetOnClicked()
         {
             SetupModeEnabled = !SetupModeEnabled;
         }
-        
+
         bool IsSamePose(in Pose b)
         {
             return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
@@ -271,7 +347,7 @@ namespace Iviz.Controllers
                     setupModeFrame.Tint = Color.white;
                     //hasSetupModePose = true;
                     ArSet.Visible = true;
-                    ArInfoPanel.SetActive(false);   
+                    ArInfoPanel.SetActive(false);
                 }
                 else
                 {
@@ -292,7 +368,7 @@ namespace Iviz.Controllers
             if (PinRootMarker)
             {
                 const float maxDistanceAbovePlane = 0.05f;
-                
+
                 Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
                 if (TryGetClosestPlane(ray, out ARRaycastHit hit))
@@ -316,34 +392,19 @@ namespace Iviz.Controllers
         {
             try
             {
-                worldAnchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
-                worldAnchor.Moved += OnWorldAnchorMoved;
+                var anchor = anchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
+                anchor.Moved += OnWorldAnchorMoved;
+                worldAnchor = anchor;
             }
             catch (InvalidOperationException e)
             {
                 Logger.External("Failed to initialize AR world anchor", e);
-            }            
+            }
         }
 
         void OnWorldAnchorMoved(Pose newPose)
         {
             SetWorldPose(newPose, RootMover.Anchor);
-        }
-
-        protected override bool FindRayHit(in Ray ray, out Vector3 anchor, out Vector3 normal)
-        {
-            if (!TryGetClosestPlane(ray, out ARRaycastHit hit))
-            {
-                anchor = ray.origin;
-                normal = default;
-                return false;
-            }
-
-            anchor = hit.pose.position;
-            normal = (hit.hitType & TrackableType.Planes) != 0 
-                ? planeManager.trackables[hit.trackableId].normal 
-                : default;
-            return true;
         }
 
         bool TryGetClosestPlane(in Ray ray, out ARRaycastHit hit)
@@ -357,17 +418,21 @@ namespace Iviz.Controllers
 
             List<ARRaycastHit> results = new List<ARRaycastHit>();
             raycaster.Raycast(ray, results);
-            if (results.Count == 0)
-            {
-                hit = default;
-                return false;
-            }
+            results.RemoveAll(rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
 
-            Vector3 origin = ray.origin;
-            hit = results.Count == 1
-                ? results[0]
-                : results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit;
-            return true;
+            switch (results.Count)
+            {
+                case 0:
+                    hit = default;
+                    return false;
+                case 1:
+                    hit = results[0];
+                    return true;
+                default:
+                    Vector3 origin = ray.origin;
+                    hit = results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit;
+                    return true;
+            }
         }
 
 
@@ -430,7 +495,7 @@ namespace Iviz.Controllers
             ArSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
             Destroy(fovDisplay.gameObject);
-            
+
             ArSet.Visible = false;
             ArInfoPanel.SetActive(false);
         }

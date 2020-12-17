@@ -14,9 +14,7 @@ namespace Iviz.App
 {
     interface IMenuDialogContents
     {
-        event Action<uint> MenuClicked;
-        void Set([NotNull] MenuEntryList menu, Vector3 positionHint);
-        void Close();
+        void Set([NotNull] MenuEntryList menu, Vector3 positionHint, Action<uint> callback);
     }
     
     public sealed class MarkerMenuDialogContents : ItemListDialogContents, IMenuDialogContents
@@ -37,7 +35,7 @@ namespace Iviz.App
             }
         }
 
-        public event Action<uint> MenuClicked;
+        Action<uint> callback;
 
         void Awake()
         {
@@ -48,8 +46,9 @@ namespace Iviz.App
             CloseClicked += Close;
         }
 
-        public void Set(MenuEntryList menu, Vector3 positionHint)
+        public void Set(MenuEntryList menu, Vector3 positionHint, Action<uint> newCallback)
         {
+            callback = newCallback;
             menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
             CurrentEntries = menuEntryList.GetDescriptionsFor(null);
             gameObject.SetActive(true);
@@ -64,12 +63,13 @@ namespace Iviz.App
             }
             else
             {
-                MenuClicked?.Invoke(entry.Id);
+                callback?.Invoke(entry.Id);
                 Close();
             }
         }
 
-        static string DescriptionToString(MenuEntryList.EntryDescription description)
+        [NotNull]
+        static string DescriptionToString([NotNull] MenuEntryList.EntryDescription description)
         {
             switch (description.Type)
             {
@@ -88,10 +88,10 @@ namespace Iviz.App
             }
         }
 
-        public void Close()
+        void Close()
         {
             gameObject.SetActive(false);
-            MenuClicked = null;
+            callback = null;
         }
     }
 }

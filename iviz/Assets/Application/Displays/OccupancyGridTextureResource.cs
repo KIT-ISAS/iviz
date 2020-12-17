@@ -6,25 +6,30 @@ using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class OccupancyGridTextureResource : MarkerResourceWithColormap
+    public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
-        static Texture2D atlasLarge;
+        [CanBeNull] static Texture2D atlasLarge;
 
+        [NotNull]
         static Texture2D AtlasLarge => (atlasLarge != null)
             ? atlasLarge
-            : atlasLarge = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large");
-        
-        static Texture2D atlasLargeFlipped;
+            : atlasLarge = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large") ??
+                           throw new InvalidOperationException("Atlas large texture is missing!");
 
+        [CanBeNull] static Texture2D atlasLargeFlipped;
+
+        [NotNull]
         static Texture2D AtlasLargeFlipped => (atlasLargeFlipped != null)
             ? atlasLargeFlipped
-            : atlasLargeFlipped = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large-flip");
+            : atlasLargeFlipped = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large-flip") ??
+                                  throw new InvalidOperationException("Atlas texture is missing!");
 
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
 
@@ -39,7 +44,7 @@ namespace Iviz.Displays
         MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
 
         public bool IsProcessing { get; private set; }
-        
+
         public int NumValidValues { get; private set; }
 
         public override Vector2 IntensityBounds
@@ -59,11 +64,11 @@ namespace Iviz.Displays
                 material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
             }
         }
-        
+
         protected override void Awake()
         {
             material = Resource.Materials.OccupancyGridTexture.Instantiate();
-            
+
             MeshRenderer.sharedMaterial = material;
 
             base.Awake();
@@ -137,7 +142,7 @@ namespace Iviz.Displays
                     Visible = false;
                     IsProcessing = false;
                 });
-                
+
                 return;
             }
 
@@ -238,7 +243,7 @@ namespace Iviz.Displays
             return size;
         }
 
-        
+
         static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
         {
             for (int v = 0; v < height; v += 2)
@@ -258,6 +263,18 @@ namespace Iviz.Displays
 
         static int Fuse(int a, int b, int c, int d)
         {
+            int4 abcd = new int4(a, b, c, d);
+            int4 sign = ~abcd >> 8;
+            int numValid = -(sign.x + sign.y + sign.z + sign.w);
+            if (numValid <= 1)
+            {
+                return -1;
+            }
+
+            int4 value = abcd & sign;
+            int sum = value.x + value.y + value.z + value.w;
+
+            /*
             int signA = ~a >> 8; // a >= 0 ? -1 : 0
             int signB = ~b >> 8; // b >= 0 ? -1 : 0
             int signC = ~c >> 8; // c >= 0 ? -1 : 0
@@ -275,6 +292,7 @@ namespace Iviz.Displays
             int valueD = d & signD; // d >= 0 ? d : 0
 
             int sum = valueA + valueB + valueC + valueD;
+            */
             switch (numValid)
             {
                 case 2:

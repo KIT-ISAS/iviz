@@ -21,10 +21,10 @@ namespace Iviz.App
         static readonly string[] LogLevelFields =
         {
             "Debug or Higher",
-            "<color=navy>Info or Higher</color>",
+            "<color=#000080>Info or Higher</color>",
             "<color=#7F5200>Warn or Higher</color>",
-            "<color=brown>Error or Higher</color>",
-            "<color=red>Fatal Only</color>"
+            "<color=#a52a2a>Error or Higher</color>",
+            "<color=#ff0000>Fatal Only</color>"
         };
 
         [NotNull] readonly ConsoleDialogContents dialog;
@@ -94,12 +94,12 @@ namespace Iviz.App
         {
             if (level >= LogLevel.Fatal)
             {
-                return "red";
+                return "#ff0000";
             }
 
             if (level >= LogLevel.Error)
             {
-                return "red";
+                return "#a52a2a";
             }
 
             if (level >= LogLevel.Warn)
@@ -109,10 +109,10 @@ namespace Iviz.App
 
             if (level >= LogLevel.Info)
             {
-                return "navy";
+                return "#000080";
             }
 
-            return "black";
+            return "#000000";
         }
 
         static int IndexFromLevel(LogLevel level)
@@ -156,7 +156,7 @@ namespace Iviz.App
             {
                 Debug.Log(message.Message);
                 var messageLevel = message.Level;
-                if (message.SourceId != null && messageLevel < minLogLevel)
+                if (messageLevel < minLogLevel)
                 {
                     continue;
                 }
@@ -174,10 +174,21 @@ namespace Iviz.App
 
                 description
                     .Append("<color=").Append(levelColor).Append(">")
-                    .Append(message.SourceId ?? "Me").Append(": </color></b>");
-                description.Append(message.Message).AppendLine();
+                    .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
-                ids.Add(message.SourceId);
+
+                const int maxMessageLength = 300;
+                if (message.Message.Length < maxMessageLength)
+                {
+                    description.Append(message.Message).AppendLine();
+                }
+                else
+                {
+                    description.Append(message.Message, 0, maxMessageLength).Append("<i>... +")
+                        .Append(message.Message.Length - maxMessageLength).Append(" chars</i>").AppendLine();
+                }
+
+                ids.Add(message.SourceId ?? "[Me]");
             }
 
             dialog.Text.text = description.ToString();

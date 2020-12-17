@@ -4,6 +4,7 @@ using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -92,10 +93,10 @@ namespace Iviz.Controllers
                 bounds = value ?? throw new NullReferenceException();
 
                 Vector3 center = bounds.center;
-                Vector3 size = bounds.size / 4;
+                Vector3 size = bounds.size.Abs();
 
-                float minAxisLength = Mathf.Min(Mathf.Min(bounds.size.x, bounds.size.y), bounds.size.z);
-                FrameAxisLength = minAxisLength * 0.05f;
+                float minAxisLength = Mathf.Min(Mathf.Min(size.x, size.y), size.z);
+                FrameAxisLength = minAxisLength * 0.1f;
                 frames[0].transform.localPosition = center + new Vector3(size.x, -size.y, size.z) / 2;
                 frames[1].transform.localPosition = center + new Vector3(size.x, -size.y, -size.z) / 2;
                 frames[2].transform.localPosition = center + new Vector3(-size.x, -size.y, -size.z) / 2;
@@ -119,10 +120,10 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
+                foreach (var resource in holder.GetComponentsInChildren<MeshMarkerResource>())
                 {
-                    meshRenderer.SetPropertyEmissiveColor(value / 2);
-                    meshRenderer.SetPropertyColor(value);
+                    resource.EmissiveColor = value / 2;
+                    resource.Color = value;
                 }
             }
         }
@@ -155,10 +156,6 @@ namespace Iviz.Controllers
 
             foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
             {
-                meshRenderer.receiveShadows = true;
-                meshRenderer.shadowCastingMode = ShadowCastingMode.On;
-                meshRenderer.SetPropertyEmissiveColor(Color.black);
-                meshRenderer.GetComponent<BoxCollider>().enabled = true;
                 ResourcePool.Dispose(Resource.Displays.Cube, meshRenderer.gameObject);
             }
 
@@ -181,7 +178,8 @@ namespace Iviz.Controllers
             frames[7] = CreateFrame(holder, Quaternion.Euler(0, 0, 180));
         }
 
-        GameObject CreateFrame(GameObject parent, Quaternion rotation)
+        [NotNull]
+        GameObject CreateFrame([NotNull] GameObject parent, Quaternion rotation)
         {
             GameObject frameLinkHolder = new GameObject("Frame Corner");
             frameLinkHolder.transform.SetParentLocal(parent.transform);
@@ -204,18 +202,14 @@ namespace Iviz.Controllers
             return frameLinkHolder;
         }
 
-        GameObject CreateFrameLink(GameObject frameLinkHolder)
+        [NotNull]
+        GameObject CreateFrameLink([NotNull] GameObject frameLinkHolder)
         {
-            GameObject frameLink = ResourcePool.GetOrCreate(Resource.Displays.Cube, frameLinkHolder.transform);
-            frameLink.name = "Cube";
-            MeshRenderer meshRenderer = frameLink.GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = Resource.Materials.Lit.Object;
-            meshRenderer.receiveShadows = false;
-            meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
-            meshRenderer.SetPropertyEmissiveColor(color / 2);
-            meshRenderer.SetPropertyColor(color);
-            meshRenderer.GetComponent<BoxCollider>().enabled = false;
-            return frameLink;
+            var frameLink = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
+            frameLink.Name = "Cube";
+            frameLink.EmissiveColor = Color / 2;
+            frameLink.Color = Color;
+            return frameLink.gameObject;
         }
     }
 }

@@ -13,7 +13,6 @@ using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Msgs.Logger;
 
@@ -157,7 +156,9 @@ namespace Iviz.Ros
                 Core.Logger.Internal("<b>Connected!</b>");
 
                 watchdogSource = new CancellationTokenSource();
-                watchdogTask = Task.Run(async () => await WatchdogAsync(MasterUri, MyId, MyUri, watchdogSource.Token));
+                watchdogTask = Task.Run(async () => await WatchdogAsync(newClient.MasterUri, newClient.CallerId,
+                    newClient.CallerUri,
+                    watchdogSource.Token));
 
                 return true;
             }
@@ -186,8 +187,8 @@ namespace Iviz.Ros
         }
 
         static async Task WatchdogAsync(
-            [NotNull] Uri masterUri, 
-            [NotNull] string callerId, 
+            [NotNull] Uri masterUri,
+            [NotNull] string callerId,
             [NotNull] Uri callerUri,
             CancellationToken token)
         {
@@ -220,7 +221,8 @@ namespace Iviz.Ros
                         {
                             // we haven't seen the master in a while, but no error has been thrown
                             // by the routine that checks every 5 seconds. maybe the app was suspended?
-                            Core.Logger.Internal("Haven't seen the master in a while. We may be out of sync. Restarting!");
+                            Core.Logger.Internal(
+                                "Haven't seen the master in a while. We may be out of sync. Restarting!");
                             instance.Disconnect();
                             break;
                         }
@@ -261,25 +263,19 @@ namespace Iviz.Ros
 
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic)
         {
-            //Core.Logger.Debug("Advertising " + topic);
             await topic.AdvertiseAsync(client);
             topic.Id = publishers.Count;
             publishers.Add(topic.Publisher);
-            //Core.Logger.Debug("Done Advertising " + topic);
         }
 
         async Task ReSubscribe([NotNull] ISubscribedTopic topic)
         {
-            //Core.Logger.Debug("Subscribing to " + topic);
             await topic.SubscribeAsync(client);
-            //Core.Logger.Debug("Done Subscribing to " + topic);
         }
 
         async Task ReAdvertiseService([NotNull] IAdvertisedService service)
         {
-            //Core.Logger.Debug("Subscribing to " + topic);
             await service.AdvertiseAsync(client);
-            //Core.Logger.Debug("Done Subscribing to " + topic);
         }
 
         public override void Disconnect()
@@ -464,7 +460,7 @@ namespace Iviz.Ros
             return result;
         }
 
-        internal void Publish<T>(Sender<T> advertiser, T msg) where T : IMessage
+        internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage
         {
             if (advertiser == null)
             {
@@ -506,7 +502,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal bool TryGetResolvedTopicName(ISender advertiser, out string topicName)
+        internal bool TryGetResolvedTopicName([NotNull] ISender advertiser, [CanBeNull] out string topicName)
         {
             if (advertiser.Id == -1)
             {
@@ -637,6 +633,7 @@ namespace Iviz.Ros
             }
         }
 
+        [NotNull]
         public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
@@ -669,6 +666,7 @@ namespace Iviz.Ros
             return cachedTopics;
         }
 
+        [NotNull]
         public ReadOnlyCollection<string> GetSystemParameterList()
         {
             AddTask(async () =>
@@ -778,7 +776,7 @@ namespace Iviz.Ros
 
                 int totalKbytes = totalBytes / 1000;
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs ↓")
-                    .Append(totalKbytes.ToString("N0")).Append("kB</b>").AppendLine();
+                    .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
 
                 if (stat.Receivers.Count == 0)
                 {
@@ -789,6 +787,17 @@ namespace Iviz.Ros
 
                 foreach (var receiver in stat.Receivers)
                 {
+                    if (receiver.EndPoint == null &&
+                        receiver.RemoteEndpoint == null &&
+                        receiver.ErrorDescription == null)
+                    {
+                        builder.Append("<color=#808080><b>←</b> [")
+                            .Append(receiver.RemoteUri.Host).Append(":")
+                            .Append(receiver.RemoteUri.Port).Append("] (Unreachable)</color>")
+                            .AppendLine();
+                        continue;
+                    }
+
                     bool isConnected = receiver.IsConnected;
                     bool isAlive = receiver.IsAlive;
                     builder.Append("<b>←</b> [");
@@ -810,7 +819,7 @@ namespace Iviz.Ros
                     }
                     else
                     {
-                        builder.Append(" <color=navy>(connecting)</color>");
+                        builder.Append(" <color=navy>(Trying to connect...)</color>");
                     }
 
                     if (receiver.ErrorDescription != null)
@@ -841,7 +850,7 @@ namespace Iviz.Ros
 
                 int totalKbytes = totalBytes / 1000;
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs ↑")
-                    .Append(totalKbytes.ToString("N0")).Append("kB</b>").AppendLine();
+                    .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
 
                 if (stat.Senders.Count == 0)
                 {
@@ -969,6 +978,7 @@ namespace Iviz.Ros
                 Publisher = null;
             }
 
+            [NotNull]
             public override string ToString()
             {
                 return $"[AdvertisedTopic '{topic}']";
@@ -1055,6 +1065,7 @@ namespace Iviz.Ros
                 }
             }
 
+            [NotNull]
             public override string ToString()
             {
                 return $"[SubscribedTopic '{topic}']";
@@ -1103,6 +1114,7 @@ namespace Iviz.Ros
                 }
             }
 
+            [NotNull]
             public override string ToString()
             {
                 return $"[AdvertisedService '{service}']";

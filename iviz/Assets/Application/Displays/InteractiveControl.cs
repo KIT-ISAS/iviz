@@ -12,6 +12,9 @@ namespace Iviz.Displays
     public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler,
         IPointerEnterHandler, IPointerExitHandler
     {
+        static readonly Color FrameActiveColor = new Color(1, 1, 1, 0.3f);
+        static readonly Color FrameInactiveColor = new Color(0, 1, 0, 0.3f);
+        
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
         [SerializeField] GameObject arrowMy = null;
@@ -240,7 +243,9 @@ namespace Iviz.Displays
             {
                 bounds = value;
 
-                Bounds newBounds = bounds ?? new Bounds(Vector3.zero, 0.5f * Vector3.one);
+                Bounds newBounds = bounds != null 
+                    ? new Bounds(bounds.Value.center, bounds.Value.size.Abs()) 
+                    : new Bounds(Vector3.zero, 0.5f * Vector3.one);
 
                 float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
 
@@ -310,6 +315,7 @@ namespace Iviz.Displays
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
             frame.Layer = LayerType.IgnoreRaycast;
+            frame.Color = FrameInactiveColor;
 
             InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
         }
@@ -376,7 +382,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            frame.Color = Color.white;
+            frame.Color = FrameActiveColor;
         }
 
         public void OnPointerExit(PointerEventData _)
@@ -386,7 +392,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            frame.Color = Color.green;
+            frame.Color = FrameInactiveColor;
         }
     }
 }

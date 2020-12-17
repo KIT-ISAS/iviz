@@ -15,7 +15,7 @@ namespace Iviz.App
     {
         const string NoneString = "(none)";
 
-        readonly ARController controller;
+        readonly ARFoundationController controller;
         readonly ARPanelContents panel;
 
         public override Resource.ModuleType ModuleType => Resource.ModuleType.AugmentedReality;
@@ -28,12 +28,12 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(Resource.ModuleType.AugmentedReality);
 
-            controller = Resource.Controllers.AR.Instantiate().GetComponent<ARController>();
+            controller = Resource.Controllers.AR.Instantiate().GetComponent<ARFoundationController>();
 
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
-                controller.Config = (ARConfiguration)constructor.Configuration;
+                controller.Config = (ARConfiguration) constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -58,22 +58,25 @@ namespace Iviz.App
             panel.MarkerAngle.Value = controller.MarkerAngle;
             panel.MarkerFrame.Value = controller.MarkerFrame;
 
-            List<string> frameHints = new List<string> { NoneString };
+            List<string> frameHints = new List<string> {NoneString};
             frameHints.AddRange(TfListener.FramesUsableAsHints);
             panel.MarkerFrame.Hints = frameHints;
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
 
+            panel.OcculusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
+            panel.OcculusionQuality.Index = (int) controller.OcclusionQuality;
+
             CheckInteractable();
 
-            panel.WorldScale.ValueChanged += f => { controller.WorldScale = f; };
+            panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
             panel.SearchMarker.ValueChanged += f =>
             {
                 controller.UseMarker = f;
                 CheckInteractable();
             };
-            panel.MarkerHorizontal.ValueChanged += f => { controller.MarkerHorizontal = f; };
-            panel.MarkerAngle.ValueChanged += f => { controller.MarkerAngle = (int)f; };
+            panel.MarkerHorizontal.ValueChanged += f => controller.MarkerHorizontal = f;
+            panel.MarkerAngle.ValueChanged += f => controller.MarkerAngle = (int) f;
             panel.MarkerFrame.EndEdit += f =>
             {
                 if (f == NoneString)
@@ -88,8 +91,13 @@ namespace Iviz.App
 
                 CheckInteractable();
             };
-            panel.MarkerOffset.ValueChanged += f => { controller.MarkerOffset = f; };
+            panel.MarkerOffset.ValueChanged += f => controller.MarkerOffset = f;
 
+            panel.OcculusionQuality.ValueChanged += (i, _) =>
+                controller.OcclusionQuality = (ARFoundationController.OcclusionQualityType) i;
+
+            panel.Description.Label = controller.Description;
+            
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -103,6 +111,11 @@ namespace Iviz.App
             };
         }
 
+        public override void UpdatePanel()
+        {
+            panel.Description.Label = controller.Description;
+        }
+
         void CheckInteractable()
         {
             panel.MarkerHorizontal.Interactable = controller.UseMarker;
@@ -110,7 +123,7 @@ namespace Iviz.App
             panel.MarkerFrame.Interactable = controller.UseMarker;
             panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<ARConfiguration>(configAsJson);
@@ -137,7 +150,7 @@ namespace Iviz.App
                     case nameof(ARConfiguration.MarkerOffset):
                         controller.Visible = config.Visible;
                         break;
-                    
+
                     default:
                         Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
                         break;
@@ -145,7 +158,7 @@ namespace Iviz.App
             }
 
             ResetPanel();
-        }           
+        }
 
         public override void AddToState(StateConfiguration config)
         {

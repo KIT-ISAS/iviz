@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -57,7 +58,7 @@ namespace Iviz.Controllers
             return CalculateHash(startHash, (byte*) ptr, sizeof(T));
         }
 
-        public unsafe uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        public unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
             {

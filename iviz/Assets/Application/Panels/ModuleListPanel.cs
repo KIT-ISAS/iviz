@@ -57,10 +57,13 @@ namespace Iviz.App
         [SerializeField] Sprite questionSprite = null;
 
         [SerializeField] Text bottomTime = null;
+        [SerializeField] Text bottomBattery = null;
         [SerializeField] Text bottomFps = null;
         [SerializeField] Text bottomBandwidth = null;
 
-        [FormerlySerializedAs("joystick")] [SerializeField] TwistJoystick twistJoystick = null;
+        [FormerlySerializedAs("joystick")] [SerializeField]
+        TwistJoystick twistJoystick = null;
+
         [SerializeField] ARJoystick arJoystick = null;
 
         [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
@@ -179,8 +182,7 @@ namespace Iviz.App
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
-            Logger.External("Welcome to iviz! This is the log console. Here you will see messages from /rosout_agg" +
-                            " when a ROS connection is established.");
+            Logger.External("Welcome to iviz! This is the log console.", LogLevel.Warn);
 
             CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
 
@@ -687,14 +689,34 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            bottomTime.text = $"<b>{DateTime.Now.ToString("HH:mm:ss")}</b>";
-            bottomFps.text = $"<b>{frameCounter.ToString()} FPS</b>";
+            bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
+            bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             int downKb = downB / 1000;
             int upKb = upB / 1000;
-            bottomBandwidth.text = $"<b>↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s</b>";
+            bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
+
+            var state = SystemInfo.batteryStatus;
+            switch (SystemInfo.batteryLevel)
+            {
+                case -1:
+                    bottomBattery.text = "---";
+                    break;
+                case 1 when state == BatteryStatus.Full || state == BatteryStatus.Charging:
+                    bottomBattery.text = "<color=#005500>Full</color>";
+                    break;
+                case 1:
+                    bottomBattery.text = "Full";
+                    break;
+                default:
+                    int level = (int) (SystemInfo.batteryLevel * 100);
+                    bottomBattery.text = state == BatteryStatus.Charging
+                        ? $"<color=#005500>{level}%</color>"
+                        : $"{level}%";
+                    break;
+            }
         }
 
         void UpdateFpsCounter()
@@ -717,8 +739,7 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(menuEntries));
             }
 
-            menuDialog.MenuClicked += callback;
-            menuDialog.Set(menuEntries, unityPositionHint);
+            menuDialog.Set(menuEntries, unityPositionHint, callback);
         }
     }
 }

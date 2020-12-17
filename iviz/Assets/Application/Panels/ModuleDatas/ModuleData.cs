@@ -8,8 +8,8 @@ namespace Iviz.App
 {
     public abstract class ModuleData : IModuleData
     {
-        [NotNull] protected ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
-        protected DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
+        [NotNull] protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
+        protected static DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
         string buttonText = "";
 
@@ -24,6 +24,7 @@ namespace Iviz.App
             }
         }
 
+        [NotNull]
         public string Description
         {
             get

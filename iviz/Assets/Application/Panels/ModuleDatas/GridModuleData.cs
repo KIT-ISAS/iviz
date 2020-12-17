@@ -222,7 +222,6 @@ namespace Iviz.App
 
         public override void OnARModeChanged(bool value)
         {
-            base.OnARModeChanged(value);
             if (!controller.HideInARMode)
             {
                 return;
