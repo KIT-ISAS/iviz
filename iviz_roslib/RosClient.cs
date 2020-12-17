@@ -572,7 +572,7 @@ namespace Iviz.Roslib
             }
 
             Task t = Task.Run(async () =>
-                await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf());
+                await subscription.PublisherUpdateRcpAsync(masterResponse.Publishers).Caf());
             t.Wait();
 
             return (id, subscription);
@@ -610,7 +610,7 @@ namespace Iviz.Roslib
             }
 
             //Logger.LogDebug("CreateSubscriber " + topic + ": Calling publisher update rpc async");
-            await subscription.Manager.PublisherUpdateRpcAsync(masterResponse.Publishers).Caf();
+            await subscription.PublisherUpdateRcpAsync(masterResponse.Publishers).Caf();
 
             //Logger.LogDebug("CreateSubscriber " + topic + ": Done!");
             return (id, subscription);
@@ -1394,13 +1394,15 @@ namespace Iviz.Roslib
         public async Task CloseAsync()
         {
             //Logger.LogDebug("1) Disposing listener");
-            await listener.DisposeAsync().AwaitNoThrow(this);
+            List<Task> tasks = new List<Task>();
+
+            Task listenerDispose = listener.DisposeAsync();
+            tasks.Add(listenerDispose);
             //Logger.LogDebug("1) Done");
 
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
-            List<Task> tasks = new List<Task>();
             Utils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
@@ -1445,7 +1447,7 @@ namespace Iviz.Roslib
                 //Logger.LogDebug("5) Done service " + senderManager.Service);
             }));
 
-            await Task.WhenAll(tasks).WaitForWithTimeout(5000, "Close() tasks timed out").AwaitNoThrow(this).Caf();
+            await Task.WhenAll(tasks).WaitForWithTimeout(3000, "Close() tasks timed out").AwaitNoThrow(this).Caf();
         }
 
         public SubscriberState GetSubscriberStatistics()

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
@@ -74,5 +75,59 @@ namespace Iviz.XmlRpc
         {
             return task.ConfigureAwait(false);
         }
+        
+
+        public static void WaitNoThrow(this Task? t, object caller)
+        {
+            if (t == null)
+            {
+                return;
+            }
+
+            try
+            {
+                t.Wait();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+        }
+
+        public static async Task AwaitNoThrow(this Task? t, object caller)
+        {
+            if (t == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await t.Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+        }
+        
+        public static async Task<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
+        {
+            if (t == null)
+            {
+                return default;
+            }
+
+            try
+            {
+                return await t.Caf();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+            }
+
+            return default;
+        }        
     }
 }

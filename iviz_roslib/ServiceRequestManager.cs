@@ -19,7 +19,6 @@ namespace Iviz.Roslib
 
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
         readonly Task task;
 
         bool keepGoing;
@@ -41,24 +40,13 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
                 this, serviceInfo.Service, serviceInfo.Type, Uri);
 
-            task = Task.Run(StartAsync);
+            task = Task.Run(RunLoop);
         }
 
         public Uri Uri { get; }
         public string Service => serviceInfo.Service;
         public string ServiceType => serviceInfo.Type;
-
-        async Task StartAsync()
-        {
-            Task loopTask = RunLoop();
-            await signal.WaitAsync().Caf();
-            keepGoing = false;
-            listener.Stop();
-            if (!await loopTask.WaitFor(2000).Caf())
-            {
-                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
-            }
-        }
+        
 
         async Task RunLoop()
         {
@@ -111,7 +99,6 @@ namespace Iviz.Roslib
             }
         }
 
-
         public void Dispose()
         {
             if (disposed)
@@ -119,18 +106,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            disposed = true;
-
-            signal.Release();
-            
-            task.WaitNoThrow(this);
-
-            foreach (ServiceRequestAsync<T> sender in connections)
-            {
-                sender.Stop();
-            }
-
-            connections.Clear();
+            Task.Run(DisposeAsync).WaitNoThrow(this);
         }
 
         public async Task DisposeAsync()
@@ -141,10 +117,18 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
+            keepGoing = false;
 
-            signal.Release();
+            using (TcpClient client = new TcpClient())
+            {
+                await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
+            }
             
-            await task.AwaitNoThrow(this).Caf();
+            listener.Stop();
+            if (!await task.WaitFor(2000).Caf())
+            {
+                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
+            }
 
             Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
             await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();

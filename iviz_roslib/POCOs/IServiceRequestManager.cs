@@ -3,11 +3,12 @@ using System.Threading.Tasks;
 
 namespace Iviz.Roslib
 {
-    internal interface IServiceRequestManager : IDisposable
+    internal interface IServiceRequestManager
     {
         string Service { get; }
         string ServiceType { get; }
         Uri Uri { get; }
+        void Dispose();
         Task DisposeAsync();
     }
 }

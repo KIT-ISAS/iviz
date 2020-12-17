@@ -44,7 +44,7 @@ namespace Iviz.Roslib
             this.serviceInfo = serviceInfo;
 
             keepRunning = true;
-            task = Task.Run(async() => await Run().Caf());
+            task = Task.Run(Run);
         }
 
         public bool IsAlive => !task.IsCompleted;
@@ -56,14 +56,14 @@ namespace Iviz.Roslib
         {
             keepRunning = false;
             tcpClient.Close();
-            Utils.WaitNoThrow(task, this);
+            task.WaitNoThrow(this);
         }
 
         public async Task StopAsync()
         {
             keepRunning = false;
             tcpClient.Close();
-            await Utils.AwaitNoThrow(task, this).Caf();
+            await task.AwaitNoThrow(this).Caf();
         }
 
         async Task<int> ReceivePacket()

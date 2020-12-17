@@ -19,6 +19,7 @@ namespace Iviz.Roslib
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
         const int WaitBetweenRetriesInMs = 2000;
+        const int DisposeTimeoutInMs = 2000;
 
         readonly TcpReceiverManager<T> manager;
         readonly TopicInfo<T> topicInfo;
@@ -77,7 +78,8 @@ namespace Iviz.Roslib
 
             if (task != null)
             {
-                await task.WaitForWithTimeout(5000, "Receiver task dispose timed out.").AwaitNoThrow(this);
+                await task.WaitForWithTimeout(DisposeTimeoutInMs, "Receiver task dispose timed out.")
+                    .AwaitNoThrow(this);
             }
 
             readBuffer = Array.Empty<byte>();

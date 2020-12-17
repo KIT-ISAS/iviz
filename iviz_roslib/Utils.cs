@@ -247,59 +247,6 @@ namespace Iviz.Roslib
             return !t.CancellationToken.IsCancellationRequested;
         }
 
-        public static void WaitNoThrow(this Task? t, object caller)
-        {
-            if (t == null)
-            {
-                return;
-            }
-
-            try
-            {
-                t.Wait();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-            }
-        }
-
-        public static async Task AwaitNoThrow(this Task? t, object caller)
-        {
-            if (t == null)
-            {
-                return;
-            }
-
-            try
-            {
-                await t.Caf();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-            }
-        }
-        
-        public static async Task<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
-        {
-            if (t == null)
-            {
-                return default;
-            }
-
-            try
-            {
-                return await t.Caf();
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-            }
-
-            return default;
-        }
-
         static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)

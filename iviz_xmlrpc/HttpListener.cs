@@ -65,23 +65,13 @@ namespace Iviz.XmlRpc
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
             runningTs.Cancel();
 
-            // now we throw everything at the listener to try to leave AcceptTcpClientAsync()
-
-            // first we enqueue a connection
             using (TcpClient client = new TcpClient())
             {
-                //Logger.LogDebug($"{this}: Using fake client");
                 client.Connect(IPAddress.Loopback, LocalPort);
             }
 
-            // now we close the listener
-            //Logger.LogDebugFormat("{0}: Stopping listener", this);
             listener.Stop();
 
-            // now we close the underlying socket
-            listener.Server.Close();
-
-            // and hope that this is enough to leave AcceptTcpClientAsync()
             Logger.LogDebugFormat("{0}: Listener dispose out", this);
         }
 
@@ -130,18 +120,17 @@ namespace Iviz.XmlRpc
                     }
                     else
                     {
-                        await CreateContextTask();
+                        await CreateContextTask().WaitForWithTimeout(2000).AwaitNoThrow(this);
                     }
                 }
                 catch (ObjectDisposedException)
                 {
-                    Logger.LogDebugFormat("{0}: Leaving thread", this);
                     break;
                 }
                 catch (Exception e)
                 {
                     Logger.LogFormat("{0}: Leaving thread {1}", this, e);
-                    break;
+                    return;
                 }
 
             Logger.LogDebugFormat("{0}: Leaving thread normally", this);

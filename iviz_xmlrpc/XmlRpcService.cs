@@ -61,6 +61,10 @@ namespace Iviz.XmlRpc
         public RpcConnectionException(string message) : base(message)
         {
         }
+
+        public RpcConnectionException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 
     public static class XmlRpcService
@@ -260,8 +264,15 @@ namespace Iviz.XmlRpc
             string inData;
             using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
             {
-                await request.StartAsync(timeoutInMs, token).Caf();
-                inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
+                try
+                {
+                    await request.StartAsync(timeoutInMs, token).Caf();
+                    inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
+                }
+                catch (Exception e)
+                {
+                    throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
+                }
             }
 
             return ProcessResponse(inData);

@@ -129,7 +129,7 @@ namespace Iviz.XmlRpc
                 if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
                 {
                     writer.Close();
-                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);
+                    throw new TimeoutException("HttpRequest: Request writing timed out!", writeTask.Exception);
                 }
 
                 await writer.FlushAsync().Caf();

@@ -40,6 +40,8 @@ namespace Iviz.Roslib
         public string Topic => topicInfo.Topic;
         public string TopicType => topicInfo.Type;
 
+        HashSet<Uri> allPublisherUris = new HashSet<Uri>();
+
         public int NumConnections
         {
             get
@@ -171,6 +173,8 @@ namespace Iviz.Roslib
             using (await mutex.LockAsync())
             {
                 HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
+                allPublisherUris = newPublishers;
+                
                 IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
 
                 TcpReceiverAsync<T>[] toDelete = connectionsByUri
@@ -233,7 +237,13 @@ namespace Iviz.Roslib
 
         public ReadOnlyCollection<SubscriberReceiverState> GetStates()
         {
-            return connectionsByUri.Values.Select(receiver => receiver.State).ToList().AsReadOnly();
+            var publisherUris = allPublisherUris;
+            var alivePublishers = connectionsByUri.Values.Select(receiver => receiver.State);
+            var missingPublishers = publisherUris
+                .Where(uri => !connectionsByUri.ContainsKey(uri))
+                .Select(uri => new SubscriberReceiverState(uri));
+                
+            return alivePublishers.Concat(missingPublishers).ToList().AsReadOnly();
         }
 
         public override string ToString()

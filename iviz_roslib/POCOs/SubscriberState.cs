@@ -11,7 +11,7 @@ namespace Iviz.Roslib
         public bool RequestNoDelay { get; }
         public Endpoint? EndPoint { get; }
         public Uri RemoteUri { get; }
-        public Endpoint RemoteEndpoint { get; }
+        public Endpoint? RemoteEndpoint { get; }
         public int NumReceived { get; }
         public int BytesReceived { get; }
         public string? ErrorDescription { get; }
@@ -33,6 +33,20 @@ namespace Iviz.Roslib
             BytesReceived = bytesReceived;
             ErrorDescription = errorDescription;
         }
+
+        internal SubscriberReceiverState(Uri remoteUri)
+        {
+            IsAlive = false;
+            IsConnected = false;
+            RequestNoDelay = false;
+            EndPoint = null; 
+            RemoteUri = remoteUri;
+            RemoteEndpoint = null;
+            NumReceived = 0;
+            BytesReceived = 0;
+            ErrorDescription = null;            
+        }
+        
 
     }
 
