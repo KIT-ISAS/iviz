@@ -8,6 +8,7 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 #endif
@@ -30,9 +31,9 @@ namespace Iviz.Roslib
 
         public IRosSubscriber<T> Subscriber =>
             subscriber ?? throw new InvalidOperationException("Channel has not been started!");
-        
+
         public string Topic => Subscriber.Topic;
-        
+
         public RosChannelReader()
         {
         }
@@ -43,13 +44,12 @@ namespace Iviz.Roslib
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested.</param>
-        public RosChannelReader(IRosClient client, string topic, bool requestNoDelay = false)
+        public RosChannelReader(IRosClient client, string topic, bool requestNoDelay = true)
         {
             Start(client, topic, requestNoDelay);
         }
 
-#if !NETSTANDARD2_0
-        public async ValueTask DisposeAsync()
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -65,8 +65,18 @@ namespace Iviz.Roslib
             }
 
 
+#if !NETSTANDARD2_0
             await subscriberToken.DisposeAsync();
+#else
+            subscriberToken.Dispose();
+#endif
             await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
+        }
+
+#if !NETSTANDARD2_0
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            await DisposeAsync();
         }
 #endif
 
@@ -146,7 +156,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false)
+        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = true)
         {
             if (client == null)
             {
@@ -172,7 +182,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to</param>
         /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public void Start(IRosClient client, string topic, bool requestNoDelay = false)
+        public void Start(IRosClient client, string topic, bool requestNoDelay = true)
         {
             if (client == null)
             {

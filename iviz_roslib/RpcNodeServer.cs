@@ -9,15 +9,16 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    internal sealed class NodeServer : IDisposable
+    internal sealed class NodeServer
     {
         static readonly Arg[] DefaultOkResponse = OkResponse(0);
 
         readonly RosClient client;
         readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
         readonly HttpListener listener;
+
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
         Task? task;
         bool disposed;
@@ -60,22 +61,9 @@ namespace Iviz.Roslib.XmlRpc
 
             disposed = true;
 
-            //Logger.LogDebug(this + ": Releasing signal!");
-            
-            // tell task thread to dispose
-            signal.Release();
-
-            if (task == null)
-            {
-                //Logger.LogDebug(this + ": Direct Disposing listener!");
-                // not initialized, dispose directly
-                listener.Dispose();
-                return;
-            }
-
-            //Logger.LogDebugFormat("{0}: Waiting for task...", this);
-            task.WaitNoThrow(this);
-            //Logger.LogDebugFormat("{0}: Task done!", this);
+            runningTs.Cancel();
+            listener.Dispose();
+            task?.WaitForWithTimeout(2000).WaitNoThrow(this);
         }
 
         public async Task DisposeAsync()
@@ -87,23 +75,14 @@ namespace Iviz.Roslib.XmlRpc
 
             disposed = true;
 
-            //Logger.LogDebug(this + ": Releasing signal!");
-            
-            // tell task thread to dispose
-            signal.Release();
-
-            if (task == null)
+            runningTs.Cancel();
+            listener.Dispose();
+            if (task != null)
             {
-                //Logger.LogDebug(this + ": Direct Disposing listener!");
-                // not initialized, dispose directly
-                listener.Dispose();
-                return;
+                await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
             }
-
-            //Logger.LogDebug(this + ": Waiting for task!");
-            await task.AwaitNoThrow(this);
         }
-        
+
         public void Start()
         {
             task = Task.Run(Run);
@@ -116,38 +95,23 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task Run()
         {
-            Logger.LogDebugFormat("{0}: Starting!", this);
-
-            Task listenerTask = Task.Run(
-                async() => await listener.StartAsync(StartContext, true).AwaitNoThrow(this));
-
-            //Logger.LogDebug(this + ": Waiting for signal...");
-            // wait until we're disposed
-            await signal.WaitAsync().Caf();
-
-            //Logger.LogDebug(this + ": Telling listener to stop listening...");
-            // tell the listener to stop listening
-            listener.Dispose();
-
-            //Logger.LogDebug(this + ": Awaiting for RPC calls...");
-            // wait for any remaining rpc calls
-            await listener.AwaitRunningTasks().Caf();
-
-            //Logger.LogDebug(this + ": Waiting...");
-            // and that is usually not enough. so we bail out
-            if (!await listenerTask.WaitFor(2000).Caf())
-            {
-                Logger.LogErrorFormat("{0}: Listener stuck. Abandoning.", this);
-            }
-
-            Logger.LogDebugFormat("{0}: Leaving thread", this);
-        }
-
-        async Task StartContext(HttpListenerContext context)
-        {
             try
             {
-                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks).Caf();
+                await listener.StartAsync(StartContext, true).AwaitNoThrow(this);
+            }
+            finally
+            {
+                await listener.AwaitRunningTasks().Caf();
+                Logger.LogDebugFormat("{0}: Leaving thread", this);
+            }
+        }
+
+        async Task StartContext(HttpListenerContext context, CancellationToken token)
+        {
+            CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            try
+            {
+                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();
             }
             catch (Exception e)
             {

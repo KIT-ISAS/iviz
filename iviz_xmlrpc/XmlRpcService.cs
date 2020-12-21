@@ -323,7 +323,8 @@ namespace Iviz.XmlRpc
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], Task>>? lateCallbacks = null)
+            IReadOnlyDictionary<string, Func<object[], Task>>? lateCallbacks = null,
+            CancellationToken token = default)
         {
             if (httpContext is null)
             {
@@ -335,7 +336,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(methods));
             }
 
-            string inData = await httpContext.GetRequest().Caf();
+            string inData = await httpContext.GetRequest(token: token).Caf();
 
 #if DEBUG__
             Logger.Log("--- MethodResponse ---");
@@ -370,7 +371,7 @@ namespace Iviz.XmlRpc
 
                 string outData = buffer.ToString();
 
-                await httpContext.Respond(outData).Caf();
+                await httpContext.Respond(outData, token: token).Caf();
 
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
@@ -388,7 +389,7 @@ namespace Iviz.XmlRpc
                 buffer.AppendLine("</fault>");
                 buffer.AppendLine("</methodResponse>");
 
-                await httpContext.Respond(buffer.ToString()).Caf();
+                await httpContext.Respond(buffer.ToString(), token: token).Caf();
             }
         }
 

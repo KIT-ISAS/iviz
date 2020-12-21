@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -163,21 +164,7 @@ namespace Iviz.App
                         return;
                     }
 
-                    Uri tmpMyUri = MyUri;
-                    if (tmpMyUri == null)
-                    {
-                        Logger.Internal("Cannot create master node without a valid own uri!");
-                        return;
-                    }
-
-                    if (tmpMyUri.Port == RosServerManager.DefaultPort)
-                    {
-                        Logger.Internal(
-                            $"Master port {RosServerManager.DefaultPort} is already being used by the caller!");
-                        return;
-                    }
-
-                    Uri ownMasterUri = new Uri($"http://{tmpMyUri.Host}:{RosServerManager.DefaultPort}/");
+                    Uri ownMasterUri = new Uri($"http://{Dns.GetHostName()}:{RosServerManager.DefaultPort}/");
                     const string ownMasterId = "/iviz_master";
 
                     if (RosServerManager.Create(ownMasterUri, ownMasterId))

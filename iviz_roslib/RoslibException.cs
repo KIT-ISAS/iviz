@@ -55,6 +55,24 @@ namespace Iviz.Roslib
         {
         }
     }
+    
+    /// <summary>
+    /// Thrown when an error happened during the connection.
+    /// </summary>
+    public class UriBindingException : ConnectionException
+    {
+        public UriBindingException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public UriBindingException()
+        {
+        }
+
+        public UriBindingException(string message) : base(message)
+        {
+        }
+    }
 
     /// <summary>
     /// Thrown when the uri provided for the caller (this node) is not reachable.

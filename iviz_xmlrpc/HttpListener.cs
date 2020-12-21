@@ -22,6 +22,7 @@ namespace Iviz.XmlRpc
         readonly List<(DateTime start, Task task)> backgroundTasks = new List<(DateTime, Task)>();
         readonly TcpListener listener;
 
+        bool started;
         bool disposed;
         
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
@@ -54,24 +55,21 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
+            runningTs.Cancel();
 
-            if (!KeepRunning)
+            if (!started)
             {
-                // not started, dispose directly
                 listener.Stop();
                 return;
             }
 
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
-            runningTs.Cancel();
-
             using (TcpClient client = new TcpClient())
             {
                 client.Connect(IPAddress.Loopback, LocalPort);
             }
 
             listener.Stop();
-
             Logger.LogDebugFormat("{0}: Listener dispose out", this);
         }
 
@@ -90,13 +88,14 @@ namespace Iviz.XmlRpc
         /// </param>
         /// <returns>An awaitable task.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handler is null</exception>
-        public async Task StartAsync(Func<HttpListenerContext, Task> handler, bool runInBackground)
+        public async Task StartAsync(Func<HttpListenerContext, CancellationToken, Task> handler, bool runInBackground)
         {
             if (handler is null)
             {
                 throw new ArgumentNullException(nameof(handler));
             }
 
+            started = true;
             while (KeepRunning)
                 try
                 {
@@ -111,19 +110,19 @@ namespace Iviz.XmlRpc
                     async Task CreateContextTask()
                     {
                         using var context = new HttpListenerContext(client);
-                        await handler(context).Caf();
+                        await handler(context, runningTs.Token).Caf();
                     }
 
                     if (runInBackground)
                     {
-                        AddToBackgroundTasks(Task.Run(CreateContextTask));
+                        AddToBackgroundTasks(Task.Run(CreateContextTask, runningTs.Token));
                     }
                     else
                     {
                         await CreateContextTask().WaitForWithTimeout(2000).AwaitNoThrow(this);
                     }
                 }
-                catch (ObjectDisposedException)
+                catch (Exception e) when (e is ObjectDisposedException || e is OperationCanceledException)
                 {
                     break;
                 }
@@ -152,6 +151,10 @@ namespace Iviz.XmlRpc
         public async Task AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
         {
             backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
+            if (backgroundTasks.Count == 0)
+            {
+                return;
+            }
 
             DateTime now = DateTime.Now;
             int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalMilliseconds > BackgroundTimeoutInMs);

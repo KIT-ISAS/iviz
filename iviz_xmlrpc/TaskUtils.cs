@@ -44,8 +44,8 @@ namespace Iviz.XmlRpc
                 throw new TimeoutException(errorMessage);
             }
         }
-        
-        
+
+
         /// <summary>
         /// Returns whether the task ran to completion (i.e., completed but not cancelled or faulted)
         /// </summary>
@@ -65,7 +65,7 @@ namespace Iviz.XmlRpc
         {
             return task.ConfigureAwait(false);
         }
-        
+
         /// <summary>
         /// Sets ConfigureAwait(false) for a task.
         /// </summary>
@@ -75,7 +75,7 @@ namespace Iviz.XmlRpc
         {
             return task.ConfigureAwait(false);
         }
-        
+
 
         public static void WaitNoThrow(this Task? t, object caller)
         {
@@ -88,6 +88,7 @@ namespace Iviz.XmlRpc
             {
                 t.Wait();
             }
+            catch (OperationCanceledException) { }
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
@@ -105,12 +106,13 @@ namespace Iviz.XmlRpc
             {
                 await t.Caf();
             }
+            catch (OperationCanceledException) { }
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
             }
         }
-        
+
         public static async Task<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
         {
             if (t == null)
@@ -128,6 +130,6 @@ namespace Iviz.XmlRpc
             }
 
             return default;
-        }        
+        }
     }
 }

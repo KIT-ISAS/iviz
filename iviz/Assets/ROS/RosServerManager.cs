@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Roslib;
 using Iviz.RosMaster;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -32,13 +34,8 @@ namespace Iviz.Ros
 
         public static void Dispose() => instance?.Reset();
 
-        // ---
-
-        readonly SemaphoreSlim signal1 = new SemaphoreSlim(0, 1);
-        readonly SemaphoreSlim signal2 = new SemaphoreSlim(0, 1);
-
-        Task task;
         RosMasterServer server;
+        Task serverTask;
 
         bool TryCreate(Uri masterUri, string masterId)
         {
@@ -52,17 +49,6 @@ namespace Iviz.Ros
                 Reset();
             }
 
-            task = Task.Run(async () => await TryCreateAsync(masterUri, masterId));
-
-            // wait for TryCreateAsync()
-            signal1.Wait();
-
-            return server != null;
-        }
-
-        async Task TryCreateAsync(Uri masterUri, string masterId)
-        {
-            Task serverTask = null;
             try
             {
                 server = new RosMasterServer(masterUri, masterId);
@@ -73,29 +59,18 @@ namespace Iviz.Ros
                 }
 
                 // start in background
-                serverTask = server.Start();
+                serverTask = Task.Run(async () =>
+                {
+                    await server.Start();
+                });
             }
             catch (Exception e)
             {
                 Logger.Warn(e);
                 server = null;
             }
-
-            // tell TryCreate() to continue
-            signal1.Release();
-
-            if (server == null || serverTask == null)
-            {
-                return;
-            }
-
-            // wait for Reset()
-            await signal2.WaitAsync();
-
-            server.Dispose();
-            await serverTask;
-
-            server = null;
+            
+            return server != null;
         }
 
         void Reset()
@@ -105,17 +80,9 @@ namespace Iviz.Ros
                 return;
             }
 
-            // tell TryCreate() to stop waiting
-            signal2.Release();
-
-            try
-            {
-                task.Wait();
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+            server.Dispose();
+            serverTask.WaitForWithTimeout(2000).WaitNoThrow("RosServerManager");
+            server = null;
         }
     }
 }

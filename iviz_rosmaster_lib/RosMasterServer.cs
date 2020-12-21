@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs.RosgraphMsgs;
+using Iviz.Roslib;
 using Iviz.XmlRpc;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 using Logger = Iviz.Msgs.Logger;
@@ -31,6 +33,8 @@ namespace Iviz.RosMaster
         readonly Dictionary<string, string> topicTypes = new Dictionary<string, string>();
 
         readonly Dictionary<string, Arg> parameters = new Dictionary<string, Arg>();
+
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
         public Uri MasterUri { get; }
         public string MasterCallerId { get; }
@@ -88,9 +92,15 @@ namespace Iviz.RosMaster
                 return;
             }
 
+            runningTs.Cancel();
             listener.Dispose();
 
             disposed = true;
+        }
+
+        public override string ToString()
+        {
+            return $"[RosMaster Uri={MasterUri}]";
         }
 
         public void AddKey(string key, Arg value)
@@ -101,21 +111,50 @@ namespace Iviz.RosMaster
 
         public async Task Start()
         {
-            Logger.Log($"** Starting at {MasterUri}");
-            await listener.StartAsync(StartContext, false);
-            await listener.AwaitRunningTasks();
-            Logger.Log("** Leaving thread.");
+            Logger.Log($"** {this}: Starting at {MasterUri}");
+            Task startTask = listener.StartAsync(StartContext, false);
+            await ManageRosoutAggAsync().AwaitNoThrow(this);
+            await startTask.AwaitNoThrow(this);
+            Logger.Log($"** {this}: Leaving thread.");
         }
 
-        async Task StartContext(HttpListenerContext context)
+        async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
+            CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+
             try
             {
-                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks);
+                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token);
             }
             catch (Exception e)
             {
                 Logger.LogError(e);
+            }
+        }
+
+        async Task ManageRosoutAggAsync()
+        {
+            Uri ownUri = new Uri($"http://{MasterUri.Host}:0");
+            RosClient client = new RosClient(MasterUri, "/rosout", ownUri);
+            RosChannelReader<Log> reader = new RosChannelReader<Log>();
+            RosChannelWriter<Log> writer = new RosChannelWriter<Log>();
+
+            try
+            {
+                await reader.StartAsync(client, "/rosout");
+                await writer.StartAsync(client, "/rosout_agg");
+
+                while (!runningTs.IsCancellationRequested)
+                {
+                    Log log = await reader.ReadAsync(runningTs.Token);
+                    await writer.WriteAsync(log);
+                }
+            }
+            finally
+            {
+                await writer.DisposeAsync();
+                await reader.DisposeAsync();
+                await client.DisposeAsync();
             }
         }
 
@@ -480,7 +519,7 @@ namespace Iviz.RosMaster
                 return ErrorResponse($"Parameter '{key}' is not set");
             }
 
-            arg = new Arg(candidates.Select(pair => (pair.Key, pair.Value)));
+            arg = new Arg(Enumerable.Select(candidates, pair => (pair.Key, pair.Value)));
             return OkResponse(arg);
         }
 

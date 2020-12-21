@@ -14,6 +14,7 @@ namespace Iviz.App
 {
     public sealed class ConsoleDialogData : DialogData
     {
+        const int MaxMessageLength = 250;
         const int MaxMessages = 100;
 
         static readonly string[] ExtraFields = {"All", "None"};
@@ -177,15 +178,14 @@ namespace Iviz.App
                     .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
 
-                const int maxMessageLength = 300;
-                if (message.Message.Length < maxMessageLength)
+                if (message.Message.Length < MaxMessageLength)
                 {
                     description.Append(message.Message).AppendLine();
                 }
                 else
                 {
-                    description.Append(message.Message, 0, maxMessageLength).Append("<i>... +")
-                        .Append(message.Message.Length - maxMessageLength).Append(" chars</i>").AppendLine();
+                    description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
+                        .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
                 }
 
                 ids.Add(message.SourceId ?? "[Me]");

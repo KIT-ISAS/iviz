@@ -184,9 +184,8 @@ namespace Iviz.Roslib
                 Logger.Log($"{this}: {e}");
             }
         }
-
-#if !NETSTANDARD2_0
-        public async ValueTask DisposeAsync()
+        
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -208,6 +207,12 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
+        }        
+
+#if !NETSTANDARD2_0
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            await DisposeAsync();
         }
 #endif
     }
