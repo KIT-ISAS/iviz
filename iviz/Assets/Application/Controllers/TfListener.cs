@@ -70,15 +70,16 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Instance = this;
 
-            FrameNode defaultListener = FrameNode.Instantiate("[.]");
 
             UnityFrame = Add(CreateFrameObject("TF", null, null));
             UnityFrame.ForceInvisible = true;
             UnityFrame.Visible = false;
+
+            FrameNode defaultListener = FrameNode.Instantiate("[.]");
             UnityFrame.AddListener(defaultListener);
 
-            keepAllListener = FrameNode.Instantiate("[TFNode]", UnityFrame.Transform);
-            staticListener = FrameNode.Instantiate("[TFStatic]", UnityFrame.Transform);
+            keepAllListener = FrameNode.Instantiate("[TFNode]");
+            staticListener = FrameNode.Instantiate("[TFStatic]");
             defaultListener.transform.parent = UnityFrame.Transform;
 
             Config = new TfConfiguration();
@@ -108,7 +109,12 @@ namespace Iviz.Controllers
         public static TfListener Instance { get; private set; }
         [NotNull] public Sender<TFMessage> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
-        [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
+
+        [NotNull]
+        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.SafeNull() ??
+                                                       throw new InvalidOperationException(
+                                                           "GuiInputModule has not been started!");
+
         public static TfFrame MapFrame { get; private set; }
         public static TfFrame RootFrame { get; private set; }
         public static TfFrame OriginFrame { get; private set; }
@@ -364,7 +370,7 @@ namespace Iviz.Controllers
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
             var frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
-            frame.name = $"{{{id}}}";
+            frame.Name = "{" + id + "}";
             frame.Id = id;
             frame.Visible = config.Visible;
             frame.FrameSize = config.FrameSize;

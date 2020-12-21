@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 
 namespace Iviz.Core
@@ -56,6 +57,12 @@ namespace Iviz.Core
         public static void Error(object t)
         {
             External(t.ToString(), LogLevel.Error);
+        }
+
+        public static void Error(object t, Exception e, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            ExternalImpl(t.ToString(), e, file, line);
         }
 
         public static void Warn(object t)
@@ -134,12 +141,17 @@ namespace Iviz.Core
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
+            ExternalImpl(msg, e, file, line);
+        }
+
+        static void ExternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, string file, int line)
+        {
             var str = new StringBuilder();
             str.Append(msg ?? NullMessage);
 
             if (e == null)
             {
-                str.AppendLine().Append("→ ").Append(NullException);
+                str.AppendLine().Append(NullException);
             }
             else
             {

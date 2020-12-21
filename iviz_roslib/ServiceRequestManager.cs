@@ -15,7 +15,7 @@ namespace Iviz.Roslib
     internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
     {
         readonly Func<T, Task> callback;
-        readonly HashSet<ServiceRequestAsync<T>> connections = new HashSet<ServiceRequestAsync<T>>();
+        readonly HashSet<ServiceRequestAsync<T>> requests = new HashSet<ServiceRequestAsync<T>>();
 
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
@@ -69,9 +69,9 @@ namespace Iviz.Roslib
                     }
 
                     var sender = new ServiceRequestAsync<T>(serviceInfo, client, new Endpoint(endPoint), callback);
-                    connections.Add(sender);
+                    requests.Add(sender);
 
-                    Cleanup();
+                    await CleanupAsync();
                 }
             }
             catch (ObjectDisposedException)
@@ -87,16 +87,17 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Leaving thread (normally)", this); // also expected
         }
 
-        void Cleanup()
+        async Task CleanupAsync()
         {
-            ServiceRequestAsync<T>[] toRemove = connections.Where(connection => !connection.IsAlive).ToArray();
-            foreach (ServiceRequestAsync<T> connection in toRemove)
+            ServiceRequestAsync<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
+            var tasks = toRemove.Select(async request =>
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
-                    this, connection.Hostname);
-                connection.Stop();
-                connections.Remove(connection);
-            }
+                    this, request.Hostname);
+                await request.StopAsync().Caf();
+                requests.Remove(request);
+            });
+            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf(); 
         }
 
         public void Dispose()
@@ -130,9 +131,9 @@ namespace Iviz.Roslib
                 Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
 
-            Task[] tasks = connections.Select(sender => sender.StopAsync()).ToArray();
+            Task[] tasks = requests.Select(request => request.StopAsync()).ToArray();
             await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
-            connections.Clear();
+            requests.Clear();
         }
 
         public override string ToString()

@@ -571,10 +571,7 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            Task t = Task.Run(async () =>
-                await subscription.PublisherUpdateRcpAsync(masterResponse.Publishers).Caf());
-            t.Wait();
-
+            subscription.PublisherUpdateRcp(masterResponse.Publishers);
             return (id, subscription);
         }
 
@@ -587,20 +584,15 @@ namespace Iviz.Roslib
                 throw new ArgumentException($"'{topic}' is not a valid resource name");
             }
 
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Entering");
-
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Creating subsciber");
             RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
 
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling subscribe");
             string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
 
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling register subscribe async");
             var masterResponse = await RosMasterApi.RegisterSubscriberAsync(topic, topicInfo.Type).Caf();
             if (!masterResponse.IsValid)
             {
@@ -609,10 +601,7 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Calling publisher update rpc async");
             await subscription.PublisherUpdateRcpAsync(masterResponse.Publishers).Caf();
-
-            //Logger.LogDebug("CreateSubscriber " + topic + ": Done!");
             return (id, subscription);
         }
 
@@ -1405,11 +1394,8 @@ namespace Iviz.Roslib
 
             Utils.AddRange(tasks, publishers.Select(async publisher =>
             {
-                //Logger.LogDebug("2) Disposing publisher " + publisher.Topic);
                 await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
-                //Logger.LogDebug("2) Unregistering publisher " + publisher.Topic);
                 await RosMasterApi.UnregisterPublisherAsync(publisher.Topic).AwaitNoThrow(this).Caf();
-                //Logger.LogDebug("2) Done publisher " + publisher.Topic);
             }));
 
             var subscribers = subscribersByTopic.Values.ToArray();
@@ -1417,11 +1403,8 @@ namespace Iviz.Roslib
 
             Utils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
-                //Logger.LogDebug("3) Disposing subscriber " + subscriber.Topic);
                 await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
-                //Logger.LogDebug("3) Unregistering subscriber " + subscriber.Topic);
                 await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic).AwaitNoThrow(this).Caf();
-                //Logger.LogDebug("3) Done subscriber " + subscriber.Topic);
             }));
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
@@ -1429,9 +1412,7 @@ namespace Iviz.Roslib
 
             foreach (IServiceCaller receiver in receivers)
             {
-                //Logger.LogDebug("4) Disposing service receiver " + receiver.ServiceType);
                 receiver.Dispose();
-                //Logger.LogDebug("4) Done service receiver " + receiver.ServiceType);
             }
 
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
@@ -1439,15 +1420,13 @@ namespace Iviz.Roslib
 
             Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
-                //Logger.LogDebug("5) Disposing service " + senderManager.Service);
                 await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
-                //Logger.LogDebug("5) Unregistering service " + senderManager.Service);
-                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri).AwaitNoThrow(this)
-                    .Caf();
-                //Logger.LogDebug("5) Done service " + senderManager.Service);
+                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri)
+                    .AwaitNoThrow(this).Caf();
             }));
 
-            await Task.WhenAll(tasks).WaitForWithTimeout(3000, "Close() tasks timed out").AwaitNoThrow(this).Caf();
+            await Task.WhenAll(tasks).WaitForWithTimeout(3000, "Close() tasks timed out")
+                .AwaitNoThrow(this).Caf();
         }
 
         public SubscriberState GetSubscriberStatistics()

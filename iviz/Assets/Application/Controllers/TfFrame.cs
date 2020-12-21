@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection.Emit;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
@@ -18,7 +19,7 @@ namespace Iviz.Controllers
         [SerializeField] string id;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
+        readonly HashSet<FrameNode> nodes = new HashSet<FrameNode>();
         readonly Timeline timeline = new Timeline();
 
         Pose pose;
@@ -26,7 +27,6 @@ namespace Iviz.Controllers
         float labelSize = 1.0f;
         bool labelVisible;
         bool trailVisible;
-
         bool visible;
         bool forceVisible;
 
@@ -53,7 +53,51 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
+        TextMarkerResource LabelObjectText
+        {
+            get
+            {
+                if (labelObjectText == null)
+                {
+                    labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
+                    labelObjectText.Name = "[Label]";
+                    labelObjectText.Text = Id;
+                    labelObjectText.transform.localScale = 0.5f * LabelSize * FrameSize * Vector3.one;
+                    labelObjectText.Visible = !ForceInvisible && LabelVisible && (ForceVisible || Visible);
+                    labelObjectText.BillboardOffset = 1.5f * FrameSize * Vector3.up;
+                    labelObjectText.Layer = LayerType.IgnoreRaycast;
+                }
+
+                return labelObjectText;
+            }
+        }
+        
+        [NotNull]
+        LineConnector ParentConnector
+        {
+            get
+            {
+                if (parentConnector == null)
+                {
+                    parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
+                    parentConnector.A = Transform;
+
+                    parentConnector.B = Transform.parent.SafeNull() ?? TfListener.RootFrame.Transform;
+
+                    parentConnector.name = "[Connector]";
+                    parentConnector.LineWidth = FrameSize / 20;
+                    parentConnector.Layer = LayerType.IgnoreRaycast;
+                    parentConnector.gameObject.SetActive(false);
+                }
+
+                return parentConnector;
+            }
+        }
+
         bool HasTrail => trail != null;
+        bool HasLabelObjectText => labelObjectText != null;
+        bool HasParentConnector => parentConnector != null;
 
         [NotNull] public IEnumerable<TfFrame> Children => children.Values;
 
@@ -64,15 +108,17 @@ namespace Iviz.Controllers
             set
             {
                 id = value ?? throw new ArgumentNullException(nameof(value));
-                labelObjectText.Text = id;
+                if (HasLabelObjectText)
+                {
+                    LabelObjectText.Text = id;
+                }
+
                 if (HasTrail)
                 {
                     Trail.Name = $"[Trail:{id}]";
                 }
             }
         }
-
-        const bool Selected = false;
 
         bool ForceVisible
         {
@@ -104,24 +150,40 @@ namespace Iviz.Controllers
             set
             {
                 labelVisible = value;
-                labelObjectText.Visible = !ForceInvisible && (value || Selected) && (ForceVisible || Visible);
+                if (!HasLabelObjectText && !value)
+                {
+                    return;
+                }
+
+                LabelObjectText.Visible = !ForceInvisible && (ForceVisible || Visible);
             }
         }
 
-        public float LabelSize
+        float LabelSize
         {
             get => labelSize;
             set
             {
                 labelSize = value;
-                labelObjectText.transform.localScale = 0.5f * value * FrameSize * Vector3.one;
+                if (HasLabelObjectText)
+                {
+                    LabelObjectText.transform.localScale = 0.5f * value * FrameSize * Vector3.one;
+                }
             }
         }
 
         public bool ConnectorVisible
         {
-            get => parentConnector.Visible;
-            set => parentConnector.Visible = value;
+            get => HasParentConnector && ParentConnector.Visible;
+            set
+            {
+                if (!HasParentConnector && !value)
+                {
+                    return;
+                }
+                
+                ParentConnector.Visible = value;   
+            }
         }
 
         public float FrameSize
@@ -130,8 +192,16 @@ namespace Iviz.Controllers
             set
             {
                 axis.AxisLength = value;
-                parentConnector.LineWidth = FrameSize / 20;
-                labelObjectText.BillboardOffset = 1.5f * FrameSize * Vector3.up;
+                if (HasParentConnector)
+                {
+                    parentConnector.LineWidth = FrameSize / 20;
+                }
+
+                if (HasLabelObjectText)
+                {
+                    LabelObjectText.BillboardOffset = 1.5f * FrameSize * Vector3.up;
+                }
+
                 LabelSize = LabelSize;
             }
         }
@@ -177,26 +247,31 @@ namespace Iviz.Controllers
 
         public Pose AbsolutePose => Transform.AsPose();
 
-        bool HasNoListeners => listeners.Count == 0;
+        bool HasNoListeners => nodes.Count == 0;
 
         bool IsChildless => children.Count == 0;
 
         void Awake()
         {
+            /*
             labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
             labelObjectText.Visible = false;
             labelObjectText.Name = "[Label]";
             labelObjectText.transform.localScale = 0.5f * Vector3.one;
+            */
 
+            /*
             parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
             parentConnector.A = Transform;
-            
+
             var parent = Transform.parent;
             parentConnector.B = parent != null
                 ? parent
                 : (TfListener.RootFrame != null ? TfListener.RootFrame.Transform : null);
 
             parentConnector.name = "[Connector]";
+            parentConnector.gameObject.SetActive(false);
+            */
 
             axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(Transform);
 
@@ -207,14 +282,8 @@ namespace Iviz.Controllers
 
             axis.ColliderEnabled = true;
             axis.Layer = LayerType.IgnoreRaycast;
-
             axis.name = "[Axis]";
-
             FrameSize = 0.125f;
-
-            parentConnector.gameObject.SetActive(false);
-
-            TrailVisible = false;
         }
 
         public void AddListener([NotNull] FrameNode frame)
@@ -224,7 +293,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            listeners.Add(frame);
+            nodes.Add(frame);
         }
 
         public void RemoveListener([NotNull] FrameNode frame)
@@ -239,7 +308,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            listeners.Remove(frame);
+            nodes.Remove(frame);
             CheckIfDead();
         }
 
@@ -303,8 +372,10 @@ namespace Iviz.Controllers
                 Parent.AddChild(this);
             }
 
-            var parent = Transform.parent;
-            parentConnector.B = parent != null ? parent : TfListener.OriginFrame.Transform;
+            if (HasParentConnector)
+            {
+                ParentConnector.B = Transform.parent.SafeNull() ?? TfListener.OriginFrame.Transform;
+            }
 
             return true;
         }
@@ -352,7 +423,7 @@ namespace Iviz.Controllers
 
         void LogPose(in TimeSpan time)
         {
-            if (listeners.Count != 0)
+            if (nodes.Count != 0)
             {
                 timeline.Add(time, WorldPose);
             }
@@ -374,6 +445,7 @@ namespace Iviz.Controllers
             timeline.Clear();
             axis.DisposeDisplay();
             trail.DisposeDisplay();
+            labelObjectText.DisposeDisplay();
 
             trail = null;
             axis = null;

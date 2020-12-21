@@ -257,6 +257,10 @@ namespace Iviz.Roslib
             await manager.PublisherUpdateRpcAsync(publisherUris).Caf();
         }
         
+        internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris)
+        {
+            Task.Run(async () => await PublisherUpdateRcpAsync(publisherUris).Caf()).Wait();
+        }
 
         public override string ToString()
         {

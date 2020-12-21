@@ -16,6 +16,7 @@ namespace Iviz.Ros
     public abstract class RosConnection : IExternalServiceProvider
     {
         const int TaskWaitTimeInMs = 2000;
+        const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
         [ItemNotNull] protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
             Array.Empty<BriefTopicInfo>().AsReadOnly();
@@ -88,11 +89,15 @@ namespace Iviz.Ros
 
         async Task Run()
         {
+            DateTime lastConnectionTry = DateTime.MinValue;
             try
             {
                 while (keepRunning)
                 {
-                    if (KeepReconnecting && ConnectionState != ConnectionState.Connected)
+                    DateTime now = DateTime.Now;
+                    if (KeepReconnecting 
+                        && ConnectionState != ConnectionState.Connected 
+                        && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
@@ -100,11 +105,12 @@ namespace Iviz.Ros
 
                         try
                         {
+                            lastConnectionTry = now;
                             connectionResult = await Connect();
                         }
                         catch (Exception e)
                         {
-                            Logger.Error("Unexpected error in Connect: " + e);
+                            Msgs.Logger.LogErrorFormat("Unexpected error in RosConnection.Connect: {0}", e);
                             continue;
                         }
 
@@ -119,7 +125,7 @@ namespace Iviz.Ros
                     }
                     catch (Exception e)
                     {
-                        Logger.Error("Unexpected error in ExecuteTask: " + e);
+                        Logger.Error("Unexpected error in RosConnection.ExecuteTask: {0}", e);
                     }
                 }
 
@@ -130,7 +136,7 @@ namespace Iviz.Ros
                 // shouldn't happen
                 Logger.Internal("Left connection thread!");
                 Logger.Internal("Error:", e);
-                Logger.Error("XXX Left connection thread: " + e);
+                Logger.Error("XXX Left connection thread: ", e);
             }
         }
 
@@ -144,7 +150,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Msgs.Logger.LogErrorFormat("Exception in RosConnection task: {0}", e);
                 }
             }
         }

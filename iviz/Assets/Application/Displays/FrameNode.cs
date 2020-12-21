@@ -5,6 +5,11 @@ using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
+    public interface IFrameNodeOwner
+    {
+        string Description { get; }
+    }
+    
     /// <summary>
     /// Class for displays that want to attach themselves to a TF frame.
     /// This increases the reference count of the frame, and prevents the TFListener from
@@ -16,13 +21,21 @@ namespace Iviz.Controllers
         TfFrame parent;
 
         Transform mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
 
-
-        [CanBeNull] public virtual TfFrame Parent
+        IFrameNodeOwner owner;
+        
+        [CanBeNull]
+        public virtual TfFrame Parent
         {
             get => parent;
             set => SetParent(value, true);
+        }
+
+        public string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value;
         }
 
         void SetParent(TfFrame newParent, bool attach)
@@ -45,9 +58,7 @@ namespace Iviz.Controllers
 
             if (attach)
             {
-                Transform.SetParentLocal(newParent == null ? 
-                    TfListener.OriginFrame.Transform : 
-                    newParent.Transform);
+                Transform.SetParentLocal(newParent == null ? TfListener.OriginFrame.Transform : newParent.Transform);
             }
         }
 
@@ -60,12 +71,10 @@ namespace Iviz.Controllers
 
             if (Parent == null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId) ? 
-                    TfListener.MapFrame : 
-                    TfListener.GetOrCreateFrame(parentId);
+                Parent = string.IsNullOrEmpty(parentId) ? TfListener.MapFrame : TfListener.GetOrCreateFrame(parentId);
             }
         }
-        
+
         public void AttachTo([NotNull] string parentId, in Msgs.time timestamp)
         {
             if (parentId == null)
@@ -108,12 +117,12 @@ namespace Iviz.Controllers
         {
             Parent = null;
         }
-        
+
         sealed class SimpleFrameNode : FrameNode
         {
         }
-        
-        public static FrameNode Instantiate([NotNull] string name, [CanBeNull] Transform transform = null)
+
+        public static FrameNode Instantiate([NotNull] string name, IFrameNodeOwner owner = null)
         {
             if (name == null)
             {
@@ -122,18 +131,18 @@ namespace Iviz.Controllers
 
             GameObject obj = new GameObject(name);
             SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
-            if (transform != null)
-            {
-                node.Transform.parent = transform;
-            }
-            else
+            if (TfListener.MapFrame != null)
             {
                 node.Parent = TfListener.MapFrame;
             }
+            else
+            {
+                // TF not initialized yet
+                node.transform.parent = TfListener.UnityFrame.transform;
+            }
 
+            node.owner = owner;
             return node;
         }
-        
     }
-
 }

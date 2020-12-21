@@ -18,13 +18,9 @@ namespace Iviz.Displays
         [NotNull]
         protected BoxCollider BoxCollider
         {
-            get => boxCollider != null
-                ? boxCollider
-                : throw new NullReferenceException("This asset has no box collider!");
-            set => boxCollider =
-                value != null
-                    ? value
-                    : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
+            get => boxCollider.SafeNull() ?? throw new NullReferenceException("This asset has no box collider!");
+            set => boxCollider = value.SafeNull() ??
+                                 throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
         }
 
         protected Bounds WorldBounds => BoxCollider.bounds;

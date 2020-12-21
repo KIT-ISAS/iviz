@@ -164,7 +164,8 @@ namespace Iviz.Controllers
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             
             node = FrameNode.Instantiate("[GridMapNode]");
-            link = FrameNode.Instantiate("[GridMapLink]", node.transform);
+            link = FrameNode.Instantiate("[GridMapLink]");
+            link.transform.parent = node.Transform;
             resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.GridMap, link.transform);
 
             Config = new GridMapConfiguration();

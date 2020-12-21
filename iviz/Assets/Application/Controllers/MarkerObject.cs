@@ -172,9 +172,9 @@ namespace Iviz.Controllers
 
             description.Append("</b>").AppendLine();
 
-            ExpirationTime = msg.Lifetime.IsZero ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
+            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
 
-            if (msg.Lifetime.IsZero)
+            if (msg.Lifetime == default)
             {
                 ExpirationTime = DateTime.MaxValue;
                 description.Append("Expiration: None").AppendLine();

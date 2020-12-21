@@ -102,7 +102,7 @@ namespace Iviz.App
             tfLink.LinkClicked += OnTfLinkClicked;
             SelectedFrame = null;
 
-            placeHolder = FrameNode.Instantiate("TFLog Placeholder", TfListener.ListenersFrame.transform);
+            placeHolder = FrameNode.Instantiate("TFLog Placeholder");
 
             gotoButton.interactable = false;
             trail.interactable = false;
@@ -196,18 +196,19 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             Initialize();
 
             TfNode root = new TfNode(TfListener.OriginFrame);
 
             StringBuilder str = new StringBuilder();
             root.Write(str);
+            str.AppendLine().AppendLine();
 
             tfText.text = str.ToString();
 
-            RectTransform ctransform = (RectTransform) content.transform;
-            ctransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+            RectTransform cTransform = (RectTransform) content.transform;
+            cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }
 
         public void ClearSubscribers()
@@ -261,27 +262,14 @@ namespace Iviz.App
             {
                 trailText.text = "Trail:\nOff";
                 lockPivotText.text = "Lock Pivot\nOff";
-                //lock1PVText.text = "Lock 1PV\nOff";
             }
             else
             {
-                if (SelectedFrame.TrailVisible)
-                {
-                    trailText.text = "Trail:\n<b>On</b>";
-                }
-                else
-                {
-                    trailText.text = "Trail:\nOff";
-                }
+                trailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
 
-                if (TfListener.GuiInputModule.OrbitCenterOverride == SelectedFrame)
-                {
-                    lockPivotText.text = "Lock Pivot\n<b>On</b>";
-                }
-                else
-                {
-                    lockPivotText.text = "Lock Pivot\nOff";
-                }
+                lockPivotText.text = TfListener.GuiInputModule.OrbitCenterOverride == SelectedFrame
+                    ? "Lock Pivot\n<b>On</b>"
+                    : "Lock Pivot\nOff";
             }
         }
 
