@@ -226,12 +226,12 @@ namespace Iviz.Roslib
 
             try
             {
-                // Create an XmlRpc server. This will tell us fast whether the port is taken.
+                // Create an XmlRpc server. This will tell us quickly whether the port is taken.
                 listener = new NodeServer(this);
             }
             catch (SocketException e)
             {
-                throw new ConnectionException($"Failed to bind to local URI '{callerUri}'", e);
+                throw new UriBindingException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
             if (CallerUri.Port == AnyPort || CallerUri.IsDefaultPort)
@@ -1858,10 +1858,15 @@ namespace Iviz.Roslib
             Close();
         }
 
-#if !NETSTANDARD2_0
-        public async ValueTask DisposeAsync()
+        public async Task DisposeAsync()
         {
             await CloseAsync();
+        }
+
+#if !NETSTANDARD2_0
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            await DisposeAsync();
         }
 #endif
 
