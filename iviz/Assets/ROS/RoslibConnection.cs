@@ -178,7 +178,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Warn(e);
+                Core.Logger.Error("Exception during Connect():" , e);
             }
 
             //Core.Logger.Debug("*** Disconnecting!");
@@ -400,7 +400,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
                 }
             });
         }
@@ -450,7 +450,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Debug(e);
+                    Core.Logger.Error("Exception during RoslibConnection.CallService(): ", e);
                 }
 
                 signal.Release();
@@ -480,7 +480,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.Publish(): ", e);
                 }
 
                 await Task.CompletedTask;
@@ -530,7 +530,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.Subscribe(): ", e);
                 }
             });
         }
@@ -563,7 +563,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
                 }
             });
         }
@@ -609,7 +609,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
                 }
             });
         }
@@ -654,7 +654,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes(): ", e);
                 }
                 finally
                 {
@@ -683,7 +683,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error(e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
                 }
             });
 
@@ -711,7 +711,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Warn(e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetParameter(): ", e);
                 }
 
                 signal.Release();
@@ -944,7 +944,7 @@ namespace Iviz.Ros
 
             public async Task AdvertiseAsync(RosClient client)
             {
-                var fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
+                string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
                 IRosPublisher publisher;
                 if (client != null)
                 {

@@ -20,7 +20,7 @@ namespace Iviz.Controllers
         public ModelService()
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
-            Logger.Internal("Trying to start embedded <b>Iviz.Model.Service</b>...");
+            //Logger.Internal("Trying to start embedded <b>Iviz.Model.Service</b>...");
 
             string homeFolder;
             bool isRosInstalled;

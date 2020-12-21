@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
@@ -211,9 +212,20 @@ namespace Iviz.Controllers
                 return;
             }
 
-            msg.Markers.ForEach(CreateInteractiveMarker);
-            msg.Poses.ForEach(UpdateInteractiveMarkerPose);
-            msg.Erases.ForEach(DestroyInteractiveMarker);
+            foreach (var marker in msg.Markers)
+            {
+                CreateInteractiveMarker(marker);
+            }
+
+            foreach (var pose in msg.Poses)
+            {
+                UpdateInteractiveMarkerPose(pose);
+            }
+
+            foreach (string name in msg.Erases)
+            {
+                DestroyInteractiveMarker(name);
+            }
         }
 
         void HandlerUpdateFull([NotNull] InteractiveMarkerInit msg)

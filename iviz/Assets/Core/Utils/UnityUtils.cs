@@ -443,5 +443,10 @@ namespace Iviz.Core
             GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
+
+        public static T SafeNull<T>(this T o) where T : UnityEngine.Object
+        {
+            return o != null ? o : null;
+        }
     }
 }

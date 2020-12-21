@@ -52,8 +52,9 @@ namespace Iviz.Msgs
         {
             return this == other;
         }
-
-        public bool IsZero => Secs == 0 && Nsecs == 0;
+        
+        public static implicit operator duration(in TimeSpan t) => new duration(t);
+        public static implicit operator TimeSpan(in duration t) => t.ToTimeSpan();
     }
 
 }

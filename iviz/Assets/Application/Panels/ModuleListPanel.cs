@@ -119,7 +119,7 @@ namespace Iviz.App
 
         [NotNull]
         public static ModuleListPanel Instance =>
-            instance != null ? instance : throw new InvalidOperationException("Module list panel has not been set!");
+            instance.SafeNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
 
         public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;

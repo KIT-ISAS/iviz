@@ -52,18 +52,11 @@ namespace Iviz.Roslib
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Hostname;
 
-        public void Stop()
-        {
-            keepRunning = false;
-            tcpClient.Close();
-            task.WaitNoThrow(this);
-        }
-
         public async Task StopAsync()
         {
             keepRunning = false;
             tcpClient.Close();
-            await task.AwaitNoThrow(this).Caf();
+            await task.WaitForWithTimeout(2000).AwaitNoThrow(this).Caf();
         }
 
         async Task<int> ReceivePacket()

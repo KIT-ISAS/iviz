@@ -223,15 +223,8 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            if (pointCloud != null)
-            {
-                pointCloud.DisposeDisplay();
-            }
-
-            if (lines != null)
-            {
-                lines.DisposeDisplay();
-            }
+            pointCloud.DisposeDisplay();
+            lines.DisposeDisplay();
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,

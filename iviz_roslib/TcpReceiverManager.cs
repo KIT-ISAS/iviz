@@ -174,7 +174,7 @@ namespace Iviz.Roslib
             {
                 HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
                 allPublisherUris = newPublishers;
-                
+
                 IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
 
                 TcpReceiverAsync<T>[] toDelete = connectionsByUri
@@ -202,7 +202,6 @@ namespace Iviz.Roslib
         async Task<bool> CleanupAsync()
         {
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
-
             if (toDelete.Length == 0)
             {
                 return false;
@@ -242,7 +241,7 @@ namespace Iviz.Roslib
             var missingPublishers = publisherUris
                 .Where(uri => !connectionsByUri.ContainsKey(uri))
                 .Select(uri => new SubscriberReceiverState(uri));
-                
+
             return alivePublishers.Concat(missingPublishers).ToList().AsReadOnly();
         }
 
