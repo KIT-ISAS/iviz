@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
@@ -10,8 +12,10 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.XR.WSA;
 using Logger = Iviz.Core.Logger;
 using Vector3 = UnityEngine.Vector3;
 
@@ -52,12 +56,17 @@ namespace Iviz.Controllers
 
     public sealed class MarkerObject : FrameNode
     {
+        const int LoadResourceTimeoutInMs = 2500;
+
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
         static Crc32Calculator Crc32 => Crc32Calculator.Instance;
 
         readonly StringBuilder description = new StringBuilder(250);
+
+        [CanBeNull] Task resourceTask;
+        [CanBeNull] CancellationTokenSource resourceTs;
 
         (string Ns, int Id) id;
 
@@ -147,8 +156,10 @@ namespace Iviz.Controllers
 
         public void Set([NotNull] Marker msg)
         {
-            if (msg == null) throw new ArgumentNullException(nameof(msg));
-
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
 
             var newId = MarkerListener.IdFromMessage(msg);
             if (id != newId)
@@ -209,7 +220,7 @@ namespace Iviz.Controllers
                 case MarkerType.Sphere:
                 case MarkerType.Cylinder:
                 case MarkerType.MeshResource:
-                    CrateMeshResource(msg);
+                    CreateMeshResource(msg);
                     break;
                 case MarkerType.TextViewFacing:
                 case MarkerType.Text:
@@ -583,7 +594,7 @@ namespace Iviz.Controllers
                 .Append(msg.Color.A).AppendLine();
         }
 
-        void CrateMeshResource([NotNull] Marker msg)
+        void CreateMeshResource([NotNull] Marker msg)
         {
             if (resource is MeshMarkerResource meshMarker)
             {
@@ -771,8 +782,16 @@ namespace Iviz.Controllers
         }
 
         [CanBeNull]
-        static Info<GameObject> GetRequestedResource([NotNull] Marker msg)
+        Info<GameObject> GetRequestedResource([NotNull] Marker msg)
         {
+            if (msg.Type() == MarkerType.MeshResource)
+            {
+                resourceTask = LoadResourceAsync(msg.MeshResource);
+                return null;
+            }
+
+            StopLoadResourceTask();
+            
             switch (msg.Type())
             {
                 case MarkerType.Arrow:
@@ -789,11 +808,6 @@ namespace Iviz.Controllers
                 case MarkerType.LineStrip:
                 case MarkerType.LineList:
                     return Resource.Displays.Line;
-                case MarkerType.MeshResource:
-                    return !Resource.TryGetResource(msg.MeshResource, out Info<GameObject> info,
-                        ConnectionManager.ServiceProvider)
-                        ? null
-                        : info;
                 case MarkerType.CubeList:
                 case MarkerType.SphereList:
                     return Resource.Displays.MeshList;
@@ -805,6 +819,52 @@ namespace Iviz.Controllers
                     return Resource.Displays.Image;
                 default:
                     return null;
+            }
+        }
+
+        void StopLoadResourceTask()
+        {
+            if (resourceTask == null)
+            {
+                return;
+            }
+            
+            resourceTs?.Cancel();
+            resourceTask?.WaitForWithTimeout(LoadResourceTimeoutInMs).WaitNoThrow(this);
+            resourceTs = null;
+            resourceTask = null;
+        }
+        
+        async Task LoadResourceAsync(string uriString)
+        {
+            if (resourceTask != null)
+            {
+                resourceTs?.Cancel();
+                await resourceTask.WaitForWithTimeout(LoadResourceTimeoutInMs).AwaitNoThrow(this);
+            }
+            
+            resourceTs = new CancellationTokenSource();
+            try
+            {
+                resourceInfo = await Resource.GetGameObjectResourceAsync(uriString, ConnectionManager.ServiceProvider,
+                    resourceTs.Token);
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"{this}: LoadResourceAsync failed with exception: {e}");
+            }
+
+            if (resourceInfo == null)
+            {
+                Debug.LogWarning($"{this}: Resource {uriString} returned null");
+                return;
+            }
+
+            GameObject resourceGameObject = ResourcePool.GetOrCreate(resourceInfo, transform);
+            resource = resourceGameObject.GetComponent<IDisplay>();
+            if (resource != null)
+            {
+                resource.Layer = LayerType.IgnoreRaycast;
             }
         }
 
@@ -866,6 +926,8 @@ namespace Iviz.Controllers
         public override void Stop()
         {
             base.Stop();
+            
+            StopLoadResourceTask();
 
             if (resource == null || resourceInfo == null)
             {
@@ -897,6 +959,11 @@ namespace Iviz.Controllers
 
             previousHash = currentHash;
             return false;
+        }
+
+        public override string ToString()
+        {
+            return $"[MarkerObject {name}]";
         }
     }
 

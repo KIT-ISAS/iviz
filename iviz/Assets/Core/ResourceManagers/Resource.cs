@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
@@ -122,8 +124,12 @@ namespace Iviz.Resources
             texturedMaterials ?? (texturedMaterials = new TexturedMaterialsType());
 
         [NotNull] public static FontInfo Font => fontInfo ?? (fontInfo = new FontInfo());
-        [NotNull] public static InternalResourceManager Internal => internals ?? (internals = new InternalResourceManager());
-        [NotNull] public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
+
+        [NotNull]
+        public static InternalResourceManager Internal => internals ?? (internals = new InternalResourceManager());
+
+        [NotNull]
+        public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
 
         public static bool ContainsRobot([NotNull] string robotName)
         {
@@ -146,19 +152,32 @@ namespace Iviz.Resources
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
         public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info,
-            [CanBeNull] IExternalServiceProvider provider)
+            [CanBeNull] IExternalServiceProvider _)
         {
-            //
-            return Internal.TryGet(uriString, out info) ||
-                   External.TryGet(uriString, out info, Settings.IsHololens ? null : provider);
+            return Internal.TryGet(uriString, out info);
         }
 
-        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public static bool TryGetResource([NotNull] string uriString, out Info<Texture2D> info,
-            [CanBeNull] IExternalServiceProvider provider)
+        [ItemCanBeNull]
+        public static async Task<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
+            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            return Internal.TryGet(uriString, out info) ||
-                   External.TryGet(uriString, out info, Settings.IsHololens ? null : provider);
+            if (Internal.TryGet(uriString, out GameObjectInfo info))
+            {
+                return info;
+            }
+
+            return await External.TryGetGameObjectAsync(uriString, Settings.IsHololens ? null : provider, token);
+        }
+
+        internal static async Task<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
+            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
+        {
+            if (Internal.TryGet(uriString, out Info<Texture2D> info))
+            {
+                return info;
+            }
+
+            return await External.TryGetTextureAsync(uriString, Settings.IsHololens ? null : provider, token);
         }
     }
 }

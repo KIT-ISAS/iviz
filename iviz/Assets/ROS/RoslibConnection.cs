@@ -178,7 +178,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during Connect():" , e);
+                Core.Logger.Error("Exception during Connect():", e);
             }
 
             //Core.Logger.Debug("*** Disconnecting!");
@@ -457,6 +457,42 @@ namespace Iviz.Ros
             });
 
             signal.Wait();
+            return result;
+        }
+
+        public override async Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            if (srv == null)
+            {
+                throw new ArgumentNullException(nameof(srv));
+            }
+
+            var signal = new SemaphoreSlim(0, 1);
+            bool result = false;
+
+            AddTask(async () =>
+            {
+                try
+                {
+                    result = client != null && await client.CallServiceAsync(service, srv, true, token);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error("Exception during RoslibConnection.CallService(): ", e);
+                }
+
+                signal.Release();
+            });
+
+            await signal.WaitAsync(token);
             return result;
         }
 

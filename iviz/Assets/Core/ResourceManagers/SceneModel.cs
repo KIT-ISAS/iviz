@@ -2,18 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
+using Color32 = UnityEngine.Color32;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Displays
 {
     public static class SceneModel
     {
         [NotNull]
-        public static AggregatedMeshMarkerResource Create([NotNull] string uriString, [NotNull] Msgs.IvizMsgs.Model msg,
-            [CanBeNull] IExternalServiceProvider provider)
+        public static async Task<AggregatedMeshMarkerResource> Create([NotNull] string uriString,
+            [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
             {
@@ -25,8 +30,24 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(msg));
             }
 
+            token.ThrowIfCancellationRequested();
+
             GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
-            
+
+            try
+            {
+                return await CreateImpl(uriString, msg, provider, token, root);
+            }
+            catch (Exception)
+            {
+                Object.Destroy(root);
+                throw;
+            }
+        }
+
+        static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, Model msg,
+            IExternalServiceProvider provider, CancellationToken token, GameObject root)
+        {
             switch (msg.OrientationHint.ToUpperInvariant())
             {
                 case "Z_UP":
@@ -36,8 +57,6 @@ namespace Iviz.Displays
                     root.transform.localRotation = Quaternion.Euler(90, 0, 90);
                     break;
             }
-            
-            //Debug.Log(JsonConvert.SerializeObject(msg.Nodes, Formatting.Indented));
 
             AggregatedMeshMarkerResource amm = root.AddComponent<AggregatedMeshMarkerResource>();
             List<MeshTrianglesResource> children = new List<MeshTrianglesResource>();
@@ -45,11 +64,14 @@ namespace Iviz.Displays
 
             foreach (var mesh in msg.Meshes)
             {
+                token.ThrowIfCancellationRequested();
+
                 GameObject obj = new GameObject();
 
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
                 obj.AddComponent<BoxCollider>();
+                obj.transform.parent = root.transform;
 
                 MeshTrianglesResource r = obj.AddComponent<MeshTrianglesResource>();
 
@@ -74,7 +96,8 @@ namespace Iviz.Displays
                 MemCopy(mesh.Faces, triangles, triangles.Length * sizeof(int));
 
                 var material = msg.Materials[mesh.MaterialIndex];
-                r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B, material.Diffuse.A);
+                r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B,
+                    material.Diffuse.A);
                 r.EmissiveColor = new Color32(material.Emissive.R, material.Emissive.G, material.Emissive.B,
                     material.Emissive.A);
 
@@ -90,9 +113,10 @@ namespace Iviz.Displays
 
                     string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
                     string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
-                    if (Resource.TryGetResource(textureUri, out Info<Texture2D> info, provider))
+                    var textureInfo = await Resource.GetTextureResourceAsync(textureUri, provider, token);
+                    if (textureInfo != null)
                     {
-                        r.Texture = info.Object;
+                        r.Texture = textureInfo.Object;
                     }
                     else
                     {
@@ -172,8 +196,8 @@ namespace Iviz.Displays
             }
 
             return bounds;
-        }        
-        
+        }
+
 
         static Vector3 Assimp2Unity(in Msgs.IvizMsgs.Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);

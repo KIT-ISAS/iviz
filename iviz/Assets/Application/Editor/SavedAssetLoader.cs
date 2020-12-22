@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
@@ -16,7 +17,7 @@ namespace Iviz.Editor
     public class SavedAssetLoader : UnityEditor.Editor
     {
         [MenuItem("Iviz/Import Saved Assets To Unity")]
-        public static void CreateAllAssets()
+        public static async void CreateAllAssets()
         {
             ExternalResourceManager manager = Resource.External;
             IReadOnlyList<string> resourceUris = manager.GetListOfModels();
@@ -24,7 +25,7 @@ namespace Iviz.Editor
             Debug.Log("SavedAssetLoader: Transferring " + resourceUris.Count + " assets...");
             foreach (string uri in resourceUris)
             {
-                CreateAsset(new Uri(uri), manager);
+                await CreateAssetAsync(new Uri(uri), manager);
             }
 
             CreateRobots(manager);
@@ -63,12 +64,14 @@ namespace Iviz.Editor
             string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";
             Directory.CreateDirectory(absolutePath);
 
-            Dictionary<string, string> resourceFile = new Dictionary<string, string>();
+            //Dictionary<string, string> resourceFile = new Dictionary<string, string>();
+            /*
             foreach (string robotName in manager.GetRobotNames())
             {
                 string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
                 resourceFile[robotName] = filename;
             }
+            */
 
             Debug.LogWarning("SavedAssetLoader: Not writing robot resource files.");
 
@@ -81,7 +84,7 @@ namespace Iviz.Editor
         }
 
 
-        static void CreateAsset(Uri assetUri, ExternalResourceManager manager)
+        static async Task CreateAssetAsync(Uri assetUri, ExternalResourceManager manager)
         {
             const string basePath = "Assets/Resources/Package/";
             string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
@@ -109,7 +112,8 @@ namespace Iviz.Editor
 
             Directory.CreateDirectory(absolutePath);
 
-            if (!manager.TryGet(assetUri.ToString(), out Info<GameObject> resourceInfo, null))
+            var resourceInfo = await manager.TryGetGameObjectAsync(assetUri.ToString(), null, default);
+            if (resourceInfo == null)
             {
                 throw new FileNotFoundException(assetUri.ToString());
             }
