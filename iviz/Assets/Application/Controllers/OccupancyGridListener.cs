@@ -264,9 +264,9 @@ namespace Iviz.Controllers
             textureNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
-            cubeNode.Transform.SetLocalPose(origin);
-            textureNode.Transform.SetLocalPose(origin);
-            textureNode.Transform.position += new Vector3(0, 0.001f, 0);
+            //cubeNode.Transform.SetLocalPose(origin);
+            //textureNode.Transform.SetLocalPose(origin);
+            //textureNode.Transform.position += new Vector3(0, 0.001f, 0);
 
             numCellsX = (int) msg.Info.Width;
             numCellsY = (int) msg.Info.Height;
@@ -274,16 +274,16 @@ namespace Iviz.Controllers
 
             if (CubesVisible)
             {
-                SetCubes(msg);
+                SetCubes(msg, origin);
             }
 
             if (TextureVisible)
             {
-                SetTextures(msg);
+                SetTextures(msg, origin);
             }
         }
 
-        void SetCubes([NotNull] OccupancyGrid msg)
+        void SetCubes([NotNull] OccupancyGrid msg, Pose pose)
         {
             if (gridTiles.Length != 16)
             {
@@ -319,7 +319,7 @@ namespace Iviz.Controllers
                     {
                         try
                         {
-                            grid.SetOccupancy(msg.Data, rect);
+                            grid.SetOccupancy(msg.Data, rect, pose);
                         }
                         catch (Exception e)
                         {
@@ -332,7 +332,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] OccupancyGrid msg)
+        void SetTextures([NotNull] OccupancyGrid msg, Pose pose)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -378,7 +378,7 @@ namespace Iviz.Controllers
                     {
                         try
                         {
-                            texture.Set(msg.Data, cellSize, numCellsX, numCellsY, rect);
+                            texture.Set(msg.Data, cellSize, numCellsX, numCellsY, rect, pose);
                         }
                         catch (Exception e)
                         {

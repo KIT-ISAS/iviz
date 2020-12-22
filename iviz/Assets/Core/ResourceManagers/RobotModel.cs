@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Urdf;
@@ -9,6 +11,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
+using Logger = Iviz.Core.Logger;
 using Material = Iviz.Urdf.Material;
 using Object = UnityEngine.Object;
 using Vector3 = UnityEngine.Vector3;
@@ -31,6 +34,9 @@ namespace Iviz.Displays
         readonly List<(GameObject, Info<GameObject>)> objectResources =
             new List<(GameObject, Info<GameObject>)>();
 
+        readonly Robot robot;
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+
         bool occlusionOnly;
         bool visible = true;
         Color tint = Color.white;
@@ -44,67 +50,98 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public RobotModel([NotNull] string robotDescription, [CanBeNull] IExternalServiceProvider provider,
-            bool keepMeshMaterials = true)
+        public RobotModel([NotNull] string robotDescription)
         {
             if (string.IsNullOrEmpty(robotDescription))
             {
                 throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
             }
 
-            var robot = UrdfFile.CreateFromXml(robotDescription);
+            robot = UrdfFile.CreateFromXml(robotDescription);
 
             Name = robot.Name;
             Description = robotDescription;
 
-            var rootMaterials = new Dictionary<string, Material>();
-            foreach (var material in robot.Materials)
+            LinkParents = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+            LinkObjects = new ReadOnlyDictionary<string, GameObject>(new Dictionary<string, GameObject>());
+            Joints = new ReadOnlyDictionary<string, Joint>(new Dictionary<string, Joint>());
+            BaseLinkObject = new GameObject(Name);
+        }
+
+        public async void StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
+        {
+            IsStarting = true;
+
+            try
             {
-                if (material.Name == null)
+                var rootMaterials = new Dictionary<string, Material>();
+                foreach (var material in robot.Materials)
                 {
-                    continue;
+                    rootMaterials[material.Name] = material;
                 }
 
-                rootMaterials[material.Name] = material;
+                try
+                {
+                    foreach (var link in robot.Links)
+                    {
+                        await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Start stopped with exception", e);
+                    return;
+                }
+
+                foreach (var joint in robot.Joints)
+                {
+                    ProcessJoint(joint);
+                }
+
+                if (linkObjects.Count == 0)
+                {
+                    return;
+                }
+
+                var unparentedKeys = new HashSet<string>(linkObjects.Keys);
+                unparentedKeys.RemoveWhere(linkParents.Keys.Contains);
+
+                BaseLink = unparentedKeys.FirstOrDefault();
+                if (BaseLink != null)
+                {
+                    linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+                }
+
+                LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
+                LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
+                Joints = new ReadOnlyDictionary<string, Joint>(joints);
+
+                Tint = tint;
+                OcclusionOnly = occlusionOnly;
+                Visible = visible;
+                ApplyAnyValidConfiguration();
             }
-
-
-            foreach (var link in robot.Links)
+            finally
             {
-                ProcessLink(keepMeshMaterials, link, rootMaterials, provider);
+                IsStarting = false;
             }
+        }
 
-            foreach (var joint in robot.Joints)
-            {
-                ProcessJoint(joint);
-            }
-
-            if (linkObjects.Count == 0)
-            {
-                return;
-            }
-
-            var unparentedKeys = new HashSet<string>(linkObjects.Keys);
-            unparentedKeys.RemoveWhere(linkParents.Keys.Contains);
-
-            BaseLink = unparentedKeys.FirstOrDefault();
-            BaseLinkObject = BaseLink == null ? null : linkObjects[BaseLink];
-
-            LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
-            LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
-            LinkParentObjects = new ReadOnlyDictionary<GameObject, GameObject>(linkParentObjects);
-            Joints = new ReadOnlyDictionary<string, Joint>(joints);
+        public void Cancel()
+        {
+            tokenSource.Cancel();
         }
 
         public string Name { get; }
-        public string BaseLink { get; }
+        public string BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
         public string Description { get; }
 
-        public ReadOnlyDictionary<string, string> LinkParents { get; }
-        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; }
-        public ReadOnlyDictionary<GameObject, GameObject> LinkParentObjects { get; }
-        public ReadOnlyDictionary<string, Joint> Joints { get; }
+        public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
+        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; private set; }
+        public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
+
+        public bool IsStarting { get; private set; }
 
         public bool OcclusionOnly
         {
@@ -145,16 +182,20 @@ namespace Iviz.Displays
             }
         }
 
-        void ProcessLink(bool keepMeshMaterials,
+        async Task ProcessLinkAsync(bool keepMeshMaterials,
             [NotNull] Link link,
             [NotNull] IReadOnlyDictionary<string, Material> rootMaterials,
             [CanBeNull] IExternalServiceProvider provider)
         {
             var linkObject = new GameObject("Link:" + link.Name);
-            linkObjects[link.Name] = linkObject;
+            linkObject.transform.parent = BaseLinkObject.transform;
+
+            linkObjects[link.Name ?? ""] = linkObject;
 
             foreach (var visual in link.Visuals)
             {
+                tokenSource.Token.ThrowIfCancellationRequested();
+
                 var geometry = visual.Geometry;
 
                 var visualObject = new GameObject
@@ -170,9 +211,25 @@ namespace Iviz.Displays
                 if (geometry.Mesh != null)
                 {
                     string uri = geometry.Mesh.Filename;
-                    if (!Resource.TryGetResource(geometry.Mesh.Filename, out Info<GameObject> info, provider))
+                    Info<GameObject> info;
+                    try
                     {
-                        Debug.Log("Robot: Failed to retrieve " + uri);
+                        info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider,
+                            tokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                        return;
+                    }
+
+                    if (info == null)
+                    {
+                        Debug.Log($"{this}: Failed to retrieve '{uri}'");
                         continue;
                     }
 
@@ -289,11 +346,13 @@ namespace Iviz.Displays
         }
 
         [CanBeNull]
-        static Material GetMaterialForVisual([NotNull] Visual visual, [CanBeNull] IReadOnlyDictionary<string, Material> rootMaterials)
+        static Material GetMaterialForVisual([NotNull] Visual visual,
+            [CanBeNull] IReadOnlyDictionary<string, Material> rootMaterials)
         {
             var material = visual.Material;
 
             if (material != null &&
+                visual.Material != null &&
                 visual.Material.IsReference() &&
                 rootMaterials != null &&
                 rootMaterials.TryGetValue(visual.Material.Name, out var newMaterial))
@@ -318,10 +377,17 @@ namespace Iviz.Displays
                 mTransform.localPosition = Vector3.zero;
                 mTransform.localRotation = Quaternion.identity;
             }
+
+            if (BaseLink != null)
+            {
+                linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+            }
         }
 
         public void Dispose()
         {
+            Cancel();
+            
             ResetLinkParents();
 
             foreach (var (gameObject, info) in objectResources)
@@ -338,11 +404,6 @@ namespace Iviz.Displays
         {
             foreach (var joint in joints)
             {
-                if (joint.Value.Limit == null)
-                {
-                    continue;
-                }
-
                 if (joint.Value.Limit.Lower > 0)
                 {
                     TryWriteJoint(joint.Key, joint.Value.Limit.Lower, out _);
@@ -354,7 +415,8 @@ namespace Iviz.Displays
             }
         }
 
-        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose, bool onlyCalculatePose = false)
+        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose,
+            bool onlyCalculatePose = false)
         {
             if (jointName == null)
             {
@@ -391,6 +453,12 @@ namespace Iviz.Displays
             jointObject.transform.SetLocalPose(unityPose);
 
             return true;
+        }
+
+        [NotNull]
+        public override string ToString()
+        {
+            return $"[Robot {Name}]";
         }
     }
 }

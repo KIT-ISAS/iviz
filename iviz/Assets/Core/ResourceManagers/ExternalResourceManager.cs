@@ -10,6 +10,7 @@ using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
@@ -279,18 +280,18 @@ namespace Iviz.Displays
                 var resource =
                     fileType == ".SDF" || fileType == ".WORLD"
                         ? await TryGetSceneAsync(uriString, provider, token)
-                        : await TryGetModel(uriString, provider, token);
+                        : await TryGetModelAsync(uriString, provider, token);
 
                 if (resource == null)
                 {
-                    temporaryBlacklist.Add(uriString, currentTime);
+                    temporaryBlacklist[uriString] = currentTime;
                 }
 
                 return resource;
             }
         }
 
-        async Task<Info<GameObject>> TryGetModel([NotNull] string uriString,
+        async Task<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (loadedModels.TryGetValue(uriString, out Info<GameObject> resource))
@@ -298,6 +299,11 @@ namespace Iviz.Displays
                 return resource;
             }
 
+            if (temporaryBlacklist.ContainsKey(uriString))
+            {
+                return null;
+            }
+            
             if (resourceFiles.Models.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
@@ -315,6 +321,8 @@ namespace Iviz.Displays
                 return null;
             }
 
+            token.ThrowIfCancellationRequested();
+
             GetModelResource msg = new GetModelResource
             {
                 Request =
@@ -322,14 +330,30 @@ namespace Iviz.Displays
                     Uri = uriString
                 }
             };
-            
-            token.ThrowIfCancellationRequested();
 
-            if (await provider.CallServiceAsync(ModelServiceName, msg, token) && msg.Response.Success)
+            try
             {
-                return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
-            }
+                bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, token);
+                if (!hasClient)
+                {
+                    Debug.LogWarning("ExternalResourceManager: Call service failed, no connection");
+                    return null;
+                }
 
+                if (msg.Response.Success)
+                {
+                    return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
+                }
+            }
+            catch (Exception e)
+            {
+                if (!(e is OperationCanceledException))
+                {
+                    temporaryBlacklist[uriString] = Time.time;
+                }
+
+                throw;
+            }
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
@@ -367,7 +391,7 @@ namespace Iviz.Displays
             {
                 return null;
             }
-            
+
             token.ThrowIfCancellationRequested();
 
             GetSdf msg = new GetSdf
@@ -436,7 +460,7 @@ namespace Iviz.Displays
             {
                 return null;
             }
-            
+
             token.ThrowIfCancellationRequested();
 
             GetModelTexture msg = new GetModelTexture()
@@ -563,7 +587,6 @@ namespace Iviz.Displays
                 Msgs.Buffer.Serialize(msg.Model, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
-                //Logger.Internal($"Added external model <i>{uri}</i>");
 
                 resourceFiles.Models[uriString] = localPath;
                 WriteResourceFile();
@@ -572,7 +595,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error($"{this}: Error processing model response: ", e);
                 return null;
             }
         }
@@ -602,7 +625,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error($"{this}: Error processing texture response: ", e);
                 return null;
             }
         }
@@ -625,7 +648,6 @@ namespace Iviz.Displays
                 Msgs.Buffer.Serialize(msg.Scene, buffer);
                 File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
-                //Logger.Internal($"Added external scene <i>{uri}</i>");
 
                 resourceFiles.Scenes[uriString] = localPath;
                 WriteResourceFile();
@@ -634,16 +656,17 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error($"{this}: Error processing scene response: ", e);
                 return null;
             }
         }
 
         [NotNull]
+        [ItemNotNull]
         async Task<GameObject> CreateModelObjectAsync([NotNull] string uriString, [NotNull] Model msg,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            GameObject model = (await SceneModel.Create(uriString, msg, provider, token)).gameObject;
+            GameObject model = (await SceneModel.CreateAsync(uriString, msg, provider, token)).gameObject;
             if (Node != null)
             {
                 model.transform.SetParent(Node.transform, false);
@@ -653,6 +676,7 @@ namespace Iviz.Displays
         }
 
         [NotNull]
+        [ItemNotNull]
         async Task<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -683,7 +707,7 @@ namespace Iviz.Displays
                     await Resource.GetGameObjectResourceAsync(include.Uri, provider, token);
                 if (includeResource == null)
                 {
-                    Logger.Debug("ExternalResourceManager: Failed to retrieve resource '" + include.Uri + "'");
+                    Logger.Debug("ExternalResourceManager: Failed to retrieve model '" + include.Uri + "'");
                     continue;
                 }
 

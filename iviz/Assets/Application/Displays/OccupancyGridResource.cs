@@ -126,7 +126,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void SetOccupancy(sbyte[] values, Rect? inBounds = null)
+        public void SetOccupancy(sbyte[] values, Rect? inBounds, Pose pose)
         {
             IsProcessing = true;
             Rect bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
@@ -153,6 +153,7 @@ namespace Iviz.Displays
 
             GameThread.PostImmediate(() =>
             {
+                resource.transform.SetLocalPose(pose);
                 resource.SetDirect(pointBuffer);
                 resource.IntensityBounds = new Vector2(0, 1);
                 IsProcessing = false;

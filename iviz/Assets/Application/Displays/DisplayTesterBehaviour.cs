@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Ros;
 using UnityEngine;
 
 namespace Iviz.App
@@ -9,8 +10,15 @@ namespace Iviz.App
     {
         const int MaxSegmentsForMesh = 30;
 
-        void OnEnable()
+        async void OnEnable()
         {
+            var uri = "package://e2_urdf_model/meshes/chassis.dae";
+            Info<GameObject> info = await
+                Resource.External.TryGetGameObjectAsync(uri, ConnectionManager.Connection, default);
+            info.Instantiate();
+
+
+
             /*
             Matrix4x4 f = new Matrix4x4();
             f.SetColumn(0, new Vector3(1, 0, 0).Ros2Unity());
@@ -30,12 +38,13 @@ namespace Iviz.App
             Debug.Log(f);
             Debug.Log(q);
             */
-            
-            
+
+            /*
             CreatePointListResource(-3);
             CreateLineResource(0);
             CreateLineResourceShort(5);
             CreateMeshListResource(10);
+            */
         }
 
         static void CreateMeshListResource(float z)

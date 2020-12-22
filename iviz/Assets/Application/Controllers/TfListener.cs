@@ -56,7 +56,7 @@ namespace Iviz.Controllers
             get => Instance.fixedFrameId;
             set
             {
-                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? null : value;
+                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? BaseFrameId : value;
                 Pose originPose =
                     value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
                         ? frame.WorldPose.Inverse()
@@ -415,7 +415,7 @@ namespace Iviz.Controllers
             frames.Remove(frame.Id);
 
             frame.Stop();
-            UnityEngine.Object.Destroy(frame);
+            UnityEngine.Object.Destroy(frame.gameObject);
         }
 
         void LateUpdate()

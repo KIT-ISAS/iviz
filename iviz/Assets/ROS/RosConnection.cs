@@ -36,7 +36,6 @@ namespace Iviz.Ros
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
-        public abstract bool CallService<T>(string service, T srv) where T : IService;
         public abstract Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token) where T : IService;
 
         public event Action<ConnectionState> ConnectionStateChanged;

@@ -17,7 +17,7 @@ namespace Iviz.Displays
     public static class SceneModel
     {
         [NotNull]
-        public static async Task<AggregatedMeshMarkerResource> Create([NotNull] string uriString,
+        public static async Task<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
             [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
@@ -67,11 +67,10 @@ namespace Iviz.Displays
                 token.ThrowIfCancellationRequested();
 
                 GameObject obj = new GameObject();
-
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
                 obj.AddComponent<BoxCollider>();
-                obj.transform.parent = root.transform;
+                obj.transform.SetParent(root.transform, false);
 
                 MeshTrianglesResource r = obj.AddComponent<MeshTrianglesResource>();
 
@@ -120,7 +119,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        Debug.Log("SceneModel: Failed to retrieve texture " + textureUri);
+                        Debug.Log($"SceneModel: Failed to retrieve texture {textureUri}");
                     }
                 }
 
@@ -162,7 +161,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        GameObject newMesh = UnityEngine.Object.Instantiate(
+                        GameObject newMesh = Object.Instantiate(
                             templateMeshes[meshId].gameObject,
                             nodeObject.transform,
                             false);
@@ -199,7 +198,7 @@ namespace Iviz.Displays
         }
 
 
-        static Vector3 Assimp2Unity(in Msgs.IvizMsgs.Vector3f vector3) =>
+        static Vector3 Assimp2Unity(in Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
 
         static void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)

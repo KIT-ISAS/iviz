@@ -89,6 +89,7 @@ namespace Iviz.App
             string pandaUrdf = UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/panda").text;
 
 
+            /*
             // first, we create a normal robot
             RobotModel robot1 = new RobotModel(pandaUrdf, Connection);
             robot1.BaseLinkObject.transform.position = new Vector3(0, 0, 0);
@@ -130,6 +131,7 @@ namespace Iviz.App
 
             lines.ElementScale = 0.015f; // 5 mm width
             lines.Set(linesToDraw);
+            */
         }
     }
 }
