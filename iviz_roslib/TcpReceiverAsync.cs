@@ -27,8 +27,8 @@ namespace Iviz.Roslib
 
         Endpoint remoteEndpoint;
         Endpoint? endpoint;
-        int numReceived;
-        int bytesReceived;
+        long numReceived;
+        long bytesReceived;
 
         string? errorDescription;
         int connectionTimeoutInMs;

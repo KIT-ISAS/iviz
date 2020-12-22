@@ -125,6 +125,20 @@ namespace Iviz.Roslib
         }
     }    
     
+    public class RosServiceCallFailed : RoslibException
+    {
+        public RosServiceCallFailed(string message) : base(message)
+        {
+        }
+
+        public RosServiceCallFailed()
+        {
+        }
+
+        public RosServiceCallFailed(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }  
     public class RosInvalidPackageSizeException : RoslibException
     {
         public RosInvalidPackageSizeException(string message) : base(message)

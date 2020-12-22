@@ -36,10 +36,10 @@ namespace Iviz.Roslib
         bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new();
         Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback) where T : IService, new();
 
-        bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+        void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService;
 
-        Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+        Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
             CancellationToken token = default)
             where T : IService;
     }
@@ -1562,7 +1562,7 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-        public bool CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+        public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService
         {
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
@@ -1579,7 +1579,12 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    return existingReceiver.Execute(service, timeoutTs.Token);
+                    if (!existingReceiver.Execute(service, timeoutTs.Token))
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
+
+                    return;
                 }
 
                 existingReceiver.Dispose();
@@ -1602,13 +1607,19 @@ namespace Iviz.Roslib
                     var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
                     serviceCaller.Start(persistent);
                     subscribedServicesByName.TryAdd(serviceName, serviceCaller);
-                    return serviceCaller.Execute(service, timeoutTs.Token);
+                    if (!serviceCaller.Execute(service, timeoutTs.Token))
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
                 }
                 else
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
                     serviceCaller.Start(persistent);
-                    return serviceCaller.Execute(service, timeoutTs.Token);
+                    if (!serviceCaller.Execute(service, timeoutTs.Token))
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -1630,11 +1641,18 @@ namespace Iviz.Roslib
         /// <param name="timeoutInMs">Maximal time to wait.</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
             int timeoutInMs = 5000) where T : IService
         {
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
+            try
+            {
+                await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Service call {serviceName} timed out");
+            }
         }
 
         /// <summary>
@@ -1646,7 +1664,7 @@ namespace Iviz.Roslib
         /// <param name="token">A cancellation token</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public async Task<bool> CallServiceAsync<T>(string serviceName, T service, bool persistent,
+        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
             CancellationToken token)
             where T : IService
         {
@@ -1662,7 +1680,12 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    return await existingReceiver.ExecuteAsync(service, token);
+                    if (!await existingReceiver.ExecuteAsync(service, token))
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
+
+                    return;
                 }
 
                 existingReceiver.Dispose();
@@ -1685,18 +1708,24 @@ namespace Iviz.Roslib
                     var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
                     await serviceCaller.StartAsync(persistent, token).Caf();
                     subscribedServicesByName.TryAdd(serviceName, serviceCaller);
-                    return await serviceCaller.ExecuteAsync(service, token).Caf();
+                    if (!await serviceCaller.ExecuteAsync(service, token).Caf())
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
                 }
                 else
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
                     await serviceCaller.StartAsync(persistent, token).Caf();
-                    return await serviceCaller.ExecuteAsync(service, token).Caf();
+                    if (!await serviceCaller.ExecuteAsync(service, token).Caf())
+                    {
+                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Service call {serviceName} to uri '{serviceUri}' timed out");
+                throw;
             }
             catch (Exception e)
             {
@@ -1725,6 +1754,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="serviceName">Name of the ROS service.</param>
         /// <param name="callback">Function to be called when a service request arrives. The response should be written in the response field.</param>
+        /// <returns>Whether the advertisement was new. If false, the service already existed, but can still be used.</returns>
         /// <typeparam name="T">Service type.</typeparam>
         public bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
         {
