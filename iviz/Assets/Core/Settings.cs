@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
@@ -55,13 +56,22 @@ namespace Iviz.Core
 #else
             false;
 #endif
-        [NotNull] public static string PlatformName => UnityEngine.Application.platform.ToString().ToLower();
-        [NotNull] public static string PersistentDataPath => UnityEngine.Application.persistentDataPath;
+        [NotNull] public static string PersistentDataPath => Application.persistentDataPath;
         [NotNull] public static string SavedFolder => PersistentDataPath + "/saved";
         [NotNull] public static string SimpleConfigurationPath => PersistentDataPath + "/connection.json";
         [NotNull] public static string ResourcesPath => PersistentDataPath + "/resources";
         [NotNull] public static string SavedRobotsPath => PersistentDataPath + "/robots";
         [NotNull] public static string ResourcesFilePath => PersistentDataPath + "/resources.json";
-        public static Camera MainCamera { get; set; }
+
+        [CanBeNull] static Camera mainCamera;
+
+        [NotNull]
+        public static Camera MainCamera
+        {
+            get => mainCamera.SafeNull() ??
+                   (mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
+                       .GetComponent<Camera>());
+            set => mainCamera = value.SafeNull() ?? throw new NullReferenceException("Camera cannot be null!");
+        }
     }
 }

@@ -278,18 +278,18 @@ namespace Iviz.Controllers
                 if (parentId.Length == 0)
                 {
                     child.SetParent(OriginFrame);
-                    child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
+                    child.SetPose(t.Transform.Ros2Unity());
                 }
                 else if (!(child.Parent is null) && parentId == child.Parent.Id)
                 {
-                    child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
+                    child.SetPose(t.Transform.Ros2Unity());
                 }
                 else
                 {
                     TfFrame parent = GetOrCreateFrame(parentId);
                     if (child.SetParent(parent))
                     {
-                        child.SetPose(t.Header.Stamp, t.Transform.Ros2Unity());
+                        child.SetPose(t.Transform.Ros2Unity());
                     }
                 }
             }

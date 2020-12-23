@@ -160,9 +160,6 @@ namespace Iviz.App
 
         void Start()
         {
-            var mainCameraObj = GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera");
-            Settings.MainCamera = mainCameraObj.GetComponent<Camera>();
-
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
 
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();

@@ -37,7 +37,7 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        const int ProbeRefreshTimeInSec = 5;
+        const int ProbeRefreshTimeInSec = 3;
 
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;

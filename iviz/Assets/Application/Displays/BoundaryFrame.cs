@@ -18,7 +18,7 @@ namespace Iviz.Controllers
         Bounds bounds;
         GameObject holder;
         Billboard labelBillboard;
-        GameObject labelObject;
+        TextMarkerResource labelObject;
         TextMesh labelObjectText;
         Color color;
 
@@ -38,7 +38,7 @@ namespace Iviz.Controllers
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
 
-            labelObject = ResourcePool.GetOrCreate(Resource.Displays.Text, transform);
+            labelObject = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(transform);
             labelObject.name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.transform.SetParentLocal(transform);
@@ -141,7 +141,7 @@ namespace Iviz.Controllers
         public void SplitForRecycle()
         {
             DestroySelectionFrame();
-            ResourcePool.Dispose(Resource.Displays.Text, labelObject);
+            ResourcePool.DisposeDisplay(labelObject);
             labelObject = null;
             labelObjectText = null;
             labelBillboard = null;

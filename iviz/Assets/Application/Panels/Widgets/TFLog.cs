@@ -219,7 +219,7 @@ namespace Iviz.App
         {
             if (SelectedFrame != null)
             {
-                TfListener.GuiInputModule.LookAt(SelectedFrame.AbsolutePose.position);
+                TfListener.GuiInputModule.LookAt(SelectedFrame.UnityWorldPose.position);
             }
 
             Close?.Invoke();

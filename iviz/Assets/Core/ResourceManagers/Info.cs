@@ -12,8 +12,7 @@ namespace Iviz.Resources
     /// <typeparam name="T">Unity object type, such as a GameObject or a Texture.</typeparam>
     public sealed class Info<T> : IEquatable<Info<T>> where T : UnityEngine.Object
     {
-        readonly string resourceName;
-
+        [CanBeNull] readonly string resourceName;
         [CanBeNull] T baseObject;
 
         /// <summary>
@@ -47,22 +46,32 @@ namespace Iviz.Resources
         public int Id => (id != 0) ? id : (id = Object.GetInstanceID());
 
         /// <summary>
-        /// Constructs a unique identifier from a resource path, and loads it from memory.
+        /// Constructs a unique identifier from a resource path. The instance will be loaded the first time it is needed.
         /// </summary>
         /// <param name="resourceName">Path to the resource.</param>
-        public Info([NotNull] string resourceName)
+        public Info([NotNull] string resourceName) : this(resourceName, null, null)
         {
-            this.resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
+            if (resourceName == null)
+            {
+                throw new ArgumentNullException(nameof(resourceName));
+            }
         }
 
         /// <summary>
-        /// Constructs a unique identifier from a resource path, and sets the resource to a previously loaded instance.
+        /// Constructs a unique identifier from an existing instance
         /// </summary>
-        /// <param name="resourceName">Path to the resource.</param>
-        /// <param name="baseObject">Previously loaded instance.</param>
-        public Info([NotNull] string resourceName, [CanBeNull] T baseObject)
+        /// <param name="baseObject">Loaded instance of this type, if already available.</param>
+        public Info([NotNull] T baseObject) : this(null, baseObject, null)
         {
-            this.resourceName = resourceName ?? throw new ArgumentNullException(nameof(resourceName));
+            if (baseObject == null)
+            {
+                throw new ArgumentNullException(nameof(baseObject));
+            }
+        }
+
+        Info([CanBeNull] string resourceName, [CanBeNull] T baseObject, object _)
+        {
+            this.resourceName = resourceName;
             this.baseObject = baseObject;
         }
 

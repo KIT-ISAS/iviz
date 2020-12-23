@@ -57,20 +57,21 @@ namespace Iviz.Resources
 
         public DisplaysType()
         {
-            Cube = new Info<GameObject>("CoreDisplays/Cube");
-            Cylinder = new Info<GameObject>("CoreDisplays/Cylinder");
-            Sphere = new Info<GameObject>("CoreDisplays/Sphere");
-            Text = new Info<GameObject>("CoreDisplays/Text");
+            var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
+            Cube = new Info<GameObject>(assetHolder.Cube);
+            Cylinder = new Info<GameObject>(assetHolder.Cylinder);
+            Sphere = new Info<GameObject>(assetHolder.Sphere);
+            Text = new Info<GameObject>(assetHolder.Text);
             LineConnector = new Info<GameObject>("Displays/LineConnector");
             BoundaryFrame = new Info<GameObject>("Displays/BoundaryFrame");
             Arrow = new Info<GameObject>("Displays/Arrow");
-            MeshList = new Info<GameObject>("CoreDisplays/MeshList");
-            PointList = new Info<GameObject>("CoreDisplays/PointList");
-            MeshTriangles = new Info<GameObject>("CoreDisplays/MeshTriangles");
+            MeshList = new Info<GameObject>(assetHolder.MeshList);
+            PointList = new Info<GameObject>(assetHolder.PointList);
+            MeshTriangles = new Info<GameObject>(assetHolder.MeshTriangles);
             TfFrame = new Info<GameObject>("Displays/TFFrame");
             Image = new Info<GameObject>("Displays/ImageResource");
-            Square = new Info<GameObject>("CoreDisplays/Plane");
-            Line = new Info<GameObject>("CoreDisplays/Line");
+            Square = new Info<GameObject>(assetHolder.Plane);
+            Line = new Info<GameObject>(assetHolder.Line);
             Grid = new Info<GameObject>("Displays/Grid");
             DepthImageResource = new Info<GameObject>("Displays/DepthImageResource");
             OccupancyGridResource = new Info<GameObject>("Displays/OccupancyGridResource");
@@ -83,14 +84,14 @@ namespace Iviz.Resources
             GridMap = new Info<GameObject>("Displays/GridMap");
             OccupancyGridTextureResource = new Info<GameObject>("Displays/OccupancyGridTextureResource");
 
-            resourceByType = CreateTypeDictionary();
+            resourceByType = CreateTypeDictionary(this);
         }
 
         [NotNull]
-        Dictionary<Type, Info<GameObject>> CreateTypeDictionary()
+        static Dictionary<Type, Info<GameObject>> CreateTypeDictionary(DisplaysType o)
         {
-            Dictionary<Type, Info<GameObject>> tmpResourceByType = new Dictionary<Type, Info<GameObject>>();
-            PropertyInfo[] properties = GetType().GetProperties();
+            Dictionary<Type, Info<GameObject>> resourceByType = new Dictionary<Type, Info<GameObject>>();
+            PropertyInfo[] properties = typeof(DisplaysType).GetProperties();
             foreach (var property in properties)
             {
                 if (!typeof(Info<GameObject>).IsAssignableFrom(property.PropertyType))
@@ -98,7 +99,7 @@ namespace Iviz.Resources
                     continue;
                 }
 
-                Info<GameObject> info = (Info<GameObject>) property.GetValue(this);
+                Info<GameObject> info = (Info<GameObject>) property.GetValue(o);
                 IDisplay display = info.Object.GetComponent<IDisplay>();
                 Type type = display?.GetType();
                 string name = type?.FullName;
@@ -107,16 +108,16 @@ namespace Iviz.Resources
                     continue;
                 }
 
-                if (tmpResourceByType.ContainsKey(type))
+                if (resourceByType.ContainsKey(type))
                 {
-                    tmpResourceByType[type] = null; // not unique! invalidate
+                    resourceByType[type] = null; // not unique! invalidate
                     continue;
                 }
 
-                tmpResourceByType[type] = info;
+                resourceByType[type] = info;
             }
 
-            return tmpResourceByType;
+            return resourceByType;
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]

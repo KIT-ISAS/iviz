@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6592562066270136912
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3972495279250188617}
+  - component: {fileID: 8588499365211087799}
+  m_Layer: 0
+  m_Name: Asset Holder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3972495279250188617
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6592562066270136912}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 942.3363, y: 979.7857, z: -15540.422}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8588499365211087799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6592562066270136912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 228ae1f10aef4e13923ed01ec808495b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Cube: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8, type: 3}
+  Cylinder: {fileID: 5794672389663626657, guid: 29f1782d45b2944d2814d57956eae4f3,
+    type: 3}
+  Line: {fileID: 6975508339416741863, guid: 70e0460c54a3b9848870a19b84e0062c, type: 3}
+  MeshList: {fileID: 8497843833201729871, guid: 6724c66106a96494e9840d1b79fd6318,
+    type: 3}
+  MeshTriangles: {fileID: 6472923824794949481, guid: f2cf4b04d93765d4198139172cdd31c8,
+    type: 3}
+  Plane: {fileID: 2206290937164603317, guid: 5cc48531145ea45b495da4682f9e688a, type: 3}
+  PointList: {fileID: 6472923824794949481, guid: 850c32e7fe76a4ee8a97c23f124a7b50,
+    type: 3}
+  Sphere: {fileID: 4602828156360642986, guid: 04469a87993a24ad4978e6e69619098c, type: 3}
+  Text: {fileID: 3616584195209632817, guid: f89b75492bba14bc598806f892dbdf00, type: 3}

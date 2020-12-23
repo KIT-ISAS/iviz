@@ -127,7 +127,8 @@ namespace Iviz.App
         {
 #if UNITY_EDITOR
             QualitySettings.vSyncCount = 0;  // VSync must be disabled
-            UnityEngine.Application.targetFrameRate = 60;
+            //UnityEngine.Application.targetFrameRate = 60;
+            MainCamera.allowHDR = true;
 #endif
 
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
@@ -253,7 +254,7 @@ namespace Iviz.App
 
             if (!(CameraViewOverride is null))
             {
-                Transform.SetPose(CameraViewOverride.AbsolutePose);
+                Transform.SetPose(CameraViewOverride.UnityWorldPose);
             }
                 
             if (Settings.IsMobile)
@@ -262,11 +263,11 @@ namespace Iviz.App
                 {
                     ProcessOrbiting();
                     ProcessScaling(false);
-                    Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                    Quaternion q = OrbitCenterOverride.UnityWorldPose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
                     Transform.SetPositionAndRotation(
                         -orbitRadius * (q * Vector3.forward) + orbitCenter,
                         q);
-                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
+                    orbitCenter = OrbitCenterOverride.UnityWorldPose.position;
                 }
                 else
                 {
@@ -279,8 +280,8 @@ namespace Iviz.App
                 if (OrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
-                    Quaternion q = OrbitCenterOverride.AbsolutePose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
-                    orbitCenter = OrbitCenterOverride.AbsolutePose.position;
+                    Quaternion q = OrbitCenterOverride.UnityWorldPose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                    orbitCenter = OrbitCenterOverride.UnityWorldPose.position;
                     Transform.SetPositionAndRotation(
                         -orbitRadius * (q * Vector3.forward) + orbitCenter,
                         q);

@@ -75,42 +75,14 @@ namespace Iviz.Controllers
             }
         }
 
-        public void AttachTo([NotNull] string parentId, in Msgs.time timestamp)
+        public void AttachTo([NotNull] string parentId, in Msgs.time _)
         {
             if (parentId == null)
             {
                 throw new ArgumentNullException(nameof(parentId));
             }
 
-            //AttachTo(parentId, timestamp.ToTimeSpan());
             AttachTo(parentId);
-        }
-
-        void AttachTo([NotNull] string parentId, in TimeSpan timestamp)
-        {
-            if (parentId == null)
-            {
-                throw new ArgumentNullException(nameof(parentId));
-            }
-
-            transform.SetParentLocal(TfListener.MapFrame.Transform);
-            if (parentId.Length == 0)
-            {
-                transform.SetLocalPose(Pose.identity);
-            }
-            else
-            {
-                if (Parent == null || parentId != Parent.Id)
-                {
-                    TfFrame frame = TfListener.GetOrCreateFrame(parentId, this);
-                    SetParent(frame, false);
-                }
-
-                if (Parent != null)
-                {
-                    Transform.SetLocalPose(TfListener.RelativePoseToOrigin(Parent.LookupPose(timestamp)));
-                }
-            }
         }
 
         public virtual void Stop()

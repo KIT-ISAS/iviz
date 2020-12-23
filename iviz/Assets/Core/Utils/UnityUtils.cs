@@ -438,15 +438,13 @@ namespace Iviz.Core
         }
 
         static readonly Plane[] PlaneCache = new Plane[6];
+
         public static bool IsVisibleFromMainCamera(this Bounds bounds)
         {
             GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
-        public static T SafeNull<T>(this T o) where T : UnityEngine.Object
-        {
-            return o != null ? o : null;
-        }
+        public static T SafeNull<T>(this T o) where T : UnityEngine.Object => o != null ? o : null;
     }
 }

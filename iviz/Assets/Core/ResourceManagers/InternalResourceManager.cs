@@ -123,7 +123,7 @@ namespace Iviz.Resources
                 return false;
             }
 
-            info = new Info<T>(path, resource);
+            info = new Info<T>(resource);
             repository[uriString] = info;
             return true;
         }

@@ -484,7 +484,7 @@ namespace Iviz.Displays
             Model msg = Msgs.Buffer.Deserialize(modelGenerator, buffer, buffer.Length);
             GameObject obj = await CreateModelObjectAsync(uriString, msg, provider, token);
 
-            Info<GameObject> resource = new Info<GameObject>(uriString, obj);
+            Info<GameObject> resource = new Info<GameObject>(obj);
             loadedModels[uriString] = resource;
 
             return resource;
@@ -514,7 +514,7 @@ namespace Iviz.Displays
 
             texture.name = uriString;
 
-            Info<Texture2D> resource = new Info<Texture2D>(uriString, texture);
+            Info<Texture2D> resource = new Info<Texture2D>(texture);
             loadedTextures[uriString] = resource;
 
             return resource;
@@ -539,7 +539,7 @@ namespace Iviz.Displays
             Scene msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer, buffer.Length);
             GameObject obj = await CreateSceneNodeAsync(msg, provider, token);
 
-            Info<GameObject> resource = new Info<GameObject>(uriString, obj);
+            Info<GameObject> resource = new Info<GameObject>(obj);
             loadedScenes[uriString] = resource;
 
             return resource;
@@ -554,7 +554,7 @@ namespace Iviz.Displays
             {
                 GameObject obj = await CreateModelObjectAsync(uriString, msg.Model, provider, token);
 
-                Info<GameObject> info = new Info<GameObject>(uriString, obj);
+                Info<GameObject> info = new Info<GameObject>(obj);
                 loadedModels[uriString] = info;
 
                 string localPath = SanitizeForFilename(uriString);
@@ -586,7 +586,7 @@ namespace Iviz.Displays
                 texture.LoadImage(msg.Image.Data);
                 texture.name = uriString;
 
-                Info<Texture2D> info = new Info<Texture2D>(uriString, texture);
+                Info<Texture2D> info = new Info<Texture2D>(texture);
                 loadedTextures[uriString] = info;
 
                 string localPath = SanitizeForFilename(uriString);
@@ -615,7 +615,7 @@ namespace Iviz.Displays
             {
                 GameObject node = await CreateSceneNodeAsync(msg.Scene, provider, token);
 
-                Info<GameObject> info = new Info<GameObject>(uriString, node);
+                Info<GameObject> info = new Info<GameObject>(node);
 
                 loadedScenes[uriString] = info;
 

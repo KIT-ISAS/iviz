@@ -209,13 +209,13 @@ namespace Iviz.Controllers
 
                 if (topHeader == header)
                 {
-                    Pose newPose = node.Parent.LookupPose(stamp.ToTimeSpan());
+                    Pose newPose = node.Parent.WorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
                 else if (TfListener.TryGetFrame(ps.Header.FrameId, out TfFrame frame))
                 {
-                    Pose newPose = frame.LookupPose(stamp.ToTimeSpan());
+                    Pose newPose = frame.WorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }

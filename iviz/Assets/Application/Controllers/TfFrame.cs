@@ -20,7 +20,6 @@ namespace Iviz.Controllers
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
         readonly HashSet<FrameNode> nodes = new HashSet<FrameNode>();
-        readonly Timeline timeline = new Timeline();
 
         Pose pose;
 
@@ -243,9 +242,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public Pose WorldPose => TfListener.RelativePoseToOrigin(Transform.AsPose());
+        /// <summary>
+        /// Pose in relation to the ROS origin in Unity coordinates
+        /// </summary>
+        public Pose WorldPose => TfListener.RelativePoseToOrigin(UnityWorldPose);
 
-        public Pose AbsolutePose => Transform.AsPose();
+        /// <summary>
+        /// Pose in relation to the Unity origin in Unity coordinates
+        /// </summary>
+        public Pose UnityWorldPose => Transform.AsPose();
 
         bool HasNoListeners => nodes.Count == 0;
 
@@ -253,26 +258,6 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            /*
-            labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
-            labelObjectText.Visible = false;
-            labelObjectText.Name = "[Label]";
-            labelObjectText.transform.localScale = 0.5f * Vector3.one;
-            */
-
-            /*
-            parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
-            parentConnector.A = Transform;
-
-            var parent = Transform.parent;
-            parentConnector.B = parent != null
-                ? parent
-                : (TfListener.RootFrame != null ? TfListener.RootFrame.Transform : null);
-
-            parentConnector.name = "[Connector]";
-            parentConnector.gameObject.SetActive(false);
-            */
-
             axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(Transform);
 
             if (Settings.IsHololens)
@@ -392,23 +377,6 @@ namespace Iviz.Controllers
 
         public void SetPose(in Pose newPose)
         {
-            SetPose(default(TimeSpan), newPose);
-        }
-
-        public void SetPose(in Msgs.time time, in Pose newPose)
-        {
-            /*
-            var timestamp = time == default 
-                ? TimeSpan.MaxValue 
-                : time.ToTimeSpan();
-            SetPose(timestamp, newPose);
-                */
-
-            SetPose(default(TimeSpan), newPose);
-        }
-
-        void SetPose(in TimeSpan time, in Pose newPose)
-        {
             if (pose == newPose)
             {
                 return;
@@ -416,33 +384,11 @@ namespace Iviz.Controllers
 
             pose = newPose;
             Transform.SetLocalPose(newPose);
-            /*
-            LogPose(time);
-            */
-        }
-
-        void LogPose(in TimeSpan time)
-        {
-            if (nodes.Count != 0)
-            {
-                timeline.Add(time, WorldPose);
-            }
-
-            foreach (var child in children.Values)
-            {
-                child.LogPose(time);
-            }
-        }
-
-        public Pose LookupPose(in TimeSpan time)
-        {
-            return timeline.Count == 0 ? pose : timeline.Lookup(time);
         }
 
         public override void Stop()
         {
             base.Stop();
-            timeline.Clear();
             axis.DisposeDisplay();
             trail.DisposeDisplay();
             labelObjectText.DisposeDisplay();
