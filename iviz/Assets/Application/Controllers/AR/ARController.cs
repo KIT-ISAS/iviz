@@ -62,6 +62,7 @@ namespace Iviz.Controllers
         protected Canvas canvas;
         protected FrameNode node;
 
+        [CanBeNull] public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
 
         public ARConfiguration Config
@@ -196,6 +197,8 @@ namespace Iviz.Controllers
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
+
+            GuiInputModule.Instance.UpdateQualityLevel();
         }
 
         float? velocityAngle;
@@ -289,6 +292,8 @@ namespace Iviz.Controllers
             ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
             ShowARJoystick = false;
             Instance = null;
+            
+            GuiInputModule.Instance.UpdateQualityLevel();
         }
 
         void IController.ResetController()

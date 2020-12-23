@@ -16,9 +16,17 @@ namespace Iviz.Core
         readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
         float lastRunTime;
         Thread gameThread;
+        int counter;
 
-        bool skip; 
-        
+        static int networkFrameSkip = Settings.IsHololens ? 2 : 1;
+
+        public static int NetworkFrameSkip
+        {
+            get => networkFrameSkip;
+            set => networkFrameSkip =
+                (value >= 1) ? value : throw new ArgumentException($"Invalid argument {value}");
+        }
+
         public static float GameTime { get; private set; }
 
         void Awake()
@@ -44,13 +52,10 @@ namespace Iviz.Core
                 action();
             }
 
-            if (Settings.IsHololens)
+            counter++;
+            if (counter != NetworkFrameSkip)
             {
-                skip = !skip;
-                if (skip)
-                {
-                    return;
-                }
+                return;
             }
 
             ListenersEveryFrame?.Invoke();
@@ -58,7 +63,8 @@ namespace Iviz.Core
             {
                 action();
             }
-            
+
+            counter = 0;
         }
 
         void LateUpdate()
@@ -75,7 +81,7 @@ namespace Iviz.Core
         /// Runs every frame on the Unity thread.
         /// </summary>
         public static event Action EveryFrame;
-        
+
         /// <summary>
         /// Runs every frame on the Unity thread, but may be slowed down if the CPU load is too high.
         /// Used by the ROS listeners.

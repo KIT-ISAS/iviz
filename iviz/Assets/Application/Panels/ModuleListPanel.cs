@@ -50,6 +50,7 @@ namespace Iviz.App
         [SerializeField] Button resetAll = null;
         [SerializeField] Button showNetwork = null;
         [SerializeField] Button showConsole = null;
+        [SerializeField] Button showSettings = null;
 
         [SerializeField] Sprite connectedSprite = null;
         [SerializeField] Sprite connectingSprite = null;
@@ -85,6 +86,7 @@ namespace Iviz.App
         MarkerDialogData markerData;
         NetworkDialogData networkData;
         ConsoleDialogData consoleData;
+        SettingsDialogData settingsData;
 
         ControllerService controllerService;
 
@@ -136,7 +138,7 @@ namespace Iviz.App
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         Controllers.ModelService modelService;
-
+        
         public bool UnlockButtonVisible
         {
             get => UnlockButton.gameObject.activeSelf;
@@ -174,6 +176,7 @@ namespace Iviz.App
             networkData = new NetworkDialogData();
             connectionData = new ConnectionDialogData();
             consoleData = new ConsoleDialogData();
+            settingsData = new SettingsDialogData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -200,6 +203,7 @@ namespace Iviz.App
             resetAll.onClick.AddListener(ResetAllModules);
             showNetwork.onClick.AddListener(networkData.Show);
             showConsole.onClick.AddListener(consoleData.Show);
+            showSettings.onClick.AddListener(settingsData.Show);
 
             string MasterUriToString(Uri uri) =>
                 uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";

@@ -2,7 +2,7 @@
 
 namespace Iviz.App
 {
-    public sealed class TFDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class TfDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TFLog tfLog = null;

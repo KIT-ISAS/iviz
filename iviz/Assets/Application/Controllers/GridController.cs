@@ -23,7 +23,7 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = Color.white * 0.25f;
-        [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.5f;
+        [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.75f;
         [DataMember] public float GridLineWidth { get; set; } = 0.01f;
         [DataMember] public float GridCellSize { get; set; } = 1;
         [DataMember] public int NumberOfGridCells { get; set; } = 90;
@@ -37,7 +37,7 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        const int ProbeRefreshTimeInSec = 3;
+        const int ProbeRefreshTimeInSec = 30;
 
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;

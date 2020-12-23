@@ -6,12 +6,12 @@ namespace Iviz.App
 {
     public sealed class TfDialogData : DialogData
     {
-        [NotNull] readonly TFDialogContents panel;
+        [NotNull] readonly TfDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         public TfDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<TFDialogContents>(DialogPanelType.Tf);
+            panel = DialogPanelManager.GetPanelByType<TfDialogContents>(DialogPanelType.Tf);
         }
 
         public override void SetupPanel()

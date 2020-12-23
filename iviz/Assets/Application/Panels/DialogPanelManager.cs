@@ -18,11 +18,12 @@ namespace Iviz.App
         Marker,
         Network,
         Console,
+        Settings,
     }
 
     public class DialogPanelManager : MonoBehaviour
     {
-        readonly Dictionary<DialogPanelType, IDialogPanelContents> PanelByType =
+        readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType =
             new Dictionary<DialogPanelType, IDialogPanelContents>();
 
         DialogData selectedDialogData;
@@ -45,17 +46,18 @@ namespace Iviz.App
                 (DialogPanelType.ItemList, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
                 (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
                 (DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
-                (DialogPanelType.Tf, CreatePanel<TFDialogContents>(Resource.Widgets.TfPanel)),
+                (DialogPanelType.Tf, CreatePanel<TfDialogContents>(Resource.Widgets.TfPanel)),
                 (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogContents>(Resource.Widgets.SaveAsPanel)),
                 (DialogPanelType.AddTopic, CreatePanel<AddTopicDialogContents>(Resource.Widgets.AddTopicPanel)),
                 (DialogPanelType.Marker, CreatePanel<MarkerDialogContents>(Resource.Widgets.MarkerPanel)),
                 (DialogPanelType.Network, CreatePanel<NetworkDialogContents>(Resource.Widgets.NetworkPanel)),
                 (DialogPanelType.Console, CreatePanel<ConsoleDialogContents>(Resource.Widgets.ConsolePanel)),
+                (DialogPanelType.Settings, CreatePanel<SettingsDialogContents>(Resource.Widgets.SettingsPanel)),
             };
 
             foreach (var (type, panel) in list)
             {
-                PanelByType.Add(type, panel);
+                panelByType.Add(type, panel);
                 panel.Active = false;
             }
 
@@ -96,7 +98,7 @@ namespace Iviz.App
         [NotNull]
         public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanelContents
         {
-            if (!PanelByType.TryGetValue(resource, out IDialogPanelContents cm))
+            if (!panelByType.TryGetValue(resource, out IDialogPanelContents cm))
             {
                 throw new InvalidOperationException("There is no panel for this type!");
             }

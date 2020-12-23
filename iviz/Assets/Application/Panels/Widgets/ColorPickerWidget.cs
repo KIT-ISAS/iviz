@@ -184,6 +184,7 @@ namespace Iviz.App
 
         void Start()
         {
+            Value = color;
             OnValueChanged();
         }
     }
