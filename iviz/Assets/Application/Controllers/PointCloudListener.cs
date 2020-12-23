@@ -45,6 +45,7 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly PointListResource pointCloud;
 
+        bool disposed;
         bool isProcessing;
 
         NativeList<float4> pointBuffer = new NativeList<float4>(Allocator.Persistent);
@@ -269,6 +270,12 @@ namespace Iviz.Controllers
 
         void ProcessMessage([NotNull] PointCloud2 msg)
         {
+            if (disposed)
+            {
+                // we're dead
+                return;
+            }
+            
             if (msg.PointStep < 3 * sizeof(float) ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
@@ -326,7 +333,7 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
-                if (node.gameObject == null)
+                if (disposed)
                 {
                     // we're dead
                     return;
@@ -622,6 +629,7 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
+            disposed = true;
 
             if (pointCloud != null)
             {

@@ -65,8 +65,21 @@ namespace Iviz.Controllers
 
         readonly StringBuilder description = new StringBuilder(250);
 
-        [CanBeNull] Task resourceTask;
-        [CanBeNull] CancellationTokenSource resourceTs;
+        class TaskInfo
+        {
+            [NotNull] public Task Task { get; }
+            [NotNull] public CancellationTokenSource TokenSource { get; }
+            [NotNull] public string Uri { get; }
+
+            public TaskInfo([NotNull] Task task, [NotNull] CancellationTokenSource tokenSource, [NotNull] string uri)
+            {
+                Task = task;
+                TokenSource = tokenSource;
+                Uri = uri;
+            }
+        }
+
+        [CanBeNull] TaskInfo taskInfo;
 
         (string Ns, int Id) id;
 
@@ -569,6 +582,7 @@ namespace Iviz.Controllers
             }
 
             PointListResource.DirectPointSetter setterCallback = PointHelper.GetPointSetter(msg);
+            meshList.ElementScale3 = msg.Scale.Ros2Unity().Abs();
             meshList.SetDirect(setterCallback, msg.Points.Length);
         }
 
@@ -786,12 +800,18 @@ namespace Iviz.Controllers
         {
             if (msg.Type() == MarkerType.MeshResource)
             {
-                resourceTask = LoadResourceAsync(msg.MeshResource);
+                if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
+                {
+                    StopLoadResourceTask();
+                    CancellationTokenSource tokenSource = new CancellationTokenSource();
+                    taskInfo = new TaskInfo(LoadResourceAsync(msg.MeshResource, tokenSource), tokenSource,
+                        msg.MeshResource);
+                }
+
                 return null;
             }
 
             StopLoadResourceTask();
-            
             switch (msg.Type())
             {
                 case MarkerType.Arrow:
@@ -824,48 +844,40 @@ namespace Iviz.Controllers
 
         void StopLoadResourceTask()
         {
-            if (resourceTask == null)
-            {
-                return;
-            }
-            
-            resourceTs?.Cancel();
-            resourceTask?.WaitForWithTimeout(LoadResourceTimeoutInMs).WaitNoThrow(this);
-            resourceTs = null;
-            resourceTask = null;
+            taskInfo?.TokenSource.Cancel();
+            taskInfo = null;
         }
-        
-        async Task LoadResourceAsync(string uriString)
+
+        async Task LoadResourceAsync(string uriString, CancellationTokenSource tokenSource)
         {
-            if (resourceTask != null)
-            {
-                resourceTs?.Cancel();
-                await resourceTask.WaitForWithTimeout(LoadResourceTimeoutInMs).AwaitNoThrow(this);
-            }
-            
-            resourceTs = new CancellationTokenSource();
+            Info<GameObject> newResourceInfo;
             try
             {
-                resourceInfo = await Resource.GetGameObjectResourceAsync(uriString, ConnectionManager.ServiceProvider,
-                    resourceTs.Token);
+                newResourceInfo = await Resource.GetGameObjectResourceAsync(uriString,
+                    ConnectionManager.ServiceProvider,
+                    tokenSource.Token);
             }
             catch (Exception e)
             {
-                Debug.Log($"{this}: LoadResourceAsync failed with exception: {e}");
-            }
-
-            if (resourceInfo == null)
-            {
-                Debug.LogWarning($"{this}: Resource {uriString} returned null");
+                Logger.External($"{this}: LoadResourceAsync failed for '{uriString}'" + e);
                 return;
             }
 
-            GameObject resourceGameObject = ResourcePool.GetOrCreate(resourceInfo, transform);
-            resource = resourceGameObject.GetComponent<IDisplay>();
-            if (resource != null)
+            if (newResourceInfo == null)
             {
-                resource.Layer = LayerType.IgnoreRaycast;
+                //Debug.LogWarning($"{this}: Resource {uriString} returned null");
+                return;
             }
+
+            GameObject resourceGameObject = ResourcePool.GetOrCreate(newResourceInfo, transform);
+            var newResource = resourceGameObject.GetComponent<IDisplay>();
+            if (newResource != null)
+            {
+                newResource.Layer = LayerType.IgnoreRaycast;
+            }
+
+            resourceInfo = newResourceInfo;
+            resource = newResource;
         }
 
         [NotNull]
@@ -926,7 +938,7 @@ namespace Iviz.Controllers
         public override void Stop()
         {
             base.Stop();
-            
+
             StopLoadResourceTask();
 
             if (resource == null || resourceInfo == null)
@@ -940,7 +952,7 @@ namespace Iviz.Controllers
             previousHash = null;
         }
 
-        static uint CalculateMarkerHash(Marker msg)
+        static uint CalculateMarkerHash([NotNull] Marker msg)
         {
             uint hash = Crc32.Compute(msg.Type);
             hash = Crc32.Compute(msg.Color, hash);
@@ -949,7 +961,7 @@ namespace Iviz.Controllers
             return hash;
         }
 
-        bool HasSameHash(Marker msg)
+        bool HasSameHash([NotNull] Marker msg)
         {
             uint currentHash = CalculateMarkerHash(msg);
             if (previousHash == currentHash)
@@ -964,6 +976,11 @@ namespace Iviz.Controllers
         public override string ToString()
         {
             return $"[MarkerObject {name}]";
+        }
+
+        void OnDestroy()
+        {
+            StopLoadResourceTask();
         }
     }
 

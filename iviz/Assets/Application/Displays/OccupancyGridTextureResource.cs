@@ -95,10 +95,11 @@ namespace Iviz.Displays
                 wrapMode = TextureWrapMode.Clamp,
             };
             material.mainTexture = texture;
+            //Debug.Log("new texture! " + sizeX + " " + sizeY);
         }
 
         public void Set([NotNull] sbyte[] values, float cellSize, int numCellsX, int numCellsY,
-            OccupancyGridResource.Rect? inBounds = null)
+            OccupancyGridResource.Rect? inBounds, Pose pose)
         {
             if (values == null)
             {
@@ -156,12 +157,18 @@ namespace Iviz.Displays
                 //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
                 Vector3 rosCenter =
                     new Vector3(bounds.XMax + bounds.XMin - 1, bounds.YMax + bounds.YMin - 1, 0) * (cellSize / 2);
-                mTransform.localPosition = rosCenter.Ros2Unity();
-                mTransform.localRotation = Quaternion.Euler(0, 90, 0);
+                rosCenter.z += 0.001f;
+
+                Pose offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
+                Pose newPose = pose.Multiply(offset);
+                mTransform.SetLocalPose(newPose);
                 mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs() * 0.1f;
 
                 EnsureSize(segmentWidth, segmentHeight);
-                texture.GetRawTextureData<sbyte>().CopyFrom(buffer);
+                var array = texture.GetRawTextureData<sbyte>();
+                //Debug.Log("Native array: " + array.Length);
+
+                array.CopyFrom(buffer);
                 texture.Apply(false);
                 IsProcessing = false;
             });
@@ -215,37 +222,53 @@ namespace Iviz.Displays
             MeshRenderer.SetPropertyBlock(Properties);
         }
 
-        static unsafe void CreateMipmaps(sbyte[] array, int width, int height)
+        static unsafe void CreateMipmaps([NotNull] sbyte[] array, int width, int height)
         {
             fixed (sbyte* srcPtr = array)
             {
+                sbyte* maxPtr = srcPtr + array.Length;
                 sbyte* srcMipmap = srcPtr;
                 while (width > 1 && height > 1)
                 {
-                    Reduce(srcMipmap, width, height, srcMipmap + width * height);
+                    sbyte* dstPtr = srcMipmap + width * height;
+                    if (dstPtr > maxPtr)
+                    {
+                        throw new InvalidOperationException("Possible Buffer Overflow!");
+                    }
+
+                    Reduce(srcMipmap, width, height, dstPtr);
                     srcMipmap += width * height;
                     width /= 2;
                     height /= 2;
                 }
+                
+                //Debug.Log("Mipmap used " + (srcMipmap - srcPtr) + " expected: " + array.Length);
             }
         }
 
         static int CalculateAllMipmapsSize(int width, int height)
         {
             int size = 0;
-            while (width > 0 && height > 0)
+            while (width != 1 || height != 1)
             {
+                //Debug.Log(width + " " + height + " -> " + width * height);
                 size += width * height;
-                width /= 2;
-                height /= 2;
+                width = Math.Max(width / 2, 1);
+                height = Math.Max(height / 2, 1);
             }
 
-            return size;
+            //Debug.Log("Total: " + size);
+            return size + 1;
         }
 
 
         static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
         {
+            if (width < 2 || height < 2)
+            {
+                throw new InvalidOperationException("NYI!");
+            }
+            
             for (int v = 0; v < height; v += 2)
             {
                 sbyte* row0 = src + width * v;

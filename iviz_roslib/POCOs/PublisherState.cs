@@ -13,10 +13,10 @@ namespace Iviz.Roslib
         public Endpoint? RemoteEndpoint { get; }
         public int CurrentQueueSize { get; }
         public int MaxQueueSize { get; }
-        public int NumSent { get; }
-        public int BytesSent { get; }
-        public int NumDropped { get; }
-        public int BytesDropped { get; }
+        public long NumSent { get; }
+        public long BytesSent { get; }
+        public long NumDropped { get; }
+        public long BytesDropped { get; }
 
         internal PublisherSenderState(bool isAlive,
                            bool latching,
@@ -26,10 +26,10 @@ namespace Iviz.Roslib
                            Endpoint? remoteEndpoint,
                            int currentQueueSize,
                            int maxQueueSize,
-                           int numSent,
-                           int bytesSent,
-                           int numDropped, 
-                           int bytesDropped)
+                           long numSent,
+                           long bytesSent,
+                           long numDropped, 
+                           long bytesDropped)
         {
             IsAlive = isAlive;
             Latching = latching;

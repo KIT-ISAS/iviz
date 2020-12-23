@@ -40,15 +40,15 @@ namespace Iviz.Roslib
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
 
-        int bytesDropped;
-        int bytesSent;
+        long bytesDropped;
+        long bytesSent;
         bool disposed;
 
         Endpoint? endpoint;
         Endpoint? remoteEndpoint;
 
-        int numDropped;
-        int numSent;
+        long numDropped;
+        long numSent;
         SenderStatus status;
         NetworkStream? stream;
         Task? task;

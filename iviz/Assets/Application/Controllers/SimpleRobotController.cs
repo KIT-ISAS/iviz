@@ -42,7 +42,22 @@ namespace Iviz.Controllers
             Config = new SimpleRobotConfiguration();
         }
 
-        public RobotModel Robot { get; private set; }
+        RobotModel robot;
+
+        public RobotModel Robot
+        {
+            get => robot;
+            private set
+            {
+                if (robot != null)
+                {
+                    robot.Cancel();
+                    robot.Dispose();
+                }
+
+                robot = value;
+            }
+        }
 
         GameObject RobotObject => Robot.BaseLinkObject;
 
@@ -124,7 +139,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -139,7 +154,7 @@ namespace Iviz.Controllers
             set
             {
                 config.RenderAsOcclusionOnly = value;
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -174,14 +189,13 @@ namespace Iviz.Controllers
                 AttachedToTf = false;
             }
 
-            Robot?.Dispose();
+            Robot = null;
             Stopped?.Invoke();
             Object.Destroy(node.gameObject);
         }
 
         public void ResetController()
         {
-            Robot?.Dispose();
             Robot = null;
 
             if (!string.IsNullOrEmpty(SavedRobotName))
@@ -208,11 +222,11 @@ namespace Iviz.Controllers
 
         public TfFrame Frame => node.Parent;
 
-        public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
+        [NotNull] public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
 
         public event Action Stopped;
 
-        public bool TryWriteJoint(string joint, float value)
+        public bool TryWriteJoint([NotNull] string joint, float value)
         {
             return Robot.TryWriteJoint(joint, value, out _);
         }
@@ -240,7 +254,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void ProcessRobotSource(string savedRobotName, string sourceParameter)
+        public void ProcessRobotSource([CanBeNull] string savedRobotName, [CanBeNull] string sourceParameter)
         {
             if (!string.IsNullOrEmpty(savedRobotName))
             {
@@ -264,7 +278,6 @@ namespace Iviz.Controllers
         public bool TryLoadFromSourceParameter([CanBeNull] string value)
         {
             config.SourceParameter = "";
-            Robot?.Dispose();
             Robot = null;
 
             if (string.IsNullOrEmpty(value))
@@ -306,7 +319,6 @@ namespace Iviz.Controllers
         public bool TryLoadSavedRobot([CanBeNull] string robotName)
         {
             config.SavedRobotName = "";
-            Robot?.Dispose();
             Robot = null;
 
             if (string.IsNullOrEmpty(robotName))
@@ -340,7 +352,8 @@ namespace Iviz.Controllers
 
             try
             {
-                Robot = new RobotModel(description, ConnectionManager.ServiceProvider);
+                Robot = new RobotModel(description);
+                Robot.StartAsync(ConnectionManager.ServiceProvider);
             }
             catch (Exception e)
             {

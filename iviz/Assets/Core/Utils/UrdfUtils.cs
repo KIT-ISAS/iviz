@@ -46,14 +46,9 @@ namespace Iviz.Core
             return new Color(v.Rgba.R, v.Rgba.G, v.Rgba.B, v.Rgba.A);
         }
 
-        public static bool IsReference([NotNull] this Urdf.Material material)
+        public static bool IsReference([CanBeNull] this Urdf.Material material)
         {
-            if (material == null)
-            {
-                throw new ArgumentNullException(nameof(material));
-            }
-
-            return material.Color is null && material.Texture is null && !(material.Name is null);
+            return material != null && material.Color is null && material.Texture is null;
         }
     }
 }

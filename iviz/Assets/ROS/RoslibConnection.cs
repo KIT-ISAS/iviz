@@ -427,39 +427,6 @@ namespace Iviz.Ros
             servicesByTopic.Add(service, newAdvertisedService);
         }
 
-        public override bool CallService<T>(string service, T srv)
-        {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            if (srv == null)
-            {
-                throw new ArgumentNullException(nameof(srv));
-            }
-
-            var signal = new SemaphoreSlim(0, 1);
-            bool result = false;
-
-            AddTask(async () =>
-            {
-                try
-                {
-                    result = client != null && await client.CallServiceAsync(service, srv);
-                }
-                catch (Exception e)
-                {
-                    Core.Logger.Error("Exception during RoslibConnection.CallService(): ", e);
-                }
-
-                signal.Release();
-            });
-
-            signal.Wait();
-            return result;
-        }
-
         public override async Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
         {
             if (service == null)
@@ -473,27 +440,38 @@ namespace Iviz.Ros
             }
 
             var signal = new SemaphoreSlim(0, 1);
-            bool result = false;
+            bool hasClient = false;
+            Exception exception = null;
 
             AddTask(async () =>
             {
                 try
                 {
-                    result = client != null && await client.CallServiceAsync(service, srv, true, token);
-                }
-                catch (OperationCanceledException)
-                {
+                    if (client == null)
+                    {
+                        return;
+                    }
+
+                    hasClient = true;
+                    await client.CallServiceAsync(service, srv, true, token);
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.CallService(): ", e);
+                    exception = e;
                 }
-
-                signal.Release();
+                finally
+                {
+                    signal.Release();
+                }
             });
 
             await signal.WaitAsync(token);
-            return result;
+            if (exception != null)
+            {
+                throw exception;
+            }
+
+            return hasClient;
         }
 
         internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage
@@ -802,15 +780,15 @@ namespace Iviz.Ros
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
-                int totalMessages = 0;
-                int totalBytes = 0;
+                long totalMessages = 0;
+                long totalBytes = 0;
                 foreach (var receiver in stat.Receivers)
                 {
                     totalMessages += receiver.NumReceived;
                     totalBytes += receiver.BytesReceived;
                 }
 
-                int totalKbytes = totalBytes / 1000;
+                long totalKbytes = totalBytes / 1000;
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs ↓")
                     .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
 
@@ -846,7 +824,7 @@ namespace Iviz.Ros
                     builder.Append(":").Append(receiver.RemoteUri.Port).Append("]");
                     if (isAlive && isConnected)
                     {
-                        int kbytes = receiver.BytesReceived / 1000;
+                        long kbytes = receiver.BytesReceived / 1000;
                         builder.Append(" ↓").Append(kbytes.ToString("N0")).Append("kB");
                     }
                     else if (!isAlive)
@@ -876,15 +854,15 @@ namespace Iviz.Ros
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
-                int totalMessages = 0;
-                int totalBytes = 0;
+                long totalMessages = 0;
+                long totalBytes = 0;
                 foreach (var sender in stat.Senders)
                 {
                     totalMessages += sender.NumSent;
                     totalBytes += sender.BytesSent;
                 }
 
-                int totalKbytes = totalBytes / 1000;
+                long totalKbytes = totalBytes / 1000;
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs ↑")
                     .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
 
@@ -913,7 +891,7 @@ namespace Iviz.Ros
 
                     if (isAlive)
                     {
-                        int kbytes = receiver.BytesSent / 1000;
+                        long kbytes = receiver.BytesSent / 1000;
                         builder.Append(" ↑").Append(kbytes.ToString("N0")).Append("kB");
                     }
                     else
