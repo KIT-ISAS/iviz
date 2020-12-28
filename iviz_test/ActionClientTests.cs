@@ -13,7 +13,7 @@ namespace iviz_test
         {
             Console.WriteLine("** Starting Fibonacci action test!");
             using RosClient client = new RosClient(RosMasterUri, callerUri: RosClient.TryGetCallerUri(7632));
-            using var actionClient = ActionClient.Create(client, "fibonacci", default(FibonacciAction));
+            using var actionClient = RosActionClient.Create(client, "fibonacci", default(FibonacciAction));
 
             Console.WriteLine("** Waiting for server...");
             if (!actionClient.WaitForServer(150000))

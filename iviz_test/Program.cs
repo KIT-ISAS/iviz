@@ -1,7 +1,10 @@
-﻿class Program
+﻿using System.Threading.Tasks;
+using iviz_test;
+
+class Program
 {
-    static void Main()
+    static async Task Main()
     {
-        
+        await TwistTest.TwistMarkerTest();
     }
 }
