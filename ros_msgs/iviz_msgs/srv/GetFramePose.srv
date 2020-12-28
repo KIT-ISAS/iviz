@@ -1,0 +1,6 @@
+# Gets the absolute pose of a TF frame w.r.t. the map frame
+
+string[] frames			# Frame ids
+---
+bool[] is_valid			# Whether the entry is valid
+geometry_msgs/Pose[] poses 	# The absolute poses
