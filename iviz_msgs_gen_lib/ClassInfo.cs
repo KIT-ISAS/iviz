@@ -113,7 +113,7 @@ namespace Iviz.MsgsGen
         readonly string fullMessageText;
         readonly VariableElement[] variables;
 
-        public int FixedSize { get; set; } = UninitializedSize;
+        public int FixedSize { get; internal set; } = UninitializedSize;
         public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
         public ReadOnlyCollection<IElement> Elements { get; }
 
@@ -273,7 +273,7 @@ namespace Iviz.MsgsGen
                 return new[]
                 {
                     $"/// <summary> Constant size of this message. </summary>",
-                    $"public const int RosFixedMessageLength = {fixedSize};",
+                    $"[Preserve] public const int RosFixedMessageLength = {fixedSize};",
                     "",
                     $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
                 };
@@ -839,8 +839,8 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
-                    ? $"public unsafe struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>"
-                    : $"public struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>");
+                    ? $"public unsafe readonly struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>"
+                    : $"public readonly struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>");
             }
             else
             {

@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 3;
+        [Preserve] public const int RosFixedMessageLength = 3;
         
         public int RosMessageLength => RosFixedMessageLength;
     

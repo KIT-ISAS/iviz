@@ -7,12 +7,12 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Color32")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
+    public readonly struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
     {
-        [DataMember (Name = "r")] public byte R { get; set; }
-        [DataMember (Name = "g")] public byte G { get; set; }
-        [DataMember (Name = "b")] public byte B { get; set; }
-        [DataMember (Name = "a")] public byte A { get; set; }
+        [DataMember (Name = "r")] public byte R { get; }
+        [DataMember (Name = "g")] public byte G { get; }
+        [DataMember (Name = "b")] public byte B { get; }
+        [DataMember (Name = "a")] public byte A { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Color32(byte R, byte G, byte B, byte A)
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 4;
+        [Preserve] public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

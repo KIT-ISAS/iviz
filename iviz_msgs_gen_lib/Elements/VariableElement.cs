@@ -48,7 +48,8 @@ namespace Iviz.MsgsGen
             "override",
         };
 
-        internal VariableElement(string comment, string rosClassToken, string fieldName, string parentClassName = null, ClassInfo classInfo = null)
+        internal VariableElement(string comment, string rosClassToken, string fieldName, string parentClassName = null,
+            ClassInfo classInfo = null)
         {
             Comment = comment;
             this.rosClassToken = rosClassToken;
@@ -132,7 +133,9 @@ namespace Iviz.MsgsGen
             switch (ArraySize)
             {
                 case NotAnArray:
-                    result = $"public {CsClassName} {CsFieldName} {{ get; set; }}";
+                    result = isInStruct
+                        ? $"public {CsClassName} {CsFieldName} {{ get; }}"
+                        : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
                     break;
                 case DynamicSizeArray:
                     result = $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
@@ -152,10 +155,10 @@ namespace Iviz.MsgsGen
 
             if (ArraySize <= 0 || !isInStruct)
             {
-                return new[] { csString };
+                return new[] {csString};
             }
 
-            List<string> list = new List<string> { csString };
+            List<string> list = new List<string> {csString};
             for (int i = 0; i < ArraySize; i++)
             {
                 list.Add($"public {CsClassName} {CsFieldName}{i}");
@@ -189,7 +192,7 @@ namespace Iviz.MsgsGen
                     _ => $"{RosClassName}[{ArraySize}] {RosFieldName}"
                 };
             }
-            
+
             // now we start improvising
             if (RosClassName == "std_msgs/Header")
             {

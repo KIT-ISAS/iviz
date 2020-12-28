@@ -7,12 +7,12 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Wrench")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Wrench : IMessage, System.IEquatable<Wrench>, IDeserializable<Wrench>
+    public readonly struct Wrench : IMessage, System.IEquatable<Wrench>, IDeserializable<Wrench>
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
-        [DataMember (Name = "force")] public Vector3 Force { get; set; }
-        [DataMember (Name = "torque")] public Vector3 Torque { get; set; }
+        [DataMember (Name = "force")] public Vector3 Force { get; }
+        [DataMember (Name = "torque")] public Vector3 Torque { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Wrench(in Vector3 Force, in Vector3 Torque)
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 48;
+        [Preserve] public const int RosFixedMessageLength = 48;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

@@ -7,9 +7,9 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Char")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Char : IMessage, System.IEquatable<Char>, IDeserializable<Char>
+    public readonly struct Char : IMessage, System.IEquatable<Char>, IDeserializable<Char>
     {
-        [DataMember (Name = "data")] public sbyte Data { get; set; }
+        [DataMember (Name = "data")] public sbyte Data { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Char(sbyte Data)
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 1;
+        [Preserve] public const int RosFixedMessageLength = 1;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

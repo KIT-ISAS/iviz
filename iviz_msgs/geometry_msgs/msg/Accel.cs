@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Accel")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Accel : IMessage, System.IEquatable<Accel>, IDeserializable<Accel>
+    public readonly struct Accel : IMessage, System.IEquatable<Accel>, IDeserializable<Accel>
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
-        [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
-        [DataMember (Name = "angular")] public Vector3 Angular { get; set; }
+        [DataMember (Name = "linear")] public Vector3 Linear { get; }
+        [DataMember (Name = "angular")] public Vector3 Angular { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Accel(in Vector3 Linear, in Vector3 Angular)
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 48;
+        [Preserve] public const int RosFixedMessageLength = 48;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

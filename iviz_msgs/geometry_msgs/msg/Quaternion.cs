@@ -7,13 +7,13 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
+    public readonly struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
-        [DataMember (Name = "x")] public double X { get; set; }
-        [DataMember (Name = "y")] public double Y { get; set; }
-        [DataMember (Name = "z")] public double Z { get; set; }
-        [DataMember (Name = "w")] public double W { get; set; }
+        [DataMember (Name = "x")] public double X { get; }
+        [DataMember (Name = "y")] public double Y { get; }
+        [DataMember (Name = "z")] public double Z { get; }
+        [DataMember (Name = "w")] public double W { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Quaternion(double X, double Y, double Z, double W)
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 32;
+        [Preserve] public const int RosFixedMessageLength = 32;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
@@ -79,20 +79,13 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
-        public static Quaternion operator *(in Quaternion a, in Quaternion b) =>
-            new Quaternion(
-                a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
-                a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
-                a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
-                a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z
-            );
-        public static Vector3 operator *(in Quaternion q, in Vector3 v)
-        {
-                Vector3 qv = new Vector3(q.X, q.Y, q.Z);
-                return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);
-        }
-        public static Point operator *(in Quaternion q, in Point v) => q * (Vector3)v;
+        public static readonly Quaternion Identity = (0, 0, 0, 1);
+        public static Quaternion operator *(in Quaternion a, in Quaternion b) => MsgUtils.Multiply(a, b).Normalized;
+        public static Vector3 operator *(in Quaternion q, in Vector3 v) => MsgUtils.Multiply(q, v);
+        public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;
+        public readonly Quaternion Normalized => MsgUtils.Normalize(this);
         public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
+        public static implicit operator Quaternion((Vector3 XYZ, double W) p) => new Quaternion(p.XYZ.X, p.XYZ.Y, p.XYZ.Z, p.W);
+        public static Quaternion AngleAxis(double angleInRad, Vector3 axis) => (System.Math.Sin(angleInRad / 2) * axis, System.Math.Cos(angleInRad / 2));
     }
 }

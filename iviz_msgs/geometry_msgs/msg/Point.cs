@@ -7,12 +7,12 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
+    public readonly struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
     {
         // This contains the position of a point in free space
-        [DataMember (Name = "x")] public double X { get; set; }
-        [DataMember (Name = "y")] public double Y { get; set; }
-        [DataMember (Name = "z")] public double Z { get; set; }
+        [DataMember (Name = "x")] public double X { get; }
+        [DataMember (Name = "y")] public double Y { get; }
+        [DataMember (Name = "z")] public double Z { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Point(double X, double Y, double Z)
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 24;
+        [Preserve] public const int RosFixedMessageLength = 24;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
@@ -82,8 +82,8 @@ namespace Iviz.Msgs.GeometryMsgs
         public static readonly Point UnitY = new Point(0, 1, 0);
         public static readonly Point UnitZ = new Point(0, 0, 1);
         public static implicit operator Vector3(in Point p) => new Vector3(p.X, p.Y, p.Z);
-        public static Point operator +(in Point v, in Point w) => new Point(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
-        public static Point operator -(in Point v, in Point w) => new Point(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Point operator +(in Point v, in Vector3 w) => new Point(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Point operator -(in Point v, in Vector3 w) => new Point(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
         public static Point operator *(double f, in Point v) => new Point(f * v.X, f * v.Y, f * v.Z);
         public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);
         public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);

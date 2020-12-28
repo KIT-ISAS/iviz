@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Pose")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage, System.IEquatable<Pose>, IDeserializable<Pose>
+    public readonly struct Pose : IMessage, System.IEquatable<Pose>, IDeserializable<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
-        [DataMember (Name = "position")] public Point Position { get; set; }
-        [DataMember (Name = "orientation")] public Quaternion Orientation { get; set; }
+        [DataMember (Name = "position")] public Point Position { get; }
+        [DataMember (Name = "orientation")] public Quaternion Orientation { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Pose(in Point Position, in Quaternion Orientation)
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 56;
+        [Preserve] public const int RosFixedMessageLength = 56;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
@@ -76,7 +76,8 @@ namespace Iviz.Msgs.GeometryMsgs
                 "e9fsbQFfEg3oDvACaqg09xMCAAA=";
                 
         /// Custom iviz code
-        public static readonly Pose Identity = new Pose(Point.Zero, Quaternion.Identity);
+        public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);
         public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);
+        public static implicit operator Pose((Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);
     }
 }

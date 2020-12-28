@@ -7,10 +7,10 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Vector2f")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2f : IMessage, System.IEquatable<Vector2f>, IDeserializable<Vector2f>
+    public readonly struct Vector2f : IMessage, System.IEquatable<Vector2f>, IDeserializable<Vector2f>
     {
-        [DataMember (Name = "x")] public float X { get; set; }
-        [DataMember (Name = "y")] public float Y { get; set; }
+        [DataMember (Name = "x")] public float X { get; }
+        [DataMember (Name = "y")] public float Y { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Vector2f(float X, float Y)
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 8;
+        [Preserve] public const int RosFixedMessageLength = 8;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

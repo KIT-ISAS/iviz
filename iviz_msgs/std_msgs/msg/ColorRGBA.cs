@@ -7,12 +7,12 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/ColorRGBA")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
+    public readonly struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
     {
-        [DataMember (Name = "r")] public float R { get; set; }
-        [DataMember (Name = "g")] public float G { get; set; }
-        [DataMember (Name = "b")] public float B { get; set; }
-        [DataMember (Name = "a")] public float A { get; set; }
+        [DataMember (Name = "r")] public float R { get; }
+        [DataMember (Name = "g")] public float G { get; }
+        [DataMember (Name = "b")] public float B { get; }
+        [DataMember (Name = "a")] public float A { get; }
     
         /// <summary> Explicit constructor. </summary>
         public ColorRGBA(float R, float G, float B, float A)
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 16;
+        [Preserve] public const int RosFixedMessageLength = 16;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
@@ -76,15 +76,15 @@ namespace Iviz.Msgs.StdMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         /// Custom iviz code
-        public static readonly ColorRGBA White = new ColorRGBA(1, 1, 1, 1);
-        public static readonly ColorRGBA Black = new ColorRGBA(0, 0, 0, 1);
-        public static readonly ColorRGBA Red = new ColorRGBA(1, 0, 0, 1);
-        public static readonly ColorRGBA Green = new ColorRGBA(0, 1, 0, 1);
-        public static readonly ColorRGBA Blue = new ColorRGBA(0, 0, 1, 1);
-        public static readonly ColorRGBA Yellow = new ColorRGBA(1, 1, 0, 1);
-        public static readonly ColorRGBA Cyan = new ColorRGBA(0, 1, 1, 1);
-        public static readonly ColorRGBA Magenta = new ColorRGBA(1, 0, 1, 1);
-        public static readonly ColorRGBA Grey = new ColorRGBA(0.5f, 0.5f, 0.5f, 1);
+        public static readonly ColorRGBA White = (1, 1, 1, 1);
+        public static readonly ColorRGBA Black = (0, 0, 0, 1);
+        public static readonly ColorRGBA Red = (1, 0, 0, 1);
+        public static readonly ColorRGBA Green = (0, 1, 0, 1);
+        public static readonly ColorRGBA Blue = (0, 0, 1, 1);
+        public static readonly ColorRGBA Yellow = (1, 1, 0, 1);
+        public static readonly ColorRGBA Cyan = (0, 1, 1, 1);
+        public static readonly ColorRGBA Magenta = (1, 0, 1, 1);
+        public static readonly ColorRGBA Grey = (0.5f, 0.5f, 0.5f, 1);
         public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);
         public static implicit operator ColorRGBA((float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);
     }

@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Transform")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
+    public readonly struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
-        [DataMember (Name = "translation")] public Vector3 Translation { get; set; }
-        [DataMember (Name = "rotation")] public Quaternion Rotation { get; set; }
+        [DataMember (Name = "translation")] public Vector3 Translation { get; }
+        [DataMember (Name = "rotation")] public Quaternion Rotation { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Transform(in Vector3 Translation, in Quaternion Rotation)
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 56;
+        [Preserve] public const int RosFixedMessageLength = 56;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
@@ -78,7 +78,14 @@ namespace Iviz.Msgs.GeometryMsgs
                 "WutVw6gX5/A2oWFC7/9S9XzHfmo7AIs3OMZ30Hl6e5kvaAr514X2qHfuA/8+ZJE+AwAA";
                 
         /// Custom iviz code
-        public static readonly Transform Identity = new Transform(Point.Zero, Quaternion.Identity);
+        public static readonly Transform Identity = (Vector3.Zero, Quaternion.Identity);
         public static implicit operator Pose(in Transform p) => new Pose(p.Translation, p.Rotation);
+        public readonly Transform Inverse => new Transform(-(Rotation.Inverse * Translation), Rotation.Inverse);
+        public static Transform operator *(in Transform t, in Transform q) =>
+                new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
+        public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;
+        public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
+        public static Transform RotateAround(in Quaternion q, in Point p) => new Transform(p - q * p, q);
+        public static implicit operator Transform((Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
     }
 }

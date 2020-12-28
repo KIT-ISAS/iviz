@@ -7,9 +7,9 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Duration")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Duration : IMessage, System.IEquatable<Duration>, IDeserializable<Duration>
+    public readonly struct Duration : IMessage, System.IEquatable<Duration>, IDeserializable<Duration>
     {
-        [DataMember (Name = "data")] public duration Data { get; set; }
+        [DataMember (Name = "data")] public duration Data { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Duration(duration Data)
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 8;
+        [Preserve] public const int RosFixedMessageLength = 8;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

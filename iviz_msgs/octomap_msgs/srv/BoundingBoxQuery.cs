@@ -97,7 +97,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 48;
+        [Preserve] public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
     }
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 0;
+        [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     }

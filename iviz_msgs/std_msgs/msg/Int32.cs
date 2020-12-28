@@ -7,9 +7,9 @@ namespace Iviz.Msgs.StdMsgs
 {
     [DataContract (Name = "std_msgs/Int32")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Int32 : IMessage, System.IEquatable<Int32>, IDeserializable<Int32>
+    public readonly struct Int32 : IMessage, System.IEquatable<Int32>, IDeserializable<Int32>
     {
-        [DataMember (Name = "data")] public int Data { get; set; }
+        [DataMember (Name = "data")] public int Data { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Int32(int Data)
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 4;
+        [Preserve] public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

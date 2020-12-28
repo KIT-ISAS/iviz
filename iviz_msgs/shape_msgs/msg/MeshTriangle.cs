@@ -50,7 +50,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 12;
+        [Preserve] public const int RosFixedMessageLength = 12;
         
         public int RosMessageLength => RosFixedMessageLength;
     

@@ -7,11 +7,11 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
+    public readonly struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {
-        [DataMember (Name = "a")] public uint A { get; set; }
-        [DataMember (Name = "b")] public uint B { get; set; }
-        [DataMember (Name = "c")] public uint C { get; set; }
+        [DataMember (Name = "a")] public uint A { get; }
+        [DataMember (Name = "b")] public uint B { get; }
+        [DataMember (Name = "c")] public uint C { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Triangle(uint A, uint B, uint C)
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 12;
+        [Preserve] public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

@@ -83,7 +83,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 0;
+        [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     }

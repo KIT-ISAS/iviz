@@ -7,22 +7,22 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Inertia")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Inertia : IMessage, System.IEquatable<Inertia>, IDeserializable<Inertia>
+    public readonly struct Inertia : IMessage, System.IEquatable<Inertia>, IDeserializable<Inertia>
     {
         // Mass [kg]
-        [DataMember (Name = "m")] public double M { get; set; }
+        [DataMember (Name = "m")] public double M { get; }
         // Center of mass [m]
-        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; set; }
+        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; }
         // Inertia Tensor [kg-m^2]
         //     | ixx ixy ixz |
         // I = | ixy iyy iyz |
         //     | ixz iyz izz |
-        [DataMember (Name = "ixx")] public double Ixx { get; set; }
-        [DataMember (Name = "ixy")] public double Ixy { get; set; }
-        [DataMember (Name = "ixz")] public double Ixz { get; set; }
-        [DataMember (Name = "iyy")] public double Iyy { get; set; }
-        [DataMember (Name = "iyz")] public double Iyz { get; set; }
-        [DataMember (Name = "izz")] public double Izz { get; set; }
+        [DataMember (Name = "ixx")] public double Ixx { get; }
+        [DataMember (Name = "ixy")] public double Ixy { get; }
+        [DataMember (Name = "ixz")] public double Ixz { get; }
+        [DataMember (Name = "iyy")] public double Iyy { get; }
+        [DataMember (Name = "iyz")] public double Iyz { get; }
+        [DataMember (Name = "izz")] public double Izz { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Inertia(double M, in GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 80;
+        [Preserve] public const int RosFixedMessageLength = 80;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

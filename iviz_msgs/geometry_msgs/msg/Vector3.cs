@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [DataContract (Name = "geometry_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
+    public readonly struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -15,9 +15,9 @@ namespace Iviz.Msgs.GeometryMsgs
         // generic rigid transformation to a Vector3, tf2 will only apply the
         // rotation). If you want your data to be translatable too, use the
         // geometry_msgs/Point message instead.
-        [DataMember (Name = "x")] public double X { get; set; }
-        [DataMember (Name = "y")] public double Y { get; set; }
-        [DataMember (Name = "z")] public double Z { get; set; }
+        [DataMember (Name = "x")] public double X { get; }
+        [DataMember (Name = "y")] public double Y { get; }
+        [DataMember (Name = "z")] public double Z { get; }
     
         /// <summary> Explicit constructor. </summary>
         public Vector3(double X, double Y, double Z)
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        public const int RosFixedMessageLength = 24;
+        [Preserve] public const int RosFixedMessageLength = 24;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     

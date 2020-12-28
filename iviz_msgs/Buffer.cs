@@ -88,7 +88,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string[] DeserializeStringArray(uint count)
+        string[] DeserializeStringArray(uint count)
         {
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
@@ -286,9 +286,10 @@ namespace Iviz.Msgs
         /// <param name="size">
         /// Optional. The expected size of the message inside of the array. Must be less or equal the array size.
         /// </param>
+        /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1)
+        public static T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1, int offset = 0)
             where T : ISerializable
         {
             if (buffer == null)
@@ -296,7 +297,12 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            if (buffer.Length < size || size < -1)
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (buffer.Length < offset + size || size < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
@@ -306,14 +312,20 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(generator));
             }
 
-            fixed (byte* bPtr = buffer)
-            {
-                int span = (size == -1) ? buffer.Length : size;
-                Buffer b = new Buffer(bPtr, bPtr + span);
-                return generator.RosDeserialize(ref b);
-            }
+            return DeserializeImpl(generator, buffer, size, offset);
         }
 
+        static T DeserializeImpl<T>(IDeserializable<T> generator, byte[] buffer, int size, int offset)
+            where T : ISerializable
+        {
+            fixed (byte* bPtr = buffer)
+            {
+                int span = (size == -1) ? buffer.Length - offset : size;
+                Buffer b = new Buffer(bPtr + offset, bPtr + span);
+                return generator.RosDeserialize(ref b);
+            }
+        }        
+        
         /// <summary>
         /// Serializes the given message into the buffer array.
         /// </summary>
