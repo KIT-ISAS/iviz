@@ -152,7 +152,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Core.Logger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

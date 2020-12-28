@@ -47,7 +47,7 @@ namespace Iviz.App
         [NotNull] public abstract DataPanelContents Panel { get; }
         [NotNull] public abstract IController Controller { get; }
         [NotNull] public abstract IConfiguration Configuration { get; }
-        bool Visible => Configuration?.Visible ?? true;
+        bool Visible => Configuration.Visible;
         protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
         protected ModuleData([NotNull] string topic, [NotNull] string type)

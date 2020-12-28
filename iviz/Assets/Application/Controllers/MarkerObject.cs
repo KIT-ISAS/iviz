@@ -56,8 +56,6 @@ namespace Iviz.Controllers
 
     public sealed class MarkerObject : FrameNode
     {
-        const int LoadResourceTimeoutInMs = 2500;
-
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
@@ -67,13 +65,13 @@ namespace Iviz.Controllers
 
         class TaskInfo
         {
-            [NotNull] public Task Task { get; }
+            [NotNull] readonly Task task;
             [NotNull] public CancellationTokenSource TokenSource { get; }
             [NotNull] public string Uri { get; }
 
             public TaskInfo([NotNull] Task task, [NotNull] CancellationTokenSource tokenSource, [NotNull] string uri)
             {
-                Task = task;
+                this.task = task;
                 TokenSource = tokenSource;
                 Uri = uri;
             }
@@ -129,7 +127,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public float Metallic
         {
             get => resource is ISupportsPbr r ? r.Metallic : 0;
@@ -140,8 +138,8 @@ namespace Iviz.Controllers
                     pbrResource.Metallic = value;
                 }
             }
-        }   
-        
+        }
+
         public float Smoothness
         {
             get => resource is ISupportsPbr r ? r.Smoothness : 0;
@@ -152,7 +150,7 @@ namespace Iviz.Controllers
                     pbrResource.Smoothness = value;
                 }
             }
-        }        
+        }
 
         public bool Visible
         {
@@ -578,8 +576,8 @@ namespace Iviz.Controllers
             description.Append("Scale: [")
                 .Append(msg.Scale.X).Append(" | ")
                 .Append(msg.Scale.Y).Append(" | ")
-                .Append(msg.Scale.Z).Append("]").AppendLine();            
-            
+                .Append(msg.Scale.Z).Append("]").AppendLine();
+
             if (msg.Points.Length == 0)
             {
                 description.Append("Elements: Empty").AppendLine();
@@ -587,7 +585,7 @@ namespace Iviz.Controllers
             else
             {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
-            }            
+            }
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
@@ -788,7 +786,7 @@ namespace Iviz.Controllers
             resource = resourceGameObject.GetComponent<IDisplay>();
             if (resource != null)
             {
-                resource.Layer = LayerType.IgnoreRaycast;
+                Layer = LayerType.IgnoreRaycast;
                 resource.Name = gameObject.name;
                 return; // all OK
             }
@@ -896,9 +894,13 @@ namespace Iviz.Controllers
                     ConnectionManager.ServiceProvider,
                     tokenSource.Token);
             }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
             catch (Exception e)
             {
-                Logger.External($"{this}: LoadResourceAsync failed for '{uriString}'" + e);
+                Logger.Error($"{this}: LoadResourceAsync failed for '{uriString}'", e);
                 return;
             }
 
@@ -941,7 +943,7 @@ namespace Iviz.Controllers
                 case MarkerType.LineList:
                     return "LineList";
                 case MarkerType.MeshResource:
-                    return $"MeshResource";
+                    return "MeshResource";
                 case MarkerType.CubeList:
                     return "CubeList";
                 case MarkerType.SphereList:

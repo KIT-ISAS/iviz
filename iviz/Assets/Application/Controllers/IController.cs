@@ -24,7 +24,7 @@ namespace Iviz.Controllers
         /// </summary>
         /// <param name="configAsJson">The new configuration, encoded as JSON</param>
         /// <param name="fields">The fields in the configuration that are active.</param>
-        void UpdateConfiguration([NotNull] string configAsJson, [NotNull] IEnumerable<string> fields);
+        void UpdateConfiguration([NotNull] string configAsJson, [NotNull, ItemNotNull] IEnumerable<string> fields);
     }
 
     /// <summary>

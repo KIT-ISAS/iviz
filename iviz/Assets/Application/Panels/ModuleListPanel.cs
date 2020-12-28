@@ -182,7 +182,7 @@ namespace Iviz.App
             LoadSimpleConfiguration();
 
             Logger.Internal("<b>Welcome to iviz</b>");
-            Logger.External("Welcome to iviz! This is the log console.", LogLevel.Warn);
+            Logger.Info("Welcome to iviz! This is the log console.");
 
             CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
 

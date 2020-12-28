@@ -53,7 +53,7 @@ namespace Iviz.Ros
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
 
-            Logger.Internal($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
+            Logger.Info($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
 
             GameThread.EverySecond += UpdateStats;
         }
@@ -93,7 +93,7 @@ namespace Iviz.Ros
                 GameThread.ListenersEveryFrame -= CallHandlerDelayed;
             }
 
-            Logger.Internal($"Unsubscribing from {Topic}.");
+            Logger.Info($"Unsubscribing from {Topic}.");
             if (Subscribed)
             {
                 Connection.Unsubscribe(this);

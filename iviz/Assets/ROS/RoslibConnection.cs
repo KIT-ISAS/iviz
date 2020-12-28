@@ -423,9 +423,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            Core.Logger.External(
-                $"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.",
-                LogLevel.Info);
+            Core.Logger.Info($"Advertising service <b>{service}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
 
             var newAdvertisedService = new AdvertisedService<T>(service, callback);
 
@@ -680,7 +678,7 @@ namespace Iviz.Ros
             return cachedTopics;
         }
         
-        [NotNull]
+        [NotNull, ItemCanBeNull]
         public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs, CancellationToken token = default)
         {
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
@@ -704,7 +702,7 @@ namespace Iviz.Ros
             return await signal.WaitAsync(timeoutInMs, token) ? cachedTopics : null;
         }        
 
-        [NotNull]
+        [NotNull, ItemNotNull]
         public IEnumerable<string> GetSystemParameterList()
         {
             AddTask(async () =>
@@ -728,6 +726,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
+        [NotNull, ItemCanBeNull]
         public async Task<object> GetParameterAsync([NotNull] string parameter, int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)

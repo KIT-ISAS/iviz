@@ -158,9 +158,8 @@ namespace Iviz.App
                     case nameof(LaserScanConfiguration.FlipMinMax):
                         listener.FlipMinMax = config.FlipMinMax;
                         break;
-
                     default:
-                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Logger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

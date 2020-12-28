@@ -49,30 +49,30 @@ namespace Iviz.Core
         public static event Action<string> LogInternal;
         public static event ExternalLogDelegate LogExternal;
 
-        public static void Info(object t)
+        public static void Info([CanBeNull] object t)
         {
-            External(t.ToString(), LogLevel.Info);
+            External(t?.ToString(), LogLevel.Info);
         }
 
-        public static void Error(object t)
+        public static void Error([CanBeNull] object t)
         {
-            External(t.ToString(), LogLevel.Error);
+            External(t?.ToString(), LogLevel.Error);
         }
 
-        public static void Error(object t, Exception e, [CallerFilePath] string file = "",
+        public static void Error([CanBeNull] object t, Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            ExternalImpl(t.ToString(), e, file, line);
+            ExternalImpl(t?.ToString(), e, file, line);
         }
 
-        public static void Warn(object t)
+        public static void Warn([CanBeNull] object t)
         {
-            External(t.ToString(), LogLevel.Warn);
+            External(t?.ToString(), LogLevel.Warn);
         }
 
-        public static void Debug(object t)
+        public static void Debug([CanBeNull] object t)
         {
-            External(t.ToString());
+            External(t?.ToString(), LogLevel.Debug);
         }
 
         public static void Internal([CanBeNull] string msg)
@@ -118,7 +118,7 @@ namespace Iviz.Core
         }
 
 
-        public static void External([CanBeNull] string msg, LogLevel level = LogLevel.Debug,
+        static void External([CanBeNull] string msg, LogLevel level,
             [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
@@ -138,11 +138,13 @@ namespace Iviz.Core
             }
         }
 
+        /*
         public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
             ExternalImpl(msg, e, file, line);
         }
+        */
 
         static void ExternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, string file, int line)
         {

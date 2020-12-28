@@ -109,7 +109,7 @@ namespace Iviz.App
                         listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
                         break;
                     default:
-                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Logger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

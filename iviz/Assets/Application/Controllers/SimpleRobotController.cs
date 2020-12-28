@@ -46,6 +46,7 @@ namespace Iviz.Controllers
 
         RobotModel robot;
 
+        [CanBeNull]
         public RobotModel Robot
         {
             get => robot;
@@ -61,7 +62,7 @@ namespace Iviz.Controllers
             }
         }
 
-        GameObject RobotObject => Robot.BaseLinkObject;
+        [CanBeNull] GameObject RobotObject => Robot?.BaseLinkObject;
 
         public SimpleRobotConfiguration Config
         {
@@ -262,6 +263,11 @@ namespace Iviz.Controllers
 
         public bool TryWriteJoint([NotNull] string joint, float value)
         {
+            if (Robot == null)
+            {
+                throw new InvalidOperationException("There is no robot to set joints to!");
+            }
+            
             return Robot.TryWriteJoint(joint, value, out _);
         }
 
@@ -416,6 +422,11 @@ namespace Iviz.Controllers
 
         void DetachFromTf()
         {
+            if (Robot == null || RobotObject == null)
+            {
+                return;
+            }
+            
             foreach (var entry in Robot.LinkParents)
             {
                 if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
@@ -439,6 +450,11 @@ namespace Iviz.Controllers
 
         void AttachToTf()
         {
+            if (Robot == null || RobotObject == null)
+            {
+                return;
+            }
+
             RobotObject.transform.SetParentLocal(TfListener.MapFrame.transform);
             foreach (var entry in Robot.LinkObjects)
             {

@@ -35,7 +35,7 @@ namespace Iviz.App
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
-        LogLevel minLogLevel = LogLevel.Warn;
+        LogLevel minLogLevel = LogLevel.Info;
 
         public ConsoleDialogData()
         {

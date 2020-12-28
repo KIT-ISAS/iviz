@@ -171,9 +171,8 @@ namespace Iviz.App
                     case nameof(DepthCloudConfiguration.FovAngle):
                         controller.FovAngle = config.FovAngle;
                         break;
-
                     default:
-                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Logger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

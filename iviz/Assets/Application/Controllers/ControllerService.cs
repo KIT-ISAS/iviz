@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -111,12 +110,12 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    Logger.External($"Creating module of type {moduleType}");
+                    Logger.Info($"Creating module of type {moduleType}");
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    Logger.External("Done!");
+                    Logger.Info("Done!");
                 }
                 catch (Exception e)
                 {
@@ -259,13 +258,13 @@ namespace Iviz.Controllers
                 {
                     result.success = false;
                     result.message = $"EE Error parsing JSON config: {e.Message}";
-                    Logger.External("Error:", e);
+                    Logger.Error("Error:", e);
                 }
                 catch (Exception e)
                 {
                     result.success = false;
                     result.message = $"EE An exception was raised: {e.Message}";
-                    Logger.External("Error:", e);
+                    Logger.Error("Error:", e);
                 }
                 finally
                 {

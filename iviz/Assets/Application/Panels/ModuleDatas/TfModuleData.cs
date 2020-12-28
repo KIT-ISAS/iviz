@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -39,9 +40,9 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public void UpdateConfiguration(TfConfiguration configuration)
+        public void UpdateConfiguration([NotNull] TfConfiguration configuration)
         {
-            listener.Config = configuration;
+            listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public override void SetupPanel()
@@ -103,7 +104,7 @@ namespace Iviz.App
                         listener.KeepAllFrames = config.KeepAllFrames;
                         break;
                     default:
-                        Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Logger.Error($"{this}: Unknown field '{field}'");
                         break;                    
                 }
             }

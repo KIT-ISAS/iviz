@@ -36,7 +36,7 @@ namespace Iviz.Ros
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
 
-            Logger.Internal($"Advertising <b>{topic}</b> <i>[{Type}]</i>.");
+            Logger.Info($"Advertising <b>{topic}</b> <i>[{Type}]</i>.");
             GameThread.EverySecond += UpdateStats;
             Connection.Advertise(this);
         }
@@ -55,7 +55,7 @@ namespace Iviz.Ros
         public void Stop()
         {
             GameThread.EverySecond -= UpdateStats;
-            Logger.Internal($"Unadvertising {Topic}.");
+            Logger.Info($"Unadvertising {Topic}.");
             Connection.Unadvertise(this);
         }
 

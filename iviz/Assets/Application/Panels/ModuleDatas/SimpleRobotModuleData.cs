@@ -138,7 +138,7 @@ namespace Iviz.App
             };
             panel.Save.ValueChanged += f =>
             {
-                if (string.IsNullOrEmpty(Robot?.Robot?.Name) || string.IsNullOrEmpty(Robot.Robot.Description))
+                if (string.IsNullOrEmpty(Robot.Robot?.Name) || string.IsNullOrEmpty(Robot.Robot.Description))
                 {
                     return;
                 }
@@ -160,11 +160,14 @@ namespace Iviz.App
             panel.SourceParam.Hints = GetParameterHints();
         }
 
+        [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterCandidates() =>
             ConnectionManager.Connection.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
 
+        [NotNull, ItemNotNull]
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
 
+        [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterHints() => GetParameterCandidates();
 
         bool IsRobotSaved => Robot.Robot?.Name != null && Resource.ContainsRobot(Robot.Robot.Name);
