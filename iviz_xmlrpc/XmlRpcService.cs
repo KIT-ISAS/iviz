@@ -82,8 +82,8 @@ namespace Iviz.XmlRpc
             if (value == null)
             {
                 throw new ParseException("Expected child node but received null!");
-            }            
-            
+            }
+
             Assert(value.Name, "value");
             if (!value.HasChildNodes)
             {
@@ -253,26 +253,33 @@ namespace Iviz.XmlRpc
         public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
             IEnumerable<Arg> args, int timeoutInMs = 2000, CancellationToken token = default)
         {
-            if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
+            if (remoteUri is null)
+            {
+                throw new ArgumentNullException(nameof(remoteUri));
+            }
 
-            if (callerUri is null) { throw new ArgumentNullException(nameof(callerUri)); }
+            if (callerUri is null)
+            {
+                throw new ArgumentNullException(nameof(callerUri));
+            }
 
-            if (args is null) { throw new ArgumentNullException(nameof(args)); }
+            if (args is null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
 
             string outData = CreateRequest(method, args);
-
             string inData;
-            using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
+
+            using HttpRequest request = new HttpRequest(callerUri, remoteUri);
+            try
             {
-                try
-                {
-                    await request.StartAsync(timeoutInMs, token).Caf();
-                    inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
-                }
-                catch (Exception e)
-                {
-                    throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
-                }
+                await request.StartAsync(timeoutInMs, token).Caf();
+                inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
+            }
+            catch (Exception e)
+            {
+                throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
 
             return ProcessResponse(inData);
@@ -291,19 +298,33 @@ namespace Iviz.XmlRpc
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
             int timeoutInMs = 2000)
         {
-            if (remoteUri is null) { throw new ArgumentNullException(nameof(remoteUri)); }
+            if (remoteUri is null)
+            {
+                throw new ArgumentNullException(nameof(remoteUri));
+            }
 
-            if (callerUri is null) { throw new ArgumentNullException(nameof(callerUri)); }
+            if (callerUri is null)
+            {
+                throw new ArgumentNullException(nameof(callerUri));
+            }
 
-            if (args is null) { throw new ArgumentNullException(nameof(args)); }
+            if (args is null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
 
             string outData = CreateRequest(method, args);
-
             string inData;
-            using (HttpRequest request = new HttpRequest(callerUri, remoteUri))
+            
+            using HttpRequest request = new HttpRequest(callerUri, remoteUri);
+            try
             {
                 request.Start(timeoutInMs);
                 inData = request.Request(outData, timeoutInMs);
+            }
+            catch (Exception e)
+            {
+                throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
 
             return ProcessResponse(inData);
@@ -338,17 +359,8 @@ namespace Iviz.XmlRpc
 
             string inData = await httpContext.GetRequest(token: token).Caf();
 
-#if DEBUG__
-            Logger.Log("--- MethodResponse ---");
-            Logger.Log("<< " + inData);
-#endif
-
             try
             {
-#if DEBUG__
-                Logger.Log(">> " + buffer);
-                Logger.Log("--- End MethodResponse ---");
-#endif
                 var (methodName, args) = ParseResponseXml(inData);
 
                 if (!methods.TryGetValue(methodName, out var method))

@@ -31,7 +31,7 @@ namespace Iviz.Roslib
 
             keepGoing = true;
 
-            listener = new TcpListener(IPAddress.Any, 0);
+            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
             listener.Start();
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
@@ -46,7 +46,7 @@ namespace Iviz.Roslib
         public Uri Uri { get; }
         public string Service => serviceInfo.Service;
         public string ServiceType => serviceInfo.Type;
-        
+
 
         async Task RunLoop()
         {
@@ -97,7 +97,7 @@ namespace Iviz.Roslib
                 await request.StopAsync().Caf();
                 requests.Remove(request);
             });
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf(); 
+            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
         }
 
         public void Dispose()
@@ -120,11 +120,11 @@ namespace Iviz.Roslib
             disposed = true;
             keepGoing = false;
 
-            using (TcpClient client = new TcpClient())
+            using (TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
             {
                 await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
             }
-            
+
             listener.Stop();
             if (!await task.WaitFor(2000).Caf())
             {

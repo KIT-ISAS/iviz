@@ -60,10 +60,10 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPidResponse(response);
         }
 
-        public async Task<GetPidResponse> GetPidAsync()
+        public async Task<GetPidResponse> GetPidAsync(CancellationToken token = default)
         {
             Arg[] args = {CallerId};
-            object[]? response = await MethodCallAsync("getPid", args).Caf();
+            object[]? response = await MethodCallAsync("getPid", args, token).Caf();
             return new GetPidResponse(response);
         }
 

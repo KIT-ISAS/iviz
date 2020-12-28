@@ -128,7 +128,7 @@ namespace Iviz.RosMaster
             }
             catch (Exception e)
             {
-                Logger.LogError(e);
+                Logger.LogErrorFormat("{0}: {1}", this, e);
             }
         }
 
@@ -243,7 +243,7 @@ namespace Iviz.RosMaster
             }
             catch (Exception e)
             {
-                Logger.LogDebug(e);
+                Logger.LogFormat("{0}: {1}", this, e);
             }
         }
 
@@ -442,7 +442,7 @@ namespace Iviz.RosMaster
             var subscribers = subscribersByTopic.Select(
                 pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
             var providers = serviceProviders.Select(
-                pair => new Arg[] {pair.Key, new Arg(Yield(pair.Value))});
+                pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value})});
 
             return OkResponse(new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)});
         }
@@ -552,11 +552,6 @@ namespace Iviz.RosMaster
         static Arg[] SearchParam(object[] _)
         {
             return ErrorResponse("Not implemented yet");
-        }
-
-        static IEnumerable<T> Yield<T>(T element)
-        {
-            yield return element;
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,25 +20,12 @@ namespace Iviz.XmlRpc
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.uri = uri ?? throw new ArgumentNullException(nameof(uri));
-            client = new TcpClient();
+            client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
         }
 
         public void Start(int timeoutInMs = DefaultTimeoutInMs)
         {
-            string hostname = uri.Host;
-            int port = uri.Port;
-
-            Task task = client.ConnectAsync(hostname, port);
-            
-            if (!task.Wait(timeoutInMs) || !task.RanToCompletion())
-            {
-                if (task.IsFaulted)
-                {
-                    throw new IOException($"HttpRequest: Connection to {hostname}:{port} failed", task.Exception?.InnerException);
-                }
-
-                throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
-            }
+            Task.Run(async () => await StartAsync(timeoutInMs)).Wait();
         }
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
@@ -52,7 +38,7 @@ namespace Iviz.XmlRpc
             {
                 if (task.IsFaulted)
                 {
-                    throw new IOException($"HttpRequest: Connection to {hostname}:{port} failed", task.Exception?.InnerException);
+                    await task; // rethrow
                 }
 
                 throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
@@ -79,7 +65,7 @@ namespace Iviz.XmlRpc
             {
                 throw new IOException("Partner closed connection or returned empty response");
             }
-            
+
             int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
             if (index == -1)
             {
@@ -118,8 +104,9 @@ namespace Iviz.XmlRpc
 
             return ProcessResponse(response);
         }
-        
-        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
+
+        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs,
+            CancellationToken token = default)
         {
             string response;
             using (Stream stream = client.GetStream())
@@ -149,6 +136,7 @@ namespace Iviz.XmlRpc
         }
 
         bool disposed;
+
         public void Dispose()
         {
             if (disposed)
@@ -157,7 +145,7 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
-            client.Close();
+            client?.Close();
         }
     }
 }

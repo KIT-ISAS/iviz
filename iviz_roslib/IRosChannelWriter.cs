@@ -16,7 +16,7 @@ namespace Iviz.Roslib
         public void Write(IMessage msg);
         public void WriteAll(IEnumerable<IMessage> msgs);
 #if !NETSTANDARD2_0
-        public ValueTask WriteAllAsync(IAsyncEnumerable<IMessage> msgs);
+        public ValueTask WriteAllAsync(IAsyncEnumerable<IMessage> msgs, RosPublishPolicy policy = RosPublishPolicy.DoNotWait);
 #endif
     }
 }

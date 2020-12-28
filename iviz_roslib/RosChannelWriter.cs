@@ -11,13 +11,16 @@ namespace Iviz.Roslib
         IRosPublisher<T>? publisher;
         string? publisherId;
         bool disposed;
-
+        bool latchingEnabled;
+        bool forceTcpNoDelay;
+        
         public IRosPublisher<T> Publisher =>
-            publisher ?? throw new InvalidOperationException("Channel has not been started!");
+            publisher ?? throw new InvalidOperationException("Publisher has not been started!");
+
+        public bool IsAlive => publisher != null && !disposed;
 
         IRosPublisher IRosChannelWriter.Publisher => Publisher;
 
-        bool latchingEnabled;
         public bool LatchingEnabled
         {
             get => latchingEnabled;
@@ -31,7 +34,6 @@ namespace Iviz.Roslib
             }
         }
 
-        bool forceTcpNoDelay;
         public bool ForceTcpNoDelay
         {
             get => forceTcpNoDelay;
@@ -46,17 +48,17 @@ namespace Iviz.Roslib
         }
 
         public string Topic => Publisher.Topic;
-        
+
         public RosChannelWriter()
         {
         }
 
-        public RosChannelWriter(IRosClient client, string topic, bool requestNoDelay = false)
+        public RosChannelWriter(IRosClient client, string topic, bool requestNoDelay = true)
         {
             Start(client, topic, requestNoDelay);
         }
 
-        public void Start(IRosClient client, string topic, bool requestNoDelay = false)
+        public void Start(IRosClient client, string topic, bool requestNoDelay = true)
         {
             if (client == null)
             {
@@ -85,9 +87,9 @@ namespace Iviz.Roslib
             Publisher.Publish(msg);
         }
 
-        public async Task WriteAsync(T msg)
+        public async Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait)
         {
-            await Publisher.PublishAsync(msg);
+            await Publisher.PublishAsync(msg, policy);
         }
 
         void IRosChannelWriter.Write(IMessage msg)
@@ -122,7 +124,8 @@ namespace Iviz.Roslib
         }
 
 #if !NETSTANDARD2_0
-        public async ValueTask WriteAllAsync(IAsyncEnumerable<T> messages)
+        public async ValueTask WriteAllAsync(IAsyncEnumerable<T> messages, RosPublishPolicy policy =
+ RosPublishPolicy.DoNotWait)
         {
             if (messages == null)
             {
@@ -131,11 +134,11 @@ namespace Iviz.Roslib
             
             await foreach (T msg in messages)
             {
-                await Publisher.PublishAsync(msg);
+                await Publisher.PublishAsync(msg, policy);
             }
         }
 
-        async ValueTask IRosChannelWriter.WriteAllAsync(IAsyncEnumerable<IMessage> msgs)
+        async ValueTask IRosChannelWriter.WriteAllAsync(IAsyncEnumerable<IMessage> msgs, RosPublishPolicy policy)
         {
             if (msgs == null)
             {
@@ -144,7 +147,7 @@ namespace Iviz.Roslib
             
             await foreach (IMessage msg in msgs)
             {
-                await Publisher.PublishAsync(msg);
+                await Publisher.PublishAsync(msg, policy);
             }
         }
 #endif
@@ -184,7 +187,7 @@ namespace Iviz.Roslib
                 Logger.Log($"{this}: {e}");
             }
         }
-        
+
         public async Task DisposeAsync()
         {
             if (disposed)
@@ -207,7 +210,7 @@ namespace Iviz.Roslib
             {
                 Logger.Log($"{this}: {e}");
             }
-        }        
+        }
 
 #if !NETSTANDARD2_0
         async ValueTask IAsyncDisposable.DisposeAsync()

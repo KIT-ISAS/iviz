@@ -83,8 +83,7 @@ namespace Iviz.Roslib.Actionlib
             resultSubscriber!.Dispose();
         }
 
-#if !NETSTANDARD2_0
-        public async ValueTask DisposeAsync()
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -103,6 +102,12 @@ namespace Iviz.Roslib.Actionlib
             await cancelPublisher!.UnadvertiseAsync(cancelPublisherId!);
             await feedbackSubscriber!.DisposeAsync();
             await resultSubscriber!.DisposeAsync();
+        }
+
+#if !NETSTANDARD2_0
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            await DisposeAsync();
         }
 #endif
 
@@ -144,7 +149,7 @@ namespace Iviz.Roslib.Actionlib
 
             goalPublisherId = client.Advertise($"/{newActionName}/goal", out goalPublisher);
             goalPublisher.LatchingEnabled = true;
-            
+
             cancelPublisherId = client.Advertise($"/{newActionName}/cancel", out cancelPublisher);
             feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
             resultSubscriber = new RosChannelReader<TAResult>(client, $"/{newActionName}/result");
@@ -174,7 +179,7 @@ namespace Iviz.Roslib.Actionlib
         }
 
         // ---------------------------------------------------------------------------
-        
+
         void ProcessGoalStatus(RosGoalStatus status)
         {
             switch (State)
@@ -311,7 +316,7 @@ namespace Iviz.Roslib.Actionlib
         }
 
         #region WaitForServer
-        
+
         public bool WaitForServer(int timeInMs)
         {
             using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
@@ -382,7 +387,7 @@ namespace Iviz.Roslib.Actionlib
 
 
         #region WaitForResult
-        
+
         public bool WaitForResult(int timeInMs)
         {
             using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
@@ -414,7 +419,7 @@ namespace Iviz.Roslib.Actionlib
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
-            
+
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
@@ -480,7 +485,7 @@ namespace Iviz.Roslib.Actionlib
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
-            
+
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
@@ -541,7 +546,7 @@ namespace Iviz.Roslib.Actionlib
         {
             return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>(client, actionName);
         }
-        
+
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
             (

@@ -105,7 +105,7 @@ namespace Iviz.Roslib
             TcpSenderAsync<TMessage> newSender = new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching);
 
             Endpoint endPoint;
-            using (SemaphoreSlim managerSignal = new SemaphoreSlim(0, 1))
+            using (SemaphoreSlim managerSignal = new SemaphoreSlim(0))
             {
                 endPoint = newSender.Start(TimeoutInMs, managerSignal);
 
@@ -181,17 +181,17 @@ namespace Iviz.Roslib
                 pair.Value.Publish(msg);
             }
         }
-
-        public async Task PublishAsync(TMessage msg)
+        
+        public async Task PublishAndWaitAsync(TMessage msg, CancellationToken token)
         {
             if (Latching)
             {
                 hasLatchedMessage = true;
                 latchedMessage = msg;
             }
-
-            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAsync(msg))).AwaitNoThrow(this);
-        }
+            
+            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAndWaitAsync(msg, token))).AwaitNoThrow(this);
+        }        
 
         public void Stop()
         {

@@ -154,5 +154,19 @@ namespace Iviz.Roslib
         }
     }    
     
+    public class RosQueueOverflowException : RoslibException
+    {
+        public RosQueueOverflowException(string message) : base(message)
+        {
+        }
+
+        public RosQueueOverflowException()
+        {
+        }
+
+        public RosQueueOverflowException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }    
     
 }

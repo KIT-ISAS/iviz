@@ -13,13 +13,13 @@ namespace Iviz.Roslib
 {
     internal sealed class ServiceCallerAsync<T> : IServiceCaller where T : IService
     {
+        const int DefaultTimeoutInMs = 5000;
         const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
 
         readonly bool requestNoDelay;
         readonly ServiceInfo<T> serviceInfo;
-        readonly NetworkStream stream;
-        readonly TcpClient tcpClient = new TcpClient();
+        readonly TcpClient tcpClient;
 
         bool disposed;
 
@@ -29,19 +29,17 @@ namespace Iviz.Roslib
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
 
-        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, Uri remoteUri, bool requestNoDelay)
+        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, bool requestNoDelay)
         {
             this.serviceInfo = serviceInfo;
             this.requestNoDelay = requestNoDelay;
 
-            string remoteHostname = remoteUri.Host;
-            int remotePort = remoteUri.Port;
-
-            tcpClient.ReceiveTimeout = 5000;
-            tcpClient.SendTimeout = 5000;
-
-            tcpClient.Connect(remoteHostname, remotePort);
-            stream = tcpClient.GetStream();
+            tcpClient = new TcpClient(AddressFamily.InterNetworkV6)
+            {
+                Client = {DualMode = true}, 
+                ReceiveTimeout = DefaultTimeoutInMs, 
+                SendTimeout = DefaultTimeoutInMs
+            };
         }
 
         public void Dispose()
@@ -52,11 +50,10 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            stream.Dispose();
             tcpClient.Dispose();
         }
 
-        async Task SendHeaderAsync(bool persistent, CancellationToken token)
+        async Task SendHeaderAsync(NetworkStream stream, bool persistent, CancellationToken token)
         {
             string[] contents =
             {
@@ -71,11 +68,11 @@ namespace Iviz.Roslib
             await Utils.WriteHeaderAsync(stream, contents, token).Caf();
         }
 
-        async Task ProcessHandshake(bool persistent, CancellationToken token)
+        async Task ProcessHandshake(NetworkStream stream, bool persistent, CancellationToken token)
         {
-            await SendHeaderAsync(persistent, token).Caf();
+            await SendHeaderAsync(stream, persistent, token).Caf();
 
-            int receivedLength = await ReceivePacketAsync(token).Caf();
+            int receivedLength = await ReceivePacketAsync(stream, token).Caf();
             if (receivedLength == -1)
             {
                 throw new IOException("Connection closed during handshake");
@@ -84,8 +81,6 @@ namespace Iviz.Roslib
             List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
-                tcpClient.Close();
-
                 int index = responses[0].IndexOf('=');
                 throw new RosRpcException(index != -1
                     ? $"Failed handshake: {responses[0].Substring(index + 1)}"
@@ -93,25 +88,31 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task StartAsync(bool persistent, CancellationToken token = default)
+        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token = default)
         {
-            await ProcessHandshake(persistent, token);
+            string remoteHostname = remoteUri.Host;
+            int remotePort = remoteUri.Port;
+            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort);
+            if (!await task.WaitFor(DefaultTimeoutInMs, token) || !task.RanToCompletion())
+            {
+                if (task.IsFaulted)
+                {
+                    await task; // rethrow
+                }
+
+                throw new TimeoutException($"{this}: Host {remoteHostname}:{remotePort} timed out");
+            }
+
+            await ProcessHandshake(tcpClient.GetStream(), persistent, token);
         }
 
-        public void Start(bool persistent)
+        public void Start(Uri remoteUri, bool persistent)
         {
             // just call the async version from sync
-            try
-            {
-                Task.Run(async () => { await StartAsync(persistent).Caf(); }).Wait();
-            }
-            catch (AggregateException e) when (e.InnerExceptions.Count == 1)
-            {
-                throw e.InnerExceptions[0];
-            }
+            Task.Run(async () => { await StartAsync(remoteUri, persistent).Caf(); }).WaitNoThrow(this);
         }
 
-        async Task<int> ReceivePacketAsync(CancellationToken token)
+        async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
         {
             if (!await stream.ReadChunkAsync(readBuffer, 4, token))
             {
@@ -164,6 +165,11 @@ namespace Iviz.Roslib
 
         async Task<bool> ExecuteImplAsync(T service, CancellationToken token)
         {
+            if (tcpClient == null)
+            {
+                throw new InvalidOperationException("Service caller has not been started!");
+            }
+            
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
             if (writeBuffer.Length < msgLength)
@@ -172,6 +178,8 @@ namespace Iviz.Roslib
             }
 
             uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
+
+            var stream = tcpClient.GetStream();
             await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4, token).Caf();
             await stream.WriteAsync(writeBuffer, 0, (int) sendLength, token).Caf();
 
@@ -183,7 +191,7 @@ namespace Iviz.Roslib
 
             byte statusByte = readBuffer[0];
 
-            int rcvLength = await ReceivePacketAsync(token);
+            int rcvLength = await ReceivePacketAsync(stream, token);
             if (rcvLength == -1)
             {
                 throw new IOException("Partner closed the connection");

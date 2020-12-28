@@ -108,7 +108,7 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             try
             {
                 await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();

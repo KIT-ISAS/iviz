@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -64,6 +65,8 @@ namespace Iviz.Roslib
 
         readonly ConcurrentDictionary<string, IServiceRequestManager> advertisedServicesByName =
             new ConcurrentDictionary<string, IServiceRequestManager>();
+
+        readonly string namespacePrefix;
 
         public delegate void ShutdownActionCall(
             string callerId, string reason,
@@ -191,8 +194,9 @@ namespace Iviz.Roslib
         /// Other clients will use this address to connect to this node.
         /// Leave empty to generate one automatically. </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+        /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
         public RosClient(Uri? masterUri = null, string? callerId = null, Uri? callerUri = null,
-            bool ensureCleanSlate = true)
+            bool ensureCleanSlate = true, string? namespaceOverride = null)
         {
             masterUri ??= EnvironmentMasterUri;
 
@@ -214,9 +218,20 @@ namespace Iviz.Roslib
                 throw new ArgumentException("URI scheme must be http", nameof(callerUri));
             }
 
-            callerId ??= CreateCallerId();
+            if (string.IsNullOrWhiteSpace(callerId))
+            {
+                callerId = CreateCallerId();
+            }
 
-            if (!IsValidGlobalResourceName(callerId))
+            string? ns = namespaceOverride ?? EnvironmentRosNamespace;
+            namespacePrefix = ns == null ? "/" : $"/{ns}/";
+
+            if (callerId![0] != '/')
+            {
+                callerId = $"{namespacePrefix}{callerId}";
+            }
+
+            if (!IsValidResourceName(callerId))
             {
                 throw new ArgumentException($"Caller id '{callerId}' is not a valid global ROS resource name");
             }
@@ -256,29 +271,6 @@ namespace Iviz.Roslib
 
             // Start the XmlRpc server.
             listener.Start();
-
-            /*
-            NodeClient.GetPidResponse response;
-            try
-            {
-                response = CreateTalker(CallerUri).GetPid();
-            }
-            catch (Exception e)
-            {
-                listener.Dispose();
-                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
-            }
-
-            if (!response.IsValid)
-            {
-                Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
-            }
-            else if (response.Pid != Process.GetCurrentProcess().Id)
-            {
-                listener.Dispose();
-                throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
-            }
-            */
 
             Logger.LogFormat("{0}: Initialized.", this);
 
@@ -323,7 +315,7 @@ namespace Iviz.Roslib
         public static string CreateCallerId()
         {
             string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
-            return $"/iviz_{seed.GetDeterministicHashCode():x8}";
+            return $"iviz_{seed.GetDeterministicHashCode():x8}";
         }
 
         /// <summary>
@@ -443,10 +435,25 @@ namespace Iviz.Roslib
             }
         }
 
+        static string? EnvironmentRosNamespace
+        {
+            get
+            {
+                string? ns = Environment.GetEnvironmentVariable("ROS_NAMESPACE");
+                if (string.IsNullOrEmpty(ns))
+                {
+                    return null;
+                }
+
+                return !IsValidResourceName(ns) ? null : ns;
+            }
+        }
+
+
         /// <summary>
         /// Checks if the given name is a valid ROS resource name
         /// </summary>  
-        public static bool IsValidResourceName(string name)
+        public static bool IsValidResourceName(string? name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -455,7 +462,7 @@ namespace Iviz.Roslib
 
             static bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 
-            if (!IsAlpha(name[0]) && name[0] != '/' && name[0] != '~')
+            if (!IsAlpha(name![0]) && name[0] != '/' && name[0] != '~')
             {
                 return false;
             }
@@ -469,14 +476,6 @@ namespace Iviz.Roslib
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Checks if the given name is a valid global ROS resource name
-        /// </summary>         
-        public static bool IsValidGlobalResourceName(string name)
-        {
-            return IsValidResourceName(name) && name[0] == '/';
         }
 
         /// <summary>
@@ -511,13 +510,14 @@ namespace Iviz.Roslib
             }
         }
 
+
         /// <summary>
         /// Asks the master which topics we advertise and are subscribed to, and removes them.
         /// If you are interested in the async version, make sure to set ensureCleanSlate to false in the constructor.
         /// </summary>
-        public async Task EnsureCleanSlateAsync()
+        public async Task EnsureCleanSlateAsync(CancellationToken token = default)
         {
-            SystemState state = await GetSystemStateAsync().Caf();
+            SystemState state = await GetSystemStateAsync(token).Caf();
             List<Task> tasks = new List<Task>();
             tasks.AddRange(
                 state.Subscribers
@@ -541,6 +541,50 @@ namespace Iviz.Roslib
             }
         }
 
+        public void CheckOwnUri()
+        {
+            NodeClient.GetPidResponse response;
+            try
+            {
+                response = CreateTalker(CallerUri).GetPid();
+            }
+            catch (Exception e)
+            {
+                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
+            }
+
+            if (!response.IsValid)
+            {
+                Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
+            }
+            else if (response.Pid != Process.GetCurrentProcess().Id)
+            {
+                throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
+            }
+        }
+
+        public async Task CheckOwnUriAsync(CancellationToken token = default)
+        {
+            NodeClient.GetPidResponse response;
+            try
+            {
+                response = await CreateTalker(CallerUri).GetPidAsync(token);
+            }
+            catch (Exception e)
+            {
+                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
+            }
+
+            if (!response.IsValid)
+            {
+                Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
+            }
+            else if (response.Pid != Process.GetCurrentProcess().Id)
+            {
+                throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
+            }
+        }
+
         internal NodeClient CreateTalker(Uri otherUri)
         {
             return new NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
@@ -550,11 +594,6 @@ namespace Iviz.Roslib
             CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback)
             where T : IMessage, IDeserializable<T>, new()
         {
-            if (!IsValidResourceName(topic))
-            {
-                throw new ArgumentException($"'{topic}' is not a valid resource name");
-            }
-
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
@@ -579,11 +618,6 @@ namespace Iviz.Roslib
             CreateSubscriberAsync<T>(string topic, bool requestNoDelay, Action<T> firstCallback)
             where T : IMessage, IDeserializable<T>, new()
         {
-            if (!IsValidResourceName(topic))
-            {
-                throw new ArgumentException($"'{topic}' is not a valid resource name");
-            }
-
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
@@ -634,20 +668,16 @@ namespace Iviz.Roslib
             bool requestNoDelay = true)
             where T : IMessage, IDeserializable<T>, new()
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
+            string resolvedTopic = ResolveResourceName(topic);
+            if (!TryGetSubscriber(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
                 string id;
-                (id, subscriber) = CreateSubscriber(topic, requestNoDelay, callback);
+                (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback);
                 return id;
             }
 
@@ -679,11 +709,6 @@ namespace Iviz.Roslib
         public string Subscribe(string topic, Action<IMessage> callback, Type msgType, out IRosSubscriber subscriber,
             bool requestNoDelay = false)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
@@ -694,7 +719,8 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(msgType));
             }
 
-            if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
+            string resolvedTopic = ResolveResourceName(topic);
+            if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
                 MethodInfo? baseMethod = GetType().GetMethod(nameof(CreateSubscriber), flags);
@@ -705,7 +731,7 @@ namespace Iviz.Roslib
                 }
 
                 object? subscriberObj = method.Invoke(this, flags, null,
-                    new object[] {topic, requestNoDelay}, BuiltIns.Culture);
+                    new object[] {resolvedTopic, requestNoDelay}, BuiltIns.Culture);
 
                 subscriber = (IRosSubscriber?) subscriberObj ??
                              throw new InvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
@@ -736,19 +762,15 @@ namespace Iviz.Roslib
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false)
             where T : IMessage, IDeserializable<T>, new()
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
             if (callback is null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (!TryGetSubscriber(topic, out IRosSubscriber baseSubscriber))
+            string resolvedTopic = ResolveResourceName(topic);
+            if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
-                return await CreateSubscriberAsync(topic, requestNoDelay, callback).Caf();
+                return await CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback).Caf();
             }
 
             var newSubscriber = baseSubscriber as RosSubscriber<T>;
@@ -815,12 +837,13 @@ namespace Iviz.Roslib
         /// <returns>Whether the subscriber was found.</returns>
         public bool TryGetSubscriber(string topic, out IRosSubscriber subscriber)
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            string resolvedTopic = ResolveResourceName(topic);
+            return TryGetSubscriberImpl(resolvedTopic, out subscriber);
+        }
 
-            return subscribersByTopic.TryGetValue(topic, out subscriber!);
+        bool TryGetSubscriberImpl(string resolvedTopic, out IRosSubscriber subscriber)
+        {
+            return subscribersByTopic.TryGetValue(resolvedTopic, out subscriber!);
         }
 
         /// <summary>
@@ -830,11 +853,6 @@ namespace Iviz.Roslib
         /// <returns></returns>
         public IRosSubscriber GetSubscriber(string topic)
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
             if (TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
                 return subscriber;
@@ -843,13 +861,23 @@ namespace Iviz.Roslib
             throw new KeyNotFoundException($"Cannot find subscriber for topic '{topic}'");
         }
 
-        RosPublisher<T> CreatePublisher<T>(string topic) where T : IMessage
+        string ResolveResourceName(string name)
         {
-            if (!IsValidResourceName(topic))
+            if (!IsValidResourceName(name))
             {
-                throw new ArgumentException($"'{topic}' is not a valid resource name");
+                throw new ArgumentException($"'{name}' is not a valid resource name");
             }
 
+            return name[0] switch
+            {
+                '/' => name,
+                '~' => $"{CallerId}/{name.Substring(1)}",
+                _ => $"{namespacePrefix}{name}"
+            };
+        }
+
+        RosPublisher<T> CreatePublisher<T>(string topic) where T : IMessage
+        {
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
             RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
                 {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
@@ -878,11 +906,6 @@ namespace Iviz.Roslib
 
         async Task<IRosPublisher> CreatePublisherAsync<T>(string topic) where T : IMessage
         {
-            if (!IsValidResourceName(topic))
-            {
-                throw new ArgumentException($"'{topic}' is not a valid resource name");
-            }
-
             TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
             RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
                 {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
@@ -921,14 +944,11 @@ namespace Iviz.Roslib
         /// <returns>A token that can be used to unadvertise from this publisher.</returns>
         public string Advertise<T>(string topic, out RosPublisher<T> publisher) where T : IMessage
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            string resolvedTopic = ResolveResourceName(topic);
 
-            if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
+            if (!TryGetPublisher(resolvedTopic, out IRosPublisher basePublisher))
             {
-                publisher = CreatePublisher<T>(topic);
+                publisher = CreatePublisher<T>(resolvedTopic);
             }
             else
             {
@@ -955,15 +975,12 @@ namespace Iviz.Roslib
         /// <returns>A pair containing a token that can be used to unadvertise from this publisher, and the publisher object.</returns>
         public async Task<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic) where T : IMessage
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            string resolvedTopic = ResolveResourceName(topic);
 
             RosPublisher<T> publisher;
             if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
             {
-                publisher = (RosPublisher<T>) await CreatePublisherAsync<T>(topic).Caf();
+                publisher = (RosPublisher<T>) await CreatePublisherAsync<T>(resolvedTopic).Caf();
             }
             else
             {
@@ -982,17 +999,14 @@ namespace Iviz.Roslib
 
         string IRosClient.Advertise(string topic, Type msgType, out IRosPublisher publisher)
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            string resolvedTopic = ResolveResourceName(topic);
 
             if (msgType is null)
             {
                 throw new ArgumentNullException(nameof(msgType));
             }
 
-            if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
+            if (!TryGetPublisher(resolvedTopic, out IRosPublisher basePublisher))
             {
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
                 MethodInfo? baseMethod = GetType().GetMethod(nameof(CreatePublisher), flags);
@@ -1002,7 +1016,7 @@ namespace Iviz.Roslib
                     throw new InvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
-                object? publisherObj = method.Invoke(this, flags, null, new object[] {topic}, BuiltIns.Culture);
+                object? publisherObj = method.Invoke(this, flags, null, new object[] {resolvedTopic}, BuiltIns.Culture);
                 publisher = (IRosPublisher?) publisherObj ??
                             throw new InvalidMessageTypeException("Failed to call 'CreatePublisher'!");
             }
@@ -1022,10 +1036,7 @@ namespace Iviz.Roslib
 
         async Task<(string id, IRosPublisher publisher)> IRosClient.AdvertiseAsync(string topic, Type msgType)
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            string resolvedTopic = ResolveResourceName(topic);
 
             if (msgType is null)
             {
@@ -1033,7 +1044,7 @@ namespace Iviz.Roslib
             }
 
             IRosPublisher publisher;
-            if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
+            if (!TryGetPublisher(resolvedTopic, out IRosPublisher basePublisher))
             {
                 const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
                 MethodInfo? baseMethod = GetType().GetMethod(nameof(CreatePublisherAsync), flags);
@@ -1043,7 +1054,7 @@ namespace Iviz.Roslib
                     throw new InvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
-                object? result = method.Invoke(this, flags, null, new object[] {topic}, BuiltIns.Culture);
+                object? result = method.Invoke(this, flags, null, new object[] {resolvedTopic}, BuiltIns.Culture);
                 if (result == null)
                 {
                     throw new InvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
@@ -1121,12 +1132,8 @@ namespace Iviz.Roslib
         /// <returns>Whether the publisher was found.</returns>
         public bool TryGetPublisher(string topic, out IRosPublisher publisher)
         {
-            if (topic is null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            return publishersByTopic.TryGetValue(topic, out publisher!);
+            string resolvedTopic = ResolveResourceName(topic);
+            return publishersByTopic.TryGetValue(resolvedTopic, out publisher!);
         }
 
         /// <summary>
@@ -1518,9 +1525,11 @@ namespace Iviz.Roslib
         public async Task WaitForServiceExistenceAsync(string serviceName, CancellationToken token = default,
             int pollingPeriodInMs = 100)
         {
+            string resolvedServiceName = ResolveResourceName(serviceName);
+
             while (true)
             {
-                var serviceResponse = await RosMasterApi.LookupServiceAsync(serviceName, token);
+                var serviceResponse = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token);
                 if (serviceResponse.IsValid)
                 {
                     break;
@@ -1540,10 +1549,12 @@ namespace Iviz.Roslib
         public async Task WaitForTopicExistenceAsync(string topicName, CancellationToken token = default,
             int pollingPeriodInMs = 100)
         {
+            string resolvedTopicName = ResolveResourceName(topicName);
+
             while (true)
             {
                 var systemState = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
-                if (systemState.IsValid && systemState.Topics.Any(tuple => tuple.name == topicName))
+                if (systemState.IsValid && systemState.Topics.Any(tuple => tuple.name == resolvedTopicName))
                 {
                     break;
                 }
@@ -1565,14 +1576,15 @@ namespace Iviz.Roslib
         public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService
         {
+            string resolvedServiceName = ResolveResourceName(serviceName);
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
 
-            if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
+            if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
+                        $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
                         "does not match the new given type.");
                 }
 
@@ -1581,54 +1593,54 @@ namespace Iviz.Roslib
                 {
                     if (!existingReceiver.Execute(service, timeoutTs.Token))
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
 
                     return;
                 }
 
                 existingReceiver.Dispose();
-                subscribedServicesByName.TryRemove(serviceName, out _);
+                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
             }
 
             // otherwise, create a new transient one
-            LookupServiceResponse response = RosMasterApi.LookupService(serviceName);
+            LookupServiceResponse response = RosMasterApi.LookupService(resolvedServiceName);
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service {serviceName}: {response.StatusMessage}");
+                throw new RosRpcException($"Failed to call service {resolvedServiceName}: {response.StatusMessage}");
             }
 
             Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
+            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
             try
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    serviceCaller.Start(persistent);
-                    subscribedServicesByName.TryAdd(serviceName, serviceCaller);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    serviceCaller.Start(serviceUri, persistent);
+                    subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     if (!serviceCaller.Execute(service, timeoutTs.Token))
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    serviceCaller.Start(persistent);
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    serviceCaller.Start(serviceUri, persistent);
                     if (!serviceCaller.Execute(service, timeoutTs.Token))
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Service call {serviceName} to uri '{serviceUri}' timed out");
+                throw new TimeoutException($"Service call {resolvedServiceName} to uri '{serviceUri}' timed out");
             }
             catch (Exception e)
             {
-                throw new RoslibException($"Service call {serviceName} to uri '{serviceUri}' failed", e);
+                throw new RoslibException($"Service call {resolvedServiceName} to uri '{serviceUri}' failed", e);
             }
         }
 
@@ -1664,16 +1676,17 @@ namespace Iviz.Roslib
         /// <param name="token">A cancellation token</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
-        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
-            CancellationToken token)
+        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent, CancellationToken token)
             where T : IService
         {
-            if (subscribedServicesByName.TryGetValue(serviceName, out var baseExistingReceiver))
+            string resolvedServiceName = ResolveResourceName(serviceName);
+
+            if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
                     throw new InvalidMessageTypeException(
-                        $"Existing connection of {serviceName} with service type {baseExistingReceiver.ServiceType} " +
+                        $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
                         "does not match the new given type.");
                 }
 
@@ -1682,44 +1695,44 @@ namespace Iviz.Roslib
                 {
                     if (!await existingReceiver.ExecuteAsync(service, token))
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
 
                     return;
                 }
 
                 existingReceiver.Dispose();
-                subscribedServicesByName.TryRemove(serviceName, out _);
+                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
             }
 
 
-            LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(serviceName, token).Caf();
+            LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token).Caf();
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service {serviceName}: {response.StatusMessage}");
+                throw new RosRpcException($"Failed to call service {resolvedServiceName}: {response.StatusMessage}");
             }
 
             Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName);
+            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
             try
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    await serviceCaller.StartAsync(persistent, token).Caf();
-                    subscribedServicesByName.TryAdd(serviceName, serviceCaller);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
+                    subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     if (!await serviceCaller.ExecuteAsync(service, token).Caf())
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, serviceUri, true);
-                    await serviceCaller.StartAsync(persistent, token).Caf();
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     if (!await serviceCaller.ExecuteAsync(service, token).Caf())
                     {
-                        throw new RosServiceCallFailed($"Service call to '{serviceName}' failed");
+                        throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
                 }
             }
@@ -1758,7 +1771,9 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         public bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
         {
-            if (ServiceAlreadyAdvertised<T>(serviceName))
+            string resolvedServiceName = ResolveResourceName(serviceName);
+
+            if (ServiceAlreadyAdvertised<T>(resolvedServiceName))
             {
                 return false;
             }
@@ -1769,18 +1784,18 @@ namespace Iviz.Roslib
                 await Task.CompletedTask;
             }
 
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName, new T());
+            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, Wrapper);
 
-            advertisedServicesByName.TryAdd(serviceName, advertisedService);
+            advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 
             try
             {
-                RosMasterApi.RegisterService(serviceName, advertisedService.Uri);
+                RosMasterApi.RegisterService(resolvedServiceName, advertisedService.Uri);
             }
             catch (Exception e)
             {
-                advertisedServicesByName.TryRemove(serviceName, out _);
+                advertisedServicesByName.TryRemove(resolvedServiceName, out _);
                 throw new RosRpcException("Failed to advertise service", e);
             }
 
@@ -1796,29 +1811,30 @@ namespace Iviz.Roslib
         public async Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback)
             where T : IService, new()
         {
-            //Logger.LogDebug("Entering advertise async...");
-            if (ServiceAlreadyAdvertised<T>(serviceName))
+            string resolvedServiceName = ResolveResourceName(serviceName);
+
+            if (ServiceAlreadyAdvertised<T>(resolvedServiceName))
             {
                 return false;
             }
 
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, serviceName, new T());
+            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
 
             //Logger.LogDebug("Creating request manager...");
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
             //Logger.LogDebug("Created request manager!");
 
-            advertisedServicesByName.TryAdd(serviceName, advertisedService);
+            advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 
             try
             {
                 //Logger.LogDebug("Calling register service...");
-                await RosMasterApi.RegisterServiceAsync(serviceName, advertisedService.Uri).Caf();
+                await RosMasterApi.RegisterServiceAsync(resolvedServiceName, advertisedService.Uri).Caf();
                 //Logger.LogDebug("Register service returned!");
             }
             catch (Exception e)
             {
-                advertisedServicesByName.TryRemove(serviceName, out _);
+                advertisedServicesByName.TryRemove(resolvedServiceName, out _);
                 throw new RosRpcException("Failed to advertise service", e);
             }
 
@@ -1833,15 +1849,17 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentException">Thrown if name is null</exception>
         public void UnadvertiseService(string name)
         {
-            if (!advertisedServicesByName.TryGetValue(name, out var advertisedService))
+            string resolvedServiceName = ResolveResourceName(name);
+
+            if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
             {
                 throw new ArgumentException("Service does not exist", nameof(name));
             }
 
-            advertisedServicesByName.TryRemove(name, out _);
+            advertisedServicesByName.TryRemove(resolvedServiceName, out _);
 
             advertisedService.Dispose();
-            RosMasterApi.UnregisterService(name, advertisedService.Uri);
+            RosMasterApi.UnregisterService(resolvedServiceName, advertisedService.Uri);
         }
 
         /// <summary>
@@ -1851,15 +1869,17 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentException">Thrown if name is null</exception>        
         public async Task UnadvertiseServiceAsync(string name)
         {
-            if (!advertisedServicesByName.TryGetValue(name, out var advertisedService))
+            string resolvedServiceName = ResolveResourceName(name);
+
+            if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
             {
                 throw new ArgumentException("Service does not exist", nameof(name));
             }
 
-            advertisedServicesByName.TryRemove(name, out _);
+            advertisedServicesByName.TryRemove(resolvedServiceName, out _);
 
             await advertisedService.DisposeAsync();
-            await RosMasterApi.UnregisterServiceAsync(name, advertisedService.Uri);
+            await RosMasterApi.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri);
         }
 
         public void Dispose()

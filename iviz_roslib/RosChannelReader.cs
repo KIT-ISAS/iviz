@@ -34,6 +34,8 @@ namespace Iviz.Roslib
 
         public string Topic => Subscriber.Topic;
 
+        public bool IsAlive => subscriber != null && !disposed;
+
         public RosChannelReader()
         {
         }

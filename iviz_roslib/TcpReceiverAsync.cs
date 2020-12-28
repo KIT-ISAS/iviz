@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -78,7 +75,8 @@ namespace Iviz.Roslib
 
             if (task != null)
             {
-                await task.WaitForWithTimeout(DisposeTimeoutInMs, "Receiver task dispose timed out.")
+                await task
+                    .WaitForWithTimeout(DisposeTimeoutInMs, "Receiver task dispose timed out.")
                     .AwaitNoThrow(this);
             }
 
@@ -95,7 +93,8 @@ namespace Iviz.Roslib
 
         async Task<TcpClient?> TryToConnect()
         {
-            TcpClient client = new TcpClient();
+            TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
+
             try
             {
 #if !NET5_0
@@ -126,7 +125,7 @@ namespace Iviz.Roslib
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
-                var client = await TryToConnect().Caf();
+                TcpClient? client = await TryToConnect().Caf();
                 if (client != null)
                 {
                     return client;
@@ -287,6 +286,52 @@ namespace Iviz.Roslib
         {
             await ProcessHandshake().Caf();
 
+            bool hasFixedSize = BuiltIns.TryGetFixedSize(typeof(T), out int fixedSize);
+
+            if (hasFixedSize)
+            {
+                await ProcessLoopFixed(fixedSize);
+            }
+            else
+            {
+                await ProcessLoopVariable();
+            }
+        }
+
+        async Task ProcessLoopFixed(int fixedSize)
+        {
+            int fixedSizeWithHeader = 4 + fixedSize;
+            if (readBuffer.Length < fixedSizeWithHeader)
+            {
+                readBuffer = new byte[fixedSizeWithHeader];
+            }
+
+            while (KeepRunning)
+            {
+                bool success = await stream!.ReadChunkAsync(readBuffer, fixedSizeWithHeader, runningTs.Token);
+                if (!success)
+                {
+                    Logger.LogDebugFormat("{0}: Partner closed connection", this);
+                    return;
+                }
+
+                int receivedSize = BitConverter.ToInt32(readBuffer, 0);
+                if (receivedSize != fixedSize)
+                {
+                    throw new RosInvalidPackageSizeException(
+                        $"Receiver expected packet with fixed size of {fixedSize} bytes, but got a packet of size {receivedSize}!");
+                }
+
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, fixedSize, 4);
+                manager.MessageCallback(message);
+                
+                numReceived++;
+                bytesReceived += fixedSizeWithHeader;
+            }
+        }
+
+        async Task ProcessLoopVariable()
+        {
             while (KeepRunning)
             {
                 int rcvLength = await ReceivePacket();
@@ -297,8 +342,8 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-
                 manager.MessageCallback(message);
+                
                 numReceived++;
                 bytesReceived += rcvLength + 4;
             }
@@ -306,8 +351,8 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return
-                $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} PartnerSocket={remoteEndpoint.Hostname}:{remoteEndpoint.Port}]";
+            return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
+                   $"PartnerSocket={remoteEndpoint.Hostname}:{remoteEndpoint.Port}]";
         }
     }
 }

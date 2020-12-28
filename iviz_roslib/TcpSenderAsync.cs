@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,8 +10,6 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -34,8 +29,8 @@ namespace Iviz.Roslib
         const int MaxSizeInPacketsWithoutConstraint = 2;
         const int MaxConnectionRetries = 3;
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
-        readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0);
+        readonly ConcurrentQueue<(T, SemaphoreSlim?)> messageQueue = new ConcurrentQueue<(T, SemaphoreSlim?)>();
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
@@ -118,7 +113,7 @@ namespace Iviz.Roslib
 
         public Endpoint Start(int timeoutInMs, SemaphoreSlim managerSignal)
         {
-            listener = new TcpListener(IPAddress.Any, 0);
+            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
             listener.Start();
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
@@ -276,7 +271,7 @@ namespace Iviz.Roslib
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
 
-                    TryRelease(managerSignal);
+                    managerSignal?.Release();
                     managerSignal = null;
 
                     if (!KeepRunning)
@@ -347,11 +342,11 @@ namespace Iviz.Roslib
         {
             await ProcessHandshake().Caf();
 
-            List<(T msg, int msgLength)> tmpQueue = new List<(T, int)>();
+            List<(T msg, int msgLength, SemaphoreSlim? signal)> tmpQueue = new List<(T, int, SemaphoreSlim?)>();
 
             if (BuiltIns.TryGetFixedSize(typeof(T), out int fixedSize))
             {
-                writeBuffer = new byte[4 + fixedSize];                
+                writeBuffer = new byte[4 + fixedSize];
             }
 
             while (KeepRunning)
@@ -376,6 +371,11 @@ namespace Iviz.Roslib
                 numDropped += startIndex;
                 bytesDropped += newBytesDropped;
 
+                for (int i = 0; i < startIndex; i++)
+                {
+                    tmpQueue[i].signal?.Dispose();
+                }
+
                 for (int i = startIndex; i < tmpQueue.Count; i++)
                 {
                     T message = tmpQueue[i].msg;
@@ -391,6 +391,7 @@ namespace Iviz.Roslib
 
                     numSent++;
                     bytesSent += (int) sendLength + 4;
+                    tmpQueue[i].signal?.Release();
                 }
             }
         }
@@ -403,68 +404,47 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Enqueue(message);
-            Signal();
+            messageQueue.Enqueue((message, null));
+            signal.Release();
         }
 
-        public Task PublishAsync(T message)
+        public async Task PublishAndWaitAsync(T message, CancellationToken token)
         {
             if (!IsAlive)
             {
                 numDropped++;
             }
-            else
-            {
-                messageQueue.Enqueue(message);
-                Signal();
-            }
 
-            return Task.CompletedTask; // TODO: implement policies!
-        }
-
-        void Signal()
-        {
-            if (signal.CurrentCount != 0)
-            {
-                return;
-            }
+            SemaphoreSlim msgSignal = new SemaphoreSlim(0);
+            messageQueue.Enqueue((message, msgSignal));
+            signal.Release();
 
             try
             {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
-        }
-
-        static void TryRelease(SemaphoreSlim? s)
-        {
-            try
-            {
-                s?.Release();
+                await msgSignal.WaitAsync(token);
             }
             catch (ObjectDisposedException)
             {
+                throw new RosQueueOverflowException($"Message could not be sent to node '{RemoteCallerId}'");
             }
         }
 
-        int ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength)> result)
+        int ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength, SemaphoreSlim? signal)> result)
         {
             int totalQueueSizeInBytes = 0;
 
             result.Clear();
-            while (messageQueue.TryDequeue(out T msg))
+            while (messageQueue.TryDequeue(out (T msg, SemaphoreSlim? signal) tuple))
             {
-                int msgLength = msg.RosMessageLength;
-                result.Add((msg, msgLength));
+                int msgLength = tuple.msg.RosMessageLength;
+                result.Add((tuple.msg, msgLength, tuple.signal));
                 totalQueueSizeInBytes += msgLength;
             }
 
             return totalQueueSizeInBytes;
         }
 
-        static void DiscardOldMessages(List<(T msg, int msgLength)> queue,
+        static void DiscardOldMessages(List<(T msg, int msgLength, SemaphoreSlim?)> queue,
             int totalQueueSizeInBytes, int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
         {
             int c = queue.Count - 1;

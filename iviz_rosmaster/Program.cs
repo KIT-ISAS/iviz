@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
@@ -29,12 +30,12 @@ namespace Iviz.RosMaster
                 masterUri = uri;
             }
             
-            Logger.Log = Console.WriteLine;
-            Logger.LogError = Console.Error.WriteLine;
+            //Logger.Log = Console.WriteLine;
+            //Logger.LogError = Console.Error.WriteLine;
             
-            masterUri ??= RosClient.TryGetCallerUri(RosMasterServer.DefaultPort);
+            masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
             using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);    
-            Console.WriteLine("** Iviz.RosMaster: Starting...");
+            Console.WriteLine($"** Iviz.RosMaster: Starting at uri {rosMasterServer.MasterUri} ...");
             rosMasterServer.AddKey("/rosdistro", "noetic");
             rosMasterServer.AddKey("/rosversion", "1.15.8");
             await rosMasterServer.Start();

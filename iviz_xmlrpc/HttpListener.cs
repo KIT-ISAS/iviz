@@ -24,18 +24,18 @@ namespace Iviz.XmlRpc
 
         bool started;
         bool disposed;
-        
+
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         bool KeepRunning => !runningTs.IsCancellationRequested;
-        
+
         /// <summary>
         /// Creates a new HTTP listener that listens on the given port.
         /// </summary>
         /// <param name="requestedPort">The port to listen on. Ports 0 and 80 are assumed to be 'any'.</param>
         public HttpListener(int requestedPort = AnyPort)
         {
-            listener = new TcpListener(IPAddress.Any,
-                requestedPort == DefaultHttpPort ? AnyPort : requestedPort);
+            listener = new TcpListener(IPAddress.IPv6Any, requestedPort == DefaultHttpPort ? AnyPort : requestedPort)
+                {Server = {DualMode = true}};
             listener.Start();
 
             IPEndPoint endpoint = (IPEndPoint) listener.LocalEndpoint;
@@ -64,7 +64,7 @@ namespace Iviz.XmlRpc
             }
 
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
-            using (TcpClient client = new TcpClient())
+            using (TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
             {
                 client.Connect(IPAddress.Loopback, LocalPort);
             }
@@ -134,8 +134,8 @@ namespace Iviz.XmlRpc
 
             Logger.LogDebugFormat("{0}: Leaving thread normally", this);
         }
-        
-        
+
+
         void AddToBackgroundTasks(Task task)
         {
             backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
@@ -169,7 +169,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: Got an exception while waiting: {1}", this, e);                
+                Logger.LogFormat("{0}: Got an exception while waiting: {1}", this, e);
             }
         }
 

@@ -5,6 +5,13 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
+    
+    public enum RosPublishPolicy
+    {
+        DoNotWait,
+        WaitUntilSent,
+    }
+    
     /// <summary>
     /// Interface for all ROS publishers.
     /// </summary>
@@ -49,8 +56,8 @@ namespace Iviz.Roslib
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
-        public Task PublishAsync(IMessage message);        
-
+        public Task PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);      
+        
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
         /// </summary>
@@ -113,7 +120,7 @@ namespace Iviz.Roslib
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage
     {
         public void Publish(T message);
-        public Task PublishAsync(T message);
+        public Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
     }
 
 }
