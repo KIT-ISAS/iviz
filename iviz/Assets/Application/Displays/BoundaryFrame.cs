@@ -33,13 +33,13 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            Color = new Color(0, 1, 0, 0.3f);
+            Color = Color.green.WithAlpha(0.3f);
             FrameAxisLength = 0.33f;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
 
             labelObject = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(transform);
-            labelObject.name = "Frame Axis Label";
+            labelObject.Name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.transform.SetParentLocal(transform);
 
@@ -67,10 +67,11 @@ namespace Iviz.Controllers
         }
 
 
-        string Name
+        [NotNull]
+        public string Name
         {
-            get => labelObjectText.text;
-            set => labelObjectText.text = value;
+            get => gameObject.name;
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public bool Visible

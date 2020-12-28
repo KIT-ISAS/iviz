@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -21,7 +22,7 @@ namespace Iviz.Ros
         [ItemNotNull] protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+        readonly SemaphoreSlim signal = new SemaphoreSlim(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
 
@@ -45,14 +46,7 @@ namespace Iviz.Ros
         {
             keepRunning = false;
             Signal();
-            try
-            {
-                task?.Wait();
-            }
-            catch (Exception e)
-            {
-                Logger.Debug(e);
-            }
+            task.WaitNoThrow(this);
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -79,13 +73,7 @@ namespace Iviz.Ros
 
         protected void Signal()
         {
-            try
-            {
-                signal.Release();
-            }
-            catch (SemaphoreFullException)
-            {
-            }
+            signal.Release();
         }
 
         async Task Run()
@@ -111,7 +99,7 @@ namespace Iviz.Ros
                         }
                         catch (Exception e)
                         {
-                            Msgs.Logger.LogErrorFormat("Unexpected error in RosConnection.Connect: {0}", e);
+                            Logger.Error("Unexpected error in RosConnection.Connect", e);
                             continue;
                         }
 
@@ -120,14 +108,7 @@ namespace Iviz.Ros
 
                     await signal.WaitAsync(TaskWaitTimeInMs);
 
-                    try
-                    {
-                        await ExecuteTasks();
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("Unexpected error in RosConnection.ExecuteTask: {0}", e);
-                    }
+                    await ExecuteTasks().AwaitNoThrow(this);
                 }
 
                 SetConnectionState(ConnectionState.Disconnected);
@@ -145,14 +126,7 @@ namespace Iviz.Ros
         {
             while (toDos.TryDequeue(out var action))
             {
-                try
-                {
-                    await action();
-                }
-                catch (Exception e)
-                {
-                    Msgs.Logger.LogErrorFormat("Exception in RosConnection task: {0}", e);
-                }
+                await action().AwaitNoThrow(this);
             }
         }
 
@@ -162,12 +136,16 @@ namespace Iviz.Ros
         {
             SetConnectionState(ConnectionState.Disconnected);
         }
+
+        public override string ToString()
+        {
+            return "[RosConnection]";
+        }
     }
 
     public enum RequestType
     {
         CachedOnly,
         CachedButRequestInBackground,
-        WaitForRequest
     }
 }

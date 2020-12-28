@@ -4,17 +4,14 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Core;
-using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.Tf;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
-using Object = System.Object;
+using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Transform = UnityEngine.Transform;
@@ -44,26 +41,13 @@ namespace Iviz.Controllers
         static uint tfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
+        readonly List<(TransformStamped frame, bool isStatic)> frameBuffer = new List<(TransformStamped, bool)>();
+        readonly List<(TransformStamped frame, bool isStatic)> frameList = new List<(TransformStamped, bool)>();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         readonly FrameNode keepAllListener;
         readonly FrameNode staticListener;
 
         string fixedFrameId;
-
-        [CanBeNull]
-        public static string FixedFrameId
-        {
-            get => Instance.fixedFrameId;
-            set
-            {
-                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? BaseFrameId : value;
-                Pose originPose =
-                    value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
-                        ? frame.WorldPose.Inverse()
-                        : Pose.identity;
-                OriginFrame.Transform.SetLocalPose(originPose);
-            }
-        }
 
         public TfListener([NotNull] IModuleData moduleData)
         {
@@ -104,6 +88,21 @@ namespace Iviz.Controllers
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
             GameThread.LateEveryFrame += LateUpdate;
+        }
+
+        [CanBeNull]
+        public static string FixedFrameId
+        {
+            get => Instance.fixedFrameId;
+            set
+            {
+                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? BaseFrameId : value;
+                Pose originPose =
+                    value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
+                        ? frame.WorldPose.Inverse()
+                        : Pose.identity;
+                OriginFrame.Transform.SetLocalPose(originPose);
+            }
         }
 
         public static TfListener Instance { get; private set; }
@@ -149,7 +148,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                foreach (var frame in frames.Values)
+                foreach (TfFrame frame in frames.Values)
                 {
                     frame.Visible = value;
                 }
@@ -162,7 +161,7 @@ namespace Iviz.Controllers
             set
             {
                 config.FrameLabelsVisible = value;
-                foreach (var frame in frames.Values)
+                foreach (TfFrame frame in frames.Values)
                 {
                     frame.LabelVisible = value;
                 }
@@ -175,7 +174,7 @@ namespace Iviz.Controllers
             set
             {
                 config.FrameSize = value;
-                foreach (var frame in frames.Values)
+                foreach (TfFrame frame in frames.Values)
                 {
                     frame.FrameSize = value;
                 }
@@ -188,7 +187,7 @@ namespace Iviz.Controllers
             set
             {
                 config.ParentConnectorVisible = value;
-                foreach (var frame in frames.Values)
+                foreach (TfFrame frame in frames.Values)
                 {
                     frame.ConnectorVisible = value;
                 }
@@ -203,7 +202,7 @@ namespace Iviz.Controllers
                 config.KeepAllFrames = value;
                 if (value)
                 {
-                    foreach (var frame in frames.Values)
+                    foreach (TfFrame frame in frames.Values)
                     {
                         frame.AddListener(keepAllListener);
                     }
@@ -213,7 +212,7 @@ namespace Iviz.Controllers
                     // here we remove unused frames
                     // we create a copy because this generally modifies the collection
                     var framesCopy = frames.Values.ToList();
-                    foreach (var frame in framesCopy)
+                    foreach (TfFrame frame in framesCopy)
                     {
                         frame.RemoveListener(keepAllListener);
                     }
@@ -228,14 +227,13 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<TFMessage>(DefaultTopic, SubscriptionHandler_v2) {MaxQueueSize = 200};
-            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, SubscriptionHandlerStatic)
-                {MaxQueueSize = 200};
+            Listener = new Listener<TFMessage>(DefaultTopic, SubscriptionHandlerNonStatic);
+            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, SubscriptionHandlerStatic);
         }
 
-        void ProcessMessages([NotNull] TransformStamped[] transforms, bool isStatic)
+        void ProcessMessages()
         {
-            foreach (var t in transforms)
+            foreach ((TransformStamped t, bool isStatic) in frameList)
             {
                 if (t.Transform.HasNaN() || t.ChildFrameId.Length == 0)
                 {
@@ -306,7 +304,7 @@ namespace Iviz.Controllers
             KeepAllFrames = false;
 
             var framesCopy = frames.Values.ToList();
-            foreach (var frame in framesCopy)
+            foreach (TfFrame frame in framesCopy)
             {
                 frame.RemoveListener(staticListener);
             }
@@ -341,9 +339,9 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(reqId));
             }
 
-            string frameId = (reqId.Length != 0 && reqId[0] == '/') ? reqId.Substring(1) : reqId;
+            string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
 
-            var frame = Instance.GetOrCreateFrameImpl(frameId);
+            TfFrame frame = Instance.GetOrCreateFrameImpl(frameId);
             if (frame.Id != frameId)
             {
                 // shouldn't happen!
@@ -361,7 +359,7 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame GetOrCreateFrameImpl([NotNull] string id)
         {
-            return TryGetFrameImpl(id, out var frame)
+            return TryGetFrameImpl(id, out TfFrame frame)
                 ? frame
                 : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
         }
@@ -369,7 +367,7 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
-            var frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
+            TfFrame frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
             frame.Name = "{" + id + "}";
             frame.Id = id;
             frame.Visible = config.Visible;
@@ -390,19 +388,42 @@ namespace Iviz.Controllers
             return frames.TryGetValue(id, out t);
         }
 
-        void SubscriptionHandler_v1([NotNull] tfMessage msg)
+        bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            ProcessMessages(msg.Transforms, false);
+            lock (frameBuffer)
+            {
+                foreach (TransformStamped ts in msg.Transforms)
+                {
+                    frameBuffer.Add((ts, false));
+                }
+            }
+
+            return true;
         }
 
-        void SubscriptionHandler_v2([NotNull] TFMessage msg)
+        bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            ProcessMessages(msg.Transforms, false);
+            lock (frameBuffer)
+            {
+                foreach (TransformStamped ts in msg.Transforms)
+                {
+                    frameBuffer.Add((ts, true));
+                }
+            }
+
+            return true;
         }
 
-        void SubscriptionHandlerStatic([NotNull] TFMessage msg)
+        void ProcessAll()
         {
-            ProcessMessages(msg.Transforms, true);
+            lock (frameBuffer)
+            {
+                frameList.AddRange(frameBuffer);
+                frameBuffer.Clear();
+            }
+
+            ProcessMessages();
+            frameList.Clear();
         }
 
         public void MarkAsDead([NotNull] TfFrame frame)
@@ -415,11 +436,13 @@ namespace Iviz.Controllers
             frames.Remove(frame.Id);
 
             frame.Stop();
-            UnityEngine.Object.Destroy(frame.gameObject);
+            Object.Destroy(frame.gameObject);
         }
 
         void LateUpdate()
         {
+            ProcessAll();
+
             if (FixedFrameId != null && TryGetFrameImpl(FixedFrameId, out TfFrame child))
             {
                 OriginFrame.Transform.SetLocalPose(child.WorldPose.Inverse());
@@ -441,13 +464,13 @@ namespace Iviz.Controllers
 
         public static Vector3 RelativePositionToOrigin(in Vector3 unityPosition)
         {
-            var originFrame = OriginFrame.Transform;
+            Transform originFrame = OriginFrame.Transform;
             return originFrame.InverseTransformPoint(unityPosition);
         }
 
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
-            var originFrame = OriginFrame.Transform;
+            Transform originFrame = OriginFrame.Transform;
             return new Pose(
                 originFrame.InverseTransformPoint(unityPose.position),
                 Quaternion.Inverse(originFrame.rotation) * unityPose.rotation
@@ -457,7 +480,7 @@ namespace Iviz.Controllers
         public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
             in Pose unityPose)
         {
-            var msg = new TFMessage
+            TFMessage msg = new TFMessage
             (
                 new[]
                 {

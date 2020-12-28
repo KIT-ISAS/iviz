@@ -352,7 +352,7 @@ namespace Iviz.Controllers
                 else
                 {
                     setupModeFrame.transform.localPosition = new Vector3(0, 0, 0.5f);
-                    setupModeFrame.Tint = new Color(1, 1, 1, 0.3f);
+                    setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
                     //hasSetupModePose = false;
                     ArSet.Visible = false;
                 }
@@ -373,7 +373,7 @@ namespace Iviz.Controllers
                 Ray ray = new Ray(origin, Vector3.down);
                 if (TryGetClosestPlane(ray, out ARRaycastHit hit))
                 {
-                    Pose pose = new Pose(hit.pose.position, WorldPose.rotation);
+                    Pose pose = WorldPose.WithPosition(hit.pose.position);
                     InitializeWorldAnchor();
                     SetWorldPose(pose, RootMover.Anchor);
                 }

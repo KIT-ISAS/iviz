@@ -131,8 +131,7 @@ namespace Iviz.Displays
             }
 
             float alpha = 1 - delta / PulseLength;
-            Color color = new Color(boundaryColor.r, boundaryColor.g, boundaryColor.b, alpha);
-            lines.Tint = color;
+            lines.Tint = boundaryColor.WithAlpha(alpha);
         }
 
         void OnDestroy()

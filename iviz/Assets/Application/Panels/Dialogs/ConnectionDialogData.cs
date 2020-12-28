@@ -17,7 +17,7 @@ namespace Iviz.App
         const int DefaultPort = 7613;
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         [NotNull] static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
-        [NotNull] static string DefaultMyId => "/iviz_" + UnityEngine.Application.platform.ToString().ToLower();
+        [NotNull] static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         [NotNull] readonly ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;
@@ -142,7 +142,7 @@ namespace Iviz.App
             };
             panel.MyId.EndEdit += text =>
             {
-                MyId = RosClient.IsValidGlobalResourceName(text) ? text : null;
+                MyId = RosClient.IsValidResourceName(text) ? text : null;
             };
             panel.RefreshMyId.Clicked += () =>
             {

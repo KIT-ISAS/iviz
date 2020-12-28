@@ -221,9 +221,9 @@ namespace Iviz.Controllers
             else
             {
                 Vector3 cameraPosition = Settings.MainCamera.transform.position;
-                var q1 = new Pose(cameraPosition, Quaternion.identity);
-                var q2 = new Pose(Vector3.zero, Quaternion.AngleAxis(velocityAngle.Value, Vector3.up));
-                var q3 = new Pose(-cameraPosition, Quaternion.identity);
+                var q1 = Pose.identity.WithPosition(cameraPosition);
+                var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(velocityAngle.Value, Vector3.up));
+                var q3 = Pose.identity.WithPosition(-cameraPosition);
                 SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
             }
         }
@@ -349,7 +349,7 @@ namespace Iviz.Controllers
         void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
         {
             WorldPosition = unityPosition;
-            UpdateWorldPose(new Pose(unityPosition, WorldPose.rotation), mover);
+            UpdateWorldPose(WorldPose.WithPosition(unityPosition), mover);
         }
 
         void SetWorldAngle(float angle, RootMover mover)

@@ -10,6 +10,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine.Rendering;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
@@ -22,9 +23,9 @@ namespace Iviz.Controllers
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Grid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
-        [DataMember] public SerializableColor GridColor { get; set; } = Color.white * 0.25f;
-        [DataMember] public SerializableColor InteriorColor { get; set; } = Color.white * 0.75f;
-        [DataMember] public float GridLineWidth { get; set; } = 0.01f;
+        [DataMember] public SerializableColor GridColor { get; set; } = GridController.DefaultColor * 0.25f;
+        [DataMember] public SerializableColor InteriorColor { get; set; } = GridController.DefaultColor;
+        [DataMember] public float GridLineWidth { get; set; } = 0.025f;
         [DataMember] public float GridCellSize { get; set; } = 1;
         [DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
@@ -37,7 +38,10 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        const int ProbeRefreshTimeInSec = 30;
+        //public static readonly Color DefaultColor = new Color(0.12f, 0.14f, 0.19f); 
+        public static readonly Color DefaultColor = (0.6f * Color.white).WithAlpha(1); 
+        
+        const int ProbeRefreshTimeInSec = 5;
 
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
@@ -61,9 +65,11 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 GridColor = value.GridColor;
                 InteriorColor = value.InteriorColor;
+                /*
                 GridLineWidth = value.GridLineWidth;
                 GridCellSize = value.GridCellSize;
                 NumberOfGridCells = value.NumberOfGridCells;
+                */
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
@@ -127,6 +133,7 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         public float GridLineWidth
         {
             get => config.GridLineWidth;
@@ -137,7 +144,9 @@ namespace Iviz.Controllers
                 UpdateMesh();
             }
         }
+        */
 
+        /*
         public float GridCellSize
         {
             get => config.GridCellSize;
@@ -148,7 +157,9 @@ namespace Iviz.Controllers
                 UpdateMesh();
             }
         }
+        */
 
+        /*
         public int NumberOfGridCells
         {
             get => config.NumberOfGridCells;
@@ -159,6 +170,7 @@ namespace Iviz.Controllers
                 UpdateMesh();
             }
         }
+        */
 
         public bool InteriorVisible
         {
@@ -259,9 +271,10 @@ namespace Iviz.Controllers
 
             reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
 
-            reflectionProbe.mode = UnityEngine.Rendering.ReflectionProbeMode.Realtime;
-            reflectionProbe.refreshMode = UnityEngine.Rendering.ReflectionProbeRefreshMode.ViaScripting;
-            reflectionProbe.clearFlags = UnityEngine.Rendering.ReflectionProbeClearFlags.SolidColor;
+            reflectionProbe.mode = ReflectionProbeMode.Realtime;
+            reflectionProbe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
+            reflectionProbe.refreshMode = ReflectionProbeRefreshMode.ViaScripting;
+            reflectionProbe.clearFlags = ReflectionProbeClearFlags.SolidColor;
             UpdateMesh();
 
             GameThread.EverySecond += CheckProbeUpdate;
@@ -285,7 +298,10 @@ namespace Iviz.Controllers
 
         void UpdateMesh()
         {
-            float totalSize = NumberOfGridCells * GridCellSize;
+            const int numberOfGridCells = 90;
+            const float gridCellSize = 1;
+            
+            float totalSize = numberOfGridCells * gridCellSize;
             reflectionProbe.size = new Vector3(totalSize * 2, 4.05f, totalSize * 2);
             reflectionProbe.RenderProbe();
         }
@@ -310,14 +326,19 @@ namespace Iviz.Controllers
         }
 
 
-        int ticks = 0;
+        int ticks;
 
         void CheckProbeUpdate()
         {
             ticks++;
             if (ticks == ProbeRefreshTimeInSec)
             {
-                reflectionProbe?.RenderProbe();
+                if (reflectionProbe != null)
+                {
+                    reflectionProbe.backgroundColor = GuiInputModule.Instance.BackgroundColor;
+                    reflectionProbe.RenderProbe();
+                }
+
                 ticks = 0;
             }
         }

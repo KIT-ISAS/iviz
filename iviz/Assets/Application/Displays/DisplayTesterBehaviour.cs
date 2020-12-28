@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.IO;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -12,12 +14,17 @@ namespace Iviz.App
 
         async void OnEnable()
         {
+            
+            Texture2D texture = GenerateSquareTexture();
+            byte[] png = texture.EncodeToPNG();
+            File.WriteAllBytes("Assets/Core/Textures/grid.png", png);
+            
+            /*
             var uri = "package://e2_urdf_model/meshes/chassis.dae";
             Info<GameObject> info = await
                 Resource.External.TryGetGameObjectAsync(uri, ConnectionManager.Connection, default);
             info.Instantiate();
-
-
+            */
 
             /*
             Matrix4x4 f = new Matrix4x4();
@@ -46,6 +53,49 @@ namespace Iviz.App
             CreateMeshListResource(10);
             */
         }
+        
+        static Texture2D GenerateSquareTexture()
+        {
+            const int size = 128;
+            const int border = 2;
+            Color32 white = Color.white;
+            Color32 black = new Color(0.25f, 0.25f, 0.25f, 1);
+
+            Color32[] colors = new Color32[size * size];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = white;
+            }
+
+            for (int v = 0; v < size; v++)
+            {
+                for (int i = 0; i < border; i++)
+                {
+                    colors[v * size + i] = black;
+                    colors[(v + 1) * size - 1 - i] = black;
+                }
+            }
+
+            for (int i = 0; i < size * border; i++)
+            {
+                colors[i] = black;
+            }
+
+            for (int i = size * (size - border); i < size * size; i++)
+            {
+                colors[i] = black;
+            }
+
+            Texture2D texture = new Texture2D(size, size);
+            texture.SetPixels32(colors);
+            texture.Apply();
+            return texture;
+
+
+            //Texture2D texture = GenerateTexture();
+            //byte[] png = texture.EncodeToPNG();
+            //File.WriteAllBytes("square.png", png);
+        }        
 
         static void CreateMeshListResource(float z)
         {
@@ -168,7 +218,7 @@ namespace Iviz.App
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
-                        new Vector3(i, 0, z + 2), new Color(1, 0, 0, 0.25f),
+                        new Vector3(i, 0, z + 2), Color.red.WithAlpha(0.25f),
                         new Vector3(i + 1, 1, z + 2), Color.green
                     ));
                 }
@@ -188,7 +238,7 @@ namespace Iviz.App
                 }
 
                 resource.UseColormap = true;
-                resource.Tint = new Color(1, 1, 1, 0.25f);
+                resource.Tint = Color.white.WithAlpha(0.25f);
                 resource.Colormap = Resource.ColormapId.hsv;
                 resource.Set(lines);
             }

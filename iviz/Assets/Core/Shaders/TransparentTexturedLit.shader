@@ -21,13 +21,12 @@
             float2 uv_MainTex;
         };
 
-        float _Smoothness;
-        float _Metallic;
-
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
         UNITY_DEFINE_INSTANCED_PROP(float4, _MainTex_ST_)
         UNITY_DEFINE_INSTANCED_PROP(fixed4, _EmissiveColor)
+		UNITY_DEFINE_INSTANCED_PROP(half, _Metallic)
+		UNITY_DEFINE_INSTANCED_PROP(half, _Smoothness)
         UNITY_INSTANCING_BUFFER_END(Props)
 
         void surf(Input IN, inout SurfaceOutputStandard o) {
@@ -35,9 +34,9 @@
             float4 st = UNITY_ACCESS_INSTANCED_PROP(Props, _MainTex_ST_);
             fixed4 textureColor = tex2D(_MainTex, IN.uv_MainTex * st.xy + st.zw);
             o.Albedo = albedoColor.rgb * textureColor.rgb;
-            o.Smoothness = _Smoothness;
             o.Alpha = albedoColor.a * textureColor.a;
-            o.Metallic = _Metallic;
+			o.Metallic = UNITY_ACCESS_INSTANCED_PROP(Props, _Metallic);
+			o.Smoothness = UNITY_ACCESS_INSTANCED_PROP(Props, _Smoothness);
             o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
         }
         ENDCG

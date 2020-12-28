@@ -129,6 +129,30 @@ namespace Iviz.Controllers
                 }
             }
         }
+        
+        public float Metallic
+        {
+            get => resource is ISupportsPbr r ? r.Metallic : 0;
+            set
+            {
+                if (resource is ISupportsPbr pbrResource)
+                {
+                    pbrResource.Metallic = value;
+                }
+            }
+        }   
+        
+        public float Smoothness
+        {
+            get => resource is ISupportsPbr r ? r.Smoothness : 0;
+            set
+            {
+                if (resource is ISupportsPbr pbrResource)
+                {
+                    pbrResource.Smoothness = value;
+                }
+            }
+        }        
 
         public bool Visible
         {
@@ -551,6 +575,20 @@ namespace Iviz.Controllers
                 .Append(msg.Color.B).Append(" | ")
                 .Append(msg.Color.A).AppendLine();
 
+            description.Append("Scale: [")
+                .Append(msg.Scale.X).Append(" | ")
+                .Append(msg.Scale.Y).Append(" | ")
+                .Append(msg.Scale.Z).Append("]").AppendLine();            
+            
+            if (msg.Points.Length == 0)
+            {
+                description.Append("Elements: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+            }            
+
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
@@ -751,6 +789,7 @@ namespace Iviz.Controllers
             if (resource != null)
             {
                 resource.Layer = LayerType.IgnoreRaycast;
+                resource.Name = gameObject.name;
                 return; // all OK
             }
 

@@ -5,7 +5,9 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
+using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -104,4 +106,50 @@ namespace Iviz.Controllers
             }
         }
     }
+
+    /*
+    [BurstCompile]
+    struct MyJob : IJobParallelFor, IDisposable
+    {
+        [ReadOnly] NativeArray<float3> points;
+        [ReadOnly] NativeArray<float4> colors;
+        [ReadOnly] readonly float4 mRgba;
+        [WriteOnly] NativeList<float4> pointBuffer;
+
+        public MyJob(Point[] points, ColorRGBA[] colors, Color color, NativeList<float4> pointBuffer)
+        {
+            this.points = new NativeArray<float3>(points.Length, Allocator.Temp);
+            this.points.Reinterpret<Point>().CopyFrom(points);
+            this.colors = new NativeArray<float4>(colors.Length, Allocator.Temp);
+            this.colors.Reinterpret<ColorRGBA>().CopyFrom(colors);
+            mRgba = new float4(color.r, color.g, color.b, color.a);
+            this.pointBuffer = pointBuffer;
+        }
+
+        public void Dispose()
+        {
+            points.Dispose();
+            colors.Dispose();
+        }
+
+        public void Execute(int i)
+        {
+                float4 rgba = colors[i];
+                int4 rgbaAsInt = math.min(new int4(rgba * mRgba * 255), 255);
+                int4 rgbaTmp = new int4(rgbaAsInt.x << 24, rgbaAsInt.y << 16, rgbaAsInt.z << 8, rgbaAsInt.w) & 0xff;
+                int rgba32 = rgbaTmp.x + rgbaTmp.y + rgbaTmp.z + rgbaTmp.w;
+                float rgbaAsFloat;
+                unsafe
+                {
+                    rgbaAsFloat = *(float*) &rgba32;
+                }
+
+                float4 point = new float4(points[i].Ros2Unity(), rgbaAsFloat);
+                if (!(float.IsNaN(point.x) || float.IsNaN(point.y) || float.IsNaN(point.z)))
+                {
+                    pointBuffer.Add(point);
+                }
+        }
+    }
+    */
 }

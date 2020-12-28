@@ -45,6 +45,7 @@ namespace Iviz.App
             MyId.ClearSubscribers();
             RefreshMyUri.ClearSubscribers();
             RefreshMyId.ClearSubscribers();
+            ServerMode.ClearSubscribers();
             Close.ClearSubscribers();
         }
     }

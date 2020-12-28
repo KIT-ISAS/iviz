@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Sdf;
@@ -10,6 +11,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Logger = Iviz.Core.Logger;
 using Material = UnityEngine.Material;
 
 namespace Iviz.Displays
@@ -29,6 +31,11 @@ namespace Iviz.Displays
         bool isDirty;
 
         int Size => pointBuffer.Length;
+
+        public override string ToString()
+        {
+            return "[PointListResource '" + Name + "']";
+        }
 
         /// <summary>
         /// Sets the list of points.
@@ -82,13 +89,25 @@ namespace Iviz.Displays
             return !(t.Position.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq);
         }
 
+        public static bool IsElementValid(float3 t)
+        {
+            return !(t.HasNaN() || t.MagnitudeSq() > MaxPositionMagnitudeSq);
+        }
+
         public delegate void DirectPointSetter(ref NativeList<float4> pointBuffer);
 
+        bool processing;
         public void SetDirect([NotNull] DirectPointSetter callback, int reserve = 0)
         {
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
+            }
+
+            if (processing)
+            {
+                Logger.Error($"{this}: Missed a SetDirect!");
+                return;
             }
 
             if (reserve != 0)
@@ -97,8 +116,28 @@ namespace Iviz.Displays
             }
 
             pointBuffer.Clear();
-            callback(ref pointBuffer);
-            isDirty = true;
+            if (reserve < 1000)
+            {
+                callback(ref pointBuffer);
+                isDirty = true;
+                processing = false;
+            }
+            else
+            {
+                processing = true;
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        callback(ref pointBuffer);
+                        isDirty = true;
+                    }
+                    finally
+                    {
+                        processing = false;
+                    }
+                });
+            }
         }
 
         void UpdateBuffer()

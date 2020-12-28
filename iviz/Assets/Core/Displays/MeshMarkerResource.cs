@@ -12,14 +12,16 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(BoxCollider))]
-    public class MeshMarkerResource : MarkerResource, ISupportsTintAndAROcclusion
+    public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
         [SerializeField] Texture2D texture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
         [SerializeField] Color tint = Color.white;
         [SerializeField] bool occlusionOnly;
-
+        [SerializeField] float smoothness = 0.5f;
+        [SerializeField] float metallic = 0.5f;
+        
         MeshRenderer mainRenderer;
         MeshFilter meshFilter;
         Material textureMaterial;
@@ -68,6 +70,26 @@ namespace Iviz.Displays
                 SetEffectiveColor();
             }
         }
+        
+        public float Smoothness
+        {
+            get => smoothness;
+            set
+            {
+                smoothness = value;
+                MainRenderer.SetPropertySmoothness(smoothness);
+            }
+        }
+
+        public float Metallic
+        {
+            get => metallic;
+            set
+            {
+                metallic = value;
+                MainRenderer.SetPropertyMetallic(metallic);
+            }
+        }
 
         public Mesh Mesh => MeshFilter.sharedMesh;
 
@@ -77,6 +99,8 @@ namespace Iviz.Displays
             Color = color;
             EmissiveColor = emissiveColor;
             Tint = tint;
+            Metallic = metallic;
+            Smoothness = smoothness;
 
             MainRenderer.SetPropertyMainTexSt(Vector2.zero, Vector2.one);
         }

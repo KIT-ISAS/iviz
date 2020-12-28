@@ -1,4 +1,6 @@
-﻿using Iviz.Core;
+﻿using System;
+using Iviz.Core;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -11,6 +13,12 @@ namespace Iviz.Displays
         LineRenderer line;
         readonly Vector3[] positions = new Vector3[2];
         
+        [NotNull]
+        public string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
+        }        
         
         public float LineWidth
         {

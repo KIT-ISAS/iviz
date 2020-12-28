@@ -228,7 +228,7 @@ namespace Iviz.App
                 else if (RosServerManager.IsActive)
                 {
                     Logger.Internal($"Changing master uri to local master '{uri}'");
-                    masterUriStr.Label = $"Master Mode\n{uri.Host}:{uri.Port} →";
+                    masterUriStr.Label = MasterUriToString(uri);
                 }
                 else
                 {

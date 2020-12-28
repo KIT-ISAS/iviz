@@ -7,6 +7,7 @@ using Iviz.Displays;
 using Iviz.Hololens;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -436,7 +437,9 @@ namespace Iviz.Controllers
         {
             if (Control != null)
             {
-                Control.Bounds = bounds;
+                Control.Bounds = Settings.IsHololens 
+                    ? bounds 
+                    : UnityUtils.TransformBoundInverse(bounds, transform);
             }
         }
 

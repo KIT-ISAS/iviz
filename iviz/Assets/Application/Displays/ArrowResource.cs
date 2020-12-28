@@ -52,7 +52,7 @@ namespace Iviz.Displays
         public void Set(in Vector3 scale)
         {
             transform.localScale = new Vector3(scale.z, scale.y, scale.x);
-            transform.SetLocalPose(new Pose(Vector3.zero, PointToX));
+            transform.SetLocalPose(Pose.identity.WithRotation( PointToX));
         }
 
         public void Reset()

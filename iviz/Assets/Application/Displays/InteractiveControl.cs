@@ -12,9 +12,9 @@ namespace Iviz.Displays
     public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler,
         IPointerEnterHandler, IPointerExitHandler
     {
-        static readonly Color FrameActiveColor = new Color(1, 1, 1, 0.3f);
-        static readonly Color FrameInactiveColor = new Color(0, 1, 0, 0.3f);
-        
+        static readonly Color FrameActiveColor = Color.white.WithAlpha(0.3f);
+        static readonly Color FrameInactiveColor = Color.green.WithAlpha(0.3f);
+
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;
         [SerializeField] GameObject arrowMy = null;
@@ -43,6 +43,13 @@ namespace Iviz.Displays
         bool pointsToCamera;
 
         Bounds? bounds;
+
+        [NotNull]
+        public string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         public bool EnableMenu
         {
@@ -243,17 +250,32 @@ namespace Iviz.Displays
             {
                 bounds = value;
 
-                Bounds newBounds = bounds != null 
-                    ? new Bounds(bounds.Value.center, bounds.Value.size.Abs()) 
+                Bounds newBounds = bounds != null
+                    ? new Bounds(bounds.Value.center, bounds.Value.size.Abs())
                     : new Bounds(Vector3.zero, 0.5f * Vector3.one);
 
-                float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
+                float holderScale;
+                switch (InteractionMode)
+                {
+                    case InteractionModeType.MoveAxisX:
+                        holderScale = newBounds.size.z;
+                        break;
+                    case InteractionModeType.MovePlaneYZ:
+                    case InteractionModeType.RotateAxisX:
+                    case InteractionModeType.MovePlaneYZ_RotateAxisX:
+                        holderScale = Mathf.Max(newBounds.size.x, newBounds.size.y);
+                        break;
+                    default:
+                        holderScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
+                        break;
+                }
 
                 GameObject holder = holderCollider.gameObject;
                 holder.transform.localPosition = newBounds.center;
-                holder.transform.localScale = 2 * maxScale * Vector3.one;
-                holderCollider.size = newBounds.size / (2 * maxScale);
+                holder.transform.localScale = 2 * holderScale * Vector3.one;
+                holderCollider.size = newBounds.size / (2 * holderScale);
 
+                float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
                 menuObject.transform.localScale = 0.5f * maxScale * Vector3.one;
                 menuObject.GetComponent<Billboard>().offset =
                     new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale);

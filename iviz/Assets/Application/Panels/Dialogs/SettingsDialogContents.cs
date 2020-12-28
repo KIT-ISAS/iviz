@@ -14,6 +14,7 @@ namespace Iviz.App
         [SerializeField] DropdownWidget networkProcessing = null;
         
         [SerializeField] ColorPickerWidget backgroundColor = null;
+        [SerializeField] SliderWidget sunDirection = null;
 
         [SerializeField] Button clearModelCache = null;
         [SerializeField] Button clearSavedFiles = null;
@@ -25,6 +26,7 @@ namespace Iviz.App
         public DropdownWidget TargetFps => targetFps;
         public DropdownWidget NetworkProcessing => networkProcessing;
         public ColorPickerWidget BackgroundColor => backgroundColor;
+        public SliderWidget SunDirection => sunDirection;
 
         public event Action ClearModelCacheClicked; 
         public event Action ClearSavedFilesClicked; 
@@ -51,6 +53,7 @@ namespace Iviz.App
             networkProcessing.ClearSubscribers();
             backgroundColor.ClearSubscribers();
             close.ClearSubscribers();
+            sunDirection.ClearSubscribers();
 
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;

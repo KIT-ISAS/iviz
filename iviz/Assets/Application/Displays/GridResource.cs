@@ -6,6 +6,7 @@ using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
@@ -22,8 +23,12 @@ namespace Iviz.Displays
         static readonly Color GreenLineColor = new Color(0, 0.5f, 0);
         static readonly Color RedLineColor = new Color(0.5f, 0, 0);
 
-        Mesh mesh;
+        //Mesh mesh;
         MeshRenderer meshRenderer;
+        
+        [NotNull]
+        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();        
+        
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
         readonly List<MeshMarkerResource> horizontals = new List<MeshMarkerResource>();
@@ -59,7 +64,7 @@ namespace Iviz.Displays
             set
             {
                 gridColor = value;
-                meshRenderer.SetPropertyColor(value);
+                MeshRenderer.SetPropertyColor(value);
             }
         }
 
@@ -78,43 +83,43 @@ namespace Iviz.Displays
 
         float gridLineWidth;
 
-        public float GridLineWidth
+        float GridLineWidth
         {
             get => gridLineWidth;
             set
             {
                 gridLineWidth = value;
-                if (!(mesh is null))
+                //if (!(mesh is null))
                 {
                     UpdateMesh();
                 }
             }
         }
 
-        float gridCellSize;
+        float gridCellSize = 1;
 
-        public float GridCellSize
+        float GridCellSize
         {
             get => gridCellSize;
             set
             {
                 gridCellSize = value;
-                if (!(mesh is null))
+                //if (!(mesh is null))
                 {
                     UpdateMesh();
                 }
             }
         }
 
-        int numberOfGridCells;
+        int numberOfGridCells = 90;
 
-        public int NumberOfGridCells
+        int NumberOfGridCells
         {
             get => numberOfGridCells;
             set
             {
                 numberOfGridCells = value;
-                if (!(mesh is null))
+                //if (!(mesh is null))
                 {
                     UpdateMesh();
                 }
@@ -139,11 +144,13 @@ namespace Iviz.Displays
         {
             base.Awake();
 
+            /*
             mesh = new Mesh {name = "Grid Mesh"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             meshRenderer = GetComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = Resource.Materials.Grid.Object;
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            */
             //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
@@ -157,11 +164,11 @@ namespace Iviz.Displays
             //interiorRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
             Orientation = GridOrientation.XY;
-            GridColor = new Color(1, 1, 1, 0.25f);
+            GridColor = Color.white.WithAlpha(0.25f);
             InteriorColor = Color.white * 0.5f;
-            GridLineWidth = 0.02f;
+            GridLineWidth = 0.025f;
             GridCellSize = 1;
-            NumberOfGridCells = 20;
+            NumberOfGridCells = 90;
             ShowInterior = true;
 
             UpdateMesh();
@@ -217,6 +224,7 @@ namespace Iviz.Displays
 
         void UpdateMesh()
         {
+            /*
             Mesh squareMesh = Resource.Displays.Square.Object.GetComponent<MeshFilter>().sharedMesh;
             IEnumerable<int> squareIndices = squareMesh.GetIndices(0);
 
@@ -266,6 +274,9 @@ namespace Iviz.Displays
             mesh.SetNormals(normals);
             mesh.SetIndices(indices.ToArray(), squareMesh.GetTopology(0), 0);
             mesh.Optimize();
+            */
+
+            float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
 
             const float interiorHeight = 1 / 512f;
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);

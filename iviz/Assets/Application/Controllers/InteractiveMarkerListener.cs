@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -51,7 +49,6 @@ namespace Iviz.Controllers
         public Sender<InteractiveMarkerFeedback> Publisher { get; private set; }
         public override TfFrame Frame => TfListener.MapFrame;
         public override IModuleData ModuleData { get; }
-        public string Topic => config.Topic;
 
         public InteractiveMarkerConfiguration Config
         {
@@ -74,12 +71,28 @@ namespace Iviz.Controllers
                 }
 
                 config.DescriptionsVisible = value;
-                foreach (var interactiveMarker in interactiveMarkers.Values)
+                foreach (InteractiveMarkerObject interactiveMarker in interactiveMarkers.Values)
                 {
                     interactiveMarker.DescriptionVisible = value;
                 }
             }
         }
+
+        public bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+
+                foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
+                {
+                    marker.Visible = value;
+                }
+            }
+        }
+
+        public string Topic => config.Topic;
 
         public void GenerateLog(StringBuilder description)
         {
@@ -88,7 +101,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(description));
             }
 
-            foreach (var interactiveMarker in interactiveMarkers.Values)
+            foreach (InteractiveMarkerObject interactiveMarker in interactiveMarkers.Values)
             {
                 interactiveMarker.GenerateLog(description);
                 description.AppendLine();
@@ -116,7 +129,7 @@ namespace Iviz.Controllers
                 }
 
                 int totalErrors = 0, totalWarnings = 0;
-                foreach (var marker in interactiveMarkers.Values)
+                foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
                 {
                     marker.GetErrorCount(out int numErrors, out int numWarnings);
                     totalErrors += numErrors;
@@ -168,7 +181,7 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate);
-            GameThread.EverySecond += CheckForExpiredMarkers;
+            //GameThread.EverySecond += CheckForExpiredMarkers;
 
             int lastSlash = config.Topic.LastIndexOf('/');
             string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);
@@ -183,9 +196,9 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-            GameThread.EverySecond -= CheckForExpiredMarkers;
+            //GameThread.EverySecond -= CheckForExpiredMarkers;
 
-            foreach (var markerObject in interactiveMarkers.Values)
+            foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
                 DeleteMarkerObject(markerObject);
             }
@@ -209,15 +222,21 @@ namespace Iviz.Controllers
         {
             if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
+                if (msg.Poses.Length != 0 || msg.Erases.Length != 0 || msg.Markers.Length != 0)
+                {
+                    Logger.Info(
+                        $"{this}: A keep-alive message with non-empty payload was sent. The payload will be ignored.");
+                }
+
                 return;
             }
 
-            foreach (var marker in msg.Markers)
+            foreach (InteractiveMarker marker in msg.Markers)
             {
                 CreateInteractiveMarker(marker);
             }
 
-            foreach (var pose in msg.Poses)
+            foreach (InteractiveMarkerPose pose in msg.Poses)
             {
                 UpdateInteractiveMarkerPose(pose);
             }
@@ -273,7 +292,6 @@ namespace Iviz.Controllers
             }
 
             im.Set(msg.Pose);
-            //im.UpdateExpirationTime();
         }
 
         void DestroyInteractiveMarker([NotNull] string id)
@@ -289,13 +307,13 @@ namespace Iviz.Controllers
         }
 
         internal void OnInteractiveControlObjectMouseEvent(
-            string interactiveMarkerId, string controlId,
+            [NotNull] string interactiveMarkerId, [NotNull] string controlId, [CanBeNull] string frameId,
             in Pose relativeControlPose, in Vector3? position,
             MouseEventType eventType)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++),
+                RosUtils.CreateHeader(feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -311,11 +329,11 @@ namespace Iviz.Controllers
 
         internal void OnInteractiveControlObjectMoved(
             [NotNull] string interactiveMarkerId, [NotNull] string controlId,
-            in Pose relativeControlPose)
+            [CanBeNull] string frameId, in Pose relativeControlPose)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++),
+                RosUtils.CreateHeader(feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -330,15 +348,15 @@ namespace Iviz.Controllers
         }
 
         internal void OnInteractiveControlObjectMenuSelect(
-            [NotNull] string interactiveMarkerId, [NotNull] string controlId,
+            [NotNull] string interactiveMarkerId, [CanBeNull] string frameId,
             uint menuEntryId, in Pose relativeControlPose)
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++),
+                RosUtils.CreateHeader(feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
-                controlId,
+                "",
                 InteractiveMarkerFeedback.MENU_SELECT,
                 relativeControlPose.Unity2RosPose(),
                 menuEntryId,
@@ -349,41 +367,9 @@ namespace Iviz.Controllers
             Logger.Info($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 
-        void CheckForExpiredMarkers()
-        {
-            /*
-            if (!EnableAutoExpiration)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            string[] deadMarkers = imarkers
-                .Where(entry => entry.Value.ExpirationTime < now)
-                .Select(entry => entry.Key)
-                .ToArray();
-
-            foreach (string key in deadMarkers) DestroyInteractiveMarker(key);
-            */
-        }
-
-        public bool Visible
-        {
-            get => config.Visible;
-            set
-            {
-                config.Visible = value;
-
-                foreach (var marker in interactiveMarkers.Values)
-                {
-                    marker.Visible = value;
-                }
-            }
-        }
-
         void DestroyAllMarkers()
         {
-            foreach (var markerObject in interactiveMarkers.Values)
+            foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
                 DeleteMarkerObject(markerObject);
             }

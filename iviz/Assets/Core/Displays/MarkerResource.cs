@@ -29,15 +29,7 @@ namespace Iviz.Displays
         public string Name
         {
             get => gameObject.name;
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                gameObject.name = value;
-            }
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public Transform Parent

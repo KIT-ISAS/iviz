@@ -84,23 +84,19 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = Robot.RenderAsOcclusionOnly;
             panel.Tint.Value = Robot.Tint;
             panel.Alpha.Value = Robot.Tint.a;
+            panel.Metallic.Value = Robot.Metallic;
+            panel.Smoothness.Value = Robot.Smoothness;
 
             panel.Save.Value = IsRobotSaved;
             panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
-            {
-                Color color = f;
-                color.a = panel.Alpha.Value;
-                Robot.Tint = color;
-            };
+                Robot.Tint = f.WithAlpha(panel.Alpha.Value);
             panel.Alpha.ValueChanged += f =>
-            {
-                Color color = panel.Tint.Value;
-                color.a = f;
-                Robot.Tint = color;
-            };
-            panel.OcclusionOnlyMode.ValueChanged += f => { Robot.RenderAsOcclusionOnly = f; };
+                Robot.Tint = panel.Tint.Value.WithAlpha(f);
+            panel.Metallic.ValueChanged += f => Robot.Metallic = f;
+            panel.Smoothness.ValueChanged += f => Robot.Smoothness = f;
+            panel.OcclusionOnlyMode.ValueChanged += f => Robot.RenderAsOcclusionOnly = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
                 Robot.TryLoadSavedRobot(i == 0 ? null : name);
@@ -125,14 +121,15 @@ namespace Iviz.App
 
                 panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
             };
-            panel.AttachToTf.ValueChanged += f => { Robot.AttachedToTf = f; };
+            panel.AttachToTf.ValueChanged += f => 
+                Robot.AttachedToTf = f;
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
             };
-            panel.FramePrefix.EndEdit += f => { Robot.FramePrefix = f; };
-            panel.FrameSuffix.EndEdit += f => { Robot.FrameSuffix = f; };
+            panel.FramePrefix.EndEdit += f => Robot.FramePrefix = f;
+            panel.FrameSuffix.EndEdit += f => Robot.FrameSuffix = f;
             panel.HideButton.Clicked += () =>
             {
                 Robot.Visible = !Robot.Visible;
@@ -222,8 +219,14 @@ namespace Iviz.App
                     case nameof(SimpleRobotConfiguration.Tint):
                         Robot.Tint = config.Tint;
                         break;
+                    case nameof(SimpleRobotConfiguration.Metallic):
+                        Robot.Metallic = config.Metallic;
+                        break;
+                    case nameof(SimpleRobotConfiguration.Smoothness):
+                        Robot.Smoothness = config.Smoothness;
+                        break;
                     default:
-                        Core.Logger.External($"{this}: Unknown field '{field}'", LogLevel.Warn);
+                        Core.Logger.Warn($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

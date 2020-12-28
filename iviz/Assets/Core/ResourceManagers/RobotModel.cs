@@ -21,9 +21,9 @@ namespace Iviz.Displays
     /// <summary>
     /// Wrapper around the 3D models of a robot.
     /// </summary>
-    public sealed class RobotModel
+    public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion
     {
-        readonly List<ISupportsTintAndAROcclusion> displays = new List<ISupportsTintAndAROcclusion>();
+        readonly List<MeshMarkerResource> displays = new List<MeshMarkerResource>();
         readonly Dictionary<string, GameObject> jointObjects = new Dictionary<string, GameObject>();
         readonly Dictionary<string, Joint> joints = new Dictionary<string, Joint>();
 
@@ -40,16 +40,13 @@ namespace Iviz.Displays
         bool occlusionOnly;
         bool visible = true;
         Color tint = Color.white;
+        float smoothness = 0.5f;
+        float metallic = 0.5f;
 
         /// <summary>
-        /// Constructs a robot from the given URDF text.
+        /// Initializes a robot with the given URDF text. Call <see cref="StartAsync"/> to construct it.
         /// </summary>
         /// <param name="robotDescription">URDF text.</param>
-        /// <param name="provider">Object that can call CallService, usually a wrapped RosClient. Null if not available.</param>
-        /// <param name="keepMeshMaterials">
-        /// For external 3D models, whether to keep the materials instead
-        /// of replacing them with the provided colors.
-        /// </param>
         public RobotModel([NotNull] string robotDescription)
         {
             if (string.IsNullOrEmpty(robotDescription))
@@ -68,6 +65,12 @@ namespace Iviz.Displays
             BaseLinkObject = new GameObject(Name);
         }
 
+        /// <summary>Constructs a robot asynchronously.</summary>
+        /// <param name="provider">Object that can call CallService, usually a wrapped RosClient. Null if not available.</param>
+        /// <param name="keepMeshMaterials">
+        /// For external 3D models, whether to keep the materials instead
+        /// of replacing them with the provided colors.
+        /// </param>
         public async void StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
         {
             IsStarting = true;
@@ -87,6 +90,11 @@ namespace Iviz.Displays
                         await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider);
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    Logger.Debug($"{this}: Start was cancelled!");
+                    return;
+                }
                 catch (Exception e)
                 {
                     Logger.Error($"{this}: Start stopped with exception", e);
@@ -103,10 +111,10 @@ namespace Iviz.Displays
                     return;
                 }
 
-                var unparentedKeys = new HashSet<string>(linkObjects.Keys);
-                unparentedKeys.RemoveWhere(linkParents.Keys.Contains);
+                var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
+                keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
 
-                BaseLink = unparentedKeys.FirstOrDefault();
+                BaseLink = keysWithoutParent.FirstOrDefault();
                 if (BaseLink != null)
                 {
                     linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
@@ -119,6 +127,8 @@ namespace Iviz.Displays
                 Tint = tint;
                 OcclusionOnly = occlusionOnly;
                 Visible = visible;
+                Smoothness = smoothness;
+                Metallic = metallic;
                 ApplyAnyValidConfiguration();
             }
             finally
@@ -181,6 +191,32 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public float Smoothness
+        {
+            get => smoothness;
+            set
+            {
+                smoothness = value;
+                foreach (var display in displays)
+                {
+                    display.Smoothness = value;
+                }
+            }
+        }        
+        
+        public float Metallic
+        {
+            get => metallic;
+            set
+            {
+                metallic = value;
+                foreach (var display in displays)
+                {
+                    display.Metallic = value;
+                }
+            }
+        }         
 
         async Task ProcessLinkAsync(bool keepMeshMaterials,
             [NotNull] Link link,
@@ -297,7 +333,7 @@ namespace Iviz.Displays
                     var color = material?.Color?.ToColor() ?? Color.white;
 
                     var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                    var resources = new List<ISupportsTintAndAROcclusion>();
+                    var resources = new List<MeshMarkerResource>();
 
                     foreach (var renderer in renderers)
                     {
@@ -434,10 +470,10 @@ namespace Iviz.Displays
                 case Joint.JointType.Revolute:
                 case Joint.JointType.Continuous:
                     float angle = value * Mathf.Rad2Deg;
-                    unityPose = new Pose(Vector3.zero, Quaternion.AngleAxis(-angle, joint.Axis.Xyz.ToVector3()));
+                    unityPose = Pose.identity.WithRotation(Quaternion.AngleAxis(-angle, joint.Axis.Xyz.ToVector3()));
                     break;
                 case Joint.JointType.Prismatic:
-                    unityPose = new Pose(joint.Axis.Xyz.ToVector3() * value, Quaternion.identity);
+                    unityPose = Pose.identity.WithPosition(joint.Axis.Xyz.ToVector3() * value);
                     break;
                 default:
                     unityPose = Pose.identity;

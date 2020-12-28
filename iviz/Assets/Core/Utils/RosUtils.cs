@@ -88,6 +88,9 @@ namespace Iviz.Core
         public static Vector3 Ros2Unity(this Vector3 vector3) => new Vector3(-vector3.y, vector3.z, vector3.x);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float3 Ros2Unity(this float3 vector3) => new Vector3(-vector3.y, vector3.z, vector3.x);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Ros2Unity(this Quaternion quaternion) =>
             new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 

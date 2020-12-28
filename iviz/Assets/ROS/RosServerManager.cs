@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Roslib;
+using Iviz.Core;
 using Iviz.RosMaster;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
     public class RosServerManager
     {
         public const int DefaultPort = RosMasterServer.DefaultPort;
+        const int DisposeTimeoutInMs = 2000;
 
         static readonly List<(string key, string value)> DefaultKeys = new List<(string, string)>
         {
@@ -23,19 +21,25 @@ namespace Iviz.Ros
         };
 
         static RosServerManager instance;
+
+        RosMasterServer server;
+        Task serverTask;
+        
         [NotNull] static RosServerManager Instance => instance ?? (instance = new RosServerManager());
         public static bool IsActive => instance?.server != null;
         [CanBeNull] public static Uri MasterUri => instance?.server?.MasterUri;
 
-        public static bool Create([NotNull] Uri masterUri, [NotNull] string masterId) =>
-            Instance.TryCreate(
+        public static bool Create([NotNull] Uri masterUri, [NotNull] string masterId)
+        {
+            return Instance.TryCreate(
                 masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
                 masterId ?? throw new ArgumentNullException(nameof(masterId)));
+        }
 
-        public static void Dispose() => instance?.Reset();
-
-        RosMasterServer server;
-        Task serverTask;
+        public static void Dispose()
+        {
+            instance?.DisposeImpl();
+        }
 
         bool TryCreate(Uri masterUri, string masterId)
         {
@@ -46,34 +50,31 @@ namespace Iviz.Ros
                     return true;
                 }
 
-                Reset();
+                DisposeImpl();
             }
 
             try
             {
                 server = new RosMasterServer(masterUri, masterId);
 
-                foreach (var (key, value) in DefaultKeys)
+                foreach ((string key, string value) in DefaultKeys)
                 {
                     server.AddKey(key, value);
                 }
 
                 // start in background
-                serverTask = Task.Run(async () =>
-                {
-                    await server.Start();
-                });
+                serverTask = Task.Run(async () => { await server.Start(); });
             }
             catch (Exception e)
             {
-                Logger.Warn(e);
+                Logger.Internal("<b>Error:</b> Failed to start ROS master", e);
                 server = null;
             }
-            
+
             return server != null;
         }
 
-        void Reset()
+        void DisposeImpl()
         {
             if (server == null)
             {
@@ -81,7 +82,7 @@ namespace Iviz.Ros
             }
 
             server.Dispose();
-            serverTask.WaitForWithTimeout(2000).WaitNoThrow("RosServerManager");
+            serverTask.WaitForWithTimeout(DisposeTimeoutInMs).WaitNoThrow("RosServerManager");
             server = null;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -32,11 +33,21 @@ namespace Iviz.Controllers
     public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
         readonly MarkerConfiguration config = new MarkerConfiguration();
-        readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new Dictionary<(string Ns, int Id), MarkerObject>();
+
+        /// List of markers
+        readonly Dictionary<(string Ns, int Id), MarkerObject> markers =
+            new Dictionary<(string Ns, int Id), MarkerObject>();
+
+        /// Temporary buffer to hold incoming marker messages from the network thread
+        readonly Dictionary<(string Ns, int Id), Marker> markerBuffer = new Dictionary<(string Ns, int Id), Marker>();
+        
+        /// Temporary buffer 
+        readonly List<Marker> markerList = new List<Marker>();
 
         public MarkerListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            GameThread.EveryFrame += Handle;
         }
 
         public override IModuleData ModuleData { get; }
@@ -97,7 +108,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public bool TriangleListFlipWinding
         {
             get => config.TriangleListFlipWinding;
@@ -117,10 +128,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Marker.RosMessageType:
-                    Listener = new Listener<Marker>(config.Topic, Handler) {MaxQueueSize = 500};
+                    Listener = new Listener<Marker>(config.Topic, Handler);
                     break;
                 case MarkerArray.RosMessageType:
-                    Listener = new Listener<MarkerArray>(config.Topic, Handler) {MaxQueueSize = 500};
+                    Listener = new Listener<MarkerArray>(config.Topic, Handler);
                     break;
             }
 
@@ -136,7 +147,7 @@ namespace Iviz.Controllers
             foreach (var entry in deadEntries)
             {
                 markers.Remove(entry.Key);
-                Debug.Log("Killing " + entry.Key);
+                //Debug.Log("Killing " + entry.Key);
                 DeleteMarkerObject(entry.Value);
             }
         }
@@ -147,6 +158,7 @@ namespace Iviz.Controllers
             DestroyAllMarkers();
 
             GameThread.EverySecond -= CheckDeadMarkers;
+            GameThread.EveryFrame -= Handle;
         }
 
         public string Topic => config.Topic;
@@ -257,55 +269,81 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        void Handler([NotNull] MarkerArray msg)
+        bool Handler([NotNull] MarkerArray msg)
         {
-            foreach (var marker in msg.Markers)
+            lock (markerBuffer)
             {
-                Handler(marker);
+                foreach (var marker in msg.Markers)
+                {
+                    markerBuffer[IdFromMessage(marker)] = marker;
+                }
             }
+
+            return true;
         }
 
-        void Handler([NotNull] Marker msg)
+        bool Handler([NotNull] Marker marker)
         {
-            var id = IdFromMessage(msg);
-            switch (msg.Action)
+            lock (markerBuffer)
             {
-                case Marker.ADD:
-                    if (msg.Pose.HasNaN())
-                    {
-                        Logger.Debug("MarkerListener: NaN in pose!");
-                        return;
-                    }
-
-                    if (msg.Scale.HasNaN())
-                    {
-                        Logger.Debug("MarkerListener: NaN in scale!");
-                        return;
-                    }
-
-                    if (!markers.TryGetValue(id, out var markerToAdd))
-                    {
-                        markerToAdd = CreateMarkerObject();
-                        //markerToAdd.ModuleData = ModuleData;
-                        markerToAdd.Parent = TfListener.ListenersFrame;
-                        markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
-                        markerToAdd.Tint = Tint;
-                        markerToAdd.Visible = Visible;
-                        markerToAdd.Layer = LayerType.IgnoreRaycast;
-                        markers[id] = markerToAdd;
-                    }
-
-                    markerToAdd.Set(msg);
-                    break;
-                case Marker.DELETE:
-                    if (markers.TryGetValue(id, out var markerToDelete))
-                    {
-                        DeleteMarkerObject(markerToDelete);
-                        markers.Remove(id);
-                    }
-
-                    break;
+                markerBuffer[IdFromMessage(marker)] = marker;
             }
+
+            return true;
+        }
+
+        void Handle()
+        {
+            lock (markerBuffer)
+            {
+                markerList.AddRange(markerBuffer.Values);
+                markerBuffer.Clear();
+            }
+
+            foreach (Marker msg in markerList)
+            {
+                var id = IdFromMessage(msg);
+                switch (msg.Action)
+                {
+                    case Marker.ADD:
+                        if (msg.Pose.HasNaN())
+                        {
+                            Logger.Debug("MarkerListener: NaN in pose!");
+                            return;
+                        }
+
+                        if (msg.Scale.HasNaN())
+                        {
+                            Logger.Debug("MarkerListener: NaN in scale!");
+                            return;
+                        }
+
+                        if (!markers.TryGetValue(id, out var markerToAdd))
+                        {
+                            markerToAdd = CreateMarkerObject();
+                            //markerToAdd.ModuleData = ModuleData;
+                            markerToAdd.Parent = TfListener.ListenersFrame;
+                            markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
+                            markerToAdd.Tint = Tint;
+                            markerToAdd.Visible = Visible;
+                            markerToAdd.Layer = LayerType.IgnoreRaycast;
+                            markers[id] = markerToAdd;
+                        }
+
+                        markerToAdd.Set(msg);
+                        break;
+                    case Marker.DELETE:
+                        if (markers.TryGetValue(id, out var markerToDelete))
+                        {
+                            DeleteMarkerObject(markerToDelete);
+                            markers.Remove(id);
+                        }
+
+                        break;
+                }
+            }
+            
+            markerList.Clear();
         }
 
         public static (string Ns, int Id) IdFromMessage([NotNull] Marker marker)

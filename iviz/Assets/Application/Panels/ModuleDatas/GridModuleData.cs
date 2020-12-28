@@ -50,7 +50,7 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
-            panel.LineWidth.Value = controller.GridLineWidth;
+            //panel.LineWidth.Value = controller.GridLineWidth;
             //panel.NumberOfCells.Value = controller.NumberOfGridCells;
             //panel.CellSize.Value = controller.GridCellSize;
             //panel.Orientation.Index = (int)controller.Orientation;
@@ -67,10 +67,12 @@ namespace Iviz.App
             panel.TapTopic.Interactable = controller.PublishLongTapPosition;
             panel.TapTopic.Hints = GetTopicHints();
 
+            /*
             panel.LineWidth.ValueChanged += f =>
             {
                 controller.GridLineWidth = f;
             };
+            */
             /*
             panel.NumberOfCells.ValueChanged += f =>
             {
@@ -185,6 +187,7 @@ namespace Iviz.App
                     case nameof(GridConfiguration.InteriorColor):
                         controller.InteriorColor = config.InteriorColor;
                         break;
+                    /*
                     case nameof(GridConfiguration.GridLineWidth):
                         controller.GridLineWidth = config.GridLineWidth;
                         break;
@@ -194,6 +197,7 @@ namespace Iviz.App
                     case nameof(GridConfiguration.NumberOfGridCells):
                         controller.NumberOfGridCells = config.NumberOfGridCells;
                         break;
+                        */
                     case nameof(GridConfiguration.InteriorVisible):
                         controller.InteriorVisible = config.InteriorVisible;
                         break;

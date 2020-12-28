@@ -19,6 +19,8 @@ namespace Iviz.App
         public InputFieldWidget FrameSuffix { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
+        public SliderWidget Metallic { get; private set; }
+        public SliderWidget Smoothness { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
         public ToggleWidget Save { get; private set; }
 
@@ -36,6 +38,8 @@ namespace Iviz.App
             FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
             Save = p.AddToggle("Save this Robot Locally");
             CloseButton = p.AddTrashButton();

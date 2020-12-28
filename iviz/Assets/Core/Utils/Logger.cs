@@ -102,7 +102,7 @@ namespace Iviz.Core
                     if (!(childException is AggregateException))
                     {
                         str.AppendLine()
-                            .Append("<color=red>→ ")
+                            .Append("<color=red>")
                             .Append(childException.GetType())
                             .Append("</color> ")
                             .Append(childException.Message);

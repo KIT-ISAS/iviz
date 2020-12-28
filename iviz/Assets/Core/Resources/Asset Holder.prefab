@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6592562066270136912}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 942.3363, y: 979.7857, z: -15540.422}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -56,3 +56,35 @@ MonoBehaviour:
     type: 3}
   Sphere: {fileID: 4602828156360642986, guid: 04469a87993a24ad4978e6e69619098c, type: 3}
   Text: {fileID: 3616584195209632817, guid: f89b75492bba14bc598806f892dbdf00, type: 3}
+  FontMaterial: {fileID: 2100000, guid: 48207f643b93d4e3b85c153dbb9bbaaa, type: 2}
+  FontMaterialZWrite: {fileID: 2100000, guid: 7aa9c595e29be460d810e7b0f9564d63, type: 2}
+  Lit: {fileID: 2100000, guid: 002af6810bb6243818acb8f5941f5b6c, type: 2}
+  TexturedLit: {fileID: 2100000, guid: f53a5de9d2f22f9498a56c363fe3adb5, type: 2}
+  TransparentLit: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
+  TransparentTexturedLit: {fileID: 2100000, guid: 05f42792aba3d440e9fe1a51161b5d26,
+    type: 2}
+  PointCloud: {fileID: 2100000, guid: b03b21172f7085346ae7aa04334ae0f6, type: 2}
+  PointCloudWithColormap: {fileID: 2100000, guid: 5f2ef28c70bc04853b522597ec8b1738,
+    type: 2}
+  LineMaterial: {fileID: 2100000, guid: 024589e00cb654296b6616fdaccde49e, type: 2}
+  TransparentLine: {fileID: 2100000, guid: e66c468d082b44738a158a584125ccec, type: 2}
+  LineWithColormap: {fileID: 2100000, guid: b7efc500b34554995863a03c83bd3590, type: 2}
+  TransparentLineWithColormap: {fileID: 2100000, guid: a4e2875eea0dd4d989ce4fd43410c725,
+    type: 2}
+  LineSimple: {fileID: 2100000, guid: b21587cae16184a7a874039108e3a9f8, type: 2}
+  TransparentLineSimple: {fileID: 2100000, guid: 7b974265b08c14578bd69e3eb804ed5a,
+    type: 2}
+  LineSimpleWithColormap: {fileID: 2100000, guid: a20994715f9e54e72b6bb7144aa8d2eb,
+    type: 2}
+  TransparentLineSimpleWithColormap: {fileID: 2100000, guid: 32af4d95c3ca34683b8a78eaf94f0d4e,
+    type: 2}
+  LitOcclusionOnly: {fileID: 2100000, guid: de0cfb337e3f84356a7a652c47ee75d5, type: 2}
+  MeshListMaterial: {fileID: 2100000, guid: 4d085d458d11a23488567d041611c202, type: 2}
+  MeshListWithColormap: {fileID: 2100000, guid: efabf005bac284c55baf34451ee0e132,
+    type: 2}
+  MeshListWithColormapScaleY: {fileID: 2100000, guid: fe42fda78a9d444b29afc7f9c75e0fc3,
+    type: 2}
+  MeshListOcclusionOnly: {fileID: 2100000, guid: 42ee0d356c9fd4019b3c4dc81e8dd259,
+    type: 2}
+  MeshListOcclusionOnlyWithScaleY: {fileID: 2100000, guid: ebd2b232c7da04af6994225a29382d4f,
+    type: 2}

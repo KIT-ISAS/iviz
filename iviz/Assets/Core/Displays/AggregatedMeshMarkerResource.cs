@@ -8,15 +8,24 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class AggregatedMeshMarkerResource : MonoBehaviour, ISupportsTintAndAROcclusion
+    public sealed class AggregatedMeshMarkerResource : MonoBehaviour, ISupportsAROcclusion, ISupportsTint, ISupportsPbr
     {
         [SerializeField] MeshTrianglesResource[] children = Array.Empty<MeshTrianglesResource>();
         [SerializeField] bool occlusionOnly;
         [SerializeField] Color tint = Color.white;
+        [SerializeField] float smoothness = 0.5f;
+        [SerializeField] float metallic = 0.5f;
 
         BoxCollider boxCollider;
         [NotNull] BoxCollider Collider => boxCollider != null ? boxCollider : boxCollider = GetComponent<BoxCollider>();
 
+        [NotNull]
+        public string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
+        }        
+        
         [NotNull]
         public IReadOnlyCollection<MeshTrianglesResource> Children
         {
@@ -89,6 +98,39 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        
+        public float Smoothness
+        {
+            get => smoothness;
+            set
+            {
+                smoothness = value;
+                foreach (var child in children)
+                {
+                    if (child != null)
+                    {
+                        child.Smoothness = value;
+                    }
+                }
+            }
+        }
+
+        public float Metallic
+        {
+            get => metallic;
+            set
+            {
+                metallic = value;
+                foreach (var child in children)
+                {
+                    if (child != null)
+                    {
+                        child.Metallic = value;
+                    }
+                }
+            }
+        }        
 
         public void Suspend()
         {

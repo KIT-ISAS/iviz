@@ -21,6 +21,8 @@ namespace Iviz.Controllers
         [DataMember] public bool AttachedToTf { get; set; }
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public float Metallic { get; set; } = 0.5f;
+        [DataMember] public float Smoothness { get; set; } = 0.5f;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
         [DataMember] public bool Visible { get; set; } = true;
@@ -72,6 +74,8 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint;
+                Smoothness = value.Smoothness;
+                Metallic = value.Metallic;
                 
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
@@ -177,6 +181,36 @@ namespace Iviz.Controllers
                 Robot.Tint = value;
             }
         }
+        
+        public float Metallic
+        {
+            get => config.Metallic;
+            set
+            {
+                config.Metallic = value;
+                if (Robot is null)
+                {
+                    return;
+                }
+
+                Robot.Metallic = value;
+            }
+        }        
+        
+        public float Smoothness
+        {
+            get => config.Smoothness;
+            set
+            {
+                config.Smoothness = value;
+                if (Robot is null)
+                {
+                    return;
+                }
+
+                Robot.Smoothness = value;
+            }
+        }   
 
         public IModuleData ModuleData { get; }
 
@@ -275,7 +309,7 @@ namespace Iviz.Controllers
             }            
         }
         
-        public bool TryLoadFromSourceParameter([CanBeNull] string value)
+        public async void TryLoadFromSourceParameter([CanBeNull] string value)
         {
             config.SourceParameter = "";
             Robot = null;
@@ -284,39 +318,39 @@ namespace Iviz.Controllers
             {
                 config.SavedRobotName = "";
                 HelpText = "[No Robot Selected]";
-                return true;
+                return;
             }
 
             object parameterValue;
             try
             {
-                parameterValue = ConnectionManager.Connection.GetParameter(value);
+                const int timeoutInMs = 1000;
+                parameterValue = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
             }
             catch (Exception e)
             {
                 Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
                 HelpText = "[Failed to Retrieve Parameter]";
-                return false;
+                return;
             }
 
             if (!(parameterValue is string robotDescription))
             {
                 Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
                 HelpText = "[Invalid Parameter Type]";
-                return false;
+                return;
             }
 
             if (!LoadRobotFromDescription(robotDescription))
             {
-                return false;
+                return;
             }
 
             config.SavedRobotName = "";
             config.SourceParameter = value;
-            return true;
         }
 
-        public bool TryLoadSavedRobot([CanBeNull] string robotName)
+        public void TryLoadSavedRobot([CanBeNull] string robotName)
         {
             config.SavedRobotName = "";
             Robot = null;
@@ -325,7 +359,7 @@ namespace Iviz.Controllers
             {
                 config.SourceParameter = "";
                 HelpText = "[No Robot Selected]";
-                return true;
+                return;
             }
 
             if (!Resource.TryGetRobot(robotName, out string robotDescription))
@@ -333,12 +367,12 @@ namespace Iviz.Controllers
                 // shouldn't happen!
                 Debug.Log("SimpleRobotController: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
-                return false;
+                return;
             }
 
             config.SourceParameter = "";
             config.SavedRobotName = robotName;
-            return LoadRobotFromDescription(robotDescription);
+            LoadRobotFromDescription(robotDescription);
         }
 
         bool LoadRobotFromDescription([CanBeNull] string description)
@@ -369,6 +403,8 @@ namespace Iviz.Controllers
             Visible = Visible;
             RenderAsOcclusionOnly = RenderAsOcclusionOnly;
             Tint = Tint;
+            Smoothness = Smoothness;
+            Metallic = Metallic;
             return true;
         }
 

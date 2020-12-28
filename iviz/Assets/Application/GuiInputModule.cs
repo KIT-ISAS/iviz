@@ -1,10 +1,15 @@
 ﻿using System;
 using Iviz.Resources;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Roslib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.PostProcessing;
@@ -17,12 +22,40 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum QualityType
+    {
+        VeryLow,
+        Low,
+        Medium,
+        High,
+        VeryHigh,
+        Ultra,
+        Mega
+    }
+    
+    [DataContract]
+    public class SettingsConfiguration : JsonToString
+    {
+        [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
+        [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
+        [DataMember] public int NetworkFrameSkip { get; set; } = 1;
+        [DataMember] public int TargetFps { get; set; } = Settings.IsMobile ? GuiInputModule.DefaultFps : 60;
+        [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
+        [DataMember] public int SunDirection{ get; set; } = 0;
+    }    
+    
     public sealed class GuiInputModule : FrameNode
     {
         const float MinShadowDistance = 4;
+        public const int DefaultFps = -1;
 
         public static GuiInputModule Instance { get; private set; }
 
+        readonly SettingsConfiguration config = new SettingsConfiguration();
+
+        [CanBeNull] Light mainLight;
+        
         Vector2 lastPointer;
         Vector2 lastPointerAlt;
         float lastAltDistance;
@@ -87,26 +120,25 @@ namespace Iviz.App
 
         bool PointerDown { get; set; }
 
-        public enum QualityType
+        public int SunDirection
         {
-            VeryLow,
-            Low,
-            Medium,
-            High,
-            VeryHigh,
-            Ultra,
-            Mega
-        }
-
-        QualityType qualityInAr;
-        QualityType qualityInView;
-
-        public QualityType QualityInAr
-        {
-            get => qualityInAr;
+            get => config.SunDirection;
             set
             {
-                qualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
+                config.SunDirection = value;
+                if (mainLight != null)
+                {
+                    mainLight.transform.rotation = Quaternion.Euler(90 + value, 0, 0);
+                }
+            }
+        }
+        
+        public QualityType QualityInAr
+        {
+            get => config.QualityInAr;
+            set
+            {
+                config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
                 if (ARController.HasARController)
                 {
                     QualitySettings.SetQualityLevel((int) value, true);
@@ -116,10 +148,10 @@ namespace Iviz.App
 
         public QualityType QualityInView
         {
-            get => qualityInView;
+            get => config.QualityInView;
             set
             {
-                qualityInView = value;
+                config.QualityInView = value;
                 if (ARController.HasARController)
                 {
                     return;
@@ -141,8 +173,8 @@ namespace Iviz.App
 
         public void UpdateQualityLevel()
         {
-            QualityInAr = qualityInAr;
-            QualityInView = qualityInView;
+            QualityInAr = QualityInAr;
+            QualityInView = QualityInView;
         }
 
         public event Action<Vector2> LongClick;
@@ -174,23 +206,55 @@ namespace Iviz.App
             }
         }
 
-        int targetFps;
-
         public int TargetFps
         {
-            get => targetFps;
+            get => config.TargetFps;
             set
             {
-                targetFps = value;
+                config.TargetFps = value;
                 UnityEngine.Application.targetFrameRate = value;
             }
         }
 
-        public static Color BackgroundColor
+        public Color BackgroundColor
         {
-            get => MainCamera.backgroundColor;
-            set => MainCamera.backgroundColor = new Color(value.r, value.g, value.b, 0);
+            get => config.BackgroundColor;
+            set
+            {
+                config.BackgroundColor = value.WithAlpha(1);
+                
+                Color valueNoAlpha = value.WithAlpha(0);
+                MainCamera.backgroundColor = valueNoAlpha;
+
+                float maxRGB = Mathf.Max(Mathf.Max(value.r, value.g), value.b);
+                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
+                RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
+            }
         }
+        
+        public int NetworkFrameSkip
+        {
+            get => config.NetworkFrameSkip;
+            set
+            {
+                config.NetworkFrameSkip = value;
+                GameThread.NetworkFrameSkip = value;
+            }
+        }        
+        
+        public SettingsConfiguration Config
+        {
+            get => config;
+            set
+            {
+                BackgroundColor = value.BackgroundColor;
+                SunDirection = value.SunDirection;
+                NetworkFrameSkip = value.NetworkFrameSkip;
+                QualityInAr = value.QualityInAr;
+                QualityInView = value.QualityInView;
+                TargetFps = value.TargetFps;
+            }
+        }        
 
         void Awake()
         {
@@ -199,23 +263,23 @@ namespace Iviz.App
 
         void Start()
         {
-            QualitySettings.vSyncCount = 0;
             if (!Settings.IsMobile)
             {
-                TargetFps = 60;
+                QualitySettings.vSyncCount = 0;
+                MainCamera.allowHDR = true;
             }
 
-            QualityInView = QualityType.Ultra;
-            QualityInAr = QualityType.Ultra;
-
-            MainCamera.allowHDR = true;
-
+            Config = new SettingsConfiguration();
+            
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
             canvas.referenceResolution = Settings.IsMobile ? new Vector2(800, 600) : new Vector2(800, 800);
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
+            mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
+
             StartOrbiting();
+            
         }
 
         void OnEnable()

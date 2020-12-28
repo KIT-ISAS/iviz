@@ -187,68 +187,6 @@ namespace Iviz.Core
             return new ArraySegment<T>(ts, offset, count);
         }
 
-        static MaterialPropertyBlock propBlock;
-        static readonly int ColorPropId = Shader.PropertyToID("_Color");
-
-        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            if (propBlock == null)
-            {
-                propBlock = new MaterialPropertyBlock();
-            }
-
-            meshRenderer.GetPropertyBlock(propBlock, id);
-            propBlock.SetColor(ColorPropId, color);
-            meshRenderer.SetPropertyBlock(propBlock, id);
-        }
-
-        static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
-
-        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            if (propBlock == null)
-            {
-                propBlock = new MaterialPropertyBlock();
-            }
-
-            meshRenderer.GetPropertyBlock(propBlock, id);
-            propBlock.SetColor(EmissiveColorPropId, color);
-            meshRenderer.SetPropertyBlock(propBlock, id);
-        }
-
-        static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
-
-        public static void SetPropertyMainTexSt(
-            [NotNull] this MeshRenderer meshRenderer,
-            in Vector2 xy,
-            in Vector2 wh,
-            int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            if (propBlock == null)
-            {
-                propBlock = new MaterialPropertyBlock();
-            }
-
-            meshRenderer.GetPropertyBlock(propBlock, id);
-            propBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
-            meshRenderer.SetPropertyBlock(propBlock, id);
-        }
-
         public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {
             if (resource != null)
@@ -338,9 +276,26 @@ namespace Iviz.Core
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
 
+        static Bounds TransformBoundInverse(Bounds bounds, [NotNull] Transform transform)
+        {
+            Vector3 scale = transform.localScale;
+            return TransformBound(bounds, transform.AsLocalPose().Inverse(),
+                new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z));
+        }
+
         public static Bounds? TransformBound(Bounds? bounds, Pose pose, Vector3 scale)
         {
             return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, pose, scale);
+        }
+
+        public static Bounds? TransformBoundInverse(Bounds? bounds, [NotNull] Transform transform)
+        {
+            if (transform == null)
+            {
+                throw new ArgumentNullException(nameof(transform));
+            }
+
+            return bounds == null ? (Bounds?) null : TransformBoundInverse(bounds.Value, transform);
         }
 
         public static Bounds? TransformBound(Bounds? bounds, [NotNull] Transform transform)
@@ -446,5 +401,82 @@ namespace Iviz.Core
         }
 
         public static T SafeNull<T>(this T o) where T : UnityEngine.Object => o != null ? o : null;
+
+        public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
+        public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
+        public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
+    }
+
+    public static class MeshRendererUtils
+    {
+        static MaterialPropertyBlock propBlock;
+        [NotNull] static MaterialPropertyBlock PropBlock => propBlock ?? (propBlock = new MaterialPropertyBlock());
+
+        static readonly int ColorPropId = Shader.PropertyToID("_Color");
+        static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
+        static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
+        static readonly int SmoothnessPropId = Shader.PropertyToID("_Smoothness");
+        static readonly int MetallicPropId = Shader.PropertyToID("_Metallic");
+
+        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, id);
+            PropBlock.SetColor(ColorPropId, color);
+            meshRenderer.SetPropertyBlock(PropBlock, id);
+        }
+
+        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, id);
+            PropBlock.SetColor(EmissiveColorPropId, color);
+            meshRenderer.SetPropertyBlock(PropBlock, id);
+        }
+        
+        public static void SetPropertySmoothness([NotNull] this MeshRenderer meshRenderer, float smoothness, int id = 0)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, id);
+            PropBlock.SetFloat(SmoothnessPropId, smoothness);
+            meshRenderer.SetPropertyBlock(PropBlock, id);
+        }
+        
+        public static void SetPropertyMetallic([NotNull] this MeshRenderer meshRenderer, float metallic, int id = 0)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, id);
+            PropBlock.SetFloat(MetallicPropId, metallic);
+            meshRenderer.SetPropertyBlock(PropBlock, id);
+        }        
+
+        public static void SetPropertyMainTexSt([NotNull] this MeshRenderer meshRenderer, 
+            in Vector2 xy, in Vector2 wh, int id = 0)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, id);
+            PropBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
+            meshRenderer.SetPropertyBlock(PropBlock, id);
+        }
     }
 }

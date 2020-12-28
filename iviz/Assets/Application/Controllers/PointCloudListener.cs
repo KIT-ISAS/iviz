@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -235,7 +236,7 @@ namespace Iviz.Controllers
         [ContractAnnotation("=> false, result:null; => true, result:notnull")]
         static bool TryGetField([NotNull] PointField[] fields, string name, out PointField result)
         {
-            foreach (var field in fields)
+            foreach (PointField field in fields)
             {
                 if (field.Name != name)
                 {
@@ -257,7 +258,7 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            foreach (var (field, fieldName) in fields.Zip(fieldNames))
+            foreach ((PointField field, string fieldName) in fields.Zip(fieldNames))
             {
                 if (field.Name != fieldName)
                 {
@@ -275,7 +276,7 @@ namespace Iviz.Controllers
                 // we're dead
                 return;
             }
-            
+
             if (msg.PointStep < 3 * sizeof(float) ||
                 msg.RowStep < msg.PointStep * msg.Width ||
                 msg.Data.Length < msg.RowStep * msg.Height)
@@ -329,7 +330,7 @@ namespace Iviz.Controllers
 
             GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
-            var msgHeader = msg.Header;
+            Header msgHeader = msg.Header;
 
             GameThread.PostInListenerQueue(() =>
             {
@@ -362,7 +363,7 @@ namespace Iviz.Controllers
             int iType,
             bool rgbaHint)
         {
-            var xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
+            bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             if (xyzAligned)
             {
                 GeneratePointBufferXYZ(msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
@@ -377,9 +378,9 @@ namespace Iviz.Controllers
             int iType,
             bool rgbaHint)
         {
-            var heightOffset = 0;
-            var rowStep = (int) msg.RowStep;
-            var pointStep = (int) msg.PointStep;
+            int heightOffset = 0;
+            int rowStep = (int) msg.RowStep;
+            int pointStep = (int) msg.PointStep;
 
             Func<byte[], int, float> intensityFn;
             if (rgbaHint)
@@ -420,12 +421,12 @@ namespace Iviz.Controllers
                 }
             }
 
-            for (var v = (int) msg.Height; v > 0; v--, heightOffset += rowStep)
+            for (int v = (int) msg.Height; v > 0; v--, heightOffset += rowStep)
             {
-                var rowOffset = heightOffset;
-                for (var u = (int) msg.Width; u > 0; u--, rowOffset += pointStep)
+                int rowOffset = heightOffset;
+                for (int u = (int) msg.Width; u > 0; u--, rowOffset += pointStep)
                 {
-                    var xyz = new Vector3(
+                    Vector3 xyz = new Vector3(
                         BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
                         BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
                         BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
@@ -451,17 +452,17 @@ namespace Iviz.Controllers
 
             unsafe
             {
-                float4* pointBufferPtr = (float4*) pointBuffer.GetUnsafePtr();
+                var pointBufferPtr = (float4*) pointBuffer.GetUnsafePtr();
                 fixed (byte* dataPtr = msg.Data)
                 {
-                    float4* pointBufferOff = pointBufferPtr;
-                    byte* dataRowOff = dataPtr;
+                    var pointBufferOff = pointBufferPtr;
+                    var dataRowOff = dataPtr;
                     switch (iType)
                     {
                         case PointField.FLOAT32 when iOffset == 12:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float4 data = *(float4*) dataOff;
@@ -478,7 +479,7 @@ namespace Iviz.Controllers
                         case PointField.FLOAT32:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -496,7 +497,7 @@ namespace Iviz.Controllers
                         case PointField.FLOAT64:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -514,7 +515,7 @@ namespace Iviz.Controllers
                         case PointField.INT8:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -532,7 +533,7 @@ namespace Iviz.Controllers
                         case PointField.UINT8:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -550,7 +551,7 @@ namespace Iviz.Controllers
                         case PointField.INT16:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -568,7 +569,7 @@ namespace Iviz.Controllers
                         case PointField.UINT16:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -586,7 +587,7 @@ namespace Iviz.Controllers
                         case PointField.INT32:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -604,7 +605,7 @@ namespace Iviz.Controllers
                         case PointField.UINT32:
                             for (int v = height; v > 0; v--, dataRowOff += rowStep)
                             {
-                                byte* dataOff = dataRowOff;
+                                var dataOff = dataRowOff;
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
@@ -633,8 +634,8 @@ namespace Iviz.Controllers
 
             if (pointCloud != null)
             {
-                pointCloud.DisposeDisplay();  
-            } 
+                pointCloud.DisposeDisplay();
+            }
 
             node.Stop();
             Object.Destroy(node.gameObject);

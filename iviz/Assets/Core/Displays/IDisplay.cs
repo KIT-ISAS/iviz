@@ -26,12 +26,14 @@ namespace Iviz.Displays
         /// Gets or sets whether the display is visible. 
         /// </summary>
         bool Visible { get; set; }
+        
+        string Name { get; set; }
     }
     
     /// <summary>
     /// Interface for displays that support the AR occlusion mode.
     /// </summary>
-    public interface ISupportsAROcclusion : IDisplay
+    public interface ISupportsAROcclusion
     {
         /// <summary>
         /// Gets or sets whether the occlusion mode is active. 
@@ -42,19 +44,17 @@ namespace Iviz.Displays
     /// <summary>
     /// Interface for displays that support color tinting.
     /// </summary>
-    public interface ISupportsTint : IDisplay
+    public interface ISupportsTint
     {
         /// <summary>
         /// Gets or sets the color tint.
         /// </summary>
         Color Tint { get; set; }
     }
-
-    /// <summary>
-    /// Interface for displays that support both occlusion mode and color tinting.
-    /// </summary>
-    public interface ISupportsTintAndAROcclusion : ISupportsAROcclusion, ISupportsTint
+    
+    public interface ISupportsPbr
     {
-    }
-
+        float Metallic { get; set; }
+        float Smoothness { get; set; }
+    }    
 }

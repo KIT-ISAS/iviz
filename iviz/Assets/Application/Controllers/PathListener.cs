@@ -263,7 +263,7 @@ namespace Iviz.Controllers
                     continue;
                 }
 
-                savedPoses.Add(new Pose(p.Ros2Unity(), Quaternion.identity));
+                savedPoses.Add(Pose.identity.WithPosition(p.Ros2Unity()));
             }
 
             savedPoses.Add(savedPoses[0]);

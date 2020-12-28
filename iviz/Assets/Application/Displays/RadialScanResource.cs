@@ -34,6 +34,13 @@ namespace Iviz.Displays
         bool colliderEnabled;
         bool visible = true;
         int layer;
+        
+        [NotNull]
+        public string Name
+        {
+            get => gameObject.name;
+            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
+        }        
 
         public int Size
         {

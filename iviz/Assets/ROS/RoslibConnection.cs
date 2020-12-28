@@ -382,6 +382,16 @@ namespace Iviz.Ros
         public void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
             where T : IService, new()
         {
+            AdvertiseService(service, (T t) =>
+            {
+                callback(t);
+                return Task.CompletedTask;
+            });
+        }
+
+        public void AdvertiseService<T>([NotNull] string service, [NotNull] Func<T, Task> callback)
+            where T : IService, new()
+        {
             if (service == null)
             {
                 throw new ArgumentNullException(nameof(service));
@@ -405,7 +415,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task AdvertiseServiceImpl<T>([NotNull] string service, [NotNull] Action<T> callback)
+        async Task AdvertiseServiceImpl<T>([NotNull] string service, [NotNull] Func<T, Task> callback)
             where T : IService, new()
         {
             if (servicesByTopic.ContainsKey(service))
@@ -544,7 +554,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Subscribe(): ", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Subscribe()", e);
                 }
             });
         }
@@ -577,7 +587,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise()", e);
                 }
             });
         }
@@ -623,7 +633,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe()", e);
                 }
             });
         }
@@ -648,17 +658,12 @@ namespace Iviz.Ros
         }
 
         [NotNull]
-        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
-            RequestType type = RequestType.CachedButRequestInBackground)
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedOnly)
             {
                 return cachedTopics;
             }
-
-            SemaphoreSlim signal = type == RequestType.WaitForRequest
-                ? new SemaphoreSlim(0, 1)
-                : null;
 
             AddTask(async () =>
             {
@@ -668,20 +673,39 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes(): ", e);
-                }
-                finally
-                {
-                    signal?.Release();
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes()", e);
                 }
             });
 
-            signal?.Wait();
             return cachedTopics;
         }
+        
+        [NotNull]
+        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs, CancellationToken token = default)
+        {
+            SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+
+            AddTask(async () =>
+            {
+                try
+                {
+                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync(token);
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes()", e);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+
+            return await signal.WaitAsync(timeoutInMs, token) ? cachedTopics : null;
+        }        
 
         [NotNull]
-        public ReadOnlyCollection<string> GetSystemParameterList()
+        public IEnumerable<string> GetSystemParameterList()
         {
             AddTask(async () =>
             {
@@ -697,21 +721,21 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList()", e);
                 }
             });
 
             return cachedParameters;
         }
 
-        public object GetParameter([NotNull] string parameter)
+        public async Task<object> GetParameterAsync([NotNull] string parameter, int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            var signal = new SemaphoreSlim(0, 1);
+            var signal = new SemaphoreSlim(0);
             object result = null;
 
             AddTask(async () =>
@@ -725,13 +749,13 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.GetParameter(): ", e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
                 }
 
                 signal.Release();
             });
 
-            signal.Wait();
+            await signal.WaitAsync(timeoutInMs, token);
             return result;
         }
 
@@ -1096,28 +1120,11 @@ namespace Iviz.Ros
             [NotNull] readonly Func<T, Task> callback;
             [NotNull] readonly string service;
 
-            public AdvertisedService([NotNull] string service, [NotNull] Action<T> callback)
-            {
-                this.service = service ?? throw new ArgumentNullException(nameof(service));
-                if (callback == null)
-                {
-                    throw new ArgumentNullException(nameof(callback));
-                }
-
-                this.callback = t =>
-                {
-                    callback(t);
-                    return Task.CompletedTask;
-                };
-            }
-
-            /*
             public AdvertisedService([NotNull] string service, [NotNull] Func<T, Task> callback)
             {
                 this.service = service ?? throw new ArgumentNullException(nameof(service));
                 this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
             }
-            */
 
             public async Task AdvertiseAsync(RosClient client)
             {

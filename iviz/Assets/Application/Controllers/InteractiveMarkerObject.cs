@@ -32,8 +32,9 @@ namespace Iviz.Controllers
         GameObject controlNode;
 
         string rosId;
+        bool visible;
 
-        Pose? cachedPose;
+        Pose? bufferedPose;
         bool poseUpdateEnabled = true;
 
         internal bool PoseUpdateEnabled
@@ -42,10 +43,10 @@ namespace Iviz.Controllers
             set
             {
                 poseUpdateEnabled = value;
-                if (poseUpdateEnabled && cachedPose != null)
+                if (poseUpdateEnabled && bufferedPose != null)
                 {
-                    controlNode.transform.SetLocalPose(cachedPose.Value);
-                    cachedPose = null;
+                    controlNode.transform.SetLocalPose(bufferedPose.Value);
+                    bufferedPose = null;
                 }
             }
         }
@@ -67,12 +68,10 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    cachedPose = value;
+                    bufferedPose = value;
                 }
             }
         }
-
-        bool visible;
 
         public bool Visible
         {
@@ -126,12 +125,12 @@ namespace Iviz.Controllers
 
             if (Mathf.Approximately(msg.Scale, 0))
             {
-                transform.localScale = Vector3.one;
+                controlNode.transform.localScale = Vector3.one;
                 description.Append("Scale: 0 <i>(1)</i>").AppendLine();
             }
             else
             {
-                transform.localScale = msg.Scale * Vector3.one;
+                controlNode.transform.localScale = msg.Scale * Vector3.one;
                 description.Append("Scale: ").Append(msg.Scale).AppendLine();
             }
 
@@ -183,8 +182,8 @@ namespace Iviz.Controllers
 
 
             // update the dimensions of the controls
-            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = controls.Values
-                .Select(marker => (marker.Bounds, marker.transform));
+            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = 
+                controls.Values.Select(control => (control.Bounds, control.transform));
 
             Bounds? totalBounds =
                 UnityUtils.CombineBounds(
@@ -219,7 +218,6 @@ namespace Iviz.Controllers
 
         public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
         {
-            //Debug.Log("Received: " + rosPose.Ros2Unity() + "  ---   Actual:" + controlNode.transform.AsLocalPose());
             LocalPose = rosPose.Ros2Unity();
         }
 
@@ -230,8 +228,9 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener?.OnInteractiveControlObjectMouseEvent(rosId, rosControlId, controlNode.transform.AsLocalPose(),
-                point, type);
+            var pose = controlNode.transform.AsLocalPose();
+            listener?.OnInteractiveControlObjectMouseEvent(rosId, rosControlId,
+                Parent != null ? Parent.Id : null, pose, point, type);
         }
 
         internal void OnMoved(string rosControlId)
@@ -241,7 +240,9 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, controlNode.transform.AsLocalPose());
+            var pose = controlNode.transform.AsLocalPose();
+            listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, 
+                Parent != null ? Parent.Id : null, pose);
         }
 
         void OnMenuClick(uint entryId)
@@ -251,7 +252,9 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener?.OnInteractiveControlObjectMenuSelect(rosId, "", entryId, controlNode.transform.AsLocalPose());
+            listener?.OnInteractiveControlObjectMenuSelect(rosId, 
+                Parent != null ? Parent.Id : null, entryId,
+                controlNode.transform.AsLocalPose());
         }
 
         public override void Stop()
