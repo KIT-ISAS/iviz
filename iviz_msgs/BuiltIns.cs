@@ -21,13 +21,20 @@ namespace Iviz.Msgs
             string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
             if (constant == null)
             {
-                throw new ArgumentException("Failed to resolve constant '" + name + "' in class " + type.FullName,
+                throw new ArgumentException($"Failed to resolve constant '{name}' in class {type.FullName}",
                     nameof(name));
             }
 
             return constant;
         }
 
+        /// <summary>
+        /// Returns the ROS message name of the given message type.
+        /// </summary>
+        /// <param name="type">The message type. Should derive from IMessage.</param>
+        /// <returns>The ROS message type.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
+        /// <exception cref="ArgumentException">Thrown if the type does not implement IMessage.</exception>
         public static string GetMessageType(Type type)
         {
             if (type == null)
@@ -38,6 +45,13 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosMessageType");
         }
 
+        /// <summary>
+        /// Returns the ROS service name of the given service type.
+        /// </summary>
+        /// <param name="type">The message type. Should derive from IService.</param>
+        /// <returns>The ROS service type.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
+        /// <exception cref="ArgumentException">Thrown if the type does not implement IService.</exception>
         public static string GetServiceType(Type type)
         {
             if (type == null)
@@ -48,6 +62,13 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosServiceType");
         }
 
+        /// <summary>
+        /// Returns the MD5 value of the given message or service type.
+        /// </summary>
+        /// <param name="type">The message type. Should derive from IMessage or IService.</param>
+        /// <returns>The MD5 value.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
+        /// <exception cref="ArgumentException">Thrown if the type does not implement IMessage or IService.</exception>
         public static string GetMd5Sum(Type type)
         {
             if (type == null)
@@ -58,6 +79,13 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosMd5Sum");
         }
 
+        /// <summary>
+        /// Checks if the size of the ROS message type is fixed, and returns it.
+        /// </summary>
+        /// <param name="type">The message type. Should derive from IMessage.</param>
+        /// <param name="size">The fixed size, if it exists.</param>
+        /// <returns>True if the message has a fixed size.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if the type is null.</exception>
         public static bool TryGetFixedSize(Type type, out int size)
         {
             if (type == null)
