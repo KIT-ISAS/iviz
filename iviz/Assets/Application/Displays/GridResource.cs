@@ -161,7 +161,10 @@ namespace Iviz.Displays
             interiorRenderer.sharedMaterial = Resource.Materials.GridInterior.Object;
             interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             interiorRenderer.receiveShadows = true;
-            //interiorRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            
+            // the grid "jumps" every meter to center itself under the camera
+            // this breaks motion blur, so we tell the camera to ignore the motion of the grid
+            interiorRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.Camera; // camera only
 
             Orientation = GridOrientation.XY;
             GridColor = Color.white.WithAlpha(0.25f);

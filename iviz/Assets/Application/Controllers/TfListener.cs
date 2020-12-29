@@ -34,9 +34,9 @@ namespace Iviz.Controllers
 
     public sealed class TfListener : ListenerController
     {
-        const string DefaultTopicStatic = "/tf_static";
         public const string DefaultTopic = "/tf";
-        public const string BaseFrameId = "map";
+        const string DefaultTopicStatic = "/tf_static";
+        const string BaseFrameId = "map";
 
         static uint tfSeq;
 
@@ -46,8 +46,9 @@ namespace Iviz.Controllers
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         readonly FrameNode keepAllListener;
         readonly FrameNode staticListener;
+        readonly FrameNode fixedFrameListener;
 
-        string fixedFrameId;
+        [NotNull] TfFrame fixedFrame;
 
         public TfListener([NotNull] IModuleData moduleData)
         {
@@ -64,6 +65,7 @@ namespace Iviz.Controllers
 
             keepAllListener = FrameNode.Instantiate("[TFNode]");
             staticListener = FrameNode.Instantiate("[TFStatic]");
+            fixedFrameListener = FrameNode.Instantiate("[TFFixedFrame]");
             defaultListener.transform.parent = UnityFrame.Transform;
 
             Config = new TfConfiguration();
@@ -85,23 +87,36 @@ namespace Iviz.Controllers
             MapFrame.AddListener(defaultListener);
             MapFrame.ParentCanChange = false;
 
+            fixedFrame = MapFrame;
+
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
+            FixedFrameId = "";
             GameThread.LateEveryFrame += LateUpdate;
         }
 
         [CanBeNull]
         public static string FixedFrameId
         {
-            get => Instance.fixedFrameId;
+            get => Instance.fixedFrame.Id;
             set
             {
-                Instance.fixedFrameId = string.IsNullOrEmpty(value) ? BaseFrameId : value;
-                Pose originPose =
-                    value != null && Instance.TryGetFrameImpl(value, out TfFrame frame)
-                        ? frame.WorldPose.Inverse()
-                        : Pose.identity;
-                OriginFrame.Transform.SetLocalPose(originPose);
+                if (Instance.fixedFrame != null)
+                {
+                    Instance.fixedFrame.RemoveListener(Instance.fixedFrameListener);
+                }
+
+                if (string.IsNullOrEmpty(value) || !TryGetFrame(value, out TfFrame frame))
+                {
+                    Instance.fixedFrame = MapFrame;
+                    OriginFrame.Transform.SetLocalPose(Pose.identity);
+                }
+                else
+                {
+                    Instance.fixedFrame = frame;
+                    Instance.fixedFrame.AddListener(Instance.fixedFrameListener);
+                    OriginFrame.Transform.SetLocalPose(frame.WorldPose.Inverse());
+                }
             }
         }
 
@@ -443,10 +458,7 @@ namespace Iviz.Controllers
         {
             ProcessAll();
 
-            if (FixedFrameId != null && TryGetFrameImpl(FixedFrameId, out TfFrame child))
-            {
-                OriginFrame.Transform.SetLocalPose(child.WorldPose.Inverse());
-            }
+            OriginFrame.Transform.SetLocalPose(fixedFrame.WorldPose.Inverse());
         }
 
         public override void StopController()

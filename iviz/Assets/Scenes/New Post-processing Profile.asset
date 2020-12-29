@@ -1,5 +1,33 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7766283382846204906
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 556797029e73b2347956b6579e77e05b, type: 3}
+  m_Name: DepthOfField
+  m_EditorClassIdentifier: 
+  active: 0
+  enabled:
+    overrideState: 1
+    value: 1
+  focusDistance:
+    overrideState: 1
+    value: 2
+  aperture:
+    overrideState: 1
+    value: 7.1
+  focalLength:
+    overrideState: 1
+    value: 50
+  kernelSize:
+    overrideState: 1
+    value: 2
 --- !u!114 &-4471620987677225426
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -56,6 +84,7 @@ MonoBehaviour:
   - {fileID: 2787914538547017645}
   - {fileID: 9082294906118008534}
   - {fileID: 4080682499310139496}
+  - {fileID: -7766283382846204906}
 --- !u!114 &2787914538547017645
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -105,16 +134,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b94fcd11afffcb142908bfcb1e261fba, type: 3}
   m_Name: MotionBlur
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   enabled:
     overrideState: 1
     value: 1
   shutterAngle:
     overrideState: 1
-    value: 90
+    value: 270
   sampleCount:
     overrideState: 1
-    value: 10
+    value: 5
 --- !u!114 &5838275743702444692
 MonoBehaviour:
   m_ObjectHideFlags: 3

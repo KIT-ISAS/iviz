@@ -17,6 +17,7 @@ namespace Iviz.Ros
     public interface IListener
     {
         [NotNull] string Topic { get; }
+        [NotNull] string Type { get; }
         RosListenerStats Stats { get; }
         int NumPublishers { get; }
         int MaxQueueSize { set; }
@@ -30,7 +31,7 @@ namespace Iviz.Ros
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
-        
+
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
         readonly Action<T> delayedHandler;
         readonly Func<T, bool> directHandler;
@@ -73,13 +74,18 @@ namespace Iviz.Ros
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
-            
+
             Connection.Subscribe(this);
             Subscribed = true;
         }
 
+        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : 
+            this(topic, (T t) => handler(t))
+        {
+        }
+
         public string Topic { get; }
-        string Type { get; }
+        public string Type { get; }
         public RosListenerStats Stats { get; private set; }
         public int NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 50;

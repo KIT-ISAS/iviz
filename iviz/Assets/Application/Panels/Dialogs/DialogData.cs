@@ -11,12 +11,21 @@ namespace Iviz.App
         protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
         [NotNull] public abstract IDialogPanelContents Panel { get; }
 
+        /// <summary>
+        /// Called once when the dialog is selected.
+        /// </summary>
         public abstract void SetupPanel();
 
+        /// <summary>
+        /// Called when the dialog is closed or replaced.
+        /// </summary>
         public virtual void CleanupPanel()
         {
         }
 
+        /// <summary>
+        /// Called every second.
+        /// </summary>
         public virtual void UpdatePanel()
         {
         }

@@ -51,6 +51,7 @@ namespace Iviz.App
         [SerializeField] Button showNetwork = null;
         [SerializeField] Button showConsole = null;
         [SerializeField] Button showSettings = null;
+        [SerializeField] Button showEcho = null;
 
         [SerializeField] Sprite connectedSprite = null;
         [SerializeField] Sprite connectingSprite = null;
@@ -87,6 +88,7 @@ namespace Iviz.App
         NetworkDialogData networkData;
         ConsoleDialogData consoleData;
         SettingsDialogData settingsData;
+        EchoDialogData echoData;
 
         ControllerService controllerService;
 
@@ -177,6 +179,7 @@ namespace Iviz.App
             connectionData = new ConnectionDialogData();
             consoleData = new ConsoleDialogData();
             settingsData = new SettingsDialogData();
+            echoData = new EchoDialogData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -204,6 +207,7 @@ namespace Iviz.App
             showNetwork.onClick.AddListener(networkData.Show);
             showConsole.onClick.AddListener(consoleData.Show);
             showSettings.onClick.AddListener(settingsData.Show);
+            showEcho.onClick.AddListener(echoData.Show);
 
             string MasterUriToString(Uri uri) =>
                 uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";

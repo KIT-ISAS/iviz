@@ -289,7 +289,7 @@ namespace Iviz.Controllers
                 lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
                 SenderPoint.Publish(new PointStamped
                 {
-                    Header = RosUtils.CreateHeader(clickedSeq++, timestamp: time.Now()),
+                    Header = RosUtils.CreateHeader(clickedSeq++),
                     Point = lastTapPosition.Value
                 });
                 ModuleData.ResetPanel();

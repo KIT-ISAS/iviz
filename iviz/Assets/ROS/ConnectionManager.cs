@@ -59,7 +59,7 @@ namespace Iviz.Ros
         {
             logSender.Publish(new Log
             {
-                Header = RosUtils.CreateHeader(logSeq++, timestamp: time.Now()),
+                Header = RosUtils.CreateHeader(logSeq++),
                 Level = (byte) msg.Level,
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message,

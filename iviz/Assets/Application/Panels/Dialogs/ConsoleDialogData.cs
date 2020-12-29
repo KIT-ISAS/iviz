@@ -155,7 +155,6 @@ namespace Iviz.App
             LogMessage[] messages = messageQueue.ToArray();
             foreach (var message in messages)
             {
-                Debug.Log(message.Message);
                 var messageLevel = message.Level;
                 if (messageLevel < minLogLevel)
                 {

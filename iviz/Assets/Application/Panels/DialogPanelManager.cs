@@ -19,6 +19,7 @@ namespace Iviz.App
         Network,
         Console,
         Settings,
+        Echo,
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -53,6 +54,7 @@ namespace Iviz.App
                 (DialogPanelType.Network, CreatePanel<NetworkDialogContents>(Resource.Widgets.NetworkPanel)),
                 (DialogPanelType.Console, CreatePanel<ConsoleDialogContents>(Resource.Widgets.ConsolePanel)),
                 (DialogPanelType.Settings, CreatePanel<SettingsDialogContents>(Resource.Widgets.SettingsPanel)),
+                (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
             };
 
             foreach (var (type, panel) in list)

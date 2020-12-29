@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
@@ -243,19 +244,18 @@ namespace Iviz.Controllers
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
 
-                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TfListener.BaseFrameId : AttachToFrame;
-
                 Vector2 linear = XIsFront ? new Vector2(leftDir.y, -leftDir.x) : new Vector2(leftDir.x, leftDir.y);
 
                 Twist twist = new Twist(
-                    new Msgs.GeometryMsgs.Vector3(linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
-                    new Msgs.GeometryMsgs.Vector3(0, 0, -rightDir.x * MaxSpeed.z)
+                    (linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
+                    (0, 0, -rightDir.x * MaxSpeed.z)
                 );
 
                 if (UseTwistStamped)
                 {
+                    string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                     TwistStamped twistStamped = new TwistStamped(
-                        RosUtils.CreateHeader(twistSeq++, frame),
+                        RosUtils.CreateHeader(twistSeq++, frameId),
                         twist
                     );
                     SenderTwist.Publish(twistStamped);
@@ -271,10 +271,9 @@ namespace Iviz.Controllers
                 Vector2 leftDir = Joystick.Left;
                 Vector2 rightDir = Joystick.Right;
 
-                string frame = string.IsNullOrWhiteSpace(AttachToFrame) ? TfListener.BaseFrameId : AttachToFrame;
-
+                string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                 Joy joy = new Joy(
-                    RosUtils.CreateHeader(joySeq++, frame),
+                    RosUtils.CreateHeader(joySeq++, frameId),
                     new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
                     Array.Empty<int>()
                 );
