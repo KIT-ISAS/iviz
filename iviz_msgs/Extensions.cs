@@ -3,7 +3,7 @@ using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Msgs
 {
-    public static class MsgUtils
+    public static class Extensions
     {
         public static Quaternion Multiply(in Quaternion a, in Quaternion b)
         {

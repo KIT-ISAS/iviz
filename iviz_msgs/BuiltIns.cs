@@ -109,7 +109,7 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosDependenciesBase64");
         }
 
-        public static string DecompressDependency(Type type)
+        public static string DecompressDependencies(Type type)
         {
             if (type == null)
             {

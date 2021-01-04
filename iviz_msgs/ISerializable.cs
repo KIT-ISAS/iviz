@@ -4,9 +4,8 @@ namespace Iviz.Msgs
 {
     /// <summary>
     /// Attribute that tells the Unity Engine not to strip these fields even if no code accesses them.
-    /// (Note: Their only requirement is that the attribute must have the exact name 'Preserve')
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Method)]
     public class PreserveAttribute : Attribute
     {
     }
@@ -35,7 +34,7 @@ namespace Iviz.Msgs
         void RosValidate();
         
         /// <summary>
-        /// Deserializes a new message from information read from the given buffer.
+        /// Creates a new message and deserializes into it the information read from the given buffer.
         /// </summary>
         /// <param name="b">
         /// Buffer object.
@@ -46,7 +45,7 @@ namespace Iviz.Msgs
     public interface IDeserializable<out T> where T : ISerializable
     {
         /// <summary>
-        /// Deserializes a new message from information read from the given buffer.
+        /// Creates a new message an deserializes into it the information read from the given buffer.
         /// </summary>
         /// <param name="b">
         /// Buffer object.

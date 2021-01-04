@@ -25,7 +25,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Memcpy(void* dst, void* src, uint size)
+        static void MemoryCopy(void* dst, void* src, uint size)
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
         }
@@ -40,11 +40,10 @@ namespace Iviz.Msgs
 
             if (ptr == default && end == default)
             {
-                throw new InvalidOperationException("Buffer has not been initialized!");
+                throw new BufferException("Buffer has not been initialized!");
             }
 
-            throw new IndexOutOfRangeException(
-                $"Buffer: Requested {off} bytes, but only {(end - ptr)} remain!");
+            throw new BufferException($"Requested {off} bytes, but only {end - ptr} remain!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -57,7 +56,8 @@ namespace Iviz.Msgs
 
             if (array.Length != size)
             {
-                throw new IndexOutOfRangeException($"Cannot write {array.Length} values into array of fixed size {size}.");
+                throw new IndexOutOfRangeException(
+                    $"Cannot write {array.Length} values into array of fixed size {size}.");
             }
         }
 
@@ -88,7 +88,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        string[] DeserializeStringArray(uint count)
+        public string[] DeserializeStringArray(uint count)
         {
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
@@ -133,7 +133,7 @@ namespace Iviz.Msgs
             fixed (T* bPtr = val)
             {
                 uint size = count * (uint) sizeof(T);
-                Memcpy(bPtr, ptr, size);
+                MemoryCopy(bPtr, ptr, size);
                 ptr += size;
             }
 
@@ -164,7 +164,10 @@ namespace Iviz.Msgs
             ThrowIfOutOfRange(4 + count);
             *(uint*) ptr = count;
             ptr += 4;
-            if (count == 0) { return; }
+            if (count == 0)
+            {
+                return;
+            }
 
             fixed (char* bPtr = val)
             {
@@ -174,7 +177,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray(string[] val, uint count)
+        public void SerializeArray(string[] val, uint count = 0)
         {
             if (count == 0)
             {
@@ -194,7 +197,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeStructArray<T>(T[] val, uint count) where T : unmanaged
+        public void SerializeStructArray<T>(T[] val, uint count = 0) where T : unmanaged
         {
             if (count == 0)
             {
@@ -211,13 +214,13 @@ namespace Iviz.Msgs
             fixed (T* bPtr = val)
             {
                 uint size = (uint) (val.Length * sizeof(T));
-                Memcpy(ptr, bPtr, size);
+                MemoryCopy(ptr, bPtr, size);
                 ptr += size;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray<T>(T[] val, uint count) where T : IMessage
+        public void SerializeArray<T>(T[] val, uint count = 0) where T : IMessage
         {
             if (count == 0)
             {
@@ -324,8 +327,8 @@ namespace Iviz.Msgs
                 Buffer b = new Buffer(bPtr + offset, bPtr + span);
                 return generator.RosDeserialize(ref b);
             }
-        }        
-        
+        }
+
         /// <summary>
         /// Serializes the given message into the buffer array.
         /// </summary>
