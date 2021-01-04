@@ -19,12 +19,12 @@ namespace Iviz.MsgsGen
         public string RosClassName { get; }
         public string CsFieldName { get; }
         public string CsClassName { get; }
-        internal int ArraySize { get; }
+        public int ArraySize { get; }
         public bool IsArray => ArraySize != NotAnArray;
         public bool IsDynamicSizeArray => ArraySize == DynamicSizeArray;
         public bool IsFixedSizeArray => ArraySize > 0;
         public int FixedArraySize => IsFixedSizeArray ? ArraySize : -1;
-        public ClassInfo ClassInfo { get; internal set; }
+        public ClassInfo? ClassInfo { get; internal set; }
         public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassName);
         public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
 
@@ -48,8 +48,10 @@ namespace Iviz.MsgsGen
             "override",
         };
 
-        internal VariableElement(string comment, string rosClassToken, string fieldName, string parentClassName = null,
-            ClassInfo classInfo = null)
+        internal VariableElement(string comment, string rosClassToken, string fieldName,
+            string? parentClassName = null,
+            ClassInfo? classInfo = null
+            )
         {
             Comment = comment;
             this.rosClassToken = rosClassToken;
@@ -100,7 +102,7 @@ namespace Iviz.MsgsGen
                 RosClassName = "std_msgs/Header";
                 CsClassName = "StdMsgs.Header";
             }
-            else if (MsgParser.BuiltInsMaps.TryGetValue(RosClassName, out string className))
+            else if (MsgParser.BuiltInsMaps.TryGetValue(RosClassName, out string? className))
             {
                 CsClassName = className;
             }
@@ -176,11 +178,11 @@ namespace Iviz.MsgsGen
             return $"{rosClassToken} {RosFieldName}";
         }
 
-        public string GetEntryForMd5Hash()
+        public string? GetEntryForMd5Hash(string parentPackageName)
         {
             if (ClassInfo != null)
             {
-                return $"{ClassInfo.GetMd5()} {RosFieldName}";
+                return $"{ClassInfo.Md5Hash} {RosFieldName}";
             }
 
             if (ClassInfo.IsBuiltinType(RosClassName))
@@ -199,12 +201,15 @@ namespace Iviz.MsgsGen
                 return $"{CachedHeaderMd5} {RosFieldName}";
             }
 
+            string fullRosClassName =
+                RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
+            
             // is it in the assembly?
-            Type guessType = BuiltIns.TryGetTypeFromMessageName(RosClassName);
+            Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
             if (guessType == null)
             {
                 // nope? we bail out
-                Console.WriteLine($"EE Cannot find md5 for {RosClassName}. Produced file will not be valid!");
+                Console.WriteLine($"EE Cannot find md5 for {fullRosClassName}. Produced file will not be valid!");
                 return null;
             }
 

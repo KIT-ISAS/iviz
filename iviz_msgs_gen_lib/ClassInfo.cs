@@ -24,6 +24,9 @@ namespace Iviz.MsgsGen
 
     public sealed class ClassInfo
     {
+        public const string DependencySeparator =
+            "================================================================================";
+
         internal const int UninitializedSize = -2;
         const int UnknownSizeAtCompileTime = -1;
 
@@ -47,7 +50,6 @@ namespace Iviz.MsgsGen
             {"char", 1},
             {"byte", 1}
         };
-
 
         static readonly HashSet<string> BuiltInTypes = new HashSet<string>
         {
@@ -100,61 +102,102 @@ namespace Iviz.MsgsGen
             "iviz_msgs/Vector2f",
             "iviz_msgs/Vector3f",
             "iviz_msgs/Triangle",
-            "iviz_msgs/BoundingBox",
+            "iviz_msgs/BoundingBox"
         };
-
-        internal static bool IsClassForceStruct(string f) => ForceStructs.Contains(f);
-        internal static bool IsBuiltinType(string f) => BuiltInTypes.Contains(f);
 
         static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
 
+        readonly ActionMessageType actionMessageType;
+        readonly string? actionRoot;
         readonly string csPackage;
         readonly IElement[] elements;
         readonly string fullMessageText;
         readonly VariableElement[] variables;
+        string? md5;
+        string? md5File;
 
-        public int FixedSize { get; internal set; } = UninitializedSize;
-        public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
-        public ReadOnlyCollection<IElement> Elements { get; }
-
-        ActionMessageType ActionMessageType { get; }
-        string ActionRoot { get; }
-
-        string md5;
-        string md5File;
-
-        public ClassInfo(string package, string path)
+        public ClassInfo(string packageName, string messageFilePath, bool forceStruct = false) :
+            this(packageName, Path.GetFileNameWithoutExtension(messageFilePath), ReadFile(messageFilePath), forceStruct)
         {
-            if (package == null)
+        }
+
+        static string ReadFile(string messageFilePath)
+        {
+            if (messageFilePath == null)
             {
-                throw new ArgumentNullException(nameof(package));
+                throw new ArgumentNullException(nameof(messageFilePath));
             }
 
-            if (path == null)
+            if (!File.Exists(messageFilePath))
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new FileNotFoundException($"File {messageFilePath} does not exist.");
             }
 
-            if (!File.Exists(path))
+            Console.WriteLine($"-- Parsing '{messageFilePath}'");
+
+            return File.ReadAllText(messageFilePath);
+        }
+
+        static bool IsVariableForStruct(string rosPackage, VariableElement v)
+        {
+            if (v.IsArray || v.RosClassName == "string")
             {
-                throw new ArgumentException($"File {path} does not exist.");
+                return false;
             }
 
-            Console.WriteLine($"-- Parsing '{path}'");
+            if (BuiltInTypes.Contains(v.RosClassName))
+            {
+                return true;
+            }
 
-            RosPackage = package;
+            string resolvedName = v.RosClassName.Contains("/") ? $"{rosPackage}/{v.RosClassName}" : v.RosClassName;
+            return ForceStructs.Contains(resolvedName);
+        }
+
+        public ClassInfo(string package, string messageName, string messageDefinition, bool forceStruct = false)
+        {
+            if (messageName == null)
+            {
+                throw new ArgumentNullException(nameof(messageName));
+            }
+            
+            int lastSlash = messageName.LastIndexOf('/');
+            if (lastSlash != -1)
+            {
+                if (!string.IsNullOrEmpty(package))
+                {
+                    throw new ArgumentException("Message name contains a package, but package argument is also set!");
+                }
+
+                package = messageName.Substring(0, lastSlash);
+                messageName = messageName.Substring(lastSlash + 1);
+            }
+
+            RosPackage = package ?? throw new ArgumentNullException(nameof(package));
             csPackage = MsgParser.CsIfiy(package);
-            Name = Path.GetFileNameWithoutExtension(path);
-            fullMessageText = File.ReadAllText(path);
+            Name = messageName;
+            fullMessageText = messageDefinition;
 
-            var lines = File.ReadAllLines(path);
+            var lines = fullMessageText.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
             elements = MsgParser.ParseFile(lines, Name).ToArray();
             Elements = new ReadOnlyCollection<IElement>(elements);
+            if (forceStruct)
+            {
+                if (!variables.All(variable => IsVariableForStruct(RosPackage, variable)))
+                {
+                    throw new MessageStructException();
+                }
 
-            ForceStruct = ForceStructs.Contains($"{package}/{Name}");
+                ForceStruct = true;
+            }
+            else if (ForceStructs.Contains($"{RosPackage}/{Name}"))
+            {
+                ForceStruct = true;
+            }
 
             variables = elements.OfType<VariableElement>().ToArray();
         }
+
 
         public ClassInfo(string package, string name, IEnumerable<IElement> newElements) :
             this(package, name, newElements, null, ActionMessageType.None)
@@ -162,7 +205,7 @@ namespace Iviz.MsgsGen
         }
 
         internal ClassInfo(string package, string name, IEnumerable<IElement> newElements,
-            string actionRoot, ActionMessageType actionMessageType)
+            string? actionRoot, ActionMessageType actionMessageType)
         {
             if (package == null)
             {
@@ -193,22 +236,35 @@ namespace Iviz.MsgsGen
 
             variables = elements.OfType<VariableElement>().ToArray();
 
-            ActionRoot = actionRoot;
-            ActionMessageType = actionMessageType;
+            this.actionRoot = actionRoot;
+            this.actionMessageType = actionMessageType;
         }
 
+        public int FixedSize { get; internal set; } = UninitializedSize;
+        public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
+        public ReadOnlyCollection<IElement> Elements { get; }
         public string RosPackage { get; }
         public string Name { get; }
         public bool ForceStruct { get; }
         public string FullRosName => $"{RosPackage}/{Name}";
 
+        internal static bool IsClassForceStruct(string f)
+        {
+            return ForceStructs.Contains(f);
+        }
+
+        internal static bool IsBuiltinType(string f)
+        {
+            return BuiltInTypes.Contains(f);
+        }
+
         internal static void DoResolveClasses(PackageInfo packageInfo, string package,
             IEnumerable<VariableElement> variables)
         {
-            foreach (var variable in variables)
+            foreach (VariableElement variable in variables)
             {
                 if (!BuiltInsSizes.ContainsKey(variable.RosClassName) &&
-                    packageInfo.TryGet(variable.RosClassName, package, out var classInfo))
+                    packageInfo.TryGet(variable.RosClassName, package, out ClassInfo? classInfo))
                 {
                     variable.ClassInfo = classInfo;
                 }
@@ -223,11 +279,11 @@ namespace Iviz.MsgsGen
         internal static int DoCheckFixedSize(IEnumerable<VariableElement> variables)
         {
             int fixedSize = 0;
-            foreach (var variable in variables)
+            foreach (VariableElement variable in variables)
             {
                 if (!variable.IsDynamicSizeArray)
                 {
-                    if (BuiltInsSizes.TryGetValue(variable.RosClassName, out var size))
+                    if (BuiltInsSizes.TryGetValue(variable.RosClassName, out int size))
                     {
                         fixedSize += variable.IsFixedSizeArray ? size * variable.ArraySize : size;
                     }
@@ -267,12 +323,12 @@ namespace Iviz.MsgsGen
             int fixedSize,
             bool forceStruct)
         {
-            var readOnlyId = forceStruct ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
             if (fixedSize != UnknownSizeAtCompileTime)
             {
                 return new[]
                 {
-                    $"/// <summary> Constant size of this message. </summary>",
+                    "/// <summary> Constant size of this message. </summary>",
                     $"[Preserve] public const int RosFixedMessageLength = {fixedSize};",
                     "",
                     $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
@@ -283,15 +339,15 @@ namespace Iviz.MsgsGen
             {
                 return new[]
                 {
-                    $"public {readOnlyId}int RosMessageLength => 0;",
+                    $"public {readOnlyId}int RosMessageLength => 0;"
                 };
             }
 
             var fieldsWithSize = new List<string>();
-            var fieldSize = 0;
-            foreach (var variable in variables)
+            int fieldSize = 0;
+            foreach (VariableElement variable in variables)
             {
-                if (BuiltInsSizes.TryGetValue(variable.RosClassName, out var size))
+                if (BuiltInsSizes.TryGetValue(variable.RosClassName, out int size))
                 {
                     if (!variable.IsArray)
                     {
@@ -373,7 +429,7 @@ namespace Iviz.MsgsGen
             lines.Add("{");
             lines.Add("    get {");
             lines.Add($"        int size = {fieldSize};");
-            foreach (var entry in fieldsWithSize)
+            foreach (string entry in fieldsWithSize)
             {
                 lines.Add($"        {entry}");
             }
@@ -411,7 +467,7 @@ namespace Iviz.MsgsGen
                 lines.Add("/// <summary> Constructor for empty message. </summary>");
                 lines.Add($"public {name}()");
                 lines.Add("{");
-                foreach (var variable in variables)
+                foreach (VariableElement variable in variables)
                 {
                     if (BuiltInTypes.Contains(variable.RosClassName))
                     {
@@ -462,10 +518,10 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("/// <summary> Explicit constructor. </summary>");
 
-                var args = string.Join(", ", variables.Select(ParamToArg));
+                string args = string.Join(", ", variables.Select(ParamToArg));
                 lines.Add($"public {name}({args})");
                 lines.Add("{");
-                foreach (var variable in variables)
+                foreach (VariableElement variable in variables)
                 {
                     if (variable.ArraySize > 0 && forceStruct)
                     {
@@ -498,7 +554,7 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                foreach (var variable in variables)
+                foreach (VariableElement variable in variables)
                 {
                     if (BuiltInTypes.Contains(variable.RosClassName))
                     {
@@ -578,7 +634,7 @@ namespace Iviz.MsgsGen
             lines.Add("");
 
 
-            var readOnlyId = forceStruct ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
             lines.Add($"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b)");
             lines.Add("{");
             if (variables.Any())
@@ -587,7 +643,7 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                lines.Add($"    return Singleton;");
+                lines.Add("    return Singleton;");
             }
 
             lines.Add("}");
@@ -601,19 +657,19 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                lines.Add($"    return Singleton;");
+                lines.Add("    return Singleton;");
             }
 
             lines.Add("}");
 
             if (forceStruct)
             {
-                var myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
+                string myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
 
                 if (myVars.Length == 0)
                 {
                     lines.Add("");
-                    lines.Add($"public override readonly int GetHashCode() => 0;");
+                    lines.Add("public override readonly int GetHashCode() => 0;");
                     lines.Add("");
                     lines.Add($"public override readonly bool Equals(object? o) => o is {name};");
                     lines.Add("");
@@ -632,7 +688,7 @@ namespace Iviz.MsgsGen
                     lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
                     lines.Add("");
 
-                    var oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
+                    string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
 
                     lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
                     lines.Add("");
@@ -656,7 +712,7 @@ namespace Iviz.MsgsGen
         {
             var lines = new List<string>();
 
-            var readOnlyId = forceStruct ? "readonly " : "";
+            string readOnlyId = forceStruct ? "readonly " : "";
 
             lines.Add($"public {readOnlyId}void RosSerialize(ref Buffer b)");
             lines.Add("{");
@@ -666,7 +722,7 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                foreach (var variable in variables)
+                foreach (VariableElement variable in variables)
                 {
                     if (BuiltInTypes.Contains(variable.RosClassName))
                     {
@@ -702,7 +758,7 @@ namespace Iviz.MsgsGen
             lines.Add("");
             lines.Add($"public {readOnlyId}void RosValidate()");
             lines.Add("{");
-            foreach (var variable in variables)
+            foreach (VariableElement variable in variables)
             {
                 if (variable.ArraySize > 0)
                 {
@@ -759,7 +815,7 @@ namespace Iviz.MsgsGen
 
         public string ToCsString()
         {
-            var str = new StringBuilder();
+            StringBuilder str = new StringBuilder();
 
             str.AppendLine("/* This file was created automatically, do not edit! */");
             str.AppendLine();
@@ -775,7 +831,7 @@ namespace Iviz.MsgsGen
             str.AppendLine($"namespace Iviz.Msgs.{csPackage}");
             str.AppendLine("{");
 
-            foreach (var entry in CreateClassContent())
+            foreach (string entry in CreateClassContent())
             {
                 str.Append("    ").AppendLine(entry);
             }
@@ -790,17 +846,17 @@ namespace Iviz.MsgsGen
             var lines = new List<string>();
             var inputBytes = Utf8.GetBytes(catDependencies);
 
-            using var outputStream = new MemoryStream();
+            using MemoryStream outputStream = new MemoryStream();
 
-            using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+            using (GZipStream gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
             {
                 gZipStream.Write(inputBytes, 0, inputBytes.Length);
             }
 
-            var base64 = Convert.ToBase64String(outputStream.ToArray());
+            string base64 = Convert.ToBase64String(outputStream.ToArray());
 
             const int lineWidth = 80;
-            for (var i = 0; i < base64.Length; i += lineWidth)
+            for (int i = 0; i < base64.Length; i += lineWidth)
             {
                 bool last;
                 int end;
@@ -815,7 +871,7 @@ namespace Iviz.MsgsGen
                     end = base64.Length;
                 }
 
-                var sub = base64.Substring(i, end - i);
+                string sub = base64.Substring(i, end - i);
                 if (!last)
                 {
                     lines.Add($"\"{sub}\" +");
@@ -845,18 +901,18 @@ namespace Iviz.MsgsGen
             else
             {
                 string line = $"public sealed class {Name} : IDeserializable<{Name}>";
-                string fullLine = ActionMessageType switch
+                string fullLine = actionMessageType switch
                 {
                     ActionMessageType.None => $"{line}, IMessage",
-                    ActionMessageType.Goal => $"{line}, IGoal<{ActionRoot}ActionGoal>",
-                    ActionMessageType.Feedback => $"{line}, IFeedback<{ActionRoot}ActionFeedback>",
-                    ActionMessageType.Result => $"{line}, IResult<{ActionRoot}ActionResult>",
-                    ActionMessageType.ActionGoal => $"{line}, IActionGoal<{ActionRoot}Goal>",
-                    ActionMessageType.ActionFeedback => $"{line}, IActionFeedback<{ActionRoot}Feedback>",
-                    ActionMessageType.ActionResult => $"{line}, IActionResult<{ActionRoot}Result>",
+                    ActionMessageType.Goal => $"{line}, IGoal<{actionRoot}ActionGoal>",
+                    ActionMessageType.Feedback => $"{line}, IFeedback<{actionRoot}ActionFeedback>",
+                    ActionMessageType.Result => $"{line}, IResult<{actionRoot}ActionResult>",
+                    ActionMessageType.ActionGoal => $"{line}, IActionGoal<{actionRoot}Goal>",
+                    ActionMessageType.ActionFeedback => $"{line}, IActionFeedback<{actionRoot}Feedback>",
+                    ActionMessageType.ActionResult => $"{line}, IActionResult<{actionRoot}Result>",
                     ActionMessageType.Action =>
-                        $"{line},\n\t\tIAction<{ActionRoot}ActionGoal, {ActionRoot}ActionFeedback, {ActionRoot}ActionResult>",
-                    _ => throw new ArgumentOutOfRangeException($"Unknown action message type {ActionMessageType}")
+                        $"{line},\n\t\tIAction<{actionRoot}ActionGoal, {actionRoot}ActionFeedback, {actionRoot}ActionResult>",
+                    _ => throw new MessageParseException($"Unknown action message type {actionMessageType}")
                 };
                 lines.Add(fullLine);
             }
@@ -864,7 +920,7 @@ namespace Iviz.MsgsGen
             lines.Add("{");
 
             var csElements = elements.SelectMany(element => element.ToCsString(ForceStruct));
-            foreach (var entry in csElements)
+            foreach (string entry in csElements)
             {
                 lines.Add($"    {entry}");
             }
@@ -875,14 +931,14 @@ namespace Iviz.MsgsGen
             }
 
             var constructors = CreateConstructors(variables, Name, ForceStruct);
-            foreach (var entry in constructors)
+            foreach (string entry in constructors)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
             var serializer = CreateSerializers(variables, ForceStruct);
-            foreach (var entry in serializer)
+            foreach (string entry in serializer)
             {
                 lines.Add($"    {entry}");
             }
@@ -891,13 +947,13 @@ namespace Iviz.MsgsGen
 
             CheckFixedSize();
             var lengthProperty = CreateLengthProperty(variables, FixedSize, ForceStruct);
-            foreach (var entry in lengthProperty)
+            foreach (string entry in lengthProperty)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            var readOnlyId = ForceStruct ? "readonly " : "";
+            string readOnlyId = ForceStruct ? "readonly " : "";
             lines.Add($"    public {readOnlyId}string RosType => RosMessageType;");
 
             lines.Add("");
@@ -907,10 +963,9 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            string md5Property = GetMd5Property();
             lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
             lines.Add(
-                $"    [Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};");
+                $"    [Preserve] public const string RosMd5Sum = {(Md5Hash.Length == 0 ? "null" : $"\"{Md5Hash}\"")};");
 
             lines.Add("");
 
@@ -918,9 +973,9 @@ namespace Iviz.MsgsGen
                 "    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
             lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
 
-            var catDependencies = GetCatDependencies();
+            string catDependencies = CreateCatDependencies();
             var compressedDeps = Compress(catDependencies);
-            foreach (var entry in compressedDeps)
+            foreach (string entry in compressedDeps)
             {
                 lines.Add($"            {entry}");
             }
@@ -928,7 +983,7 @@ namespace Iviz.MsgsGen
             if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
             {
                 lines.Add("    /// Custom iviz code");
-                foreach (var entry in extraLines)
+                foreach (string entry in extraLines)
                 {
                     lines.Add($"    {entry}");
                 }
@@ -941,7 +996,7 @@ namespace Iviz.MsgsGen
 
         void AddDependencies(ICollection<ClassInfo> dependencies)
         {
-            foreach (var variable in variables)
+            foreach (VariableElement variable in variables)
             {
                 if (variable.ClassInfo != null &&
                     !dependencies.Contains(variable.ClassInfo))
@@ -952,17 +1007,17 @@ namespace Iviz.MsgsGen
             }
         }
 
-        string GetCatDependencies()
+        public string CreateCatDependencies()
         {
             var dependencies = new List<ClassInfo>();
             AddDependencies(dependencies);
 
-            var builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
             builder.AppendLine(fullMessageText);
 
-            foreach (var classInfo in dependencies)
+            foreach (ClassInfo classInfo in dependencies)
             {
-                builder.AppendLine("================================================================================");
+                builder.AppendLine(DependencySeparator);
                 builder.AppendLine($"MSG: {classInfo.RosPackage}/{classInfo.Name}");
                 builder.AppendLine(classInfo.fullMessageText);
             }
@@ -970,27 +1025,11 @@ namespace Iviz.MsgsGen
             return builder.ToString();
         }
 
-        string GetMd5Property()
+        public string Md5Hash => md5 ??= CalculateMd5();
+
+        string CalculateMd5()
         {
-            GetMd5();
-
-            /*
-#pragma warning disable CA5351
-            using MD5 md5Hash = MD5.Create();
-#pragma warning restore CA5351
-            return GetMd5Hash(md5Hash, md5File);
-            */
-            return md5;
-        }
-
-        internal string GetMd5()
-        {
-            if (md5 != null)
-            {
-                return md5;
-            }
-
-            var str = new StringBuilder();
+            StringBuilder str = new StringBuilder();
 
             var md5Constants = elements
                 .OfType<ConstantElement>()
@@ -1005,11 +1044,10 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var md5Variables = variables.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            var md5Variables = variables.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (md5Variables.Any(md5String => md5String == null))
             {
-                md5 = "";
-                return md5;
+                return ""; // shouldn't happen, exception thrown earlier
             }
 
             str.Append(string.Join("\n", md5Variables));
@@ -1020,16 +1058,14 @@ namespace Iviz.MsgsGen
             using MD5 md5Hash = MD5.Create();
 #pragma warning restore CA5351
 
-            md5 = GetMd5Hash(md5Hash, md5File);
-
-            return md5;
+            return GetMd5Hash(md5Hash, md5File);
         }
 
         internal static string GetMd5Hash(MD5 md5Hash, string input)
         {
             var data = md5Hash.ComputeHash(Utf8.GetBytes(input));
-            var sBuilder = new StringBuilder();
-            foreach (var b in data)
+            StringBuilder sBuilder = new StringBuilder();
+            foreach (byte b in data)
             {
                 sBuilder.Append(b.ToString("x2", Culture));
             }

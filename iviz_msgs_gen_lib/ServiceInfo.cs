@@ -18,7 +18,7 @@ namespace Iviz.MsgsGen
         int fixedSizeReq = ClassInfo.UninitializedSize;
         int fixedSizeResp = ClassInfo.UninitializedSize;
 
-        string md5;
+        string? md5;
 
         public ServiceInfo(string package, string path)
         {
@@ -49,7 +49,7 @@ namespace Iviz.MsgsGen
             int serviceSeparator = elements.FindIndex(x => x.Type == ElementType.ServiceSeparator);
             if (serviceSeparator == -1)
             {
-                throw new InvalidDataException("Service file has no separator");
+                throw new MessageParseException("Service file has no separator");
             }
 
             elementsReq = elements.GetRange(0, serviceSeparator).ToArray();
@@ -133,21 +133,6 @@ namespace Iviz.MsgsGen
             return lines;
         }
 
-        /*
-        void AddDependencies(List<ClassInfo> dependencies, List<VariableElement> variables)
-        {
-            foreach (var variable in variables)
-            {
-                if (variable.ClassInfo != null &&
-                    !dependencies.Contains(variable.ClassInfo))
-                {
-                    dependencies.Add(variable.ClassInfo);
-                    variable.ClassInfo.AddDependencies(dependencies);
-                }
-            }
-        }
-        */
-
         string GetMd5()
         {
             if (md5 != null)
@@ -168,7 +153,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var reqHashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            var reqHashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (reqHashVariables.Any(md5String => md5String == null))
             {
                 return "";
@@ -188,7 +173,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var respHashVariables = variablesResp.Select(x => x.GetEntryForMd5Hash()).ToArray();
+            var respHashVariables = variablesResp.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (respHashVariables.Any(md5String => md5String == null))
             {
                 return "";

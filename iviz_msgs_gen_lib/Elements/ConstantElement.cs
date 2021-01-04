@@ -28,7 +28,7 @@ namespace Iviz.MsgsGen
             string commentStr = Comment.Length == 0 ? "" : $" //{Comment}";   
 
             string result;
-            if (MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string alias))
+            if (MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string? alias))
             {
                 if (alias != "time" && alias != "duration")
                 {

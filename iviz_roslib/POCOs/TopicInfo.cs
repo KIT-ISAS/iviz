@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Msgs;
+using Iviz.MsgsGen.Dynamic;
 
 namespace Iviz.Roslib
 {
@@ -10,10 +11,10 @@ namespace Iviz.Roslib
     {
         readonly IDeserializable<T>? generator;
 
-        TopicInfo(string messageDefinition, string callerId, string topic, string md5Sum, string type,
+        TopicInfo(string messageDependencies, string callerId, string topic, string md5Sum, string type,
             IDeserializable<T>? generator)
         {
-            MessageDefinition = messageDefinition;
+            MessageDependencies = messageDependencies;
             CallerId = callerId;
             Topic = topic;
             Md5Sum = md5Sum;
@@ -23,7 +24,7 @@ namespace Iviz.Roslib
 
         public TopicInfo(string callerId, string topic, IDeserializable<T>? generator = null)
             : this(
-                BuiltIns.DecompressDependency(typeof(T)),
+                BuiltIns.DecompressDependencies(typeof(T)),
                 callerId, topic,
                 BuiltIns.GetMd5Sum(typeof(T)),
                 BuiltIns.GetMessageType(typeof(T)),
@@ -32,10 +33,23 @@ namespace Iviz.Roslib
         {
         }
 
+        public TopicInfo(string callerId, string topic, DynamicMessage generator)
+            : this(
+                generator.RosInstanceDependencies ??
+                throw new NullReferenceException("Dynamic message has not been initialized"),
+                callerId, topic,
+                generator.RosInstanceMd5Sum ??
+                throw new NullReferenceException("Dynamic message has not been initialized"),
+                generator.RosType,
+                generator as IDeserializable<T> ??
+                throw new InvalidOperationException("Type T needs to be DynamicMessage"))
+        {
+        }
+
         /// <summary>
         ///     Concatenated dependencies file.
         /// </summary>
-        public string MessageDefinition { get; }
+        public string MessageDependencies { get; }
 
         /// <summary>
         ///     ROS name of this node.

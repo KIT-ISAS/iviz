@@ -49,13 +49,13 @@ namespace Iviz.MsgsGen
             {
                 "public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);", 
                 "public static readonly Quaternion Identity = (0, 0, 0, 1);", 
-                "public static Quaternion operator *(in Quaternion a, in Quaternion b) => MsgUtils.Multiply(a, b).Normalized;",
-                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => MsgUtils.Multiply(q, v);",
+                "public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;",
+                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);",
                 "public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;",
-                "public readonly Quaternion Normalized => MsgUtils.Normalize(this);",
+                "public readonly Quaternion Normalized => Extensions.Normalize(this);",
                 "public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);",
                 "public static implicit operator Quaternion((Vector3 XYZ, double W) p) => new Quaternion(p.XYZ.X, p.XYZ.Y, p.XYZ.Z, p.W);",
-                "public static Quaternion AngleAxis(double angleInRad, Vector3 axis) => (System.Math.Sin(angleInRad / 2) * axis, System.Math.Cos(angleInRad / 2));",            
+                "public static Quaternion AngleAxis(double angleInRad, Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);",            
             },
             
             ["geometry_msgs/Transform"] = new[]

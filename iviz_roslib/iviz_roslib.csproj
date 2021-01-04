@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
     <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />
   </ItemGroup>
   <ItemGroup>

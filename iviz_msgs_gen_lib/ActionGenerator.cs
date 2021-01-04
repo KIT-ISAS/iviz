@@ -8,7 +8,7 @@ namespace Iviz.MsgsGen
 {
     public static class ActionGenerator
     {
-        public static ClassInfo[] GenerateFor(string package, string path)
+        public static ClassInfo[]? GenerateFor(string package, string path)
         {
             string[] lines = File.ReadAllLines(path);
             string actionName = Path.GetFileNameWithoutExtension(path);
@@ -48,7 +48,7 @@ namespace Iviz.MsgsGen
             {
                 new VariableElement("", "Header", "header"),
                 new VariableElement("", "actionlib_msgs/GoalID", "goal_id"),
-                new VariableElement("", $"{actionName}Goal", "goal", null, goalInfo),
+                new VariableElement("", $"{actionName}Goal", "goal", null,  goalInfo),
             };
             ClassInfo actionGoalInfo = new ClassInfo(package, $"{actionName}ActionGoal", actionGoalElements, actionName,
                 ActionMessageType.ActionGoal);

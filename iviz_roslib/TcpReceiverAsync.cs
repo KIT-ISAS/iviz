@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.MsgsGen;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -19,7 +22,8 @@ namespace Iviz.Roslib
         const int DisposeTimeoutInMs = 2000;
 
         readonly TcpReceiverManager<T> manager;
-        readonly TopicInfo<T> topicInfo;
+
+        TopicInfo<T> topicInfo;
         readonly bool requestNoDelay;
 
         Endpoint remoteEndpoint;
@@ -158,7 +162,7 @@ namespace Iviz.Roslib
         {
             string[] contents =
             {
-                $"message_definition={topicInfo.MessageDefinition}",
+                $"message_definition={topicInfo.MessageDependencies}",
                 $"callerid={topicInfo.CallerId}",
                 $"topic={topicInfo.Topic}",
                 $"md5sum={topicInfo.Md5Sum}",
@@ -217,15 +221,40 @@ namespace Iviz.Roslib
             }
 
             List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
-            if (responses.Count == 0 || !responses[0].HasPrefix("error"))
+            if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
-                return;
+                int index = responses[0].IndexOf('=');
+                string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+                errorDescription = errorMsg;
+                throw new RosHandshakeException($"Failed handshake: {errorMsg}");
             }
 
-            int index = responses[0].IndexOf('=');
-            string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-            errorDescription = errorMsg;
-            throw new RosHandshakeException($"Failed handshake: {errorMsg}");
+            if (DynamicMessage.IsDynamic<T>())
+            {
+                GenerateNewTopicInfo(responses);
+            }
+        }
+
+        void GenerateNewTopicInfo(List<string> responses)
+        {
+            const string typePrefix = "type=";
+            const string definitionPrefix = "message_definition=";
+
+            string callerId = topicInfo.CallerId;
+            string topicName = topicInfo.Topic;
+            string? dynamicType = responses.FirstOrDefault(
+                entry => entry.HasPrefix(typePrefix))?.Substring(typePrefix.Length);
+            string? dynamicDependency = responses.FirstOrDefault(
+                entry => entry.HasPrefix(definitionPrefix))?.Substring(definitionPrefix.Length);
+            if (dynamicType == null || dynamicDependency == null)
+            {
+                throw new RosHandshakeException(
+                    "Partner did not send type and definition, required to instantiate dynamic messages.");
+            }
+
+            ClassInfo dynamicMessageInfo = DynamicMessage.CreateFromDependencyString(dynamicType, dynamicDependency);
+            DynamicMessage generator = new DynamicMessage(dynamicMessageInfo);
+            topicInfo = new TopicInfo<T>(callerId, topicName, generator);
         }
 
         async Task StartSession()
@@ -324,7 +353,7 @@ namespace Iviz.Roslib
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, fixedSize, 4);
                 manager.MessageCallback(message);
-                
+
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
             }
@@ -343,7 +372,7 @@ namespace Iviz.Roslib
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
                 manager.MessageCallback(message);
-                
+
                 numReceived++;
                 bytesReceived += rcvLength + 4;
             }

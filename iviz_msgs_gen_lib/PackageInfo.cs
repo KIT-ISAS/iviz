@@ -2,37 +2,48 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 
 namespace Iviz.MsgsGen
 {
     public sealed class PackageInfo
     {
-        readonly Dictionary<string, ClassInfo> messages = new Dictionary<string, ClassInfo>();
-        readonly Dictionary<string, ServiceInfo> services = new Dictionary<string, ServiceInfo>();
+        readonly Dictionary<string, ClassInfo> messages;
+        readonly Dictionary<string, ServiceInfo> services;
         readonly HashSet<string> packages = new HashSet<string>();
 
         public PackageInfo()
         {
+            messages = new Dictionary<string, ClassInfo>();
+            services = new Dictionary<string, ServiceInfo>();
             Messages = new ReadOnlyDictionary<string, ClassInfo>(messages);
             Services = new ReadOnlyDictionary<string, ServiceInfo>(services);
         }
 
+        public PackageInfo(IEnumerable<ClassInfo> messages, IEnumerable<ServiceInfo> services)
+        {
+            this.messages = messages.ToDictionary(message => message.FullRosName, message => message);
+            this.services = services.ToDictionary(service => service.FullRosName, service => service);
+            Messages = new ReadOnlyDictionary<string, ClassInfo>(this.messages);
+            Services = new ReadOnlyDictionary<string, ServiceInfo>(this.services);
+        }
+        
         public IReadOnlyDictionary<string, ClassInfo> Messages { get; }
         public IReadOnlyDictionary<string, ServiceInfo> Services { get; }
 
-        static void GetFilesWithExtension(string path, ICollection<string> msgs, string ext)
+        static void GetFilesWithExtension(string path, ICollection<string> messages, string ext)
         {
             string[] files = Directory.GetFiles(path);
             foreach (string file in files)
             {
                 if (Path.GetExtension(file) == ext && Path.GetFileName(file)[0] != '.')
                 {
-                    msgs.Add(file);
+                    messages.Add(file);
                 }
             }
 
             string[] dirs = Directory.GetDirectories(path);
-            foreach (string dir in dirs) GetFilesWithExtension(dir, msgs, ext);
+            foreach (string dir in dirs) GetFilesWithExtension(dir, messages, ext);
         }
 
         static void CollectMsgFiles(string path, ICollection<string> fullMsgPaths)
@@ -106,7 +117,7 @@ namespace Iviz.MsgsGen
             
         }
 
-        internal bool TryGet(string name, string package, out ClassInfo classInfo)
+        internal bool TryGet(string name, string package, out ClassInfo? classInfo)
         {
             return
                 messages.TryGetValue(name, out classInfo) ||
