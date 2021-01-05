@@ -156,7 +156,7 @@ namespace Iviz.App
                 status.enabled = value;
             }
         }
-
+        
         void Awake()
         {
             instance = this;
@@ -348,6 +348,14 @@ namespace Iviz.App
         {
             AllGuiVisible = !AllGuiVisible;
             EventSystem.current.SetSelectedGameObject(null);
+        }
+
+        public void SetConnectionData(string masterUri, string myUri, string myId)
+        {
+            connectionData.MasterUri = new Uri(masterUri);
+            connectionData.MyUri = new Uri(myUri);
+            connectionData.MyId = myId;
+            ConnectionManager.Connection.KeepReconnecting = true;
         }
 
         public void SaveStateConfiguration([NotNull] string file)

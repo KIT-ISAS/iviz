@@ -260,11 +260,6 @@ namespace Iviz.Controllers
         {
             axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(Transform);
 
-            if (Settings.IsHololens)
-            {
-                axis.ColliderEnabled = false;
-            }
-
             axis.ColliderEnabled = true;
             axis.Layer = LayerType.IgnoreRaycast;
             axis.name = "[Axis]";

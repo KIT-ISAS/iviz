@@ -37,16 +37,18 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(str));
             }
 
-            string[] sublines = str.Split('\n');
-            lines.AddRange(sublines);
+            string[] subLines = str.Split('\n');
+            lines.AddRange(subLines);
         }
 
         public void Flush()
         {
+            /*
             if (Settings.IsHololens)
             {
                 return;
             }
+            */
 
             if (!Active)
             {

@@ -178,14 +178,14 @@ namespace Iviz.Hololens
         void StartRosConnection()
         {
 #if UNITY_EDITOR
-            ConnectionManager.Connection.MyUri = new Uri("http://141.3.59.11:7613");
-            ConnectionManager.Connection.MyId = "/iviz_win_hololens";
+            const string myUri ="http://141.3.59.11:7613";
+            const string myId = "/iviz_win_hololens";
 #else
-            ConnectionManager.Connection.MyUri = new Uri("http://141.3.59.45:7613");
-            ConnectionManager.Connection.MyId = "/iviz_hololens";
+            const string myUri = "http://141.3.59.45:7613";
+            const string myId = "/iviz_hololens";
 #endif
-            ConnectionManager.Connection.MasterUri = new Uri("http://141.3.59.5:11311");
-            ConnectionManager.Connection.KeepReconnecting = true;
+            const string masterUri = "http://141.3.59.5:11311";
+            ModuleListPanel.Instance.SetConnectionData(masterUri, myUri, myId);
         }
 
         void StartPalms()
@@ -273,10 +273,10 @@ namespace Iviz.Hololens
                 new HololensMenuEntry("Set World Scale", SetWorldScale),
                 new HololensMenuEntry("Reposition Origin", StartOriginPlaceMode),
                 new HololensMenuEntry("Toggle TF Visibility", ToggleTfVisibility),
-                new HololensMenuEntry("Reset All", ResetAll),
-                new HololensMenuEntry("Show Console", ShowConsoleLog),
-                new HololensMenuEntry("Print Listener Status", PrintListenerStatus),
-                new HololensMenuEntry("Reconnect", Reconnect),
+                //new HololensMenuEntry("Reset All", ResetAll),
+                new HololensMenuEntry("Show Canvas", ShowConsoleLog),
+                //new HololensMenuEntry("Print Listener Status", PrintListenerStatus),
+                //new HololensMenuEntry("Reconnect", Reconnect),
             };
             hololensHandMenu.SetPalm(entries);
         }
@@ -343,7 +343,7 @@ namespace Iviz.Hololens
                     .Append(listener.NumPublishers).Append(" publishers").AppendLine();
             }
 
-            Logger.External(str.ToString());
+            Logger.Info(str.ToString());
         }
 
         void Reconnect()

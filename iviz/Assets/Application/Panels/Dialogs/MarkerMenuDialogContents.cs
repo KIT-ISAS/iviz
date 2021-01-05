@@ -12,11 +12,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    interface IMenuDialogContents
-    {
-        void Set([NotNull] MenuEntryList menu, Vector3 positionHint, Action<uint> callback);
-    }
-    
     public sealed class MarkerMenuDialogContents : ItemListDialogContents, IMenuDialogContents
     {
         const int MaxPanelSizeInEntries = 7;
@@ -35,7 +30,7 @@ namespace Iviz.App
             }
         }
 
-        Action<uint> callback;
+        [CanBeNull] Action<uint> callback;
 
         void Awake()
         {
@@ -48,7 +43,7 @@ namespace Iviz.App
 
         public void Set(MenuEntryList menu, Vector3 positionHint, Action<uint> newCallback)
         {
-            callback = newCallback;
+            callback = newCallback ?? throw new ArgumentNullException(nameof(newCallback));
             menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
             CurrentEntries = menuEntryList.GetDescriptionsFor(null);
             gameObject.SetActive(true);

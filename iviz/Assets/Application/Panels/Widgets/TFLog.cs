@@ -192,10 +192,12 @@ namespace Iviz.App
 
         public void Flush()
         {
+            /*
             if (Settings.IsHololens)
             {
                 return;
             }
+            */
 
             Initialize();
 

@@ -67,10 +67,12 @@ namespace Iviz.Ros
                 Line = (uint) msg.Line
             });
 
+            /*
             if (Settings.IsHololens && logSender.NumSubscribers == 0)
             {
                 Logger.Internal(msg.Message);
             }
+            */
         }
 
         internal static void ReportBandwidthUp(long size)
