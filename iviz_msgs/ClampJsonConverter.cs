@@ -4,6 +4,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Iviz.Msgs
 {
+    /// <summary>
+    /// JSON serializer that shortens arrays and strings
+    /// </summary>
     public class ClampJsonConverter : JsonConverter
     {
         readonly int maxStringLength;

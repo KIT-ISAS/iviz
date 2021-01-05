@@ -29,7 +29,6 @@ namespace Iviz.MsgsGen.Dynamic
             ["byte"] = typeof(byte),
         };
 
-        readonly Property[] fields;
         public ReadOnlyCollection<Property> Fields { get; }
         public string RosType { get; }
         public string? RosInstanceMd5Sum { get; }
@@ -40,7 +39,7 @@ namespace Iviz.MsgsGen.Dynamic
         public DynamicMessage()
         {
             RosType = "";
-            fields = Array.Empty<Property>();
+            var fields = Array.Empty<Property>();
             Fields = new ReadOnlyCollection<Property>(fields);
         }
 
@@ -140,7 +139,7 @@ namespace Iviz.MsgsGen.Dynamic
                 newFields.Add(new Property(name, field));
             }
 
-            fields = newFields.ToArray();
+            var fields = newFields.ToArray();
             Fields = new ReadOnlyCollection<Property>(fields);
         }
 
@@ -149,10 +148,10 @@ namespace Iviz.MsgsGen.Dynamic
             RosType = other.RosType;
             RosInstanceMd5Sum = other.RosInstanceMd5Sum;
             RosInstanceDependencies = other.RosInstanceDependencies;
-            fields = new Property[other.fields.Length];
+            var fields = new Property[other.Fields.Count];
             for (int i = 0; i < fields.Length; i++)
             {
-                fields[i] = new Property(other.fields[i].Name, other.fields[i].Value.Generate());
+                fields[i] = new Property(other.Fields[i].Name, other.Fields[i].Value.Generate());
             }
 
             Fields = new ReadOnlyCollection<Property>(fields);
@@ -163,7 +162,7 @@ namespace Iviz.MsgsGen.Dynamic
             get
             {
                 int size = 0;
-                foreach (var field in fields)
+                foreach (var field in Fields)
                 {
                     size += field.Value.RosMessageLength;
                 }
@@ -174,7 +173,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosValidate()
         {
-            foreach (var field in fields)
+            foreach (var field in Fields)
             {
                 field.Value.RosValidate();
             }
@@ -182,7 +181,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosSerialize(ref Buffer b)
         {
-            foreach (var field in fields)
+            foreach (var field in Fields)
             {
                 field.Value.RosSerialize(ref b);
             }
@@ -190,7 +189,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref Buffer b)
         {
-            foreach (var field in fields)
+            foreach (var field in Fields)
             {
                 field.Value.RosDeserializeInPlace(ref b);
             }
@@ -201,7 +200,7 @@ namespace Iviz.MsgsGen.Dynamic
             return Generate();
         }
 
-        object IField.Value => fields;
+        object IField.Value => Fields;
 
         DynamicMessage Generate()
         {
