@@ -363,7 +363,7 @@ namespace Iviz.Roslib.XmlRpc
         private protected bool hasParseError;
 
         public int Code { get; protected set; }
-        public string? StatusMessage { get; protected set; }
+        public string StatusMessage { get; protected set; } = "";
         public bool IsValid => Code == StatusCode.Success && !hasParseError;
     }
 
