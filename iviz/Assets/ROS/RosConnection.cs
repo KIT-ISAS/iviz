@@ -37,7 +37,9 @@ namespace Iviz.Ros
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
-        public abstract Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token) where T : IService;
+
+        public abstract Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+            where T : IService;
 
         public event Action<ConnectionState> ConnectionStateChanged;
         public event Action<bool> ConnectionWarningStateChanged;
@@ -71,6 +73,13 @@ namespace Iviz.Ros
             Signal();
         }
 
+        protected void ClearTaskQueue()
+        {
+            while (toDos.TryDequeue(out _))
+            {
+            }
+        }
+
         protected void Signal()
         {
             signal.Release();
@@ -84,8 +93,8 @@ namespace Iviz.Ros
                 while (keepRunning)
                 {
                     DateTime now = DateTime.Now;
-                    if (KeepReconnecting 
-                        && ConnectionState != ConnectionState.Connected 
+                    if (KeepReconnecting
+                        && ConnectionState != ConnectionState.Connected
                         && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
                     {
                         SetConnectionState(ConnectionState.Connecting);
