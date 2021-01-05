@@ -5,14 +5,16 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class MessageField<T> : IField where T : IMessage, IDeserializable<T>, new()
+    public sealed class MessageField<T> : IField<T> where T : IMessage, IDeserializable<T>, new()
     {
         static readonly IDeserializable<T> Generator = new T();
 
         public T Value { get; set; } = new T();
 
         object IField.Value => Value;
-
+        
+        public FieldType Type => FieldType.Message;
+        
         public int RosMessageLength => Value.RosMessageLength;
 
         public void RosValidate()

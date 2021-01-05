@@ -14,6 +14,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         object IField.Value => Value;
 
+        public FieldType Type => FieldType.DynamicMessageArray;
+
         public DynamicMessageArrayField(DynamicMessage generator)
         {
             this.generator = generator;

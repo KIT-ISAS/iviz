@@ -5,12 +5,14 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class StringField : IField
+    public sealed class StringField : IField
     {
         public string Value { get; set; } = "";
 
         object IField.Value => Value;
 
+        public FieldType Type => FieldType.String;
+        
         public int RosMessageLength => 4 + BuiltIns.UTF8.GetByteCount(Value);
 
         public void RosValidate()

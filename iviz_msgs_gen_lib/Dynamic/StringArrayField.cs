@@ -5,11 +5,13 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class StringArrayField : IField
+    public sealed class StringArrayField : IField<string[]>
     {
         public string[] Value { get; set; } = Array.Empty<string>();
 
         object IField.Value => Value;
+        
+        public FieldType Type => FieldType.StringArray;
 
         public int RosMessageLength
         {

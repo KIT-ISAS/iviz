@@ -14,6 +14,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         object IField.Value => Value;
 
+        public FieldType Type => FieldType.DynamicMessageFixedArray;
+
         public DynamicMessageArrayFieldFixed(uint count, DynamicMessage generator)
         {
             Count = count;

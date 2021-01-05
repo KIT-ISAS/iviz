@@ -6,13 +6,15 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class StructArrayFieldFixed<T> : IField where T : unmanaged
+    public sealed class StructArrayFieldFixed<T> : IField where T : unmanaged
     {
         public uint Count { get; }
 
         public T[] Value { get; set; }
 
         object IField.Value => Value;
+        
+        public FieldType Type => FieldType.StructFixedArray;
 
         public int RosMessageLength => (int) Count * Marshal.SizeOf<T>();
 

@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization;
 using Iviz.Msgs;
-using Iviz.MsgsGen;
 using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
@@ -30,16 +29,21 @@ namespace Iviz.MsgsGen.Dynamic
             ["byte"] = typeof(byte),
         };
 
-        readonly (string Name, IField Value)[] fields;
+        readonly Property[] fields;
+        public ReadOnlyCollection<Property> Fields { get; }
         public string RosType { get; }
         public string? RosInstanceMd5Sum { get; }
         public string? RosInstanceDependencies { get; }
 
+        public FieldType Type => FieldType.DynamicMessage;
+
         public DynamicMessage()
         {
             RosType = "";
-            fields = Array.Empty<(string Name, IField Value)>();
+            fields = Array.Empty<Property>();
+            Fields = new ReadOnlyCollection<Property>(fields);
         }
+
         public DynamicMessage(ClassInfo classInfo, bool allowAssemblyLookup = true) : this(classInfo,
             new Dictionary<string, DynamicMessage>(), allowAssemblyLookup)
         {
@@ -66,7 +70,7 @@ namespace Iviz.MsgsGen.Dynamic
 
             string FullRosName(string rosType) => rosType.Contains("/") ? rosType : $"{classInfo.RosPackage}/{rosType}";
 
-            List<(string Name, IField Value)> newFields = new List<(string Name, IField Value)>();
+            List<Property> newFields = new List<Property>();
             foreach (VariableElement element in classInfo.Elements.OfType<VariableElement>())
             {
                 IField field;
@@ -133,10 +137,11 @@ namespace Iviz.MsgsGen.Dynamic
                     };
                 }
 
-                newFields.Add((name, field));
+                newFields.Add(new Property(name, field));
             }
 
             fields = newFields.ToArray();
+            Fields = new ReadOnlyCollection<Property>(fields);
         }
 
         internal DynamicMessage(DynamicMessage other)
@@ -144,11 +149,13 @@ namespace Iviz.MsgsGen.Dynamic
             RosType = other.RosType;
             RosInstanceMd5Sum = other.RosInstanceMd5Sum;
             RosInstanceDependencies = other.RosInstanceDependencies;
-            fields = new (string Name, IField Value)[other.fields.Length];
+            fields = new Property[other.fields.Length];
             for (int i = 0; i < fields.Length; i++)
             {
-                fields[i] = (other.fields[i].Name, other.fields[i].Value.Generate());
+                fields[i] = new Property(other.fields[i].Name, other.fields[i].Value.Generate());
             }
+
+            Fields = new ReadOnlyCollection<Property>(fields);
         }
 
         public int RosMessageLength
@@ -227,17 +234,35 @@ namespace Iviz.MsgsGen.Dynamic
         [Preserve] public const string RosDependenciesBase64 = "";
 
 
-        public static ClassInfo CreateFromDependencyString(string msgName, string dependencies)
+        public static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
         {
+            if (fullRosMsgName == null)
+            {
+                throw new ArgumentNullException(nameof(fullRosMsgName));
+            }
+
+            if (dependencies == null)
+            {
+                throw new ArgumentNullException(nameof(dependencies));
+            }
+
             var msgDefinitionsWithHeader = dependencies
                 .Split(new[] {ClassInfo.DependencySeparator}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(def => def.Trim());
-            var msgDefinitions = StripHeader(msgName, msgDefinitionsWithHeader);
+            var msgDefinitions = StripHeader(fullRosMsgName, msgDefinitionsWithHeader);
             var classInfos = msgDefinitions.Select(tuple => new ClassInfo("", tuple.Name, tuple.Definition));
 
             PackageInfo packageInfo = new PackageInfo(classInfos, Array.Empty<ServiceInfo>());
             packageInfo.ResolveAll();
-            return packageInfo.Messages[msgName];
+            return packageInfo.Messages[fullRosMsgName];
+        }
+
+        public static DynamicMessage CreateFromDependencyString(string fullRosMsgName, string dependencies,
+            bool allowAssemblyLookup = true)
+        {
+            return new DynamicMessage(
+                CreateDefinitionFromDependencyString(fullRosMsgName, dependencies),
+                allowAssemblyLookup);
         }
 
         static IEnumerable<(string Name, string Definition)> StripHeader(string msgName,

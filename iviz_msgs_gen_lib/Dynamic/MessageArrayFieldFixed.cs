@@ -5,7 +5,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class MessageArrayFieldFixed<T> : IField where T : IMessage, IDeserializable<T>, new()
+    public sealed class MessageArrayFieldFixed<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
     {
         static readonly IDeserializable<T> Generator = new T();
 
@@ -14,6 +14,8 @@ namespace Iviz.MsgsGen.Dynamic
         public T[] Value { get; set; }
 
         object IField.Value => Value;
+        
+        public FieldType Type => FieldType.MessageFixedArray;
 
         public MessageArrayFieldFixed(uint count)
         {

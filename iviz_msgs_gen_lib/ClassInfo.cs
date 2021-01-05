@@ -172,8 +172,13 @@ namespace Iviz.MsgsGen
                 package = messageName.Substring(0, lastSlash);
                 messageName = messageName.Substring(lastSlash + 1);
             }
-
-            RosPackage = package ?? throw new ArgumentNullException(nameof(package));
+ 
+            if (string.IsNullOrWhiteSpace(package))
+            {
+                throw new InvalidOperationException("Could not find the package this message belongs to");
+            }
+            
+            RosPackage = package;
             csPackage = MsgParser.CsIfiy(package);
             Name = messageName;
             fullMessageText = messageDefinition;

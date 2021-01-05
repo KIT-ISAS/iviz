@@ -5,13 +5,15 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class StringArrayFieldFixed : IField
+    public sealed class StringArrayFieldFixed : IField
     {
         public uint Count { get; }
 
         public string[] Value { get; set; }
 
         object IField.Value => Value;
+        
+        public FieldType Type => FieldType.StringFixedArray;
 
         public StringArrayFieldFixed(uint count)
         {
