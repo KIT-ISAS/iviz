@@ -252,8 +252,7 @@ namespace Iviz.Roslib
                     "Partner did not send type and definition, required to instantiate dynamic messages.");
             }
 
-            ClassInfo dynamicMessageInfo = DynamicMessage.CreateFromDependencyString(dynamicType, dynamicDependency);
-            DynamicMessage generator = new DynamicMessage(dynamicMessageInfo);
+            DynamicMessage generator = DynamicMessage.CreateFromDependencyString(dynamicType, dynamicDependency);
             topicInfo = new TopicInfo<T>(callerId, topicName, generator);
         }
 

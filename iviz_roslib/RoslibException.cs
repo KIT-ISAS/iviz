@@ -125,6 +125,27 @@ namespace Iviz.Roslib
         }
     }    
     
+    public class RosServiceNotFoundException : RoslibException
+    {
+        public string ServiceName { get; }
+        public string ErrorMessage { get; }
+        
+        public RosServiceNotFoundException(string service, string message) 
+            : base($"Failed to call service {service}: {message}")
+        {
+            ServiceName = service;
+            ErrorMessage = message;
+        }
+        
+        public RosServiceNotFoundException(string service, string message, Exception innerException) 
+            : base($"Failed to call service {service}: {message}", innerException)
+        {
+            ServiceName = service;
+            ErrorMessage = message;
+        }
+        
+    }  
+    
     public class RosServiceCallFailed : RoslibException
     {
         public RosServiceCallFailed(string message) : base(message)
@@ -138,7 +159,8 @@ namespace Iviz.Roslib
         public RosServiceCallFailed(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }  
+    }      
+    
     public class RosInvalidPackageSizeException : RoslibException
     {
         public RosInvalidPackageSizeException(string message) : base(message)

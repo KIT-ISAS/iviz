@@ -108,7 +108,8 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            using CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using CancellationTokenSource linkedTs =
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             try
             {
                 await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();
@@ -138,18 +139,26 @@ namespace Iviz.Roslib.XmlRpc
         Arg[] GetBusInfo(object[] _)
         {
             var busInfo = client.GetBusInfoRcp();
-            Arg[][] response = busInfo.Select(
-                info => new Arg[]
-                {
-                    info.ConnectionId,
-                    info.DestinationId,
-                    info.Direction,
-                    info.Transport,
-                    info.Topic,
-                    info.Connected
-                }).ToArray();
-
+            Arg[][] response = busInfo.Select(BusInfoToArg).ToArray();
             return OkResponse(response);
+        }
+
+        static Arg[] BusInfoToArg(BusInfo info)
+        {
+            return new Arg[]
+            {
+                info.ConnectionId,
+                info.DestinationId,
+                info.Direction switch
+                {
+                    BusInfo.DirectionType.In => 1,
+                    BusInfo.DirectionType.Out => 0,
+                    _ => -1
+                },
+                info.Transport,
+                info.Topic,
+                info.Connected ? 1 : 0
+            };
         }
 
         Arg[] GetMasterUri(object[] _)

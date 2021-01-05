@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -29,15 +28,15 @@ namespace Iviz.Roslib
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
 
-        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, bool requestNoDelay)
+        public ServiceCallerAsync(ServiceInfo<T> serviceInfo, bool requestNoDelay = true)
         {
             this.serviceInfo = serviceInfo;
             this.requestNoDelay = requestNoDelay;
 
             tcpClient = new TcpClient(AddressFamily.InterNetworkV6)
             {
-                Client = {DualMode = true}, 
-                ReceiveTimeout = DefaultTimeoutInMs, 
+                Client = {DualMode = true},
+                ReceiveTimeout = DefaultTimeoutInMs,
                 SendTimeout = DefaultTimeoutInMs
             };
         }
@@ -159,8 +158,10 @@ namespace Iviz.Roslib
 
         public bool Execute(T service, CancellationToken token)
         {
+            bool result = false;
             // just call the async version from sync
-            return Task.Run(async () => await ExecuteAsync(service, token).Caf(), token).WaitAndUnwrapException();
+            Task.Run(async () => result = await ExecuteAsync(service, token).Caf(), token).Wait(token);
+            return result;
         }
 
         async Task<bool> ExecuteImplAsync(T service, CancellationToken token)
@@ -169,7 +170,7 @@ namespace Iviz.Roslib
             {
                 throw new InvalidOperationException("Service caller has not been started!");
             }
-            
+
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
             if (writeBuffer.Length < msgLength)

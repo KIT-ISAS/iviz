@@ -1389,12 +1389,10 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task CloseAsync()
         {
-            //Logger.LogDebug("1) Disposing listener");
             List<Task> tasks = new List<Task>();
 
             Task listenerDispose = listener.DisposeAsync();
             tasks.Add(listenerDispose);
-            //Logger.LogDebug("1) Done");
 
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
@@ -1482,7 +1480,7 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri!, "o", topic.Topic, sender.IsAlive);
+                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri!, BusInfo.DirectionType.Out, topic.Topic, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
                 }
@@ -1607,7 +1605,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = RosMasterApi.LookupService(resolvedServiceName);
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service {resolvedServiceName}: {response.StatusMessage}");
+                throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl!;
@@ -1616,7 +1614,7 @@ namespace Iviz.Roslib
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     serviceCaller.Start(serviceUri, persistent);
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     if (!serviceCaller.Execute(service, timeoutTs.Token))
@@ -1626,7 +1624,7 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     serviceCaller.Start(serviceUri, persistent);
                     if (!serviceCaller.Execute(service, timeoutTs.Token))
                     {
@@ -1676,6 +1674,7 @@ namespace Iviz.Roslib
         /// <param name="token">A cancellation token</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
+        /// <exception cref="RosServiceCallFailed">An error happened during </exception>
         public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent, CancellationToken token)
             where T : IService
         {
@@ -1709,7 +1708,7 @@ namespace Iviz.Roslib
             LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token).Caf();
             if (!response.IsValid)
             {
-                throw new RosRpcException($"Failed to call service {resolvedServiceName}: {response.StatusMessage}");
+                throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl!;
@@ -1718,7 +1717,7 @@ namespace Iviz.Roslib
             {
                 if (persistent)
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     if (!await serviceCaller.ExecuteAsync(service, token).Caf())
@@ -1728,7 +1727,7 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo, true);
+                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     if (!await serviceCaller.ExecuteAsync(service, token).Caf())
                     {
@@ -1820,17 +1819,13 @@ namespace Iviz.Roslib
 
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
 
-            //Logger.LogDebug("Creating request manager...");
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
-            //Logger.LogDebug("Created request manager!");
 
             advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 
             try
             {
-                //Logger.LogDebug("Calling register service...");
                 await RosMasterApi.RegisterServiceAsync(resolvedServiceName, advertisedService.Uri).Caf();
-                //Logger.LogDebug("Register service returned!");
             }
             catch (Exception e)
             {

@@ -137,6 +137,11 @@ namespace Iviz.Msgs
 
         public static string RosNameToCs(string name)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             StringBuilder str = new StringBuilder();
             str.Append(char.ToUpper(name[0], Culture));
             for (int i = 1; i < name.Length; i++)

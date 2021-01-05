@@ -10,6 +10,7 @@
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "NETStandard.Library": "2.0.3",
           "Newtonsoft.Json": "12.0.3",
@@ -85,8 +86,20 @@
         }
       },
       "Iviz.Msgs/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
         "runtime": {
           "Iviz.Msgs.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.Lib.dll": {}
         }
       },
       "Iviz.XmlRpc/1.0.0": {
@@ -162,6 +175,11 @@
       "hashPath": "system.collections.immutable.1.4.0.nupkg.sha512"
     },
     "Iviz.Msgs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
