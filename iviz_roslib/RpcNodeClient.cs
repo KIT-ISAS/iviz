@@ -117,9 +117,7 @@ namespace Iviz.Roslib.XmlRpc
                     !(a[0] is int code) ||
                     !(a[1] is string statusMessage))
                 {
-                    Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
-                    Code = StatusCode.Error;
-                    hasParseError = true;
+                    MarkError();
                     return;
                 }
 
@@ -133,9 +131,7 @@ namespace Iviz.Roslib.XmlRpc
                 
                 if (!(a[2] is object[] protocols))
                 {
-                    Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
-                    Code = StatusCode.Error;
-                    hasParseError = true;
+                    MarkError();
                     return;
                 }                
 
@@ -153,9 +149,7 @@ namespace Iviz.Roslib.XmlRpc
                             !(protocols[1] is string hostname) ||
                             !(protocols[2] is int port))
                         {
-                            Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
-                            Code = StatusCode.Error;
-                            hasParseError = true;
+                            MarkError();
                             return;
                         }
 
@@ -169,9 +163,7 @@ namespace Iviz.Roslib.XmlRpc
                             !(innerProtocols[1] is string hostname) ||
                             !(innerProtocols[2] is int port))
                         {
-                            Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
-                            Code = StatusCode.Error;
-                            hasParseError = true;
+                            MarkError();
                             return;
                         }
 
@@ -199,9 +191,7 @@ namespace Iviz.Roslib.XmlRpc
                     !(a[2] is string uriStr) ||
                     !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
                 {
-                    Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);
-                    Code = StatusCode.Error;
-                    hasParseError = true;
+                    MarkError();
                     return;
                 }
 
@@ -229,9 +219,7 @@ namespace Iviz.Roslib.XmlRpc
                     !(a[1] is string statusMessage) ||
                     !(a[2] is int pid))
                 {
-                    Logger.LogFormat("{0}: Parse error in {1}", this, MethodBase.GetCurrentMethod()?.Name);                    
-                    Code = StatusCode.Error;
-                    hasParseError = true;
+                    MarkError();
                     return;
                 }
 

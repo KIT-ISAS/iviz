@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -328,22 +329,34 @@ namespace Iviz.Controllers
             }
 
             object parameterValue;
+            string errorMsg;
             try
             {
                 const int timeoutInMs = 1000;
-                parameterValue = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
+                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
+            }
+            catch (TaskCanceledException)
+            {
+                HelpText = "<b>Error:</b> Task cancelled";
+                return;
             }
             catch (Exception e)
             {
                 Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
-                HelpText = "[Failed to Retrieve Parameter]";
+                HelpText = "<b>Error:</b> Failed to retrieve parameter";
+                return;
+            }
+
+            if (errorMsg != null)
+            {
+                HelpText = $"<b>Error:</b> {errorMsg}";
                 return;
             }
 
             if (!(parameterValue is string robotDescription))
             {
                 Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
-                HelpText = "[Invalid Parameter Type]";
+                HelpText = "<b>Error:</b> Expected string parameter";
                 return;
             }
 

@@ -109,7 +109,7 @@ namespace Iviz.Ros
 
                 RosClient newClient = new RosClient(MasterUri, MyId, MyUri, false);
                 client = newClient;
-
+                
                 await newClient.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
@@ -259,6 +259,8 @@ namespace Iviz.Ros
             catch (OperationCanceledException)
             {
             }
+            
+            instance.SetConnectionWarningState(false);
         }
 
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic)
@@ -280,12 +282,14 @@ namespace Iviz.Ros
 
         public override void Disconnect()
         {
+            ClearTaskQueue();
+
             if (client == null)
             {
                 Signal();
                 return;
             }
-
+            
             AddTask(DisconnectImpl);
         }
 
@@ -656,7 +660,8 @@ namespace Iviz.Ros
         }
 
         [NotNull]
-        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
+            RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedOnly)
             {
@@ -677,9 +682,10 @@ namespace Iviz.Ros
 
             return cachedTopics;
         }
-        
+
         [NotNull, ItemCanBeNull]
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs, CancellationToken token = default)
+        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
+            CancellationToken token = default)
         {
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
 
@@ -700,7 +706,7 @@ namespace Iviz.Ros
             });
 
             return await signal.WaitAsync(timeoutInMs, token) ? cachedTopics : null;
-        }        
+        }
 
         [NotNull, ItemNotNull]
         public IEnumerable<string> GetSystemParameterList()
@@ -726,8 +732,9 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        [NotNull, ItemCanBeNull]
-        public async Task<object> GetParameterAsync([NotNull] string parameter, int timeoutInMs, CancellationToken token = default)
+        [NotNull]
+        public async Task<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
+            int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
             {
@@ -736,26 +743,43 @@ namespace Iviz.Ros
 
             var signal = new SemaphoreSlim(0);
             object result = null;
+            string errorMsg = null;
 
             AddTask(async () =>
             {
                 try
                 {
-                    if (client?.Parameters != null)
+                    if (client?.Parameters == null)
                     {
-                        (_, result) = await client.Parameters.GetParameterAsync(parameter);
+                        errorMsg = "Not connected";
+                        return;
                     }
+
+                    var (success, param) = await client.Parameters.GetParameterAsync(parameter);
+                    if (!success)
+                    {
+                        errorMsg = $"'{parameter}' not found";
+                        return;
+                    }
+
+                    result = param;
                 }
                 catch (Exception e)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
                 }
-
-                signal.Release();
+                finally
+                {
+                    signal.Release();
+                }
             });
 
-            await signal.WaitAsync(timeoutInMs, token);
-            return result;
+            if (!await signal.WaitAsync(timeoutInMs, token))
+            {
+                return (null, "Request timed out");
+            }
+
+            return (result, errorMsg);
         }
 
         public int GetNumPublishers([NotNull] string topic)

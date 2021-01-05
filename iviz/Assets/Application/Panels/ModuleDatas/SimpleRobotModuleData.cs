@@ -70,10 +70,10 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.Frame.Owner = Robot;
-            panel.SourceParam.Value = Robot.SourceParameter;
+            panel.SourceParameter.Value = Robot.SourceParameter;
             panel.HelpText.Label = Robot.HelpText;
 
-            panel.SourceParam.Hints = GetParameterHints();
+            panel.SourceParameter.Hints = GetParameterHints();
             panel.SavedRobotName.Options = GetSavedRobots();
 
             //panel.FramePrefix.Value = Robot.FramePrefix;
@@ -100,7 +100,7 @@ namespace Iviz.App
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
                 Robot.TryLoadSavedRobot(i == 0 ? null : name);
-                panel.SourceParam.Value = "";
+                panel.SourceParameter.Value = "";
                 panel.Save.Value = IsRobotSaved;
 
                 panel.HelpText.Label = Robot.HelpText;
@@ -110,7 +110,7 @@ namespace Iviz.App
                     !string.IsNullOrEmpty(Robot.Robot?.Name) &&
                     !Resource.Internal.ContainsRobot(name);
             };
-            panel.SourceParam.EndEdit += f =>
+            panel.SourceParameter.EndEdit += f =>
             {
                 Robot.TryLoadFromSourceParameter(f);
                 panel.SavedRobotName.Index = 0;
@@ -156,8 +156,9 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
-            panel.SourceParam.Hints = GetParameterHints();
+            panel.SourceParameter.Hints = GetParameterHints();
+            panel.HelpText.Label = Robot.HelpText;
+            UpdateModuleButton();
         }
 
         [NotNull, ItemNotNull]
