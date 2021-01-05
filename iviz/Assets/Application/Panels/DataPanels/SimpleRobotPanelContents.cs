@@ -15,8 +15,8 @@ namespace Iviz.App
         public InputFieldWithHintsWidget SourceParam { get; private set; }
         public DropdownWidget SavedRobotName { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
-        public InputFieldWidget FramePrefix { get; private set; }
-        public InputFieldWidget FrameSuffix { get; private set; }
+        //public InputFieldWidget FramePrefix { get; private set; }
+        //public InputFieldWidget FrameSuffix { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
         public SliderWidget Metallic { get; private set; }
@@ -34,8 +34,8 @@ namespace Iviz.App
             SourceParam = p.AddInputFieldWithHints("Load From Source Parameter").SetPlaceholder("<none>");
             SavedRobotName = p.AddDropdown("Load From Saved");
             AttachToTf = p.AddToggle("Attach to TF Frames");
-            FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
-            FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");
+            //FramePrefix = p.AddInputField("TF Frame Prefix").SetPlaceholder("<none>");
+            //FrameSuffix = p.AddInputField("TF Frame Suffix").SetPlaceholder("<none>");
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

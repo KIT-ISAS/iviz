@@ -76,8 +76,8 @@ namespace Iviz.App
             panel.SourceParam.Hints = GetParameterHints();
             panel.SavedRobotName.Options = GetSavedRobots();
 
-            panel.FramePrefix.Value = Robot.FramePrefix;
-            panel.FrameSuffix.Value = Robot.FrameSuffix;
+            //panel.FramePrefix.Value = Robot.FramePrefix;
+            //panel.FrameSuffix.Value = Robot.FrameSuffix;
             panel.AttachToTf.Value = Robot.AttachedToTf;
             panel.HideButton.State = Robot.Visible;
 
@@ -128,8 +128,8 @@ namespace Iviz.App
                 DataPanelManager.HideSelectedPanel();
                 ModuleListPanel.RemoveModule(this);
             };
-            panel.FramePrefix.EndEdit += f => Robot.FramePrefix = f;
-            panel.FrameSuffix.EndEdit += f => Robot.FrameSuffix = f;
+            //panel.FramePrefix.EndEdit += f => Robot.FramePrefix = f;
+            //panel.FrameSuffix.EndEdit += f => Robot.FrameSuffix = f;
             panel.HideButton.Clicked += () =>
             {
                 Robot.Visible = !Robot.Visible;
