@@ -9,7 +9,7 @@ namespace Iviz.App
 {
     public enum DialogPanelType
     {
-        ItemList,
+        AddModule,
         Connection,
         AddTopic,
         Image,
@@ -44,7 +44,7 @@ namespace Iviz.App
             gameObject.SetActive(false);
             (DialogPanelType type, IDialogPanelContents panel)[] list =
             {
-                (DialogPanelType.ItemList, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
+                (DialogPanelType.AddModule, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
                 (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
                 (DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
                 (DialogPanelType.Tf, CreatePanel<TfDialogContents>(Resource.Widgets.TfPanel)),

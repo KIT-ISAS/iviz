@@ -332,7 +332,7 @@ namespace Iviz.Controllers
             string errorMsg;
             try
             {
-                const int timeoutInMs = 1000;
+                const int timeoutInMs = 800;
                 (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
             }
             catch (TaskCanceledException)

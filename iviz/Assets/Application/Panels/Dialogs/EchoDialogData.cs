@@ -172,7 +172,7 @@ namespace Iviz.App
             else
             {
                 dialog.Publishers.text = $"{listener.NumPublishers} publishers";
-                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} msgs/s";
+                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} mps";
                 var kbytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kbytesPerSecond.ToString("N0")} kB/s";
             }

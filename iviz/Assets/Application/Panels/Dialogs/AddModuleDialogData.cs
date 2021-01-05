@@ -28,12 +28,12 @@ namespace Iviz.App
 
         public AddModuleDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
         }
 
         public override void SetupPanel()
         {
-            itemList.Title = "Available Modules";
+            itemList.Title = "Add New Module";
             itemList.Items = Modules.Select(tuple => tuple.Caption);
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;

@@ -109,6 +109,8 @@ namespace Iviz.Ros
 
                 RosClient newClient = new RosClient(MasterUri, MyId, MyUri, false);
                 client = newClient;
+                client.RosMasterApi.TimeoutInMs = 750;
+                client.Parameters.TimeoutInMs = 750;
                 
                 await newClient.EnsureCleanSlateAsync();
 
@@ -755,7 +757,7 @@ namespace Iviz.Ros
                         return;
                     }
 
-                    var (success, param) = await client.Parameters.GetParameterAsync(parameter);
+                    var (success, param) = await client.Parameters.GetParameterAsync(parameter, token);
                     if (!success)
                     {
                         errorMsg = $"'{parameter}' not found";

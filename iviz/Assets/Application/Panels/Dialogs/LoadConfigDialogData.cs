@@ -17,7 +17,7 @@ namespace Iviz.App
 
         public LoadConfigDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.ItemList);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
         }
 
         public override void SetupPanel()
