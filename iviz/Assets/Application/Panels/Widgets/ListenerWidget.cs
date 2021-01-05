@@ -43,7 +43,7 @@ namespace Iviz.App
         [CanBeNull] string Topic => Listener?.Topic;
         int NumPublishers => (!ConnectionManager.IsConnected || Listener == null) ? -1 : Listener.NumPublishers;
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
-        int BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
+        long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
         int Dropped => Listener?.Stats.Dropped ?? 0;
         bool Subscribed => Listener?.Subscribed ?? false;
 

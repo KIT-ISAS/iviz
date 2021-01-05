@@ -10,10 +10,16 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] DropdownWidget topics = null;
         [SerializeField] TMP_Text text = null;
+        [SerializeField] TMP_Text publishers = null;
+        [SerializeField] TMP_Text messages = null;
+        [SerializeField] TMP_Text kbytes = null;
 
         public TrashButtonWidget Close => close;
         public DropdownWidget Topics => topics;
         public TMP_Text Text => text;
+        public TMP_Text Publishers => publishers;
+        public TMP_Text Messages => messages;
+        public TMP_Text KBytes => kbytes;
 
         public bool Active
         {

@@ -23,7 +23,7 @@ namespace Iviz.Controllers
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
-        [DataMember] public bool TriangleListFlipWinding { get; set; }
+        [DataMember] public bool TriangleListFlipWinding { get; set; } = true;
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Marker;
@@ -327,6 +327,7 @@ namespace Iviz.Controllers
                             markerToAdd.Tint = Tint;
                             markerToAdd.Visible = Visible;
                             markerToAdd.Layer = LayerType.IgnoreRaycast;
+                            markerToAdd.TriangleListFlipWinding = TriangleListFlipWinding;
                             markers[id] = markerToAdd;
                         }
 

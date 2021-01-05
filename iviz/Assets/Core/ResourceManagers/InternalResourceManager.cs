@@ -22,8 +22,9 @@ namespace Iviz.Resources
         readonly HashSet<string> negGameObjects = new HashSet<string>();
         readonly HashSet<string> negTextures = new HashSet<string>();
 
-        readonly ReadOnlyDictionary<string, string> robotDescriptions;
+        [NotNull] readonly ReadOnlyDictionary<string, string> robotDescriptions;
 
+        [NotNull, ItemNotNull]
         public IEnumerable<string> GetRobotNames() => robotDescriptions.Keys;
 
         public InternalResourceManager()
@@ -128,6 +129,7 @@ namespace Iviz.Resources
             return true;
         }
 
+        [NotNull]
         public override string ToString()
         {
             return "[InternalResourceManager]";

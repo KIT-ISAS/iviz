@@ -1,12 +1,13 @@
 using System.Runtime.Serialization;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
     [DataContract]
     public readonly struct RosListenerStats
     {
-        public RosListenerStats(int totalMessages, int messagesPerSecond, int bytesPerSecond, int messagesInQueue, int dropped)
+        public RosListenerStats(int totalMessages, int messagesPerSecond, long bytesPerSecond, int messagesInQueue, int dropped)
         {
             TotalMessages = totalMessages;
             MessagesPerSecond = messagesPerSecond;
@@ -17,10 +18,11 @@ namespace Iviz.Ros
 
         [DataMember] public int TotalMessages { get; }
         [DataMember] public int MessagesPerSecond { get; }
-        [DataMember] public int BytesPerSecond { get; }
+        [DataMember] public long BytesPerSecond { get; }
         [DataMember] public int MessagesInQueue { get; }
         [DataMember] public int Dropped { get; }
 
+        [NotNull]
         public override string ToString()
         {
             return Utils.ToJsonString(this);

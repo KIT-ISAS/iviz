@@ -26,8 +26,8 @@ namespace Iviz.Ros
         public static event Action<Log> LogMessageArrived;
 
         
-        int frameBandwidthDown;
-        int frameBandwidthUp;
+        long frameBandwidthDown;
+        long frameBandwidthUp;
         uint logSeq;
 
         Sender<Log> logSender;
@@ -73,19 +73,19 @@ namespace Iviz.Ros
             }
         }
 
-        internal static void ReportBandwidthUp(int size)
+        internal static void ReportBandwidthUp(long size)
         {
             instance.frameBandwidthUp += size;
         }
 
-        internal static void ReportBandwidthDown(int size)
+        internal static void ReportBandwidthDown(long size)
         {
             instance.frameBandwidthDown += size;
         }
 
-        public static (int, int) CollectBandwidthReport()
+        public static (long, long) CollectBandwidthReport()
         {
-            (int, int) result = (instance.frameBandwidthDown, instance.frameBandwidthUp);
+            (long, long) result = (instance.frameBandwidthDown, instance.frameBandwidthUp);
             instance.frameBandwidthDown = 0;
             instance.frameBandwidthUp = 0;
             return result;

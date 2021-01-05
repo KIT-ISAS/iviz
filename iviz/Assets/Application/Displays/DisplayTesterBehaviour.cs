@@ -4,6 +4,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -12,54 +13,27 @@ namespace Iviz.App
     {
         const int MaxSegmentsForMesh = 30;
 
-        async void OnEnable()
+        void OnEnable()
         {
-            
+            /*
             Texture2D texture = GenerateSquareTexture();
             byte[] png = texture.EncodeToPNG();
             File.WriteAllBytes("Assets/Core/Textures/grid.png", png);
-            
-            /*
-            var uri = "package://e2_urdf_model/meshes/chassis.dae";
-            Info<GameObject> info = await
-                Resource.External.TryGetGameObjectAsync(uri, ConnectionManager.Connection, default);
-            info.Instantiate();
             */
-
-            /*
-            Matrix4x4 f = new Matrix4x4();
-            f.SetColumn(0, new Vector3(1, 0, 0).Ros2Unity());
-            f.SetColumn(1, new Vector3(0, 1, 0).Ros2Unity());
-            f.SetColumn(2, new Vector3(0, 0, 1).Ros2Unity());
-            f.SetColumn(3, new Vector4(0, 0, 0, 1));
-            Matrix4x4 q = Matrix4x4.Rotate(new Quaternion(0.5f, -0.5f, 0.5f, 0.5f));
             
-            Matrix4x4 f = new Matrix4x4();
-            f.SetColumn(0, new Vector3(1, 0, 0).Unity2Ros());
-            f.SetColumn(1, new Vector3(0, 1, 0).Unity2Ros());
-            f.SetColumn(2, new Vector3(0, 0, 1).Unity2Ros());
-            f.SetColumn(3, new Vector4(0, 0, 0, 1));
-            Matrix4x4 q = Matrix4x4.Rotate(new Quaternion(0.5f, -0.5f, -0.5f, 0.5f));
-
-            
-            Debug.Log(f);
-            Debug.Log(q);
-            */
-
-            /*
             CreatePointListResource(-3);
             CreateLineResource(0);
             CreateLineResourceShort(5);
             CreateMeshListResource(10);
-            */
         }
         
+        [NotNull]
         static Texture2D GenerateSquareTexture()
         {
             const int size = 128;
             const int border = 2;
             Color32 white = Color.white;
-            Color32 black = new Color(0.25f, 0.25f, 0.25f, 1);
+            Color32 frameColor = new Color(0.25f, 0.25f, 0.25f, 1);
 
             Color32[] colors = new Color32[size * size];
             for (int i = 0; i < colors.Length; i++)
@@ -71,30 +45,25 @@ namespace Iviz.App
             {
                 for (int i = 0; i < border; i++)
                 {
-                    colors[v * size + i] = black;
-                    colors[(v + 1) * size - 1 - i] = black;
+                    colors[v * size + i] = frameColor;
+                    colors[(v + 1) * size - 1 - i] = frameColor;
                 }
             }
 
             for (int i = 0; i < size * border; i++)
             {
-                colors[i] = black;
+                colors[i] = frameColor;
             }
 
             for (int i = size * (size - border); i < size * size; i++)
             {
-                colors[i] = black;
+                colors[i] = frameColor;
             }
 
             Texture2D texture = new Texture2D(size, size);
             texture.SetPixels32(colors);
             texture.Apply();
             return texture;
-
-
-            //Texture2D texture = GenerateTexture();
-            //byte[] png = texture.EncodeToPNG();
-            //File.WriteAllBytes("square.png", png);
         }        
 
         static void CreateMeshListResource(float z)

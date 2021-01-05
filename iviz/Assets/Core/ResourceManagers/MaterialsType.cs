@@ -63,13 +63,13 @@ namespace Iviz.Resources
             DepthCloud = new Info<Material>("Materials/DepthCloud");
             OccupancyGridTexture = new Info<Material>("Materials/OccupancyGrid");
 
-            PointCloud = new Info<Material>("CoreMaterials/PointCloud");
+            PointCloud = new Info<Material>(assetHolder.PointCloud);
             Line = new Info<Material>(assetHolder.LineMaterial);
             TransparentLine = new Info<Material>(assetHolder.TransparentLine);
             LineSimple = new Info<Material>(assetHolder.LineSimple);
             TransparentLineSimple = new Info<Material>(assetHolder.TransparentLineSimple);
 
-            PointCloudWithColormap = new Info<Material>("CoreMaterials/PointCloud with Colormap");
+            PointCloudWithColormap = new Info<Material>(assetHolder.PointCloudWithColormap);
             LineWithColormap = new Info<Material>(assetHolder.LineWithColormap);
             TransparentLineWithColormap = new Info<Material>(assetHolder.TransparentLineWithColormap);
             LineSimpleWithColormap = new Info<Material>(assetHolder.LineSimpleWithColormap);

@@ -7,9 +7,11 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.Tf2Msgs;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
@@ -29,13 +31,13 @@ namespace Iviz.App
         readonly StringBuilder messageBuffer = new StringBuilder();
         IListener listener;
         bool queueIsDirty;
-        
+
         class TopicEntry
         {
-            public string Topic { get; }
-            public string RosMsgType { get; }
-            public Type CsType { get; }
-            public string Description { get; }
+            [CanBeNull] public string Topic { get; }
+            [CanBeNull] public string RosMsgType { get; }
+            [NotNull] public Type CsType { get; }
+            [NotNull] public string Description { get; }
 
             public TopicEntry()
             {
@@ -44,7 +46,7 @@ namespace Iviz.App
                 CsType = null;
                 Description = $"<color=grey>(None)</color>";
             }
-            
+
             public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
             {
                 Topic = topic;
@@ -62,7 +64,7 @@ namespace Iviz.App
             dialog = DialogPanelManager.GetPanelByType<EchoDialogContents>(DialogPanelType.Echo);
         }
 
-        bool TryGetType(string rosMsgType, out Type type)
+        bool TryGetType([NotNull] string rosMsgType, out Type type)
         {
             if (topicTypes.TryGetValue(rosMsgType, out type))
             {
@@ -79,7 +81,7 @@ namespace Iviz.App
             return false;
         }
 
-        void CreateListener(string topicName, string rosMsgType, Type csType)
+        void CreateListener(string topicName, string rosMsgType, [NotNull] Type csType)
         {
             if (listener != null)
             {
@@ -101,26 +103,22 @@ namespace Iviz.App
         {
             var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
             entries.Clear();
-            
+
             entries.Add(new TopicEntry());
-            
+
             foreach (var entry in newTopics)
             {
                 string topic = entry.Topic;
                 string msgType = entry.Type;
 
-                if (!TryGetType(msgType, out Type csType))
-                {
-                    continue;
-                } 
-                
+                Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
         }
 
         void Handler(IMessage msg)
         {
-            string time = $"<b>{DateTime.Now:HH:mm:ss}</b> ";
+            string time = $"<b>{DateTime.Now.ToString("HH:mm:ss")}</b> ";
             messageQueue.Enqueue((time, msg));
             if (messageQueue.Count > MaxMessages)
             {
@@ -139,12 +137,13 @@ namespace Iviz.App
                 if (i == 0)
                 {
                     listener?.Stop();
+                    listener = null;
                     return;
                 }
-                
+
                 var entry = entries[i];
                 CreateListener(entry.Topic, entry.RosMsgType, entry.CsType);
-                
+
                 messageQueue.Clear();
                 queueIsDirty = false;
                 messageBuffer.Length = 0;
@@ -162,9 +161,23 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
+            UpdateOptions();
             ProcessMessages();
+            if (listener == null)
+            {
+                dialog.Publishers.text = "---";
+                dialog.Messages.text = "---";
+                dialog.KBytes.text = "---";
+            }
+            else
+            {
+                dialog.Publishers.text = $"{listener.NumPublishers} publishers";
+                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} msgs/s";
+                var kbytesPerSecond = listener.Stats.BytesPerSecond / 1000;
+                dialog.KBytes.text = $"{kbytesPerSecond.ToString("N0")} kB/s";
+            }
         }
-        
+
         void ProcessMessages()
         {
             if (!queueIsDirty)
@@ -177,22 +190,14 @@ namespace Iviz.App
             (string time, IMessage msg)[] messages = messageQueue.ToArray();
             foreach ((string time, IMessage msg) in messages)
             {
-                string msgAsText = msg.ToJsonString();
+                string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
+                    new ClampJsonConverter(MaxMessageLength));
                 messageBuffer.Append(time);
-
-                if (msgAsText.Length < MaxMessageLength)
-                {
-                    messageBuffer.Append(msgAsText).AppendLine();
-                }
-                else
-                {
-                    messageBuffer.Append(msgAsText, 0, MaxMessageLength).Append("<i>... +")
-                        .Append(msgAsText.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
-                }
+                messageBuffer.Append(msgAsText).AppendLine();
             }
 
             dialog.Text.text = messageBuffer.ToString();
             queueIsDirty = false;
-        }        
+        }
     }
 }

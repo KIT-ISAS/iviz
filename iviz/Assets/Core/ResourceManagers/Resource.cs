@@ -151,10 +151,9 @@ namespace Iviz.Resources
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info,
-            [CanBeNull] IExternalServiceProvider _)
+        public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info)
         {
-            return Internal.TryGet(uriString, out info);
+            return Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
         }
 
         [ItemCanBeNull]
@@ -169,6 +168,7 @@ namespace Iviz.Resources
             return await External.TryGetGameObjectAsync(uriString, Settings.IsHololens ? null : provider, token);
         }
 
+        [ItemCanBeNull]
         internal static async Task<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {

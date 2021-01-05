@@ -68,6 +68,7 @@ namespace Iviz.Controllers
             [NotNull] readonly Task task;
             [NotNull] public CancellationTokenSource TokenSource { get; }
             [NotNull] public string Uri { get; }
+            [CanBeNull] public Info<GameObject> ResourceInfo { get; set; }
 
             public TaskInfo([NotNull] Task task, [NotNull] CancellationTokenSource tokenSource, [NotNull] string uri)
             {
@@ -101,14 +102,15 @@ namespace Iviz.Controllers
         UnityEngine.Pose currentPose;
         Vector3 currentScale;
 
-
         public DateTime ExpirationTime { get; private set; }
 
+        bool occlusionOnly;
         public bool OcclusionOnly
         {
-            get => resource is ISupportsAROcclusion r && r.OcclusionOnly;
+            get => occlusionOnly;
             set
             {
+                occlusionOnly = value;
                 if (resource is ISupportsAROcclusion arResource)
                 {
                     arResource.OcclusionOnly = value;
@@ -116,11 +118,13 @@ namespace Iviz.Controllers
             }
         }
 
+        Color tint;
         public Color Tint
         {
-            get => resource is ISupportsTint r ? r.Tint : Color.white;
+            get => tint;
             set
             {
+                tint = value;
                 if (resource is ISupportsTint tintResource)
                 {
                     tintResource.Tint = value;
@@ -128,11 +132,13 @@ namespace Iviz.Controllers
             }
         }
 
+        float metallic;
         public float Metallic
         {
-            get => resource is ISupportsPbr r ? r.Metallic : 0;
+            get => metallic;
             set
             {
+                metallic = value;
                 if (resource is ISupportsPbr pbrResource)
                 {
                     pbrResource.Metallic = value;
@@ -140,11 +146,13 @@ namespace Iviz.Controllers
             }
         }
 
+        float smoothness;
         public float Smoothness
         {
-            get => resource is ISupportsPbr r ? r.Smoothness : 0;
+            get => smoothness;
             set
             {
+                smoothness = value;
                 if (resource is ISupportsPbr pbrResource)
                 {
                     pbrResource.Smoothness = value;
@@ -163,7 +171,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-
+        
         public int Layer
         {
             get => resource?.Layer ?? 0;
@@ -176,15 +184,23 @@ namespace Iviz.Controllers
             }
         }
 
+        bool triangleListFlipWinding;
+
         public bool TriangleListFlipWinding
         {
-            get => resource is MeshTrianglesResource r && r.FlipWinding;
+            get => triangleListFlipWinding;
             set
             {
-                if (resource is MeshTrianglesResource r && r.FlipWinding != value)
+                if (triangleListFlipWinding == value)
                 {
-                    r.FlipWinding = value;
+                    return;
+                }
+
+                triangleListFlipWinding = value;
+                if (resource is MeshTrianglesResource r)
+                {
                     previousHash = null;
+                    r.FlipWinding = value;
                 }
             }
         }
@@ -432,6 +448,8 @@ namespace Iviz.Controllers
             {
                 points[i] = msg.Points[i].Ros2Unity();
             }
+
+            meshTriangles.FlipWinding = TriangleListFlipWinding;
 
             if (msg.Colors.Length != 0)
             {
@@ -837,6 +855,11 @@ namespace Iviz.Controllers
         {
             if (msg.Type() == MarkerType.MeshResource)
             {
+                if (Resource.TryGetResource(msg.MeshResource, out var newResourceInfo))
+                {
+                    return newResourceInfo;
+                }
+
                 if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
                 {
                     StopLoadResourceTask();
@@ -845,7 +868,7 @@ namespace Iviz.Controllers
                         msg.MeshResource);
                 }
 
-                return null;
+                return taskInfo.ResourceInfo;
             }
 
             StopLoadResourceTask();
@@ -904,9 +927,8 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (newResourceInfo == null)
+            if (tokenSource.IsCancellationRequested || newResourceInfo == null)
             {
-                //Debug.LogWarning($"{this}: Resource {uriString} returned null");
                 return;
             }
 
@@ -915,6 +937,11 @@ namespace Iviz.Controllers
             if (newResource != null)
             {
                 newResource.Layer = LayerType.IgnoreRaycast;
+            }
+
+            if (taskInfo != null)
+            {
+                taskInfo.ResourceInfo = resourceInfo;
             }
 
             resourceInfo = newResourceInfo;

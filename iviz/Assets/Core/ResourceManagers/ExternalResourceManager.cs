@@ -245,6 +245,12 @@ namespace Iviz.Displays
 
         #endregion
 
+        [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
+        public bool TryGetGameObject([NotNull] string uriString, out Info<GameObject> resource)
+        {
+            return TryGetModel(uriString, out resource) || TryGetScene(uriString, out resource);        
+        }          
+        
         [ItemCanBeNull]
         public async Task<Info<GameObject>> TryGetGameObjectAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
@@ -290,6 +296,12 @@ namespace Iviz.Displays
                 return resource;
             }
         }
+        
+        [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
+        bool TryGetModel([NotNull] string uriString, out Info<GameObject> resource)
+        {
+            return loadedModels.TryGetValue(uriString, out resource);
+        }        
 
         async Task<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
@@ -366,6 +378,12 @@ namespace Iviz.Displays
 
             return null;
         }
+        
+        [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
+        bool TryGetScene([NotNull] string uriString, out Info<GameObject> resource)
+        {
+            return loadedScenes.TryGetValue(uriString, out resource);
+        }  
 
         async Task<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)

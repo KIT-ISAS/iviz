@@ -47,7 +47,11 @@ namespace Iviz.App
                 InputModule.QualityInAr = (QualityType) f;
             };
 
-            if (InputModule.TargetFps <= 15)
+            if (InputModule.TargetFps == GuiInputModule.DefaultFps)
+            {
+                panel.TargetFps.Index = 0;
+            }
+            else if (InputModule.TargetFps <= 15)
             {
                 panel.TargetFps.Index = 3;
             }

@@ -70,7 +70,7 @@ namespace Iviz.App
             GameThread.EverySecond += UpdateSelected;
         }
 
-        T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanelContents
+        T CreatePanel<T>([NotNull] Info<GameObject> source) where T : IDialogPanelContents
         {
             return source.Instantiate(transform).GetComponent<T>();
         }
@@ -81,19 +81,8 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateSelected;
         }
 
-        int round = 0;
-
         void UpdateSelected()
         {
-            if (Settings.IsHololens)
-            {
-                round++;
-                if (round % 5 != 0)
-                {
-                    return;
-                }
-            }
-
             selectedDialogData?.UpdatePanel();
         }
 

@@ -68,12 +68,10 @@ namespace Iviz.App
 
         [SerializeField] ARJoystick arJoystick = null;
 
-        [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
 
         int frameCounter;
-        float buttonHeight;
         bool allGuiVisible = true;
 
         Canvas parentCanvas;
@@ -90,7 +88,9 @@ namespace Iviz.App
         SettingsDialogData settingsData;
         EchoDialogData echoData;
 
-        ControllerService controllerService;
+        Controllers.ControllerService controllerService;
+        Controllers.ModelService modelService;
+        ModuleListButtons buttons;
 
         [SerializeField] GameObject menuObject = null;
         IMenuDialogContents menuDialog;
@@ -139,8 +139,8 @@ namespace Iviz.App
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
-        Controllers.ModelService modelService;
-        
+        [NotNull] ModuleListButtons Buttons => buttons ?? (buttons = new ModuleListButtons(contentObject));
+
         public bool UnlockButtonVisible
         {
             get => UnlockButton.gameObject.activeSelf;
@@ -164,8 +164,6 @@ namespace Iviz.App
 
         void Start()
         {
-            buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
-
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
@@ -538,31 +536,9 @@ namespace Iviz.App
             }
 
             moduleDatas.Add(moduleData);
-            CreateButtonObject(moduleData);
+            Buttons.CreateButtonObject(moduleData);
 
             return moduleData;
-        }
-
-        // TODO: move graphics out of this
-        void CreateButtonObject([NotNull] ModuleData moduleData)
-        {
-            GameObject buttonObject =
-                ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
-
-            int size = buttons.Count;
-            float y = 2 * YOffset + size * (buttonHeight + YOffset);
-
-            ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
-
-            Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
-            buttonObjectText.text = moduleData.ButtonText;
-            buttonObject.name = $"Button:{moduleData.ModuleType}";
-            buttonObject.SetActive(true);
-            buttons.Add(buttonObject);
-
-            Button button = buttonObject.GetComponent<Button>();
-            button.onClick.AddListener(moduleData.ToggleShowPanel);
-            ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
         }
 
         [NotNull]
@@ -602,29 +578,9 @@ namespace Iviz.App
             moduleDatas[index].Stop();
             moduleDatas.RemoveAt(index);
 
-            RemoveButton(index);
+            Buttons.RemoveButton(index);
         }
 
-        // TODO: move graphics out of this
-        void RemoveButton(int index)
-        {
-            GameObject displayButton = buttons[index];
-            buttons.RemoveAt(index);
-
-            displayButton.GetComponent<Button>().onClick.RemoveAllListeners();
-            ResourcePool.Dispose(Resource.Widgets.DisplayButton, displayButton);
-
-            int i;
-            for (i = index; i < buttons.Count; i++)
-            {
-                GameObject buttonObject = buttons[i];
-                float y = 2 * YOffset + i * (buttonHeight + YOffset);
-                ((RectTransform) buttonObject.transform).anchoredPosition = new Vector3(0, -y);
-            }
-
-            ((RectTransform) contentObject.transform).sizeDelta =
-                new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
-        }
 
         public void UpdateModuleButton([NotNull] ModuleData entry, [NotNull] string content)
         {
@@ -633,33 +589,13 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)
             {
                 return;
             }
-
-            GameObject buttonObject = buttons[index];
-            Text text = buttonObject.GetComponentInChildren<Text>();
-            text.text = content;
-            int lineBreaks = content.Count(x => x == '\n');
-            switch (lineBreaks)
-            {
-                case 2:
-                    text.fontSize = 11;
-                    break;
-                case 3:
-                    text.fontSize = 10;
-                    break;
-                default:
-                    text.fontSize = 12;
-                    break;
-            }
+            
+            Buttons.UpdateModuleButton(index, content);
         }
 
         public void RegisterDisplayedTopic([NotNull] string topic)
@@ -699,8 +635,8 @@ namespace Iviz.App
             frameCounter = 0;
 
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
-            int downKb = downB / 1000;
-            int upKb = upB / 1000;
+            long downKb = downB / 1000;
+            long upKb = upB / 1000;
             bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
 
             var state = SystemInfo.batteryStatus;
@@ -745,6 +681,90 @@ namespace Iviz.App
             }
 
             menuDialog.Set(menuEntries, unityPositionHint, callback);
+        }
+        
+        class ModuleListButtons
+        {
+            [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
+            readonly GameObject contentObject;
+            readonly float buttonHeight;
+
+            public ModuleListButtons(GameObject contentObject)
+            {
+                buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
+                this.contentObject = contentObject;
+            }
+            
+            public void CreateButtonObject([NotNull] ModuleData moduleData)
+            {
+                GameObject buttonObject =
+                    ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
+
+                int size = buttons.Count;
+                float y = 2 * YOffset + size * (buttonHeight + YOffset);
+
+                ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
+
+                Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
+                buttonObjectText.text = moduleData.ButtonText;
+                buttonObject.name = $"Button:{moduleData.ModuleType}";
+                buttonObject.SetActive(true);
+                buttons.Add(buttonObject);
+
+                Button button = buttonObject.GetComponent<Button>();
+                button.onClick.AddListener(moduleData.ToggleShowPanel);
+                ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
+            }
+            
+            public void RemoveButton(int index)
+            {
+                GameObject displayButton = buttons[index];
+                buttons.RemoveAt(index);
+
+                displayButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                ResourcePool.Dispose(Resource.Widgets.DisplayButton, displayButton);
+
+                int i;
+                for (i = index; i < buttons.Count; i++)
+                {
+                    GameObject buttonObject = buttons[i];
+                    float y = 2 * YOffset + i * (buttonHeight + YOffset);
+                    ((RectTransform) buttonObject.transform).anchoredPosition = new Vector3(0, -y);
+                }
+
+                ((RectTransform) contentObject.transform).sizeDelta =
+                    new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
+            }
+            
+            public void UpdateModuleButton(int index, [NotNull] string content)
+            {
+                if (index < 0 || index >= buttons.Count)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                if (content == null)
+                {
+                    throw new ArgumentNullException(nameof(content));
+                }
+                
+                GameObject buttonObject = buttons[index];
+                Text text = buttonObject.GetComponentInChildren<Text>();
+                text.text = content;
+                int lineBreaks = content.Count(x => x == '\n');
+                switch (lineBreaks)
+                {
+                    case 2:
+                        text.fontSize = 11;
+                        break;
+                    case 3:
+                        text.fontSize = 10;
+                        break;
+                    default:
+                        text.fontSize = 12;
+                        break;
+                }
+            }            
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,8 @@ namespace Iviz.App
     public class DropdownWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
-        [SerializeField] Dropdown dropdown = null;
+        //[SerializeField] Dropdown dropdown = null;
+        [SerializeField] TMP_Dropdown dropdown = null;
 
         [NotNull]
         public string Label
@@ -66,15 +68,15 @@ namespace Iviz.App
             }
         }
 
-        readonly List<Dropdown.OptionData> optionDatas = new List<Dropdown.OptionData>();
+        readonly List<TMP_Dropdown.OptionData> optionDatas = new List<TMP_Dropdown.OptionData>();
         [NotNull]
         public IEnumerable<string> Options
         {
-            get => optionDatas.Select(x => x.text);
+            get => dropdown.options.Select(x => x.text);
             set
             {
                 optionDatas.Clear();
-                optionDatas.AddRange(value.Select(x => new Dropdown.OptionData(x)));
+                optionDatas.AddRange(value.Select(x => new TMP_Dropdown.OptionData(x)));
                 dropdown.options = optionDatas;
             }
         }

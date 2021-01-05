@@ -40,7 +40,7 @@ namespace Iviz.Ros
         readonly bool callbackInGameThread = true;
 
         int dropped;
-        int lastMsgBytes;
+        long lastMsgBytes;
         int msgsInQueue;
         int totalMsgCounter;
 

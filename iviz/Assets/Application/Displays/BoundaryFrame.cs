@@ -42,10 +42,11 @@ namespace Iviz.Controllers
             labelObject.Name = "Frame Axis Label";
             labelObjectText = labelObject.GetComponent<TextMesh>();
             labelObject.transform.SetParentLocal(transform);
+            labelObject.Visible = false;
 
             labelBillboard = labelObject.GetComponent<Billboard>();
 
-            Name = "";
+            Name = "Boundary Frame";
         }
 
         public float FrameAxisLength
