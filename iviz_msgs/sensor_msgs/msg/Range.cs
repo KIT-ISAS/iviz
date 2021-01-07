@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/Range")]
+    [Preserve, DataContract (Name = "sensor_msgs/Range")]
     public sealed class Range : IDeserializable<Range>, IMessage
     {
         // Single range reading from an active ranger that emits energy and reports

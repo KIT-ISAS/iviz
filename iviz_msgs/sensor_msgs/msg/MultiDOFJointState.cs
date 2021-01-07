@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/MultiDOFJointState")]
+    [Preserve, DataContract (Name = "sensor_msgs/MultiDOFJointState")]
     public sealed class MultiDOFJointState : IDeserializable<MultiDOFJointState>, IMessage
     {
         // Representation of state for joints with multiple degrees of freedom, 
@@ -58,8 +58,16 @@ namespace Iviz.Msgs.SensorMsgs
             Header = new StdMsgs.Header(ref b);
             JointNames = b.DeserializeStringArray();
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Twist = b.DeserializeStructArray<GeometryMsgs.Twist>();
-            Wrench = b.DeserializeStructArray<GeometryMsgs.Wrench>();
+            Twist = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                Twist[i] = new GeometryMsgs.Twist(ref b);
+            }
+            Wrench = b.DeserializeArray<GeometryMsgs.Wrench>();
+            for (int i = 0; i < Wrench.Length; i++)
+            {
+                Wrench[i] = new GeometryMsgs.Wrench(ref b);
+            }
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -77,8 +85,8 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames, 0);
             b.SerializeStructArray(Transforms, 0);
-            b.SerializeStructArray(Twist, 0);
-            b.SerializeStructArray(Wrench, 0);
+            b.SerializeArray(Twist, 0);
+            b.SerializeArray(Wrench, 0);
         }
         
         public void RosValidate()
@@ -92,7 +100,17 @@ namespace Iviz.Msgs.SensorMsgs
             }
             if (Transforms is null) throw new System.NullReferenceException(nameof(Transforms));
             if (Twist is null) throw new System.NullReferenceException(nameof(Twist));
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                if (Twist[i] is null) throw new System.NullReferenceException($"{nameof(Twist)}[{i}]");
+                Twist[i].RosValidate();
+            }
             if (Wrench is null) throw new System.NullReferenceException(nameof(Wrench));
+            for (int i = 0; i < Wrench.Length; i++)
+            {
+                if (Wrench[i] is null) throw new System.NullReferenceException($"{nameof(Wrench)}[{i}]");
+                Wrench[i].RosValidate();
+            }
         }
     
         public int RosMessageLength

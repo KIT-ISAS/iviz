@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/Empty")]
+    [Preserve, DataContract (Name = "std_msgs/Empty")]
     public sealed class Empty : IDeserializable<Empty>, IMessage
     {
         /// <summary> Constructor for empty message. </summary>

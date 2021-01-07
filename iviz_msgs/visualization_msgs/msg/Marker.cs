@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract (Name = "visualization_msgs/Marker")]
+    [Preserve, DataContract (Name = "visualization_msgs/Marker")]
     public sealed class Marker : IDeserializable<Marker>, IMessage
     {
         // See http://www.ros.org/wiki/rviz/DisplayTypes/Marker and http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes for more information on using this message with rviz

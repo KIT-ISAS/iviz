@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Pose")]
+    [Preserve, DataContract (Name = "geometry_msgs/Pose")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Pose : IMessage, System.IEquatable<Pose>, IDeserializable<Pose>
     {

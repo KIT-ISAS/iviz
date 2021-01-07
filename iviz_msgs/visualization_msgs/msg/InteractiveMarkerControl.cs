@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract (Name = "visualization_msgs/InteractiveMarkerControl")]
+    [Preserve, DataContract (Name = "visualization_msgs/InteractiveMarkerControl")]
     public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker

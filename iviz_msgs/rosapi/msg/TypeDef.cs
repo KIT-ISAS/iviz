@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/TypeDef")]
+    [Preserve, DataContract (Name = "rosapi/TypeDef")]
     public sealed class TypeDef : IDeserializable<TypeDef>, IMessage
     {
         [DataMember (Name = "type")] public string Type { get; set; }

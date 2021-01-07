@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Color32")]
+    [Preserve, DataContract (Name = "iviz_msgs/Color32")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
     {

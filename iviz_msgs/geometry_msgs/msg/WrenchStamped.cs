@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/WrenchStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/WrenchStamped")]
     public sealed class WrenchStamped : IDeserializable<WrenchStamped>, IMessage
     {
         // A wrench with reference coordinate frame and timestamp
@@ -15,10 +15,11 @@ namespace Iviz.Msgs.GeometryMsgs
         public WrenchStamped()
         {
             Header = new StdMsgs.Header();
+            Wrench = new Wrench();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public WrenchStamped(StdMsgs.Header Header, in Wrench Wrench)
+        public WrenchStamped(StdMsgs.Header Header, Wrench Wrench)
         {
             this.Header = Header;
             this.Wrench = Wrench;
@@ -51,6 +52,8 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
+            if (Wrench is null) throw new System.NullReferenceException(nameof(Wrench));
+            Wrench.RosValidate();
         }
     
         public int RosMessageLength

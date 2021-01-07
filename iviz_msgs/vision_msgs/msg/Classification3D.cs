@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/Classification3D")]
+    [Preserve, DataContract (Name = "vision_msgs/Classification3D")]
     public sealed class Classification3D : IDeserializable<Classification3D>, IMessage
     {
         // Defines a 3D classification result.

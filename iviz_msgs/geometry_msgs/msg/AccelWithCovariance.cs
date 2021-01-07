@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/AccelWithCovariance")]
+    [Preserve, DataContract (Name = "geometry_msgs/AccelWithCovariance")]
     public sealed class AccelWithCovariance : IDeserializable<AccelWithCovariance>, IMessage
     {
         // This expresses acceleration in free space with uncertainty.
@@ -18,11 +18,12 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovariance()
         {
+            Accel = new Accel();
             Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelWithCovariance(in Accel Accel, double[] Covariance)
+        public AccelWithCovariance(Accel Accel, double[] Covariance)
         {
             this.Accel = Accel;
             this.Covariance = Covariance;
@@ -53,6 +54,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
+            Accel.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException(nameof(Covariance));
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }

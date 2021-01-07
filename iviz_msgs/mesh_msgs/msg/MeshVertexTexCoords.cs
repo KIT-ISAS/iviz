@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/MeshVertexTexCoords")]
+    [Preserve, DataContract (Name = "mesh_msgs/MeshVertexTexCoords")]
     public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessage
     {
         // Mesh Attribute Type

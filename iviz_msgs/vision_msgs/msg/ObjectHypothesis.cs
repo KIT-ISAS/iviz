@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/ObjectHypothesis")]
+    [Preserve, DataContract (Name = "vision_msgs/ObjectHypothesis")]
     public sealed class ObjectHypothesis : IDeserializable<ObjectHypothesis>, IMessage
     {
         // An object hypothesis that contains no position information.

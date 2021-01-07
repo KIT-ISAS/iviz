@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/TF2Error")]
+    [Preserve, DataContract (Name = "tf2_msgs/TF2Error")]
     public sealed class TF2Error : IDeserializable<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;

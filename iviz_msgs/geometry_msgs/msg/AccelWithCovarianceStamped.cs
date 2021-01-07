@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/AccelWithCovarianceStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/AccelWithCovarianceStamped")]
     public sealed class AccelWithCovarianceStamped : IDeserializable<AccelWithCovarianceStamped>, IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.

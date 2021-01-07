@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/BoundingBox3DArray")]
+    [Preserve, DataContract (Name = "vision_msgs/BoundingBox3DArray")]
     public sealed class BoundingBox3DArray : IDeserializable<BoundingBox3DArray>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

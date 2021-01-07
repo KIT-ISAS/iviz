@@ -1,16 +1,19 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/UInt32")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct UInt32 : IMessage, System.IEquatable<UInt32>, IDeserializable<UInt32>
+    [Preserve, DataContract (Name = "std_msgs/UInt32")]
+    public sealed class UInt32 : IDeserializable<UInt32>, IMessage
     {
-        [DataMember (Name = "data")] public uint Data { get; }
+        [DataMember (Name = "data")] public uint Data { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public UInt32()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public UInt32(uint Data)
         {
@@ -20,44 +23,34 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor with buffer. </summary>
         public UInt32(ref Buffer b)
         {
-            b.Deserialize(out this);
+            Data = b.Deserialize<uint>();
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
             return new UInt32(ref b);
         }
         
-        readonly UInt32 IDeserializable<UInt32>.RosDeserialize(ref Buffer b)
+        UInt32 IDeserializable<UInt32>.RosDeserialize(ref Buffer b)
         {
             return new UInt32(ref b);
         }
-        
-        public override readonly int GetHashCode() => (Data).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is UInt32 s && Equals(s);
-        
-        public readonly bool Equals(UInt32 o) => (Data) == (o.Data);
-        
-        public static bool operator==(in UInt32 a, in UInt32 b) => a.Equals(b);
-        
-        public static bool operator!=(in UInt32 a, in UInt32 b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(Data);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 4;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/UInt32";

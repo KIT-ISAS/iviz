@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/BoundingBox2D")]
+    [Preserve, DataContract (Name = "vision_msgs/BoundingBox2D")]
     public sealed class BoundingBox2D : IDeserializable<BoundingBox2D>, IMessage
     {
         // A 2D bounding box that can be rotated about its center.

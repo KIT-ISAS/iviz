@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Include")]
+    [Preserve, DataContract (Name = "iviz_msgs/Include")]
     public sealed class Include : IDeserializable<Include>, IMessage
     {
         // Reference to an external asset

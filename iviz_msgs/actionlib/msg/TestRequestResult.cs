@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [DataContract (Name = "actionlib/TestRequestResult")]
+    [Preserve, DataContract (Name = "actionlib/TestRequestResult")]
     public sealed class TestRequestResult : IDeserializable<TestRequestResult>, IResult<TestRequestActionResult>
     {
         [DataMember (Name = "the_result")] public int TheResult { get; set; }

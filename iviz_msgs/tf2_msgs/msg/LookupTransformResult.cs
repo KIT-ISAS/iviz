@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/LookupTransformResult")]
+    [Preserve, DataContract (Name = "tf2_msgs/LookupTransformResult")]
     public sealed class LookupTransformResult : IDeserializable<LookupTransformResult>, IResult<LookupTransformActionResult>
     {
         [DataMember (Name = "transform")] public GeometryMsgs.TransformStamped Transform { get; set; }

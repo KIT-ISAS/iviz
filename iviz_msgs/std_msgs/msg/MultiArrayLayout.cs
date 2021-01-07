@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/MultiArrayLayout")]
+    [Preserve, DataContract (Name = "std_msgs/MultiArrayLayout")]
     public sealed class MultiArrayLayout : IDeserializable<MultiArrayLayout>, IMessage
     {
         // The multiarray declares a generic multi-dimensional array of a

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/Joy")]
+    [Preserve, DataContract (Name = "sensor_msgs/Joy")]
     public sealed class Joy : IDeserializable<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.

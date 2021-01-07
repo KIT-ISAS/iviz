@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TurtleActionlib
 {
-    [DataContract (Name = "turtle_actionlib/ShapeResult")]
+    [Preserve, DataContract (Name = "turtle_actionlib/ShapeResult")]
     public sealed class ShapeResult : IDeserializable<ShapeResult>, IResult<ShapeActionResult>
     {
         //result definition

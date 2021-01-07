@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/RegionOfInterest")]
+    [Preserve, DataContract (Name = "sensor_msgs/RegionOfInterest")]
     public sealed class RegionOfInterest : IDeserializable<RegionOfInterest>, IMessage
     {
         // This message is used to specify a region of interest within an image.

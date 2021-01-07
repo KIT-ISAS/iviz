@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/VisionInfo")]
+    [Preserve, DataContract (Name = "vision_msgs/VisionInfo")]
     public sealed class VisionInfo : IDeserializable<VisionInfo>, IMessage
     {
         // Provides meta-information about a visual pipeline.

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract (Name = "trajectory_msgs/JointTrajectoryPoint")]
+    [Preserve, DataContract (Name = "trajectory_msgs/JointTrajectoryPoint")]
     public sealed class JointTrajectoryPoint : IDeserializable<JointTrajectoryPoint>, IMessage
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]

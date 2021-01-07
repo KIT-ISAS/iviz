@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Triangle")]
+    [Preserve, DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {

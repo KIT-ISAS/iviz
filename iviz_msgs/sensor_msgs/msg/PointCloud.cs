@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/PointCloud")]
+    [Preserve, DataContract (Name = "sensor_msgs/PointCloud")]
     public sealed class PointCloud : IDeserializable<PointCloud>, IMessage
     {
         // This message holds a collection of 3d points, plus optional additional

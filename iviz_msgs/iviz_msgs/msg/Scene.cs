@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Scene")]
+    [Preserve, DataContract (Name = "iviz_msgs/Scene")]
     public sealed class Scene : IDeserializable<Scene>, IMessage
     {
         // A complete scene 

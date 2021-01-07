@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract (Name = "trajectory_msgs/MultiDOFJointTrajectoryPoint")]
+    [Preserve, DataContract (Name = "trajectory_msgs/MultiDOFJointTrajectoryPoint")]
     public sealed class MultiDOFJointTrajectoryPoint : IDeserializable<MultiDOFJointTrajectoryPoint>, IMessage
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
@@ -36,8 +36,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public MultiDOFJointTrajectoryPoint(ref Buffer b)
         {
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Velocities = b.DeserializeStructArray<GeometryMsgs.Twist>();
-            Accelerations = b.DeserializeStructArray<GeometryMsgs.Twist>();
+            Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < Velocities.Length; i++)
+            {
+                Velocities[i] = new GeometryMsgs.Twist(ref b);
+            }
+            Accelerations = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < Accelerations.Length; i++)
+            {
+                Accelerations[i] = new GeometryMsgs.Twist(ref b);
+            }
             TimeFromStart = b.Deserialize<duration>();
         }
         
@@ -54,8 +62,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Transforms, 0);
-            b.SerializeStructArray(Velocities, 0);
-            b.SerializeStructArray(Accelerations, 0);
+            b.SerializeArray(Velocities, 0);
+            b.SerializeArray(Accelerations, 0);
             b.Serialize(TimeFromStart);
         }
         
@@ -63,7 +71,17 @@ namespace Iviz.Msgs.TrajectoryMsgs
         {
             if (Transforms is null) throw new System.NullReferenceException(nameof(Transforms));
             if (Velocities is null) throw new System.NullReferenceException(nameof(Velocities));
+            for (int i = 0; i < Velocities.Length; i++)
+            {
+                if (Velocities[i] is null) throw new System.NullReferenceException($"{nameof(Velocities)}[{i}]");
+                Velocities[i].RosValidate();
+            }
             if (Accelerations is null) throw new System.NullReferenceException(nameof(Accelerations));
+            for (int i = 0; i < Accelerations.Length; i++)
+            {
+                if (Accelerations[i] is null) throw new System.NullReferenceException($"{nameof(Accelerations)}[{i}]");
+                Accelerations[i].RosValidate();
+            }
         }
     
         public int RosMessageLength

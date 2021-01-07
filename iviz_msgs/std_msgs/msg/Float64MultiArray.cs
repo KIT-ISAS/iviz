@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/Float64MultiArray")]
+    [Preserve, DataContract (Name = "std_msgs/Float64MultiArray")]
     public sealed class Float64MultiArray : IDeserializable<Float64MultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for

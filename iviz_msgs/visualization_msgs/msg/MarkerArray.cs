@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract (Name = "visualization_msgs/MarkerArray")]
+    [Preserve, DataContract (Name = "visualization_msgs/MarkerArray")]
     public sealed class MarkerArray : IDeserializable<MarkerArray>, IMessage
     {
         [DataMember (Name = "markers")] public Marker[] Markers { get; set; }

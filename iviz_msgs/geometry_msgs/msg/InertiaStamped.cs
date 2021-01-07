@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/InertiaStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/InertiaStamped")]
     public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -14,10 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         public InertiaStamped()
         {
             Header = new StdMsgs.Header();
+            Inertia = new Inertia();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InertiaStamped(StdMsgs.Header Header, in Inertia Inertia)
+        public InertiaStamped(StdMsgs.Header Header, Inertia Inertia)
         {
             this.Header = Header;
             this.Inertia = Inertia;
@@ -50,6 +51,8 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
+            if (Inertia is null) throw new System.NullReferenceException(nameof(Inertia));
+            Inertia.RosValidate();
         }
     
         public int RosMessageLength

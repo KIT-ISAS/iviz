@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Vector2f")]
+    [Preserve, DataContract (Name = "iviz_msgs/Vector2f")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Vector2f : IMessage, System.IEquatable<Vector2f>, IDeserializable<Vector2f>
     {

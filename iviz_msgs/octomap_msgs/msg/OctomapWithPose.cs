@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [DataContract (Name = "octomap_msgs/OctomapWithPose")]
+    [Preserve, DataContract (Name = "octomap_msgs/OctomapWithPose")]
     public sealed class OctomapWithPose : IDeserializable<OctomapWithPose>, IMessage
     {
         // A 3D map in binary format, as Octree

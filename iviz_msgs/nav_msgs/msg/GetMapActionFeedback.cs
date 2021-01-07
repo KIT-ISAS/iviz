@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/GetMapActionFeedback")]
+    [Preserve, DataContract (Name = "nav_msgs/GetMapActionFeedback")]
     public sealed class GetMapActionFeedback : IDeserializable<GetMapActionFeedback>, IActionFeedback<GetMapFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

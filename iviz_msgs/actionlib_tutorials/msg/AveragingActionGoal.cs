@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [DataContract (Name = "actionlib_tutorials/AveragingActionGoal")]
+    [Preserve, DataContract (Name = "actionlib_tutorials/AveragingActionGoal")]
     public sealed class AveragingActionGoal : IDeserializable<AveragingActionGoal>, IActionGoal<AveragingGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

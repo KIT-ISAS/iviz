@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract (Name = "shape_msgs/Mesh")]
+    [Preserve, DataContract (Name = "shape_msgs/Mesh")]
     public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         // Definition of a mesh

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestUInt8")]
+    [Preserve, DataContract (Name = "rosbridge_library/TestUInt8")]
     public sealed class TestUInt8 : IDeserializable<TestUInt8>, IMessage
     {
         [DataMember (Name = "data")] public byte[] Data { get; set; }

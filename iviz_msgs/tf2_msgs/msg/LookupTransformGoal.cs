@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/LookupTransformGoal")]
+    [Preserve, DataContract (Name = "tf2_msgs/LookupTransformGoal")]
     public sealed class LookupTransformGoal : IDeserializable<LookupTransformGoal>, IGoal<LookupTransformActionGoal>
     {
         //Simple API

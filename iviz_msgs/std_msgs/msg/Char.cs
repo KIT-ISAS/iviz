@@ -1,16 +1,19 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/Char")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Char : IMessage, System.IEquatable<Char>, IDeserializable<Char>
+    [Preserve, DataContract (Name = "std_msgs/Char")]
+    public sealed class Char : IDeserializable<Char>, IMessage
     {
-        [DataMember (Name = "data")] public sbyte Data { get; }
+        [DataMember (Name = "data")] public sbyte Data { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public Char()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public Char(sbyte Data)
         {
@@ -20,44 +23,34 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor with buffer. </summary>
         public Char(ref Buffer b)
         {
-            b.Deserialize(out this);
+            Data = b.Deserialize<sbyte>();
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
             return new Char(ref b);
         }
         
-        readonly Char IDeserializable<Char>.RosDeserialize(ref Buffer b)
+        Char IDeserializable<Char>.RosDeserialize(ref Buffer b)
         {
             return new Char(ref b);
         }
-        
-        public override readonly int GetHashCode() => (Data).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Char s && Equals(s);
-        
-        public readonly bool Equals(Char o) => (Data) == (o.Data);
-        
-        public static bool operator==(in Char a, in Char b) => a.Equals(b);
-        
-        public static bool operator!=(in Char a, in Char b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(Data);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 1;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Char";

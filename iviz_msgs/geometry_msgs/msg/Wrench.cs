@@ -1,19 +1,22 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Wrench")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Wrench : IMessage, System.IEquatable<Wrench>, IDeserializable<Wrench>
+    [Preserve, DataContract (Name = "geometry_msgs/Wrench")]
+    public sealed class Wrench : IDeserializable<Wrench>, IMessage
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
-        [DataMember (Name = "force")] public Vector3 Force { get; }
-        [DataMember (Name = "torque")] public Vector3 Torque { get; }
+        [DataMember (Name = "force")] public Vector3 Force { get; set; }
+        [DataMember (Name = "torque")] public Vector3 Torque { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public Wrench()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public Wrench(in Vector3 Force, in Vector3 Torque)
         {
@@ -24,44 +27,36 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         public Wrench(ref Buffer b)
         {
-            b.Deserialize(out this);
+            Force = new Vector3(ref b);
+            Torque = new Vector3(ref b);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
             return new Wrench(ref b);
         }
         
-        readonly Wrench IDeserializable<Wrench>.RosDeserialize(ref Buffer b)
+        Wrench IDeserializable<Wrench>.RosDeserialize(ref Buffer b)
         {
             return new Wrench(ref b);
         }
-        
-        public override readonly int GetHashCode() => (Force, Torque).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Wrench s && Equals(s);
-        
-        public readonly bool Equals(Wrench o) => (Force, Torque) == (o.Force, o.Torque);
-        
-        public static bool operator==(in Wrench a, in Wrench b) => a.Equals(b);
-        
-        public static bool operator!=(in Wrench a, in Wrench b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            Force.RosSerialize(ref b);
+            Torque.RosSerialize(ref b);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 48;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Wrench";

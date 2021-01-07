@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/LookupTransformFeedback")]
+    [Preserve, DataContract (Name = "tf2_msgs/LookupTransformFeedback")]
     public sealed class LookupTransformFeedback : IDeserializable<LookupTransformFeedback>, IFeedback<LookupTransformActionFeedback>
     {
         /// <summary> Constructor for empty message. </summary>

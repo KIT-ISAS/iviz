@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/GridCells")]
+    [Preserve, DataContract (Name = "nav_msgs/GridCells")]
     public sealed class GridCells : IDeserializable<GridCells>, IMessage
     {
         //an array of cells in a 2D grid

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Texture")]
+    [Preserve, DataContract (Name = "iviz_msgs/Texture")]
     public sealed class Texture : IDeserializable<Texture>, IMessage
     {
         [DataMember (Name = "path")] public string Path { get; set; }

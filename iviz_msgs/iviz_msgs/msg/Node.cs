@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Node")]
+    [Preserve, DataContract (Name = "iviz_msgs/Node")]
     public sealed class Node : IDeserializable<Node>, IMessage
     {
         [DataMember (Name = "name")] public string Name { get; set; }

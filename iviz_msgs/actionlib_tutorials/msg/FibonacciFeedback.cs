@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [DataContract (Name = "actionlib_tutorials/FibonacciFeedback")]
+    [Preserve, DataContract (Name = "actionlib_tutorials/FibonacciFeedback")]
     public sealed class FibonacciFeedback : IDeserializable<FibonacciFeedback>, IFeedback<FibonacciActionFeedback>
     {
         //feedback

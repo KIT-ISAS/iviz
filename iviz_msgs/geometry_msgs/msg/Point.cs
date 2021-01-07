@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Point")]
+    [Preserve, DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
     {

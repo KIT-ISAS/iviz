@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/GetMapAction")]
+    [Preserve, DataContract (Name = "nav_msgs/GetMapAction")]
     public sealed class GetMapAction : IDeserializable<GetMapAction>,
 		IAction<GetMapActionGoal, GetMapActionFeedback, GetMapActionResult>
     {

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/Feature")]
+    [Preserve, DataContract (Name = "mesh_msgs/Feature")]
     public sealed class Feature : IDeserializable<Feature>, IMessage
     {
         [DataMember (Name = "location")] public GeometryMsgs.Point Location { get; set; }
@@ -27,7 +27,11 @@ namespace Iviz.Msgs.MeshMsgs
         public Feature(ref Buffer b)
         {
             Location = new GeometryMsgs.Point(ref b);
-            Descriptor = b.DeserializeStructArray<StdMsgs.Float32>();
+            Descriptor = b.DeserializeArray<StdMsgs.Float32>();
+            for (int i = 0; i < Descriptor.Length; i++)
+            {
+                Descriptor[i] = new StdMsgs.Float32(ref b);
+            }
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -43,12 +47,17 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             Location.RosSerialize(ref b);
-            b.SerializeStructArray(Descriptor, 0);
+            b.SerializeArray(Descriptor, 0);
         }
         
         public void RosValidate()
         {
             if (Descriptor is null) throw new System.NullReferenceException(nameof(Descriptor));
+            for (int i = 0; i < Descriptor.Length; i++)
+            {
+                if (Descriptor[i] is null) throw new System.NullReferenceException($"{nameof(Descriptor)}[{i}]");
+                Descriptor[i].RosValidate();
+            }
         }
     
         public int RosMessageLength

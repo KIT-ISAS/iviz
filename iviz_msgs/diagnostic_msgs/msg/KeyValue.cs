@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract (Name = "diagnostic_msgs/KeyValue")]
+    [Preserve, DataContract (Name = "diagnostic_msgs/KeyValue")]
     public sealed class KeyValue : IDeserializable<KeyValue>, IMessage
     {
         [DataMember (Name = "key")] public string Key { get; set; } // what to label this value when viewing

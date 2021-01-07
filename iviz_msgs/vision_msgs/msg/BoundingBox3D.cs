@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/BoundingBox3D")]
+    [Preserve, DataContract (Name = "vision_msgs/BoundingBox3D")]
     public sealed class BoundingBox3D : IDeserializable<BoundingBox3D>, IMessage
     {
         // A 3D bounding box that can be positioned and rotated about its center (6 DOF)

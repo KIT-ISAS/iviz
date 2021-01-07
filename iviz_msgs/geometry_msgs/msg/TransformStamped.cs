@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/TransformStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/TransformStamped")]
     public sealed class TransformStamped : IDeserializable<TransformStamped>, IMessage
     {
         // This expresses a transform from coordinate frame header.frame_id

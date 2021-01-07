@@ -1,16 +1,19 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [DataContract (Name = "std_msgs/Float64")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Float64 : IMessage, System.IEquatable<Float64>, IDeserializable<Float64>
+    [Preserve, DataContract (Name = "std_msgs/Float64")]
+    public sealed class Float64 : IDeserializable<Float64>, IMessage
     {
-        [DataMember (Name = "data")] public double Data { get; }
+        [DataMember (Name = "data")] public double Data { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public Float64()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public Float64(double Data)
         {
@@ -20,44 +23,34 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor with buffer. </summary>
         public Float64(ref Buffer b)
         {
-            b.Deserialize(out this);
+            Data = b.Deserialize<double>();
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
             return new Float64(ref b);
         }
         
-        readonly Float64 IDeserializable<Float64>.RosDeserialize(ref Buffer b)
+        Float64 IDeserializable<Float64>.RosDeserialize(ref Buffer b)
         {
             return new Float64(ref b);
         }
-        
-        public override readonly int GetHashCode() => (Data).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Float64 s && Equals(s);
-        
-        public readonly bool Equals(Float64 o) => (Data) == (o.Data);
-        
-        public static bool operator==(in Float64 a, in Float64 b) => a.Equals(b);
-        
-        public static bool operator!=(in Float64 a, in Float64 b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(Data);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 8;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Float64";

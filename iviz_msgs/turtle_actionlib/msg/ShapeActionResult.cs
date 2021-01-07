@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TurtleActionlib
 {
-    [DataContract (Name = "turtle_actionlib/ShapeActionResult")]
+    [Preserve, DataContract (Name = "turtle_actionlib/ShapeActionResult")]
     public sealed class ShapeActionResult : IDeserializable<ShapeActionResult>, IActionResult<ShapeResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

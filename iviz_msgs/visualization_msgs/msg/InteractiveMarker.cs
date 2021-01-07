@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract (Name = "visualization_msgs/InteractiveMarker")]
+    [Preserve, DataContract (Name = "visualization_msgs/InteractiveMarker")]
     public sealed class InteractiveMarker : IDeserializable<InteractiveMarker>, IMessage
     {
         // Time/frame info.

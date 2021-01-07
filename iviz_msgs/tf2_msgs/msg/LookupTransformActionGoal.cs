@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/LookupTransformActionGoal")]
+    [Preserve, DataContract (Name = "tf2_msgs/LookupTransformActionGoal")]
     public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

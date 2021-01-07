@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/MeshVertexColors")]
+    [Preserve, DataContract (Name = "mesh_msgs/MeshVertexColors")]
     public sealed class MeshVertexColors : IDeserializable<MeshVertexColors>, IMessage
     {
         // Mesh Attribute Message

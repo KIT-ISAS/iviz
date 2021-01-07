@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/TimeReference")]
+    [Preserve, DataContract (Name = "sensor_msgs/TimeReference")]
     public sealed class TimeReference : IDeserializable<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.

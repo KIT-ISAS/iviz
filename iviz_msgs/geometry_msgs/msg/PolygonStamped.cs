@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/PolygonStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/PolygonStamped")]
     public sealed class PolygonStamped : IDeserializable<PolygonStamped>, IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/MagneticField")]
+    [Preserve, DataContract (Name = "sensor_msgs/MagneticField")]
     public sealed class MagneticField : IDeserializable<MagneticField>, IMessage
     {
         // Measurement of the Magnetic Field vector at a specific location.

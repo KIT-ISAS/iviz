@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Pose2D")]
+    [Preserve, DataContract (Name = "geometry_msgs/Pose2D")]
     public sealed class Pose2D : IDeserializable<Pose2D>, IMessage
     {
         // Deprecated

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/Image")]
+    [Preserve, DataContract (Name = "sensor_msgs/Image")]
     public sealed class Image : IDeserializable<Image>, IMessage
     {
         // This message contains an uncompressed image

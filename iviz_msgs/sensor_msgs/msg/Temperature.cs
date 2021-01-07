@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/Temperature")]
+    [Preserve, DataContract (Name = "sensor_msgs/Temperature")]
     public sealed class Temperature : IDeserializable<Temperature>, IMessage
     {
         // Single temperature reading.

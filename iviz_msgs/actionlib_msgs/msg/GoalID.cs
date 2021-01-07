@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibMsgs
 {
-    [DataContract (Name = "actionlib_msgs/GoalID")]
+    [Preserve, DataContract (Name = "actionlib_msgs/GoalID")]
     public sealed class GoalID : IDeserializable<GoalID>, IMessage
     {
         // The stamp should store the time at which this goal was requested.

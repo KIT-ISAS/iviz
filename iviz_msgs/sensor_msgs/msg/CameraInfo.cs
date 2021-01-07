@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/CameraInfo")]
+    [Preserve, DataContract (Name = "sensor_msgs/CameraInfo")]
     public sealed class CameraInfo : IDeserializable<CameraInfo>, IMessage
     {
         // This message defines meta information for a camera. It should be in a

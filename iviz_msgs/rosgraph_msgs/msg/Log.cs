@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
-    [DataContract (Name = "rosgraph_msgs/Log")]
+    [Preserve, DataContract (Name = "rosgraph_msgs/Log")]
     public sealed class Log : IDeserializable<Log>, IMessage
     {
         //#

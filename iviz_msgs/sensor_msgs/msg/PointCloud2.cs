@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/PointCloud2")]
+    [Preserve, DataContract (Name = "sensor_msgs/PointCloud2")]
     public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessage
     {
         // This message holds a collection of N-dimensional points, which may

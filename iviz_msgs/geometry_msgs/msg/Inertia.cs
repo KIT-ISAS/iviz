@@ -1,29 +1,32 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Inertia")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Inertia : IMessage, System.IEquatable<Inertia>, IDeserializable<Inertia>
+    [Preserve, DataContract (Name = "geometry_msgs/Inertia")]
+    public sealed class Inertia : IDeserializable<Inertia>, IMessage
     {
         // Mass [kg]
-        [DataMember (Name = "m")] public double M { get; }
+        [DataMember (Name = "m")] public double M { get; set; }
         // Center of mass [m]
-        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; }
+        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; set; }
         // Inertia Tensor [kg-m^2]
         //     | ixx ixy ixz |
         // I = | ixy iyy iyz |
         //     | ixz iyz izz |
-        [DataMember (Name = "ixx")] public double Ixx { get; }
-        [DataMember (Name = "ixy")] public double Ixy { get; }
-        [DataMember (Name = "ixz")] public double Ixz { get; }
-        [DataMember (Name = "iyy")] public double Iyy { get; }
-        [DataMember (Name = "iyz")] public double Iyz { get; }
-        [DataMember (Name = "izz")] public double Izz { get; }
+        [DataMember (Name = "ixx")] public double Ixx { get; set; }
+        [DataMember (Name = "ixy")] public double Ixy { get; set; }
+        [DataMember (Name = "ixz")] public double Ixz { get; set; }
+        [DataMember (Name = "iyy")] public double Iyy { get; set; }
+        [DataMember (Name = "iyz")] public double Iyz { get; set; }
+        [DataMember (Name = "izz")] public double Izz { get; set; }
     
+        /// <summary> Constructor for empty message. </summary>
+        public Inertia()
+        {
+        }
+        
         /// <summary> Explicit constructor. </summary>
         public Inertia(double M, in GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
         {
@@ -40,44 +43,48 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         public Inertia(ref Buffer b)
         {
-            b.Deserialize(out this);
+            M = b.Deserialize<double>();
+            Com = new GeometryMsgs.Vector3(ref b);
+            Ixx = b.Deserialize<double>();
+            Ixy = b.Deserialize<double>();
+            Ixz = b.Deserialize<double>();
+            Iyy = b.Deserialize<double>();
+            Iyz = b.Deserialize<double>();
+            Izz = b.Deserialize<double>();
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
+        public ISerializable RosDeserialize(ref Buffer b)
         {
             return new Inertia(ref b);
         }
         
-        readonly Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b)
+        Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b)
         {
             return new Inertia(ref b);
         }
-        
-        public override readonly int GetHashCode() => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Inertia s && Equals(s);
-        
-        public readonly bool Equals(Inertia o) => (M, Com, Ixx, Ixy, Ixz, Iyy, Iyz, Izz) == (o.M, o.Com, o.Ixx, o.Ixy, o.Ixz, o.Iyy, o.Iyz, o.Izz);
-        
-        public static bool operator==(in Inertia a, in Inertia b) => a.Equals(b);
-        
-        public static bool operator!=(in Inertia a, in Inertia b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(M);
+            Com.RosSerialize(ref b);
+            b.Serialize(Ixx);
+            b.Serialize(Ixy);
+            b.Serialize(Ixz);
+            b.Serialize(Iyy);
+            b.Serialize(Iyz);
+            b.Serialize(Izz);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 80;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Inertia";

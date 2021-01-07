@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [DataContract (Name = "actionlib/TwoIntsGoal")]
+    [Preserve, DataContract (Name = "actionlib/TwoIntsGoal")]
     public sealed class TwoIntsGoal : IDeserializable<TwoIntsGoal>, IGoal<TwoIntsActionGoal>
     {
         [DataMember (Name = "a")] public long A { get; set; }

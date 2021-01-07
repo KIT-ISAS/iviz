@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeMsgs
 {
-    [DataContract (Name = "rosbridge_msgs/ConnectedClient")]
+    [Preserve, DataContract (Name = "rosbridge_msgs/ConnectedClient")]
     public sealed class ConnectedClient : IDeserializable<ConnectedClient>, IMessage
     {
         [DataMember (Name = "ip_address")] public string IpAddress { get; set; }

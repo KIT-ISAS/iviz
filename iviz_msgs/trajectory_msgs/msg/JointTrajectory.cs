@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [DataContract (Name = "trajectory_msgs/JointTrajectory")]
+    [Preserve, DataContract (Name = "trajectory_msgs/JointTrajectory")]
     public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/JoyFeedbackArray")]
+    [Preserve, DataContract (Name = "sensor_msgs/JoyFeedbackArray")]
     public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IMessage
     {
         // This message publishes values for multiple feedback at once. 

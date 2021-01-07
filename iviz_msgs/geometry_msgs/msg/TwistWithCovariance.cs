@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/TwistWithCovariance")]
+    [Preserve, DataContract (Name = "geometry_msgs/TwistWithCovariance")]
     public sealed class TwistWithCovariance : IDeserializable<TwistWithCovariance>, IMessage
     {
         // This expresses velocity in free space with uncertainty.
@@ -18,11 +18,12 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovariance()
         {
+            Twist = new Twist();
             Covariance = new double[36];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwistWithCovariance(in Twist Twist, double[] Covariance)
+        public TwistWithCovariance(Twist Twist, double[] Covariance)
         {
             this.Twist = Twist;
             this.Covariance = Covariance;
@@ -53,6 +54,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
+            if (Twist is null) throw new System.NullReferenceException(nameof(Twist));
+            Twist.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException(nameof(Covariance));
             if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
         }

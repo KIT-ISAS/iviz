@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [DataContract (Name = "actionlib_tutorials/AveragingAction")]
+    [Preserve, DataContract (Name = "actionlib_tutorials/AveragingAction")]
     public sealed class AveragingAction : IDeserializable<AveragingAction>,
 		IAction<AveragingActionGoal, AveragingActionFeedback, AveragingActionResult>
     {

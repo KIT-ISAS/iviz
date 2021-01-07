@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
-    [DataContract (Name = "rosgraph_msgs/Clock")]
+    [Preserve, DataContract (Name = "rosgraph_msgs/Clock")]
     public sealed class Clock : IDeserializable<Clock>, IMessage
     {
         // roslib/Clock is used for publishing simulated time in ROS. 

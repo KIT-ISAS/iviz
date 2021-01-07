@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/PoseArray")]
+    [Preserve, DataContract (Name = "geometry_msgs/PoseArray")]
     public sealed class PoseArray : IDeserializable<PoseArray>, IMessage
     {
         // An array of poses with a header for global reference.

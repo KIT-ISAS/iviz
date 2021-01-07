@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/Illuminance")]
+    [Preserve, DataContract (Name = "sensor_msgs/Illuminance")]
     public sealed class Illuminance : IDeserializable<Illuminance>, IMessage
     {
         // Single photometric illuminance measurement.  Light should be assumed to be

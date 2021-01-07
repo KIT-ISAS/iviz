@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/MapMetaData")]
+    [Preserve, DataContract (Name = "nav_msgs/MapMetaData")]
     public sealed class MapMetaData : IDeserializable<MapMetaData>, IMessage
     {
         // This hold basic information about the characterists of the OccupancyGrid

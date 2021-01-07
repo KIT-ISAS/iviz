@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/MeshFaceClusterStamped")]
+    [Preserve, DataContract (Name = "mesh_msgs/MeshFaceClusterStamped")]
     public sealed class MeshFaceClusterStamped : IDeserializable<MeshFaceClusterStamped>, IMessage
     {
         // header

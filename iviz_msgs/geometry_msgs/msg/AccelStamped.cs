@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/AccelStamped")]
+    [Preserve, DataContract (Name = "geometry_msgs/AccelStamped")]
     public sealed class AccelStamped : IDeserializable<AccelStamped>, IMessage
     {
         // An accel with reference coordinate frame and timestamp
@@ -15,10 +15,11 @@ namespace Iviz.Msgs.GeometryMsgs
         public AccelStamped()
         {
             Header = new StdMsgs.Header();
+            Accel = new Accel();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelStamped(StdMsgs.Header Header, in Accel Accel)
+        public AccelStamped(StdMsgs.Header Header, Accel Accel)
         {
             this.Header = Header;
             this.Accel = Accel;
@@ -51,6 +52,8 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             if (Header is null) throw new System.NullReferenceException(nameof(Header));
             Header.RosValidate();
+            if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
+            Accel.RosValidate();
         }
     
         public int RosMessageLength

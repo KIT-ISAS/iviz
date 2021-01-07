@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/Light")]
+    [Preserve, DataContract (Name = "iviz_msgs/Light")]
     public sealed class Light : IDeserializable<Light>, IMessage
     {
         public const byte POINT = 0;

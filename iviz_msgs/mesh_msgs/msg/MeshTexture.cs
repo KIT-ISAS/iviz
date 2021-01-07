@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/MeshTexture")]
+    [Preserve, DataContract (Name = "mesh_msgs/MeshTexture")]
     public sealed class MeshTexture : IDeserializable<MeshTexture>, IMessage
     {
         // Mesh Attribute Message

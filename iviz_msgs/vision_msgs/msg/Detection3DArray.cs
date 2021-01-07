@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/Detection3DArray")]
+    [Preserve, DataContract (Name = "vision_msgs/Detection3DArray")]
     public sealed class Detection3DArray : IDeserializable<Detection3DArray>, IMessage
     {
         // A list of 3D detections, for a multi-object 3D detector.

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Transform")]
+    [Preserve, DataContract (Name = "geometry_msgs/Transform")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {

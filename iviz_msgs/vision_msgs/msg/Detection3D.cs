@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [DataContract (Name = "vision_msgs/Detection3D")]
+    [Preserve, DataContract (Name = "vision_msgs/Detection3D")]
     public sealed class Detection3D : IDeserializable<Detection3D>, IMessage
     {
         // Defines a 3D detection result.

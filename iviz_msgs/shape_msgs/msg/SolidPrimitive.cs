@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract (Name = "shape_msgs/SolidPrimitive")]
+    [Preserve, DataContract (Name = "shape_msgs/SolidPrimitive")]
     public sealed class SolidPrimitive : IDeserializable<SolidPrimitive>, IMessage
     {
         // Define box, sphere, cylinder, cone 

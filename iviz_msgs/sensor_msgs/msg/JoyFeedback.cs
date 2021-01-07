@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/JoyFeedback")]
+    [Preserve, DataContract (Name = "sensor_msgs/JoyFeedback")]
     public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback

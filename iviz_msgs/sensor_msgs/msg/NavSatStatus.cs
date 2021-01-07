@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/NavSatStatus")]
+    [Preserve, DataContract (Name = "sensor_msgs/NavSatStatus")]
     public sealed class NavSatStatus : IDeserializable<NavSatStatus>, IMessage
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System

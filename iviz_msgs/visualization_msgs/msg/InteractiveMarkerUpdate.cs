@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [DataContract (Name = "visualization_msgs/InteractiveMarkerUpdate")]
+    [Preserve, DataContract (Name = "visualization_msgs/InteractiveMarkerUpdate")]
     public sealed class InteractiveMarkerUpdate : IDeserializable<InteractiveMarkerUpdate>, IMessage
     {
         // Identifying string. Must be unique in the topic namespace

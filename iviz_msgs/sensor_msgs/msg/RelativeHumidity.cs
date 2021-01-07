@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/RelativeHumidity")]
+    [Preserve, DataContract (Name = "sensor_msgs/RelativeHumidity")]
     public sealed class RelativeHumidity : IDeserializable<RelativeHumidity>, IMessage
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial

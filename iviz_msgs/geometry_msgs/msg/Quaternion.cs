@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [DataContract (Name = "geometry_msgs/Quaternion")]
+    [Preserve, DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
     {

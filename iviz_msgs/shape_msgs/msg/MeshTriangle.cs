@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
 {
-    [DataContract (Name = "shape_msgs/MeshTriangle")]
+    [Preserve, DataContract (Name = "shape_msgs/MeshTriangle")]
     public sealed class MeshTriangle : IDeserializable<MeshTriangle>, IMessage
     {
         // Definition of a triangle's vertices
