@@ -368,7 +368,7 @@ namespace Iviz.Roslib.XmlRpc
 
         protected void MarkError()
         {
-            Logger.LogFormat("{0}: Failed to parse response", GetType().Name);
+            Logger.LogFormat("[{0}]: Failed to parse response", GetType().Name);
             Code = StatusCode.Error;
             hasParseError = true;
         }
