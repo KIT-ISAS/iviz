@@ -7,59 +7,63 @@ namespace Iviz.App
 {
     public class SettingsDialogData : DialogData
     {
-        static readonly string[] QualityInViewOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
-        static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
         static readonly string[] TargetFpsOptions = {"Default", "60", "30", "15"};
         static readonly string[] NetworkProcessingOptions = {"Every Frame", "Every Second", "Every Fourth"};
 
         [NotNull] readonly SettingsDialogContents panel;
         public override IDialogPanelContents Panel => panel;
-        static GuiInputModule InputModule => GuiInputModule.Instance;
+        static ISettingsManager SettingsManager => Settings.SettingsManager;
 
         public SettingsDialogData(SettingsConfiguration config = null)
         {
             panel = DialogPanelManager.GetPanelByType<SettingsDialogContents>(DialogPanelType.Settings);
             if (config != null)
             {
-                InputModule.Config = config;
+                SettingsManager.Config = config;
             }
         }
 
         public override void SetupPanel()
         {
-            panel.QualityInView.Options = QualityInViewOptions;
-            panel.QualityInAr.Options = QualityInArOptions;
+            panel.QualityInView.Options = SettingsManager.QualityLevelsInView;
+            panel.QualityInView.Index = (int) SettingsManager.QualityInView;
+            panel.QualityInView.Interactable = SettingsManager.SupportsView;
+
+            panel.QualityInAr.Options = SettingsManager.QualityLevelsInAR;
+            panel.QualityInAr.Index = (int) SettingsManager.QualityInAr;
+            panel.QualityInAr.Interactable = SettingsManager.SupportsAR;
+
             panel.TargetFps.Options = TargetFpsOptions;
             panel.NetworkProcessing.Options = NetworkProcessingOptions;
             panel.SunDirection.SetMinValue(-60).SetMaxValue(60).SetIntegerOnly(true);
 
-            panel.BackgroundColor.Value = InputModule.BackgroundColor.WithAlpha(1);
-            panel.QualityInView.Index = (int) InputModule.QualityInView;
-            panel.QualityInAr.Index = (int) InputModule.QualityInAr;
-            panel.SunDirection.Value = InputModule.SunDirection;
+            panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
+            panel.BackgroundColor.Interactable = SettingsManager.SupportsView;
+            
+            panel.SunDirection.Value = SettingsManager.SunDirection;
 
             panel.QualityInView.ValueChanged += (f, _) =>
             {
-                InputModule.QualityInView = (QualityType) f;
+                SettingsManager.QualityInView = (QualityType) f;
             };
             panel.QualityInAr.ValueChanged += (f, _) =>
             {
-                InputModule.QualityInAr = (QualityType) f;
+                SettingsManager.QualityInAr = (QualityType) f;
             };
 
-            if (InputModule.TargetFps == GuiInputModule.DefaultFps)
+            if (SettingsManager.TargetFps == Settings.DefaultFps)
             {
                 panel.TargetFps.Index = 0;
             }
-            else if (InputModule.TargetFps <= 15)
+            else if (SettingsManager.TargetFps <= 15)
             {
                 panel.TargetFps.Index = 3;
             }
-            else if (InputModule.TargetFps <= 30)
+            else if (SettingsManager.TargetFps <= 30)
             {
                 panel.TargetFps.Index = 2;
             }
-            else if (InputModule.TargetFps <= 60)
+            else if (SettingsManager.TargetFps <= 60)
             {
                 panel.TargetFps.Index = 1;
             }
@@ -68,7 +72,7 @@ namespace Iviz.App
                 panel.TargetFps.Index = 0;
             }
 
-            switch (InputModule.NetworkFrameSkip)
+            switch (SettingsManager.NetworkFrameSkip)
             {
                 case 1:
                     panel.NetworkProcessing.Index = 0;
@@ -83,7 +87,7 @@ namespace Iviz.App
 
             panel.BackgroundColor.ValueChanged += c =>
             {
-                InputModule.BackgroundColor = c;
+                SettingsManager.BackgroundColor = c;
             };
 
             panel.TargetFps.ValueChanged += (i, _) =>
@@ -91,16 +95,16 @@ namespace Iviz.App
                 switch (i)
                 {
                     case 0:
-                        InputModule.TargetFps = GuiInputModule.DefaultFps;
+                        SettingsManager.TargetFps = Settings.DefaultFps;
                         break;
                     case 1:
-                        InputModule.TargetFps = 60;
+                        SettingsManager.TargetFps = 60;
                         break;
                     case 2:
-                        InputModule.TargetFps = 30;
+                        SettingsManager.TargetFps = 30;
                         break;
                     case 3:
-                        InputModule.TargetFps = 15;
+                        SettingsManager.TargetFps = 15;
                         break;
                 }
             };
@@ -110,20 +114,20 @@ namespace Iviz.App
                 switch (i)
                 {
                     case 0:
-                        InputModule.NetworkFrameSkip = 1;
+                        SettingsManager.NetworkFrameSkip = 1;
                         break;
                     case 1:
-                        InputModule.NetworkFrameSkip = 2;
+                        SettingsManager.NetworkFrameSkip = 2;
                         break;
                     case 2:
-                        InputModule.NetworkFrameSkip = 4;
+                        SettingsManager.NetworkFrameSkip = 4;
                         break;
                 }
             };
 
             panel.SunDirection.ValueChanged += f =>
             {
-                InputModule.SunDirection = (int) f;
+                SettingsManager.SunDirection = (int) f;
             };
             
             panel.Close.Clicked += Close;            

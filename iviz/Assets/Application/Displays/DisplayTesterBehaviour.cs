@@ -21,10 +21,12 @@ namespace Iviz.App
             File.WriteAllBytes("Assets/Core/Textures/grid.png", png);
             */
             
+            
             CreatePointListResource(-3);
             CreateLineResource(0);
             CreateLineResourceShort(5);
             CreateMeshListResource(10);
+            
         }
         
         [NotNull]

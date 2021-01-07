@@ -58,31 +58,32 @@ namespace Iviz.Resources
         public DisplaysType()
         {
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
+            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
             Cube = new Info<GameObject>(assetHolder.Cube);
             Cylinder = new Info<GameObject>(assetHolder.Cylinder);
             Sphere = new Info<GameObject>(assetHolder.Sphere);
             Text = new Info<GameObject>(assetHolder.Text);
-            LineConnector = new Info<GameObject>("Displays/LineConnector");
-            BoundaryFrame = new Info<GameObject>("Displays/BoundaryFrame");
-            Arrow = new Info<GameObject>("Displays/Arrow");
+            LineConnector = new Info<GameObject>(appAssetHolder.LineConnector);
+            BoundaryFrame = new Info<GameObject>(appAssetHolder.BoundaryFrame);
+            Arrow = new Info<GameObject>(appAssetHolder.Arrow);
             MeshList = new Info<GameObject>(assetHolder.MeshList);
             PointList = new Info<GameObject>(assetHolder.PointList);
             MeshTriangles = new Info<GameObject>(assetHolder.MeshTriangles);
-            TfFrame = new Info<GameObject>("Displays/TFFrame");
-            Image = new Info<GameObject>("Displays/ImageResource");
+            TfFrame = new Info<GameObject>(appAssetHolder.TFFrame);
+            Image = new Info<GameObject>(appAssetHolder.Image);
             Square = new Info<GameObject>(assetHolder.Plane);
             Line = new Info<GameObject>(assetHolder.Line);
-            Grid = new Info<GameObject>("Displays/Grid");
-            DepthImageResource = new Info<GameObject>("Displays/DepthImageResource");
-            OccupancyGridResource = new Info<GameObject>("Displays/OccupancyGridResource");
-            RadialScanResource = new Info<GameObject>("Displays/RadialScanResource");
-            ARMarkerResource = new Info<GameObject>("Displays/ARMarkerResource");
-            AxisFrame = new Info<GameObject>("Displays/AxisFrameResource");
-            AngleAxis = new Info<GameObject>("Displays/AngleAxis");
-            Trail = new Info<GameObject>("Displays/Trail");
-            InteractiveControl = new Info<GameObject>("Displays/InteractiveControl");
-            GridMap = new Info<GameObject>("Displays/GridMap");
-            OccupancyGridTextureResource = new Info<GameObject>("Displays/OccupancyGridTextureResource");
+            Grid = new Info<GameObject>(appAssetHolder.Grid);
+            DepthImageResource = new Info<GameObject>(appAssetHolder.DepthImage);
+            OccupancyGridResource = new Info<GameObject>(appAssetHolder.OccupancyGrid);
+            RadialScanResource = new Info<GameObject>(appAssetHolder.RadialScan);
+            ARMarkerResource = new Info<GameObject>(appAssetHolder.ARMarkerResource);
+            AxisFrame = new Info<GameObject>(appAssetHolder.AxisFrame);
+            AngleAxis = new Info<GameObject>(appAssetHolder.AngleAxis);
+            Trail = new Info<GameObject>(appAssetHolder.Trail);
+            InteractiveControl = new Info<GameObject>(appAssetHolder.InteractiveControl);
+            GridMap = new Info<GameObject>(appAssetHolder.GridMap);
+            OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
 
             resourceByType = CreateTypeDictionary(this);
         }

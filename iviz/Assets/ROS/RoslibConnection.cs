@@ -30,7 +30,7 @@ namespace Iviz.Ros
         [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
         [CanBeNull] RosClient client;
 
-        CancellationTokenSource watchdogSource;
+        CancellationTokenSource connectionTs;
         Task watchdogTask;
 
         Uri masterUri;
@@ -100,6 +100,9 @@ namespace Iviz.Ros
 
             try
             {
+                const int rpcTimeoutInMs = 750;
+                const int disposeTimeoutInMs = 5000;
+
 #if LOG_ENABLED
                 Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
@@ -109,9 +112,10 @@ namespace Iviz.Ros
 
                 RosClient newClient = new RosClient(MasterUri, MyId, MyUri, false);
                 client = newClient;
-                client.RosMasterApi.TimeoutInMs = 750;
-                client.Parameters.TimeoutInMs = 750;
-                
+
+                client.RosMasterApi.TimeoutInMs = rpcTimeoutInMs;
+                client.Parameters.TimeoutInMs = rpcTimeoutInMs;
+
                 await newClient.EnsureCleanSlateAsync();
 
                 if (publishersByTopic.Count != 0 || subscribersByTopic.Count != 0)
@@ -121,48 +125,37 @@ namespace Iviz.Ros
 
                 Core.Logger.Debug("*** ReAdvertising...");
                 await Task.WhenAll(publishersByTopic.Values.Select(ReAdvertise))
-                    .WaitForWithTimeout(5000, "ReAdvertise task timed out");
-                /*
-                foreach (var publisher in publishersByTopic.Values)
-                {
-                    await ReAdvertise(publisher);
-                }
-                */
+                    .WaitForWithTimeout(disposeTimeoutInMs, "ReAdvertise task timed out");
+
                 Core.Logger.Debug("*** Done ReAdvertising");
                 Core.Logger.Debug("*** Resubscribing...");
                 await Task.WhenAll(subscribersByTopic.Values.Select(ReSubscribe))
-                    .WaitForWithTimeout(5000, "ReSubscribe task timed out");
-                /*
-                foreach (var subscriber in subscribersByTopic.Values)
-                {
-                    await ReSubscribe(subscriber);
-                }
-                */
+                    .WaitForWithTimeout(disposeTimeoutInMs, "ReSubscribe task timed out");
+
                 Core.Logger.Debug("*** Done Resubscribing");
                 Core.Logger.Debug("*** Requesting topics...");
                 cachedTopics = await newClient.GetSystemPublishedTopicsAsync();
                 Core.Logger.Debug("*** Done Requesting topics");
 
                 Core.Logger.Debug("*** Advertising services...");
-                /*
-                foreach (var entry in servicesByTopic.Values)
-                {
-                    await entry.AdvertiseAsync(newClient);
-                }
-                */
+
                 await Task.WhenAll(servicesByTopic.Values.Select(ReAdvertiseService))
-                    .WaitForWithTimeout(5000, "ReAdvertiseService task timed out");
+                    .WaitForWithTimeout(disposeTimeoutInMs, "ReAdvertiseService task timed out");
                 Core.Logger.Debug("*** Done Advertising services!");
                 Core.Logger.Debug("*** Connected!");
 
                 Core.Logger.Internal("<b>Connected!</b>");
 
-                watchdogSource = new CancellationTokenSource();
+                connectionTs = new CancellationTokenSource();
                 watchdogTask = Task.Run(async () => await WatchdogAsync(newClient.MasterUri, newClient.CallerId,
-                    newClient.CallerUri,
-                    watchdogSource.Token));
+                    newClient.CallerUri, connectionTs.Token));
 
                 return true;
+            }
+            catch (UriBindingException)
+            {
+                Core.Logger.Internal(
+                    $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
             }
             catch (Exception e) when
             (e is UnreachableUriException ||
@@ -194,6 +187,8 @@ namespace Iviz.Ros
             [NotNull] Uri callerUri,
             CancellationToken token)
         {
+            const int maxTimeMasterUnseenInMs = 10000;
+
             RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
             DateTime lastMasterAccess = DateTime.Now;
             bool warningSet = false;
@@ -219,7 +214,7 @@ namespace Iviz.Ros
                             break;
                         }
 
-                        if (timeSinceLastAccess.TotalMilliseconds > 10000)
+                        if (timeSinceLastAccess.TotalMilliseconds > maxTimeMasterUnseenInMs)
                         {
                             // we haven't seen the master in a while, but no error has been thrown
                             // by the routine that checks every 5 seconds. maybe the app was suspended?
@@ -261,7 +256,7 @@ namespace Iviz.Ros
             catch (OperationCanceledException)
             {
             }
-            
+
             instance.SetConnectionWarningState(false);
         }
 
@@ -291,7 +286,7 @@ namespace Iviz.Ros
                 Signal();
                 return;
             }
-            
+
             AddTask(DisconnectImpl);
         }
 
@@ -303,9 +298,9 @@ namespace Iviz.Ros
 
             if (watchdogTask != null)
             {
-                watchdogSource.Cancel();
+                connectionTs.Cancel();
                 await watchdogTask.AwaitNoThrow(this);
-                watchdogSource = null;
+                connectionTs = null;
                 watchdogTask = null;
             }
 
@@ -456,6 +451,7 @@ namespace Iviz.Ros
             var signal = new SemaphoreSlim(0, 1);
             bool hasClient = false;
             Exception exception = null;
+            CancellationToken serviceToken = token.LinkTo(connectionTs);
 
             AddTask(async () =>
             {
@@ -467,7 +463,7 @@ namespace Iviz.Ros
                     }
 
                     hasClient = true;
-                    await client.CallServiceAsync(service, srv, true, token);
+                    await client.CallServiceAsync(service, srv, true, serviceToken);
                 }
                 catch (Exception e)
                 {
@@ -479,7 +475,7 @@ namespace Iviz.Ros
                 }
             });
 
-            await signal.WaitAsync(token);
+            await signal.WaitAsync(serviceToken);
             if (exception != null)
             {
                 throw exception;
@@ -690,12 +686,15 @@ namespace Iviz.Ros
             CancellationToken token = default)
         {
             SemaphoreSlim signal = new SemaphoreSlim(0, 1);
+            CancellationToken serviceToken = token.LinkTo(connectionTs);
 
             AddTask(async () =>
             {
                 try
                 {
-                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync(token);
+                    cachedTopics = client == null
+                        ? EmptyTopics
+                        : await client.GetSystemPublishedTopicsAsync(serviceToken);
                 }
                 catch (Exception e)
                 {
@@ -707,7 +706,7 @@ namespace Iviz.Ros
                 }
             });
 
-            return await signal.WaitAsync(timeoutInMs, token) ? cachedTopics : null;
+            return await signal.WaitAsync(timeoutInMs, serviceToken) ? cachedTopics : null;
         }
 
         [NotNull, ItemNotNull]
@@ -743,6 +742,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(parameter));
             }
 
+            CancellationToken serviceToken = token.LinkTo(connectionTs);
             var signal = new SemaphoreSlim(0);
             object result = null;
             string errorMsg = null;
@@ -757,7 +757,7 @@ namespace Iviz.Ros
                         return;
                     }
 
-                    var (success, param) = await client.Parameters.GetParameterAsync(parameter, token);
+                    var (success, param) = await client.Parameters.GetParameterAsync(parameter, serviceToken);
                     if (!success)
                     {
                         errorMsg = $"'{parameter}' not found";
@@ -776,7 +776,7 @@ namespace Iviz.Ros
                 }
             });
 
-            if (!await signal.WaitAsync(timeoutInMs, token))
+            if (!await signal.WaitAsync(timeoutInMs, serviceToken))
             {
                 return (null, "Request timed out");
             }

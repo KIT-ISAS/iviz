@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
-using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -36,6 +34,7 @@ namespace Iviz.App
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
+        
 
         public ConsoleDialogData()
         {

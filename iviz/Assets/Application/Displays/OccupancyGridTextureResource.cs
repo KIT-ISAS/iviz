@@ -1,4 +1,5 @@
 using System;
+using Application.Displays;
 using BigGustave;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -7,6 +8,7 @@ using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -17,19 +19,20 @@ namespace Iviz.Displays
     {
         [CanBeNull] static Texture2D atlasLarge;
 
+        static AppAssetHolder AssetHolder =>
+            UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+        
         [NotNull]
         static Texture2D AtlasLarge => (atlasLarge != null)
             ? atlasLarge
-            : atlasLarge = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large") ??
-                           throw new InvalidOperationException("Atlas large texture is missing!");
+            : atlasLarge = AssetHolder.AtlasLarge;
 
         [CanBeNull] static Texture2D atlasLargeFlipped;
 
         [NotNull]
         static Texture2D AtlasLargeFlipped => (atlasLargeFlipped != null)
             ? atlasLargeFlipped
-            : atlasLargeFlipped = UnityEngine.Resources.Load<Texture2D>("Materials/atlas-large-flip") ??
-                                  throw new InvalidOperationException("Atlas texture is missing!");
+            : atlasLargeFlipped = AssetHolder.AtlasLargeFlip;
 
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
 

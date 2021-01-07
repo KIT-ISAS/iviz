@@ -8,6 +8,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.MsgsGen.Dynamic;
+using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
@@ -43,7 +44,7 @@ namespace Iviz.App
             {
                 Topic = null;
                 RosMsgType = null;
-                CsType = null;
+                CsType = typeof(object);
                 Description = $"<color=grey>(None)</color>";
             }
 
@@ -72,13 +73,14 @@ namespace Iviz.App
             }
 
             type = BuiltIns.TryGetTypeFromMessageName(rosMsgType);
-            if (type != null)
+            if (type == null)
             {
-                topicTypes.Add(rosMsgType, type);
-                return true;
+                return false;
             }
+            
+            topicTypes.Add(rosMsgType, type);
+            return true;
 
-            return false;
         }
 
         void CreateListener(string topicName, string rosMsgType, [NotNull] Type csType)
@@ -93,10 +95,17 @@ namespace Iviz.App
                 listener.Stop();
             }
 
-            Type listenerType = typeof(Listener<>).MakeGenericType(csType);
-            Action<IMessage> handler = Handler;
-
-            listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
+            if (csType == typeof(DynamicMessage))
+            {
+                listener = new Listener<DynamicMessage>(topicName, Handler);
+            }
+            else
+            {
+                Action<IMessage> handler = Handler;
+                Type listenerType = typeof(Listener<>).MakeGenericType(csType);
+                listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
+            }
+            
         }
 
         void CreateTopicList()
@@ -173,7 +182,7 @@ namespace Iviz.App
             {
                 dialog.Publishers.text = $"{listener.NumPublishers} publishers";
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} mps";
-                var kbytesPerSecond = listener.Stats.BytesPerSecond / 1000;
+                long kbytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kbytesPerSecond.ToString("N0")} kB/s";
             }
         }

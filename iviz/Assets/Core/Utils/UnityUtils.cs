@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
@@ -477,6 +478,13 @@ namespace Iviz.Core
             meshRenderer.GetPropertyBlock(PropBlock, id);
             PropBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
             meshRenderer.SetPropertyBlock(PropBlock, id);
+        }
+
+        public static CancellationToken LinkTo(this CancellationToken token, CancellationTokenSource other)
+        {
+            return token == default
+                ? other.Token
+                : CancellationTokenSource.CreateLinkedTokenSource(token, other.Token).Token;
         }
     }
 }

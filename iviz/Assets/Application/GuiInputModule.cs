@@ -22,40 +22,21 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum QualityType
+    public sealed class GuiInputModule : FrameNode, ISettingsManager
     {
-        VeryLow,
-        Low,
-        Medium,
-        High,
-        VeryHigh,
-        Ultra,
-        Mega
-    }
-    
-    [DataContract]
-    public class SettingsConfiguration : JsonToString
-    {
-        [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
-        [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
-        [DataMember] public int NetworkFrameSkip { get; set; } = 1;
-        [DataMember] public int TargetFps { get; set; } = Settings.IsMobile ? GuiInputModule.DefaultFps : 60;
-        [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
-        [DataMember] public int SunDirection{ get; set; } = 0;
-    }    
-    
-    public sealed class GuiInputModule : FrameNode
-    {
+        static readonly string[] QualityInViewOptions =
+            {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
+
+        static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
+
         const float MinShadowDistance = 4;
-        public const int DefaultFps = -1;
 
         public static GuiInputModule Instance { get; private set; }
 
         readonly SettingsConfiguration config = new SettingsConfiguration();
 
         [CanBeNull] Light mainLight;
-        
+
         Vector2 lastPointer;
         Vector2 lastPointerAlt;
         float lastAltDistance;
@@ -132,7 +113,7 @@ namespace Iviz.App
                 }
             }
         }
-        
+
         public QualityType QualityInAr
         {
             get => config.QualityInAr;
@@ -164,7 +145,7 @@ namespace Iviz.App
                     GetComponent<PostProcessLayer>().enabled = true;
                     return;
                 }
-                
+
                 GetComponent<PostProcessLayer>().enabled = false;
                 MainCamera.renderingPath = RenderingPath.Forward;
                 QualitySettings.SetQualityLevel((int) value, true);
@@ -222,7 +203,7 @@ namespace Iviz.App
             set
             {
                 config.BackgroundColor = value.WithAlpha(1);
-                
+
                 Color valueNoAlpha = value.WithAlpha(0);
                 MainCamera.backgroundColor = valueNoAlpha;
 
@@ -231,7 +212,7 @@ namespace Iviz.App
                 RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
             }
         }
-        
+
         public int NetworkFrameSkip
         {
             get => config.NetworkFrameSkip;
@@ -240,8 +221,16 @@ namespace Iviz.App
                 config.NetworkFrameSkip = value;
                 GameThread.NetworkFrameSkip = value;
             }
-        }        
-        
+        }
+
+        public bool SupportsView => true;
+
+        public bool SupportsAR => Settings.IsMobile;
+
+        public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
+
+        public IEnumerable<string> QualityLevelsInAR => QualityInArOptions;
+
         public SettingsConfiguration Config
         {
             get => config;
@@ -254,11 +243,12 @@ namespace Iviz.App
                 QualityInView = value.QualityInView;
                 TargetFps = value.TargetFps;
             }
-        }        
+        }
 
         void Awake()
         {
             Instance = this;
+            Settings.SettingsManager = this;
         }
 
         void Start()
@@ -270,7 +260,7 @@ namespace Iviz.App
             }
 
             Config = new SettingsConfiguration();
-            
+
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
             canvas.referenceResolution = Settings.IsMobile ? new Vector2(800, 600) : new Vector2(800, 800);
 
@@ -279,7 +269,6 @@ namespace Iviz.App
             mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
 
             StartOrbiting();
-            
         }
 
         void OnEnable()
