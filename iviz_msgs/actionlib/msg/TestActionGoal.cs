@@ -82,16 +82,16 @@ namespace Iviz.Msgs.Actionlib
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VUwYrbMBC9+ysGctjdQrLQ3gK9Ld3NoVDY3MNEmtiisuRq5Lj++z7JSbqFHnroGoOQ" +
-                "PPPmzbwnvwhbSdTVpWGTXQzeHQ+9tvr4HNnvnqjFcnC22YvmclQPms//+Wm+vj5vSbNdar8sjFb0mjlY" +
-                "TpZ6yWw5M50iCLu2k7T2chaPJO4HsVS/5nkQ3SBx3zklvK0ESez9TKMiKEcyse/H4Axnoex6+SMfmS4Q" +
-                "08ApOzN6ToiPybpQwk+JeynoeFV+jBKM0O5pi5igYsbsQGgGgknC6kKLj9SMLuRPH0tCs9pPcY2ttBj7" +
-                "rTjljnMhKz+HJFp4sm5R48PS3AbYGI6gilW6r2cHbPWBUAQUZIimo3sw/zbnLgYACp05OT56KcAGEwDq" +
-                "XUm6e3iDHCp04BCv8Avi7xr/AhtuuKWndQfNfOlexxYDROCQ4tlZhB7nCmK8k5AJXkuc5qZkLSWb1Zcy" +
-                "YwQhqyqClVWjcRDA0uRy12hOBb2qUaz5Tm78632o1rqQJe3i6C02MUntqzYCLafOQZDaRLkuNLFSKoZR" +
-                "NFEMtKt6V0tiJBwuxSByOsMaUyeBXCY0KlpMC19IP2TCwJFdMHVxzSQofYOmo5wKFyYjKTOUK4zezvfC" +
-                "39mrJhgv6M2lyG3OdBKxRzbfwcwiA6YcfcYdVOVWqgikgxh3cmZp8MJANxf0ckGWAJDqR81gRrh1iNpc" +
-                "9SvKvbd0j9ffVrNcwvrz+gWRtP9E9wQAAA==";
+                "H4sIAAAAAAAACrVUwWrbQBC9C/QPAzkkKdiB9mboLTTxoVCI72a8O5aWSLvqzsqq/r5vV3bcQA89NEZm" +
+                "kTTz5s17M3oWthKpLUfFJrngO3fY99row1PgbvtIDY69s9VONOVH5UFdff3Pv7r6/vK0IU12qf5cONXV" +
+                "Db0k9pajpV4SW05MxwDOrmklrjo5SYcs7gexVN6meRBd58xd65RwNeIlctfNNCqiUiAT+n70znASSq6X" +
+                "dwA51XliGjgmZ8aOIxJCtM7n+GPkXgp+/qv8HMUboe3jBlFexYzJgdQMDBOF1fkGLxE8Op++fM4ZSNxN" +
+                "YYV7aaD/GwNKLafMWH4NUTSTZd3kMp+WHteAh0iCQlbprjzb41bvCXXAQoZgWroD/R9zaoMHotCJo+ND" +
+                "JxnZQAfA3uak2/s/oTP1DXn24YK/QF6L/AuuvwLntlYtzOuyBDo20BGRQwwnZxF7mAuK6Zz4RJi7yHGu" +
+                "q5y2FAXItyw2wpBXvMHJqsE4OGFpcqmtK00xFyi+YFLr6sOm868bskzamTJpG8bO4ibEzHsZL4KrU+vg" +
+                "TOkkbxBNrBTz8Cg6KeO0LdaXEYU07M/lYHc8YUqmVjy5ROhWNA8xRkT6IRGUz+kZVZcJmgTF38DpINgY" +
+                "kCAjMTE8zJzeC31pwtmLPxAaHGFRuCpORxF7YPMKdtD5BjV07BI2U5UbKX6QDmLc0ZmlzTMLXZ/hy84s" +
+                "EWDWj5pAj7CLCIMKZy8XFz/ex4fLV62uluVcPm6/ATJ2X30YBQAA";
                 
     }
 }

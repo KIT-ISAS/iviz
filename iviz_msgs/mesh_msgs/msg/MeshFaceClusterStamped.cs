@@ -90,14 +90,14 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCm0t4WeGtLmECgkt1KWsTRrD8iSK8m78b/vkx2nIaceGiOw" +
-                "Pt57891QL+wkmVzcYchd/vh9OW/XpqFBck/TpA6YpKFb93j46qdcgLkH4JatPJ/JPt8DEk+SzkmLkDxp" +
-                "LpXtuRUvjo5gZNPG6BdUUifGfPnPn7l/+LanN7HBr4fCwXFyCK6w48J0jIhZu17SzstJPEg8jPBzeS3z" +
-                "KPkaxMdeM2F1EiSx9zNNGaASycZhmIJaRrBFkbTXfDA1ENPIqaidPCNLMSanocKPiQep6lhZfk8SrNDd" +
-                "zR6YkMVOReHQDAWbhHNN4t0NmUlD+fypEkzzeI47HKVD+l+MU+m5VGflaUySq5+c97DxYQ3uGtpIjsCK" +
-                "y3S53B1wzFcEI3BBxmh7uoTnP+bSxwBBoRMn5dZLFbbIAFQvKuni6pVyWKQDh7jJr4p/bfyLbHjRrTHt" +
-                "etTM1+jz1CGBAI4pntA3jtp5EbFeJRTy2iZOs6ms1aRpbmuOAQJrqQj+nHO0igI4Omvpt/ZeqnGoLf4+" +
-                "3VjnaW3HN4Njmm2zlvbnr2VIDhqc1llp4lg0Bvabp8soGfMHCtWNf8QDAAA=";
+                "H4sIAAAAAAAACrVTTWsbMRC9G/wfBnxIUnAK7c3QU0PaHAqF5FaKGUvj3QGttNVIdvbfd0abbEJOPTSL" +
+                "l7Wk9948zccGekJPeb2S4veDdPLxe9tY9terDQwkPdTK3mCZY/e0sLOvoUox4A8F3aKjpw1wzweGSifK" +
+                "58yFgB5ZikkEPFAgD0flyHp1SCk0WGZPRvrynx91eP9tB2/uaebuC0aP2es9C3osCMekCeCup7wNdKKg" +
+                "LBxGNdtOyzSSXBvzoWcB/XUUKWMIE1RRVEng0jDUyA71yoU1ga8FjMoREEbMhV0NqOlKKXuOhj9mHKjp" +
+                "2yv0p1J0BHc3O0VFIVcLq6lJNVwmFMvm3Y2CK8fy+ZMxlPhwTltdU6e1WBxA6bGYY3ocM4mZRdlZmA/z" +
+                "Ha9VXpNEGsgLXLa9vS7lCjSOuqAxuR4u1f7PqfQpqiLBCTPjIZApO82Dyl4Y6eLqtbRZ30HEmJ71Z8mX" +
+                "IP+iG1+E7VrbXosXLAVSO82jIsecTtpEHg5TU3GBKRYIfMiYp/XKaHNQFbm1ZCtMea02+kWR5Fgr4eHM" +
+                "pV+avtVlPzf+O3WnTdrcnm/GSZ0u/+Yy//rdRmfP0XOboE0aC6eIYTHcRszc/gUh8mK95wMAAA==";
                 
     }
 }

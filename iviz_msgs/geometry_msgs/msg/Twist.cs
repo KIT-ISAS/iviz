@@ -1,21 +1,18 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Twist")]
-    public sealed class Twist : IDeserializable<Twist>, IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
-        [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
-        [DataMember (Name = "angular")] public Vector3 Angular { get; set; }
+        [DataMember (Name = "linear")] public Vector3 Linear { get; }
+        [DataMember (Name = "angular")] public Vector3 Angular { get; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public Twist()
-        {
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public Twist(in Vector3 Linear, in Vector3 Angular)
         {
@@ -26,36 +23,44 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor with buffer. </summary>
         public Twist(ref Buffer b)
         {
-            Linear = new Vector3(ref b);
-            Angular = new Vector3(ref b);
+            b.Deserialize(out this);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
             return new Twist(ref b);
         }
         
-        Twist IDeserializable<Twist>.RosDeserialize(ref Buffer b)
+        readonly Twist IDeserializable<Twist>.RosDeserialize(ref Buffer b)
         {
             return new Twist(ref b);
         }
+        
+        public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
+        
+        public override readonly bool Equals(object? o) => o is Twist s && Equals(s);
+        
+        public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
+        
+        public static bool operator==(in Twist a, in Twist b) => a.Equals(b);
+        
+        public static bool operator!=(in Twist a, in Twist b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
-            Linear.RosSerialize(ref b);
-            Angular.RosSerialize(ref b);
+            b.Serialize(this);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary>
         [Preserve] public const int RosFixedMessageLength = 48;
         
-        public int RosMessageLength => RosFixedMessageLength;
+        public readonly int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Twist";
@@ -65,12 +70,15 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61RQUrEQBC8zysKvCiECCoeBM+yB0FQvEpv0skOO5kJPb3uxtfbkyyRvRsY6GSqqqsq" +
-                "V/jY+Qw+jcI5c8Y3h9R4neAjOmFGHqlhbCXtOdpHTfCaEXxkElBs7fSHYPNIorl2n9xoknucIX/vZ5xz" +
-                "z//8uNf3lyf0nAZWmb6G3Ofb81Z3teQTLvk4mnOyiOXuMmANg24Uhk0xTBiYosLCrkwjtl6M6lOsTZWF" +
-                "uyRcWR1okzUXk5rGQHuT5Ji5sGkcTYygQjEHKlzMDeKa676ucNxZqzPKx96AptBzZPENxPe+XZi2aFjJ" +
-                "hHO4Ctrd4ehDWDwvy3THJiJJZ8JNjU2HKR1wLIFsELSkVIS2vPqibSh+U4VDMT5LXBb6luzfWy05U8/W" +
-                "XVamtnauC4n08QGndZrW6cf9ArHUTVJfAgAA";
+                "H4sIAAAAAAAACq1SwUrDQBC9B/YfBnpRCBFUPAiepQdBULzKNJlsl252wuzUNn69s01o9W4gMOy+9+a9" +
+                "l6zgfRsy0HEUypkyfFHkNugEIUEvRJBHbAk2wjtKdqgMQTPEkAgFMHX2+n20eUTR3Ljqg1pluYMF8+tg" +
+                "QbrKVU///Ljq5e35ETzxQCrT55B9vlkWu2o1pxQqKSmZf7Sg5fJvzAYKdq1gYE5xgoEwKVjmM9WYXRDj" +
+                "Bk6NyZJQz0K1tQIdW4GJtYgMuDNRSpkKHcfR1BBUMOWIhVyOjXNFjW9qOGyt3RMqJG/AIuEpkYQWJPjQ" +
+                "zVRbNZzZCEvAGrS/hUOIcXY9b9MtFRVhPTGuG1j3MPEeDiWTDQIdqnli2JjJxRluYnHMNeyL9Vnjb62v" +
+                "bL+BVZMzerICsxJ29uFd1UdGfbiH42WcLuO3q34AsQC+J28CAAA=";
                 
+        /// Custom iviz code
+        public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);
+        public static implicit operator Twist((Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
     }
 }

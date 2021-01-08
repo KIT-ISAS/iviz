@@ -70,10 +70,10 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71RsQrCMBTc31c8cJW6iIPg4OQkKLpLqC9twOTVvIjWrzctNrGTi5jpLrm83F0muEZP" +
-                "jSchF1Qw7JA1NiyExqH2RCiNKmmKJdtu+/w+N71Wuci9Ge4WCDs2LiQB7G8qkHf93KwDWP14wfawWWJF" +
-                "bCn49mSlkllvBSZ4rI1E+/Ft4wRDTdl/zKIi6yyP4oK+sAqLOT4SahN6/sd+rm7IkD5KYvGffY7Nd+ya" +
-                "e9fsbQFfEg3oDvACaqg09xMCAAA=";
+                "H4sIAAAAAAAACr2RMQvCMBCF90D+w0FX0UUcBAcnJ0HRXUK9tAGTq7mI1l9vUmxjJxcx073kJXnfXQFr" +
+                "8Nh4ZHRBBUMOSENDjGAcaI8I3KgSJ1CSTdvn97npvMpF7U1/dwpS7Mi4MDik2N9UQO+6l7NTCilWP15S" +
+                "bA+bJVRIFoNvT5YrnnVxpCjgWBuOEPF/4xhCjZkiEqmoUu4RtBT6Qios5vDIZZvL598ochMHlGFqHKfw" +
+                "2doxQ1LXPAJN3k5T7K9kfXlP7hfm4ljNJwIAAA==";
                 
         /// Custom iviz code
         public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);

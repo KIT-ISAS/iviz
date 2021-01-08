@@ -105,10 +105,10 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE72SvwrCMBDG93uKvIGQLiI4dRAHJ8VFRK7pNQTyB5JYap/eRJLi4Khm+T5+d+Q+uAvR" +
-                "KyuZRUNwJhGdb4bLlY3koxIU3pl13qCuiGcUaWqd832A1unUxhMT2QU4eYVWakpkwPzTXdnYcGYwUirp" +
-                "ve1pAth++cHhuNswNar5ZoIMq5ofBu0wz58W91jc/K8c/HOOn08v23ntYM18UVm0K4q/D1Kvol4DVtNV" +
-                "IwCeGDGFE5QCAAA=";
+                "H4sIAAAAAAAACr2SvwrCMBCH90DeIW8gpIsITh3EwUlxEZGYXkMgfyCJpfbpvdim4uAmzfTxS8h9x11M" +
+                "QTvFnLBAyRlk8qFqL1fWQUhaQvwKnQ9WmDnjOUvQ196HBtPaG3zIMZSZMDkFLZwygFEr3r89tEsVZ1Yk" +
+                "wDuzdw30lFCy/fOh5HDcbZju9HCzUcVVaYOS1niRHbBuwecHhwVt+E+bBRTqcVrjSNYsFFAF7gXEIj5l" +
+                "V+YdwbITTSZIMqu8AH4hn0K0AgAA";
                 
     }
 }
