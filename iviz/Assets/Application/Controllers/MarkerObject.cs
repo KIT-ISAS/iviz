@@ -321,6 +321,29 @@ namespace Iviz.Controllers
 
             return result;
         }
+        
+
+        void AppendColor(ColorRGBA c)
+        {
+            description.Append("Color: ")
+                .Append(c.R.ToString("N3")).Append(" | ")
+                .Append(c.G.ToString("N3")).Append(" | ")
+                .Append(c.B.ToString("N3")).Append(" | ")
+                .Append(c.A.ToString("N3")).AppendLine();
+        }       
+        
+        void AppendScale(Iviz.Msgs.GeometryMsgs.Vector3 c)
+        {
+            description.Append("Scale: [")
+                .Append(c.X.ToString("N3")).Append(" | ")
+                .Append(c.Y.ToString("N3")).Append(" | ")
+                .Append(c.Z.ToString("N3")).Append("]").AppendLine();
+        }    
+        
+        void AppendScale(double c)
+        {
+            description.Append("Scale: ").Append(c.ToString("N3")).AppendLine();
+        } 
 
         void CreateImage([NotNull] Marker msg)
         {
@@ -375,15 +398,8 @@ namespace Iviz.Controllers
 
         void CreateTriangleList([NotNull] Marker msg)
         {
-            description.Append("Scale: [")
-                .Append(msg.Scale.X).Append(" | ")
-                .Append(msg.Scale.Y).Append(" | ")
-                .Append(msg.Scale.Z).Append("]").AppendLine();
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
+            AppendScale(msg.Scale);
+            AppendColor(msg.Color);
 
             if (msg.Points.Length == 0)
             {
@@ -472,12 +488,8 @@ namespace Iviz.Controllers
             PointListResource pointList = ValidateResource<PointListResource>();
             pointList.ElementScale = Mathf.Abs((float) msg.Scale.X);
 
-            description.Append("Scale: ").Append(msg.Scale.X).AppendLine();
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
+            AppendColor(msg.Color);
+            AppendScale(msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
@@ -521,12 +533,8 @@ namespace Iviz.Controllers
             LineResource lineResource = ValidateResource<LineResource>();
             float elementScale = Mathf.Abs((float) msg.Scale.X);
 
-            description.Append("Scale: ").Append(elementScale).AppendLine();
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
+            AppendColor(msg.Color);
+            AppendScale(elementScale);
 
             if (msg.Points.Length == 0)
             {
@@ -576,6 +584,7 @@ namespace Iviz.Controllers
             lineResource.SetDirect(setterCallback, isStrip ? msg.Points.Length - 1 : msg.Points.Length / 2);
         }
 
+        
         void CreateMeshList([NotNull] Marker msg)
         {
             MeshListResource meshList = ValidateResource<MeshListResource>();
@@ -585,16 +594,8 @@ namespace Iviz.Controllers
                 ? Resource.Displays.Cube
                 : Resource.Displays.Sphere;
 
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
-
-            description.Append("Scale: [")
-                .Append(msg.Scale.X).Append(" | ")
-                .Append(msg.Scale.Y).Append(" | ")
-                .Append(msg.Scale.Z).Append("]").AppendLine();
+            AppendColor(msg.Color);
+            AppendScale(msg.Scale);
 
             if (msg.Points.Length == 0)
             {
@@ -648,18 +649,14 @@ namespace Iviz.Controllers
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
             textResource.ElementSize = (float) msg.Scale.Z;
 
-            description.Append("Scale: ").Append(msg.Scale.Z).AppendLine();
+            AppendColor(msg.Color);
+            AppendScale(msg.Scale.Z);
+            
             if (Mathf.Approximately((float) msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 numWarnings++;
             }
-
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
         }
 
         void CreateMeshResource([NotNull] Marker msg)
@@ -669,11 +666,9 @@ namespace Iviz.Controllers
                 meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
             }
 
-            description.Append("Scale: [")
-                .Append(msg.Scale.X).Append(" | ")
-                .Append(msg.Scale.Y).Append(" | ")
-                .Append(msg.Scale.Z).Append("]").AppendLine();
-
+            AppendColor(msg.Color);
+            AppendScale(msg.Scale);
+            
             if (Mathf.Approximately((float) msg.Scale.SquaredNorm, 0))
             {
                 description.Append(WarnStr).Append("Scale value of 0").AppendLine();
@@ -684,12 +679,6 @@ namespace Iviz.Controllers
                 description.Append(WarnStr).Append("Scale value has NaN").AppendLine();
                 numWarnings++;
             }
-
-            description.Append("Color: ")
-                .Append(msg.Color.R).Append(" | ")
-                .Append(msg.Color.G).Append(" | ")
-                .Append(msg.Color.B).Append(" | ")
-                .Append(msg.Color.A).AppendLine();
 
             Vector3 newScale = msg.Scale.Ros2Unity().Abs();
             if (!Mathf.Approximately((newScale - currentScale).sqrMagnitude, 0))
@@ -726,17 +715,15 @@ namespace Iviz.Controllers
                     arrowMarker.Visible = true;
                     arrowMarker.Set(msg.Scale.Ros2Unity().Abs());
 
-
-                    description.Append("Scale: [")
-                        .Append(msg.Scale.X).Append(" | ")
-                        .Append(msg.Scale.Y).Append(" | ")
-                        .Append(msg.Scale.Z).Append("]").AppendLine();
+                    AppendColor(msg.Color);
+                    AppendScale(msg.Scale);
                     return;
                 }
                 case 2:
                 {
                     float sx = Mathf.Abs((float) msg.Scale.X);
-                    description.Append("Scale: ").Append(msg.Scale.X).AppendLine();
+                    AppendColor(msg.Color);
+                    AppendScale(msg.Scale.X);
                     switch (sx)
                     {
                         case 0:

@@ -98,7 +98,6 @@ namespace Iviz.Displays
                 wrapMode = TextureWrapMode.Clamp,
             };
             material.mainTexture = texture;
-            //Debug.Log("new texture! " + sizeX + " " + sizeY);
         }
 
         public void Set([NotNull] sbyte[] values, float cellSize, int numCellsX, int numCellsY,
