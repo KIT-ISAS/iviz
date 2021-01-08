@@ -136,7 +136,6 @@ namespace Iviz.Controllers
 
             LocalPose = msg.Pose.Ros2Unity();
 
-            description.Append("Attached to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
             AttachTo(msg.Header.FrameId);
 
             controlsToDelete.Clear();
@@ -182,7 +181,7 @@ namespace Iviz.Controllers
 
 
             // update the dimensions of the controls
-            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds = 
+            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds =
                 controls.Values.Select(control => (control.Bounds, control.transform));
 
             Bounds? totalBounds =
@@ -208,6 +207,11 @@ namespace Iviz.Controllers
                 {
                     controlMarker.EnableMenu = true;
                 }
+                else
+                {
+                    numWarnings++;
+                    description.Append(WarnStr).Append("Menu requested without a control").AppendLine();
+                }
             }
         }
 
@@ -216,8 +220,9 @@ namespace Iviz.Controllers
             ModuleListPanel.Instance.ShowMenu(menuEntries, OnMenuClick, unityPositionHint);
         }
 
-        public void Set(in Iviz.Msgs.GeometryMsgs.Pose rosPose)
+        public void Set(string frameId, in Iviz.Msgs.GeometryMsgs.Pose rosPose)
         {
+            AttachTo(frameId);
             LocalPose = rosPose.Ros2Unity();
         }
 
@@ -241,7 +246,7 @@ namespace Iviz.Controllers
             }
 
             var pose = controlNode.transform.AsLocalPose();
-            listener?.OnInteractiveControlObjectMoved(rosId, rosControlId, 
+            listener?.OnInteractiveControlObjectMoved(rosId, rosControlId,
                 Parent != null ? Parent.Id : null, pose);
         }
 
@@ -252,7 +257,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener?.OnInteractiveControlObjectMenuSelect(rosId, 
+            listener?.OnInteractiveControlObjectMenuSelect(rosId,
                 Parent != null ? Parent.Id : null, entryId,
                 controlNode.transform.AsLocalPose());
         }
@@ -276,6 +281,8 @@ namespace Iviz.Controllers
         public void GenerateLog([NotNull] StringBuilder baseDescription)
         {
             baseDescription.Append(description);
+            baseDescription.Append("Attached to: <i>").Append(Parent != null ? Parent.Id : "none").Append("</i>")
+                .AppendLine();
 
             foreach (var control in controls.Values)
             {

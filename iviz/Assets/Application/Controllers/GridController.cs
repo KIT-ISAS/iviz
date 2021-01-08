@@ -335,7 +335,7 @@ namespace Iviz.Controllers
             {
                 if (reflectionProbe != null)
                 {
-                    reflectionProbe.backgroundColor = GuiInputModule.Instance.BackgroundColor;
+                    reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
                     reflectionProbe.RenderProbe();
                 }
 

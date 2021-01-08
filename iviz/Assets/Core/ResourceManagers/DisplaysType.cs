@@ -95,7 +95,7 @@ namespace Iviz.Resources
             PropertyInfo[] properties = typeof(DisplaysType).GetProperties();
             foreach (var property in properties)
             {
-                if (!typeof(Info<GameObject>).IsAssignableFrom(property.PropertyType))
+                if (typeof(Info<GameObject>) != property.PropertyType)
                 {
                     continue;
                 }

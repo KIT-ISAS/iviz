@@ -276,9 +276,10 @@ namespace Iviz.Displays
                 holderCollider.size = newBounds.size / (2 * holderScale);
 
                 float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
-                menuObject.transform.localScale = 0.5f * maxScale * Vector3.one;
+                float absoluteScaleY = transform.lossyScale.y; 
+                menuObject.transform.localScale = 0.5f * Vector3.one;
                 menuObject.GetComponent<Billboard>().offset =
-                    new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale);
+                    new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale) * absoluteScaleY;
 
                 frame.Bounds = newBounds;
             }

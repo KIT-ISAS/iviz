@@ -21,16 +21,19 @@ namespace Iviz.Core
         Ultra,
         Mega
     }
-    
+
     [DataContract]
     public class SettingsConfiguration : JsonToString
     {
         [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
         [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
         [DataMember] public int NetworkFrameSkip { get; set; } = 1;
-        [DataMember] public int TargetFps { get; set; } = 60;
+
+        [DataMember]
+        public int TargetFps { get; set; } = (Settings.IsMobile || Settings.IsHololens) ? Settings.DefaultFps : 60;
+
         [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
-        [DataMember] public int SunDirection{ get; set; } = 0;
+        [DataMember] public int SunDirection { get; set; } = 0;
     }
 
     public interface ISettingsManager
@@ -42,14 +45,14 @@ namespace Iviz.Core
         Color BackgroundColor { get; set; }
         int SunDirection { get; set; }
         [NotNull] SettingsConfiguration Config { set; }
-        
+
         bool SupportsView { get; }
         bool SupportsAR { get; }
         [NotNull] IEnumerable<string> QualityLevelsInView { get; }
         [NotNull] IEnumerable<string> QualityLevelsInAR { get; }
-    }        
+    }
 
-    
+
     public static class Settings
     {
         public const int DefaultFps = -1;
@@ -109,7 +112,7 @@ namespace Iviz.Core
                        .GetComponent<Camera>());
             set => mainCamera = value.SafeNull() ?? throw new NullReferenceException("Camera cannot be null!");
         }
-        
+
         public static ISettingsManager SettingsManager { get; set; }
     }
 }

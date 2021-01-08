@@ -291,7 +291,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            im.Set(msg.Pose);
+            im.Set(msg.Header.FrameId, msg.Pose);
         }
 
         void DestroyInteractiveMarker([NotNull] string id)

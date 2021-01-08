@@ -308,6 +308,7 @@ namespace Iviz.Displays
                 if (!isSynthetic)
                 {
                     var resource = resourceObject.AddComponent<MeshMarkerResource>();
+                    displays.Add(resource);
 
                     var material = GetMaterialForVisual(visual, rootMaterials);
                     if (material == null)
@@ -324,8 +325,6 @@ namespace Iviz.Displays
                     {
                         // TODO!!
                     }
-
-                    displays.Add(resource);
                 }
                 else
                 {
@@ -337,14 +336,14 @@ namespace Iviz.Displays
 
                     foreach (var renderer in renderers)
                     {
-                        var trianglesResource = renderer.gameObject.GetComponent<MeshTrianglesResource>();
-                        if (trianglesResource == null)
+                        var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
+                        if (meshResource == null)
                         {
                             continue;
                         }
 
-                        trianglesResource.Color *= color;
-                        resources.Add(trianglesResource);
+                        meshResource.Color *= color;
+                        resources.Add(meshResource);
                     }
 
                     displays.AddRange(resources);

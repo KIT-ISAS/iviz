@@ -13,15 +13,15 @@ using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit;
+
 #endif
 
 namespace Iviz.Hololens
 {
 #if UNITY_WSA
-    sealed class HololensManager : MonoBehaviour
+    sealed class HololensManager : MonoBehaviour, ISettingsManager
     {
         static readonly Pose InfinitePose = new Pose(new Vector3(5000, 5000, 5000), Quaternion.identity);
 
@@ -58,27 +58,36 @@ namespace Iviz.Hololens
 
         void Initialize()
         {
-            Logger.Debug("Hololens Manager: Initializing!");
-            ModuleListPanel.InitFinished -= Initialize;
-
-            if (!UnityEngine.Application.isEditor)
+            try
             {
-                floorHelper.gameObject.SetActive(false);
+                Logger.Debug("Hololens Manager: Initializing!");
+                Settings.SettingsManager = this;
+
+                ModuleListPanel.InitFinished -= Initialize;
+
+                if (!UnityEngine.Application.isEditor)
+                {
+                    floorHelper.gameObject.SetActive(false);
+                }
+
+                floorFrame.OkClicked += StartWorld;
+
+
+                if (resourcePool == null)
+                {
+                    resourcePool = new MarkerResourcePool();
+                }
+
+                //StartLog();
+                StartRosConnection();
+                StartHandMenu();
+                //StartPalms();
+                StartOriginPlaceMode();
             }
-
-            floorFrame.OkClicked += StartWorld;
-
-
-            if (resourcePool == null)
+            catch (Exception e)
             {
-                resourcePool = new MarkerResourcePool();
+                Debug.Log(e);
             }
-
-            StartLog();
-            StartRosConnection();
-            StartHandMenu();
-            //StartPalms();
-            StartOriginPlaceMode();
         }
 
         readonly Queue<string> messageQueue = new Queue<string>();
@@ -175,10 +184,10 @@ namespace Iviz.Hololens
             };
         }
 
-        void StartRosConnection()
+        static void StartRosConnection()
         {
 #if UNITY_EDITOR
-            const string myUri ="http://141.3.59.11:7613";
+            const string myUri = "http://141.3.59.11:7613";
             const string myId = "/iviz_win_hololens";
 #else
             const string myUri = "http://141.3.59.45:7613";
@@ -429,6 +438,93 @@ namespace Iviz.Hololens
                 markers.Enqueue(obj);
             }
         }
+
+        public QualityType QualityInView
+        {
+            get => QualityType.VeryLow;
+            set => Logger.Debug($"{this}: Ignoring view quality.");
+        }
+
+        public QualityType QualityInAr
+        {
+            get => QualityType.VeryLow;
+            set => Logger.Debug($"{this}: Ignoring AR quality.");
+        }
+
+        public int NetworkFrameSkip
+        {
+            get => config.NetworkFrameSkip;
+            set
+            {
+                config.NetworkFrameSkip = value;
+                GameThread.NetworkFrameSkip = value;
+            }
+        }
+
+        public int TargetFps
+        {
+            get => config.TargetFps;
+            set
+            {
+                config.TargetFps = value;
+                UnityEngine.Application.targetFrameRate = value;
+            }
+        }
+
+        public Color BackgroundColor
+        {
+            get => Color.black;
+            set => Logger.Debug($"{this}: Ignoring background color.");
+        }
+
+        public int SunDirection
+        {
+            get => config.SunDirection;
+            set
+            {
+                config.SunDirection = value;
+                if (MainLight != null)
+                {
+                    MainLight.transform.rotation = Quaternion.Euler(90 + value, 0, 0);
+                }
+            }
+        }
+
+        public SettingsConfiguration Config
+        {
+            get => config;
+            set
+            {
+                BackgroundColor = value.BackgroundColor;
+                SunDirection = value.SunDirection;
+                NetworkFrameSkip = value.NetworkFrameSkip;
+                QualityInAr = value.QualityInAr;
+                QualityInView = value.QualityInView;
+                TargetFps = value.TargetFps;
+            }
+        }
+
+        public bool SupportsView => false;
+        public bool SupportsAR => true;
+
+        readonly SettingsConfiguration config = new SettingsConfiguration
+        {
+            QualityInAr = QualityType.VeryLow,
+            QualityInView = QualityType.VeryLow,
+        };
+
+        static readonly string[] QualityInViewOptions = { };
+
+        static readonly string[] QualityInArOptions = {"Very Low"};
+
+        public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
+        public IEnumerable<string> QualityLevelsInAR => QualityInArOptions;
+
+        Light mainLight;
+
+        Light MainLight => mainLight != null
+            ? mainLight
+            : (mainLight = GameObject.Find("MainLight")?.GetComponent<Light>());
     }
 
 #else
