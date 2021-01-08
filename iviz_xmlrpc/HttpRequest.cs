@@ -145,7 +145,7 @@ namespace Iviz.XmlRpc
             }
 
             disposed = true;
-            client?.Close();
+            client.Close();
         }
     }
 }
