@@ -79,6 +79,7 @@ namespace Iviz.MsgsGen
             "geometry_msgs/Quaternion",
             "geometry_msgs/Pose",
             "geometry_msgs/Transform",
+            "geometry_msgs/Twist",
             "std_msgs/ColorRGBA",
             "iviz_msgs/Color32",
             "iviz_msgs/Vector2f",

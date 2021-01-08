@@ -77,7 +77,13 @@ namespace Iviz.MsgsGen
                 "public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);",
                 "public static implicit operator Pose((Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);",
             },          
-            
+
+            ["geometry_msgs/Twist"] = new[]
+            {
+                "public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);", 
+                "public static implicit operator Twist((Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);",
+            },          
+
             ["std_msgs/ColorRGBA"] = new[]
             {
                 "public static readonly ColorRGBA White = (1, 1, 1, 1);", 
