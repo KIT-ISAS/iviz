@@ -327,8 +327,10 @@ namespace Iviz.Roslib
             Environment.GetEnvironmentVariable("ROS_IP");
 
         /// <summary>
-        /// Tries to retrieve a valid caller uri for this node, by checking the local addresses
-        /// of the wireless and ethernet interfaces. 
+        /// Retrieves a valid caller uri for this node, by checking the local addresses
+        /// of the wireless and ethernet interfaces.
+        /// If this fails, returns a caller uri with the local hostname.
+        /// You should probably use <see cref="TryGetCallerUriFor"/> first and then this as a fallback.  
         /// </summary>
         /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
         /// <returns>A caller uri</returns>
@@ -348,23 +350,35 @@ namespace Iviz.Roslib
 
         /// <summary>
         /// Tries to retrieve a valid caller uri for this node given a master address, by checking
-        /// the active interfaces and searching for one in the same subnet.
+        /// the active interfaces and searching for one in the same IPv4 subnet.
+        /// Returns null if none is found.
         /// </summary>
         /// <param name="masterUri">The uri of the ROS master</param>
         /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
         /// <returns>A caller uri, or null if none found.</returns>
         public static Uri? TryGetCallerUriFor(Uri masterUri, int usingPort = AnyPort)
         {
+            if (masterUri == null)
+            {
+                throw new ArgumentNullException(nameof(masterUri));
+            }
+            
             string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
                 return new Uri($"http://{envHostname}:{usingPort}/");
             }
 
-            IPAddress masterAddress =
+            IPAddress? masterAddress =
                 IPAddress.TryParse(masterUri.Host, out IPAddress parsedAddress)
                     ? parsedAddress
-                    : Dns.GetHostEntry(masterUri.Host).AddressList[0];
+                    : Dns.GetHostEntry(masterUri.Host).AddressList.FirstOrDefault(
+                        address => address.AddressFamily == AddressFamily.InterNetwork);
+
+            if (masterAddress == null)
+            {
+                return null; // IPv6 not implemented yet!
+            }
 
             var candidates = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)

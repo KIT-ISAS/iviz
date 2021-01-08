@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.Rosapi;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -170,6 +171,13 @@ namespace Iviz.Roslib
             {
                 throw new InvalidOperationException("Service caller has not been started!");
             }
+
+            if (service.Request == null)
+            {
+                throw new NullReferenceException("Request cannot be null");
+            }
+            
+            service.Request.RosValidate();
 
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -22,11 +24,14 @@ namespace Iviz.Roslib.MarkerHelper
         readonly RosChannelWriter<MarkerArray> publisher = new RosChannelWriter<MarkerArray> {LatchingEnabled = true};
         bool disposed;
 
+        public ReadOnlyCollection<Marker> Markers { get; }
+
         public string Topic => publisher.Topic;
 
         public RosMarkerHelper(string ns = "Marker")
         {
             this.ns = ns;
+            Markers = new ReadOnlyCollection<Marker>(markers);
         }
 
         public RosMarkerHelper(RosClient client, string topic = "markers", string ns = "Marker") : this(ns)
@@ -234,27 +239,38 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
-        public int CreateTextViewFacing(string text, in Point position, in ColorRGBA color, double scale,
+        public int CreateTextViewFacing(string text, Point? position = null, ColorRGBA? color = null, double scale = 1,
             string frameId = "",
             int replaceId = -1)
         {
             int id = replaceId != -1 ? replaceId : GetFreeId();
-            Marker marker = new Marker
+            Marker marker = CreateTextViewFacing(ns, id, text, position, color, scale, frameId);
+            markers[id] = marker;
+            return id;
+        }
+
+        public static Marker CreateTextViewFacing(string? ns = null, int id = 0, string text = "",
+            Point? position = null,
+            ColorRGBA? color = null, double scale = 1, string frameId = "")
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            return new Marker
             {
                 Header = {FrameId = frameId ?? ""},
-                Ns = ns,
+                Ns = ns ?? "",
                 Id = id,
                 Type = Marker.TEXT_VIEW_FACING,
                 Action = Marker.ADD,
-                Pose = new Pose(position, Quaternion.Identity),
+                Pose = Pose.Identity.WithPosition(position ?? Point.Zero),
                 Scale = scale * Vector3.One,
-                Color = color,
+                Color = color ?? ColorRGBA.White,
                 FrameLocked = true,
                 Text = text
             };
-
-            markers[id] = marker;
-            return id;
         }
 
         public int CreateLines(Point[] lines, in Pose? pose = null, in ColorRGBA? color = null, double scale = 1,
@@ -468,22 +484,31 @@ namespace Iviz.Roslib.MarkerHelper
     {
         /// NONE: This control is only meant for visualization; no context menu.
         None = InteractiveMarkerControl.NONE,
+
         /// MENU: Like NONE, but right-click menu is active.
         Menu = InteractiveMarkerControl.MENU,
+
         /// BUTTON: Element can be left-clicked.
         Button = InteractiveMarkerControl.BUTTON,
+
         /// MOVE_AXIS: Translate along local x-axis.
         MoveAxis = InteractiveMarkerControl.MOVE_AXIS,
+
         /// MOVE_PLANE: Translate in local y-z plane.
         MovePlane = InteractiveMarkerControl.MOVE_PLANE,
+
         /// ROTATE_AXIS: Rotate around local x-axis.
         RotateAxis = InteractiveMarkerControl.ROTATE_AXIS,
+
         /// MOVE_ROTATE: Combines MOVE_PLANE and ROTATE_AXIS.
         MoveRotate = InteractiveMarkerControl.MOVE_ROTATE,
+
         /// MOVE_3D: Translate freely in 3D space.
         Move3D = InteractiveMarkerControl.MOVE_3D,
+
         /// ROTATE_3D: Rotate freely in 3D space about the origin of parent frame.
         Rotate3D = InteractiveMarkerControl.ROTATE_3D,
+
         /// MOVE_ROTATE_3D: Full 6-DOF freedom of translation and rotation about the cursor origin.
         MoveRotate3D = InteractiveMarkerControl.MOVE_ROTATE_3D
     }
@@ -492,10 +517,13 @@ namespace Iviz.Roslib.MarkerHelper
     {
         /// KEEP_ALIVE: sent while dragging to keep up control of the marker
         KeepAlive = InteractiveMarkerFeedback.KEEP_ALIVE,
+
         /// POSE_UPDATE: the pose has been changed using one of the controls
         PoseUpdate = InteractiveMarkerFeedback.POSE_UPDATE,
+
         /// MENU_SELECT: a menu entry has been selected
         MenuSelect = InteractiveMarkerFeedback.MENU_SELECT,
+
         /// BUTTON_CLICK: a button control has been clicked
         ButtonClick = InteractiveMarkerFeedback.BUTTON_CLICK,
         MouseDown = InteractiveMarkerFeedback.MOUSE_DOWN,
@@ -531,6 +559,51 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
+        public class MenuEntry
+        {
+            public string Title { get; }
+            public uint Id { get; }
+            public uint ParentId { get; }
+
+            MenuEntry(string title, uint id, uint parentId = 0)
+            {
+                Title = title ?? throw new ArgumentNullException(nameof(title));
+                Id = id;
+                ParentId = parentId;
+
+                if (id == 0)
+                {
+                    throw new ArgumentException("Id cannot be 0");
+                }
+            }
+
+            public static implicit operator MenuEntry((string title, uint id) p) => new MenuEntry(p.title, p.id);
+
+            public static implicit operator MenuEntry((string title, uint id, uint parentId) p) =>
+                new MenuEntry(p.title, p.id, p.parentId);
+        }
+
+
+        public static InteractiveMarker CreateMenu(string name = "", Pose? pose = null,
+            float scale = 1, string frameId = "", Marker? controlMarker = null, params MenuEntry[] entries)
+        {
+            return new InteractiveMarker
+            {
+                Header = {FrameId = frameId},
+                Name = name,
+                Pose = pose ?? Pose.Identity,
+                Scale = scale,
+                Controls =
+                    new[]
+                    {
+                        CreateControl(mode: RosInteractionMode.Menu,
+                            markers: controlMarker ?? RosMarkerHelper.CreateSphere())
+                    },
+                MenuEntries = entries.Select(entry => new Iviz.Msgs.VisualizationMsgs.MenuEntry
+                    {Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title}).ToArray()
+            };
+        }
+
         public static InteractiveMarkerUpdate CreateMarkerUpdate(params InteractiveMarker[] args)
         {
             return new InteractiveMarkerUpdate
@@ -540,12 +613,34 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
-        public static InteractiveMarkerUpdate CreatePoseUpdate(params (string name, Pose pose)[] args)
+        public class PoseUpdate
+        {
+            public string Name { get; }
+            public Pose Pose { get; }
+            public string Parent { get; }
+
+            PoseUpdate(string name, Pose pose, string parent = "")
+            {
+                Name = name;
+                Pose = pose;
+                Parent = parent;
+            }
+
+            public static implicit operator PoseUpdate((string name, Pose pose) p) =>
+                new PoseUpdate(p.name, p.pose);
+
+            public static implicit operator PoseUpdate((string name, Pose pose, string parent) p) =>
+                new PoseUpdate(p.name, p.pose, p.parent);
+        }
+
+        public static InteractiveMarkerUpdate CreatePoseUpdate(params PoseUpdate[] args)
         {
             return new InteractiveMarkerUpdate
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
-                Poses = args.Select(tuple => new InteractiveMarkerPose {Name = tuple.name, Pose = tuple.pose}).ToArray()
+                Poses = args.Select(tuple => new InteractiveMarkerPose
+                        {Header = {FrameId = tuple.Parent}, Name = tuple.Name, Pose = tuple.Pose})
+                    .ToArray()
             };
         }
 
@@ -554,6 +649,15 @@ namespace Iviz.Roslib.MarkerHelper
             return new InteractiveMarkerInit
             {
                 Markers = markers
+            };
+        }
+
+        public static InteractiveMarkerUpdate CreateMarkerErase(params string[] args)
+        {
+            return new InteractiveMarkerUpdate
+            {
+                Type = InteractiveMarkerUpdate.UPDATE,
+                Erases = args
             };
         }
     }

@@ -102,19 +102,19 @@ namespace Iviz.Roslib
             }
         }
 
-        public static string ToJsonString(this ISerializable o)
+        public static string ToJsonString(this ISerializable o, bool indented = true)
         {
-            return ToJsonString((object) o);
+            return ToJsonString((object) o, indented);
         }
 
-        public static string ToJsonString(this IService o)
+        public static string ToJsonString(this IService o, bool indented = true)
         {
-            return ToJsonString((object) o);
+            return ToJsonString((object) o, indented);
         }
 
-        public static string ToJsonString(object o)
+        public static string ToJsonString(object o, bool indented = true)
         {
-            return JsonConvert.SerializeObject(o, Formatting.Indented);
+            return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
         }
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)

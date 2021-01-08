@@ -234,10 +234,10 @@ namespace Iviz.Roslib
         /// Waits until a message arrives.
         /// </summary>
         /// <returns>False if the channel has been disposed</returns>
-        public async Task<bool> WaitToReadAsync(int timeoutInMs)
+        public Task<bool> WaitToReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return await WaitToReadAsync(ts.Token);
+            return WaitToReadAsync(ts.Token);
         }
 
         /// <summary>
@@ -245,9 +245,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        public async Task<bool> WaitToReadAsync(CancellationToken token = default)
+        public Task<bool> WaitToReadAsync(CancellationToken token = default)
         {
-            return await messageQueue.OutputAvailableAsync(token);
+            return messageQueue.OutputAvailableAsync(token);
         }
 
 

@@ -97,7 +97,7 @@ namespace Iviz.Roslib
             manager.Publish((T) message);
         }
 
-        async Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -109,7 +109,7 @@ namespace Iviz.Roslib
                 throw new InvalidMessageTypeException("Type does not match publisher.");
             }
 
-            await PublishAsync((T) message, policy, token);
+            return PublishAsync((T) message, policy, token);
         }
 
 
@@ -131,7 +131,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public async Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -151,10 +151,11 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    break;
+                    return Task.CompletedTask;
                 case RosPublishPolicy.WaitUntilSent:
-                    await manager.PublishAndWaitAsync(message, linkedToken);
-                    break;
+                    return manager.PublishAndWaitAsync(message, linkedToken);
+                default:
+                    return Task.CompletedTask;
             }
         }
 
