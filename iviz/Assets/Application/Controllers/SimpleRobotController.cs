@@ -6,6 +6,7 @@ using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -406,7 +407,8 @@ namespace Iviz.Controllers
             try
             {
                 Robot = new RobotModel(description);
-                Robot.StartAsync(ConnectionManager.ServiceProvider);
+                var task = Robot.StartAsync(ConnectionManager.ServiceProvider);
+                Debug.Log("Robot load was synchronous: " + task.RanToCompletion());
             }
             catch (Exception e)
             {
@@ -435,12 +437,12 @@ namespace Iviz.Controllers
 
         void DetachFromTf()
         {
-            if (Robot == null || RobotObject == null)
+            if (robot == null)
             {
                 return;
             }
             
-            foreach (var entry in Robot.LinkParents)
+            foreach (var entry in robot.LinkParents)
             {
                 if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
                 {
@@ -454,22 +456,22 @@ namespace Iviz.Controllers
             }
 
             node.Parent = null;
-            Robot.ResetLinkParents();
-            Robot.ApplyAnyValidConfiguration();
+            robot.ResetLinkParents();
+            robot.ApplyAnyValidConfiguration();
 
-            node.AttachTo(Decorate(Robot.BaseLink));
-            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(robot.BaseLink));
+            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
         void AttachToTf()
         {
-            if (Robot == null || RobotObject == null)
+            if (robot == null || RobotObject == null)
             {
                 return;
             }
 
             RobotObject.transform.SetParentLocal(TfListener.MapFrame.transform);
-            foreach (var entry in Robot.LinkObjects)
+            foreach (var entry in robot.LinkObjects)
             {
                 string link = entry.Key;
                 GameObject linkObject = entry.Value;
@@ -479,7 +481,7 @@ namespace Iviz.Controllers
             }
 
             // fill in missing frame parents, but only if it hasn't been provided already
-            foreach (var entry in Robot.LinkParents)
+            foreach (var entry in robot.LinkParents)
             {
                 TfFrame frame = TfListener.GetOrCreateFrame(Decorate(entry.Key), node);
                 if (frame.Parent == TfListener.OriginFrame)
@@ -489,8 +491,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.AttachTo(Decorate(Robot.BaseLink));
-            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(robot.BaseLink));
+            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
     }
 }

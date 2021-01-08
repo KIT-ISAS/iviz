@@ -321,28 +321,29 @@ namespace Iviz.Controllers
 
             return result;
         }
-        
+
+        const string FloatFormat = "#,0.###";
 
         void AppendColor(ColorRGBA c)
         {
             description.Append("Color: ")
-                .Append(c.R.ToString("N3")).Append(" | ")
-                .Append(c.G.ToString("N3")).Append(" | ")
-                .Append(c.B.ToString("N3")).Append(" | ")
-                .Append(c.A.ToString("N3")).AppendLine();
+                .Append(c.R.ToString(FloatFormat)).Append(" | ")
+                .Append(c.G.ToString(FloatFormat)).Append(" | ")
+                .Append(c.B.ToString(FloatFormat)).Append(" | ")
+                .Append(c.A.ToString(FloatFormat)).AppendLine();
         }       
         
         void AppendScale(Iviz.Msgs.GeometryMsgs.Vector3 c)
         {
             description.Append("Scale: [")
-                .Append(c.X.ToString("N3")).Append(" | ")
-                .Append(c.Y.ToString("N3")).Append(" | ")
-                .Append(c.Z.ToString("N3")).Append("]").AppendLine();
+                .Append(c.X.ToString(FloatFormat)).Append(" | ")
+                .Append(c.Y.ToString(FloatFormat)).Append(" | ")
+                .Append(c.Z.ToString(FloatFormat)).Append("]").AppendLine();
         }    
         
         void AppendScale(double c)
         {
-            description.Append("Scale: ").Append(c.ToString("N3")).AppendLine();
+            description.Append("Scale: ").Append(c.ToString(FloatFormat)).AppendLine();
         } 
 
         void CreateImage([NotNull] Marker msg)
@@ -649,6 +650,7 @@ namespace Iviz.Controllers
             textResource.BillboardEnabled = msg.Type() != MarkerType.Text;
             textResource.ElementSize = (float) msg.Scale.Z;
 
+            description.Append("Text: ").Append(msg.Text.Length).Append(" chars").AppendLine();
             AppendColor(msg.Color);
             AppendScale(msg.Scale.Z);
             
@@ -840,25 +842,11 @@ namespace Iviz.Controllers
         [CanBeNull]
         Info<GameObject> GetRequestedResource([NotNull] Marker msg)
         {
-            if (msg.Type() == MarkerType.MeshResource)
+            if (msg.Type() != MarkerType.MeshResource)
             {
-                if (Resource.TryGetResource(msg.MeshResource, out var newResourceInfo))
-                {
-                    return newResourceInfo;
-                }
-
-                if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
-                {
-                    StopLoadResourceTask();
-                    CancellationTokenSource tokenSource = new CancellationTokenSource();
-                    taskInfo = new TaskInfo(LoadResourceAsync(msg.MeshResource, tokenSource), tokenSource,
-                        msg.MeshResource);
-                }
-
-                return taskInfo.ResourceInfo;
+                StopLoadResourceTask();
             }
 
-            StopLoadResourceTask();
             switch (msg.Type())
             {
                 case MarkerType.Arrow:
@@ -884,6 +872,21 @@ namespace Iviz.Controllers
                     return Resource.Displays.MeshTriangles;
                 case MarkerType.Image:
                     return Resource.Displays.Image;
+                case MarkerType.MeshResource:
+                    if (Resource.TryGetResource(msg.MeshResource, out var newResourceInfo))
+                    {
+                        return newResourceInfo;
+                    }
+
+                    if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
+                    {
+                        StopLoadResourceTask();
+                        CancellationTokenSource tokenSource = new CancellationTokenSource();
+                        taskInfo = new TaskInfo(LoadResourceAsync(msg.MeshResource, tokenSource), tokenSource,
+                            msg.MeshResource);
+                    }
+
+                    return taskInfo.ResourceInfo;
                 default:
                     return null;
             }
@@ -900,9 +903,10 @@ namespace Iviz.Controllers
             Info<GameObject> newResourceInfo;
             try
             {
-                newResourceInfo = await Resource.GetGameObjectResourceAsync(uriString,
+                var task = Resource.GetGameObjectResourceAsync(uriString,
                     ConnectionManager.ServiceProvider,
                     tokenSource.Token);
+                newResourceInfo = task.RanToCompletion() ? task.Result : await task;
             }
             catch (OperationCanceledException)
             {

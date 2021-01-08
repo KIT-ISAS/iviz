@@ -158,6 +158,7 @@ namespace Iviz.Controllers
 
             foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
             {
+                meshRenderer.GetComponent<MeshMarkerResource>().Suspend();
                 ResourcePool.Dispose(Resource.Displays.Cube, meshRenderer.gameObject);
             }
 

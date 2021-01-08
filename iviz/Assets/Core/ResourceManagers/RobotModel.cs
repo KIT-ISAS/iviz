@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Urdf;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -71,7 +72,7 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public async void StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
+        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
         {
             IsStarting = true;
 
@@ -191,7 +192,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public float Smoothness
         {
             get => smoothness;
@@ -203,8 +204,8 @@ namespace Iviz.Displays
                     display.Smoothness = value;
                 }
             }
-        }        
-        
+        }
+
         public float Metallic
         {
             get => metallic;
@@ -216,7 +217,7 @@ namespace Iviz.Displays
                     display.Metallic = value;
                 }
             }
-        }         
+        }
 
         async Task ProcessLinkAsync(bool keepMeshMaterials,
             [NotNull] Link link,
@@ -422,7 +423,7 @@ namespace Iviz.Displays
         public void Dispose()
         {
             Cancel();
-            
+
             ResetLinkParents();
 
             foreach (var (gameObject, info) in objectResources)

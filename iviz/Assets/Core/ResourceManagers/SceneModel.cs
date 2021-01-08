@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -112,7 +113,9 @@ namespace Iviz.Displays
 
                     string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
                     string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
-                    var textureInfo = await Resource.GetTextureResourceAsync(textureUri, provider, token);
+                    
+                    var task = Resource.GetTextureResourceAsync(textureUri, provider, token);
+                    var textureInfo = task.RanToCompletion() ? task.Result : await task;
                     if (textureInfo != null)
                     {
                         r.Texture = textureInfo.Object;
