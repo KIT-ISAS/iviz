@@ -69,5 +69,7 @@ namespace Iviz.Msgs
         
         public static Twist WithLinear(this Twist p, Vector3 v) => new Twist(v, p.Angular);
         public static Twist WithAngular(this Twist p, Vector3 v) => new Twist(p.Linear, v);
+        
+        public static Header WithNextSeq(this Header h) => new Header(h.Seq + 1, time.Now(), h.FrameId);
     }
 }

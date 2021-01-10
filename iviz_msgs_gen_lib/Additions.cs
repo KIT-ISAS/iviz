@@ -119,6 +119,13 @@ namespace Iviz.MsgsGen
                 "public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);",
                 "public readonly Vector3f Normalized => this / Norm;",
                 "public readonly Vector3f Cross(in Vector3f v) => new Vector3f(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
+            },
+            
+            
+            ["std_msgs/Header"] = new[]
+            {
+                "public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);",
+                "public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);"
             },            
         };
     }

@@ -90,6 +90,8 @@ namespace Iviz.Msgs.StdMsgs
                 "1JPcE4AG1JqYPkehUsNi6WqZh9sb94bvjGCFfIHN8u9ox7IFq2MpaMwuwMbiv80acjIiwQWF8RSpkp31" +
                 "wbDralpvf6Nr9A4SpvzDvyHvRf7DrZRvcH3WLtjwYm1BmXrroylHyRf2pj3NC8VFpqQQ+SQoc9tU262o" +
                 "QV5qs01mvmU2tmMp2bFNwsOVNbRNUakFlrkc2bdN23wB2ue47DYCAAA=";
-                
+        
+        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);        
+        public static implicit operator Header((uint seqId, string frameId, time stamp) p) => new Header(p.seqId, time.Now(), p.frameId);        
     }
 }
