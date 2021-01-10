@@ -437,9 +437,7 @@ namespace Iviz.Controllers
         {
             if (Control != null)
             {
-                Control.Bounds = Settings.IsHololens 
-                    ? bounds 
-                    : UnityUtils.TransformBoundInverse(bounds, transform);
+                Control.Bounds = UnityUtils.TransformBoundInverse(bounds, transform);
             }
         }
 

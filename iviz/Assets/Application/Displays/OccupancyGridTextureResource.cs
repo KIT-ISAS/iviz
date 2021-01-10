@@ -1,14 +1,9 @@
 using System;
-using Application.Displays;
-using BigGustave;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace Iviz.Displays

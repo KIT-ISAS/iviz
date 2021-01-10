@@ -33,6 +33,7 @@ namespace Iviz.Hololens
         [SerializeField] HololensHandMenuObject hololensHandMenu = null;
         [SerializeField] GameObject consoleLog = null;
         [SerializeField] TMP_Text consoleText = null;
+        [SerializeField] HololensMarkerMenu markerMenu = null;
 
         FrameNode node;
         TfFrame leftPalm;
@@ -78,6 +79,8 @@ namespace Iviz.Hololens
                     resourcePool = new MarkerResourcePool();
                 }
 
+                ModuleListPanel.Instance.MenuDialog = markerMenu;
+                
                 //StartLog();
                 StartRosConnection();
                 StartHandMenu();
@@ -427,6 +430,7 @@ namespace Iviz.Hololens
                 GameObject obj = markers.Dequeue();
                 //obj.SetActive(true);
                 obj.transform.SetParentLocal(parent);
+                obj.transform.SetLocalPose(Pose.identity);
                 return obj;
             }
 
@@ -435,6 +439,7 @@ namespace Iviz.Hololens
                 //obj.SetActive(false);
                 obj.transform.parent = root.transform;
                 obj.transform.SetPose(Pose.identity);
+                obj.transform.localScale = Vector3.one;
                 markers.Enqueue(obj);
             }
         }

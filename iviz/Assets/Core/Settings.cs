@@ -88,7 +88,7 @@ namespace Iviz.Core
         public const bool IsHololens =
 #if UNITY_WSA
 #if UNITY_EDITOR
-            false;
+            true;
 #else
             true;
 #endif

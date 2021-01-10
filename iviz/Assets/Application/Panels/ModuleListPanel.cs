@@ -98,6 +98,12 @@ namespace Iviz.App
         bool initialized;
         public static event Action InitFinished;
 
+        public IMenuDialogContents MenuDialog
+        {
+            get => menuDialog;
+            set => menuDialog = value;
+        }
+        
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
