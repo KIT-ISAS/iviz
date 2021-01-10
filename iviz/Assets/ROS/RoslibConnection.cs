@@ -84,11 +84,22 @@ namespace Iviz.Ros
         protected override async Task<bool> Connect()
         {
             if (MasterUri == null ||
-                MasterUri.Scheme != "http" ||
-                MyId == null ||
-                MyUri == null ||
+                MasterUri.Scheme != "http")
+            {
+                Core.Logger.Internal("Connection request failed. Invalid master uri.");
+                return false;
+            }
+
+            if (MyId == null)
+            {
+                Core.Logger.Internal("Connection request failed. Invalid id.");
+                return false;
+            }
+
+            if (MyUri == null ||
                 MyUri.Scheme != "http")
             {
+                Core.Logger.Internal("Connection request failed. Invalid own uri.");
                 return false;
             }
 

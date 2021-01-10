@@ -224,7 +224,7 @@ namespace Iviz.App
                 KeepReconnecting = false;
                 if (uri == null)
                 {
-                    Logger.Internal("Failed to set master uri.");
+                    Logger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
                     masterUriStr.Label = "(?) →";
                 }
                 else if (RosServerManager.IsActive)
@@ -242,10 +242,9 @@ namespace Iviz.App
             {
                 if (id == null)
                 {
-                    Logger.Internal("Failed to set caller id.");
-                    Logger.Internal("* First character must be /");
-                    Logger.Internal("* Second character must be alpha [a-z A-Z]");
-                    Logger.Internal("* Remaining characters must be alpha, digits, _ or /");
+                    Logger.Internal("<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
+                    Logger.Internal("* First character must be alphanumeric [a-z A-Z] or a /");
+                    Logger.Internal("* Remaining characters must be alphanumeric, digits, _ or /");
                     return;
                 }
 
@@ -257,8 +256,9 @@ namespace Iviz.App
             {
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
-                Logger.Internal(
-                    uri == null ? "Failed to set caller uri." : $"Changing caller uri to '{uri}'"
+                Logger.Internal(uri == null 
+                    ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid." 
+                    : $"Changing caller uri to '{uri}'"
                 );
             };
             stopButton.Clicked += () =>
@@ -266,7 +266,7 @@ namespace Iviz.App
                 Logger.Internal(
                     ConnectionManager.IsConnected
                         ? "Disconnection requested."
-                        : "Disconnection requested (but already disconnected)."
+                        : "Already disconnected."
                 );
                 KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();

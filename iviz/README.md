@@ -43,18 +43,49 @@ To move around:
 * On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D to translate the camera. (This is the same behaviour as in Unity)
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
 
-## 4. Working with Transform Frames
+## 4. Adding Topics and Modules
+
+In order to add a module that listens to a topic, click on the *+ Topic* button.
+You will be shown a list of available topics you can add.
+* *Show Unsupported*: Select this to show all the topics, even the ones that cannot be displayed.    
+
+iviz also supports some modules that are not related to topics, which can be found by clicking on the *+ Module* button.
+These include:
+* *Augmented Reality*: The AR manager.
+* *Robot*: Displays a robot.
+* *DepthCloud*: Transforms a depth image (optionally with a color image) into a point cloud.
+* *Joystick*: Displays two on-screen joysticks that publish twist messages.
+* *Grid*: Creates a new grid.
+
+If you're only interested in listening to a topic, but not displaying it, you can press the *Echo* button.
+In the Echo dialog, select the topic you want, and iviz will display the contents of the messages in JSON format.
+* *Topic*: The topic to be listened to, or (None) to deactivate. 
+
+Note that closing the window will leave the subscriber open (and will continue to consume bandwidth).
+If this is not desired, simply select (None) as the topic.
+
+## 5. Connections
+
+
+## 6. Working with Transform Frames
+
+The TF module automatically subscribes itself to /tf and /tf_static when the client is connected, and will by default display every transformation frame.
+iviz does not enforce a unique fixed frame, and all frames without parents are assumed to be on the origin.   
+iviz will also assume that a frame named 'map' exists on the origin.
+
+
+
 ![image](../wiki_files/tf-dialog.png)
 TBW...
 
-## 5. Working with Robots
+## 7. Working with Robots
 ![image](../wiki_files/iviz_screen.png)
 TBW...
 
-## 6. Working with Augmented Reality
+## 8. Working with Augmented Reality
 TBW...
 
-## 7. Credits
+## 9. Credits
 
 ![image](../wiki_files/robdekon_logo_web.svg)
 

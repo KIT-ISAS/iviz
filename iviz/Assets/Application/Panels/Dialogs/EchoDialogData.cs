@@ -182,8 +182,8 @@ namespace Iviz.App
             {
                 dialog.Publishers.text = $"{listener.NumPublishers} publishers";
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} mps";
-                long kbytesPerSecond = listener.Stats.BytesPerSecond / 1000;
-                dialog.KBytes.text = $"{kbytesPerSecond.ToString("N0")} kB/s";
+                long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
+                dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
             }
         }
 
