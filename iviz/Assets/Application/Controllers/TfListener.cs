@@ -44,9 +44,14 @@ namespace Iviz.Controllers
         readonly List<(TransformStamped frame, bool isStatic)> frameBuffer = new List<(TransformStamped, bool)>();
         readonly List<(TransformStamped frame, bool isStatic)> frameList = new List<(TransformStamped, bool)>();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
-        readonly FrameNode keepAllListener;
-        readonly FrameNode staticListener;
-        readonly FrameNode fixedFrameListener;
+        [NotNull] readonly FrameNode keepAllListener;
+        [NotNull] readonly FrameNode staticListener;
+        [NotNull] readonly FrameNode fixedFrameListener;
+        
+        [NotNull] readonly TfFrame mapFrame;
+        [NotNull] readonly TfFrame rootFrame;
+        [NotNull] readonly TfFrame originFrame;
+        [NotNull] readonly TfFrame unityFrame;        
 
         [NotNull] TfFrame fixedFrame;
 
@@ -55,10 +60,9 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Instance = this;
 
-
-            UnityFrame = Add(CreateFrameObject("TF", null, null));
-            UnityFrame.ForceInvisible = true;
-            UnityFrame.Visible = false;
+            unityFrame = Add(CreateFrameObject("TF", null, null));
+            unityFrame.ForceInvisible = true;
+            unityFrame.Visible = false;
 
             FrameNode defaultListener = FrameNode.Instantiate("[.]");
             UnityFrame.AddListener(defaultListener);
@@ -70,22 +74,22 @@ namespace Iviz.Controllers
 
             Config = new TfConfiguration();
 
-            RootFrame = Add(CreateFrameObject("/", UnityFrame.Transform, UnityFrame));
-            RootFrame.ForceInvisible = true;
-            RootFrame.Visible = false;
-            RootFrame.AddListener(defaultListener);
+            rootFrame = Add(CreateFrameObject("/", UnityFrame.Transform, UnityFrame));
+            rootFrame.ForceInvisible = true;
+            rootFrame.Visible = false;
+            rootFrame.AddListener(defaultListener);
 
-            OriginFrame = Add(CreateFrameObject("/_origin_", RootFrame.Transform, RootFrame));
-            OriginFrame.Parent = RootFrame;
-            OriginFrame.ForceInvisible = true;
-            OriginFrame.Visible = false;
-            OriginFrame.AddListener(defaultListener);
-            OriginFrame.ParentCanChange = false;
+            originFrame = Add(CreateFrameObject("/_origin_", RootFrame.Transform, RootFrame));
+            originFrame.Parent = RootFrame;
+            originFrame.ForceInvisible = true;
+            originFrame.Visible = false;
+            originFrame.AddListener(defaultListener);
+            originFrame.ParentCanChange = false;
 
-            MapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.Transform, OriginFrame));
-            MapFrame.Parent = OriginFrame;
-            MapFrame.AddListener(defaultListener);
-            MapFrame.ParentCanChange = false;
+            mapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.Transform, OriginFrame));
+            mapFrame.Parent = OriginFrame;
+            mapFrame.AddListener(defaultListener);
+            mapFrame.ParentCanChange = false;
 
             fixedFrame = MapFrame;
 
@@ -129,10 +133,10 @@ namespace Iviz.Controllers
                                                        throw new InvalidOperationException(
                                                            "GuiInputModule has not been started!");
 
-        public static TfFrame MapFrame { get; private set; }
-        public static TfFrame RootFrame { get; private set; }
-        public static TfFrame OriginFrame { get; private set; }
-        public static TfFrame UnityFrame { get; private set; }
+        public static TfFrame MapFrame => Instance.mapFrame;
+        public static TfFrame RootFrame => Instance.rootFrame;
+        public static TfFrame OriginFrame => Instance.originFrame;
+        public static TfFrame UnityFrame => Instance.unityFrame;
         public static TfFrame ListenersFrame => OriginFrame;
         public override TfFrame Frame => MapFrame;
 
@@ -357,11 +361,13 @@ namespace Iviz.Controllers
             string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
 
             TfFrame frame = Instance.GetOrCreateFrameImpl(frameId);
+            /*
             if (frame.Id != frameId)
             {
                 // shouldn't happen!
                 Debug.LogWarning($"Error: Broken resource pool! Requested {frameId}, received {frame.Id}");
             }
+            */
 
             if (!(listener is null))
             {
@@ -467,6 +473,7 @@ namespace Iviz.Controllers
             staticListener.Stop();
             Publisher.Stop();
             GameThread.LateEveryFrame -= LateUpdate;
+            Instance = null;
         }
 
         static void Publish([NotNull] TFMessage msg)
@@ -478,6 +485,12 @@ namespace Iviz.Controllers
         {
             Transform originFrame = OriginFrame.Transform;
             return originFrame.InverseTransformPoint(unityPosition);
+        }
+        
+        public static Vector3 RelativePositionToFixedFrame(in Vector3 unityPosition)
+        {
+            Transform fixedFrame = Instance.fixedFrame.Transform;
+            return fixedFrame.InverseTransformPoint(unityPosition);
         }
 
         public static Pose RelativePoseToOrigin(in Pose unityPose)
@@ -498,7 +511,7 @@ namespace Iviz.Controllers
                 {
                     new TransformStamped
                     (
-                        RosUtils.CreateHeader(tfSeq++, parentFrame),
+                        (tfSeq++, parentFrame),
                         childFrame ?? "",
                         RelativePoseToOrigin(unityPose).Unity2RosTransform()
                     )

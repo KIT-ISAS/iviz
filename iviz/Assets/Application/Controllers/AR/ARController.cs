@@ -286,8 +286,10 @@ namespace Iviz.Controllers
             PinControlButton.Visible = false;
             ShowARJoystickButton.Visible = false;
 
+            WorldPoseChanged = null;
             ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
+            ARJoystick.PointerUp -= OnARJoystickPointerUp;
             PinControlButton.Clicked -= OnPinControlButtonClicked;
             ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
             ShowARJoystick = false;

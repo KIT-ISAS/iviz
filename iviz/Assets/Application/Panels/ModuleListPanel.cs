@@ -168,6 +168,16 @@ namespace Iviz.App
             instance = this;
         }
 
+        void OnDestroy()
+        {
+            instance = null;
+            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
+            ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
+            ARController.ARModeChanged -= OnARModeChanged;
+            GameThread.LateEverySecond -= UpdateFpsStats;
+            GameThread.EveryFrame -= UpdateFpsCounter;            
+        }
+
         void Start()
         {
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
@@ -304,7 +314,9 @@ namespace Iviz.App
             AllGuiVisible = AllGuiVisible; // initialize value
 
             initialized = true;
+            
             InitFinished?.Invoke();
+            InitFinished = null;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -514,7 +526,7 @@ namespace Iviz.App
             }
         }
 
-        public void ResetAllModules()
+        void ResetAllModules()
         {
             foreach (ModuleData m in moduleDatas)
             {
@@ -644,14 +656,18 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
+            long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
+            bottomTime.text = $"{memBytesKb:N0} MB"; 
+
+            //bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
+            
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             long downKb = downB / 1000;
             long upKb = upB / 1000;
-            bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
+            bottomBandwidth.text = $"↓{downKb:N0}kB/s ↑{upKb:N0}kB/s";
 
             var state = SystemInfo.batteryStatus;
             switch (SystemInfo.batteryLevel)

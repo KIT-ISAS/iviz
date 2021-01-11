@@ -75,6 +75,16 @@ namespace Iviz.Core
         void OnDestroy()
         {
             Instance = null;
+            EveryFrame = null;
+            ListenersEveryFrame = null;
+            LateEveryFrame = null;
+            EverySecond = null;
+            LateEverySecond = null;
+
+            while (actionsQueue.Count != 0)
+            {
+                actionsQueue.TryDequeue(out _);
+            }
         }
 
         /// <summary>

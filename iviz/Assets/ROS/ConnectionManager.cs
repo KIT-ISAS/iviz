@@ -50,29 +50,27 @@ namespace Iviz.Ros
 
         void OnDestroy()
         {
+            logListener.Stop();
+            logSender.Stop();
             Connection.Stop();
-
             RosServerManager.Dispose();
+            instance = null;
+            connection = null;
+            LogMessageArrived = null;
+            Logger.LogExternal -= LogMessage;
         }
 
         void LogMessage(in LogMessage msg)
         {
             logSender.Publish(new Log
             {
-                Header = RosUtils.CreateHeader(logSeq++),
+                Header = (logSeq++, ""),
                 Level = (byte) msg.Level,
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message,
                 File = Path.GetFileName(msg.File),
                 Line = (uint) msg.Line
             });
-
-            /*
-            if (Settings.IsHololens && logSender.NumSubscribers == 0)
-            {
-                Logger.Internal(msg.Message);
-            }
-            */
         }
 
         internal static void ReportBandwidthUp(long size)

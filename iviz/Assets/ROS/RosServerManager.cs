@@ -39,6 +39,7 @@ namespace Iviz.Ros
         public static void Dispose()
         {
             instance?.DisposeImpl();
+            instance = null;
         }
 
         bool TryCreate(Uri masterUri, string masterId)

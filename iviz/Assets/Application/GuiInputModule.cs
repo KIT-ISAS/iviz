@@ -251,6 +251,12 @@ namespace Iviz.App
             Settings.SettingsManager = this;
         }
 
+        void OnDestroy()
+        {
+            Instance = null;
+            Settings.SettingsManager = null;
+        }
+
         void Start()
         {
             if (!Settings.IsMobile)

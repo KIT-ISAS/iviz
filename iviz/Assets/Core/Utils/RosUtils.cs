@@ -280,12 +280,6 @@ namespace Iviz.Core
             return new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
         }
 
-        [NotNull]
-        public static Header CreateHeader(uint seq = 0, [CanBeNull] string frameId = null, time? timestamp = null)
-        {
-            return new Header(seq, timestamp ?? time.Now(), frameId ?? BaseFrameId);
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this float f)
         {

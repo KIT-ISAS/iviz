@@ -286,10 +286,10 @@ namespace Iviz.Controllers
         {
             if (SenderPoint != null && grid.TryRaycast(cameraPoint, out Vector3 hit))
             {
-                lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
+                lastTapPosition = TfListener.RelativePositionToFixedFrame(hit).Unity2RosPoint();
                 SenderPoint.Publish(new PointStamped
                 {
-                    Header = RosUtils.CreateHeader(clickedSeq++),
+                    Header = (clickedSeq++, TfListener.FixedFrameId),
                     Point = lastTapPosition.Value
                 });
                 ModuleData.ResetPanel();

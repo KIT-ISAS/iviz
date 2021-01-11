@@ -313,7 +313,7 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, frameId),
+                (feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -333,14 +333,14 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, frameId),
+                (feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
                 relativeControlPose.Unity2RosPose(),
                 0,
-                Vector3.zero.Unity2RosPoint(),
+                Point.Zero,
                 false
             );
             Publisher.Publish(msg);
@@ -353,14 +353,14 @@ namespace Iviz.Controllers
         {
             InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
             (
-                RosUtils.CreateHeader(feedSeq++, frameId),
+                (feedSeq++, frameId),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 "",
                 InteractiveMarkerFeedback.MENU_SELECT,
                 relativeControlPose.Unity2RosPose(),
                 menuEntryId,
-                Vector3.zero.Unity2RosPoint(),
+                Point.Zero,
                 false
             );
             Publisher.Publish(msg);

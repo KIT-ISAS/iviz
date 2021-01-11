@@ -191,6 +191,7 @@ namespace Iviz.Controllers
             SenderJoy?.Stop();
             SenderTwist?.Stop();
             Visible = false;
+            Joystick = null;
         }
 
         public void ResetController()
@@ -246,7 +247,7 @@ namespace Iviz.Controllers
 
                 Vector2 linear = XIsFront ? new Vector2(leftDir.y, -leftDir.x) : new Vector2(leftDir.x, leftDir.y);
 
-                Twist twist = new Twist(
+                Twist twist = (
                     (linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
                     (0, 0, -rightDir.x * MaxSpeed.z)
                 );
@@ -255,7 +256,7 @@ namespace Iviz.Controllers
                 {
                     string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                     TwistStamped twistStamped = new TwistStamped(
-                        RosUtils.CreateHeader(twistSeq++, frameId),
+                        (twistSeq++, frameId),
                         twist
                     );
                     SenderTwist.Publish(twistStamped);
@@ -273,7 +274,7 @@ namespace Iviz.Controllers
 
                 string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                 Joy joy = new Joy(
-                    RosUtils.CreateHeader(joySeq++, frameId),
+                    (joySeq++, frameId),
                     new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
                     Array.Empty<int>()
                 );
