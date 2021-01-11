@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -214,8 +215,8 @@ namespace Iviz.Controllers
             set
             {
                 config.TextureVisible = value;
-                textureNode.gameObject.SetActive(value);  
-            } 
+                textureNode.gameObject.SetActive(value);
+            }
         }
 
         public OccupancyGridListener([NotNull] IModuleData moduleData)
@@ -264,9 +265,12 @@ namespace Iviz.Controllers
             textureNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
-            //cubeNode.Transform.SetLocalPose(origin);
-            //textureNode.Transform.SetLocalPose(origin);
-            //textureNode.Transform.position += new Vector3(0, 0.001f, 0);
+            if (!origin.IsUsable())
+            {
+                Logger.Error(
+                    $"{this}: Cannot use ({origin.position.x}, {origin.position.y}, {origin.position.z}) as position. Values too large");
+                origin = Pose.identity;
+            }
 
             numCellsX = (int) msg.Info.Width;
             numCellsY = (int) msg.Info.Height;
@@ -290,7 +294,8 @@ namespace Iviz.Controllers
                 gridTiles = new OccupancyGridResource[16];
                 for (int j = 0; j < gridTiles.Length; j++)
                 {
-                    gridTiles[j] = ResourcePool.GetOrCreate<OccupancyGridResource>(Resource.Displays.OccupancyGridResource,
+                    gridTiles[j] = ResourcePool.GetOrCreate<OccupancyGridResource>(
+                        Resource.Displays.OccupancyGridResource,
                         cubeNode.transform);
                     gridTiles[j].transform.SetLocalPose(Pose.identity);
                     gridTiles[j].Colormap = Colormap;

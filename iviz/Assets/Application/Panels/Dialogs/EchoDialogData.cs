@@ -2,19 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Iviz.Controllers;
-using Iviz.Core;
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
-using Iviz.Msgs.Tf2Msgs;
 using Iviz.MsgsGen.Dynamic;
-using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {

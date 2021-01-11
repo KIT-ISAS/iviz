@@ -486,5 +486,11 @@ namespace Iviz.Core
                 ? other.Token
                 : CancellationTokenSource.CreateLinkedTokenSource(token, other.Token).Token;
         }
+
+        public static bool IsUsable(this Pose pose)
+        {
+            const int maxPoseMagnitude = 10000;
+            return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
+        }
     }
 }

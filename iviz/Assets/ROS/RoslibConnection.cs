@@ -163,28 +163,31 @@ namespace Iviz.Ros
 
                 return true;
             }
-            catch (UriBindingException)
-            {
-                Core.Logger.Internal(
-                    $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
-            }
-            catch (Exception e) when
-            (e is UnreachableUriException ||
-             e is ConnectionException ||
-             e is RosRpcException ||
-             e is TimeoutException ||
-             e is XmlRpcException)
-            {
-                Core.Logger.Internal("Error:", e);
-                if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
-                {
-                    Core.Logger.Internal(
-                        "Note: This appears to be my own master. Are you sure the uri network is reachable?");
-                }
-            }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during Connect():", e);
+                switch (e)
+                {
+                    case UriBindingException _:
+                        Core.Logger.Internal(
+                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
+                        break;
+                    case RoslibException _:
+                    case TimeoutException _:
+                    case XmlRpcException _:
+                    {
+                        Core.Logger.Internal("Error:", e);
+                        if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
+                        {
+                            Core.Logger.Internal(
+                                "Note: This appears to be my own master. Are you sure the uri network is reachable?");
+                        }
+
+                        break;
+                    }
+                    default:
+                        Core.Logger.Error("Exception during Connect():", e);
+                        break;
+                }
             }
 
             //Core.Logger.Debug("*** Disconnecting!");

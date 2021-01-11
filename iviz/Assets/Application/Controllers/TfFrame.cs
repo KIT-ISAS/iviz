@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Reflection.Emit;
-using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;

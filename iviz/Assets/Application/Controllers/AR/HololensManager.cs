@@ -1,18 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Iviz.App;
-using Iviz.Controllers;
-using Iviz.Core;
-using Iviz.Msgs;
-using Iviz.Ros;
-using Iviz.Resources;
-using Newtonsoft.Json;
-using TMPro;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
+
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit;
 

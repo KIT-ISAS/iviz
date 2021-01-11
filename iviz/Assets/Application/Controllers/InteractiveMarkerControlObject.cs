@@ -7,7 +7,6 @@ using Iviz.Displays;
 using Iviz.Hololens;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 

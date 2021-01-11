@@ -7,7 +7,6 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -158,6 +157,7 @@ namespace Iviz.App
         {
             panel.SourceParameter.Hints = GetParameterHints();
             panel.HelpText.Label = Robot.HelpText;
+            Robot.CheckRobotStartTask();
             UpdateModuleButton();
         }
 

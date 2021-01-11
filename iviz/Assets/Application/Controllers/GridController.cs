@@ -5,13 +5,10 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Ros;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine.Rendering;
-using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers

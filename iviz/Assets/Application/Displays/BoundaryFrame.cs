@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Iviz.Controllers
 {

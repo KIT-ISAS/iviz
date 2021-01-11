@@ -1,7 +1,5 @@
-using System.Linq;
 using Iviz.Core;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Iviz.App
 {
