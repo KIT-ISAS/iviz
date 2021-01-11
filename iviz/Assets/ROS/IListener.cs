@@ -224,7 +224,6 @@ namespace Iviz.Ros
                     return;
                 }
 
-
                 Stats = new RosListenerStats(
                     totalMsgCounter,
                     timesOfArrival.Count,
