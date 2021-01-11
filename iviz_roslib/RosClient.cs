@@ -370,7 +370,7 @@ namespace Iviz.Roslib
             }
 
             IPAddress? masterAddress =
-                IPAddress.TryParse(masterUri.Host, out IPAddress parsedAddress)
+                IPAddress.TryParse(masterUri.Host, out IPAddress? parsedAddress)
                     ? parsedAddress
                     : Dns.GetHostEntry(masterUri.Host).AddressList.FirstOrDefault(
                         address => address.AddressFamily == AddressFamily.InterNetwork);

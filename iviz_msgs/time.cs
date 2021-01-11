@@ -6,7 +6,7 @@ namespace Iviz.Msgs
 {
     [DataContract(Name = "time")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct time : IEquatable<time>
+    public readonly struct time : IEquatable<time>, IComparable<time>
     {
         [DataMember(Name = "secs")] public uint Secs { get; }
         [DataMember(Name = "nsecs")] public uint Nsecs { get; }
@@ -65,6 +65,22 @@ namespace Iviz.Msgs
         {
             return this == other;
         }
+        
+        public int CompareTo(time other)
+        {
+            int secsComparison = Secs.CompareTo(other.Secs);
+            return secsComparison != 0 ? secsComparison : Nsecs.CompareTo(other.Nsecs);
+        }        
+
+        public static bool operator >(time left, time right)
+        {
+            return left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
+        }
+        
+        public static bool operator <(time left, time right)
+        {
+            return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
+        }        
     }
 
 }
