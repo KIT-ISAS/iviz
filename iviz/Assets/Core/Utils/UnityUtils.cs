@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
@@ -487,6 +485,12 @@ namespace Iviz.Core
             return token == default
                 ? other.Token
                 : CancellationTokenSource.CreateLinkedTokenSource(token, other.Token).Token;
+        }
+
+        public static bool IsUsable(this Pose pose)
+        {
+            const int maxPoseMagnitude = 10000;
+            return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
         }
     }
 }

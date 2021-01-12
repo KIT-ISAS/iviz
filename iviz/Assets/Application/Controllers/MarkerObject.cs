@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -15,7 +12,6 @@ using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.XR.WSA;
 using Logger = Iviz.Core.Logger;
 using Vector3 = UnityEngine.Vector3;
 
@@ -105,6 +101,7 @@ namespace Iviz.Controllers
         public DateTime ExpirationTime { get; private set; }
 
         bool occlusionOnly;
+
         public bool OcclusionOnly
         {
             get => occlusionOnly;
@@ -119,6 +116,7 @@ namespace Iviz.Controllers
         }
 
         Color tint;
+
         public Color Tint
         {
             get => tint;
@@ -133,6 +131,7 @@ namespace Iviz.Controllers
         }
 
         float metallic;
+
         public float Metallic
         {
             get => metallic;
@@ -147,6 +146,7 @@ namespace Iviz.Controllers
         }
 
         float smoothness;
+
         public float Smoothness
         {
             get => smoothness;
@@ -171,7 +171,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public int Layer
         {
             get => resource?.Layer ?? 0;
@@ -331,20 +331,20 @@ namespace Iviz.Controllers
                 .Append(c.G.ToString(FloatFormat)).Append(" | ")
                 .Append(c.B.ToString(FloatFormat)).Append(" | ")
                 .Append(c.A.ToString(FloatFormat)).AppendLine();
-        }       
-        
+        }
+
         void AppendScale(Iviz.Msgs.GeometryMsgs.Vector3 c)
         {
             description.Append("Scale: [")
                 .Append(c.X.ToString(FloatFormat)).Append(" | ")
                 .Append(c.Y.ToString(FloatFormat)).Append(" | ")
                 .Append(c.Z.ToString(FloatFormat)).Append("]").AppendLine();
-        }    
-        
+        }
+
         void AppendScale(double c)
         {
             description.Append("Scale: ").Append(c.ToString(FloatFormat)).AppendLine();
-        } 
+        }
 
         void CreateImage([NotNull] Marker msg)
         {
@@ -585,7 +585,7 @@ namespace Iviz.Controllers
             lineResource.SetDirect(setterCallback, isStrip ? msg.Points.Length - 1 : msg.Points.Length / 2);
         }
 
-        
+
         void CreateMeshList([NotNull] Marker msg)
         {
             MeshListResource meshList = ValidateResource<MeshListResource>();
@@ -653,7 +653,7 @@ namespace Iviz.Controllers
             description.Append("Text: ").Append(msg.Text.Length).Append(" chars").AppendLine();
             AppendColor(msg.Color);
             AppendScale(msg.Scale.Z);
-            
+
             if (Mathf.Approximately((float) msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
             {
                 description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
@@ -670,7 +670,7 @@ namespace Iviz.Controllers
 
             AppendColor(msg.Color);
             AppendScale(msg.Scale);
-            
+
             if (Mathf.Approximately((float) msg.Scale.SquaredNorm, 0))
             {
                 description.Append(WarnStr).Append("Scale value of 0").AppendLine();
@@ -832,11 +832,21 @@ namespace Iviz.Controllers
                 return;
             }
 
-            UnityEngine.Pose newPose = msg.Pose.Ros2Unity();
-            if (newPose != currentPose)
+            Pose newPose = msg.Pose.Ros2Unity();
+            if (newPose == currentPose)
             {
-                transform.SetLocalPose(currentPose = newPose);
+                return;
             }
+
+            if (!newPose.IsUsable())
+            {
+                numErrors++;
+                description.Append(ErrorStr).Append(
+                    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large");
+                newPose = Pose.identity;
+            }
+
+            transform.SetLocalPose(currentPose = newPose);
         }
 
         [CanBeNull]

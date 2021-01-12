@@ -37,6 +37,7 @@ namespace Iviz.Controllers
     {
         readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
         readonly FrameNode node;
+        Task robotLoadingTask;
 
         public SimpleRobotController([NotNull] IModuleData moduleData)
         {
@@ -58,6 +59,7 @@ namespace Iviz.Controllers
                 {
                     robot.Cancel();
                     robot.Dispose();
+                    robotLoadingTask = null;
                 }
 
                 robot = value;
@@ -407,8 +409,6 @@ namespace Iviz.Controllers
             try
             {
                 Robot = new RobotModel(description);
-                var task = Robot.StartAsync(ConnectionManager.ServiceProvider);
-                Debug.Log("Robot load was synchronous: " + task.RanToCompletion());
             }
             catch (Exception e)
             {
@@ -418,15 +418,42 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            node.name = "SimpleRobotNode:" + Name;
-            HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
-            AttachedToTf = AttachedToTf;
-            Visible = Visible;
-            RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-            Tint = Tint;
-            Smoothness = Smoothness;
-            Metallic = Metallic;
+            robotLoadingTask = Robot.StartAsync(ConnectionManager.ServiceProvider);
+            HelpText = "[Loading Robot...]";
+            Debug.Log("Robot load was synchronous: " + robotLoadingTask.RanToCompletion());
+            CheckRobotStartTask();
             return true;
+        }
+
+        public void CheckRobotStartTask()
+        {
+            if (robotLoadingTask == null)
+            {
+                return;
+            }
+            
+            switch (robotLoadingTask.Status)
+            {
+                case TaskStatus.Faulted:
+                    HelpText = "[Error Loading Robot. See Log.]";
+                    Robot = null;
+                    robotLoadingTask = null;
+                    return;
+                case TaskStatus.Canceled:
+                    robotLoadingTask = null;
+                    return;
+                case TaskStatus.RanToCompletion:
+                    node.name = "SimpleRobotNode:" + Name;
+                    HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
+                    AttachedToTf = AttachedToTf;
+                    Visible = Visible;
+                    RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+                    Tint = Tint;
+                    Smoothness = Smoothness;
+                    Metallic = Metallic;
+                    robotLoadingTask = null;
+                    break;
+            }
         }
 
         [NotNull]

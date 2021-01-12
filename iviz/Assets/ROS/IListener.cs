@@ -166,7 +166,11 @@ namespace Iviz.Ros
             {
                 T msg = tmpMessageBag[i];
                 lastMsgBytes += msg.RosMessageLength;
-                timesOfArrival.Add(Time.time);
+                
+                lock (timesOfArrival)
+                {
+                    timesOfArrival.Add(Time.time);
+                }
 
                 try
                 {
@@ -188,7 +192,10 @@ namespace Iviz.Ros
             lastMsgBytes += msg.RosMessageLength;
             totalMsgCounter++;
 
-            timesOfArrival.Add(GameThread.GameTime);
+            lock (timesOfArrival)
+            {
+                timesOfArrival.Add(GameThread.GameTime);
+            }
 
             bool processed;
             try
@@ -209,26 +216,28 @@ namespace Iviz.Ros
 
         void UpdateStats()
         {
-            if (timesOfArrival.Count == 0)
+            lock (timesOfArrival)
             {
-                Stats = new RosListenerStats();
-                return;
+                if (timesOfArrival.Count == 0)
+                {
+                    Stats = new RosListenerStats();
+                    return;
+                }
+
+                Stats = new RosListenerStats(
+                    totalMsgCounter,
+                    timesOfArrival.Count,
+                    lastMsgBytes,
+                    msgsInQueue,
+                    dropped
+                );
+
+                ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+
+                lastMsgBytes = 0;
+                dropped = 0;
+                timesOfArrival.Clear();
             }
-
-
-            Stats = new RosListenerStats(
-                totalMsgCounter,
-                timesOfArrival.Count,
-                lastMsgBytes,
-                msgsInQueue,
-                dropped
-            );
-
-            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
-
-            lastMsgBytes = 0;
-            dropped = 0;
-            timesOfArrival.Clear();
         }
 
         [NotNull]

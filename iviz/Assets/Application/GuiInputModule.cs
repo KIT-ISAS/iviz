@@ -1,15 +1,9 @@
 ﻿using System;
 using Iviz.Resources;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Displays;
-using Iviz.Roslib;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.PostProcessing;

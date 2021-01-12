@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
-using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Resources;
 using Iviz.Ros;

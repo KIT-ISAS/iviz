@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.App;
@@ -8,7 +7,6 @@ using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 namespace Iviz.Controllers
 {

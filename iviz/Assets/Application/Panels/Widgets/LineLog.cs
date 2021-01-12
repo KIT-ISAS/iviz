@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Text;
-using Iviz.Core;
 using JetBrains.Annotations;
 
 namespace Iviz.App

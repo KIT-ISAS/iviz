@@ -131,6 +131,15 @@ namespace Iviz.Displays
                 Smoothness = smoothness;
                 Metallic = metallic;
                 ApplyAnyValidConfiguration();
+
+                Logger.Info(
+                    $"Robot: Finished constructing '{Name}' with {LinkObjects.Count} links and {Joints.Count} joints.");
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"Robot: Failed to construct '{Name}'", e);
+                Debug.Log(e);
+                throw;
             }
             finally
             {
@@ -359,8 +368,15 @@ namespace Iviz.Displays
 
             var originObject = new GameObject($"[JointOrigin:{joint.Name}]");
 
-            var parent = linkObjects[joint.Parent.Link];
-            var child = linkObjects[joint.Child.Link];
+            if (!linkObjects.TryGetValue(joint.Parent.Link, out var parent))
+            {
+                throw new MalformedUrdfException($"Cannot find link '{joint.Parent.Link}'");
+            }
+
+            if (!linkObjects.TryGetValue(joint.Child.Link, out var child))
+            {
+                throw new MalformedUrdfException($"Cannot find link '{joint.Child.Link}'");
+            }
 
             if (parent.transform.IsChildOf(child.transform))
             {

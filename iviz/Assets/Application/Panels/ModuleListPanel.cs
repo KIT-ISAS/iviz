@@ -547,7 +547,7 @@ namespace Iviz.App
             }
         }
 
-        void ResetAllModules()
+        public void ResetAllModules()
         {
             foreach (ModuleData m in moduleDatas)
             {
