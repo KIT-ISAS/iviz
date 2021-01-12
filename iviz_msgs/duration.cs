@@ -71,5 +71,10 @@ namespace Iviz.Msgs
         {
             return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
         }
+        
+        public override string ToString()
+        {
+            return $"{{\"secs\":{Secs},\"nsecs\":{Nsecs}}}";
+        }
     }
 }

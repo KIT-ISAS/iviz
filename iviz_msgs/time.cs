@@ -80,7 +80,17 @@ namespace Iviz.Msgs
         public static bool operator <(time left, time right)
         {
             return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
-        }        
+        }
+
+        public time WithSecs(uint secs)
+        {
+            return new time(secs, Nsecs);
+        }
+
+        public override string ToString()
+        {
+            return $"{{\"secs\":{Secs},\"nsecs\":{Nsecs}}}";
+        }
     }
 
 }
