@@ -25,11 +25,14 @@ namespace Iviz.Controllers
         [DataMember] public bool DescriptionsVisible { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.InteractiveMarker;
-        [DataMember] public bool Visible { get; set; } = true;
+        [DataMember] public bool Visible { get; set; } = true; 
     }
 
     public sealed class InteractiveMarkerListener : ListenerController, IMarkerDialogListener
     {
+        const string FeedbackFormatStr = "{0}/feedback";
+        const string UpdateFullFormatStr = "{0}/update_full";
+        
         readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
 
         readonly Dictionary<string, InteractiveMarkerObject> interactiveMarkers =
@@ -38,6 +41,7 @@ namespace Iviz.Controllers
         readonly FrameNode node;
 
         uint feedSeq;
+        bool interactable;
 
         public InteractiveMarkerListener([NotNull] IModuleData moduleData)
         {
@@ -88,6 +92,19 @@ namespace Iviz.Controllers
                 foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
                 {
                     marker.Visible = value;
+                }
+            }
+        }
+        
+        public bool Interactable
+        {
+            get => interactable;
+            set
+            {
+                interactable = value;
+                foreach (var interactiveMarker in interactiveMarkers.Values)
+                {
+                    interactiveMarker.Interactable = value;
                 }
             }
         }
@@ -181,13 +198,12 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate);
-            //GameThread.EverySecond += CheckForExpiredMarkers;
 
             int lastSlash = config.Topic.LastIndexOf('/');
             string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);
 
-            string feedbackTopic = $"{root}/feedback";
-            string fullTopic = $"{root}/update_full";
+            string feedbackTopic = string.Format(FeedbackFormatStr, root);
+            string fullTopic = string.Format(UpdateFullFormatStr, root);
 
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
             FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerUpdateFull);
@@ -196,7 +212,6 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-            //GameThread.EverySecond -= CheckForExpiredMarkers;
 
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
@@ -266,6 +281,7 @@ namespace Iviz.Controllers
             newMarkerObject.Initialize(this, id);
             newMarkerObject.Parent = TfListener.ListenersFrame;
             newMarkerObject.Visible = Visible;
+            newMarkerObject.Interactable = Interactable;
             newMarkerObject.transform.SetParentLocal(node.transform);
             interactiveMarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);

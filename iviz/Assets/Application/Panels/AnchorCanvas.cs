@@ -10,6 +10,7 @@ namespace Iviz.App
         [SerializeField] Button unlock  = null;
         [SerializeField] AnchorToggleButton pinMarker = null;
         [SerializeField] AnchorToggleButton showMarker = null;
+        [SerializeField] AnchorToggleButton interact = null;
         [SerializeField] GameObject arInfoPanel = null;
 
         public AnchorToggleButton HideGui => hideGui;
@@ -17,6 +18,7 @@ namespace Iviz.App
         public Button Unlock => unlock;
         public AnchorToggleButton PinMarker => pinMarker;
         public AnchorToggleButton ShowMarker => showMarker;
+        public AnchorToggleButton Interact => interact;
         public GameObject ArInfoPanel => arInfoPanel;
     }
 }

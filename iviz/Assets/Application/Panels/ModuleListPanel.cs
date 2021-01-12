@@ -17,6 +17,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 using Logger = Iviz.Core.Logger;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace Iviz.App
 {
@@ -103,7 +104,7 @@ namespace Iviz.App
             get => menuDialog;
             set => menuDialog = value;
         }
-        
+
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -136,6 +137,7 @@ namespace Iviz.App
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
         public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
         public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
+        AnchorToggleButton InteractableButton => anchorCanvas.Interact;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
         [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
@@ -144,8 +146,23 @@ namespace Iviz.App
         [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
-
         [NotNull] ModuleListButtons Buttons => buttons ?? (buttons = new ModuleListButtons(contentObject));
+
+        bool sceneInteractable;
+
+        public bool SceneInteractable
+        {
+            get => sceneInteractable;
+            private set
+            {
+                sceneInteractable = value;
+                foreach (var moduleData in moduleDatas.OfType<InteractiveMarkerModuleData>())
+                {
+                    moduleData.UpdateInteractable();
+                }
+            }
+        }
+
 
         public bool UnlockButtonVisible
         {
@@ -162,7 +179,7 @@ namespace Iviz.App
                 status.enabled = value;
             }
         }
-        
+
         void Awake()
         {
             instance = this;
@@ -175,7 +192,7 @@ namespace Iviz.App
             ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
             ARController.ARModeChanged -= OnARModeChanged;
             GameThread.LateEverySecond -= UpdateFpsStats;
-            GameThread.EveryFrame -= UpdateFpsCounter;            
+            GameThread.EveryFrame -= UpdateFpsCounter;
         }
 
         void Start()
@@ -213,6 +230,10 @@ namespace Iviz.App
 
             HideGuiButton.Clicked += OnHideGuiButtonClick;
             HideGuiButton.State = true;
+
+            SceneInteractable = true;
+            InteractableButton.Visible = false;
+            InteractableButton.Clicked += () => SceneInteractable = !SceneInteractable;
 
             addDisplayByTopic.onClick.AddListener(availableTopics.Show);
             addDisplay.onClick.AddListener(availableModules.Show);
@@ -272,8 +293,8 @@ namespace Iviz.App
             {
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
-                Logger.Internal(uri == null 
-                    ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid." 
+                Logger.Internal(uri == null
+                    ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid."
                     : $"Changing caller uri to '{uri}'"
                 );
             };
@@ -296,7 +317,7 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
-            connectionData.MasterActiveChanged += _ => { ConnectionManager.Connection.Disconnect(); };
+            connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
             ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
@@ -314,7 +335,7 @@ namespace Iviz.App
             AllGuiVisible = AllGuiVisible; // initialize value
 
             initialized = true;
-            
+
             InitFinished?.Invoke();
             InitFinished = null;
         }
@@ -534,6 +555,12 @@ namespace Iviz.App
             }
         }
 
+        void CheckIfInteractableNeeded()
+        {
+            InteractableButton.Visible =
+                ModuleDatas.Any(module => module.ModuleType == Resource.ModuleType.InteractiveMarker);
+        }
+
         [NotNull]
         public ModuleData CreateModule(Resource.ModuleType resource,
             [NotNull] string topic = "",
@@ -564,6 +591,11 @@ namespace Iviz.App
             moduleDatas.Add(moduleData);
             Buttons.CreateButtonObject(moduleData);
 
+            if (moduleData.ModuleType == Resource.ModuleType.InteractiveMarker)
+            {
+                InteractableButton.Visible = true;
+            }
+            
             return moduleData;
         }
 
@@ -596,6 +628,11 @@ namespace Iviz.App
             }
 
             RemoveModule(moduleDatas.IndexOf(entry));
+
+            if (entry.ModuleType == Resource.ModuleType.InteractiveMarker)
+            {
+                CheckIfInteractableNeeded();
+            }
         }
 
         void RemoveModule(int index)
@@ -620,7 +657,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             Buttons.UpdateModuleButton(index, content);
         }
 
@@ -657,10 +694,10 @@ namespace Iviz.App
         void UpdateFpsStats()
         {
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            bottomTime.text = $"{memBytesKb:N0} MB"; 
+            bottomTime.text = $"{memBytesKb:N0} MB";
 
             //bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
-            
+
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
@@ -712,7 +749,7 @@ namespace Iviz.App
 
             menuDialog.Set(menuEntries, unityPositionHint, callback);
         }
-        
+
         class ModuleListButtons
         {
             [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
@@ -724,7 +761,7 @@ namespace Iviz.App
                 buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
                 this.contentObject = contentObject;
             }
-            
+
             public void CreateButtonObject([NotNull] ModuleData moduleData)
             {
                 GameObject buttonObject =
@@ -745,7 +782,7 @@ namespace Iviz.App
                 button.onClick.AddListener(moduleData.ToggleShowPanel);
                 ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
             }
-            
+
             public void RemoveButton(int index)
             {
                 GameObject displayButton = buttons[index];
@@ -765,7 +802,7 @@ namespace Iviz.App
                 ((RectTransform) contentObject.transform).sizeDelta =
                     new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
             }
-            
+
             public void UpdateModuleButton(int index, [NotNull] string content)
             {
                 if (index < 0 || index >= buttons.Count)
@@ -777,7 +814,7 @@ namespace Iviz.App
                 {
                     throw new ArgumentNullException(nameof(content));
                 }
-                
+
                 GameObject buttonObject = buttons[index];
                 Text text = buttonObject.GetComponentInChildren<Text>();
                 text.text = content;
@@ -794,7 +831,7 @@ namespace Iviz.App
                         text.fontSize = 12;
                         break;
                 }
-            }            
+            }
         }
     }
 }

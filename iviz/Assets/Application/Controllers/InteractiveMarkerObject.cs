@@ -37,6 +37,8 @@ namespace Iviz.Controllers
         Pose? bufferedPose;
         bool poseUpdateEnabled = true;
 
+        bool interactable;
+
         internal bool PoseUpdateEnabled
         {
             get => poseUpdateEnabled;
@@ -87,6 +89,18 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool Interactable
+        {
+            get => interactable;
+            set
+            {
+                interactable = value;
+                foreach (var controlObject in controls.Values)
+                {
+                    controlObject.Interactable = value;
+                }
+            }
+        }
 
         void Awake()
         {
@@ -99,6 +113,8 @@ namespace Iviz.Controllers
             text.ElementSize = 0.1f;
             text.Visible = false;
             text.VisibleOnTop = true;
+
+            Interactable = true;
         }
 
         internal void Initialize(InteractiveMarkerListener newListener, string realId)
@@ -160,6 +176,7 @@ namespace Iviz.Controllers
                 newControl.Initialize(this, controlMsg.Name);
                 newControl.transform.SetParentLocal(controlNode.transform);
                 newControl.Visible = Visible;
+                newControl.Interactable = Interactable;
                 controls[controlId] = newControl;
 
                 newControl.Set(controlMsg);

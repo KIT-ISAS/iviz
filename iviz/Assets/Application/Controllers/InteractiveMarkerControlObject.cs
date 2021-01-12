@@ -30,7 +30,8 @@ namespace Iviz.Controllers
         string rosId;
         bool visible;
 
-        InteractiveMarkerObject interactiveMarkerObject;
+        InteractiveMarkerObject parent;
+        bool interactable;
 
         [CanBeNull] public Bounds? Bounds { get; private set; }
 
@@ -52,16 +53,30 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool Interactable
+        {
+            get => interactable;
+            set
+            {
+                interactable = value;
+                if (Control != null)
+                {
+                    Control.Layer = value ? LayerType.Clickable : LayerType.IgnoreRaycast;
+                }
+            }
+        }
+
         void Awake()
         {
             markerNode = new GameObject("[MarkerNode]");
             markerNode.transform.SetParentLocal(transform);
             markerNode.AddComponent<Billboard>().enabled = false;
+            Interactable = true;
         }
 
         internal void Initialize(InteractiveMarkerObject newIMarkerObject, string realId)
         {
-            interactiveMarkerObject = newIMarkerObject;
+            parent = newIMarkerObject;
             rosId = realId;
         }
 
@@ -119,33 +134,34 @@ namespace Iviz.Controllers
 
             Control.TargetTransform = transform.parent;
             Control.Visible = Visible;
+            Interactable = Interactable;
 
             Control.Moved += (in Pose _) =>
             {
-                if (interactiveMarkerObject != null)
+                if (parent != null)
                 {
-                    interactiveMarkerObject.OnMoved(rosId);
+                    parent.OnMoved(rosId);
                 }
             };
 
             // disable external updates while dragging
             Control.PointerDown += () =>
             {
-                interactiveMarkerObject.PoseUpdateEnabled = false;
-                interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Down);
+                parent.PoseUpdateEnabled = false;
+                parent.OnMouseEvent(rosId, null, MouseEventType.Down);
             };
             Control.PointerUp += () =>
             {
-                interactiveMarkerObject.PoseUpdateEnabled = true;
-                interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Up);
+                parent.PoseUpdateEnabled = true;
+                parent.OnMouseEvent(rosId, null, MouseEventType.Up);
 
                 if (Control.InteractionMode == InteractionModeType.ClickOnly)
                 {
-                    interactiveMarkerObject.OnMouseEvent(rosId, null, MouseEventType.Click);
+                    parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
             };
 
-            Control.MenuClicked += unityPositionHint => { interactiveMarkerObject.ShowMenu(unityPositionHint); };
+            Control.MenuClicked += unityPositionHint => { parent.ShowMenu(unityPositionHint); };
 
             return Control;
         }

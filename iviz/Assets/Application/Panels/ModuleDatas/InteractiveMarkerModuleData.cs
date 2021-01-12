@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -38,8 +40,14 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
 
+            listener.Interactable = ModuleListPanel.SceneInteractable;
             listener.StartListening();
             UpdateModuleButton();
+        }
+
+        public void UpdateInteractable()
+        {
+            listener.Interactable = ModuleListPanel.SceneInteractable;
         }
 
         public override void SetupPanel()

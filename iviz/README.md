@@ -119,19 +119,21 @@ This is useful in AR mode when you want to 'teleport' the scene to a different p
 Furthermore, events such as clicks on the grid will be published based on this frame.
 The fixed frame will be shown in green.
   
+## 7. Log Dialog
 
+ 
  
 ![image](../wiki_files/tf-dialog.png)
 
 
-## 7. Working with Robots
+## 8. Working with Robots
 ![image](../wiki_files/iviz_screen.png)
 TBW...
 
-## 8. Working with Augmented Reality
+## 9. Working with Augmented Reality
 TBW...
 
-## 9. Credits
+## 10. Credits
 
 ![image](../wiki_files/robdekon_logo_web.svg)
 
