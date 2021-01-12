@@ -216,10 +216,11 @@ namespace Iviz.Controllers
                 Logger.Debug("GridMapListener: Gridmap layer is not available!");
                 return;
             }
-            
-            if (msg.Data[layer].Data.Length < width * height)
+
+            var length = msg.Data[layer].Data.Length;
+            if (length != width * height)
             {
-                Logger.Debug("GridMapListener: Gridmap layer is too small!");
+                Logger.Error($"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
                 return;
             }
 
