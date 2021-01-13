@@ -317,21 +317,38 @@ namespace Iviz.Displays
             MenuClicked = null;
         }
 
+        void RaiseMoved(in Pose pose)
+        {
+            if (canMove)
+            {
+                Moved?.Invoke(pose);
+            }
+        }
+
+        void RaisePointerUp()
+        {
+            PointerUp?.Invoke();
+            canMove = false;
+        }
+
+        void RaisePointerDown()
+        {
+            canMove = true;
+            PointerDown?.Invoke();
+        }
+
+
         void Awake()
         {
             allResources = new[]
                 {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
 
-            void Moved(in Pose pose) => this.Moved?.Invoke(pose);
-            void PointerUp() => this.PointerUp?.Invoke();
-            void PointerDown() => this.PointerDown?.Invoke();
-
             foreach (var resource in allResources)
             {
                 var draggable = resource.GetComponent<IDraggable>();
-                draggable.Moved += Moved;
-                draggable.PointerUp += PointerUp;
-                draggable.PointerDown += PointerDown;
+                draggable.Moved += RaiseMoved;
+                draggable.PointerUp += RaisePointerUp;
+                draggable.PointerDown += RaisePointerDown;
             }
 
             frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(transform);
@@ -370,6 +387,7 @@ namespace Iviz.Displays
             transform.rotation = TfListener.OriginFrame.transform.rotation;
         }
 
+        bool canMove;
         public void OnPointerDown([NotNull] PointerEventData eventData)
         {
             if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
@@ -377,7 +395,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            PointerDown?.Invoke();
+            RaisePointerDown();
         }
 
         public void OnPointerUp([NotNull] PointerEventData eventData)
@@ -393,7 +411,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            PointerUp?.Invoke();
+            RaisePointerUp();
         }
 
         public void OnPointerEnter(PointerEventData eventData)

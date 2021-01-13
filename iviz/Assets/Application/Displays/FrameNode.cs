@@ -94,7 +94,8 @@ namespace Iviz.Controllers
         {
         }
 
-        public static FrameNode Instantiate([NotNull] string name, IFrameNodeOwner owner = null)
+        [NotNull]
+        public static FrameNode Instantiate([NotNull] string name, [CanBeNull] IFrameNodeOwner owner = null)
         {
             if (name == null)
             {
@@ -103,7 +104,7 @@ namespace Iviz.Controllers
 
             GameObject obj = new GameObject(name);
             SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
-            if (TfListener.MapFrame != null)
+            if (TfListener.Instance != null)
             {
                 node.Parent = TfListener.MapFrame;
             }

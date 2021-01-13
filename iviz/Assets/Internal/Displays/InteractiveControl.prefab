@@ -144,6 +144,7 @@ MonoBehaviour:
   holderCollider: {fileID: 8502366358804280696}
   menuObject: {fileID: 1781575870965163671}
   targetTransform: {fileID: 0}
+  interactionMode: 0
 --- !u!114 &6211203596575403924
 MonoBehaviour:
   m_ObjectHideFlags: 0
