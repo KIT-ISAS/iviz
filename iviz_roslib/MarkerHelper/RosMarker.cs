@@ -12,7 +12,7 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.MarkerHelper
 {
-    public sealed class RosMarkerHelper : IDisposable
+    public sealed class RosMarker : IDisposable
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
@@ -28,13 +28,13 @@ namespace Iviz.Roslib.MarkerHelper
 
         public string Topic => publisher.Topic;
 
-        public RosMarkerHelper(string ns = "Marker")
+        public RosMarker(string ns)
         {
             this.ns = ns;
             Markers = new ReadOnlyCollection<Marker>(markers);
         }
 
-        public RosMarkerHelper(RosClient client, string topic = "markers", string ns = "Marker") : this(ns)
+        public RosMarker(IRosClient client, string topic = "markers", string ns = "Marker") : this(ns)
         {
             Start(client, topic);
         }
@@ -44,12 +44,12 @@ namespace Iviz.Roslib.MarkerHelper
             return $"[RosMarkerHelper ns={ns}]";
         }
 
-        public void Start(RosClient client, string topic = "markers")
+        public void Start(IRosClient client, string topic = "markers")
         {
             publisher.Start(client, topic);
         }
 
-        public async Task StartAsync(RosClient client, string topic = "markers")
+        public async Task StartAsync(IRosClient client, string topic = "markers")
         {
             await publisher.StartAsync(client, topic);
         }
@@ -115,19 +115,19 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateArrow(string? ns, int id, in Pose pose, in ColorRGBA color, in Vector3 scale,
-            string? frameId)
+        public static Marker CreateArrow(string ns = "", int id = 0, Pose? pose = null, ColorRGBA? color = null,
+            Vector3? scale = null, string frameId = "")
         {
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.ARROW,
                 Action = Marker.ADD,
-                Pose = pose,
-                Scale = scale,
-                Color = color,
+                Pose = pose ?? Pose.Identity,
+                Scale = scale ?? Vector3.One,
+                Color = color ?? ColorRGBA.White,
                 FrameLocked = true,
             };
         }
@@ -140,19 +140,19 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateArrow(string? ns, int id, in Point a, in Point b, in ColorRGBA color,
-            string? frameId)
+        public static Marker CreateArrow(string ns = "", int id = 0, Point a = default, Point b = default,
+            ColorRGBA? color = null, string frameId = "")
         {
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.ARROW,
                 Action = Marker.ADD,
                 Pose = Pose.Identity,
                 Scale = Vector3.One,
-                Color = color,
+                Color = color ?? ColorRGBA.White,
                 FrameLocked = true,
                 Points = new[] {a, b}
             };
@@ -166,13 +166,13 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateCube(string? ns = null, int id = 0, Pose? pose = null, Vector3? scale = null,
-            ColorRGBA? color = null, string? frameId = "")
+        public static Marker CreateCube(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
+            ColorRGBA? color = null, string frameId = "")
         {
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.CUBE,
                 Action = Marker.ADD,
@@ -191,13 +191,13 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateSphere(string? ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
-            ColorRGBA? color = null, string? frameId = "")
+        public static Marker CreateSphere(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
+            ColorRGBA? color = null, string frameId = "")
         {
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.SPHERE,
                 Action = Marker.ADD,
@@ -222,19 +222,19 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateCylinder(string? ns, int id, in Pose pose, in Vector3 scale, in ColorRGBA color,
-            string? frameId)
+        public static Marker CreateCylinder(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
+            ColorRGBA? color = null, string frameId = "")
         {
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.CYLINDER,
                 Action = Marker.ADD,
-                Pose = pose,
-                Scale = scale,
-                Color = color,
+                Pose = pose ?? Pose.Identity,
+                Scale = scale ?? Vector3.One,
+                Color = color ?? ColorRGBA.White,
                 FrameLocked = true
             };
         }
@@ -249,19 +249,13 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateTextViewFacing(string? ns = null, int id = 0, string text = "",
-            Point? position = null,
-            ColorRGBA? color = null, double scale = 1, string frameId = "")
+        public static Marker CreateTextViewFacing(string ns = "", int id = 0, string text = "",
+            Point? position = null, ColorRGBA? color = null, double scale = 1, string frameId = "")
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.TEXT_VIEW_FACING,
                 Action = Marker.ADD,
@@ -295,36 +289,31 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateLines(string? ns, int id, Point[] lines, ColorRGBA[]? colors = null,
+        public static Marker CreateLines(string ns = "", int id = 0, Point[]? lines = null, ColorRGBA[]? colors = null,
             in ColorRGBA? color = null,
             in Pose? pose = null, double scale = 1, string frameId = "")
         {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
-
-            if (lines.Length % 2 != 0)
+            if (lines != null && lines.Length % 2 != 0)
             {
                 throw new ArgumentException("Number of points must be even", nameof(lines));
             }
 
-            if (colors != null && colors.Length != lines.Length)
+            if (colors != null && lines != null && colors.Length != lines.Length)
             {
                 throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
             }
 
             return new Marker
             {
-                Header = {FrameId = frameId},
-                Ns = ns ?? "",
+                Header = (0, frameId),
+                Ns = ns,
                 Id = id,
                 Type = Marker.LINE_LIST,
                 Action = Marker.ADD,
                 Pose = pose ?? Pose.Identity,
                 Scale = scale * Vector3.One,
                 Color = color ?? ColorRGBA.White,
-                Points = lines,
+                Points = lines ?? Array.Empty<Point>(),
                 Colors = colors ?? Array.Empty<ColorRGBA>(),
                 FrameLocked = true
             };
@@ -357,23 +346,19 @@ namespace Iviz.Roslib.MarkerHelper
             return id;
         }
 
-        public static Marker CreateLineStrip(string? ns, int id, Point[] lines, ColorRGBA[]? colors = null,
+        public static Marker CreateLineStrip(string ns = "", int id = 0, Point[]? lines = null,
+            ColorRGBA[]? colors = null,
             ColorRGBA? color = null,
-            Pose? pose = null, double scale = 1, string? frameId = "")
+            Pose? pose = null, double scale = 1, string frameId = "")
         {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
-
-            if (colors != null && colors.Length != lines.Length)
+            if (colors != null && lines != null && colors.Length != lines.Length)
             {
                 throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
             }
 
             return new Marker
             {
-                Header = {FrameId = frameId ?? ""},
+                Header = (0, frameId),
                 Ns = ns ?? "",
                 Id = id,
                 Type = Marker.LINE_STRIP,
@@ -381,7 +366,51 @@ namespace Iviz.Roslib.MarkerHelper
                 Pose = pose ?? Pose.Identity,
                 Scale = scale * Vector3.One,
                 Color = color ?? ColorRGBA.White,
-                Points = lines,
+                Points = lines ?? Array.Empty<Point>(),
+                Colors = colors ?? Array.Empty<ColorRGBA>(),
+                FrameLocked = true
+            };
+        }
+
+        public enum MeshType
+        {
+            Cube = 6,
+            Sphere = 7,
+        }
+
+        public int CreateMeshList(Point[] positions, MeshType meshType, ColorRGBA? color = null, Pose? pose = null,
+            Vector3? scale = null, string frameId = "", int replaceId = -1)
+        {
+            if (positions == null)
+            {
+                throw new ArgumentNullException(nameof(positions));
+            }
+
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateMeshList(ns, id, positions, null, color, meshType, pose, scale, frameId);
+            return id;
+        }
+
+        public static Marker CreateMeshList(string ns = "", int id = 0, Point[]? positions = null,
+            ColorRGBA[]? colors = null, ColorRGBA? color = null, MeshType meshType = MeshType.Cube, Pose? pose = null,
+            Vector3? scale = null, string frameId = "")
+        {
+            if (colors != null && positions != null && colors.Length != positions.Length)
+            {
+                throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
+            }
+
+            return new Marker
+            {
+                Header = (0, frameId),
+                Ns = ns ?? "",
+                Id = id,
+                Type = (byte) meshType,
+                Action = Marker.ADD,
+                Pose = pose ?? Pose.Identity,
+                Scale = scale ?? Vector3.One,
+                Color = color ?? ColorRGBA.White,
+                Points = positions ?? Array.Empty<Point>(),
                 Colors = colors ?? Array.Empty<ColorRGBA>(),
                 FrameLocked = true
             };
@@ -476,7 +505,7 @@ namespace Iviz.Roslib.MarkerHelper
                 }
             }
 
-            await publisher.WriteAsync(array, RosPublishPolicy.WaitUntilSent);
+            await publisher.WriteAsync(array);
         }
     }
 
@@ -531,7 +560,7 @@ namespace Iviz.Roslib.MarkerHelper
     }
 
 
-    public class RosInteractiveMarkerHelper
+    public class RosInteractiveMarker
     {
         public static InteractiveMarker Create(string name, Pose? pose = null, string description = "", float scale = 1,
             string frameId = "", params InteractiveMarkerControl[] controls)
@@ -597,7 +626,7 @@ namespace Iviz.Roslib.MarkerHelper
                     new[]
                     {
                         CreateControl(mode: RosInteractionMode.Menu,
-                            markers: controlMarker ?? RosMarkerHelper.CreateSphere())
+                            markers: controlMarker ?? RosMarker.CreateSphere())
                     },
                 MenuEntries = entries.Select(entry => new Iviz.Msgs.VisualizationMsgs.MenuEntry
                     {Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title}).ToArray()

@@ -43,6 +43,7 @@ namespace Iviz.Displays
         bool pointsToCamera;
 
         Bounds? bounds;
+        int layer;
 
         [NotNull]
         public string Name
@@ -287,12 +288,14 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => LayerType.Clickable;
+            get => layer;
             set
             {
-                if (value != LayerType.Clickable)
+                layer = value;
+                gameObject.layer = value;
+                foreach (GameObject resource in allResources)
                 {
-                    throw new InvalidOperationException("This display cannot change layers");
+                    resource.layer = value;
                 }
             }
         }
@@ -310,6 +313,7 @@ namespace Iviz.Displays
             InteractionMode = InteractionModeType.None;
             EnableMenu = false;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
+            Layer = LayerType.Clickable;
 
             Moved = null;
             PointerUp = null;
@@ -342,6 +346,7 @@ namespace Iviz.Displays
         {
             allResources = new[]
                 {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
+            Layer = LayerType.Clickable;
 
             foreach (var resource in allResources)
             {

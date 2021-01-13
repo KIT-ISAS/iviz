@@ -167,6 +167,7 @@ namespace Iviz.Roslib
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
                     $"callerid={topicInfo.CallerId}",
+                    $"message_definition={topicInfo.MessageDependencies}",
                     latching ? "latching=1" : "latching=0"
                 };
             }

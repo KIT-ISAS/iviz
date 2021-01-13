@@ -487,5 +487,45 @@ namespace Iviz.Roslib
                 list.Add(b);
             }
         }
+
+        public readonly struct RefEnumerable<T>
+        {
+            readonly T[] a;
+
+            public struct RefEnumerator
+            {
+                readonly T[] a;
+                int currentIndex;
+
+                public RefEnumerator(T[] a)
+                {
+                    this.a = a;
+                    currentIndex = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    if (currentIndex == a.Length - 1)
+                    {
+                        return false;
+                    }
+
+                    currentIndex++;
+                    return true;
+                }
+
+                public ref T Current => ref a[currentIndex];
+            }
+            
+            public RefEnumerable(T[] a) => this.a = a;
+
+            public RefEnumerator GetEnumerator() => new RefEnumerator(a);
+        }
+        
+        public static RefEnumerable<T> RefEnum<T>(this T[] a) =>
+            new RefEnumerable<T>(a ?? throw new ArgumentNullException(nameof(a)));
+        
+        public static RefEnumerable<T>.RefEnumerator RefEnumerator<T>(this T[] a) =>
+            new RefEnumerable<T>.RefEnumerator(a ?? throw new ArgumentNullException(nameof(a)));
     }
 }

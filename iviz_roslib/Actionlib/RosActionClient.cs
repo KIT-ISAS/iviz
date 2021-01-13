@@ -32,10 +32,8 @@ namespace Iviz.Roslib.Actionlib
 
         RosChannelReader<TAFeedback>? feedbackSubscriber;
         RosChannelReader<TAResult>? resultSubscriber;
-        RosPublisher<GoalID>? cancelPublisher;
-        RosPublisher<TAGoal>? goalPublisher;
-        string? cancelPublisherId;
-        string? goalPublisherId;
+        RosChannelWriter<GoalID>? cancelPublisher;
+        RosChannelWriter<TAGoal>? goalPublisher;
 
         RosActionClientState state = RosActionClientState.Done;
         MergedChannelReader? channelReader;
@@ -77,8 +75,8 @@ namespace Iviz.Roslib.Actionlib
             }
 
             tokenSource.Cancel();
-            goalPublisher.Unadvertise(goalPublisherId!);
-            cancelPublisher!.Unadvertise(cancelPublisherId!);
+            goalPublisher!.Dispose();
+            cancelPublisher!.Dispose();
             feedbackSubscriber!.Dispose();
             resultSubscriber!.Dispose();
         }
@@ -98,8 +96,8 @@ namespace Iviz.Roslib.Actionlib
             }
 
             tokenSource.Cancel();
-            await goalPublisher.UnadvertiseAsync(goalPublisherId!);
-            await cancelPublisher!.UnadvertiseAsync(cancelPublisherId!);
+            await goalPublisher.DisposeAsync();
+            await cancelPublisher!.DisposeAsync();
             await feedbackSubscriber!.DisposeAsync();
             await resultSubscriber!.DisposeAsync();
         }
@@ -118,7 +116,7 @@ namespace Iviz.Roslib.Actionlib
             return $"[RosActionClient {actionName} state={State}]]";
         }
 
-        void ValidateStart(RosClient client, string newActionName)
+        void ValidateStart(IRosClient client, string newActionName)
         {
             if (client == null)
             {
@@ -147,16 +145,14 @@ namespace Iviz.Roslib.Actionlib
                 newActionName = newActionName.Substring(1);
             }
 
-            goalPublisherId = client.Advertise($"/{newActionName}/goal", out goalPublisher);
-            goalPublisher.LatchingEnabled = true;
-
-            cancelPublisherId = client.Advertise($"/{newActionName}/cancel", out cancelPublisher);
+            goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{newActionName}/goal") {LatchingEnabled = true};
+            cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{newActionName}/cancel") {LatchingEnabled = true};
             feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
             resultSubscriber = new RosChannelReader<TAResult>(client, $"/{newActionName}/result");
             channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
-        public async Task StartAsync(RosClient client, string newActionName)
+        public async Task StartAsync(IRosClient client, string newActionName)
         {
             ValidateStart(client, newActionName);
             if (newActionName[0] == '/')
@@ -164,10 +160,11 @@ namespace Iviz.Roslib.Actionlib
                 newActionName = newActionName.Substring(1);
             }
 
-            (goalPublisherId, goalPublisher) = await client.AdvertiseAsync<TAGoal>($"/{newActionName}/goal");
-            goalPublisher.LatchingEnabled = true;
+            goalPublisher = new RosChannelWriter<TAGoal> {LatchingEnabled = true};
+            await goalPublisher.StartAsync(client, $"/{newActionName}/goal");
 
-            (cancelPublisherId, cancelPublisher) = await client.AdvertiseAsync<GoalID>($"/{newActionName}/cancel");
+            cancelPublisher = new RosChannelWriter<GoalID> {LatchingEnabled = true};
+            await cancelPublisher.StartAsync(client, $"/{newActionName}/cancel");
 
             feedbackSubscriber = new RosChannelReader<TAFeedback>();
             resultSubscriber = new RosChannelReader<TAResult>();
@@ -280,7 +277,7 @@ namespace Iviz.Roslib.Actionlib
             IActionGoal<TGoal> actionTGoal = (IActionGoal<TGoal>) actionGoal;
             actionTGoal.Goal = goal;
 
-            goalPublisher.Publish(actionGoal);
+            goalPublisher.Write(actionGoal);
 
             State = RosActionClientState.WaitingForGoalAck;
         }
@@ -304,7 +301,30 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidRosActionState($"Cannot cancel from state {State}");
             }
 
-            cancelPublisher.Publish(goalId);
+            cancelPublisher.Write(goalId);
+            State = RosActionClientState.WaitingForCancelAck;
+        }
+        
+        public async Task CancelAsync()
+        {
+            if (cancelPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!!");
+            }
+
+            if (goalId == null)
+            {
+                throw new InvalidOperationException("Goal has not been set!");
+            }
+
+            if (State != RosActionClientState.WaitingForGoalAck
+                && State != RosActionClientState.Pending
+                && State != RosActionClientState.Active)
+            {
+                throw new InvalidRosActionState($"Cannot cancel from state {State}");
+            }
+
+            await cancelPublisher.WriteAsync(goalId, RosPublishPolicy.WaitUntilSent);
             State = RosActionClientState.WaitingForCancelAck;
         }
 
@@ -337,7 +357,7 @@ namespace Iviz.Roslib.Actionlib
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
             while (!linkedSource.IsCancellationRequested)
             {
-                PublisherTopicState pState = goalPublisher.GetState();
+                PublisherTopicState pState = goalPublisher.Publisher.GetState();
                 bool serverFound = pState.Senders.Any(sender => sender.RemoteId == actionServerId);
                 if (serverFound)
                 {
@@ -370,7 +390,7 @@ namespace Iviz.Roslib.Actionlib
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
             while (!linkedSource.IsCancellationRequested)
             {
-                PublisherTopicState pState = goalPublisher.GetState();
+                PublisherTopicState pState = goalPublisher.Publisher.GetState();
                 bool serverFound = pState.Senders.Any(sender => sender.RemoteId == actionServerId);
                 if (serverFound)
                 {
@@ -472,7 +492,8 @@ namespace Iviz.Roslib.Actionlib
             return await WaitForResultAsync(CancellationToken.None, feedbackCallback, resultCallback);
         }
 
-        public async Task<bool> WaitForResultAsync<TT, TU>(CancellationToken token, IProgress<TT>? feedbackCallback,
+        public async Task<bool> WaitForResultAsync<TT, TU>(CancellationToken token,
+            IProgress<TT>? feedbackCallback,
             IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
@@ -489,39 +510,41 @@ namespace Iviz.Roslib.Actionlib
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
-            try
+            await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
             {
-                await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
-                    switch (msg)
-                    {
-                        case IActionFeedback<TT> actionFeedback:
-                            if (!Equals(actionFeedback.Status.GoalId, goalId))
-                            {
-                                continue;
-                            }
+                switch (msg)
+                {
+                    case IActionFeedback<TT> actionFeedback:
+                        if (!Equals(actionFeedback.Status.GoalId, goalId))
+                        {
+                            continue;
+                        }
 
-                            ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
-                            feedbackCallback?.Report(actionFeedback.Feedback);
-                            break;
-                        case IActionResult<TU> actionResult:
-                            if (!Equals(actionResult.Status.GoalId, goalId))
-                            {
-                                continue;
-                            }
+                        ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
+                        feedbackCallback?.Report(actionFeedback.Feedback);
+                        break;
+                    case IActionResult<TU> actionResult:
+                        if (!Equals(actionResult.Status.GoalId, goalId))
+                        {
+                            continue;
+                        }
 
-                            ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
-                            resultCallback?.Report(actionResult.Result);
-                            if (State != RosActionClientState.WaitingForResult)
-                            {
-                                Logger.LogDebug($"{this}: Terminated in state {State}");
-                            }
+                        ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
+                        resultCallback?.Report(actionResult.Result);
+                        if (State != RosActionClientState.WaitingForResult)
+                        {
+                            //Console.WriteLine($"{this}: Terminated in state {State}");
+                        }
 
-                            State = RosActionClientState.Done;
-                            return true;
-                    }
-            }
-            catch (OperationCanceledException)
-            {
+                        State = RosActionClientState.Done;
+                        var endStatus = (RosGoalStatus) actionResult.Status.Status;
+                        if (endStatus != RosGoalStatus.Succeeded)
+                        {
+                            throw new RosActionFailedException(endStatus, actionResult.Status.Text);
+                        }
+
+                        return true;
+                }
             }
 
             return false;
@@ -529,6 +552,19 @@ namespace Iviz.Roslib.Actionlib
 #endif
 
         #endregion
+    }
+
+    public class RosActionFailedException : Exception
+    {
+        public RosGoalStatus Status { get; }
+        public string Text { get; }
+
+        public RosActionFailedException(RosGoalStatus status, string text) :
+            base($"Action ended with status {status}; Message: {text}")
+        {
+            Status = status;
+            Text = text;
+        }
     }
 
     public static class RosActionClient

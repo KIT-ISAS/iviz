@@ -103,17 +103,7 @@ namespace Iviz.Roslib
 
         public IEnumerator<IMessage> GetEnumerator()
         {
-            IMessage msg;
-            try
-            {
-                msg = Read(CancellationToken.None);
-            }
-            catch (OperationCanceledException)
-            {
-                yield break;
-            }
-
-            yield return msg;
+            yield return Read(CancellationToken.None);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -123,39 +113,22 @@ namespace Iviz.Roslib
 
         public IEnumerable<IMessage> ReadAll(CancellationToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                IMessage msg;
-                try
-                {
-                    msg = Read(token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return Read(token);
             }
+
+            token.ThrowIfCancellationRequested();
         }
 
         public IEnumerable<(IMessage msg, int index)> ReadAllWithIndex(CancellationToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                IMessage msg;
-                int index;
-                try
-                {
-                    (msg, index) = ReadWithIndex(token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return (msg, index);
+                yield return ReadWithIndex(token);
             }
+
+            token.ThrowIfCancellationRequested();
         }
 
 #if !NETSTANDARD2_0
@@ -163,38 +136,19 @@ namespace Iviz.Roslib
         {
             while (true)
             {
-                IMessage msg;
-                try
-                {
-                    msg = await ReadAsync(token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return await ReadAsync(token);
             }
         }
 
         public async IAsyncEnumerable<(IMessage msg, int index)>
             ReadAllWithIndexAsync([EnumeratorCancellation] CancellationToken token)
         {
-            while (true)
+            while (!token.IsCancellationRequested)
             {
-                IMessage msg;
-                int index;
-                try
-                {
-                    (msg, index) = await ReadWithIndexAsync(token);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return (msg, index);
+                yield return await ReadWithIndexAsync(token);
             }
+
+            token.ThrowIfCancellationRequested();
         }
 #endif
     }

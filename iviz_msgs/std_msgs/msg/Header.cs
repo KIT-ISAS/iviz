@@ -92,6 +92,6 @@ namespace Iviz.Msgs.StdMsgs
                 "QV5qs01mvmU2tmMp2bFNwsOVNbRNUakFlrkc2bdN23wB2ue47DYCAAA=";
         
         public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);        
-        public static implicit operator Header((uint seqId, string frameId, time stamp) p) => new Header(p.seqId, time.Now(), p.frameId);        
+        public static implicit operator Header((uint seqId, string frameId, time stamp) p) => new Header(p.seqId, p.stamp, p.frameId);        
     }
 }
