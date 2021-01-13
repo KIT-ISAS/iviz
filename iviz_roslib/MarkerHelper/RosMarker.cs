@@ -132,16 +132,16 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
-        public int CreateArrow(in Point a, in Point b, in ColorRGBA color, string frameId = "",
+        public int CreateArrow(in Point a, in Point b, float width = 1, ColorRGBA? color = null, string frameId = "",
             int replaceId = -1)
         {
             int id = replaceId != -1 ? replaceId : GetFreeId();
-            markers[id] = CreateArrow(ns, id, a, b, color, frameId);
+            markers[id] = CreateArrow(ns, id, a, b, width, color, frameId);
             return id;
         }
 
         public static Marker CreateArrow(string ns = "", int id = 0, Point a = default, Point b = default,
-            ColorRGBA? color = null, string frameId = "")
+            float width = 1, ColorRGBA? color = null, string frameId = "")
         {
             return new Marker
             {
@@ -151,7 +151,7 @@ namespace Iviz.Roslib.MarkerHelper
                 Type = Marker.ARROW,
                 Action = Marker.ADD,
                 Pose = Pose.Identity,
-                Scale = Vector3.One,
+                Scale = width * Vector3.One,
                 Color = color ?? ColorRGBA.White,
                 FrameLocked = true,
                 Points = new[] {a, b}

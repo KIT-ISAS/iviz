@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
@@ -13,7 +14,7 @@ namespace Iviz.Roslib
         bool disposed;
         bool latchingEnabled;
         bool forceTcpNoDelay;
-        
+
         public IRosPublisher<T> Publisher =>
             publisher ?? throw new InvalidOperationException("Publisher has not been started!");
 
@@ -125,29 +126,30 @@ namespace Iviz.Roslib
 
 #if !NETSTANDARD2_0
         public async ValueTask WriteAllAsync(IAsyncEnumerable<T> messages, RosPublishPolicy policy =
- RosPublishPolicy.DoNotWait)
+            RosPublishPolicy.DoNotWait, CancellationToken token = default)
         {
             if (messages == null)
             {
                 throw new ArgumentNullException(nameof(messages));
             }
-            
-            await foreach (T msg in messages)
+
+            await foreach (T msg in messages.WithCancellation(token))
             {
-                await Publisher.PublishAsync(msg, policy);
+                await Publisher.PublishAsync(msg, policy, token);
             }
         }
 
-        async ValueTask IRosChannelWriter.WriteAllAsync(IAsyncEnumerable<IMessage> msgs, RosPublishPolicy policy)
+        async ValueTask IRosChannelWriter.WriteAllAsync(IAsyncEnumerable<IMessage> messages, RosPublishPolicy policy,
+            CancellationToken token)
         {
-            if (msgs == null)
+            if (messages == null)
             {
-                throw new ArgumentNullException(nameof(msgs));
+                throw new ArgumentNullException(nameof(messages));
             }
-            
-            await foreach (IMessage msg in msgs)
+
+            await foreach (IMessage msg in messages.WithCancellation(token))
             {
-                await Publisher.PublishAsync(msg, policy);
+                await Publisher.PublishAsync(msg, policy, token);
             }
         }
 #endif
