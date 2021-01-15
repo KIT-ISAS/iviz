@@ -145,12 +145,13 @@ namespace Iviz.Roslib
             {
                 success = await ExecuteImplAsync(service, token).Caf();
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
             catch (Exception e)
             {
+                if (e is OperationCanceledException)
+                {
+                    throw;
+                }
+
                 throw new RosRpcException("Error during service call", e);
             }
 

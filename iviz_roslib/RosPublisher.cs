@@ -211,7 +211,7 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        public async Task<bool> UnadvertiseAsync(string id)
+        public async Task<bool> UnadvertiseAsync(string id, CancellationToken token = default)
         {
             if (!IsAlive)
             {
@@ -223,7 +223,7 @@ namespace Iviz.Roslib
             if (ids.Count == 0)
             {
                 await DisposeAsync().AwaitNoThrow(this);
-                await client.RemovePublisherAsync(this).AwaitNoThrow(this);
+                await client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
             }
 
             return removed;

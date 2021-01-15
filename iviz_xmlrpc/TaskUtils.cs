@@ -1,7 +1,4 @@
 using System;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,12 +90,12 @@ namespace Iviz.XmlRpc
             {
                 t.Wait();
             }
-            catch (OperationCanceledException)
-            {
-            }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
             }
         }
 
@@ -113,12 +110,12 @@ namespace Iviz.XmlRpc
             {
                 await t.Caf();
             }
-            catch (OperationCanceledException)
-            {
-            }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
             }
         }
 
@@ -135,7 +132,10 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
             }
 
             return default;

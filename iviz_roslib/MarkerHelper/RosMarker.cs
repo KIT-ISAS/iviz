@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -505,7 +506,8 @@ namespace Iviz.Roslib.MarkerHelper
                 }
             }
 
-            await publisher.WriteAsync(array);
+            CancellationTokenSource tokenSource = new CancellationTokenSource(1000);
+            await publisher.WriteAsync(array, RosPublishPolicy.WaitUntilSent, tokenSource.Token).AwaitNoThrow(this);
         }
     }
 

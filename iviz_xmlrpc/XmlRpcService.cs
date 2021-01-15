@@ -348,7 +348,7 @@ namespace Iviz.XmlRpc
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], Task>>? lateCallbacks = null,
+            IReadOnlyDictionary<string, Func<object[], CancellationToken, Task>>? lateCallbacks = null,
             CancellationToken token = default)
         {
             if (httpContext is null)
@@ -392,7 +392,7 @@ namespace Iviz.XmlRpc
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
-                    await lateCallback(args).Caf();
+                    await lateCallback(args, token).Caf();
                 }
             }
             catch (ParseException e)

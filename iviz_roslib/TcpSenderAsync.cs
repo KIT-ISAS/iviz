@@ -304,16 +304,22 @@ namespace Iviz.Roslib
                         await ProcessLoop().Caf();
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e) when (e is IOException || e is TimeoutException || e is SocketException)
-                {
-                    Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
-                }
                 catch (Exception e)
                 {
-                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                    switch (e)
+                    {
+                        case OperationCanceledException _:
+                        case ObjectDisposedException _:
+                            break;
+                        case IOException _:
+                        case TimeoutException _:
+                        case SocketException _:
+                            Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
+                            break;
+                        default:
+                            Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                            break;
+                    }
                 }
             }
 

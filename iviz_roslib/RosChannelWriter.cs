@@ -88,9 +88,10 @@ namespace Iviz.Roslib
             Publisher.Publish(msg);
         }
 
-        public Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait)
+        public Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+            CancellationToken token = default)
         {
-            return Publisher.PublishAsync(msg, policy);
+            return Publisher.PublishAsync(msg, policy, token);
         }
 
         void IRosChannelWriter.Write(IMessage msg)

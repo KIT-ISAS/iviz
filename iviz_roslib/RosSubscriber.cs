@@ -109,9 +109,9 @@ namespace Iviz.Roslib
             return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
         }
 
-        async Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
+        async Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            await PublisherUpdateRcpAsync(publisherUris).Caf();
+            await PublisherUpdateRcpAsync(publisherUris, token).Caf();
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        public async Task<bool> UnsubscribeAsync(string id)
+        public async Task<bool> UnsubscribeAsync(string id, CancellationToken token = default)
         {
             if (id is null)
             {
@@ -246,15 +246,16 @@ namespace Iviz.Roslib
             if (callbacksById.Count == 0)
             {
                 await DisposeAsync().AwaitNoThrow(this);
-                await client.RemoveSubscriberAsync(this).AwaitNoThrow(this);
+                await client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
             }
 
             return removed;
         }
 
-        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris)
+        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token = default)
         {
-            await manager.PublisherUpdateRpcAsync(publisherUris).Caf();
+            token.ThrowIfCancellationRequested();
+            await manager.PublisherUpdateRpcAsync(publisherUris).Caf(); // todo: get token in here
         }
         
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris)
