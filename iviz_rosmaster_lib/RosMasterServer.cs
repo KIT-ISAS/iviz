@@ -211,12 +211,12 @@ namespace Iviz.RosMaster
             return OkResponse(new Arg(currentSubscribers));
         }
 
-        async Task RegisterPublisherLateCallback(object[] args)
+        Task RegisterPublisherLateCallback(object[] args)
         {
             if (!(args[1] is string topic) ||
                 !subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
-                return;
+                return Task.CompletedTask;
             }
 
             IEnumerable<Uri> publisherUris =
@@ -231,7 +231,7 @@ namespace Iviz.RosMaster
                 NotifySubscriber(uri, methodArgs);
             }
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         async void NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
