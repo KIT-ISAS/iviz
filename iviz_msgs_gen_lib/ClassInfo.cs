@@ -91,7 +91,6 @@ namespace Iviz.MsgsGen
 
         readonly ActionMessageType actionMessageType;
         readonly string? actionRoot;
-        readonly string csPackage;
         readonly IElement[] elements;
         readonly string fullMessageText;
         readonly VariableElement[] variables;
@@ -162,13 +161,15 @@ namespace Iviz.MsgsGen
             }
 
             RosPackage = package;
-            csPackage = MsgParser.CsIfiy(package);
+            CsPackage = MsgParser.CsIfiy(package);
             Name = messageName;
             fullMessageText = messageDefinition;
 
             var lines = fullMessageText.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
             elements = MsgParser.ParseFile(lines, Name).ToArray();
             Elements = new ReadOnlyCollection<IElement>(elements);
+            variables = elements.OfType<VariableElement>().ToArray();
+
             if (forceStruct)
             {
                 if (!variables.All(variable => IsVariableForStruct(RosPackage, variable)))
@@ -183,7 +184,6 @@ namespace Iviz.MsgsGen
                 ForceStruct = true;
             }
 
-            variables = elements.OfType<VariableElement>().ToArray();
         }
 
 
@@ -213,7 +213,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing synthetic '{package}/{name}'");
 
             RosPackage = package;
-            csPackage = MsgParser.CsIfiy(package);
+            CsPackage = MsgParser.CsIfiy(package);
             Name = name;
 
             elements = newElements.ToArray();
@@ -232,6 +232,7 @@ namespace Iviz.MsgsGen
         public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
         public ReadOnlyCollection<IElement> Elements { get; }
         public string RosPackage { get; }
+        public string CsPackage { get; }
         public string Name { get; }
         public bool ForceStruct { get; }
         public string FullRosName => $"{RosPackage}/{Name}";
@@ -816,7 +817,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("using System.Runtime.Serialization;");
             str.AppendLine();
 
-            str.AppendLine($"namespace Iviz.Msgs.{csPackage}");
+            str.AppendLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendLine("{");
 
             foreach (string entry in CreateClassContent())

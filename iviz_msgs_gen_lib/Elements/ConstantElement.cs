@@ -25,19 +25,27 @@ namespace Iviz.MsgsGen
 
         public IEnumerable<string> ToCsString(bool _)
         {
-            string commentStr = Comment.Length == 0 ? "" : $" //{Comment}";   
+            string commentStr = Comment.Length == 0 ? "" : $" //{Comment}";
 
             string result;
             if (MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string? alias))
             {
-                if (alias != "time" && alias != "duration")
+                if (alias == "string")
+                {
+                    // const string have no comments
+                    result = $"public const string {FieldName} = \"{Value}\";";
+                }
+                else if (alias != "time" && alias != "duration")
                 {
                     result = $"public const {alias} {FieldName} = {Value};{commentStr}";
                 }
+                
                 else
                 {
-                    result = $"public static readonly {alias} {FieldName} = {Value};{commentStr}";
+                    //result = $"public static readonly {alias} {FieldName} = {Value};{commentStr}";
+                    result = "";
                 }
+                
             }
             else
             {

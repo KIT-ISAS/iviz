@@ -70,13 +70,12 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1SwUrDQBC9B/IPD3pRKBFUPAiepQdBUbzKtpmki8lOnJ0a69c727SNVQ8exD293cx7" +
-                "mfdmJnhY+gihTihS0AhdElRciBVLizlpTxSgPWPBLKUPTgmVuJYifDBEhNi5BRV5lmePtFCWs0Ghceo5" +
-                "5NndyjgSDENYt495dvXHJ89u7q8vURO3pLJ+amMdT7YN5dnkm1OH183HLzaQamcKK+bQrNGSCwrlkWrM" +
-                "0otxzUhhsiRkYdEUXlGy5RJYk0jrnk2UQrREGa7rTM19jiY9G+eIirqYol9a0JsqH2orTBI1BRK/gPja" +
-                "l+Nc9myHrcEptDpF75tm6Hr4mw0zqexSPy4wq7DmFfrkyYCgdGo9sU1635mbN6ljnmKVWh80DmO9ZW8C" +
-                "tgPR1WQBRiVXbjagatjpxTneRrge4fs/jX1cuR8nH8DiDQ45Hsw/3V7GhU1p/87XDvap+gNfpn8oWAMA" +
-                "AA==";
+                "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
+                "7+0CHtY+glAnFCloBF0TqGCIFUsLK9KeKID2DAWzlD6gElSCLUXwwRARxA4Lyp17pEJZzkZ+g+o5uLuN" +
+                "ESQYBGEdz9zVHz/u5v76EmrillSGpzbW8WRnxi2+rYjwuv32xT/Y6FLBZjk0A7SEQUF5Zhqx9GJU2yE3" +
+                "VRKykCgDr1Cy5RFYTaPFZ5OkECmxsetMDD9nko6NckR5nWfQry3f7ZQPtQ2aQk2BxBcgvvbl3MZERtgt" +
+                "l4FWp9D7phk9jz+zCk1kn/ZxDssKBt5AnxYyIFCiYhJa0eQLV03yyxlskvGtxGGgt+yNb71HrMmyi0pY" +
+                "WutVw6gX5/A2oWFC7/9S9XzHfmo7AIs3OMZ30Hl6e5kvaAr514X2qHfuA/8+ZJE+AwAA";
                 
         /// Custom iviz code
         public static readonly Transform Identity = (Vector3.Zero, Quaternion.Identity);

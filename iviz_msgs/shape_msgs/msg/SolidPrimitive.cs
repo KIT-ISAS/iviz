@@ -98,16 +98,15 @@ namespace Iviz.Msgs.ShapeMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACnWTUWvbMBDH3wP5Dgd5aMtM6LYyxsAPXeMtgdGOtIMkYwTVUmKBIxlJLsm3751kW2rK" +
-                "CJic7+5/59/dTWAmdlIJeNbHDGxTCSMyKE+1VFwY/KfRNx5N4LauwVasERaYEcB9FgenoWIvAlwlpEGR" +
-                "VnGp9qSGgaVQDvU4ZpADrjP8Tcej8aiVyn2F7w+r/GNvPP6eF8si/9Tbd+tfi/tZscw/D28e7ov8htIn" +
-                "8FRhzVMjQO+odmitDyQHhfWBXB6EslIrexa+qzVzX27+/ktCYtpBMEUfk+Ykgd9AsLIiQtYx5Tok1scS" +
-                "vSM+vXERcy4QhWGnUOOHNt6PGHzLmbdWGawzYIhrkzZO0MldC7V3Vd9TqY0RttGeOmlaybGFzotTmCas" +
-                "t6v8OjXXET6ZG2L/trMwk645reoTPqjoASvibEFaaK3goV3pYC9fOgCGcdlSIyTn6fnVGtoJytvl7Wzx" +
-                "55Haelu4H74Xprn7HmwgFNYKcEURNNYwkl7gltU6QKCgDbCjtFOgSRqx0x2+Xng7LxY/509wSeKdcRW/" +
-                "jFQQYsI/fhpu+r5ywwS6U4FLOpWrUJDSh0rhG7tKwUgq/a/MGCUGiGGazA7r/r7qHU2GaPUuEmiMPEjn" +
-                "Jc+O9hk1pCnbmplpOCbZxKXyYL2AxmnRDbQNDpn4woeObDzjM6Zxyc4Q0Lqlt/w+PhIKsa88TBSZngQA" +
-                "AA==";
+                "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
+                "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +
+                "Uu04GTkWqBylKymCL+AqpV+WJK1U7gbuHpeTz/H76fcsX+STL9G8X/2aP0zzxeRrd/D4kE+uE6rjuSKx" +
+                "Y4OgtywaaopefJ50TqXco7JSK/vedVtr4b5d/30ZeXQxexSKyx8HjNy+A4qiYiTWCeUiBOt9GdeB/r1x" +
+                "PsScU/NGHFnhhzb+lhr3pabeWqawSkEQnvW4ZobM1zWqnau6igptDNpGe8qU0soS+/4Iejaw3SwnVyNr" +
+                "1bNma02oxyUF/rEqreoj8NgLvScpGiJIC63FMtQpHezkW+zbiFK2XAJl88z8BmXv5rpZ3E7nf56onrFm" +
+                "N2Sfkwfs5W2gElYHat5MEtdG8gFtUq194+yzBnGQNgMencGtjsS6vJtZPv85e4YLzh2Ny6EnSkLcRsSH" +
+                "nmiXd5Xrmce3ABf8Fi6DHkX3OqG7qBOMkc5HKpShZxfGJyx+rHnPA2FS3RXFN0bupfMJT97kK6WQpmhr" +
+                "YbLwZGQz7JBnyvGahsT73jZpIAufItTk5CVGfv1KnTRPyzV6qf85D2DY8R/CXFx5cwQAAA==";
                 
     }
 }

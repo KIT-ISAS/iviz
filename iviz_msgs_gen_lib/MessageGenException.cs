@@ -47,4 +47,15 @@ namespace Iviz.MsgsGen
         {
         }
     }
+    
+    public class MessageDependencyException : MessageGenException
+    {
+        public MessageDependencyException(string message) : base(message)
+        {
+        }
+
+        public MessageDependencyException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }    
 }

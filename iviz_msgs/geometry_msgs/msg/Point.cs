@@ -72,8 +72,8 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkXHwQmAMAwF0HshO3xwBXESFwglpQFJSpODOr3eentvw9k1UN2S1QLZBcNDU93gDfxP" +
-                "LaGGNkUQg6tQaZdzHjvuxWfxpULlA5t44itaAAAA";
+                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
+                "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         /// Custom iviz code
         public static readonly Point Zero = new Point(0, 0, 0);
