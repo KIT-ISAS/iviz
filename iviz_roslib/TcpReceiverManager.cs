@@ -141,11 +141,6 @@ namespace Iviz.Roslib
             try
             {
                 Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
-                if (remoteEndpoint == null)
-                {
-                    return false;
-                }
-
                 CreateConnection(remoteEndpoint, remoteUri);
                 return true;
             }
@@ -157,7 +152,7 @@ namespace Iviz.Roslib
             }
         }
 
-        void CreateConnection(Endpoint remoteEndpoint, Uri remoteUri)
+        void CreateConnection(Endpoint? remoteEndpoint, Uri remoteUri)
         {
             TcpReceiverAsync<T> connection =
                 new TcpReceiverAsync<T>(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay);

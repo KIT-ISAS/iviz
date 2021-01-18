@@ -84,14 +84,15 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACo2RQWvDMAyF74H8B0EPbQftYbvlPAa7DdZ7UW01Fjh2Jivt8u8npxvdbgMH4/i9T8/S" +
-                "Ct4Vk0fxMJCiR0U4Z4HAfSDZRbpQhKI4jORhudV5pLJvmxUcAhew1VMiwRhnmIqpNIPLwzAldqgEygP9" +
-                "AVQrJ0AYUZTdFFHMkMVzqvqz4EALv36FPiZKjuD1uTNVKuQmZQs1G8MJYeHU26WJJ0769FgdZjxc887O" +
-                "1JPcE4AG1JqYPkehUsNi6WqZh9sb94bvjGCFfIHN8u9ox7IFq2MpaMwuwMbiv80acjIiwQWF8RSpkp31" +
-                "wbDralpvf6Nr9A4SpvzDvyHvRf7DrZRvcH3WLtjwYm1BmXrroylHyRf2pj3NC8VFpqQQ+SQoc9tU262o" +
-                "QV5qs01mvmU2tmMp2bFNwsOVNbRNUakFlrkc2bdN23wB2ue47DYCAAA=";
-        
-        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);        
-        public static implicit operator Header((uint seqId, string frameId, time stamp) p) => new Header(p.seqId, p.stamp, p.frameId);        
+                "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
+                "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
+                "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +
+                "PRw0orZi6XMUqq1OrHvLeLg1tzP23vyWEiqsl39Hu9YNWIiVQGPxEdZW+dussWQDElxQGE+JGtjbBIy6" +
+                "aqbV5hc5L+iMuXzjb8R7xn+w+YfbetpG21lq3deptwGacJRy4WDS07xAfGLKColPgjK75rpFuu6lzdhE" +
+                "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
+                
+        /// Custom iviz code
+        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
+        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);
     }
 }

@@ -304,7 +304,6 @@ namespace Iviz.Ros
 
         public override void Disconnect()
         {
-            //ClearTaskQueue();
             connectionTs.Cancel();
 
             if (client == null)
@@ -739,9 +738,9 @@ namespace Iviz.Ros
         }
 
         [NotNull, ItemNotNull]
-        public IEnumerable<string> GetSystemParameterList()
+        public IEnumerable<string> GetSystemParameterList(CancellationToken externalToken = default)
         {
-            CancellationToken token = connectionTs.Token;
+            CancellationToken token = externalToken.LinkTo(connectionTs);
             AddTaskNoAwait(async () =>
             {
                 try
@@ -753,6 +752,9 @@ namespace Iviz.Ros
                     }
 
                     cachedParameters = await client.Parameters.GetParameterNamesAsync(token);
+                }
+                catch (TaskCanceledException)
+                {
                 }
                 catch (Exception e)
                 {
@@ -1122,7 +1124,6 @@ namespace Iviz.Ros
 
                 if (client != null)
                 {
-                    //Core.Logger.Debug(this + ": Calling SubscribeAsync");
                     (_, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback, token: token);
                 }
                 else

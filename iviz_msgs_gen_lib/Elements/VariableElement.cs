@@ -4,6 +4,8 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen
 {
+
+     
     public sealed class VariableElement : IElement
     {
         const string CachedHeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
@@ -209,8 +211,7 @@ namespace Iviz.MsgsGen
             if (guessType == null)
             {
                 // nope? we bail out
-                Console.WriteLine($"EE Cannot find md5 for {fullRosClassName}. Produced file will not be valid!");
-                return null;
+                throw new MessageDependencyException($"Cannot find md5 for message '{fullRosClassName}'.");
             }
 
             string md5Sum = BuiltIns.GetMd5Sum(guessType);

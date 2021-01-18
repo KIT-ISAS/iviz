@@ -18,7 +18,6 @@ namespace Iviz.Roslib
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
-        const int WaitBetweenRetriesInMs = 2000;
         const int DisposeTimeoutInMs = 2000;
 
         readonly TcpReceiverManager<T> manager;
@@ -26,7 +25,7 @@ namespace Iviz.Roslib
         TopicInfo<T> topicInfo;
         readonly bool requestNoDelay;
 
-        Endpoint remoteEndpoint;
+        Endpoint? remoteEndpoint;
         Endpoint? endpoint;
         long numReceived;
         long bytesReceived;
@@ -45,7 +44,7 @@ namespace Iviz.Roslib
         bool disposed;
 
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
-            Uri remoteUri, Endpoint remoteEndpoint, TopicInfo<T> topicInfo,
+            Uri remoteUri, Endpoint? remoteEndpoint, TopicInfo<T> topicInfo,
             bool requestNoDelay)
         {
             RemoteUri = remoteUri;
@@ -95,13 +94,17 @@ namespace Iviz.Roslib
             task = Task.Run(StartSession, runningTs.Token);
         }
 
-        async Task<TcpClient?> TryToConnect()
+        async Task<TcpClient?> TryToConnect(Endpoint tryEndpoint)
         {
             TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
 
             try
             {
-                Task connectionTask = client.ConnectAsync(remoteEndpoint.Hostname, remoteEndpoint.Port);
+#if NET5_0
+                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token).AsTask();
+#else
+                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port);
+#endif
 
                 if (await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() &&
                     connectionTask.RanToCompletion())
@@ -109,7 +112,7 @@ namespace Iviz.Roslib
                     return client;
                 }
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 if (!(e is IOException || e is SocketException || e is OperationCanceledException))
                 {
@@ -125,15 +128,18 @@ namespace Iviz.Roslib
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
-                TcpClient? client = await TryToConnect().Caf();
-                if (client != null)
+                if (remoteEndpoint != null)
                 {
-                    return client;
+                    TcpClient? client = await TryToConnect(remoteEndpoint).Caf();
+                    if (client != null)
+                    {
+                        return client;
+                    }
                 }
 
                 try
                 {
-                    await Task.Delay(WaitBetweenRetriesInMs, runningTs.Token).Caf();
+                    await Task.Delay(WaitTimeInMsFromTry(i), runningTs.Token).Caf();
                 }
                 catch (OperationCanceledException)
                 {
@@ -152,6 +158,21 @@ namespace Iviz.Roslib
             }
 
             return null;
+        }
+
+        static int WaitTimeInMsFromTry(int index)
+        {
+            if (index < 10)
+            {
+                return 2000;
+            }
+
+            if (index < 50)
+            {
+                return 5000;
+            }
+
+            return 10000;
         }
 
         async Task SendHeader()
@@ -227,28 +248,28 @@ namespace Iviz.Roslib
 
             if (DynamicMessage.IsDynamic<T>())
             {
-                GenerateNewTopicInfo(responses);
+                GenerateDynamicTopicInfo(responses);
             }
         }
 
-        void GenerateNewTopicInfo(List<string> responses)
+        void GenerateDynamicTopicInfo(IReadOnlyCollection<string> responses)
         {
             const string typePrefix = "type=";
             const string definitionPrefix = "message_definition=";
 
             string callerId = topicInfo.CallerId;
             string topicName = topicInfo.Topic;
-            string? dynamicType = responses.FirstOrDefault(
+            string? dynamicMsgName = responses.FirstOrDefault(
                 entry => entry.HasPrefix(typePrefix))?.Substring(typePrefix.Length);
-            string? dynamicDependency = responses.FirstOrDefault(
+            string? dynamicDependencies = responses.FirstOrDefault(
                 entry => entry.HasPrefix(definitionPrefix))?.Substring(definitionPrefix.Length);
-            if (dynamicType == null || dynamicDependency == null)
+            if (dynamicMsgName == null || dynamicDependencies == null)
             {
                 throw new RosHandshakeException(
                     "Partner did not send type and definition, required to instantiate dynamic messages.");
             }
 
-            DynamicMessage generator = DynamicMessage.CreateFromDependencyString(dynamicType, dynamicDependency);
+            DynamicMessage generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
             topicInfo = new TopicInfo<T>(callerId, topicName, generator);
         }
 
@@ -381,7 +402,7 @@ namespace Iviz.Roslib
         public override string ToString()
         {
             return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
-                   $"PartnerSocket={remoteEndpoint.Hostname}:{remoteEndpoint.Port}]";
+                   $"PartnerSocket={remoteEndpoint?.Hostname ?? "(none)"}:{remoteEndpoint?.Port ?? -1}]";
         }
     }
 }

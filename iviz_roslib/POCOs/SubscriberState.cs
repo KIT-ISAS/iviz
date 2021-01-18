@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         internal SubscriberReceiverState(bool isAlive, bool isConnected,
             bool requestNoDelay,
             Endpoint? endPoint,
-            Uri remoteUri, Endpoint remoteEndpoint,
+            Uri remoteUri, Endpoint? remoteEndpoint,
             long numReceived, long bytesReceived,
             string? errorDescription)
         {

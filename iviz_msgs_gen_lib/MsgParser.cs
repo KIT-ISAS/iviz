@@ -47,7 +47,7 @@ namespace Iviz.MsgsGen
 
             foreach (string line in lines)
             {
-                if (line == "---")
+                if (line.TrimEnd() == "---")
                 {
                     elements.Add(new ServiceSeparatorElement());
                     continue;
@@ -104,6 +104,16 @@ namespace Iviz.MsgsGen
                         index++;
                     }
                 }
+
+                // special case for string constants
+                if (terms.Count >= 3 && terms[0] == "string" && terms[1] != "=" && terms[2][0] == '=')
+                {
+                    int eqPosition = line.IndexOf("=", StringComparison.InvariantCulture);
+                    string constStr = line.Substring(eqPosition + 1).Trim().Replace("\"", "\\\"");
+                    elements.Add(new ConstantElement("", "string", terms[1], constStr));
+                    continue;
+                }
+
 
                 switch (terms.Count)
                 {

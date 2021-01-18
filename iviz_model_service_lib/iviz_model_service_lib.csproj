@@ -3,7 +3,7 @@
     <PropertyGroup>
         <AssemblyName>Iviz.ModelService.Lib</AssemblyName>
         <RootNamespace>Iviz.ModelService</RootNamespace>
-        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

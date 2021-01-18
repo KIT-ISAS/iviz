@@ -22,9 +22,9 @@ namespace Iviz.Controllers
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = GridController.DefaultColor * 0.25f;
         [DataMember] public SerializableColor InteriorColor { get; set; } = GridController.DefaultColor;
-        [DataMember] public float GridLineWidth { get; set; } = 0.025f;
-        [DataMember] public float GridCellSize { get; set; } = 1;
-        [DataMember] public int NumberOfGridCells { get; set; } = 90;
+        //[DataMember] public float GridLineWidth { get; set; } = 0.025f;
+        //[DataMember] public float GridCellSize { get; set; } = 1;
+        //[DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool PublishLongTapPosition { get; set; } = false;
@@ -270,11 +270,12 @@ namespace Iviz.Controllers
 
             reflectionProbe.mode = ReflectionProbeMode.Realtime;
             reflectionProbe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
-            reflectionProbe.refreshMode = ReflectionProbeRefreshMode.ViaScripting;
+            //reflectionProbe.refreshMode = ReflectionProbeRefreshMode.ViaScripting;
+            reflectionProbe.refreshMode = ReflectionProbeRefreshMode.EveryFrame;
             reflectionProbe.clearFlags = ReflectionProbeClearFlags.SolidColor;
             UpdateMesh();
 
-            GameThread.EverySecond += CheckProbeUpdate;
+            //GameThread.EverySecond += CheckProbeUpdate;
 
             Config = new GridConfiguration();
         }
@@ -311,18 +312,21 @@ namespace Iviz.Controllers
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
 
             GuiInputModule.Instance.LongClick -= OnLongClick;
-            GameThread.EverySecond -= CheckProbeUpdate;
+            //GameThread.EverySecond -= CheckProbeUpdate;
         }
 
         public void ResetController()
         {
+            /*
             if (reflectionProbe)
             {
                 reflectionProbe.RenderProbe();
             }
+            */
         }
 
 
+        /*
         int ticks;
 
         void CheckProbeUpdate()
@@ -339,5 +343,7 @@ namespace Iviz.Controllers
                 ticks = 0;
             }
         }
+                 */
+
     }
 }

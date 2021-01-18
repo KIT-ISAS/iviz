@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -25,6 +26,8 @@ namespace Iviz.App
         public override IController Controller => Robot;
 
         [NotNull] public SimpleRobotController Robot { get; }
+
+        [CanBeNull] CancellationTokenSource tokenSource;
 
         static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
@@ -72,7 +75,10 @@ namespace Iviz.App
             panel.SourceParameter.Value = Robot.SourceParameter;
             panel.HelpText.Label = Robot.HelpText;
 
-            panel.SourceParameter.Hints = GetParameterHints();
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+            panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
+            
             panel.SavedRobotName.Options = GetSavedRobots();
 
             //panel.FramePrefix.Value = Robot.FramePrefix;
@@ -155,7 +161,10 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            panel.SourceParameter.Hints = GetParameterHints();
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+            panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
+
             panel.HelpText.Label = Robot.HelpText;
             Robot.CheckRobotStartTask();
             UpdateModuleButton();
@@ -163,14 +172,14 @@ namespace Iviz.App
         }
 
         [NotNull, ItemNotNull]
-        static IEnumerable<string> GetParameterCandidates() =>
-            ConnectionManager.Connection.GetSystemParameterList().Where(x => x.HasSuffix(ParamSuffix));
+        static IEnumerable<string> GetParameterCandidates(CancellationToken token) =>
+            ConnectionManager.Connection.GetSystemParameterList(token).Where(x => x.HasSuffix(ParamSuffix));
 
         [NotNull, ItemNotNull]
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
 
         [NotNull, ItemNotNull]
-        static IEnumerable<string> GetParameterHints() => GetParameterCandidates();
+        static IEnumerable<string> GetParameterHints(CancellationToken token) => GetParameterCandidates(token);
 
         bool IsRobotSaved => Robot.Robot?.Name != null && Resource.ContainsRobot(Robot.Robot.Name);
 

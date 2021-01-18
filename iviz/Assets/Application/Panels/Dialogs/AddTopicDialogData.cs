@@ -103,11 +103,11 @@ namespace Iviz.App
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
 
-            panel.Items =  topics.Select(x => x.ToString());
+            panel.Items =  (IEnumerable<string>) topics.Select(x => x.ToString());
 
             if (panel.ShowAll.Value)
             {
-                foreach (var (item, topic) in panel.Zip(topics))
+                foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
                 {
                     if (topic.ResourceType == Resource.ModuleType.Invalid)
                     {
