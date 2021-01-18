@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -16,13 +18,26 @@ namespace Iviz.Roslib.Actionlib
         }
     }
 
+    public class RosActionFailedException : Exception
+    {
+        public RosGoalStatus Status { get; }
+        public string Text { get; }
+
+        public RosActionFailedException(RosGoalStatus status, string text) :
+            base($"Action ended with status {status}; Message: {text}")
+        {
+            Status = status;
+            Text = text;
+        }
+    }
+
     public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
-        where TAGoal : IActionGoal, new()
-        where TAFeedback : IActionFeedback, IDeserializable<TAFeedback>, new()
-        where TAResult : IActionResult, IDeserializable<TAResult>, new()
+        where TAGoal : class, IActionGoal, new()
+        where TAFeedback : class, IActionFeedback, IDeserializable<TAFeedback>, new()
+        where TAResult : class, IActionResult, IDeserializable<TAResult>, new()
     {
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
@@ -304,7 +319,7 @@ namespace Iviz.Roslib.Actionlib
             cancelPublisher.Write(goalId);
             State = RosActionClientState.WaitingForCancelAck;
         }
-        
+
         public async Task CancelAsync()
         {
             if (cancelPublisher == null)
@@ -444,6 +459,7 @@ namespace Iviz.Roslib.Actionlib
                 CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
 
             foreach (IMessage msg in channelReader.ReadAll(linkedSource.Token))
+            {
                 switch (msg)
                 {
                     case IActionFeedback<TT> actionFeedback:
@@ -471,6 +487,7 @@ namespace Iviz.Roslib.Actionlib
                         State = RosActionClientState.Done;
                         return true;
                 }
+            }
 
             return false;
         }
@@ -497,6 +514,26 @@ namespace Iviz.Roslib.Actionlib
             IProgress<TU>? resultCallback)
             where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
         {
+            await foreach ((TAFeedback? actionFeedback, TAResult? actionResult) in ReadAllAsync(token))
+            {
+                if (actionFeedback != null)
+                {
+                    var feedback = (IActionFeedback<TT>) actionFeedback;
+                    feedbackCallback?.Report(feedback.Feedback);
+                }
+                else if (actionResult != null)
+                {
+                    var result = (IActionResult<TU>) actionResult;
+                    resultCallback?.Report(result.Result);
+                }
+            }
+
+            return false;
+        }
+
+        public async IAsyncEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllAsync(
+            [EnumeratorCancellation] CancellationToken token)
+        {
             if (goalId == null)
             {
                 throw new InvalidOperationException("Goal has not been set!");
@@ -514,27 +551,23 @@ namespace Iviz.Roslib.Actionlib
             {
                 switch (msg)
                 {
-                    case IActionFeedback<TT> actionFeedback:
+                    case TAFeedback actionFeedback:
                         if (!Equals(actionFeedback.Status.GoalId, goalId))
                         {
                             continue;
                         }
 
                         ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
-                        feedbackCallback?.Report(actionFeedback.Feedback);
+                        yield return (actionFeedback, null);
                         break;
-                    case IActionResult<TU> actionResult:
+                    case TAResult actionResult:
                         if (!Equals(actionResult.Status.GoalId, goalId))
                         {
                             continue;
                         }
 
                         ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
-                        resultCallback?.Report(actionResult.Result);
-                        if (State != RosActionClientState.WaitingForResult)
-                        {
-                            //Console.WriteLine($"{this}: Terminated in state {State}");
-                        }
+                        yield return (null, actionResult);
 
                         State = RosActionClientState.Done;
                         var endStatus = (RosGoalStatus) actionResult.Status.Status;
@@ -543,28 +576,13 @@ namespace Iviz.Roslib.Actionlib
                             throw new RosActionFailedException(endStatus, actionResult.Status.Text);
                         }
 
-                        return true;
+                        break;
                 }
             }
-
-            return false;
         }
 #endif
 
         #endregion
-    }
-
-    public class RosActionFailedException : Exception
-    {
-        public RosGoalStatus Status { get; }
-        public string Text { get; }
-
-        public RosActionFailedException(RosGoalStatus status, string text) :
-            base($"Action ended with status {status}; Message: {text}")
-        {
-            Status = status;
-            Text = text;
-        }
     }
 
     public static class RosActionClient
@@ -576,9 +594,9 @@ namespace Iviz.Roslib.Actionlib
                 string actionName,
                 IAction<TActionGoal, TActionFeedback, TActionResult>? _
             )
-            where TActionGoal : IActionGoal, new()
-            where TActionFeedback : IActionFeedback, IDeserializable<TActionFeedback>, new()
-            where TActionResult : IActionResult, IDeserializable<TActionResult>, new()
+            where TActionGoal : class, IActionGoal, new()
+            where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
+            where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
             return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>(client, actionName);
         }
@@ -588,9 +606,9 @@ namespace Iviz.Roslib.Actionlib
             (
                 IAction<TActionGoal, TActionFeedback, TActionResult>? _
             )
-            where TActionGoal : IActionGoal, new()
-            where TActionFeedback : IActionFeedback, IDeserializable<TActionFeedback>, new()
-            where TActionResult : IActionResult, IDeserializable<TActionResult>, new()
+            where TActionGoal : class, IActionGoal, new()
+            where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
+            where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
             return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
         }

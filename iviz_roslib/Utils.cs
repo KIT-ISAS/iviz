@@ -522,7 +522,7 @@ namespace Iviz.Roslib
             public RefEnumerator GetEnumerator() => new RefEnumerator(a);
         }
         
-        public static RefEnumerable<T> RefEnum<T>(this T[] a) =>
+        public static RefEnumerable<T> Ref<T>(this T[] a) =>
             new RefEnumerable<T>(a ?? throw new ArgumentNullException(nameof(a)));
         
         public static RefEnumerable<T>.RefEnumerator RefEnumerator<T>(this T[] a) =>

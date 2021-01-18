@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,12 +34,16 @@ namespace Iviz.XmlRpc
             string hostname = uri.Host;
             int port = uri.Port;
 
+#if NET5_0
+            Task task = client.ConnectAsync(hostname, port, token).AsTask();
+#else
             Task task = client.ConnectAsync(hostname, port);
+#endif
             if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
             {
                 if (task.IsFaulted)
                 {
-                    await task; // rethrow
+                    ExceptionDispatchInfo.Capture(task.Exception!.InnerException!).Throw();
                 }
 
                 throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");

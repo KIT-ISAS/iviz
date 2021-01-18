@@ -222,8 +222,9 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                await DisposeAsync().AwaitNoThrow(this);
-                await client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
+                Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+                Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
+                await Task.WhenAll(disposeTask, unadvertiseTask).Caf();
             }
 
             return removed;

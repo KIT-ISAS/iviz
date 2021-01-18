@@ -23,7 +23,7 @@ namespace Iviz.Roslib
         {
         }
         
-        public bool Equals(Endpoint other)
+        public bool Equals(Endpoint? other)
         {
             return other != null && Hostname == other.Hostname && Port == other.Port;
         }

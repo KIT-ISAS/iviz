@@ -883,7 +883,7 @@ namespace Iviz.Roslib
         /// <param name="token">An optional cancellation token</param>
         /// <returns>A pair containing a token that can be used to unsubscribe from this topic, and the subscriber object.</returns>
         public async Task<(string id, RosSubscriber<T> subscriber)>
-            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = false,
+            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
                 CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new()
         {

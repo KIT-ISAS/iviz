@@ -22,13 +22,13 @@ namespace Iviz.Roslib
         int totalSubscribers;
         bool disposed;
 
-        public CancellationToken CancellationToken => runningTs.Token; 
+        public CancellationToken CancellationToken => runningTs.Token;
 
         /// <summary>
         /// Whether this subscriber is valid.
         /// </summary>
         public bool IsAlive => !CancellationToken.IsCancellationRequested;
-        
+
         public string Topic => manager.Topic;
         public string TopicType => manager.TopicType;
         public int NumPublishers => manager.NumConnections;
@@ -132,9 +132,9 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            manager.Stop();
             callbacks = Array.Empty<Action<T>>();
             NumPublishersChanged = null;
+            manager.Stop();
         }
 
         public async Task DisposeAsync()
@@ -147,9 +147,9 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            await manager.StopAsync();
             callbacks = Array.Empty<Action<T>>();
             NumPublishersChanged = null;
+            await manager.StopAsync();
         }
 
         public bool MessageTypeMatches(Type type)
@@ -185,7 +185,7 @@ namespace Iviz.Roslib
             {
                 throw new ArgumentNullException(nameof(callback));
             }
-            
+
             AssertIsAlive();
 
             string id = GenerateId();
@@ -239,25 +239,29 @@ namespace Iviz.Roslib
             {
                 return true;
             }
-            
-            bool removed = callbacksById.Remove(id);
-            callbacks = callbacksById.Values.ToArray();
 
-            if (callbacksById.Count == 0)
+            bool removed = callbacksById.Remove(id);
+            if (callbacksById.Count != 0)
             {
-                await DisposeAsync().AwaitNoThrow(this);
-                await client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
+                callbacks = callbacksById.Values.ToArray();
+            }
+            else
+            {
+                callbacks = Array.Empty<Action<T>>();
+                Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+                Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
+                await Task.WhenAll(disposeTask, unsubscribeTask).Caf();
             }
 
             return removed;
         }
 
-        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token = default)
+        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            await manager.PublisherUpdateRpcAsync(publisherUris).Caf(); // todo: get token in here
+            return manager.PublisherUpdateRpcAsync(publisherUris); // todo: get token in here
         }
-        
+
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris)
         {
             Task.Run(async () => await PublisherUpdateRcpAsync(publisherUris).Caf()).Wait();

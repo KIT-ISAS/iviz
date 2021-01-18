@@ -93,8 +93,7 @@ namespace Iviz.Roslib
             {
                 if (tasks[i] == readyTask)
                 {
-                    IMessage msg = await sources[i].ReadAsync(token);
-                    return (msg, i);
+                    return (await sources[i].ReadAsync(token), i);
                 }
             }
 
