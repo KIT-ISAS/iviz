@@ -93,7 +93,7 @@ namespace Iviz.App
             panel.MarkerOffset.ValueChanged += f => controller.MarkerOffset = f;
 
             panel.OcculusionQuality.ValueChanged += (i, _) =>
-                controller.OcclusionQuality = (ARFoundationController.OcclusionQualityType) i;
+                controller.OcclusionQuality = (OcclusionQualityType) i;
 
             panel.Description.Label = controller.Description;
             

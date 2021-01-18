@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Iviz.Resources;
 using System.Collections.Generic;
 using Iviz.Controllers;
@@ -8,6 +9,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
+using UnityEngine.XR.Management;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode

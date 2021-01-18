@@ -50,7 +50,6 @@ MonoBehaviour:
   arLight: {fileID: 978464836206565950}
   fovDisplay: {fileID: 749892901891460485}
   setupModeFrame: {fileID: 0}
-  occlusionManager: {fileID: 6350551399145372016}
 --- !u!1 &2024736478269814889
 GameObject:
   m_ObjectHideFlags: 0
@@ -479,9 +478,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b15f82cc229284894964d2d30806969d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HumanSegmentationStencilMode: 3
-  m_HumanSegmentationDepthMode: 2
-  m_EnvironmentDepthMode: 3
+  m_HumanSegmentationStencilMode: 0
+  m_HumanSegmentationDepthMode: 0
+  m_EnvironmentDepthMode: 0
   m_OcclusionPreferenceMode: 0
 --- !u!1001 &121984806164138277
 PrefabInstance:

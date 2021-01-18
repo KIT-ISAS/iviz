@@ -5,10 +5,21 @@ using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum OcclusionQualityType
+    {
+        Off,
+        Fast,
+        Medium,
+        Best
+    }
+
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
@@ -24,8 +35,8 @@ namespace Iviz.Controllers
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; }
         [DataMember] public string MarkerFrame { get; set; } = "";
-
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
+        [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
         /* NonSerializable */
         public bool ShowARJoystick { get; set; }
@@ -77,7 +88,14 @@ namespace Iviz.Controllers
                 MarkerAngle = value.MarkerAngle;
                 MarkerFrame = value.MarkerFrame;
                 MarkerOffset = value.MarkerOffset;
+                OcclusionQuality = value.OcclusionQuality;
             }
+        }
+        
+        public virtual OcclusionQualityType OcclusionQuality
+        {
+            get => config.OcclusionQuality;
+            set => config.OcclusionQuality = value;
         }
 
         public Vector3 WorldPosition

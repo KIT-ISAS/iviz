@@ -42,14 +42,6 @@ namespace Iviz.Controllers
         static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
         static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
 
-        public enum OcclusionQualityType
-        {
-            Off,
-            Fast,
-            Medium,
-            Best
-        }
-
         [NotNull]
         public string Description
         {
@@ -83,13 +75,12 @@ namespace Iviz.Controllers
             }
         }
         
-        OcclusionQualityType occlusionQuality;
-        public OcclusionQualityType OcclusionQuality
+        public override OcclusionQualityType OcclusionQuality
         {
-            get => occlusionQuality;
+            get => base.OcclusionQuality;
             set
             {
-                occlusionQuality = value;
+                base.OcclusionQuality = value;
                 switch (value)
                 {
                     case OcclusionQualityType.Off:
@@ -277,8 +268,6 @@ namespace Iviz.Controllers
 
             resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             resource.Parent = node.transform;
-
-            //markerFound = false;
 
             Config = new ARConfiguration();
 

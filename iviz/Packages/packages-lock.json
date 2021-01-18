@@ -126,12 +126,12 @@
       }
     },
     "com.unity.xr.arcore": {
-      "version": "4.1.1",
+      "version": "4.1.0-preview.2",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.xr.arsubsystems": "4.1.1",
-        "com.unity.xr.management": "3.2.16",
+        "com.unity.xr.arsubsystems": "4.1.0-preview.2",
+        "com.unity.xr.management": "3.2.10",
         "com.unity.modules.androidjni": "1.0.0"
       },
       "url": "https://packages.unity.com"
