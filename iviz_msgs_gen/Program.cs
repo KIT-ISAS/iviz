@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -8,6 +9,18 @@ namespace Iviz.MsgsGen
     static class Program
     {
         static void Main(string[] args)
+        {
+            try
+            {
+                DoMain(args);
+            }
+            catch (MessageGenException e)
+            {
+                Console.Error.WriteLine($"EE [{e.GetType().Name}] {e.Message}");
+            }
+        }
+
+        static void DoMain(string[] args)
         {
             if (args.Length == 0)
             {
@@ -32,7 +45,7 @@ namespace Iviz.MsgsGen
 
             if (args.Length < 4 || (args[0] != "-o" && args[0] != "--output"))
             {
-                Console.WriteLine("EE Invalid arguments. Use -h to show usage.");
+                Console.Error.WriteLine("EE Invalid arguments. Use -h to show usage.");
                 return;
             }
 
@@ -47,7 +60,7 @@ namespace Iviz.MsgsGen
 
                     if (args.Length < 5)
                     {
-                        Console.WriteLine("EE Invalid arguments. Use -h to show usage.");
+                        Console.Error.WriteLine("EE Invalid arguments. Use -h to show usage.");
                         return;
                     }
 
@@ -59,41 +72,68 @@ namespace Iviz.MsgsGen
                             break;
                         case "-if":
                         case "--input-folder":
-                            CreateMessagesFromFolder(args, fullOutputPath, package);
+                            CreateMessagesFromFolder(args, fullOutputPath);
                             break;
                         default:
-                            Console.WriteLine($"EE Unknown argument {args[4]}. Use -h to show usage.");
+                            Console.Error.WriteLine($"EE Unknown argument {args[4]}. Use -h to show usage.");
                             break;
                     }
 
                     break;
                 }
                 default:
-                    Console.WriteLine($"EE Unknown argument {args[2]}. Use -h to show usage.");
+                    Console.Error.WriteLine($"EE Unknown argument {args[2]}. Use -h to show usage.");
                     break;
             }
         }
 
-        static void CreateMessagesFromFolder(string[] args, string fullOutputPath, string package)
+
+        static void PrintHelpMessage()
+        {
+            Console.WriteLine("** Welcome to Iviz.MsgsGen, an utility to generate C# code from ROS messages.");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -h");
+            Console.WriteLine("        Shows this text");
+            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -i Files... ");
+            Console.WriteLine(
+                "        Converts the given files (.msg, .srv, .action) into C# messages, and writes the result in OutputFolder");
+            Console.WriteLine(
+                "    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -if InputFolder  [-p Package* -if InputFolder*]...");
+            Console.WriteLine(
+                "        Searches all files in the input folders (.msg, .srv, .action), converts them into C# messages, and writes the result in OutputFolder");
+            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -r");
+            Console.WriteLine("        Regenerates the default Iviz message files from the ros_msgs folder");
+            Console.WriteLine();
+        }
+
+        static void CreateMessagesFromFolder(string[] args, string fullOutputPath)
         {
             if (args.Length < 6)
             {
-                Console.WriteLine($"EE Expected folder path after -if or --input-folder.");
+                Console.Error.WriteLine($"EE Expected folder path after -if or --input-folder.");
                 return;
             }
 
-            string inputPath = args[5];
-            string fullInputPath = Path.GetFullPath(inputPath);
-            if (!Directory.Exists(fullInputPath))
+            PackageInfo p = new();
+
+
+            for (int i = 3; i < args.Length; i += 4)
             {
-                Console.WriteLine($"EE Input path '{fullOutputPath}' does not exist.");
-                return;
+                Console.WriteLine();
+                Console.WriteLine("** Processing package '" + args[i] + "' at " + args[i + 2]);
+                string package = args[i];
+                string inputPath = args[i + 2];
+                string fullInputPath = Path.GetFullPath(inputPath);
+                if (!Directory.Exists(fullInputPath))
+                {
+                    throw new FileNotFoundException($"Input path '{fullOutputPath}' does not exist.");
+                }
+
+                p.AddAllInPackagePath(fullInputPath, package);
             }
 
             Directory.CreateDirectory(fullOutputPath);
 
-            PackageInfo p = new PackageInfo();
-            p.AddAllInPackagePath(fullInputPath, package);
             p.ResolveAll();
 
             if (p.Messages.Count == 0 && p.Services.Count == 0)
@@ -112,10 +152,15 @@ namespace Iviz.MsgsGen
                 Directory.CreateDirectory($"{fullOutputPath}/srv/");
             }
 
+            HashSet<string> usedNames = new HashSet<string>();
             foreach (ClassInfo classInfo in p.Messages.Values)
             {
                 string text = classInfo.ToCsString();
-                File.WriteAllText($"{fullOutputPath}/msg/{classInfo.Name}.cs", text);
+                string fileName = usedNames.Contains(classInfo.Name)
+                    ? classInfo.CsPackage + classInfo.Name
+                    : classInfo.Name;
+                usedNames.Add(classInfo.Name);
+                File.WriteAllText($"{fullOutputPath}/msg/{fileName}.cs", text);
             }
 
             foreach (ServiceInfo classInfo in p.Services.Values)
@@ -125,21 +170,6 @@ namespace Iviz.MsgsGen
             }
 
             Console.WriteLine("** Done!");
-        }
-
-        static void PrintHelpMessage()
-        {
-            Console.WriteLine("** Welcome to Iviz.MsgsGen, an utility to generate C# code from ROS messages.");
-            Console.WriteLine("Usage:");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -h");
-            Console.WriteLine("        Shows this text");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -i Files... ");
-            Console.WriteLine("        Converts the given files (.msg, .srv, .action) into C# messages, and writes the result in OutputFolder");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -if InputFolder");
-            Console.WriteLine("        Searches all files in the input folder (.msg, .srv, .action), convers them into C# messages, and writes the result in OutputFolder");
-            Console.WriteLine("    dotnet Iviz.MsgsGen.dll -r");
-            Console.WriteLine("        Regenerates the default Iviz message files from the ros_msgs folder");
-            Console.WriteLine();
         }
 
         static void CreateIndividualMessages(string[] args, string fullOutputPath, string package)
@@ -200,7 +230,7 @@ namespace Iviz.MsgsGen
 
             foreach (string fullPath in messageFullPaths)
             {
-                ClassInfo classInfo = new ClassInfo(package, fullPath);
+                ClassInfo classInfo = new(package, fullPath);
                 string classCode = classInfo.ToCsString();
                 string destPath = $"{fullOutputPath}/msg/{classInfo.Name}.cs";
                 File.WriteAllText(destPath, classCode);
@@ -208,7 +238,7 @@ namespace Iviz.MsgsGen
 
             foreach (string fullPath in serviceFullPaths)
             {
-                ServiceInfo serviceInfo = new ServiceInfo(package, fullPath);
+                ServiceInfo serviceInfo = new(package, fullPath);
                 string classCode = serviceInfo.ToCsString();
                 string destPath = $"{fullOutputPath}/srv/{serviceInfo.Name}.cs";
                 File.WriteAllText(destPath, classCode);
@@ -265,7 +295,7 @@ namespace Iviz.MsgsGen
                 return;
             }
 
-            PackageInfo p = new PackageInfo();
+            PackageInfo p = new();
 
             string[] packages = Directory.GetDirectories(rosBasePath);
             foreach (string packageDir in packages)

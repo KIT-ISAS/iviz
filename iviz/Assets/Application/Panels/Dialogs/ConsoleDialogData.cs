@@ -13,7 +13,7 @@ namespace Iviz.App
     public sealed class ConsoleDialogData : DialogData
     {
         const int MaxMessageLength = 250;
-        const int MaxMessages = 100;
+        const int MaxMessages = 50;
 
         static readonly string[] ExtraFields = {"All", "None"};
 

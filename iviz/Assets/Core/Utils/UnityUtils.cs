@@ -480,7 +480,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static CancellationToken LinkTo(this CancellationToken token, CancellationTokenSource other)
+        public static CancellationToken LinkTo(this CancellationToken token, [NotNull] CancellationTokenSource other)
         {
             return token == default
                 ? other.Token

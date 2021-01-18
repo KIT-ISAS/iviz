@@ -8,9 +8,9 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
-
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
+
 #endif
 
 namespace Iviz.Roslib
@@ -374,38 +374,22 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public IEnumerable<T> ReadAll(CancellationToken externalToken)
         {
-            while (true)
+            while (externalToken.IsCancellationRequested)
             {
-                T msg;
-                try
-                {
-                    msg = Read(externalToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return Read(externalToken);
             }
+
+            externalToken.ThrowIfCancellationRequested();
         }
 
         IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken externalToken)
         {
-            while (true)
+            while (!externalToken.IsCancellationRequested)
             {
-                T msg;
-                try
-                {
-                    msg = Read(externalToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return Read(externalToken);
             }
+
+            externalToken.ThrowIfCancellationRequested();
         }
 
 #if !NETSTANDARD2_0
@@ -419,39 +403,23 @@ namespace Iviz.Roslib
         public async IAsyncEnumerable<T> ReadAllAsync(
             [EnumeratorCancellation] CancellationToken externalToken)
         {
-            while (true)
+            while (!externalToken.IsCancellationRequested)
             {
-                T msg;
-                try
-                {
-                    msg = await ReadAsync(externalToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return await ReadAsync(externalToken);
             }
+
+            externalToken.ThrowIfCancellationRequested();
         }
 
         async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
             [EnumeratorCancellation] CancellationToken externalToken)
         {
-            while (true)
+            while (!externalToken.IsCancellationRequested)
             {
-                T msg;
-                try
-                {
-                    msg = await ReadAsync(externalToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-
-                yield return msg;
+                yield return await ReadAsync(externalToken);
             }
+
+            externalToken.ThrowIfCancellationRequested();
         }
 #endif
 

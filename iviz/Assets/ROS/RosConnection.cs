@@ -23,14 +23,15 @@ namespace Iviz.Ros
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0);
+        readonly SemaphoreSlim signalNoAwait = new SemaphoreSlim(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
+        readonly ConcurrentQueue<Action> toDosNoAwait = new ConcurrentQueue<Action>();
 
-        volatile bool keepRunning;
+        readonly CancellationTokenSource connectionTs = new CancellationTokenSource();
 
         protected RosConnection()
         {
-            keepRunning = true;
             task = Task.Run(Run);
         }
 
@@ -46,7 +47,7 @@ namespace Iviz.Ros
 
         internal virtual void Stop()
         {
-            keepRunning = false;
+            connectionTs.Cancel();
             Signal();
             task.WaitNoThrow(this);
         }
@@ -70,7 +71,15 @@ namespace Iviz.Ros
         protected void AddTask(Func<Task> a)
         {
             toDos.Enqueue(a);
+            //Debug.Log("+1: " + toDos.Count);
             Signal();
+        }
+
+        protected void AddTaskNoAwait(Action a)
+        {
+            toDosNoAwait.Enqueue(a);
+            //Debug.Log("A +1: " + toDosNoAwait.Count);
+            signalNoAwait.Release();
         }
 
         protected void ClearTaskQueue()
@@ -88,9 +97,10 @@ namespace Iviz.Ros
         async Task Run()
         {
             DateTime lastConnectionTry = DateTime.MinValue;
+            Task executeTask = ExecuteTasksNoAwait();
             try
             {
-                while (keepRunning)
+                while (!connectionTs.IsCancellationRequested)
                 {
                     DateTime now = DateTime.Now;
                     if (KeepReconnecting
@@ -116,7 +126,6 @@ namespace Iviz.Ros
                     }
 
                     await signal.WaitAsync(TaskWaitTimeInMs);
-
                     await ExecuteTasks().AwaitNoThrow(this);
                 }
 
@@ -129,6 +138,9 @@ namespace Iviz.Ros
                 Logger.Internal("Error:", e);
                 Logger.Error("XXX Left connection thread: ", e);
             }
+
+            connectionTs.Cancel();
+            await executeTask.AwaitNoThrow(this);
         }
 
         async Task ExecuteTasks()
@@ -136,6 +148,19 @@ namespace Iviz.Ros
             while (toDos.TryDequeue(out var action))
             {
                 await action().AwaitNoThrow(this);
+                //Debug.Log("-1: " + toDos.Count);
+            }
+        }
+
+        async Task ExecuteTasksNoAwait()
+        {
+            while (!connectionTs.IsCancellationRequested)
+            {
+                await signalNoAwait.WaitAsync(connectionTs.Token);
+                while (toDosNoAwait.TryDequeue(out var action))
+                {
+                    action();
+                }
             }
         }
 
@@ -146,6 +171,7 @@ namespace Iviz.Ros
             SetConnectionState(ConnectionState.Disconnected);
         }
 
+        [NotNull]
         public override string ToString()
         {
             return "[RosConnection]";

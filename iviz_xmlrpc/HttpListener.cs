@@ -122,12 +122,13 @@ namespace Iviz.XmlRpc
                         await CreateContextTask().WaitForWithTimeout(2000).AwaitNoThrow(this);
                     }
                 }
-                catch (Exception e) when (e is ObjectDisposedException || e is OperationCanceledException)
-                {
-                    break;
-                }
                 catch (Exception e)
                 {
+                    if (e is ObjectDisposedException || e is OperationCanceledException)
+                    {
+                        break;
+                    }
+
                     Logger.LogFormat("{0}: Leaving thread {1}", this, e);
                     return;
                 }

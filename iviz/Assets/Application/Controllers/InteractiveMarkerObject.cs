@@ -237,6 +237,20 @@ namespace Iviz.Controllers
 
         public void Set(string frameId, in Iviz.Msgs.GeometryMsgs.Pose rosPose)
         {
+            /*
+            if (Parent != null && frameId == Parent.Id)
+            {
+                LocalPose = rosPose.Ros2Unity();
+                return;
+            }
+            //AttachTo(frameId);
+            if (TfListener.TryGetFrame(frameId, out var newFrame))
+            {
+                
+                LocalPose = rosPose.Ros2Unity();
+                
+            }
+            */
             AttachTo(frameId);
             LocalPose = rosPose.Ros2Unity();
         }

@@ -70,7 +70,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>
-        public Task<bool> UnadvertiseAsync(string id);
+        public Task<bool> UnadvertiseAsync(string id, CancellationToken token = default);
 
         /// <summary>
         /// Generates a new advertisement id. Use this string for Unadvertise().

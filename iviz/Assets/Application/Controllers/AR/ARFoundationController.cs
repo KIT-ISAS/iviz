@@ -55,6 +55,11 @@ namespace Iviz.Controllers
         {
             get
             {
+                if (arSession?.subsystem == null)
+                {
+                    return "(No AR Subsystem)";
+                }
+                
                 string trackingState;
                 switch (arSession.subsystem.trackingState)
                 {

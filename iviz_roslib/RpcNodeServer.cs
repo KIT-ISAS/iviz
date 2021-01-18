@@ -14,7 +14,7 @@ namespace Iviz.Roslib.XmlRpc
         static readonly Arg[] DefaultOkResponse = OkResponse(0);
 
         readonly RosClient client;
-        readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
+        readonly Dictionary<string, Func<object[], CancellationToken, Task>> lateCallbacks;
         readonly HttpListener listener;
 
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
@@ -43,7 +43,7 @@ namespace Iviz.Roslib.XmlRpc
                 ["getPid"] = GetPid
             };
 
-            lateCallbacks = new Dictionary<string, Func<object[], Task>>
+            lateCallbacks = new Dictionary<string, Func<object[], CancellationToken, Task>>
             {
                 ["publisherUpdate"] = PublisherUpdateLateCallback
             };
@@ -220,7 +220,7 @@ namespace Iviz.Roslib.XmlRpc
             return DefaultOkResponse;
         }
 
-        async Task PublisherUpdateLateCallback(object[] args)
+        async Task PublisherUpdateLateCallback(object[] args, CancellationToken token)
         {
             if (args.Length < 3 ||
                 !(args[1] is string topic) ||
@@ -245,7 +245,7 @@ namespace Iviz.Roslib.XmlRpc
 
             try
             {
-                await client.PublisherUpdateRcpAsync(topic, publisherUris).Caf();
+                await client.PublisherUpdateRcpAsync(topic, publisherUris, token).Caf();
             }
             catch (Exception e)
             {

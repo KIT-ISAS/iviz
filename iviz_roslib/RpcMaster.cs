@@ -52,10 +52,10 @@ namespace Iviz.Roslib.XmlRpc
             return new GetUriResponse(response);
         }
 
-        public async Task<GetUriResponse> GetUriAsync()
+        public async Task<GetUriResponse> GetUriAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getUri", args).Caf();
+            object[] response = await MethodCallAsync("getUri", args, token).Caf();
             return new GetUriResponse(response);
         }
 
@@ -129,7 +129,8 @@ namespace Iviz.Roslib.XmlRpc
             return new RegisterSubscriberResponse(response);
         }
 
-        public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType)
+        public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType,
+            CancellationToken token = default)
         {
             if (topic == null)
             {
@@ -142,7 +143,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerSubscriber", args).Caf();
+            object[] response = await MethodCallAsync("registerSubscriber", args, token).Caf();
             return new RegisterSubscriberResponse(response);
         }
 
@@ -158,7 +159,8 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterSubscriberResponse(response);
         }
 
-        public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic)
+        public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic,
+            CancellationToken token = default)
         {
             if (topic == null)
             {
@@ -166,7 +168,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterSubscriber", args).Caf();
+            object[] response = await MethodCallAsync("unregisterSubscriber", args, token).Caf();
             return new UnregisterSubscriberResponse(response);
         }
 
@@ -187,7 +189,8 @@ namespace Iviz.Roslib.XmlRpc
             return new RegisterPublisherResponse(response);
         }
 
-        public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType)
+        public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType,
+            CancellationToken token)
         {
             if (topic == null)
             {
@@ -200,7 +203,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerPublisher", args).Caf();
+            object[] response = await MethodCallAsync("registerPublisher", args, token).Caf();
             return new RegisterPublisherResponse(response);
         }
 
@@ -216,7 +219,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterPublisherResponse(response);
         }
 
-        public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic)
+        public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic, CancellationToken token = default)
         {
             if (topic == null)
             {
@@ -224,7 +227,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterPublisher", args).Caf();
+            object[] response = await MethodCallAsync("unregisterPublisher", args, token).Caf();
             return new UnregisterPublisherResponse(response);
         }
 
@@ -283,7 +286,8 @@ namespace Iviz.Roslib.XmlRpc
             return new DefaultResponse(response);
         }
 
-        public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri)
+        public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri,
+            CancellationToken token = default)
         {
             if (service == null)
             {
@@ -296,7 +300,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
-            object[] response = await MethodCallAsync("registerService", args).Caf();
+            object[] response = await MethodCallAsync("registerService", args, token).Caf();
             return new DefaultResponse(response);
         }
 
@@ -317,7 +321,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterServiceResponse(response);
         }
 
-        public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri)
+        public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri, CancellationToken token = default)
         {
             if (service == null)
             {
@@ -330,7 +334,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service, rosRpcUri};
-            object[] response = await MethodCallAsync("unregisterService", args).Caf();
+            object[] response = await MethodCallAsync("unregisterService", args, token).Caf();
             return new UnregisterServiceResponse(response);
         }
 

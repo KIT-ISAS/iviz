@@ -2,6 +2,7 @@ using System;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -59,7 +60,7 @@ namespace Iviz.Displays
             mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs();
             mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
-            inputTexture.GetRawTextureData<float>().CopyFrom(data);
+            inputTexture.GetRawTextureData<float>().GetSubArray(0, newCellsX * newCellsY).CopyFrom(data);
             inputTexture.Apply();
 
             float min = float.MaxValue, max = float.MinValue;

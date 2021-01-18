@@ -75,10 +75,11 @@ namespace Iviz.Roslib
         /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
+        /// <param name="token">An optional cancellation token</param>
         /// <returns>Whether the id belonged to the subscriber.</returns>        
-        public Task<bool> UnsubscribeAsync(string id);
+        public Task<bool> UnsubscribeAsync(string id, CancellationToken token = default);
 
-        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris);
+        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
 
         public Task DisposeAsync();
     }

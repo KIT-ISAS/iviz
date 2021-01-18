@@ -1,3 +1,4 @@
+using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -8,7 +9,8 @@ namespace Iviz.Resources
 
         public ControllersType()
         {
-            AR = new Info<GameObject>("Controllers/AR");
+            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+            AR = new Info<GameObject>(appAssetHolder.ARPrefab);
         }
     }
 }

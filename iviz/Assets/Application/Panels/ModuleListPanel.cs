@@ -693,10 +693,10 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            bottomTime.text = $"{memBytesKb:N0} MB";
+            //long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
+            //bottomTime.text = $"{memBytesKb:N0} MB";
 
-            //bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
+            bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
 
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;

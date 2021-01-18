@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 using Logger = Iviz.Msgs.Logger;
 
@@ -17,10 +18,11 @@ namespace Iviz.RosMaster
         public const int DefaultPort = 11311;
 
         readonly HttpListener listener;
+        AsyncLock roslock = new AsyncLock();
 
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
 
-        readonly Dictionary<string, Func<object[], Task>> lateCallbacks;
+        readonly Dictionary<string, Func<object[], CancellationToken, Task>> lateCallbacks;
 
         readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic =
             new Dictionary<string, Dictionary<string, Uri>>();
@@ -76,7 +78,7 @@ namespace Iviz.RosMaster
                 ["unregisterSubscriber"] = UnregisterSubscriber,
             };
 
-            lateCallbacks = new Dictionary<string, Func<object[], Task>>
+            lateCallbacks = new Dictionary<string, Func<object[], CancellationToken, Task>>
             {
                 ["registerPublisher"] = RegisterPublisherLateCallback,
                 ["unregisterPublisher"] = RegisterPublisherLateCallback
@@ -109,10 +111,10 @@ namespace Iviz.RosMaster
             parameters[key] = value;
         }
 
-        public async Task Start()
+        public async Task StartAsync()
         {
             Logger.Log($"** {this}: Starting at {MasterUri}");
-            Task startTask = listener.StartAsync(StartContext, false);
+            Task startTask = listener.StartAsync(StartContext, true);
             await ManageRosoutAggAsync().AwaitNoThrow(this);
             await startTask.AwaitNoThrow(this);
             Logger.Log($"** {this}: Leaving thread.");
@@ -177,6 +179,7 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterPublisher(object[] args)
         {
+            using var myLock = roslock.Lock();
             if (args.Length != 4 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
@@ -211,35 +214,40 @@ namespace Iviz.RosMaster
             return OkResponse(new Arg(currentSubscribers));
         }
 
-        Task RegisterPublisherLateCallback(object[] args)
+        async Task RegisterPublisherLateCallback(object[] args, CancellationToken token)
         {
-            if (!(args[1] is string topic) ||
-                !subscribersByTopic.TryGetValue(topic, out var subscribers))
+            Arg[] methodArgs;
+            Dictionary<string, Uri> subscribers;
+
             {
-                return Task.CompletedTask;
+                using var myLock = await roslock.LockAsync(token);
+
+                if (!(args[1] is string topic) ||
+                    !subscribersByTopic.TryGetValue(topic, out subscribers))
+                {
+                    return;
+                }
+
+                IEnumerable<Uri> publisherUris =
+                    publishersByTopic.TryGetValue(topic, out var publishers)
+                        ? (IEnumerable<Uri>) publishers.Values
+                        : Array.Empty<Uri>();
+
+                methodArgs = new Arg[] {MasterCallerId, topic, new Arg(publisherUris)};
             }
 
-            IEnumerable<Uri> publisherUris =
-                publishersByTopic.TryGetValue(topic, out var publishers)
-                    ? (IEnumerable<Uri>) publishers.Values
-                    : Array.Empty<Uri>();
-
-            Arg[] methodArgs = {MasterCallerId, topic, new Arg(publisherUris)};
-
+            token.ThrowIfCancellationRequested();
             foreach (var uri in subscribers.Values)
             {
-                NotifySubscriber(uri, methodArgs);
+                NotifySubscriber(uri, methodArgs, token);
             }
-
-            return Task.CompletedTask;
         }
 
-        async void NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs)
+        async void NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs, CancellationToken token)
         {
             try
             {
-                // note! will block until timeout if node is not reachable
-                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs);
+                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token: token);
             }
             catch (Exception e)
             {
@@ -249,6 +257,8 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterSubscriber(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 4 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
@@ -280,6 +290,8 @@ namespace Iviz.RosMaster
 
         Arg[] UnregisterSubscriber(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 3 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
@@ -310,6 +322,8 @@ namespace Iviz.RosMaster
 
         Arg[] UnregisterPublisher(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 3 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
@@ -345,6 +359,8 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterService(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 4 ||
                 !(args[1] is string service) ||
                 !(args[2] is string serviceApi))
@@ -366,6 +382,8 @@ namespace Iviz.RosMaster
 
         Arg[] UnregisterService(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 3 ||
                 !(args[1] is string service) ||
                 !(args[2] is string serviceApi))
@@ -389,6 +407,8 @@ namespace Iviz.RosMaster
 
         Arg[] LookupNode(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 2 ||
                 !(args[1] is string node))
             {
@@ -410,6 +430,8 @@ namespace Iviz.RosMaster
 
         Arg[] LookupService(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 2 ||
                 !(args[1] is string service))
             {
@@ -423,6 +445,8 @@ namespace Iviz.RosMaster
 
         Arg[] GetPublishedTopics(object[] _)
         {
+            using var myLock = roslock.Lock();
+
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
             return OkResponse(new Arg(topics));
@@ -430,6 +454,8 @@ namespace Iviz.RosMaster
 
         Arg[] GetTopicTypes(object[] _)
         {
+            using var myLock = roslock.Lock();
+
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
             return OkResponse(new Arg(topics));
@@ -437,6 +463,8 @@ namespace Iviz.RosMaster
 
         Arg[] GetSystemState(object[] _)
         {
+            using var myLock = roslock.Lock();
+
             var publishers = publishersByTopic.Select(
                 pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
             var subscribers = subscribersByTopic.Select(
@@ -449,6 +477,8 @@ namespace Iviz.RosMaster
 
         Arg[] DeleteParam(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
@@ -461,6 +491,8 @@ namespace Iviz.RosMaster
 
         Arg[] SetParam(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             Arg arg;
 
             if (args.Length != 3 ||
@@ -486,6 +518,8 @@ namespace Iviz.RosMaster
 
         Arg[] GetParam(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
@@ -525,11 +559,15 @@ namespace Iviz.RosMaster
 
         Arg[] GetParamNames(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             return OkResponse(new Arg(parameters.Keys));
         }
 
         Arg[] HasParam(object[] args)
         {
+            using var myLock = roslock.Lock();
+
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {

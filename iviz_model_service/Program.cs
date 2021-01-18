@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
@@ -20,7 +21,26 @@ namespace Iviz.ModelService
 
             using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
             
-            using ModelServer modelServer = new ModelServer();
+            string rosPackagePathExtras = null;
+            string extrasPath = "/Users/akzeac/.iviz/ros_package_path";
+            if (File.Exists(extrasPath))
+            {
+                try
+                {
+                    rosPackagePathExtras = File.ReadAllText(extrasPath);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine($"Extras file '{extrasPath}' could not be read: {e.Message}");
+                }
+            }
+            
+            Console.WriteLine(rosPackagePathExtras);
+
+            using var modelServer = new ModelServer(rosPackagePathExtras, true);
+            
+            
+            //using ModelServer modelServer = new ModelServer();
             
             if (modelServer.NumPackages == 0)
             {

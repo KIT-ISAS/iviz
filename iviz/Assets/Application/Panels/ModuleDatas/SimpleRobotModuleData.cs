@@ -159,6 +159,7 @@ namespace Iviz.App
             panel.HelpText.Label = Robot.HelpText;
             Robot.CheckRobotStartTask();
             UpdateModuleButton();
+            panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
         }
 
         [NotNull, ItemNotNull]

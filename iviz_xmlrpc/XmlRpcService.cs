@@ -3,10 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +66,7 @@ namespace Iviz.XmlRpc
 
     public static class XmlRpcService
     {
-        static void Assert(string received, string expected)
+        static void Assert(string? received, string expected)
         {
             if (received != expected)
             {
@@ -115,9 +112,9 @@ namespace Iviz.XmlRpc
                 case "string":
                     return primitive.InnerText;
                 case "array":
-                    XmlNode data = primitive.FirstChild;
-                    Assert(data.Name, "data");
-                    return data.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray();
+                    XmlNode? data = primitive.FirstChild;
+                    Assert(data?.Name, "data");
+                    return data!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray();
                 /*
                 object?[] children = new object[data.ChildNodes.Count];
                 for (int i = 0; i < data.ChildNodes.Count; i++)
@@ -216,7 +213,7 @@ namespace Iviz.XmlRpc
                 throw new ParseException("Response has no 'methodResponse' tag");
             }
 
-            XmlNode child = root.FirstChild;
+            XmlNode? child = root.FirstChild;
 
             switch (child?.Name)
             {
@@ -228,11 +225,16 @@ namespace Iviz.XmlRpc
                     throw new ParseException("Function call returned too many arguments");
                 case "params":
                 {
-                    XmlNode param = child.FirstChild;
-                    Assert(param.Name, "param");
-                    return Parse(param.FirstChild);
+                    XmlNode? param = child.FirstChild;
+                    Assert(param?.Name, "param");
+                    return Parse(param!.FirstChild);
                 }
                 case "fault":
+                    if (child.FirstChild == null)
+                    {
+                        throw new ParseException("Expected a child under 'fault', received none. ");
+                    }
+
                     throw new FaultException(child.FirstChild.InnerXml);
                 default:
                     throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
@@ -316,7 +318,7 @@ namespace Iviz.XmlRpc
 
             string outData = CreateRequest(method, args);
             string inData;
-            
+
             using HttpRequest request = new HttpRequest(callerUri, remoteUri);
             try
             {
@@ -339,13 +341,14 @@ namespace Iviz.XmlRpc
         /// <param name="httpContext">The context containing the HTTP request</param>
         /// <param name="methods">A list of available XML-RPC methods</param>
         /// <param name="lateCallbacks">Will be called after the response is sent</param>
+        /// <param name="token">Optional cancellation token</param>
         /// <returns>An awaitable task</returns>
         /// <exception cref="ArgumentNullException">Thrown if the context or the method list is null</exception>
         /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], Task>>? lateCallbacks = null,
+            IReadOnlyDictionary<string, Func<object[], CancellationToken, Task>>? lateCallbacks = null,
             CancellationToken token = default)
         {
             if (httpContext is null)
@@ -389,7 +392,7 @@ namespace Iviz.XmlRpc
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
-                    await lateCallback(args).Caf();
+                    await lateCallback(args, token).Caf();
                 }
             }
             catch (ParseException e)
@@ -427,24 +430,31 @@ namespace Iviz.XmlRpc
             XmlNode? child = root.FirstChild;
             do
             {
-                switch (child.Name)
+                switch (child?.Name)
                 {
+                    case null:
+                        throw new ParseException("Expected 'params', 'fault', or 'methodName', got null");
                     case "params":
                     {
                         args = new object[child.ChildNodes.Count];
                         for (int i = 0; i < child.ChildNodes.Count; i++)
                         {
-                            XmlNode param = child.ChildNodes[i];
-                            Assert(param.Name, "param");
-                            object? arg = Parse(param.FirstChild);
+                            XmlNode? param = child.ChildNodes[i];
+                            Assert(param?.Name, "param");
+                            object? arg = Parse(param?.FirstChild);
                             args[i] = arg ??
                                       throw new ParseException(
-                                          $"Could not parse argument '{param.FirstChild.InnerText}'");
+                                          $"Could not parse argument '{param?.FirstChild?.InnerText}'");
                         }
 
                         break;
                     }
                     case "fault":
+                        if (child.FirstChild == null)
+                        {
+                            throw new ParseException("Expected a child under 'fault', received none. ");
+                        }
+                        
                         throw new FaultException(child.FirstChild.InnerXml);
                     case "methodName":
                         methodName = child.InnerText;

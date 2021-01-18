@@ -109,12 +109,12 @@ namespace Iviz.Roslib
                     return client;
                 }
             }
-            catch (Exception e) when (e is IOException || e is SocketException || e is OperationCanceledException)
+            catch (Exception e) 
             {
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                if (!(e is IOException || e is SocketException || e is OperationCanceledException))
+                {
+                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                }
             }
 
             client.Dispose();
@@ -283,20 +283,25 @@ namespace Iviz.Roslib
                         await ProcessLoop().Caf();
                     }
                 }
-                catch (Exception e) when (e is ObjectDisposedException || e is OperationCanceledException)
-                {
-                }
-                catch (Exception e) when (e is IOException || e is SocketException || e is TimeoutException)
-                {
-                    Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
-                }
-                catch (Exception e) when (e is RoslibException)
-                {
-                    Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
-                }
                 catch (Exception e)
                 {
-                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                    switch (e)
+                    {
+                        case ObjectDisposedException _:
+                        case OperationCanceledException _:
+                            break;
+                        case IOException _:
+                        case SocketException _:
+                        case TimeoutException _:
+                            Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
+                            break;
+                        case RoslibException _:
+                            Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
+                            break;
+                        default:
+                            Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                            break;
+                    }
                 }
             }
 
