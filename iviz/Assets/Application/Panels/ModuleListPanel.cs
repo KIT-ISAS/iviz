@@ -451,14 +451,14 @@ namespace Iviz.App
             }
             catch (FileNotFoundException)
             {
-                Logger.Internal("Error: No config file found.");
+                Logger.Internal("<b>Error:</b> Config file not found.");
                 return;
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
                 Logger.Error(e);
-                Logger.Internal("Error:", e);
+                Logger.Internal("<b>Error:</b>", e);
                 return;
             }
 
@@ -470,9 +470,10 @@ namespace Iviz.App
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
-            connectionData.MasterUri = stateConfig.MasterUri;
-            connectionData.MyUri = stateConfig.MyUri;
-            connectionData.MyId = stateConfig.MyId;
+            // TODO: should we store connection data at all?
+            //connectionData.MasterUri = stateConfig.MasterUri;
+            //connectionData.MyUri = stateConfig.MyUri;
+            //connectionData.MyId = stateConfig.MyId;
 
             TfData.UpdateConfiguration(stateConfig.Tf);
 
@@ -485,12 +486,14 @@ namespace Iviz.App
                 CreateModule(config.ModuleType, configuration: config);
             }
 
+            /*
             if (connectionData.MasterUri != null &&
                 connectionData.MyUri != null &&
                 connectionData.MyId != null)
             {
                 KeepReconnecting = true;
             }
+            */
         }
 
         void LoadSimpleConfiguration()

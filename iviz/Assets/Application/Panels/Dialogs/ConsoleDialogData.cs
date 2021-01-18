@@ -12,10 +12,21 @@ namespace Iviz.App
 {
     public sealed class ConsoleDialogData : DialogData
     {
+        enum FromIdCode
+        {
+            All,
+            None,
+            Me,
+            OnlyId
+        }
+        
         const int MaxMessageLength = 250;
         const int MaxMessages = 50;
 
-        static readonly string[] ExtraFields = {"All", "None"};
+        const string AllString = "[All]";
+        const string NoneString = "[None]";
+        const string MeString = "[Me]";
+        static readonly string[] ExtraFields = {AllString, NoneString, MeString};
 
         static readonly string[] LogLevelFields =
         {
@@ -34,7 +45,9 @@ namespace Iviz.App
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
-        
+
+        string id = AllString;
+        FromIdCode idCode = FromIdCode.All;
 
         public ConsoleDialogData()
         {
@@ -47,13 +60,19 @@ namespace Iviz.App
         {
             dialog.Close.Clicked += Close;
             ProcessLog();
-            dialog.FromField.Hints = ids;
+            dialog.FromField.Value = id;
+            dialog.FromField.Hints = ExtraFields.Concat(ids);
             dialog.LogLevel.Options = LogLevelFields;
             dialog.LogLevel.Index = IndexFromLevel(minLogLevel);
             dialog.LogLevel.ValueChanged += (f, _) =>
             {
                 minLogLevel = LevelFromIndex(f);
                 ProcessLog();
+            };
+            dialog.FromField.EndEdit += f =>
+            {
+                id = f;
+                idCode = GetIdCode(f);
             };
         }
 
@@ -64,7 +83,19 @@ namespace Iviz.App
         }
 
         void HandleMessage(in LogMessage log)
-        {
+        {  
+            if (log.SourceId != null)
+            {
+                ids.Add(log.SourceId);
+            }
+
+            if (idCode == FromIdCode.None ||
+                idCode == FromIdCode.Me && log.SourceId != null ||
+                idCode == FromIdCode.OnlyId && log.SourceId != dialog.FromField.Value)
+            {
+                return;
+            }
+            
             if (log.SourceId != null && log.Level < minLogLevel)
             {
                 return;
@@ -141,6 +172,22 @@ namespace Iviz.App
             }
         }
 
+
+        static FromIdCode GetIdCode(string id)
+        {
+            switch (id)
+            {
+                case AllString:
+                    return FromIdCode.All;
+                case NoneString:
+                    return FromIdCode.None;
+                case MeString:
+                    return FromIdCode.Me;
+                default:
+                    return FromIdCode.OnlyId;
+            }
+        }
+
         void ProcessLog()
         {
             if (!queueIsDirty)
@@ -149,9 +196,16 @@ namespace Iviz.App
             }
 
             description.Length = 0;
-            ids.Clear();
+
+            if (idCode == FromIdCode.None)
+            {
+                dialog.Text.text = "";
+                queueIsDirty = false;
+                return;
+            }
 
             LogMessage[] messages = messageQueue.ToArray();
+            
             foreach (var message in messages)
             {
                 var messageLevel = message.Level;
@@ -160,6 +214,12 @@ namespace Iviz.App
                     continue;
                 }
 
+                if (idCode == FromIdCode.Me && message.SourceId != null ||
+                    idCode == FromIdCode.OnlyId && message.SourceId != id)
+                {
+                    continue;
+                }
+                
                 if (message.Stamp == default)
                 {
                     description.Append("<b>[] ");
@@ -185,8 +245,6 @@ namespace Iviz.App
                     description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
                         .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
                 }
-
-                ids.Add(message.SourceId ?? "[Me]");
             }
 
             dialog.Text.text = description.ToString();

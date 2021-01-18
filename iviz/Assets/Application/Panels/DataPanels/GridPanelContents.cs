@@ -9,7 +9,7 @@ namespace Iviz.App
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
-        public SliderWidget LineWidth { get; private set; }
+        //public SliderWidget LineWidth { get; private set; }
         //public SliderWidget CellSize { get; private set; }
         //public SliderWidget NumberOfCells { get; private set; }
         //public DropdownWidget Orientation { get; private set; }
@@ -29,7 +29,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Grid");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
-            LineWidth = p.AddSlider("Grid Line Width").SetMinValue(0.001f).SetMaxValue(0.1f).SetNumberOfSteps(99);
+            //LineWidth = p.AddSlider("Grid Line Width").SetMinValue(0.001f).SetMaxValue(0.1f).SetNumberOfSteps(99);
             //CellSize = p.AddSlider("Grid Cell Size").SetMinValue(0.1f).SetMaxValue(10f).SetValue(1.0f).UpdateValue();
             //NumberOfCells = p.AddSlider("Number of Cells").SetMinValue(10).SetMaxValue(90).SetNumberOfSteps(4).SetValue(10).UpdateValue();
             //Orientation = p.AddDropdown("Orientation").SetOptions(GridResource.OrientationNames).SetIndex(0);

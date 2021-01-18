@@ -10,8 +10,9 @@ iviz has been designed primarily for use in **mobile devices** (iOS/Android smar
 ## 1. Installation
 
 To run iviz, you need the following:
-* Unity 2019.4 LTS editor on either Windows, Linux, or macOS
-* An iOS or Android device (optional)
+* Unity 2019.4 LTS on either Windows, Linux, or macOS
+* For mobile: iOS (> 11.0) or Android (> 7.0)
+  
 
 The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
 
@@ -35,13 +36,21 @@ Here are some instructions on how to get started:
 * Once the data is correct, tap on the _Connect_ button. The application will now try to connect to the ROS master, and keep retrying if it does not work. Tap _Stop_ to cancel the operation. 
 * Once you have connected, the top-left panel should become green. You can now add modules such as topic listeners, robots, watch the TF frames, and so on.
 
-![image](../wiki_files/connection-dialog.png)d
+You can hide the GUI with the arrows at the bottom. 
+Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
+
+![image](../wiki_files/connection-dialog.png)
 
 ## 3. Navigation
 
 To move around:
 * On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D to translate the camera. (This is the same behaviour as in Unity)
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
+
+The lines at the top-right tell you the current orientation of the camera (red is +X, green is +Y, purple is +Z).
+If you get lost, you can click on the TF button on the left, and then on the green button on the right.
+It will take you back to the map frame, positioned on the origin.
+Many modules also have a green frame widget, you can click it to go to where the module is centered.
 
 ## 4. Adding Topics and Modules
 
@@ -119,11 +128,15 @@ This is useful in AR mode when you want to 'teleport' the scene to a different p
 Furthermore, events such as clicks on the grid will be published based on this frame.
 The fixed frame will be shown in green.
   
-## 7. Log Dialog
+_Limitations_: Because iviz uses the Unity transform system as the backend for TF, you will have trouble working with coordinates that are extremely large in value (>10000).
+This is because 32-bit floats have low resolution in those ranges (ROS TF works with doubles), usually causing 3D models to be rendered incorrectly.
+For this reason, TF messages with large values will be ignored.
+This can make it difficult to work with scenarios that depend on UTM coordinates.
 
- 
- 
 ![image](../wiki_files/tf-dialog.png)
+  
+## 7. Log Dialog
+ 
 
 
 ## 8. Working with Robots
