@@ -9,6 +9,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
 using Iviz.Roslib.MarkerHelper;
 
+/*
 namespace iviz_test
 {
     public class TwistTest
@@ -156,3 +157,4 @@ namespace iviz_test
         }
     }
 }
+*/

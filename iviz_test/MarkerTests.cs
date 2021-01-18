@@ -25,7 +25,7 @@ namespace iviz_test
             Logger.LogError = Console.WriteLine;
 
             using RosClient client = new RosClient(RosMasterUri, callerUri: RosClient.TryGetCallerUri(7632));
-            using RosMarkerHelper helper = new RosMarkerHelper(client);
+            using RosMarker helper = new RosMarker(client);
 
             helper.CreateArrow(Pose.Identity, ColorRGBA.Red, new Vector3(2, 1, 10));
             
