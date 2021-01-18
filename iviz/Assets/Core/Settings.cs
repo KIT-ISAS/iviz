@@ -44,7 +44,7 @@ namespace Iviz.Core
         int TargetFps { get; set; }
         Color BackgroundColor { get; set; }
         int SunDirection { get; set; }
-        [NotNull] SettingsConfiguration Config { set; }
+        [NotNull] SettingsConfiguration Config { get; set; }
 
         bool SupportsView { get; }
         bool SupportsAR { get; }
@@ -120,6 +120,6 @@ namespace Iviz.Core
             set => mainCamera = value.SafeNull() ?? throw new NullReferenceException("Camera cannot be null!");
         }
 
-        public static ISettingsManager SettingsManager { get; set; }
+        [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
     }
 }

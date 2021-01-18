@@ -70,12 +70,15 @@ namespace Iviz.Controllers
         readonly ARConfiguration config = new ARConfiguration();
         IModuleData moduleData;
 
+        float? joyVelocityAngle;
+        Vector3? joyVelocityPos;
+
         protected Canvas canvas;
         protected FrameNode node;
 
         [CanBeNull] public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
-
+        
         public ARConfiguration Config
         {
             get => config;
@@ -219,56 +222,71 @@ namespace Iviz.Controllers
             GuiInputModule.Instance.UpdateQualityLevel();
         }
 
-        float? velocityAngle;
-
         void OnARJoystickChangedAngle(float dA)
         {
-            if (velocityAngle == null)
+            if (joyVelocityAngle == null)
             {
-                velocityAngle = 0;
+                joyVelocityAngle = 0;
+            }
+            else if (Sign(joyVelocityAngle.Value) != 0 && Sign(joyVelocityAngle.Value) != Sign(dA))
+            {
+                joyVelocityAngle = 0;
             }
             else
             {
-                velocityAngle += 0.04f * dA;
+                joyVelocityAngle += 0.02f * dA;
             }
 
             if (ARJoystick.IsGlobal)
             {
-                SetWorldAngle(WorldAngle + velocityAngle.Value, RootMover.ControlMarker);
+                SetWorldAngle(WorldAngle + joyVelocityAngle.Value, RootMover.ControlMarker);
             }
             else
             {
                 Vector3 cameraPosition = Settings.MainCamera.transform.position;
                 var q1 = Pose.identity.WithPosition(cameraPosition);
-                var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(velocityAngle.Value, Vector3.up));
+                var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-cameraPosition);
                 SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
             }
         }
 
-        Vector3? velocityPos;
+        static int Sign(float f)
+        {
+            return f > 0 ? 1 : f < 0 ? -1 : 0;
+        }
+
+        static int Sign(Vector3 v)
+        {
+            return Sign(v.x) + Sign(v.y) + Sign(v.z);  // only one of the components is nonzero
+        }
+
 
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
             Vector3 deltaPosition = 0.0005f * dPos;
-            if (velocityPos == null)
+            if (joyVelocityPos == null)
             {
-                velocityPos = Vector3.zero;
+                joyVelocityPos = Vector3.zero;
             }
+            else if (Sign(joyVelocityPos.Value) != 0 && Sign(joyVelocityPos.Value) != Sign(dPos))
+            {
+                joyVelocityPos = Vector3.zero;
+            }            
             else
             {
-                velocityPos += deltaPosition;
+                joyVelocityPos += deltaPosition;
             }
 
             Vector3 deltaWorldPosition;
             if (ARJoystick.IsGlobal)
             {
-                deltaWorldPosition = WorldPose.rotation * velocityPos.Value.Ros2Unity();
+                deltaWorldPosition = WorldPose.rotation * joyVelocityPos.Value.Ros2Unity();
             }
             else
             {
                 Quaternion cameraRotation = Settings.MainCamera.transform.rotation;
-                deltaWorldPosition = cameraRotation * velocityPos.Value;
+                deltaWorldPosition = cameraRotation * joyVelocityPos.Value;
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
@@ -276,8 +294,8 @@ namespace Iviz.Controllers
 
         void OnARJoystickPointerUp()
         {
-            velocityPos = null;
-            velocityAngle = null;
+            joyVelocityPos = null;
+            joyVelocityAngle = null;
         }
 
         void OnPinControlButtonClicked()

@@ -386,7 +386,6 @@ namespace Iviz.Controllers
 
             if (!Resource.TryGetRobot(robotName, out string robotDescription))
             {
-                // shouldn't happen!
                 Debug.Log("SimpleRobotController: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
                 return;
@@ -444,7 +443,7 @@ namespace Iviz.Controllers
                     return;
                 case TaskStatus.RanToCompletion:
                     node.name = "SimpleRobotNode:" + Name;
-                    HelpText = string.IsNullOrEmpty(Robot.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
+                    HelpText = string.IsNullOrEmpty(Robot?.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
                     AttachedToTf = AttachedToTf;
                     Visible = Visible;
                     RenderAsOcclusionOnly = RenderAsOcclusionOnly;

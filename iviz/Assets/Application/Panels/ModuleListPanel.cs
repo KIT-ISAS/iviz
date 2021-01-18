@@ -389,7 +389,7 @@ namespace Iviz.App
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        public void SetConnectionData(string masterUri, string myUri, string myId)
+        public void SetConnectionData([NotNull] string masterUri, [NotNull] string myUri, string myId)
         {
             connectionData.MasterUri = new Uri(masterUri);
             connectionData.MyUri = new Uri(myUri);
@@ -513,10 +513,14 @@ namespace Iviz.App
                 connectionData.MasterUri = config.MasterUri;
                 connectionData.MyUri = config.MyUri;
                 connectionData.MyId = config.MyId;
-
                 if (config.LastMasterUris != null)
                 {
                     connectionData.LastMasterUris = config.LastMasterUris;
+                }
+
+                if (Settings.SettingsManager != null && config.Settings != null)
+                {
+                    Settings.SettingsManager.Config = config.Settings;
                 }
             }
             catch (Exception e) when
@@ -537,7 +541,8 @@ namespace Iviz.App
                     MasterUri = connectionData.MasterUri,
                     MyUri = connectionData.MyUri,
                     MyId = connectionData.MyId,
-                    LastMasterUris = new List<Uri>(connectionData.LastMasterUris)
+                    LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
+                    Settings = Settings.SettingsManager?.Config
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -547,6 +552,28 @@ namespace Iviz.App
                 (e is IOException || e is SecurityException || e is JsonException)
             {
                 //Debug.Log(e);
+            }
+        }
+        
+        public void UpdateSimpleConfigurationSettings()
+        {
+            string path = Settings.SimpleConfigurationPath;
+            if (Settings.SettingsManager == null || !File.Exists(path))
+            {
+                return;
+            }
+
+            try
+            {
+                string inText = File.ReadAllText(path);
+                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
+                config.Settings = Settings.SettingsManager.Config; 
+                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                File.WriteAllText(path, outText);
+            }
+            catch (Exception e) when
+                (e is IOException || e is SecurityException || e is JsonException)
+            {
             }
         }
 

@@ -67,12 +67,13 @@ namespace Iviz.App
             dialog.LogLevel.ValueChanged += (f, _) =>
             {
                 minLogLevel = LevelFromIndex(f);
-                ProcessLog();
+                ProcessLog(true);
             };
             dialog.FromField.EndEdit += f =>
             {
                 id = f;
                 idCode = GetIdCode(f);
+                ProcessLog(true);
             };
         }
 
@@ -188,9 +189,9 @@ namespace Iviz.App
             }
         }
 
-        void ProcessLog()
+        void ProcessLog(bool forceReprocess = false)
         {
-            if (!queueIsDirty)
+            if (!forceReprocess && !queueIsDirty)
             {
                 return;
             }

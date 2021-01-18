@@ -1,3 +1,4 @@
+using System;
 using Iviz.Core;
 using JetBrains.Annotations;
 
@@ -10,9 +11,13 @@ namespace Iviz.App
 
         [NotNull] readonly SettingsDialogContents panel;
         public override IDialogPanelContents Panel => panel;
-        static ISettingsManager SettingsManager => Settings.SettingsManager;
 
-        public SettingsDialogData(SettingsConfiguration config = null)
+        [NotNull]
+        static ISettingsManager SettingsManager => Settings.SettingsManager ??
+                                                   throw new InvalidOperationException(
+                                                       "Settings Dialog used without a SettingsManager!");
+
+        public SettingsDialogData([CanBeNull] SettingsConfiguration config = null)
         {
             panel = DialogPanelManager.GetPanelByType<SettingsDialogContents>(DialogPanelType.Settings);
             if (config != null)
@@ -37,17 +42,8 @@ namespace Iviz.App
 
             panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
             panel.BackgroundColor.Interactable = SettingsManager.SupportsView;
-            
-            panel.SunDirection.Value = SettingsManager.SunDirection;
 
-            panel.QualityInView.ValueChanged += (f, _) =>
-            {
-                SettingsManager.QualityInView = (QualityType) f;
-            };
-            panel.QualityInAr.ValueChanged += (f, _) =>
-            {
-                SettingsManager.QualityInAr = (QualityType) f;
-            };
+            panel.SunDirection.Value = SettingsManager.SunDirection;
 
             if (SettingsManager.TargetFps == Settings.DefaultFps)
             {
@@ -82,10 +78,22 @@ namespace Iviz.App
                     panel.NetworkProcessing.Index = 2;
                     break;
             }
-
+            
+            panel.QualityInView.ValueChanged += (f, _) =>
+            {
+                SettingsManager.QualityInView = (QualityType) f;
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
+            };
+            panel.QualityInAr.ValueChanged += (f, _) =>
+            {
+                SettingsManager.QualityInAr = (QualityType) f;
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
+            };
+            
             panel.BackgroundColor.ValueChanged += c =>
             {
                 SettingsManager.BackgroundColor = c;
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
 
             panel.TargetFps.ValueChanged += (i, _) =>
@@ -105,6 +113,8 @@ namespace Iviz.App
                         SettingsManager.TargetFps = 15;
                         break;
                 }
+                
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
 
             panel.NetworkProcessing.ValueChanged += (i, _) =>
@@ -121,14 +131,17 @@ namespace Iviz.App
                         SettingsManager.NetworkFrameSkip = 4;
                         break;
                 }
+
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
 
             panel.SunDirection.ValueChanged += f =>
             {
                 SettingsManager.SunDirection = (int) f;
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
-            
-            panel.Close.Clicked += Close;            
+
+            panel.Close.Clicked += Close;
         }
     }
 }
