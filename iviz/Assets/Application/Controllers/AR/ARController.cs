@@ -338,7 +338,7 @@ namespace Iviz.Controllers
         {
         }
 
-        public TfFrame Frame => node.Parent;
+        public TfFrame Frame => TfListener.Instance.FixedFrame;
 
         public static event Action<bool> ARModeChanged;
 

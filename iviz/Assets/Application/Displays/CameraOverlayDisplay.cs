@@ -28,7 +28,7 @@ namespace Application.Displays
             Vector3 widgetWorldPos = parentCamera.ScreenToWorldPoint(point);
             transform.position = widgetWorldPos;
 
-            grandparentCamera = parentCamera.transform.parent.GetComponent<Camera>();
+            grandparentCamera = parentCamera.transform.parent.GetComponentInParent<Camera>();
         }
 
         static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);

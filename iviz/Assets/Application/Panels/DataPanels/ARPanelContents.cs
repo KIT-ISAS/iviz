@@ -12,13 +12,13 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget WorldScale { get; private set; }
-        public ToggleWidget SearchMarker { get; private set; }
+        //public ToggleWidget SearchMarker { get; private set; }
         //public NumberInputFieldWidget MarkerSize { get; private set; }
-        public ToggleWidget MarkerHorizontal { get; private set; }
-        public SliderWidget MarkerAngle { get; private set; }
-        public InputFieldWithHintsWidget MarkerFrame { get; private set; }
-        public Vector3SliderWidget MarkerOffset { get; private set; }
-        public DropdownWidget OcculusionQuality { get; private set; }
+        //public ToggleWidget MarkerHorizontal { get; private set; }
+        //public SliderWidget MarkerAngle { get; private set; }
+        //public InputFieldWithHintsWidget MarkerFrame { get; private set; }
+        //public Vector3SliderWidget MarkerOffset { get; private set; }
+        public DropdownWidget OcclusionQuality { get; private set; }
         public DataLabelWidget Description { get; private set; }
 
         //public ToggleWidget PublishHead { get; private set; }
@@ -36,12 +36,14 @@ namespace Iviz.App
             Frame = p.AddFrame();
             Description = p.AddDataLabel("").SetAlignment(TextAnchor.MiddleCenter);
             WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);
+            /*
             SearchMarker = p.AddToggle("Enable Marker Detection");
             MarkerHorizontal = p.AddToggle("Is Marker Horizontal");
             MarkerAngle = p.AddSlider("Marker Angle").SetMinValue(0).SetMaxValue(7*45).SetNumberOfSteps(7);
             MarkerFrame = p.AddInputFieldWithHints("Marker Follows TF Frame").SetPlaceholder("(none)");
             MarkerOffset = p.AddVector3Slider("Offset From TF Frame");
-            OcculusionQuality = p.AddDropdown("Occlusion Quality");
+            */
+            OcclusionQuality = p.AddDropdown("Occlusion Quality");
             
             //PublishHead = p.AddToggle("Publish Camera as PoseStamped");
             //PublishPlanes = p.AddToggle("Publish Planes as Markers");
