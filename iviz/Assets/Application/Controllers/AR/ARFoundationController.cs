@@ -47,7 +47,7 @@ namespace Iviz.Controllers
         {
             get
             {
-                if (arSession?.subsystem == null)
+                if (arSession == null || arSession.subsystem == null)
                 {
                     return "(No AR Subsystem)";
                 }

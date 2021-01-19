@@ -52,7 +52,7 @@ namespace Iviz.Controllers
         [NotNull] readonly TfFrame originFrame;
         [NotNull] readonly TfFrame unityFrame;        
 
-        [NotNull] TfFrame fixedFrame;
+        [NotNull] public TfFrame FixedFrame { get; private set; }
 
         public TfListener([NotNull] IModuleData moduleData)
         {
@@ -90,7 +90,7 @@ namespace Iviz.Controllers
             mapFrame.AddListener(defaultListener);
             mapFrame.ParentCanChange = false;
 
-            fixedFrame = MapFrame;
+            FixedFrame = MapFrame;
 
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
@@ -101,23 +101,23 @@ namespace Iviz.Controllers
         [CanBeNull]
         public static string FixedFrameId
         {
-            get => Instance.fixedFrame.Id;
+            get => Instance.FixedFrame.Id;
             set
             {
-                if (Instance.fixedFrame != null)
+                if (Instance.FixedFrame != null)
                 {
-                    Instance.fixedFrame.RemoveListener(Instance.fixedFrameListener);
+                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListener);
                 }
 
                 if (string.IsNullOrEmpty(value) || !TryGetFrame(value, out TfFrame frame))
                 {
-                    Instance.fixedFrame = MapFrame;
+                    Instance.FixedFrame = MapFrame;
                     OriginFrame.Transform.SetLocalPose(Pose.identity);
                 }
                 else
                 {
-                    Instance.fixedFrame = frame;
-                    Instance.fixedFrame.AddListener(Instance.fixedFrameListener);
+                    Instance.FixedFrame = frame;
+                    Instance.FixedFrame.AddListener(Instance.fixedFrameListener);
                     OriginFrame.Transform.SetLocalPose(frame.WorldPose.Inverse());
                 }
             }
@@ -463,7 +463,7 @@ namespace Iviz.Controllers
         {
             ProcessAll();
 
-            OriginFrame.Transform.SetLocalPose(fixedFrame.WorldPose.Inverse());
+            OriginFrame.Transform.SetLocalPose(FixedFrame.WorldPose.Inverse());
         }
 
         public override void StopController()
@@ -488,7 +488,7 @@ namespace Iviz.Controllers
         
         public static Vector3 RelativePositionToFixedFrame(in Vector3 unityPosition)
         {
-            Transform fixedFrame = Instance.fixedFrame.Transform;
+            Transform fixedFrame = Instance.FixedFrame.Transform;
             return fixedFrame.InverseTransformPoint(unityPosition);
         }
 

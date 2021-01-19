@@ -52,6 +52,7 @@ namespace Iviz.App
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
 
+            /*
             panel.SearchMarker.Value = controller.UseMarker;
             panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
             panel.MarkerAngle.Value = controller.MarkerAngle;
@@ -62,13 +63,16 @@ namespace Iviz.App
             panel.MarkerFrame.Hints = frameHints;
 
             panel.MarkerOffset.Value = controller.MarkerOffset;
+            */
 
-            panel.OcculusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
-            panel.OcculusionQuality.Index = (int) controller.OcclusionQuality;
+            panel.OcclusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
+            panel.OcclusionQuality.Index = (int) controller.OcclusionQuality;
 
-            CheckInteractable();
+            //CheckInteractable();
 
             panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
+            
+            /*
             panel.SearchMarker.ValueChanged += f =>
             {
                 controller.UseMarker = f;
@@ -91,8 +95,9 @@ namespace Iviz.App
                 CheckInteractable();
             };
             panel.MarkerOffset.ValueChanged += f => controller.MarkerOffset = f;
+            */
 
-            panel.OcculusionQuality.ValueChanged += (i, _) =>
+            panel.OcclusionQuality.ValueChanged += (i, _) =>
                 controller.OcclusionQuality = (OcclusionQualityType) i;
 
             panel.Description.Label = controller.Description;
@@ -115,6 +120,7 @@ namespace Iviz.App
             panel.Description.Label = controller.Description;
         }
 
+        /*
         void CheckInteractable()
         {
             panel.MarkerHorizontal.Interactable = controller.UseMarker;
@@ -122,6 +128,7 @@ namespace Iviz.App
             panel.MarkerFrame.Interactable = controller.UseMarker;
             panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
         }
+        */
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

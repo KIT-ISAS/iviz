@@ -12,7 +12,6 @@ iviz has been designed primarily for use in **mobile devices** (iOS/Android smar
 To run iviz, you need the following:
 * Unity 2019.4 LTS on either Windows, Linux, or macOS
 * For mobile: iOS (> 11.0) or Android (> 7.0)
-  
 
 The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
 
@@ -38,6 +37,14 @@ Here are some instructions on how to get started:
 
 You can hide the GUI with the arrows at the bottom. 
 Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
+
+Finally, one option you should check out is the *Settings* dialog (left panel, with the gear icon).
+It presents multiple options that control the quality and CPU usage of the application.
+You can get an idea of how much resources iviz is using by checking the FPS value on the left panel, at the bottom.
+You can set the maximum FPS at 60 if you want a fluid display, but you may also need to lower the graphics quality. 
+The CPU usage can also be reduced by lowering the frequency at which network data is being processed.
+Please note that the Settings configuration is saved any time it is changed, and will be reused the next time iviz is started.
+
 
 ![image](../wiki_files/connection-dialog.png)
 
@@ -128,7 +135,7 @@ This is useful in AR mode when you want to 'teleport' the scene to a different p
 Furthermore, events such as clicks on the grid will be published based on this frame.
 The fixed frame will be shown in green.
   
-_Limitations_: Because iviz uses the Unity transform system as the backend for TF, you will have trouble working with coordinates that are extremely large in value (>10000).
+*Limitations*: Because iviz uses the Unity transform system as the backend for TF, you will have trouble working with coordinates that are extremely large in value (>10000).
 This is because 32-bit floats have low resolution in those ranges (ROS TF works with doubles), usually causing 3D models to be rendered incorrectly.
 For this reason, TF messages with large values will be ignored.
 This can make it difficult to work with scenarios that depend on UTM coordinates.
@@ -136,15 +143,58 @@ This can make it difficult to work with scenarios that depend on UTM coordinates
 ![image](../wiki_files/tf-dialog.png)
   
 ## 7. Log Dialog
- 
 
+The Log Dialog is in charge of presenting messages of iviz and other nodes sent to /rosout.
+It has two widgets:
+* *From*:  This limits whose messages will be printed. You can choose between _[All]_, _[None]_, _[Me]_, or a specific node.
+* *Log Level*: This sets the lowest message level to be displayed (such as Debug, Info, Warning, etc.). 
 
 ## 8. Working with Robots
 ![image](../wiki_files/iviz_screen.png)
 TBW...
 
 ## 9. Working with Augmented Reality
-TBW...
+To enable Augmented Reality (AR), go to *+ Module* (left panel), and then choose _Augmented Reality_.
+You will need an AR-capable device (tablet or smartphone) for this.
+
+Once the AR module is active, the usual birds-eye-view visualization is replaced with the AR setup mode.
+* First, you need to let your device find a plane on which the AR view will be displayed. 
+  This is achieved by moving the device laterally (_not_ by rotating it).
+  Only by translating your device can the AR system find the 3D location of its point features and estimate a plane from them.
+* Once a plane is found, the transparent frame becomes opaque, and the _Start_ button becomes available.
+* When you find an appropriate origin, click on _Start_.
+  Your scene should now become visible.
+* *Note:* If the image appears too grainy, or iviz takes too long to find a plane, you can try moving to a more illuminated place, or adding more light to your scene.
+
+Once you start the AR visualization, pay attention to the FPS counter (left panel, at the bottom).
+Depending on the device, it should be either 30 or 60.
+If your FPS is lower than expected, you should try lowering the graphics quality (*Settings* dialog, gears button on the left panel).
+It is not a good idea to have the AR tracking system compete with the visualization for CPU.
+
+The GUI of the AR module consists of two parts. First, the buttons on the lower part:
+* *+ Marker*: This presents a menu that allows you to move the origin (red is X, green is Y, blue is Z, white is Yaw).
+It has two modalities:
+  * Global: Here, X, Y, Z, and Yaw are in the coordinate system of the origin. X is right, Y is front, and Z is up.  
+  * Screen: Here the directions are in the coordinate system of the screen, and change depending on how your screen is oriented.
+  X is to the right of the device, Y is upwards on the screen, and Z points towards the back of the device.
+    Yaw rotates around the device.
+* *Pin Down*: As the AR system learns more about the environment, it may find that the plane below the origin is slightly more upwards or downwards than it thought.
+Enable this to make the origin follow the plane as it moves.
+* *Reset*: Click this to go back to the AR setup mode.
+
+On the panel to the left you can find the *Augmented Reality* module.
+Clicking it presents the following options:
+* *Hide*: The eye button on the top middle allows you to go back to the birds-eye-view mode _without_ disabling AR.
+Click it again to go back to the AR view.
+* *Trash*: This disables the AR system.
+* *Frame Widget*: Shows the fixed TF frame used for the AR origin.
+* *Info Label*: Shows diagnostic data about the AR system.
+* *World Scale*: This allows you to make the world smaller. Useful when visualizing large robots such as cars on a small table.
+* *Occlusion Quality*: Some devices have occlusion systems that can hide a virtual object if it is hidden behind a real-world object.
+However, the accuracy of these systems is not quite perfect. Use this to enable those systems.   
+
+
+
 
 ## 10. Credits
 
