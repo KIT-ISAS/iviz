@@ -167,7 +167,7 @@ namespace Iviz.Roslib.Actionlib
             channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
-        public async Task StartAsync(IRosClient client, string newActionName)
+        public async Task StartAsync(IRosClient client, string newActionName, CancellationToken token = default)
         {
             ValidateStart(client, newActionName);
             if (newActionName[0] == '/')
@@ -176,10 +176,10 @@ namespace Iviz.Roslib.Actionlib
             }
 
             goalPublisher = new RosChannelWriter<TAGoal> {LatchingEnabled = true};
-            await goalPublisher.StartAsync(client, $"/{newActionName}/goal");
+            await goalPublisher.StartAsync(client, $"/{newActionName}/goal", token);
 
             cancelPublisher = new RosChannelWriter<GoalID> {LatchingEnabled = true};
-            await cancelPublisher.StartAsync(client, $"/{newActionName}/cancel");
+            await cancelPublisher.StartAsync(client, $"/{newActionName}/cancel", token);
 
             feedbackSubscriber = new RosChannelReader<TAFeedback>();
             resultSubscriber = new RosChannelReader<TAResult>();
@@ -576,7 +576,7 @@ namespace Iviz.Roslib.Actionlib
                             throw new RosActionFailedException(endStatus, actionResult.Status.Text);
                         }
 
-                        break;
+                        yield break;
                 }
             }
         }

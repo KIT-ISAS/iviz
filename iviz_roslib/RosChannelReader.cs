@@ -41,14 +41,13 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Constructor for the channel. Also calls <see cref="Start(IRosClient, string, bool)"/>.
+        /// Constructor for the channel. Also calls <see cref="Start(IRosClient, string)"/>.
         /// </summary>
         /// <param name="client">A connected RosClient.</param>
         /// <param name="topic">The topic to listen to.</param>
-        /// <param name="requestNoDelay">Whether NO_DELAY should be requested.</param>
-        public RosChannelReader(IRosClient client, string topic, bool requestNoDelay = true)
+        public RosChannelReader(IRosClient client, string topic)
         {
-            Start(client, topic, requestNoDelay);
+            Start(client, topic);
         }
 
         public async Task DisposeAsync()
@@ -156,9 +155,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="client">A connected RosClient</param>
         /// <param name="topic">The topic to listen to</param>
-        /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
+        /// <param name="token">An optional cancellation token.</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = true)
+        public async Task StartAsync(IRosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {
@@ -170,7 +169,7 @@ namespace Iviz.Roslib
                 throw new InvalidOperationException("Channel has already been started!");
             }
 
-            var (newId, newSubscriber) = await client.SubscribeAsync<T>(topic, Callback, requestNoDelay);
+            var (newId, newSubscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
 
             subscriberId = newId;
             subscriber = newSubscriber;
@@ -182,16 +181,15 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="client">A connected RosClient</param>
         /// <param name="topic">The topic to listen to</param>
-        /// <param name="requestNoDelay">Whether NO_DELAY should be requested</param>
         /// <exception cref="ArgumentNullException">Thrown if the client or the topic are null</exception>
-        public void Start(IRosClient client, string topic, bool requestNoDelay = true)
+        public void Start(IRosClient client, string topic)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
             }
 
-            subscriberId = client.Subscribe(topic, Callback, out subscriber, requestNoDelay);
+            subscriberId = client.Subscribe(topic, Callback, out subscriber);
             subscriberToken = subscriber.CancellationToken.Register(OnSubscriberDisposed);
         }
 
@@ -285,6 +283,7 @@ namespace Iviz.Roslib
             return messageQueue.Dequeue(token);
         }
 
+        /// <summary>
         /// Awaits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
@@ -369,27 +368,23 @@ namespace Iviz.Roslib
         /// Enumerates through the available messages, and blocks while waiting for the next.
         /// It will only return either when the token has been canceled, or the channel has been disposed.
         /// </summary>
-        /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public IEnumerable<T> ReadAll(CancellationToken externalToken)
+        public IEnumerable<T> ReadAll(CancellationToken token)
         {
-            while (externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return Read(externalToken);
+                yield return Read(token);
             }
-
-            externalToken.ThrowIfCancellationRequested();
         }
 
-        IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken externalToken)
+        IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken token)
         {
-            while (!externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return Read(externalToken);
+                yield return Read(token);
             }
-
-            externalToken.ThrowIfCancellationRequested();
         }
 
 #if !NETSTANDARD2_0
@@ -397,29 +392,25 @@ namespace Iviz.Roslib
         /// Enumerates through the available messages, and blocks while waiting for the next.
         /// It will only return either when the token has been canceled, or the channel has been disposed.
         /// </summary>
-        /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async IAsyncEnumerable<T> ReadAllAsync(
-            [EnumeratorCancellation] CancellationToken externalToken)
+            [EnumeratorCancellation] CancellationToken token)
         {
-            while (!externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return await ReadAsync(externalToken);
+                yield return await ReadAsync(token);
             }
-
-            externalToken.ThrowIfCancellationRequested();
         }
 
         async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
-            [EnumeratorCancellation] CancellationToken externalToken)
+            [EnumeratorCancellation] CancellationToken token)
         {
-            while (!externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return await ReadAsync(externalToken);
+                yield return await ReadAsync(token);
             }
-
-            externalToken.ThrowIfCancellationRequested();
         }
 #endif
 
