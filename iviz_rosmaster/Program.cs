@@ -38,7 +38,7 @@ namespace Iviz.RosMaster
             Console.WriteLine($"** Iviz.RosMaster: Starting at uri {rosMasterServer.MasterUri} ...");
             rosMasterServer.AddKey("/rosdistro", "noetic");
             rosMasterServer.AddKey("/rosversion", "1.15.8");
-            await rosMasterServer.Start();
+            await rosMasterServer.StartAsync();
         }
     }
 }
