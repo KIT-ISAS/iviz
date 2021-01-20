@@ -285,6 +285,7 @@ namespace Iviz.Roslib
             return messageQueue.Dequeue(token);
         }
 
+        /// <summary>
         /// Awaits a given time until a message arrives, and pulls it from the queue.
         /// </summary>
         /// <param name="timeoutInMs">The maximal time to wait</param>
@@ -319,6 +320,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public bool TryRead(out T t)
         {
+            ThrowIfNotStarted();
             CancellationToken cancelled = new CancellationToken(true);
             Task<T> task = messageQueue.DequeueAsync(cancelled);
             if (!task.RanToCompletion())
@@ -327,69 +329,36 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            t = task.WaitAndUnwrapException();
+            t = task.Result;
             return true;
         }
 
-        /// <summary>
-        /// Waits a given time until a message arrives. Does not throw an exception if it times out.
-        /// </summary>
-        /// <param name="t">The received message, or default if no message was available.</param>
-        /// <param name="timeoutInMs">The maximal time to wait.</param>
-        /// <returns>True if there was a message available.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public bool TryRead(out T t, int timeoutInMs)
-        {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return TryRead(out t, ts.Token);
-        }
-
-        /// <summary>
-        /// Waits until a message arrives. Does not throw an exception if it times out.
-        /// </summary>
-        /// <param name="t">The received message, or default if no message was available.</param>
-        /// <param name="token">A cancellation token that makes the function stop blocking when cancelled.</param>
-        /// <returns>True if there was a message available.</returns>
-        /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public bool TryRead(out T t, CancellationToken token)
-        {
-            try
-            {
-                t = messageQueue.Dequeue(token);
-                return true;
-            }
-            catch (OperationCanceledException)
-            {
-                t = default!;
-                return false;
-            }
-        }
 
         /// <summary>
         /// Enumerates through the available messages, and blocks while waiting for the next.
         /// It will only return either when the token has been canceled, or the channel has been disposed.
         /// </summary>
-        /// <param name="externalToken">A cancellation token that makes the function stop blocking when cancelled.</param>
+        /// <param name="token">An optional cancellation token.</param>
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public IEnumerable<T> ReadAll(CancellationToken externalToken)
+        public IEnumerable<T> ReadAll(CancellationToken token = default)
         {
-            while (externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return Read(externalToken);
+                yield return Read(token);
             }
 
-            externalToken.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
         }
 
-        IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken externalToken)
+        IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken token)
         {
-            while (!externalToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
-                yield return Read(externalToken);
+                yield return Read(token);
             }
 
-            externalToken.ThrowIfCancellationRequested();
+            token.ThrowIfCancellationRequested();
         }
 
 #if !NETSTANDARD2_0
@@ -401,7 +370,7 @@ namespace Iviz.Roslib
         /// <returns>An enumerator that can be used in a foreach</returns>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async IAsyncEnumerable<T> ReadAllAsync(
-            [EnumeratorCancellation] CancellationToken externalToken)
+            [EnumeratorCancellation] CancellationToken externalToken = default)
         {
             while (!externalToken.IsCancellationRequested)
             {

@@ -349,101 +349,9 @@ namespace Iviz.Roslib.Actionlib
         {
             return (a.Id, a.Stamp) == (b.Id, b.Stamp);
         }
+        
 
-        #region WaitForServer
-
-        public bool WaitForServer(int timeInMs)
-        {
-            using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
-            return WaitForServer(source.Token);
-        }
-
-        public bool WaitForServer(CancellationToken token = default)
-        {
-            const int sleepTimeInMs = 100;
-            string actionServerId = $"/{actionName}";
-
-            if (goalPublisher == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
-            while (!linkedSource.IsCancellationRequested)
-            {
-                PublisherTopicState pState = goalPublisher.Publisher.GetState();
-                bool serverFound = pState.Senders.Any(sender => sender.RemoteId == actionServerId);
-                if (serverFound)
-                {
-                    return true;
-                }
-
-                Thread.Sleep(sleepTimeInMs);
-            }
-
-            return false;
-        }
-
-        public async Task<bool> WaitForServerAsync(int timeInMs)
-        {
-            using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
-            return await WaitForServerAsync(source.Token).Caf();
-        }
-
-        public async Task<bool> WaitForServerAsync(CancellationToken token = default)
-        {
-            const int sleepTimeInMs = 100;
-            string actionServerId = $"/{actionName}";
-
-            if (goalPublisher == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
-            while (!linkedSource.IsCancellationRequested)
-            {
-                PublisherTopicState pState = goalPublisher.Publisher.GetState();
-                bool serverFound = pState.Senders.Any(sender => sender.RemoteId == actionServerId);
-                if (serverFound)
-                {
-                    return true;
-                }
-
-                await Task.Delay(sleepTimeInMs, token).Caf();
-            }
-
-            return false;
-        }
-
-        #endregion
-
-
-        #region WaitForResult
-
-        public bool WaitForResult(int timeInMs)
-        {
-            using CancellationTokenSource source = new CancellationTokenSource(timeInMs);
-            return WaitForResult(source.Token);
-        }
-
-        public bool WaitForResult(CancellationToken token = default)
-        {
-            return WaitForResult<IFeedback<TAFeedback>, IResult<TAResult>>(token, null, null);
-        }
-
-        public bool WaitForResult<TT, TU>(IProgress<TT>? feedbackCallback, IProgress<TU>? resultCallback)
-            where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
-        {
-            return WaitForResult(CancellationToken.None, feedbackCallback, resultCallback);
-        }
-
-        public bool WaitForResult<TT, TU>(CancellationToken token,
-            IProgress<TT>? feedbackCallback,
-            IProgress<TU>? resultCallback)
-            where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
+        public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAll(CancellationToken token = default)
         {
             if (goalId == null)
             {
@@ -462,75 +370,33 @@ namespace Iviz.Roslib.Actionlib
             {
                 switch (msg)
                 {
-                    case IActionFeedback<TT> actionFeedback:
+                    case TAFeedback actionFeedback:
                         if (!Equals(actionFeedback.Status.GoalId, goalId))
                         {
                             continue;
                         }
 
                         ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
-                        feedbackCallback?.Report(actionFeedback.Feedback);
+                        yield return (actionFeedback, null);
                         break;
-                    case IActionResult<TU> actionResult:
+                    case TAResult actionResult:
                         if (!Equals(actionResult.Status.GoalId, goalId))
                         {
                             continue;
                         }
 
                         ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
-                        resultCallback?.Report(actionResult.Result);
-                        if (State != RosActionClientState.WaitingForResult)
-                        {
-                            Logger.LogDebug($"{this}: Terminated in state {State}");
-                        }
+                        yield return (null, actionResult);
 
                         State = RosActionClientState.Done;
-                        return true;
+                        yield break;
                 }
             }
-
-            return false;
-        }
-
-        #endregion
-
+        }        
+        
         #region WaitForResultAsync
 
 #if !NETSTANDARD2_0
-        public async Task<bool> WaitForResultAsync(CancellationToken token = default)
-        {
-            return await WaitForResultAsync<IFeedback<TAFeedback>, IResult<TAResult>>(token, null, null);
-        }
-
-        public async Task<bool> WaitForResultAsync<TT, TU>(IProgress<TT>? feedbackCallback,
-            IProgress<TU>? resultCallback)
-            where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
-        {
-            return await WaitForResultAsync(CancellationToken.None, feedbackCallback, resultCallback);
-        }
-
-        public async Task<bool> WaitForResultAsync<TT, TU>(CancellationToken token,
-            IProgress<TT>? feedbackCallback,
-            IProgress<TU>? resultCallback)
-            where TT : IFeedback<TAFeedback> where TU : IResult<TAResult>
-        {
-            await foreach ((TAFeedback? actionFeedback, TAResult? actionResult) in ReadAllAsync(token))
-            {
-                if (actionFeedback != null)
-                {
-                    var feedback = (IActionFeedback<TT>) actionFeedback;
-                    feedbackCallback?.Report(feedback.Feedback);
-                }
-                else if (actionResult != null)
-                {
-                    var result = (IActionResult<TU>) actionResult;
-                    resultCallback?.Report(result.Result);
-                }
-            }
-
-            return false;
-        }
-
         public async IAsyncEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token)
         {
@@ -570,13 +436,7 @@ namespace Iviz.Roslib.Actionlib
                         yield return (null, actionResult);
 
                         State = RosActionClientState.Done;
-                        var endStatus = (RosGoalStatus) actionResult.Status.Status;
-                        if (endStatus != RosGoalStatus.Succeeded)
-                        {
-                            throw new RosActionFailedException(endStatus, actionResult.Status.Text);
-                        }
-
-                        break;
+                        yield break;
                 }
             }
         }

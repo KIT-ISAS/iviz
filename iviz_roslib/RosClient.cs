@@ -1639,74 +1639,6 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Waits for the service to appear.
-        /// </summary>
-        /// <param name="serviceName">The name of the service</param>
-        /// <param name="timeoutInMs">Time to wait in milliseconds, or -1 for infinite</param>
-        /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-        public void WaitForServiceExistence(string serviceName, int timeoutInMs)
-        {
-            CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            CancellationToken token = tokenSource.Token;
-            try
-            {
-                Task.Run(async () => await WaitForServiceExistenceAsync(serviceName, token), token).Wait(token);
-            }
-            catch (AggregateException e) when (e.InnerExceptions.Count == 1)
-            {
-                throw e.InnerExceptions[0];
-            }
-        }
-
-        /// <summary>
-        /// Waits for the service to appear.
-        /// </summary>
-        /// <param name="serviceName">The name of the service</param>
-        /// <param name="token">A cancellation token, or default for infinite</param>
-        /// <param name="pollingPeriodInMs">Time in milliseconds for the polling</param>
-        /// <exception cref="TaskCanceledException">Thrown if the token was cancelled</exception>
-        public async Task WaitForServiceExistenceAsync(string serviceName, CancellationToken token = default,
-            int pollingPeriodInMs = 100)
-        {
-            string resolvedServiceName = ResolveResourceName(serviceName);
-
-            while (true)
-            {
-                var serviceResponse = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token);
-                if (serviceResponse.IsValid)
-                {
-                    break;
-                }
-
-                await Task.Delay(pollingPeriodInMs, token);
-            }
-        }
-
-        /// <summary>
-        /// Waits for the topic to appear and have at least one publisher.
-        /// </summary>
-        /// <param name="topicName">The name of the topic</param>
-        /// <param name="token">A cancellation token, or default for infinite</param>
-        /// <param name="pollingPeriodInMs">Time in milliseconds for the polling</param>
-        /// <exception cref="TaskCanceledException">Thrown if the token was cancelled</exception>
-        public async Task WaitForTopicExistenceAsync(string topicName, CancellationToken token = default,
-            int pollingPeriodInMs = 100)
-        {
-            string resolvedTopicName = ResolveResourceName(topicName);
-
-            while (true)
-            {
-                var systemState = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
-                if (systemState.IsValid && systemState.Topics.Any(tuple => tuple.name == resolvedTopicName))
-                {
-                    break;
-                }
-
-                await Task.Delay(pollingPeriodInMs, token);
-            }
-        }
-
-        /// <summary>
         /// Calls the given ROS service.
         /// </summary>
         /// <param name="serviceName">Name of the ROS service</param>
@@ -1721,6 +1653,7 @@ namespace Iviz.Roslib
         {
             string resolvedServiceName = ResolveResourceName(serviceName);
             CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            CancellationToken token = timeoutTs.Token;
 
             if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
@@ -1734,7 +1667,7 @@ namespace Iviz.Roslib
                 // is there a persistent connection? use it
                 if (existingReceiver.IsAlive)
                 {
-                    if (!existingReceiver.Execute(service, timeoutTs.Token))
+                    if (!existingReceiver.Execute(service, token))
                     {
                         throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
@@ -1762,7 +1695,7 @@ namespace Iviz.Roslib
                     var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     serviceCaller.Start(serviceUri, persistent);
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
-                    if (!serviceCaller.Execute(service, timeoutTs.Token))
+                    if (!serviceCaller.Execute(service, token))
                     {
                         throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
@@ -1771,7 +1704,7 @@ namespace Iviz.Roslib
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     serviceCaller.Start(serviceUri, persistent);
-                    if (!serviceCaller.Execute(service, timeoutTs.Token))
+                    if (!serviceCaller.Execute(service, token))
                     {
                         throw new RosServiceCallFailed($"Service call to '{resolvedServiceName}' failed");
                     }
@@ -1880,13 +1813,12 @@ namespace Iviz.Roslib
                     }
                 }
             }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                if (e is OperationCanceledException)
-                {
-                    throw;
-                }
-
                 throw new RoslibException($"Service call {serviceName} to uri '{serviceUri}' failed", e);
             }
         }
@@ -2030,9 +1962,9 @@ namespace Iviz.Roslib
             Close();
         }
 
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            await CloseAsync();
+            return CloseAsync();
         }
 
 #if !NETSTANDARD2_0
