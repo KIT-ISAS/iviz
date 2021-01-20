@@ -12,8 +12,8 @@ namespace Iviz.Roslib
 #endif
     {
         public IRosPublisher Publisher { get; }
-        public Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false);
-        public void Start(IRosClient client, string topic, bool requestNoDelay = false);
+        public Task StartAsync(IRosClient client, string topic, CancellationToken token = default);
+        public void Start(IRosClient client, string topic);
         public void Write(IMessage msg);
         public void WriteAll(IEnumerable<IMessage> messages);
 #if !NETSTANDARD2_0

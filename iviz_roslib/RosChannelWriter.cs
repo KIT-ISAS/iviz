@@ -54,12 +54,12 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosChannelWriter(IRosClient client, string topic, bool requestNoDelay = true)
+        public RosChannelWriter(IRosClient client, string topic)
         {
-            Start(client, topic, requestNoDelay);
+            Start(client, topic);
         }
 
-        public void Start(IRosClient client, string topic, bool requestNoDelay = true)
+        public void Start(IRosClient client, string topic)
         {
             if (client == null)
             {
@@ -71,14 +71,14 @@ namespace Iviz.Roslib
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
-        public async Task StartAsync(IRosClient client, string topic, bool requestNoDelay = true)
+        public async Task StartAsync(IRosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
             }
 
-            (publisherId, publisher) = await client.AdvertiseAsync<T>(topic);
+            (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
             publisher.LatchingEnabled = LatchingEnabled;
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }

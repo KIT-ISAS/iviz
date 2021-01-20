@@ -1737,9 +1737,9 @@ namespace Iviz.Roslib
             {
                 await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
-                throw new TimeoutException($"Service call {serviceName} timed out");
+                throw new TimeoutException($"Service call {serviceName} timed out", e);
             }
         }
 

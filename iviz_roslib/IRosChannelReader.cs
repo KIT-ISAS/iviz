@@ -15,8 +15,8 @@ namespace Iviz.Roslib
         Task<bool> WaitToReadAsync(CancellationToken token);
         IMessage Read(CancellationToken token);
         Task<IMessage> ReadAsync(CancellationToken token);
-        public Task StartAsync(IRosClient client, string topic, bool requestNoDelay = false);
-        public void Start(IRosClient client, string topic, bool requestNoDelay = false);
+        public Task StartAsync(IRosClient client, string topic, CancellationToken token = default);
+        public void Start(IRosClient client, string topic);
         public IEnumerable<IMessage> ReadAll(CancellationToken externalToken);
 #if !NETSTANDARD2_0
         public IAsyncEnumerable<IMessage> ReadAllAsync(CancellationToken externalToken);
