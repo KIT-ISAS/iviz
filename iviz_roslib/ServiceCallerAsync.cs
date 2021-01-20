@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -92,7 +93,11 @@ namespace Iviz.Roslib
         {
             string remoteHostname = remoteUri.Host;
             int remotePort = remoteUri.Port;
+#if NET5_0
+            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort, token).AsTask();
+#else
             Task task = tcpClient.ConnectAsync(remoteHostname, remotePort);
+#endif
             if (!await task.WaitFor(DefaultTimeoutInMs, token) || !task.RanToCompletion())
             {
                 if (task.IsFaulted)
@@ -162,7 +167,7 @@ namespace Iviz.Roslib
         {
             bool result = false;
             // just call the async version from sync
-            Task.Run(async () => result = await ExecuteAsync(service, token).Caf(), token).Wait(token);
+            Task.Run(async () => result = await ExecuteAsync(service, token).Caf(), token).WaitAndRethrow();
             return result;
         }
 
@@ -177,7 +182,7 @@ namespace Iviz.Roslib
             {
                 throw new NullReferenceException("Request cannot be null");
             }
-            
+
             service.Request.RosValidate();
 
             IRequest requestMsg = service.Request;

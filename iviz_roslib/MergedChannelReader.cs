@@ -49,12 +49,12 @@ namespace Iviz.Roslib
             }
         }
 
-        public IMessage Read(CancellationToken token)
+        public IMessage Read(CancellationToken token = default)
         {
             return ReadWithIndex(token).msg;
         }
 
-        public (IMessage msg, int id) ReadWithIndex(CancellationToken token)
+        public (IMessage msg, int id) ReadWithIndex(CancellationToken token = default)
         {
             using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
             using CancellationTokenSource linkedCts =
@@ -72,12 +72,12 @@ namespace Iviz.Roslib
             return (msg, readyTask);
         }
 
-        public async Task<IMessage> ReadAsync(CancellationToken externalToken)
+        public async Task<IMessage> ReadAsync(CancellationToken token = default)
         {
-            return (await ReadWithIndexAsync(externalToken)).msg;
+            return (await ReadWithIndexAsync(token)).msg;
         }
 
-        public async Task<(IMessage msg, int index)> ReadWithIndexAsync(CancellationToken token)
+        public async Task<(IMessage msg, int index)> ReadWithIndexAsync(CancellationToken token = default)
         {
             using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
             using CancellationTokenSource linkedCts =
@@ -110,7 +110,7 @@ namespace Iviz.Roslib
             return GetEnumerator();
         }
 
-        public IEnumerable<IMessage> ReadAll(CancellationToken token)
+        public IEnumerable<IMessage> ReadAll(CancellationToken token = default)
         {
             while (!token.IsCancellationRequested)
             {
@@ -120,7 +120,7 @@ namespace Iviz.Roslib
             token.ThrowIfCancellationRequested();
         }
 
-        public IEnumerable<(IMessage msg, int index)> ReadAllWithIndex(CancellationToken token)
+        public IEnumerable<(IMessage msg, int index)> ReadAllWithIndex(CancellationToken token = default)
         {
             while (!token.IsCancellationRequested)
             {
@@ -131,7 +131,7 @@ namespace Iviz.Roslib
         }
 
 #if !NETSTANDARD2_0
-        public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token)
+        public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
         {
             while (true)
             {

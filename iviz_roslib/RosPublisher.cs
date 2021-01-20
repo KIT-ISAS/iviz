@@ -244,49 +244,7 @@ namespace Iviz.Roslib
         {
             return type == typeof(T);
         }
-
-        public void WaitForAnySubscriber(int timeoutInMs)
-        {
-            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            try
-            {
-                Task.Run(async () => await WaitForAnySubscriberAsync(timeoutTs.Token), timeoutTs.Token)
-                    .Wait(timeoutTs.Token);
-            }
-            catch (AggregateException e) when (e.InnerException is OperationCanceledException)
-            {
-                throw e.InnerException;
-            }
-        }
-
-        public async Task WaitForAnySubscriberAsync(CancellationToken token)
-        {
-            CancellationTokenSource linkedTs =
-                CancellationTokenSource.CreateLinkedTokenSource(token, CancellationToken);
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-
-            void Release(RosPublisher<T> _)
-            {
-                signal.Release();
-            }
-
-            NumSubscribersChanged += Release;
-
-            try
-            {
-                if (NumSubscribers != 0)
-                {
-                    return;
-                }
-
-                await signal.WaitAsync(linkedTs.Token);
-            }
-            finally
-            {
-                NumSubscribersChanged -= Release;
-            }
-        }
-
+        
         /// <summary>
         ///     Called when the number of subscribers has changed.
         /// </summary>

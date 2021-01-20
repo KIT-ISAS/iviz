@@ -97,12 +97,6 @@ namespace Iviz.Roslib
         /// </summary>        
         public PublisherTopicState GetState();
 
-        public void WaitForAnySubscriber(int timeoutInMs);
-
-        public Task WaitForAnySubscriberAsync(CancellationToken token);
-
-        internal Endpoint? RequestTopicRpc(string remoteCallerId);
-        
         /// <summary>
         /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
         /// </summary>
@@ -114,6 +108,12 @@ namespace Iviz.Roslib
         /// </summary>
         public bool ForceTcpNoDelay { get; set; }
 
+        internal Endpoint? RequestTopicRpc(string remoteCallerId);
+        
+        /// <summary>
+        /// Async version of Dispose(), for NET Core 2.0 where IAsyncDisposable is not available.
+        /// </summary>
+        /// <returns>The awaitable dispose task.</returns>
         Task DisposeAsync();
     }
     
