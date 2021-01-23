@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -16,7 +17,7 @@ namespace Iviz.Controllers
         [SerializeField] string id;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly HashSet<FrameNode> nodes = new HashSet<FrameNode>();
+        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
 
         Pose pose;
 
@@ -68,7 +69,7 @@ namespace Iviz.Controllers
                 return labelObjectText;
             }
         }
-        
+
         [NotNull]
         LineConnector ParentConnector
         {
@@ -124,6 +125,7 @@ namespace Iviz.Controllers
                 forceVisible = value;
                 Visible = Visible;
                 TrailVisible = TrailVisible;
+                LabelVisible = LabelVisible;
             }
         }
 
@@ -136,6 +138,7 @@ namespace Iviz.Controllers
             {
                 visible = value;
                 axis.Visible = (value || ForceVisible) && !ForceInvisible;
+                LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;
             }
         }
@@ -151,7 +154,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                LabelObjectText.Visible = !ForceInvisible && (ForceVisible || Visible);
+                LabelObjectText.Visible = !ForceInvisible && (ForceVisible || Visible) && value;
             }
         }
 
@@ -177,8 +180,8 @@ namespace Iviz.Controllers
                 {
                     return;
                 }
-                
-                ParentConnector.Visible = value;   
+
+                ParentConnector.Visible = !ForceInvisible && (ForceVisible || Visible) && value;
             }
         }
 
@@ -249,7 +252,7 @@ namespace Iviz.Controllers
         /// </summary>
         public Pose UnityWorldPose => Transform.AsPose();
 
-        bool HasNoListeners => nodes.Count == 0;
+        bool HasNoListeners => listeners.Count == 0;
 
         bool IsChildless => children.Count == 0;
 
@@ -270,7 +273,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            nodes.Add(frame);
+            listeners.Add(frame);
         }
 
         public void RemoveListener([NotNull] FrameNode frame)
@@ -285,7 +288,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            nodes.Remove(frame);
+            listeners.Remove(frame);
             CheckIfDead();
         }
 
@@ -306,6 +309,11 @@ namespace Iviz.Controllers
 
         void CheckIfDead()
         {
+            if (listeners.RemoveWhere(listener => listener == null) != 0)
+            {
+                Debug.LogWarning($"Frame '{id}' had a listener that was previosly destroyed.");
+            }
+            
             if (HasNoListeners && IsChildless)
             {
                 TfListener.Instance.MarkAsDead(this);

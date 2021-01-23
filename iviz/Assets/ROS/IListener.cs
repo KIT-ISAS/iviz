@@ -19,7 +19,7 @@ namespace Iviz.Ros
         [NotNull] string Topic { get; }
         [NotNull] string Type { get; }
         RosListenerStats Stats { get; }
-        int NumPublishers { get; }
+        (int Active, int Total) NumPublishers { get; }
         int MaxQueueSize { set; }
         bool Subscribed { get; }
         void Stop();
@@ -37,7 +37,7 @@ namespace Iviz.Ros
         readonly Func<T, bool> directHandler;
         readonly List<float> timesOfArrival = new List<float>();
         readonly List<T> tmpMessageBag = new List<T>();
-        readonly bool callbackInGameThread = true;
+        readonly bool callbackInGameThread;
 
         int dropped;
         long lastMsgBytes;
@@ -87,7 +87,7 @@ namespace Iviz.Ros
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
-        public int NumPublishers => Connection.GetNumPublishers(Topic);
+        public (int Active, int Total) NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 50;
         public bool Subscribed { get; private set; }
 

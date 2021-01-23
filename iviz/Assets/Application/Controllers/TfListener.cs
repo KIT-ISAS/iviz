@@ -10,6 +10,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using Nito.AsyncEx;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -40,6 +41,7 @@ namespace Iviz.Controllers
         static uint tfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
+        readonly AsyncLock mutex = new AsyncLock();
         readonly List<(TransformStamped frame, bool isStatic)> frameBuffer = new List<(TransformStamped, bool)>();
         readonly List<(TransformStamped frame, bool isStatic)> frameList = new List<(TransformStamped, bool)>();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
@@ -132,12 +134,12 @@ namespace Iviz.Controllers
                                                        throw new InvalidOperationException(
                                                            "GuiInputModule has not been started!");
 
-        public static TfFrame MapFrame => Instance.mapFrame;
-        public static TfFrame RootFrame => Instance.rootFrame;
-        public static TfFrame OriginFrame => Instance.originFrame;
-        public static TfFrame UnityFrame => Instance.unityFrame;
-        public static TfFrame ListenersFrame => OriginFrame;
-        public override TfFrame Frame => MapFrame;
+        [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
+        [NotNull] public static TfFrame RootFrame => Instance.rootFrame;
+        [NotNull] public static TfFrame OriginFrame => Instance.originFrame;
+        [NotNull] public static TfFrame UnityFrame => Instance.unityFrame;
+        [NotNull] public static TfFrame ListenersFrame => OriginFrame;
+        [NotNull] public override TfFrame Frame => MapFrame;
 
         [NotNull]
         public static IEnumerable<string> FramesUsableAsHints =>
@@ -317,7 +319,7 @@ namespace Iviz.Controllers
 
             ListenerStatic?.Reset();
             Publisher.Reset();
-
+            
             bool prevKeepAllFrames = KeepAllFrames;
             KeepAllFrames = false;
 
@@ -410,33 +412,30 @@ namespace Iviz.Controllers
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            lock (frameBuffer)
-            {
-                foreach (TransformStamped ts in msg.Transforms)
-                {
-                    frameBuffer.Add((ts, false));
-                }
-            }
-
+            AddAll(msg.Transforms, false);
             return true;
         }
 
         bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            lock (frameBuffer)
-            {
-                foreach (TransformStamped ts in msg.Transforms)
-                {
-                    frameBuffer.Add((ts, true));
-                }
-            }
-
+            AddAll(msg.Transforms, true);
             return true;
         }
 
-        void ProcessAll()
+        async void AddAll([NotNull] TransformStamped[] transforms, bool isStatic)
         {
-            lock (frameBuffer)
+            using (await mutex.LockAsync())
+            {
+                foreach (TransformStamped ts in transforms)
+                {
+                    frameBuffer.Add((ts, isStatic));
+                }
+            }
+        }
+
+        async void ProcessAll()
+        {
+            using (await mutex.LockAsync())
             {
                 frameList.AddRange(frameBuffer);
                 frameBuffer.Clear();

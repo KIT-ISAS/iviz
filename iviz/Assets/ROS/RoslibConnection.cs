@@ -115,7 +115,6 @@ namespace Iviz.Ros
             try
             {
                 const int rpcTimeoutInMs = 750;
-                const int disposeTimeoutInMs = 5000;
 
 #if LOG_ENABLED
                 Logger.LogDebug = Core.Logger.Debug;
@@ -131,6 +130,8 @@ namespace Iviz.Ros
 
                 RosClient newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                 client = newClient;
+
+                await client.CheckOwnUriAsync(token);
 
                 client.RosMasterApi.TimeoutInMs = rpcTimeoutInMs;
                 client.Parameters.TimeoutInMs = rpcTimeoutInMs;
@@ -171,6 +172,7 @@ namespace Iviz.Ros
                 Core.Logger.Internal("<b>Connected!</b>");
                 watchdogTask = Task.Run(() => WatchdogAsync(newClient.MasterUri, newClient.CallerId,
                     newClient.CallerUri, token), token);
+                LogConnectionCheck(token);
 
                 return true;
             }
@@ -178,6 +180,9 @@ namespace Iviz.Ros
             {
                 switch (e)
                 {
+                    case UnreachableUriException _:
+                        Core.Logger.Internal($"<b>Error:</b> Own uri validation failed. Reason: {e.Message}");
+                        break;
                     case UriBindingException _:
                         Core.Logger.Internal(
                             $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
@@ -207,6 +212,31 @@ namespace Iviz.Ros
             await DisconnectImpl();
             return false;
         }
+
+        static async void LogConnectionCheck(CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(10000, token);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+
+            var sender = ConnectionManager.LogSender;
+            if (sender == null)
+            {
+                return;
+            }
+            
+            if (sender.NumSubscribers == 0)
+            {
+                Core.Logger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
+                                     "It is possible that iviz cannot receive outside connections, which we need in order to publish messages. " +
+                                     "Check that your address is correct, that it is accesible to other nodes, and that your firewall isn't blocking connections.");
+            }
+        }  
 
         static async Task WatchdogAsync(
             [NotNull] Uri masterUri,
@@ -813,7 +843,7 @@ namespace Iviz.Ros
             return (result, errorMsg);
         }
 
-        public int GetNumPublishers([NotNull] string topic)
+        public (int Active, int Total) GetNumPublishers([NotNull] string topic)
         {
             if (topic == null)
             {
@@ -821,7 +851,8 @@ namespace Iviz.Ros
             }
 
             subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
-            return subscribedTopic?.Subscriber?.NumPublishers ?? 0;
+            var subscriber = subscribedTopic?.Subscriber;
+            return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : default;
         }
 
         public int GetNumSubscribers([NotNull] string topic)
