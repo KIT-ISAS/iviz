@@ -4,8 +4,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen
 {
-
-     
     public sealed class VariableElement : IElement
     {
         const string CachedHeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
@@ -28,6 +26,7 @@ namespace Iviz.MsgsGen
         public int FixedArraySize => IsFixedSizeArray ? ArraySize : -1;
         public ClassInfo? ClassInfo { get; internal set; }
         public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassName);
+        public bool ClassIsBlittable => ClassInfo?.IsBlittable ?? ClassInfo.IsClassBlittable(RosClassName);
         public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
 
         static readonly HashSet<string> Keywords = new HashSet<string>
@@ -53,7 +52,7 @@ namespace Iviz.MsgsGen
         internal VariableElement(string comment, string rosClassToken, string fieldName,
             string? parentClassName = null,
             ClassInfo? classInfo = null
-            )
+        )
         {
             Comment = comment;
             this.rosClassToken = rosClassToken;
@@ -142,7 +141,9 @@ namespace Iviz.MsgsGen
                         : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
                     break;
                 case DynamicSizeArray:
-                    result = $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                    result = isInStruct
+                        ? $"public {CsClassName}[] {CsFieldName} {{ get; }}"
+                        : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
                     break;
                 default:
                 {
@@ -205,7 +206,7 @@ namespace Iviz.MsgsGen
 
             string fullRosClassName =
                 RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
-            
+
             // is it in the assembly?
             Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
             if (guessType == null)

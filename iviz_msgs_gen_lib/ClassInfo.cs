@@ -71,7 +71,7 @@ namespace Iviz.MsgsGen
             "string"
         };
 
-        static readonly HashSet<string> ForceStructs = new HashSet<string>
+        static readonly HashSet<string> BlittableStructs = new HashSet<string>
         {
             "geometry_msgs/Vector3",
             "geometry_msgs/Point",
@@ -87,6 +87,13 @@ namespace Iviz.MsgsGen
             "iviz_msgs/Triangle",
         };
 
+        static readonly HashSet<string> ForceStructs = new HashSet<string>
+        {
+            "std_msgs/Header",
+            "geometry_msgs/TransformStamped",
+            "rosgraph_msgs/Log"
+        };
+
         static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
 
         readonly ActionMessageType actionMessageType;
@@ -96,6 +103,17 @@ namespace Iviz.MsgsGen
         readonly VariableElement[] variables;
         string? md5;
         string? md5File;
+
+        public int FixedSize { get; internal set; } = UninitializedSize;
+        public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
+        public ReadOnlyCollection<IElement> Elements { get; }
+        public string RosPackage { get; }
+        public string CsPackage { get; }
+        public string Name { get; }
+        public bool ForceStruct { get; }
+        readonly bool isBlittable;
+        public bool IsBlittable => isBlittable || (ForceStruct && FixedSize >= 0);
+        public string FullRosName => $"{RosPackage}/{Name}";
 
         public ClassInfo(string packageName, string messageFilePath, bool forceStruct = false) :
             this(packageName, Path.GetFileNameWithoutExtension(messageFilePath),
@@ -120,7 +138,7 @@ namespace Iviz.MsgsGen
             return File.ReadAllText(messageFilePath);
         }
 
-        static bool IsVariableForStruct(string rosPackage, VariableElement v)
+        static bool IsVariableBlittable(string rosPackage, VariableElement v)
         {
             if (v.IsArray || v.RosClassName == "string")
             {
@@ -133,7 +151,7 @@ namespace Iviz.MsgsGen
             }
 
             string resolvedName = v.RosClassName.Contains("/") ? $"{rosPackage}/{v.RosClassName}" : v.RosClassName;
-            return ForceStructs.Contains(resolvedName);
+            return BlittableStructs.Contains(resolvedName);
         }
 
         public ClassInfo(string package, string messageName, string messageDefinition, bool forceStruct = false)
@@ -170,20 +188,12 @@ namespace Iviz.MsgsGen
             Elements = new ReadOnlyCollection<IElement>(elements);
             variables = elements.OfType<VariableElement>().ToArray();
 
-            if (forceStruct)
-            {
-                if (!variables.All(variable => IsVariableForStruct(RosPackage, variable)))
-                {
-                    throw new MessageStructException();
-                }
-
-                ForceStruct = true;
-            }
-            else if (ForceStructs.Contains($"{RosPackage}/{Name}"))
+            if (forceStruct || IsClassForceStruct($"{RosPackage}/{Name}"))
             {
                 ForceStruct = true;
             }
 
+            isBlittable = ForceStruct && variables.All(variable => IsVariableBlittable(RosPackage, variable));
         }
 
 
@@ -228,18 +238,14 @@ namespace Iviz.MsgsGen
             this.actionMessageType = actionMessageType;
         }
 
-        public int FixedSize { get; internal set; } = UninitializedSize;
-        public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
-        public ReadOnlyCollection<IElement> Elements { get; }
-        public string RosPackage { get; }
-        public string CsPackage { get; }
-        public string Name { get; }
-        public bool ForceStruct { get; }
-        public string FullRosName => $"{RosPackage}/{Name}";
-
         internal static bool IsClassForceStruct(string f)
         {
-            return ForceStructs.Contains(f);
+            return BlittableStructs.Contains(f) || ForceStructs.Contains(f);
+        }
+
+        internal static bool IsClassBlittable(string f)
+        {
+            return BlittableStructs.Contains(f);
         }
 
         internal static bool IsBuiltinType(string f)
@@ -365,7 +371,7 @@ namespace Iviz.MsgsGen
                             fieldSize += 4;
                             fieldsWithSize.Add($"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
                         }
-                        else if (variable.ClassIsStruct)
+                        else if (variable.ClassIsBlittable)
                         {
                             fieldsWithSize.Add($"size += {variable.CsClassName}.RosFixedMessageLength;");
                         }
@@ -386,7 +392,7 @@ namespace Iviz.MsgsGen
                             fieldsWithSize.Add(
                                 $"size += {variable.ClassInfo.FixedSize} * {variable.CsFieldName}.Length;");
                         }
-                        else if (variable.ClassIsStruct)
+                        else if (variable.ClassIsBlittable)
                         {
                             fieldsWithSize.Add(
                                 $"size += {variable.CsClassName}.RosFixedMessageLength * {variable.CsFieldName}.Length;");
@@ -446,8 +452,7 @@ namespace Iviz.MsgsGen
         }
 
         internal static IEnumerable<string> CreateConstructors(IReadOnlyCollection<VariableElement> variables,
-            string name,
-            bool forceStruct)
+            string name, bool forceStruct, bool structIsBlittable)
         {
             var lines = new List<string>();
 
@@ -534,7 +539,7 @@ namespace Iviz.MsgsGen
             lines.Add("/// <summary> Constructor with buffer. </summary>");
             lines.Add($"public {name}(ref Buffer b)");
             lines.Add("{");
-            if (forceStruct)
+            if (structIsBlittable)
             {
                 if (variables.Any())
                 {
@@ -582,7 +587,7 @@ namespace Iviz.MsgsGen
                                 }
 
                                 break;
-                            case VariableElement.DynamicSizeArray when variable.ClassIsStruct:
+                            case VariableElement.DynamicSizeArray when variable.ClassIsBlittable:
                                 lines.Add(
                                     $"    {variable.CsFieldName} = b.DeserializeStructArray<{variable.CsClassName}>();");
                                 break;
@@ -596,7 +601,7 @@ namespace Iviz.MsgsGen
                                 break;
                             default:
                             {
-                                if (variable.ClassIsStruct)
+                                if (variable.ClassIsBlittable)
                                 {
                                     lines.Add(
                                         $"    {variable.CsFieldName} = b.DeserializeStructArray<{variable.CsClassName}>({variable.ArraySize});");
@@ -697,7 +702,7 @@ namespace Iviz.MsgsGen
         }
 
         internal static IEnumerable<string> CreateSerializers(IReadOnlyCollection<VariableElement> variables,
-            bool forceStruct)
+            bool forceStruct, bool isBlittable)
         {
             var lines = new List<string>();
 
@@ -705,7 +710,7 @@ namespace Iviz.MsgsGen
 
             lines.Add($"public {readOnlyId}void RosSerialize(ref Buffer b)");
             lines.Add("{");
-            if (forceStruct)
+            if (isBlittable)
             {
                 lines.Add("    b.Serialize(this);");
             }
@@ -717,13 +722,30 @@ namespace Iviz.MsgsGen
                     {
                         if (!variable.IsArray)
                         {
-                            lines.Add($"    b.Serialize({variable.CsFieldName});");
+                            if (forceStruct && variable.RosClassName == "string")
+                            {
+                                lines.Add($"    b.Serialize({variable.CsFieldName} ?? string.Empty);");
+                            }
+                            else
+                            {
+                                lines.Add($"    b.Serialize({variable.CsFieldName});");
+                            }
                         }
                         else
                         {
-                            lines.Add(variable.CsClassName == "string"
-                                ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
-                                : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
+                            if (forceStruct)
+                            {
+                                lines.Add(variable.CsClassName == "string"
+                                    ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>(), {variable.ArraySize});"
+                                    : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>(), {{variable.ArraySize}});");
+                            }
+                            else
+                            {
+                                lines.Add(variable.CsClassName == "string"
+                                    ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
+                                    : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
+                            }
+                            
                         }
                     }
                     else
@@ -734,7 +756,7 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            lines.Add(variable.ClassIsStruct
+                            lines.Add(variable.ClassIsBlittable
                                 ? $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});"
                                 : $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});");
                         }
@@ -747,6 +769,12 @@ namespace Iviz.MsgsGen
             lines.Add("");
             lines.Add($"public {readOnlyId}void RosValidate()");
             lines.Add("{");
+            if (isBlittable)
+            {
+                lines.Add("}");
+                return lines;
+            }
+
             foreach (VariableElement variable in variables)
             {
                 if (variable.ArraySize > 0)
@@ -767,8 +795,12 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    lines.Add(
-                        $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
+                    if (!variable.ClassIsStruct)
+                    {
+                        lines.Add(
+                            $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
+                    }
+
                     if (!variable.IsArray && variable.RosClassName != "string")
                     {
                         lines.Add($"    {variable.CsFieldName}.RosValidate();");
@@ -785,12 +817,16 @@ namespace Iviz.MsgsGen
                             $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
                         lines.Add("    }");
                     }
-                    else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsStruct)
+                    else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsBlittable)
                     {
                         lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                         lines.Add("    {");
-                        lines.Add(
-                            $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                        if (!variable.ClassIsStruct)
+                        {
+                            lines.Add(
+                                $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                        }
+
                         lines.Add($"        {variable.CsFieldName}[i].RosValidate();");
                         lines.Add("    }");
                     }
@@ -919,14 +955,14 @@ namespace Iviz.MsgsGen
                 lines.Add("");
             }
 
-            var constructors = CreateConstructors(variables, Name, ForceStruct);
+            var constructors = CreateConstructors(variables, Name, ForceStruct, IsBlittable);
             foreach (string entry in constructors)
             {
                 lines.Add($"    {entry}");
             }
 
             lines.Add("");
-            var serializer = CreateSerializers(variables, ForceStruct);
+            var serializer = CreateSerializers(variables, ForceStruct, IsBlittable);
             foreach (string entry in serializer)
             {
                 lines.Add($"    {entry}");

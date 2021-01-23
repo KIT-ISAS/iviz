@@ -125,7 +125,8 @@ namespace Iviz.MsgsGen
             ["std_msgs/Header"] = new[]
             {
                 "public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);",
-                "public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);"
+                "public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);",
+                "public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);"
             },            
         };
     }
