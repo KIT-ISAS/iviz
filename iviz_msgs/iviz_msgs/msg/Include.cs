@@ -85,16 +85,15 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Include";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "933c5aadd2dc42b0552cfd62d9d326d5";
+        [Preserve] public const string RosMd5Sum = "39837fcbb846cd5b31941b250794d8ae";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71STUsDMRA9N79i6F4FsRURwZMH8VAQP06lyGwyuxndJEsm2xZ/vematohXay4vQ968" +
-                "eTOTCp6ooUheE6QA6IG2iaLHDlCEklKSIvsWsNbmdlrp4Bz5JFPASMCtD5HMgTREhsmkgteMoYFkqags" +
-                "MBO2l9AHoR3hMeMvBkXOZV257DV71B/YjlkPzVjBogCCC4Y6EG3J0VkWYgH2hnVOl1G3JO7aEsKorQKl" +
-                "bv/4qMXz/Q3wmj/fnLRyXhpVTRcwzWfLi6sVOKgghk3u7D3E//HwY4IeHam70IU4nwG6mvMCD7Hhphnk" +
-                "+E6ORXhN6iV/hCHvuBBKeHr3xYga2KdriAXbgnVBPL2RfceHf5jsWDwPacPmGFji1qZ9VPf9t8XlCgym" +
-                "7PMLsMVOWGMDAAA=";
+                "H4sIAAAAAAAAE71STUsDMRA9N9D/MLBXQWxFRPDkQTwUxI9TKTK7O9mMbpIlk22Lv950zbKKV9tc5s3w" +
+                "5s2bJAU8kaZAriKIHtAB7SMFhy2gCEWlJAZ2DfSBYTYr4DVFryEayoQVJsL+EjovdCA8pviHQYGTos1g" +
+                "1Oyw+sBm6HrQwwSDAgjW19SCVIYsnSUhFmBXc5XaZdDNjQfHQhgqo0Cp238+avV8fwO85c83K42c50WV" +
+                "bj3G5WJ9cbUBCwUEv0ubvftwGg+/btChpbm6860PywWgLZlcnAo1a93LDwZZFuFtqrykd+4DjZSczo+/" +
+                "QraienbxGsI8g2YE5QjwBGby2tOHjGaYnq5qx/WUGOLGxDEru+7b43oDNUZU6gsHCTSjRwMAAA==";
                 
     }
 }

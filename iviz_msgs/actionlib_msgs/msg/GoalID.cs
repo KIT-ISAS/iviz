@@ -1,5 +1,6 @@
 /* This file was created automatically, do not edit! */
 
+using System;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibMsgs
@@ -80,6 +81,12 @@ namespace Iviz.Msgs.ActionlibMsgs
                 "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
                 "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +
                 "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";
-                
+
+        public bool Equals(GoalID? other) => !ReferenceEquals(other, null) && Stamp == other.Stamp && Id == other.Id;
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is GoalID other && Equals(other);
+        public override int GetHashCode() => (Stamp, Id).GetHashCode();
+        public static bool operator ==(GoalID? left, GoalID? right) => ReferenceEquals(left, right) || !ReferenceEquals(left, null) && left.Equals(right);
+        public static bool operator !=(GoalID? left, GoalID? right) => !(left == right);
+
     }
 }

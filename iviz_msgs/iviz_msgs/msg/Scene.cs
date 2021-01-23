@@ -108,19 +108,19 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Scene";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "965a996af3ac75fb8fe896116fd6f8e5";
+        [Preserve] public const string RosMd5Sum = "a45481618525051c846ff1ff1f5e7329";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71US2+bQBA+e3/FKFwrtXGqqqrkQ5RUFZJjW4mbSxRZCwwwLeyinSV28us7wIIb5RqH" +
-                "yzz2m9e3s0RwCamtmwo9AqdoEJRi78gUYHSNs1kEK5Fgc/BlgIyAnCocQWtHBRldTU4Vm7RqM3x4BBo0" +
-                "FtiS2He5apthxeAtJDieZ2pJRekloOokz/7DDx6lFu/8qZu7Xz+AnuhlV3PBn0PTKoJbzNGhSbFrUhvA" +
-                "g0fXDaiZ0U8k6STNFmeRcFij8XwG2slAhbFO5hlBrSPopvktMhA5ZLnRAjh8hcZyz+JG5BsEOpKydVDG" +
-                "nI1O/+qij4rzvkKpGfTArNxTiTV+kkTEwm9GqYRznzcEdmMxapeWCk7PaxhU5ZXV/mL+cP7tEWqIwNm9" +
-                "TPbHuo/p4RWD/ZZe2cq6iznoOiG5wMnOKM9bPp5jTcz0hGori9DKHQdAME/ffWhEtWT8d3BBFkEmQerT" +
-                "NzJOPO2hL/viQtKesqNRYvdmRytpmqFFed6Z9h/QZ/8zUYGXzTpebWEBX4J9Hd/+vNrG69XlUrznwXu3" +
-                "WXeg+atfYDjzzw2qxNoKUs1+x6XO7J7f7EtYcHDaFKjuMfVynHcPnDxZc/Rk5ETtXGMIGYNuJ3HVMY1t" +
-                "/eRTp+ds7G6qf5i050l7UeofDNfUSTcGAAA=";
+                "H4sIAAAAAAAAE71UUWvbMBB+jiD/4SCvg63pGGPQh9KNYUiT0GZ7KSUo9tm+TZaMJDdpf/1OthSnbI9L" +
+                "7QedPn93/u7zyTO4htw0rUKP4HLUCEI4b0lXoGWDk8kMlryCKcHXkZIIJSlMpJWlirRUR1BkOlddgQ+P" +
+                "QEPkmLYg50OtxhSoHHgDO0zPC7GgqvacoMLqJif8ARHi6j9f4vb++xegJ3rZNq5y76NoMYM7LNGizjGI" +
+                "lBrw4NGGBqVz6I8mdZYgCP3Ba/RoINxKJhw+Qmtcb9Ca178YaIkrNjFINVuZ/5ZVn5WV/Rtq6UAOpvEn" +
+                "qLHBd1yIHFtXUM7prq8bE4Nih9LmtYDzWxYbFaUy0l/OHy4+PUIDM7Bmz539MvZtNLxyMAzgVNwYZezl" +
+                "HGSzI9R+BAoqy86dMLAh5+iJkQ1/585iosTt9PwtRCmiI+0/g53GoErBLgXyDcTEtseB9HX/drZqT8W4" +
+                "qTGcy7Tbte2gkY9wIb08v87+hyGSM+tVttzAFXxIwNfs7tvNJlstrxcMXyT4fr0KtPmUM18NzPDYP7cc" +
+                "74xRkEvnt66Whdm7f4xPHHmwUle8/Ym5Z0IZzjx5MvoEKshy2GMpi7RGu+VUdVLKdH4Ew312D5PEo4TD" +
+                "qOZ5DF9Yyh85YZZsLgYAAA==";
                 
     }
 }
