@@ -202,11 +202,11 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            var tasks = toDelete.Select(async receiver =>
+            var tasks = toDelete.Select(receiver =>
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);
-                await receiver.DisposeAsync().Caf();
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
+                return receiver.DisposeAsync();
             });
 
             await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
