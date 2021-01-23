@@ -42,39 +42,30 @@ namespace Iviz.Roslib
 
         HashSet<Uri> allPublisherUris = new HashSet<Uri>();
 
-        public int NumConnections
+        public int NumConnections => connectionsByUri.Count;
+
+        public int NumActiveConnections => connectionsByUri.Count(pair => pair.Value.IsConnected);
+
+        public int GetTotalActiveConnections(int timeoutInMs = 500)
         {
-            get
-            {
-                TryToCleanup();
-                return connectionsByUri.Count;
-            }
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token), tokenSource.Token)
+                .WaitNoThrow(this);
         }
 
-        void TryToCleanup()
+        public async Task<int> GetTotalActiveConnectionsAsync(CancellationToken token = default)
         {
+            int numActiveConnections = NumActiveConnections;
             if (!NeedsCleanup())
             {
-                return;
+                return numActiveConnections;
             }
 
-            Task.Run(async () =>
+            try
             {
-                IDisposable @lock;
-                using (CancellationTokenSource tokenSource = new CancellationTokenSource(100))
-                {
-                    try
-                    {
-                        @lock = await mutex.LockAsync(tokenSource.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        return;
-                    }
-                }
-
                 bool numConnectionsChanged;
-                using (@lock)
+
+                using (await mutex.LockAsync(token))
                 {
                     numConnectionsChanged = await CleanupAsync();
                 }
@@ -83,7 +74,12 @@ namespace Iviz.Roslib
                 {
                     subscriber.RaiseNumPublishersChanged();
                 }
-            }).WaitNoThrow(this);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+
+            return numActiveConnections;
         }
 
         public bool RequestNoDelay { get; }
@@ -202,11 +198,11 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            var tasks = toDelete.Select(async receiver =>
+            var tasks = toDelete.Select(receiver =>
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);
-                await receiver.DisposeAsync().Caf();
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
+                return receiver.DisposeAsync();
             });
 
             await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();

@@ -142,10 +142,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
             message.RosValidate();
 
-            CancellationToken linkedToken;
-            linkedToken = token == default
-                ? runningTs.Token
-                : CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token).Token;
+            using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
 
             switch (policy)
             {
@@ -153,7 +150,7 @@ namespace Iviz.Roslib
                     manager.Publish(message);
                     return Task.CompletedTask;
                 case RosPublishPolicy.WaitUntilSent:
-                    return manager.PublishAndWaitAsync(message, linkedToken);
+                    return manager.PublishAndWaitAsync(message, linkedToken.Token);
                 default:
                     return Task.CompletedTask;
             }

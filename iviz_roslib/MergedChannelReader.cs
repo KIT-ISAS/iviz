@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -16,6 +17,9 @@ namespace Iviz.Roslib
     /// A subscriber queue that merges two or more <see cref="RosChannelReader{T}"/>
     /// </summary>
     public class MergedChannelReader : IEnumerable<IMessage>
+#if !NETSTANDARD2_0
+        , IAsyncEnumerable<IMessage>
+#endif
     {
         readonly IRosChannelReader[] sources;
 
@@ -79,9 +83,7 @@ namespace Iviz.Roslib
 
         public async Task<(IMessage msg, int index)> ReadWithIndexAsync(CancellationToken token = default)
         {
-            using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
-            using CancellationTokenSource linkedCts =
-                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, token);
+            using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             Task<bool>[] tasks = sources.Select(queue => queue.WaitToReadAsync(linkedCts.Token)).ToArray();
             Task<bool> readyTask = await Task.WhenAny(tasks);
@@ -102,7 +104,7 @@ namespace Iviz.Roslib
 
         public IEnumerator<IMessage> GetEnumerator()
         {
-            yield return Read(CancellationToken.None);
+            yield return Read();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -112,42 +114,61 @@ namespace Iviz.Roslib
 
         public IEnumerable<IMessage> ReadAll(CancellationToken token = default)
         {
+            Task[] tasks = new Task[sources.Length];
+
             while (!token.IsCancellationRequested)
             {
-                yield return Read(token);
-            }
+                using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
-            token.ThrowIfCancellationRequested();
+                for (int i = 0; i < sources.Length; i++)
+                {
+                    tasks[i] = sources[i].WaitToReadAsync(linkedCts.Token);
+                }
+
+                int readyTask = Task.WaitAny(tasks, token);
+                linkedCts.Cancel();
+
+                token.ThrowIfCancellationRequested();
+
+                yield return sources[readyTask].Read(token);
+            }
         }
 
-        public IEnumerable<(IMessage msg, int index)> ReadAllWithIndex(CancellationToken token = default)
+        public IEnumerable<IMessage> TryReadAll()
         {
-            while (!token.IsCancellationRequested)
-            {
-                yield return ReadWithIndex(token);
-            }
-
-            token.ThrowIfCancellationRequested();
-        }
-
+            return sources.SelectMany(source => source.TryReadAll());
+        }        
+        
 #if !NETSTANDARD2_0
         public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
         {
-            while (true)
+            Task<bool>[] tasks = new Task<bool>[sources.Length];
+
+            while (!token.IsCancellationRequested)
             {
-                yield return await ReadAsync(token);
+                using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+
+                for (int i = 0; i < sources.Length; i++)
+                {
+                    tasks[i] = sources[i].WaitToReadAsync(linkedCts.Token);
+                }
+
+                Task<bool> readyTask = await Task.WhenAny(tasks);
+                linkedCts.Cancel();
+
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    if (tasks[i] == readyTask)
+                    {
+                        yield return await sources[i].ReadAsync(token);
+                    }
+                }
             }
         }
 
-        public async IAsyncEnumerable<(IMessage msg, int index)>
-            ReadAllWithIndexAsync([EnumeratorCancellation] CancellationToken token)
+        public IAsyncEnumerator<IMessage> GetAsyncEnumerator(CancellationToken token = default)
         {
-            while (!token.IsCancellationRequested)
-            {
-                yield return await ReadWithIndexAsync(token);
-            }
-
-            token.ThrowIfCancellationRequested();
+            return ReadAllAsync(token).GetAsyncEnumerator(token);
         }
 #endif
     }

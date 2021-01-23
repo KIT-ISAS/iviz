@@ -50,9 +50,9 @@ namespace Iviz.Roslib.MarkerHelper
             publisher.Start(client, topic);
         }
 
-        public async Task StartAsync(IRosClient client, string topic = "markers")
+        public async Task StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
         {
-            await publisher.StartAsync(client, topic);
+            await publisher.StartAsync(client, topic, token);
         }
 
         public void Dispose()
@@ -506,7 +506,7 @@ namespace Iviz.Roslib.MarkerHelper
                 }
             }
 
-            CancellationTokenSource tokenSource = new CancellationTokenSource(1000);
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(1000);
             await publisher.WriteAsync(array, RosPublishPolicy.WaitUntilSent, tokenSource.Token).AwaitNoThrow(this);
         }
     }

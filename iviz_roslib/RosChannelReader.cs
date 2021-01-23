@@ -1,13 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -21,6 +25,9 @@ namespace Iviz.Roslib
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public sealed class RosChannelReader<T> : IEnumerable<T>, IRosChannelReader
+#if !NETSTANDARD2_0
+            , IAsyncEnumerable<T>
+#endif
         where T : IMessage, IDeserializable<T>, new()
     {
         readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
@@ -113,10 +120,7 @@ namespace Iviz.Roslib
         /// <returns>An enumerator that can be used in a foreach</returns>
         public IEnumerator<T> GetEnumerator()
         {
-            while (TryRead(out T t))
-            {
-                yield return t;
-            }
+            return ReadAll().GetEnumerator();
         }
 
         /// <summary>
@@ -290,10 +294,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async Task<T> ReadAsync(int timeoutInMs)
+        public Task<T> ReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return await ReadAsync(ts.Token);
+            return ReadAsync(ts.Token);
         }
 
         /// <summary>
@@ -303,10 +307,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async Task<T> ReadAsync(CancellationToken token = default)
+        public Task<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return await messageQueue.DequeueAsync(token);
+            return messageQueue.DequeueAsync(token);
         }
 
 
@@ -319,16 +323,24 @@ namespace Iviz.Roslib
         public bool TryRead(out T t)
         {
             ThrowIfNotStarted();
-            CancellationToken cancelled = new CancellationToken(true);
-            Task<T> task = messageQueue.DequeueAsync(cancelled);
+            Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
             if (!task.RanToCompletion())
             {
-                t = default!; // may be null though
+                t = default!;
                 return false;
             }
-
-            t = task.Result;
-            return true;
+            
+            try
+            {
+                t = messageQueue.Dequeue(new CancellationToken(true));
+                return true;
+            }
+            catch (TaskCanceledException)
+            {
+                // this shouldn't happen unless multiple reads get called at the same time
+                t = default!;
+                return false;
+            }
         }
 
 
@@ -341,7 +353,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public IEnumerable<T> ReadAll(CancellationToken token = default)
         {
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 yield return Read(token);
             }
@@ -349,11 +361,45 @@ namespace Iviz.Roslib
 
         IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            return ReadAll(token).Cast<IMessage>();
+        }
+
+        public IEnumerable<T> TryReadAll()
+        {
+            IEnumerable<T> enumerable = messageQueue.GetConsumingEnumerable(new CancellationToken(true));
+            using IEnumerator<T> enumerator = enumerable.GetEnumerator();
+            while (true)
             {
-                yield return Read(token);
+                Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
+                if (!task.RanToCompletion())
+                {
+                    yield break;
+                }
+
+                bool canMoveNext;
+                try
+                {
+                    canMoveNext = enumerator.MoveNext();
+                }
+                catch (TaskCanceledException)
+                {
+                    // this shouldn't happen unless multiple reads get called at the same time
+                    yield break;
+                }
+
+                if (!canMoveNext)
+                {
+                    yield break;
+                }
+
+                yield return enumerator.Current!;
             }
         }
+        
+        IEnumerable<IMessage> IRosChannelReader.TryReadAll()
+        {
+            return TryReadAll().Cast<IMessage>();
+        }        
 
 #if !NETSTANDARD2_0
         /// <summary>
@@ -366,7 +412,7 @@ namespace Iviz.Roslib
         public async IAsyncEnumerable<T> ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token = default)
         {
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 yield return await ReadAsync(token);
             }
@@ -375,10 +421,15 @@ namespace Iviz.Roslib
         async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token)
         {
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 yield return await ReadAsync(token);
             }
+        }
+        
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken token = default)
+        {
+            return ReadAllAsync(token).GetAsyncEnumerator(token);
         }
 #endif
 

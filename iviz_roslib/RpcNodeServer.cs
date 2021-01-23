@@ -64,6 +64,7 @@ namespace Iviz.Roslib.XmlRpc
             runningTs.Cancel();
             listener.Dispose();
             task?.WaitForWithTimeout(2000).WaitNoThrow(this);
+            runningTs.Dispose();
         }
 
         public async Task DisposeAsync()
@@ -77,10 +78,8 @@ namespace Iviz.Roslib.XmlRpc
 
             runningTs.Cancel();
             listener.Dispose();
-            if (task != null)
-            {
-                await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
-            }
+            await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
+            runningTs.Dispose();
         }
 
         public void Start()
@@ -182,8 +181,11 @@ namespace Iviz.Roslib.XmlRpc
 
         static Arg[] GetPid(object[] _)
         {
+#if NET5_0
+            int id = Environment.ProcessId;
+#else
             int id = Process.GetCurrentProcess().Id;
-
+#endif
             return OkResponse(id);
         }
 

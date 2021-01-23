@@ -239,7 +239,7 @@ namespace Iviz.Roslib.XmlRpc
         }
 
 
-        SubscribeParamResponse SubscribeParam(string key)
+        SubscribeParamResponse SubscribeParam(string key, CancellationToken token = default)
         {
             Arg[] args = {CallerId, key, CallerUri};
             object response = MethodCall("subscribeParam", args);

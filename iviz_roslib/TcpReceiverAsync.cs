@@ -35,7 +35,7 @@ namespace Iviz.Roslib
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
         bool KeepRunning => !runningTs.IsCancellationRequested;
-        bool IsConnected => tcpClient?.Connected ?? false;
+        public bool IsConnected => tcpClient != null && tcpClient.Connected;
 
         byte[] readBuffer = new byte[4];
         NetworkStream? stream;
@@ -85,6 +85,7 @@ namespace Iviz.Roslib
 
             readBuffer = Array.Empty<byte>();
             task = null;
+            runningTs.Dispose();
         }
 
 
