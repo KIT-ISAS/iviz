@@ -96,6 +96,7 @@ namespace Iviz.RosMaster
 
             runningTs.Cancel();
             listener.Dispose();
+            runningTs.Dispose();
 
             disposed = true;
         }
@@ -122,7 +123,7 @@ namespace Iviz.RosMaster
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             try
             {
