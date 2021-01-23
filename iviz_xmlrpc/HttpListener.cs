@@ -71,6 +71,7 @@ namespace Iviz.XmlRpc
 
             listener.Stop();
             Logger.LogDebugFormat("{0}: Listener dispose out", this);
+            runningTs.Dispose();
         }
 
         /// <summary>

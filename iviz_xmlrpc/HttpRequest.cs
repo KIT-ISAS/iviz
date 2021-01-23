@@ -24,9 +24,9 @@ namespace Iviz.XmlRpc
             client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
         }
 
-        public void Start(int timeoutInMs = DefaultTimeoutInMs)
+        public void Start(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
         {
-            Task.Run(async () => await StartAsync(timeoutInMs)).Wait();
+            Task.Run(async () => await StartAsync(timeoutInMs, token), token).WaitAndRethrow();
         }
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
