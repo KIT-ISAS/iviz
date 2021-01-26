@@ -15,13 +15,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Joy()
         {
-            Header = new StdMsgs.Header();
             Axes = System.Array.Empty<float>();
             Buttons = System.Array.Empty<int>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Joy(StdMsgs.Header Header, float[] Axes, int[] Buttons)
+        public Joy(in StdMsgs.Header Header, float[] Axes, int[] Buttons)
         {
             this.Header = Header;
             this.Axes = Axes;
@@ -55,8 +54,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Axes is null) throw new System.NullReferenceException(nameof(Axes));
             if (Buttons is null) throw new System.NullReferenceException(nameof(Buttons));
         }

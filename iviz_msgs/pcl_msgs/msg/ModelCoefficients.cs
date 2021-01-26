@@ -13,12 +13,11 @@ namespace Iviz.Msgs.PclMsgs
         /// <summary> Constructor for empty message. </summary>
         public ModelCoefficients()
         {
-            Header = new StdMsgs.Header();
             Values = System.Array.Empty<float>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ModelCoefficients(StdMsgs.Header Header, float[] Values)
+        public ModelCoefficients(in StdMsgs.Header Header, float[] Values)
         {
             this.Header = Header;
             this.Values = Values;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Values is null) throw new System.NullReferenceException(nameof(Values));
         }
     

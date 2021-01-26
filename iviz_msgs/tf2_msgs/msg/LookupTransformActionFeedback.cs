@@ -14,13 +14,12 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public LookupTransformActionFeedback()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Feedback = LookupTransformFeedback.Singleton;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LookupTransformActionFeedback(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, LookupTransformFeedback Feedback)
+        public LookupTransformActionFeedback(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, LookupTransformFeedback Feedback)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));

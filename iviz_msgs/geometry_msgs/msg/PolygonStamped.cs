@@ -14,12 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PolygonStamped()
         {
-            Header = new StdMsgs.Header();
             Polygon = new Polygon();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PolygonStamped(StdMsgs.Header Header, Polygon Polygon)
+        public PolygonStamped(in StdMsgs.Header Header, Polygon Polygon)
         {
             this.Header = Header;
             this.Polygon = Polygon;
@@ -50,8 +49,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Polygon is null) throw new System.NullReferenceException(nameof(Polygon));
             Polygon.RosValidate();
         }

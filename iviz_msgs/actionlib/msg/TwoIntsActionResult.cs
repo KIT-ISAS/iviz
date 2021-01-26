@@ -14,13 +14,12 @@ namespace Iviz.Msgs.Actionlib
         /// <summary> Constructor for empty message. </summary>
         public TwoIntsActionResult()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Result = new TwoIntsResult();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TwoIntsActionResult(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, TwoIntsResult Result)
+        public TwoIntsActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, TwoIntsResult Result)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Result is null) throw new System.NullReferenceException(nameof(Result));

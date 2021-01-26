@@ -35,7 +35,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()
         {
-            Header = new StdMsgs.Header();
             JointNames = System.Array.Empty<string>();
             Transforms = System.Array.Empty<GeometryMsgs.Transform>();
             Twist = System.Array.Empty<GeometryMsgs.Twist>();
@@ -43,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointState(StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
+        public MultiDOFJointState(in StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
         {
             this.Header = Header;
             this.JointNames = JointNames;
@@ -87,8 +86,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (JointNames is null) throw new System.NullReferenceException(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {

@@ -120,5 +120,19 @@ namespace Iviz.Msgs
             Stamp = h.Stamp;
             FrameId = h.FrameId;
         }
+
+        public static TransformStamped WithTransform(this TransformStamped ts, in Transform t) => (ts.Header, ts.ChildFrameId, t);
+        public static TransformStamped WithNextTransform(this TransformStamped ts, in Transform t) => (ts.Header.WithNextSeq(), ts.ChildFrameId, t);
+        
+        public static TransformStamped WithHeader(this TransformStamped ts, in Header h) => (h, ts.ChildFrameId, ts.Transform);
+        public static TransformStamped WithChildFrameId(this TransformStamped ts, string s) => (ts.Header, s, ts.Transform);
+
+        public static void Deconstruct(this TransformStamped t, out StdMsgs.Header Header, out string ChildFrameId, out Transform Transform)
+        {
+            Header = t.Header;
+            ChildFrameId = t.ChildFrameId;
+            Transform = t.Transform;
+        }
+        
     }
 }

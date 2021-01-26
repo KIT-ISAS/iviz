@@ -21,11 +21,10 @@ namespace Iviz.Msgs.GridMapMsgs
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GridMapInfo(StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, in GeometryMsgs.Pose Pose)
+        public GridMapInfo(in StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, in GeometryMsgs.Pose Pose)
         {
             this.Header = Header;
             this.Resolution = Resolution;
@@ -65,8 +64,6 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
         }
     
         public int RosMessageLength

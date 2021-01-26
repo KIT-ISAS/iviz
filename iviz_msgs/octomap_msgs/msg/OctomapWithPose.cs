@@ -17,12 +17,11 @@ namespace Iviz.Msgs.OctomapMsgs
         /// <summary> Constructor for empty message. </summary>
         public OctomapWithPose()
         {
-            Header = new StdMsgs.Header();
             Octomap = new OctomapMsgs.Octomap();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public OctomapWithPose(StdMsgs.Header Header, in GeometryMsgs.Pose Origin, OctomapMsgs.Octomap Octomap)
+        public OctomapWithPose(in StdMsgs.Header Header, in GeometryMsgs.Pose Origin, OctomapMsgs.Octomap Octomap)
         {
             this.Header = Header;
             this.Origin = Origin;
@@ -56,8 +55,6 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Octomap is null) throw new System.NullReferenceException(nameof(Octomap));
             Octomap.RosValidate();
         }

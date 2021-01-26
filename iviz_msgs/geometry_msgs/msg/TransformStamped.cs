@@ -1,11 +1,13 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/TransformStamped")]
-    public sealed class TransformStamped : IDeserializable<TransformStamped>, IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct TransformStamped : IMessage, System.IEquatable<TransformStamped>, IDeserializable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -13,19 +15,12 @@ namespace Iviz.Msgs.GeometryMsgs
         // This message is mostly used by the 
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "child_frame_id")] public string ChildFrameId { get; set; } // the frame id of the child frame
-        [DataMember (Name = "transform")] public Transform Transform { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; }
+        [DataMember (Name = "child_frame_id")] public string ChildFrameId { get; } // the frame id of the child frame
+        [DataMember (Name = "transform")] public Transform Transform { get; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public TransformStamped()
-        {
-            Header = new StdMsgs.Header();
-            ChildFrameId = "";
-        }
-        
         /// <summary> Explicit constructor. </summary>
-        public TransformStamped(StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
+        public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;
@@ -40,31 +35,38 @@ namespace Iviz.Msgs.GeometryMsgs
             Transform = new Transform(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
             return new TransformStamped(ref b);
         }
         
-        TransformStamped IDeserializable<TransformStamped>.RosDeserialize(ref Buffer b)
+        readonly TransformStamped IDeserializable<TransformStamped>.RosDeserialize(ref Buffer b)
         {
             return new TransformStamped(ref b);
         }
+        
+        public override readonly int GetHashCode() => (Header, ChildFrameId, Transform).GetHashCode();
+        
+        public override readonly bool Equals(object? o) => o is TransformStamped s && Equals(s);
+        
+        public readonly bool Equals(TransformStamped o) => (Header, ChildFrameId, Transform) == (o.Header, o.ChildFrameId, o.Transform);
+        
+        public static bool operator==(in TransformStamped a, in TransformStamped b) => a.Equals(b);
+        
+        public static bool operator!=(in TransformStamped a, in TransformStamped b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(ChildFrameId);
+            b.Serialize(ChildFrameId ?? string.Empty);
             Transform.RosSerialize(ref b);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
-            if (ChildFrameId is null) throw new System.NullReferenceException(nameof(ChildFrameId));
         }
     
-        public int RosMessageLength
+        public readonly int RosMessageLength
         {
             get {
                 int size = 60;
@@ -74,7 +76,7 @@ namespace Iviz.Msgs.GeometryMsgs
             }
         }
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/TransformStamped";
@@ -97,6 +99,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "GJbGwzSOJKAKJh4m1T6mGIYY6mGdAqPjO0AKhBStue8Bxk9rEo9hsit5ne/TqkF9060ohNS2qdFNQd7U" +
                 "mGMzG7Mx0zq5fdLqEEJq2ynmyRkoBMim2ns5XVQ0uoFWMSEs/Hq+ONA7x5X6QJ3bj8NlDfG8oJcO3b79" +
                 "FNigmGxgvWod6+dP9Divxnn1612o3mrsLbYtOW/m78szzuPufivQWOQ/JrRZrbLsN7aLdoyMBwAA";
-                
+
+        public static implicit operator TransformStamped((StdMsgs.Header Header, string ChildFrameId, Transform Transform) p) => new TransformStamped(p.Header, p.ChildFrameId, p.Transform);
     }
 }

@@ -27,11 +27,10 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Illuminance()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Illuminance(StdMsgs.Header Header, double Illuminance_, double Variance)
+        public Illuminance(in StdMsgs.Header Header, double Illuminance_, double Variance)
         {
             this.Header = Header;
             this.Illuminance_ = Illuminance_;
@@ -65,8 +64,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
         }
     
         public int RosMessageLength

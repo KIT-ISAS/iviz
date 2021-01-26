@@ -166,7 +166,8 @@ namespace Iviz.MsgsGen
             {
                 if (!string.IsNullOrEmpty(package))
                 {
-                    throw new ArgumentException("messageName contains a package, but package is not null. Only one of both must be set!");
+                    throw new ArgumentException(
+                        "messageName contains a package, but package is not null. Only one of both must be set!");
                 }
 
                 package = messageName.Substring(0, lastSlash);
@@ -745,7 +746,6 @@ namespace Iviz.MsgsGen
                                     ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
                                     : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
                             }
-                            
                         }
                     }
                     else
@@ -795,7 +795,7 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    if (!variable.ClassIsStruct)
+                    if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
                     {
                         lines.Add(
                             $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
@@ -817,16 +817,12 @@ namespace Iviz.MsgsGen
                             $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
                         lines.Add("    }");
                     }
-                    else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsBlittable)
+                    else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsStruct)
                     {
                         lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                         lines.Add("    {");
-                        if (!variable.ClassIsStruct)
-                        {
-                            lines.Add(
-                                $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
-                        }
-
+                        lines.Add(
+                            $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
                         lines.Add($"        {variable.CsFieldName}[i].RosValidate();");
                         lines.Add("    }");
                     }

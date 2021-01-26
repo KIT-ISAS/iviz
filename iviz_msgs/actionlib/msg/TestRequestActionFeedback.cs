@@ -14,13 +14,12 @@ namespace Iviz.Msgs.Actionlib
         /// <summary> Constructor for empty message. </summary>
         public TestRequestActionFeedback()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Feedback = TestRequestFeedback.Singleton;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestRequestActionFeedback(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, TestRequestFeedback Feedback)
+        public TestRequestActionFeedback(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, TestRequestFeedback Feedback)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));

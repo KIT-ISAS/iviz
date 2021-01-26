@@ -14,13 +14,12 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetMapActionFeedback()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Feedback = GetMapFeedback.Singleton;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetMapActionFeedback(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, GetMapFeedback Feedback)
+        public GetMapActionFeedback(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, GetMapFeedback Feedback)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));

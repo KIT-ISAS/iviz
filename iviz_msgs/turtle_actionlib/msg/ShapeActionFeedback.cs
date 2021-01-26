@@ -14,13 +14,12 @@ namespace Iviz.Msgs.TurtleActionlib
         /// <summary> Constructor for empty message. </summary>
         public ShapeActionFeedback()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Feedback = ShapeFeedback.Singleton;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ShapeActionFeedback(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, ShapeFeedback Feedback)
+        public ShapeActionFeedback(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, ShapeFeedback Feedback)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));

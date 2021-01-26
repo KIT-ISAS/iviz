@@ -21,13 +21,12 @@ namespace Iviz.Msgs.OctomapMsgs
         /// <summary> Constructor for empty message. </summary>
         public Octomap()
         {
-            Header = new StdMsgs.Header();
             Id = "";
             Data = System.Array.Empty<sbyte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Octomap(StdMsgs.Header Header, bool Binary, string Id, double Resolution, sbyte[] Data)
+        public Octomap(in StdMsgs.Header Header, bool Binary, string Id, double Resolution, sbyte[] Data)
         {
             this.Header = Header;
             this.Binary = Binary;
@@ -67,8 +66,6 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }

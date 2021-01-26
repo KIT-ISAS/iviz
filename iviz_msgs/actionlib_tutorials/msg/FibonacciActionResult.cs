@@ -14,13 +14,12 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// <summary> Constructor for empty message. </summary>
         public FibonacciActionResult()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Result = new FibonacciResult();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public FibonacciActionResult(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, FibonacciResult Result)
+        public FibonacciActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, FibonacciResult Result)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Result is null) throw new System.NullReferenceException(nameof(Result));

@@ -13,12 +13,11 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()
         {
-            Header = new StdMsgs.Header();
             Mesh = new MeshMsgs.TriangleMesh();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TriangleMeshStamped(StdMsgs.Header Header, MeshMsgs.TriangleMesh Mesh)
+        public TriangleMeshStamped(in StdMsgs.Header Header, MeshMsgs.TriangleMesh Mesh)
         {
             this.Header = Header;
             this.Mesh = Mesh;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Mesh is null) throw new System.NullReferenceException(nameof(Mesh));
             Mesh.RosValidate();
         }

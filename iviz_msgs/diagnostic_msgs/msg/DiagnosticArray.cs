@@ -14,12 +14,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticArray()
         {
-            Header = new StdMsgs.Header();
             Status = System.Array.Empty<DiagnosticStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DiagnosticArray(StdMsgs.Header Header, DiagnosticStatus[] Status)
+        public DiagnosticArray(in StdMsgs.Header Header, DiagnosticStatus[] Status)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             for (int i = 0; i < Status.Length; i++)
             {

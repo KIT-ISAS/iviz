@@ -14,12 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()
         {
-            Header = new StdMsgs.Header();
             Pose = new PoseWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseWithCovarianceStamped(StdMsgs.Header Header, PoseWithCovariance Pose)
+        public PoseWithCovarianceStamped(in StdMsgs.Header Header, PoseWithCovariance Pose)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -50,8 +49,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
             Pose.RosValidate();
         }

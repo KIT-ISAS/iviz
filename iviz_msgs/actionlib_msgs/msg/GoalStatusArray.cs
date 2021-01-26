@@ -15,12 +15,11 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// <summary> Constructor for empty message. </summary>
         public GoalStatusArray()
         {
-            Header = new StdMsgs.Header();
             StatusList = System.Array.Empty<GoalStatus>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GoalStatusArray(StdMsgs.Header Header, GoalStatus[] StatusList)
+        public GoalStatusArray(in StdMsgs.Header Header, GoalStatus[] StatusList)
         {
             this.Header = Header;
             this.StatusList = StatusList;
@@ -55,8 +54,6 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (StatusList is null) throw new System.NullReferenceException(nameof(StatusList));
             for (int i = 0; i < StatusList.Length; i++)
             {

@@ -12,11 +12,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderTwo()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestHeaderTwo(StdMsgs.Header Header)
+        public TestHeaderTwo(in StdMsgs.Header Header)
         {
             this.Header = Header;
         }
@@ -44,8 +43,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
         }
     
         public int RosMessageLength

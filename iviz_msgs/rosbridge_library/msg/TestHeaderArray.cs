@@ -49,11 +49,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosValidate()
         {
             if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            for (int i = 0; i < Header.Length; i++)
-            {
-                if (Header[i] is null) throw new System.NullReferenceException($"{nameof(Header)}[{i}]");
-                Header[i].RosValidate();
-            }
         }
     
         public int RosMessageLength

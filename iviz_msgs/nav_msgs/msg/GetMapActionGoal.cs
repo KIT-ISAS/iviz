@@ -14,13 +14,12 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetMapActionGoal()
         {
-            Header = new StdMsgs.Header();
             GoalId = new ActionlibMsgs.GoalID();
             Goal = GetMapGoal.Singleton;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetMapActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, GetMapGoal Goal)
+        public GetMapActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, GetMapGoal Goal)
         {
             this.Header = Header;
             this.GoalId = GoalId;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (GoalId is null) throw new System.NullReferenceException(nameof(GoalId));
             GoalId.RosValidate();
             if (Goal is null) throw new System.NullReferenceException(nameof(Goal));

@@ -14,13 +14,12 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public LookupTransformActionGoal()
         {
-            Header = new StdMsgs.Header();
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new LookupTransformGoal();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LookupTransformActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, LookupTransformGoal Goal)
+        public LookupTransformActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, LookupTransformGoal Goal)
         {
             this.Header = Header;
             this.GoalId = GoalId;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (GoalId is null) throw new System.NullReferenceException(nameof(GoalId));
             GoalId.RosValidate();
             if (Goal is null) throw new System.NullReferenceException(nameof(Goal));

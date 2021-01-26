@@ -17,13 +17,12 @@ namespace Iviz.Msgs.PclMsgs
         /// <summary> Constructor for empty message. </summary>
         public PolygonMesh()
         {
-            Header = new StdMsgs.Header();
             Cloud = new SensorMsgs.PointCloud2();
             Polygons = System.Array.Empty<Vertices>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PolygonMesh(StdMsgs.Header Header, SensorMsgs.PointCloud2 Cloud, Vertices[] Polygons)
+        public PolygonMesh(in StdMsgs.Header Header, SensorMsgs.PointCloud2 Cloud, Vertices[] Polygons)
         {
             this.Header = Header;
             this.Cloud = Cloud;
@@ -61,8 +60,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Cloud is null) throw new System.NullReferenceException(nameof(Cloud));
             Cloud.RosValidate();
             if (Polygons is null) throw new System.NullReferenceException(nameof(Polygons));

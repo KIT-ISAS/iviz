@@ -14,12 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public AccelStamped()
         {
-            Header = new StdMsgs.Header();
             Accel = new Accel();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AccelStamped(StdMsgs.Header Header, Accel Accel)
+        public AccelStamped(in StdMsgs.Header Header, Accel Accel)
         {
             this.Header = Header;
             this.Accel = Accel;
@@ -50,8 +49,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
             Accel.RosValidate();
         }

@@ -47,13 +47,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()
         {
-            Header = new StdMsgs.Header();
             Status = new NavSatStatus();
             PositionCovariance = new double[9];
         }
         
         /// <summary> Explicit constructor. </summary>
-        public NavSatFix(StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
+        public NavSatFix(in StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
         {
             this.Header = Header;
             this.Status = Status;
@@ -99,8 +98,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (PositionCovariance is null) throw new System.NullReferenceException(nameof(PositionCovariance));

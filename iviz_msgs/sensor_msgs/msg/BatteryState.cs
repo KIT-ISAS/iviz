@@ -57,7 +57,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public BatteryState()
         {
-            Header = new StdMsgs.Header();
             CellVoltage = System.Array.Empty<float>();
             CellTemperature = System.Array.Empty<float>();
             Location = "";
@@ -65,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public BatteryState(StdMsgs.Header Header, float Voltage, float Temperature, float Current, float Charge, float Capacity, float DesignCapacity, float Percentage, byte PowerSupplyStatus, byte PowerSupplyHealth, byte PowerSupplyTechnology, bool Present, float[] CellVoltage, float[] CellTemperature, string Location, string SerialNumber)
+        public BatteryState(in StdMsgs.Header Header, float Voltage, float Temperature, float Current, float Charge, float Capacity, float DesignCapacity, float Percentage, byte PowerSupplyStatus, byte PowerSupplyHealth, byte PowerSupplyTechnology, bool Present, float[] CellVoltage, float[] CellTemperature, string Location, string SerialNumber)
         {
             this.Header = Header;
             this.Voltage = Voltage;
@@ -138,8 +137,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (CellVoltage is null) throw new System.NullReferenceException(nameof(CellVoltage));
             if (CellTemperature is null) throw new System.NullReferenceException(nameof(CellTemperature));
             if (Location is null) throw new System.NullReferenceException(nameof(Location));

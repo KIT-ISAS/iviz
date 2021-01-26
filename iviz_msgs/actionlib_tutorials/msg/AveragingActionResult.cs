@@ -14,13 +14,12 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// <summary> Constructor for empty message. </summary>
         public AveragingActionResult()
         {
-            Header = new StdMsgs.Header();
             Status = new ActionlibMsgs.GoalStatus();
             Result = new AveragingResult();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public AveragingActionResult(StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, AveragingResult Result)
+        public AveragingActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, AveragingResult Result)
         {
             this.Header = Header;
             this.Status = Status;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
             Status.RosValidate();
             if (Result is null) throw new System.NullReferenceException(nameof(Result));

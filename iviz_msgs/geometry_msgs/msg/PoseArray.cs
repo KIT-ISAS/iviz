@@ -14,12 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PoseArray()
         {
-            Header = new StdMsgs.Header();
             Poses = System.Array.Empty<Pose>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PoseArray(StdMsgs.Header Header, Pose[] Poses)
+        public PoseArray(in StdMsgs.Header Header, Pose[] Poses)
         {
             this.Header = Header;
             this.Poses = Poses;
@@ -50,8 +49,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
         }
     

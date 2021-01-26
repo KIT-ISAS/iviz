@@ -31,7 +31,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()
         {
-            Header = new StdMsgs.Header();
             Name = "";
             Description = "";
             MenuEntries = System.Array.Empty<MenuEntry>();
@@ -39,7 +38,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public InteractiveMarker(StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
+        public InteractiveMarker(in StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
         {
             this.Header = Header;
             this.Pose = Pose;
@@ -93,8 +92,6 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
             if (Description is null) throw new System.NullReferenceException(nameof(Description));
             if (MenuEntries is null) throw new System.NullReferenceException(nameof(MenuEntries));

@@ -1,11 +1,13 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
     [Preserve, DataContract (Name = "rosgraph_msgs/Log")]
-    public sealed class Log : IDeserializable<Log>, IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct Log : IMessage, System.IEquatable<Log>, IDeserializable<Log>
     {
         //#
         //# Severity level constants
@@ -18,28 +20,17 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         //# Fields
         //#
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "level")] public byte Level { get; set; }
-        [DataMember (Name = "name")] public string Name { get; set; } // name of the node
-        [DataMember (Name = "msg")] public string Msg { get; set; } // message 
-        [DataMember (Name = "file")] public string File { get; set; } // file the message came from
-        [DataMember (Name = "function")] public string Function { get; set; } // function the message came from
-        [DataMember (Name = "line")] public uint Line { get; set; } // line the message came from
-        [DataMember (Name = "topics")] public string[] Topics { get; set; } // topic names that the node publishes
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; }
+        [DataMember (Name = "level")] public byte Level { get; }
+        [DataMember (Name = "name")] public string Name { get; } // name of the node
+        [DataMember (Name = "msg")] public string Msg { get; } // message 
+        [DataMember (Name = "file")] public string File { get; } // file the message came from
+        [DataMember (Name = "function")] public string Function { get; } // function the message came from
+        [DataMember (Name = "line")] public uint Line { get; } // line the message came from
+        [DataMember (Name = "topics")] public string[] Topics { get; } // topic names that the node publishes
     
-        /// <summary> Constructor for empty message. </summary>
-        public Log()
-        {
-            Header = new StdMsgs.Header();
-            Name = "";
-            Msg = "";
-            File = "";
-            Function = "";
-            Topics = System.Array.Empty<string>();
-        }
-        
         /// <summary> Explicit constructor. </summary>
-        public Log(StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
+        public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
         {
             this.Header = Header;
             this.Level = Level;
@@ -64,44 +55,47 @@ namespace Iviz.Msgs.RosgraphMsgs
             Topics = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
             return new Log(ref b);
         }
         
-        Log IDeserializable<Log>.RosDeserialize(ref Buffer b)
+        readonly Log IDeserializable<Log>.RosDeserialize(ref Buffer b)
         {
             return new Log(ref b);
         }
+        
+        public override readonly int GetHashCode() => (Header, Level, Name, Msg, File, Function, Line, Topics).GetHashCode();
+        
+        public override readonly bool Equals(object? o) => o is Log s && Equals(s);
+        
+        public readonly bool Equals(Log o) => (Header, Level, Name, Msg, File, Function, Line, Topics) == (o.Header, o.Level, o.Name, o.Msg, o.File, o.Function, o.Line, o.Topics);
+        
+        public static bool operator==(in Log a, in Log b) => a.Equals(b);
+        
+        public static bool operator!=(in Log a, in Log b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
-            b.Serialize(Name);
-            b.Serialize(Msg);
-            b.Serialize(File);
-            b.Serialize(Function);
+            b.Serialize(Name ?? string.Empty);
+            b.Serialize(Msg ?? string.Empty);
+            b.Serialize(File ?? string.Empty);
+            b.Serialize(Function ?? string.Empty);
             b.Serialize(Line);
-            b.SerializeArray(Topics, 0);
+            b.SerializeArray(Topics ?? System.Array.Empty<string>(), 0);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Msg is null) throw new System.NullReferenceException(nameof(Msg));
-            if (File is null) throw new System.NullReferenceException(nameof(File));
-            if (Function is null) throw new System.NullReferenceException(nameof(Function));
-            if (Topics is null) throw new System.NullReferenceException(nameof(Topics));
             for (int i = 0; i < Topics.Length; i++)
             {
                 if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
             }
         }
     
-        public int RosMessageLength
+        public readonly int RosMessageLength
         {
             get {
                 int size = 25;
@@ -119,7 +113,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosgraph_msgs/Log";

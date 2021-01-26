@@ -13,12 +13,11 @@ namespace Iviz.Msgs.PclMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointIndices()
         {
-            Header = new StdMsgs.Header();
             Indices = System.Array.Empty<int>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointIndices(StdMsgs.Header Header, int[] Indices)
+        public PointIndices(in StdMsgs.Header Header, int[] Indices)
         {
             this.Header = Header;
             this.Indices = Indices;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Indices is null) throw new System.NullReferenceException(nameof(Indices));
         }
     

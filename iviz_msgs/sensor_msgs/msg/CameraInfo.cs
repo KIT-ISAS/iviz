@@ -128,7 +128,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()
         {
-            Header = new StdMsgs.Header();
             DistortionModel = "";
             D = System.Array.Empty<double>();
             K = new double[9];
@@ -138,7 +137,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CameraInfo(StdMsgs.Header Header, uint Height, uint Width, string DistortionModel, double[] D, double[] K, double[] R, double[] P, uint BinningX, uint BinningY, RegionOfInterest Roi)
+        public CameraInfo(in StdMsgs.Header Header, uint Height, uint Width, string DistortionModel, double[] D, double[] K, double[] R, double[] P, uint BinningX, uint BinningY, RegionOfInterest Roi)
         {
             this.Header = Header;
             this.Height = Height;
@@ -196,8 +195,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (DistortionModel is null) throw new System.NullReferenceException(nameof(DistortionModel));
             if (D is null) throw new System.NullReferenceException(nameof(D));
             if (K is null) throw new System.NullReferenceException(nameof(K));

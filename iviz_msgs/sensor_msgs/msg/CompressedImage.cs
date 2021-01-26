@@ -22,13 +22,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
         {
-            Header = new StdMsgs.Header();
             Format = "";
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CompressedImage(StdMsgs.Header Header, string Format, byte[] Data)
+        public CompressedImage(in StdMsgs.Header Header, string Format, byte[] Data)
         {
             this.Header = Header;
             this.Format = Format;
@@ -62,8 +61,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Format is null) throw new System.NullReferenceException(nameof(Format));
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }

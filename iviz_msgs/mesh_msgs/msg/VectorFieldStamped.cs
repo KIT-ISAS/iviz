@@ -13,12 +13,11 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()
         {
-            Header = new StdMsgs.Header();
             VectorField = new MeshMsgs.VectorField();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public VectorFieldStamped(StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
+        public VectorFieldStamped(in StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
         {
             this.Header = Header;
             this.VectorField = VectorField;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (VectorField is null) throw new System.NullReferenceException(nameof(VectorField));
             VectorField.RosValidate();
         }

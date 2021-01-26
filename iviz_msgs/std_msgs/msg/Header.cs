@@ -1,32 +1,28 @@
 /* This file was created automatically, do not edit! */
 
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
     [Preserve, DataContract (Name = "std_msgs/Header")]
-    public sealed class Header : IDeserializable<Header>, IMessage
+    [StructLayout(LayoutKind.Sequential)]
+    public readonly struct Header : IMessage, System.IEquatable<Header>, IDeserializable<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
         // in a particular coordinate frame.
         // 
         // sequence ID: consecutively increasing ID 
-        [DataMember (Name = "seq")] public uint Seq { get; set; }
+        [DataMember (Name = "seq")] public uint Seq { get; }
         //Two-integer timestamp that is expressed as:
         // * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
         // * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
         // time-handling sugar is provided by the client library
-        [DataMember (Name = "stamp")] public time Stamp { get; set; }
+        [DataMember (Name = "stamp")] public time Stamp { get; }
         //Frame this data is associated with
-        [DataMember (Name = "frame_id")] public string FrameId { get; set; }
+        [DataMember (Name = "frame_id")] public string FrameId { get; }
     
-        /// <summary> Constructor for empty message. </summary>
-        public Header()
-        {
-            FrameId = "";
-        }
-        
         /// <summary> Explicit constructor. </summary>
         public Header(uint Seq, time Stamp, string FrameId)
         {
@@ -43,29 +39,38 @@ namespace Iviz.Msgs.StdMsgs
             FrameId = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
+        public readonly ISerializable RosDeserialize(ref Buffer b)
         {
             return new Header(ref b);
         }
         
-        Header IDeserializable<Header>.RosDeserialize(ref Buffer b)
+        readonly Header IDeserializable<Header>.RosDeserialize(ref Buffer b)
         {
             return new Header(ref b);
         }
+        
+        public override readonly int GetHashCode() => (Seq, Stamp, FrameId).GetHashCode();
+        
+        public override readonly bool Equals(object? o) => o is Header s && Equals(s);
+        
+        public readonly bool Equals(Header o) => (Seq, Stamp, FrameId) == (o.Seq, o.Stamp, o.FrameId);
+        
+        public static bool operator==(in Header a, in Header b) => a.Equals(b);
+        
+        public static bool operator!=(in Header a, in Header b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(Seq);
             b.Serialize(Stamp);
-            b.Serialize(FrameId);
+            b.Serialize(FrameId ?? string.Empty);
         }
         
-        public void RosValidate()
+        public readonly void RosValidate()
         {
-            if (FrameId is null) throw new System.NullReferenceException(nameof(FrameId));
         }
     
-        public int RosMessageLength
+        public readonly int RosMessageLength
         {
             get {
                 int size = 16;
@@ -74,7 +79,7 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
     
-        public string RosType => RosMessageType;
+        public readonly string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Header";
@@ -94,5 +99,6 @@ namespace Iviz.Msgs.StdMsgs
         /// Custom iviz code
         public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
         public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);
+        public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);
     }
 }

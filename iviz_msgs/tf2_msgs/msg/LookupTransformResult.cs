@@ -13,12 +13,11 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public LookupTransformResult()
         {
-            Transform = new GeometryMsgs.TransformStamped();
             Error = new Tf2Msgs.TF2Error();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public LookupTransformResult(GeometryMsgs.TransformStamped Transform, Tf2Msgs.TF2Error Error)
+        public LookupTransformResult(in GeometryMsgs.TransformStamped Transform, Tf2Msgs.TF2Error Error)
         {
             this.Transform = Transform;
             this.Error = Error;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Transform is null) throw new System.NullReferenceException(nameof(Transform));
-            Transform.RosValidate();
             if (Error is null) throw new System.NullReferenceException(nameof(Error));
             Error.RosValidate();
         }

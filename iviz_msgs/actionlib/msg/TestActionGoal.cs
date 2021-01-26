@@ -14,13 +14,12 @@ namespace Iviz.Msgs.Actionlib
         /// <summary> Constructor for empty message. </summary>
         public TestActionGoal()
         {
-            Header = new StdMsgs.Header();
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new TestGoal();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public TestActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, TestGoal Goal)
+        public TestActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, TestGoal Goal)
         {
             this.Header = Header;
             this.GoalId = GoalId;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (GoalId is null) throw new System.NullReferenceException(nameof(GoalId));
             GoalId.RosValidate();
             if (Goal is null) throw new System.NullReferenceException(nameof(Goal));

@@ -18,14 +18,13 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
         {
-            Header = new StdMsgs.Header();
             ChildFrameId = "";
             Pose = new GeometryMsgs.PoseWithCovariance();
             Twist = new GeometryMsgs.TwistWithCovariance();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Odometry(StdMsgs.Header Header, string ChildFrameId, GeometryMsgs.PoseWithCovariance Pose, GeometryMsgs.TwistWithCovariance Twist)
+        public Odometry(in StdMsgs.Header Header, string ChildFrameId, GeometryMsgs.PoseWithCovariance Pose, GeometryMsgs.TwistWithCovariance Twist)
         {
             this.Header = Header;
             this.ChildFrameId = ChildFrameId;
@@ -62,8 +61,6 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (ChildFrameId is null) throw new System.NullReferenceException(nameof(ChildFrameId));
             if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
             Pose.RosValidate();

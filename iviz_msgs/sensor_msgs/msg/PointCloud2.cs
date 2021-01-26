@@ -32,13 +32,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()
         {
-            Header = new StdMsgs.Header();
             Fields = System.Array.Empty<PointField>();
             Data = System.Array.Empty<byte>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointCloud2(StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
+        public PointCloud2(in StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
         {
             this.Header = Header;
             this.Height = Height;
@@ -94,8 +93,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Fields is null) throw new System.NullReferenceException(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {

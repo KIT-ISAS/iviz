@@ -14,13 +14,12 @@ namespace Iviz.Msgs.TurtleActionlib
         /// <summary> Constructor for empty message. </summary>
         public ShapeActionGoal()
         {
-            Header = new StdMsgs.Header();
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new ShapeGoal();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public ShapeActionGoal(StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, ShapeGoal Goal)
+        public ShapeActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, ShapeGoal Goal)
         {
             this.Header = Header;
             this.GoalId = GoalId;
@@ -54,8 +53,6 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (GoalId is null) throw new System.NullReferenceException(nameof(GoalId));
             GoalId.RosValidate();
             if (Goal is null) throw new System.NullReferenceException(nameof(Goal));

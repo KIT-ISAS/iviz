@@ -14,11 +14,10 @@ namespace Iviz.Msgs.GeometryMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointStamped()
         {
-            Header = new StdMsgs.Header();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public PointStamped(StdMsgs.Header Header, in Point Point)
+        public PointStamped(in StdMsgs.Header Header, in Point Point)
         {
             this.Header = Header;
             this.Point = Point;
@@ -49,8 +48,6 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
         }
     
         public int RosMessageLength

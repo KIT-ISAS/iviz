@@ -15,13 +15,12 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
         {
-            Header = new StdMsgs.Header();
             Uuid = "";
             MeshVertexColors = new MeshMsgs.MeshVertexColors();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeshVertexColorsStamped(StdMsgs.Header Header, string Uuid, MeshMsgs.MeshVertexColors MeshVertexColors)
+        public MeshVertexColorsStamped(in StdMsgs.Header Header, string Uuid, MeshMsgs.MeshVertexColors MeshVertexColors)
         {
             this.Header = Header;
             this.Uuid = Uuid;
@@ -55,8 +54,6 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
             if (MeshVertexColors is null) throw new System.NullReferenceException(nameof(MeshVertexColors));
             MeshVertexColors.RosValidate();

@@ -34,7 +34,6 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public JointState()
         {
-            Header = new StdMsgs.Header();
             Name = System.Array.Empty<string>();
             Position = System.Array.Empty<double>();
             Velocity = System.Array.Empty<double>();
@@ -42,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public JointState(StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
+        public JointState(in StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
         {
             this.Header = Header;
             this.Name = Name;
@@ -82,8 +81,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
             for (int i = 0; i < Name.Length; i++)
             {

@@ -37,13 +37,12 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiEchoLaserScan()
         {
-            Header = new StdMsgs.Header();
             Ranges = System.Array.Empty<LaserEcho>();
             Intensities = System.Array.Empty<LaserEcho>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiEchoLaserScan(StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, LaserEcho[] Ranges, LaserEcho[] Intensities)
+        public MultiEchoLaserScan(in StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, LaserEcho[] Ranges, LaserEcho[] Intensities)
         {
             this.Header = Header;
             this.AngleMin = AngleMin;
@@ -106,8 +105,6 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Ranges is null) throw new System.NullReferenceException(nameof(Ranges));
             for (int i = 0; i < Ranges.Length; i++)
             {

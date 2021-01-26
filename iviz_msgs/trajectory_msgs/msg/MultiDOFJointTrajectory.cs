@@ -19,13 +19,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectory()
         {
-            Header = new StdMsgs.Header();
             JointNames = System.Array.Empty<string>();
             Points = System.Array.Empty<MultiDOFJointTrajectoryPoint>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MultiDOFJointTrajectory(StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
+        public MultiDOFJointTrajectory(in StdMsgs.Header Header, string[] JointNames, MultiDOFJointTrajectoryPoint[] Points)
         {
             this.Header = Header;
             this.JointNames = JointNames;
@@ -63,8 +62,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (JointNames is null) throw new System.NullReferenceException(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
