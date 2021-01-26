@@ -296,6 +296,7 @@ namespace Iviz.XmlRpc
         /// <param name="method">Name of the XML-RPC method.</param>
         /// <param name="args">List of arguments.</param>
         /// <param name="timeoutInMs">Timeout in milliseconds.</param>
+        /// <param name="token">Optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,

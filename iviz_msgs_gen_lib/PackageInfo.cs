@@ -20,8 +20,10 @@ namespace Iviz.MsgsGen
             Services = new ReadOnlyDictionary<string, ServiceInfo>(services);
         }
 
-        public PackageInfo(IEnumerable<ClassInfo> messages, IEnumerable<ServiceInfo> services)
+        public PackageInfo(IEnumerable<ClassInfo> messages, IEnumerable<ServiceInfo>? services = null)
         {
+            services ??= Array.Empty<ServiceInfo>();
+            
             this.messages = messages.ToDictionary(message => message.FullRosName, message => message);
             this.services = services.ToDictionary(service => service.FullRosName, service => service);
             Messages = new ReadOnlyDictionary<string, ClassInfo>(this.messages);
@@ -141,6 +143,11 @@ namespace Iviz.MsgsGen
                 classInfo.ResolveClasses(this);
                 classInfo.CheckFixedSize();
             }
+        }
+
+        public static void ResolveAll(params ClassInfo[] classes)
+        {
+            new PackageInfo(classes).ResolveAll();            
         }
     }
 }

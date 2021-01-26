@@ -237,7 +237,6 @@ namespace Iviz.Roslib
             {
                 TcpNoDelay = true;
                 Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
-                Console.WriteLine("tcp no delay!");
             }
 
             return null;

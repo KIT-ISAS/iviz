@@ -264,7 +264,8 @@ namespace Iviz.App
             Config = new SettingsConfiguration();
 
             CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
-            canvas.referenceResolution = Settings.IsMobile ? new Vector2(800, 600) : new Vector2(800, 800);
+            //canvas.referenceResolution = Settings.IsMobile ? new Vector2(800, 600) : new Vector2(800, 800);
+            //canvas.referenceResolution = new Vector2(800, 800);
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 

@@ -166,7 +166,7 @@ namespace Iviz.MsgsGen
             {
                 if (!string.IsNullOrEmpty(package))
                 {
-                    throw new ArgumentException("Message name contains a package, but package argument is also set!");
+                    throw new ArgumentException("messageName contains a package, but package is not null. Only one of both must be set!");
                 }
 
                 package = messageName.Substring(0, lastSlash);

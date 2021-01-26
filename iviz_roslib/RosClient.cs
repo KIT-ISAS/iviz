@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -648,26 +649,9 @@ namespace Iviz.Roslib
             }
         }
 
-        public void CheckOwnUri()
+        public void CheckOwnUri(CancellationToken token = default)
         {
-            NodeClient.GetPidResponse response;
-            try
-            {
-                response = CreateTalker(CallerUri).GetPid();
-            }
-            catch (Exception e)
-            {
-                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
-            }
-
-            if (!response.IsValid)
-            {
-                Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
-            }
-            else if (response.Pid != Process.GetCurrentProcess().Id)
-            {
-                throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
-            }
+            Task.Run(() => CheckOwnUriAsync(token), token).WaitAndRethrow();
         }
 
         public async Task CheckOwnUriAsync(CancellationToken token = default)
@@ -679,16 +663,27 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                throw new UnreachableUriException($"My own uri '{CallerUri}' does not appear to be reachable!", e);
+                throw new UnreachableUriException($"The given own uri '{CallerUri}' is not reachable.", e);
             }
+
+            static int GetProcessId()
+            {
+#if NET5_0
+                return Environment.ProcessId;
+#else
+                return Process.GetCurrentProcess().Id;
+#endif
+            }
+
 
             if (!response.IsValid)
             {
                 Logger.LogErrorFormat("{0}: Failed to validate reachability response.", this);
             }
-            else if (response.Pid != Process.GetCurrentProcess().Id)
+            else if (response.Pid != GetProcessId())
             {
-                throw new UnreachableUriException($"My uri '{CallerUri}' appears to belong to someone else!");
+                throw new UnreachableUriException(
+                    $"The given own uri '{CallerUri}' appears to belong to another node.");
             }
         }
 
@@ -1525,10 +1520,9 @@ namespace Iviz.Roslib
         public async Task CloseAsync(CancellationToken externalToken = default)
         {
             const int timeoutInMs = 3000;
-            var timeoutTokenSource = new CancellationTokenSource(timeoutInMs);
-            CancellationToken token = externalToken == default
-                ? timeoutTokenSource.Token
-                : CancellationTokenSource.CreateLinkedTokenSource(externalToken, timeoutTokenSource.Token).Token;
+            using var timeoutTokenSource = new CancellationTokenSource(timeoutInMs);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalToken, timeoutTokenSource.Token);
+            var token = tokenSource.Token;
 
             List<Task> tasks = new List<Task>();
 
@@ -1574,8 +1568,12 @@ namespace Iviz.Roslib
                     .AwaitNoThrow(this).Caf();
             }));
 
-            await Task.WhenAll(tasks).WaitForWithTimeout(timeoutInMs, "Close() tasks timed out", token)
-                .AwaitNoThrow(this).Caf();
+            Task timeoutTask = Task.Delay(timeoutInMs, token);
+            Task finalTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask).Caf();
+            if (finalTask == timeoutTask)
+            {
+                Logger.LogError($"{this}: Close() tasks timed out.");
+            }
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1651,9 +1649,25 @@ namespace Iviz.Roslib
         public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
             where T : IService
         {
+            using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            CallService(serviceName, service, persistent, timeoutTs.Token);
+        }
+
+        /// <summary>
+        /// Calls the given ROS service.
+        /// </summary>
+        /// <param name="serviceName">Name of the ROS service</param>
+        /// <param name="service">Service message. The response will be written in the response field.</param>
+        /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <param name="token">An optional cancellation token.</param>
+        /// <typeparam name="T">Service type.</typeparam>
+        /// <returns>Whether the call succeeded.</returns>
+        /// <exception cref="TaskCanceledException">The operation timed out.</exception>
+        public void CallService<T>(string serviceName, T service, bool persistent = false,
+            CancellationToken token = default)
+            where T : IService
+        {
             string resolvedServiceName = ResolveResourceName(serviceName);
-            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            CancellationToken token = timeoutTs.Token;
 
             if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
@@ -1732,15 +1746,8 @@ namespace Iviz.Roslib
         public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
             int timeoutInMs = 5000) where T : IService
         {
-            CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            try
-            {
-                await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
-            }
-            catch (OperationCanceledException e)
-            {
-                throw new TimeoutException($"Service call {serviceName} timed out", e);
-            }
+            using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
         }
 
         /// <summary>

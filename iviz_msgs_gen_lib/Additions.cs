@@ -127,7 +127,16 @@ namespace Iviz.MsgsGen
                 "public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);",
                 "public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);",
                 "public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);"
-            },            
+            },
+            
+            ["actionlib_msgs/GoalID"] = new[]
+            {
+                "public bool Equals(GoalID? other) => ReferenceEquals(this, other) || (other != null && Stamp == other.Stamp && Id == other.Id);",
+                "public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is GoalID other && Equals(other);",
+                "public override int GetHashCode() => (Stamp, Id).GetHashCode();",
+                "public static bool operator ==(GoalID? left, GoalID? right) => ReferenceEquals(left, right) || !ReferenceEquals(left, null) && left.Equals(right);",
+                "public static bool operator !=(GoalID? left, GoalID? right) => !(left == right);"
+            },   
         };
     }
 }

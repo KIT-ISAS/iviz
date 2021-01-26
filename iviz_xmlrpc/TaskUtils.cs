@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -37,9 +38,14 @@ namespace Iviz.XmlRpc
         /// <param name="errorMessage">Optional error message to appear in the timeout exception</param>
         /// <param name="token">An optional cancellation token</param>
         /// <exception cref="TimeoutException">If the task did not complete in time</exception>
-        public static async Task WaitForWithTimeout(this Task task, int timeoutInMs, string? errorMessage = null,
+        public static async Task WaitForWithTimeout(this Task? task, int timeoutInMs, string? errorMessage = null,
             CancellationToken token = default)
         {
+            if (task == null)
+            {
+                return;
+            }
+            
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs, token)).Caf();
             if (result != task)
             {
@@ -88,7 +94,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                t.Wait();
+                t.GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -98,6 +104,76 @@ namespace Iviz.XmlRpc
                 }
             }
         }
+        
+        public static T WaitNoThrow<T>(this Task<T>? t, object caller)
+        {
+            if (t == null)
+            {
+                return default!;
+            }
+
+            try
+            {
+                return t.GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+
+                return default!;
+            }
+        }
+        
+        
+        /// <summary>
+        /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
+        /// </summary>
+        /// <param name="t">The task to await.</param>
+        public static void WaitAndRethrow(this Task? t)
+        {
+            if (t == null)
+            {
+                return;
+            }
+
+            try
+            {
+                t.GetAwaiter().GetResult();
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (AggregateException e) when (e.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(e.InnerException)?.Throw();
+            }
+        }        
+        
+        public static T WaitAndRethrow<T>(this Task<T>? t)
+        {
+            if (t == null)
+            {
+                return default!;
+            }
+
+            try
+            {
+                return t.GetAwaiter().GetResult();
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (AggregateException e) when (e.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture(e.InnerException)?.Throw();
+                throw;
+            }
+        }  
 
         public static async Task AwaitNoThrow(this Task? t, object caller)
         {

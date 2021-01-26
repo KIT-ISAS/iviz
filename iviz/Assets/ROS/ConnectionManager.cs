@@ -25,7 +25,7 @@ namespace Iviz.Ros
         Listener<Log> logListener;
         public static event Action<Log> LogMessageArrived;
 
-        
+
         long frameBandwidthDown;
         long frameBandwidthUp;
         uint logSeq;
@@ -38,13 +38,16 @@ namespace Iviz.Ros
         [CanBeNull] public static string MyId => Connection.MyId;
         public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;
 
+        [CanBeNull] public static IListener LogListener => instance != null ? instance.logListener : null;
+        [CanBeNull] public static ISender LogSender => instance != null ? instance.logSender : null;
+
         void Awake()
         {
             instance = this;
 
             logSender = new Sender<Log>("/rosout");
             Logger.LogExternal += LogMessage;
-            
+
             logListener = new Listener<Log>("/rosout_agg", msg => LogMessageArrived?.Invoke(msg));
         }
 

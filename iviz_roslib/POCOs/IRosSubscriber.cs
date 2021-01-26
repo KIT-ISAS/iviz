@@ -33,9 +33,14 @@ namespace Iviz.Roslib
         public string TopicType { get; }
 
         /// <summary>
-        /// The number of publishers in the topic.
+        /// The number of publishers in the topic. Includes connections in progress, which may or may not succeed.
         /// </summary>
         public int NumPublishers { get; }
+
+        /// <summary>
+        /// The number of publishers in the topic. Only includes established connections.
+        /// </summary>
+        public int NumActivePublishers { get; }
 
         /// <summary>
         /// Returns a structure that represents the internal state of the subscriber. 

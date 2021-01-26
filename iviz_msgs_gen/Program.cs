@@ -114,7 +114,7 @@ namespace Iviz.MsgsGen
                 return;
             }
 
-            PackageInfo p = new();
+            PackageInfo p = new PackageInfo();
 
 
             for (int i = 3; i < args.Length; i += 4)
@@ -230,7 +230,7 @@ namespace Iviz.MsgsGen
 
             foreach (string fullPath in messageFullPaths)
             {
-                ClassInfo classInfo = new(package, fullPath);
+                ClassInfo classInfo = new ClassInfo(package, fullPath);
                 string classCode = classInfo.ToCsString();
                 string destPath = $"{fullOutputPath}/msg/{classInfo.Name}.cs";
                 File.WriteAllText(destPath, classCode);
@@ -238,7 +238,7 @@ namespace Iviz.MsgsGen
 
             foreach (string fullPath in serviceFullPaths)
             {
-                ServiceInfo serviceInfo = new(package, fullPath);
+                ServiceInfo serviceInfo = new ServiceInfo(package, fullPath);
                 string classCode = serviceInfo.ToCsString();
                 string destPath = $"{fullOutputPath}/srv/{serviceInfo.Name}.cs";
                 File.WriteAllText(destPath, classCode);
@@ -295,7 +295,7 @@ namespace Iviz.MsgsGen
                 return;
             }
 
-            PackageInfo p = new();
+            PackageInfo p = new PackageInfo();
 
             string[] packages = Directory.GetDirectories(rosBasePath);
             foreach (string packageDir in packages)

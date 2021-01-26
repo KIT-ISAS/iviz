@@ -41,7 +41,7 @@ namespace Iviz.App
         }
 
         [CanBeNull] string Topic => Listener?.Topic;
-        int NumPublishers => (!ConnectionManager.IsConnected || Listener == null) ? -1 : Listener.NumPublishers;
+        (int Active, int Total) NumPublishers => (!ConnectionManager.IsConnected || Listener == null) ? (-1, -1) : Listener.NumPublishers;
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
         int Dropped => Listener?.Stats.Dropped ?? 0;
@@ -50,7 +50,7 @@ namespace Iviz.App
         void UpdateStats()
         {
             string subscriberStatus;
-            int numPublishers = NumPublishers;
+            var(numActivePublishers, numPublishers) = NumPublishers;
             if (numPublishers == -1)
             {
                 subscriberStatus = "Off";
@@ -61,7 +61,7 @@ namespace Iviz.App
             }
             else
             {
-                subscriberStatus = $"{numPublishers.ToString()}↓ ";
+                subscriberStatus = $"{numActivePublishers.ToString()}/{numPublishers.ToString()}↓ ";
             }
 
             string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
@@ -69,7 +69,7 @@ namespace Iviz.App
             string dropped = Dropped.ToString(UnityUtils.Culture);
 
             text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                        $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} drop</b>";
+                        $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} dr</b>";
 
             if (listener == null)
             {
