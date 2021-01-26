@@ -113,6 +113,9 @@ namespace Iviz.Roslib.XmlRpc
             {
                 await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();
             }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception e)
             {
                 Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
@@ -249,9 +252,13 @@ namespace Iviz.Roslib.XmlRpc
             {
                 await client.PublisherUpdateRcpAsync(topic, publisherUris, token).Caf();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
-                Logger.Log(e);
+                Logger.LogErrorFormat("{0}: Error while updating the publisher list. {1}", this, e);
             }
         }
 
@@ -289,7 +296,7 @@ namespace Iviz.Roslib.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.Log(e);
+                Logger.LogErrorFormat("{0}: Error in RequestTopic: {1}", this, e);
                 return new Arg[] {StatusCode.Error, $"Unknown error: {e.Message}", 0};
             }
 

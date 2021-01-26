@@ -285,11 +285,7 @@ namespace Iviz.Roslib.Actionlib
 
             TAGoal actionGoal = new TAGoal
             {
-                GoalId = goalId,
-                Header = new Header
-                {
-                    Stamp = time.Now()
-                }
+                GoalId = goalId
             };
 
             IActionGoal<TGoal> actionTGoal = (IActionGoal<TGoal>) actionGoal;

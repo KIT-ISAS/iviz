@@ -52,11 +52,11 @@ namespace Iviz.Roslib
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Hostname;
 
-        public async Task StopAsync()
+        public Task StopAsync()
         {
             keepRunning = false;
             tcpClient.Close();
-            await task.WaitForWithTimeout(2000).AwaitNoThrow(this).Caf();
+            return task.WaitForWithTimeout(2000).AwaitNoThrow(this);
         }
 
         async Task<int> ReceivePacket()
@@ -148,7 +148,6 @@ namespace Iviz.Roslib
             if (values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
                 tcpClient.NoDelay = true;
-                Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
             }
 
             return null;
@@ -203,7 +202,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogErrorFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
                 keepRunning = false;
                 return;
             }
@@ -228,7 +227,7 @@ namespace Iviz.Roslib
                     int rcvLength = await ReceivePacket().Caf();
                     if (rcvLength == -1)
                     {
-                        Logger.LogDebug($"{this}: closed remotely.");
+                        Logger.LogDebugFormat("{0}: closed remotely.", this);
                         break;
                     }
 
@@ -247,7 +246,7 @@ namespace Iviz.Roslib
                     }
                     catch (Exception e)
                     {
-                        Logger.LogError($"{this}: Inner exception in service callback: {e}");
+                        Logger.LogErrorFormat("{0}: Inner exception in service callback: {1}", this, e);
                         errorInResponse = true;
                     }
 

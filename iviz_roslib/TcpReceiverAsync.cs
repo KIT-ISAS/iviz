@@ -102,7 +102,8 @@ namespace Iviz.Roslib
             try
             {
 #if NET5_0
-                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token).AsTask();
+                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token)
+                    .AsTask();
 #else
                 Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port);
 #endif
@@ -163,17 +164,12 @@ namespace Iviz.Roslib
 
         static int WaitTimeInMsFromTry(int index)
         {
-            if (index < 10)
+            return index switch
             {
-                return 2000;
-            }
-
-            if (index < 50)
-            {
-                return 5000;
-            }
-
-            return 10000;
+                < 10 => 2000,
+                < 50 => 5000,
+                _ => 10000
+            };
         }
 
         async Task SendHeader()
@@ -243,7 +239,6 @@ namespace Iviz.Roslib
             {
                 int index = responses[0].IndexOf('=');
                 string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-                errorDescription = errorMsg;
                 throw new RosHandshakeException($"Failed handshake: {errorMsg}");
             }
 
@@ -318,6 +313,7 @@ namespace Iviz.Roslib
                             Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
                             break;
                         case RoslibException _:
+                            errorDescription = e.Message;
                             Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
                             break;
                         default:
@@ -327,9 +323,16 @@ namespace Iviz.Roslib
                 }
             }
 
-            errorDescription = null;
             tcpClient = null;
             stream = null;
+            try
+            {
+                runningTs.Cancel();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+
             Logger.LogDebugFormat("{0}: Stopped!", this);
         }
 

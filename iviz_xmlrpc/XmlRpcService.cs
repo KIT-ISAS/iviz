@@ -280,6 +280,10 @@ namespace Iviz.XmlRpc
                 await request.StartAsync(timeoutInMs, token).Caf();
                 inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
@@ -325,6 +329,10 @@ namespace Iviz.XmlRpc
             {
                 request.Start(timeoutInMs);
                 inData = request.Request(outData, timeoutInMs);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -388,7 +396,7 @@ namespace Iviz.XmlRpc
 
                 string outData = buffer.ToString();
 
-                await httpContext.Respond(outData, token: token).Caf();
+                await httpContext.RespondAsync(outData, token: token).Caf();
 
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
@@ -406,7 +414,16 @@ namespace Iviz.XmlRpc
                 buffer.AppendLine("</fault>");
                 buffer.AppendLine("</methodResponse>");
 
-                await httpContext.Respond(buffer.ToString(), token: token).Caf();
+                await httpContext.RespondAsync(buffer.ToString(), token: token).Caf();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                await httpContext.RespondWithUnexpectedErrorAsync(token: token).Caf();
+                throw;
             }
         }
 
@@ -434,7 +451,7 @@ namespace Iviz.XmlRpc
                 switch (child?.Name)
                 {
                     case null:
-                        throw new ParseException("Expected 'params', 'fault', or 'methodName', got null");
+                        throw new ParseException("Expected 'params', 'fault', or 'methodName'; got null instead");
                     case "params":
                     {
                         args = new object[child.ChildNodes.Count];
@@ -455,7 +472,7 @@ namespace Iviz.XmlRpc
                         {
                             throw new ParseException("Expected a child under 'fault', received none. ");
                         }
-                        
+
                         throw new FaultException(child.FirstChild.InnerXml);
                     case "methodName":
                         methodName = child.InnerText;

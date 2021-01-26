@@ -2,22 +2,28 @@
 
 iviz_roslib is a (partial) implementation of the ROS API in pure C#.
 
-It is written using the .NETStandard 2.0 runtime with C#8, but can be used in C#7.3 (Unity) without issues.
-I have tested it in Windows, Ubuntu Linux, macOS, iOS, Android, and UWP 32-bit (Hololens 1), so I hope it will work pretty much anywhere.  
+It is written using the .NETStandard 2.0 runtime with C#8.
+I have tested it in Windows, Ubuntu Linux, macOS, iOS, Android, and UWP (Hololens 1 and 2), so I hope it will work pretty much anywhere.  
 
 ## Getting Started
 
-To use this library in your code, you can either:
-* include the iviz_roslib project into your VS, VSCode, or Rider solution, or
-* reference the files __Iviz.Roslib.dll__, __Iviz.Msgs.dll__, __Iviz.XmlRpc.dll__, and __Newtonsoft.Json.dll__ from the _Publish_ folder in your own project.
+There is a project called _iviz_utils_ in the root of the repository that references all the other projects.
+You can either:
+* include the project into your VS, VSCode, or Rider solution, or
+* reference all the DLLs in either /Publish (NET Standard 2) or /Publish5 (NET 5) in your project.
 
-If you are in Unity, all you need to do is copy the four files and put them somewhere in your Assets directory.
+If you are in Unity, all you need to do is copy all the DLLs and put them somewhere in your Assets directory.
 If you are recompiling the library, or adapting the code to your own libraries, keep in mind that Unity only supports .NETStandard 2.0 (not 2.1, and not Core).
 
-Note: Newer versions of Unity (in particular, the Collections package) already provide their own version of __Newtonsoft.Json.dll__.
-If you get an error of "duplicate references" will need to remove it.  
+*Note:* The file Newtonsoft.Json.dll is a bit problematic, because some Unity packages already provide it.
+If you get an error of "duplicate references" you can remove the iviz version.
+The Unity version is also safe to use.  
 
-## Examples
+## Message Generation
+
+TBW
+
+## Basic Examples
 
 The interface is inspired by [ROS#](https://github.com/siemens/ros-sharp), so if you come from that background you will find the library more intuitive than if you were using roscpp.
 
@@ -26,7 +32,7 @@ The interface is inspired by [ROS#](https://github.com/siemens/ros-sharp), so if
 Unlike Rosbridge, you do not need a special websocket app to talk to ROS.
 Still, there are some things you need to keep in mind.
 * Instead of URIs like _ws://localhost:9090_, you now connect directly to _http://localhost:11311_.
-* ROS is a peer-to-peer network, so if you're working with other computers, it is important for you to know your address.
+* ROS is a peer-to-peer network, so if you're working with other computers, you will need an address that can be reached from the outside.
 This is because this address will be sent to the other computers when they want to establish a connection with you.
 If this address is not reachable to other nodes, you will only be able to subscribe and listen to other nodes, but they will not be able to subscribe to your topics.
 * You also need a caller id, such as _/my_node_. This name must be unique in the ROS network.
@@ -36,8 +42,9 @@ A connection example follows:
 // set the master uri: check ROS_MASTER_URI first, else use the given value
 Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.220:11311");
 
-// set our own uri: check ROS_HOSTNAME and ROS_IP first, then use the IP address of the wifi/ethernet interface
-Uri callerUri = TryGetCallerUri();
+// set our own uri: TryGetCallerUriFor checks first ROS_HOSTNAME, then ROS_IP, then check the interfaces for an address that can access the master uri
+// if none are found, use the given uri 
+Uri callerUri = TryGetCallerUriFor(masterUri, 7614) ?? new Uri("http://192.168.0.2:7614");
 
 // set the name of our node
 string callerId = "/iviz_test";
@@ -46,16 +53,14 @@ string callerId = "/iviz_test";
 RosClient client = new RosClient(masterUri, callerId, callerUri);
 ```
 
-The function _TryGetCallerUri()_ tries to guess your address, but if it gets the wrong one you will need to provide it directly.
-
-Calling _TryGetCallerUri_ without an argument will use a random free port.
-However, you can also provide your own port using _TryGetCallerUri(my_port)_.
+The function _TryGetCallerUriFor_ can also be used without a port.
+In this case, a random free port will be used.
 When choosing whether to use your own port or a random port, keep in mind the following guidelines:
 * A random port is useful for finished apps. It ensures that you will never get an error like "address is already in use".
 * Specific ports are better for new apps being debugged.
 The problem is that if your app crashes or gets terminated before it unregisters itself gracefully, the advertisements and subscriptions will remain in the system.
-If your program keeps getting restarted with a new port every time, it will keep adding new entries in the list of nodes, which makes debugging difficult.   
-
+If your program keeps getting restarted with a new port every time, it will keep adding new entries in the list of nodes, which makes debugging difficult.
+  By reusing the old port, other apps can also tell that you're the same node that's just restarting.
 
 ### Publishers
 Publishers are used to send messages to topics.
@@ -235,3 +240,14 @@ else
     Console.WriteLine("Expected string value in /my_param, but got " + o);
 }
 ```
+
+## More Advanced Stuff
+
+### Channels
+TBW
+
+### Action Client
+TBW
+
+### Dynamic Messages
+TBW

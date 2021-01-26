@@ -712,7 +712,7 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            subscription.PublisherUpdateRcp(masterResponse.Publishers);
+            subscription.PublisherUpdateRcp(masterResponse.Publishers, default);
             return (id, subscription);
         }
 
@@ -1424,6 +1424,10 @@ namespace Iviz.Roslib
             {
                 await subscriber.PublisherUpdateRcpAsync(publishers, token).Caf();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 Logger.LogFormat("{0}: PublisherUpdateRcp failed: {1}", this, e);
@@ -1453,76 +1457,20 @@ namespace Iviz.Roslib
         /// <summary>
         /// Close this connection. Unsubscribes and unadvertises all topics.
         /// </summary>
-        public void Close()
+        public void Close(CancellationToken token = default)
         {
-            listener?.Dispose();
-
-            IRosPublisher[] publishers = publishersByTopic.Values.ToArray();
-            publishersByTopic.Clear();
-
-            foreach (IRosPublisher publisher in publishers)
-            {
-                try
-                {
-                    publisher.Dispose();
-                    RosMasterApi.UnregisterPublisher(publisher.Topic);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebugFormat("Error unregistering publisher {0}: {1}", publisher, e);
-                }
-            }
-
-            IRosSubscriber[] subscribers = subscribersByTopic.Values.ToArray();
-            subscribersByTopic.Clear();
-
-            foreach (IRosSubscriber subscriber in subscribers)
-            {
-                try
-                {
-                    subscriber.Dispose();
-                    RosMasterApi.UnregisterSubscriber(subscriber.Topic);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebugFormat("Error unregistering subscriber {0}: {1}", subscriber, e);
-                }
-            }
-
-            IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
-            subscribedServicesByName.Clear();
-
-            foreach (IServiceCaller receiver in receivers)
-            {
-                receiver.Dispose();
-            }
-
-            IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
-            advertisedServicesByName.Clear();
-
-            foreach (IServiceRequestManager serviceSender in serviceManagers)
-            {
-                try
-                {
-                    serviceSender.Dispose();
-                    RosMasterApi.UnregisterService(serviceSender.Service, serviceSender.Uri);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogDebugFormat("Error unregistering subscriber {0}: {1}", serviceSender, e);
-                }
-            }
+            Task.Run(() => CloseAsync(token), token).WaitNoThrow(this);
         }
 
         /// <summary>
         /// Close this connection. Unsubscribes and unadvertises all topics.
         /// </summary>
-        public async Task CloseAsync(CancellationToken externalToken = default)
+        public async Task CloseAsync(CancellationToken token = default)
         {
             const int timeoutInMs = 3000;
             using var timeoutTokenSource = new CancellationTokenSource(timeoutInMs);
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalToken, timeoutTokenSource.Token);
-            var token = tokenSource.Token;
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutTokenSource.Token);
+            var innerToken = tokenSource.Token;
 
             List<Task> tasks = new List<Task>();
 
@@ -1538,7 +1486,7 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, token).AwaitNoThrow(this).Caf();
+                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this).Caf();
             }));
 
             var subscribers = subscribersByTopic.Values.ToArray();
@@ -1547,7 +1495,7 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
                 await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, token).AwaitNoThrow(this).Caf();
+                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this).Caf();
             }));
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
@@ -1564,15 +1512,15 @@ namespace Iviz.Roslib
             Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
                 await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri, token)
+                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
                     .AwaitNoThrow(this).Caf();
             }));
 
-            Task timeoutTask = Task.Delay(timeoutInMs, token);
+            Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
             Task finalTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask).Caf();
             if (finalTask == timeoutTask)
             {
-                Logger.LogError($"{this}: Close() tasks timed out.");
+                Logger.LogErrorFormat("{0}: Close() tasks timed out.", this);
             }
         }
 
@@ -1630,7 +1578,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: GetBusInfoRcp failed: {e}");
+                Logger.LogErrorFormat("{0}: GetBusInfoRcp failed: {1}", this, e);
             }
 
             return busInfos;
@@ -1724,7 +1672,7 @@ namespace Iviz.Roslib
                     }
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 throw new TimeoutException($"Service call {resolvedServiceName} to uri '{serviceUri}' timed out");
             }
@@ -1820,7 +1768,7 @@ namespace Iviz.Roslib
                     }
                 }
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 throw;
             }

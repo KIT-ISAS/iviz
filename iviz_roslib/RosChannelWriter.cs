@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -187,7 +188,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogErrorFormat("{0}: Error in Dispose: {1}", this, e);
             }
         }
 
@@ -205,14 +206,7 @@ namespace Iviz.Roslib
                 return; // not started
             }
 
-            try
-            {
-                await Publisher.UnadvertiseAsync(publisherId!);
-            }
-            catch (Exception e)
-            {
-                Logger.Log($"{this}: {e}");
-            }
+            await Publisher.UnadvertiseAsync(publisherId!).AwaitNoThrow(this);
         }
 
 #if !NETSTANDARD2_0

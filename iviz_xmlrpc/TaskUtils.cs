@@ -143,7 +143,7 @@ namespace Iviz.XmlRpc
             {
                 t.GetAwaiter().GetResult();
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 throw;
             }
@@ -164,7 +164,7 @@ namespace Iviz.XmlRpc
             {
                 return t.GetAwaiter().GetResult();
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 throw;
             }

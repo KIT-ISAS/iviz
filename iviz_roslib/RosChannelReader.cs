@@ -110,7 +110,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log($"{this}: {e}");
+                Logger.LogErrorFormat("{0}: Error in Dispose: {1}", this, e);
             }
         }
 
@@ -335,7 +335,7 @@ namespace Iviz.Roslib
                 t = messageQueue.Dequeue(new CancellationToken(true));
                 return true;
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 // this shouldn't happen unless multiple reads get called at the same time
                 t = default!;
@@ -381,7 +381,7 @@ namespace Iviz.Roslib
                 {
                     canMoveNext = enumerator.MoveNext();
                 }
-                catch (TaskCanceledException)
+                catch (OperationCanceledException)
                 {
                     // this shouldn't happen unless multiple reads get called at the same time
                     yield break;

@@ -70,8 +70,6 @@ namespace Iviz.Roslib
             int readyTask = Task.WaitAny(tasks, token);
             linkedCts.Cancel();
 
-            token.ThrowIfCancellationRequested();
-
             IMessage msg = sources[readyTask].Read(token);
             return (msg, readyTask);
         }
@@ -88,8 +86,6 @@ namespace Iviz.Roslib
             Task<bool>[] tasks = sources.Select(queue => queue.WaitToReadAsync(linkedCts.Token)).ToArray();
             Task<bool> readyTask = await Task.WhenAny(tasks);
             linkedCts.Cancel();
-
-            token.ThrowIfCancellationRequested();
 
             for (int i = 0; i < tasks.Length; i++)
             {
@@ -127,8 +123,6 @@ namespace Iviz.Roslib
 
                 int readyTask = Task.WaitAny(tasks, token);
                 linkedCts.Cancel();
-
-                token.ThrowIfCancellationRequested();
 
                 yield return sources[readyTask].Read(token);
             }

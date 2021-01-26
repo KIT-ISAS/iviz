@@ -451,7 +451,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
         }
 
-        public void SetPose(int id, in Pose pose, Header? header = null)
+        public void SetPose(int id, in Pose pose, Header header = default)
         {
             if (id < 0 || id >= markers.Count)
             {
@@ -459,10 +459,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             markers[id].Pose = pose;
-            if (header != null)
-            {
-                markers[id].Header = header;
-            }
+            markers[id].Header = header;
         }
 
         public int Size => markers.Count(marker => marker != InvalidMarker);
@@ -569,7 +566,7 @@ namespace Iviz.Roslib.MarkerHelper
         {
             return new InteractiveMarker
             {
-                Header = {FrameId = frameId},
+                Header = frameId,
                 Name = name,
                 Description = description,
                 Pose = pose ?? Pose.Identity,
@@ -620,7 +617,7 @@ namespace Iviz.Roslib.MarkerHelper
         {
             return new InteractiveMarker
             {
-                Header = {FrameId = frameId},
+                Header = frameId,
                 Name = name,
                 Pose = pose ?? Pose.Identity,
                 Scale = scale,
@@ -670,7 +667,7 @@ namespace Iviz.Roslib.MarkerHelper
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
                 Poses = args.Select(tuple => new InteractiveMarkerPose
-                        {Header = {FrameId = tuple.Parent}, Name = tuple.Name, Pose = tuple.Pose})
+                        {Header = tuple.Parent, Name = tuple.Name, Pose = tuple.Pose})
                     .ToArray()
             };
         }

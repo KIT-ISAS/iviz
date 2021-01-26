@@ -95,7 +95,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.Log(e);
+                Logger.LogErrorFormat("{0}: Exception from RaiseNumPublishersChanged : {1}", this, e);
             }
         }
 
@@ -120,9 +120,9 @@ namespace Iviz.Roslib
             return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
         }
 
-        async Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            await PublisherUpdateRcpAsync(publisherUris, token).Caf();
+            return PublisherUpdateRcpAsync(publisherUris, token);
         }
 
         /// <summary>
@@ -267,15 +267,20 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token = default)
+        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            token.ThrowIfCancellationRequested();
-            return manager.PublisherUpdateRpcAsync(publisherUris); // todo: get token in here
+            if (token.IsCancellationRequested || runningTs.IsCancellationRequested)
+            {
+                return Task.CompletedTask;
+            }
+
+            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            return manager.PublisherUpdateRpcAsync(publisherUris, tokenSource.Token).AwaitNoThrow(this);
         }
 
-        internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris)
+        internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            Task.Run(async () => await PublisherUpdateRcpAsync(publisherUris).Caf()).Wait();
+            Task.Run( () => PublisherUpdateRcpAsync(publisherUris, token), token).WaitNoThrow(this);
         }
 
         public override string ToString()

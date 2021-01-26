@@ -236,7 +236,6 @@ namespace Iviz.Roslib
             if (TcpNoDelay || values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
             {
                 TcpNoDelay = true;
-                Logger.LogDebugFormat("{0}: requested tcp_nodelay", this);
             }
 
             return null;

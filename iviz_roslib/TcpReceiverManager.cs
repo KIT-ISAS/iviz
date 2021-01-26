@@ -85,29 +85,31 @@ namespace Iviz.Roslib
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
-        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri,
-            CancellationToken token = default)
+        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri, CancellationToken token)
         {
             NodeClient.RequestTopicResponse response;
             try
             {
                 response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic, token).Caf();
             }
-            catch (Exception e) when (
-                e is TimeoutException ||
-                e is XmlRpcException ||
-                e is SocketException ||
-                e is IOException)
-            {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}",
-                    this, remoteUri, e);
-                return null;
-            }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}",
-                    this, remoteUri, e);
-                return null;
+                switch (e)
+                {
+                    case OperationCanceledException:
+                        return null;
+                    case TimeoutException:
+                    case XmlRpcException:
+                    case SocketException:
+                    case IOException:
+                        Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}",
+                            this, remoteUri, e);
+                        return null;
+                    default:
+                        Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}",
+                            this, remoteUri, e);
+                        return null;
+                }
             }
 
             if (!response.IsValid || response.Protocol == null)
@@ -132,13 +134,17 @@ namespace Iviz.Roslib
             subscriber.MessageCallback(msg);
         }
 
-        async Task<bool> AddPublisherAsync(Uri remoteUri)
+        async Task<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
         {
             try
             {
-                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri).Caf();
+                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token).Caf();
                 CreateConnection(remoteEndpoint, remoteUri);
                 return true;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
             }
             catch (Exception e)
             {
@@ -157,11 +163,11 @@ namespace Iviz.Roslib
             connection.Start(TimeoutInMs);
         }
 
-        public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris)
+        public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             bool numConnectionsChanged;
 
-            using (await mutex.LockAsync())
+            using (await mutex.LockAsync(token))
             {
                 HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
                 allPublisherUris = newPublishers;
@@ -170,12 +176,14 @@ namespace Iviz.Roslib
 
                 TcpReceiverAsync<T>[] toDelete = connectionsByUri
                     .Where(pair => !newPublishers.Contains(pair.Key))
-                    .Select(pair => pair.Value).ToArray();
+                    .Select(pair => pair.Value)
+                    .ToArray();
 
-                var tasks = toDelete.Select(receiver => receiver.DisposeAsync());
-                await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+                var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync());
+                await Task.WhenAll(deleteTasks).AwaitNoThrow(this).Caf();
 
-                bool[]? results = await Task.WhenAll(toAdd.Select(AddPublisherAsync)).AwaitNoThrow(this).Caf();
+                var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token));
+                bool[]? results = await Task.WhenAll(addTasks).AwaitNoThrow(this).Caf();
                 numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync();
             }
 

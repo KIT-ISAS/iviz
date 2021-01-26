@@ -41,6 +41,11 @@ namespace Iviz.XmlRpc
 #endif
             if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
             {
+                if (token.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException();
+                }
+
                 if (task.IsFaulted)
                 {
                     ExceptionDispatchInfo.Capture(task.Exception!.InnerException!).Throw();
@@ -121,6 +126,16 @@ namespace Iviz.XmlRpc
                 if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
                 {
                     writer.Close();
+                    if (token.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    if (writeTask.IsFaulted)
+                    {
+                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
+                    }
+
                     throw new TimeoutException("HttpRequest: Request writing timed out!", writeTask.Exception);
                 }
 
@@ -131,7 +146,17 @@ namespace Iviz.XmlRpc
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
                     reader.Close();
-                    throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
+                    if (token.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+
+                    if (readTask.IsFaulted)
+                    {
+                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
+                    }
+
+                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);                    
                 }
 
                 response = readTask.Result;
