@@ -28,7 +28,7 @@ namespace Iviz.Core
             Line = line;
         }
 
-        public LogMessage([NotNull] Log msg)
+        public LogMessage(in Log msg)
         {
             SourceId = msg.Name;
             Stamp = msg.Header.Stamp.ToDateTime();
@@ -63,6 +63,10 @@ namespace Iviz.Core
             [CallerLineNumber] int line = 0)
         {
             ExternalImpl(t?.ToString(), e, file, line);
+        }
+
+        public static void Error(Exception e)
+        {
         }
 
         public static void Warn([CanBeNull] object t)

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
@@ -406,6 +408,60 @@ namespace Iviz.Core
         public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
         public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
         public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
+
+        public static bool IsUsable(this Pose pose)
+        {
+            const int maxPoseMagnitude = 10000;
+            return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
+        }
+
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T t)
+        {
+            using (var enumerator = enumerable.GetEnumerator())
+            {
+                if (enumerator.MoveNext())
+                {
+                    t = enumerator.Current;
+                    return true;
+                }
+
+                t = default;
+                return false;
+            }
+        }
+    }
+
+    public static class FileUtils
+    {
+        public static async Task WriteAllBytesAsync(string filePath, byte[] bytes, CancellationToken token)
+        {
+            using (FileStream stream = new FileStream(filePath, FileMode.Create,
+                FileAccess.Write, FileShare.None, 4096, true))
+            {
+                await stream.WriteAsync(bytes, 0 ,bytes.Length, token);
+            }                
+        }    
+        
+        public static async Task<byte[]> ReadAllBytesAsync(string filePath, CancellationToken token)
+        {
+            using (FileStream stream = new FileStream(filePath, FileMode.Open,
+                FileAccess.Read, FileShare.None, 4096, true))
+            {
+                byte[] bytes = new byte[stream.Length];
+                await stream.ReadAsync(bytes, 0, bytes.Length, token);
+                return bytes;
+            }                
+        }
+        
+        public static Task WriteAllTextAsync(string filePath, string text, CancellationToken token)
+        {
+            return WriteAllBytesAsync(filePath, BuiltIns.UTF8.GetBytes(text), token);
+        }    
+        
+        public static async Task<string> ReadAllTextAsync(string filePath, CancellationToken token)
+        {
+            return BuiltIns.UTF8.GetString(await ReadAllBytesAsync(filePath, token));
+        }         
     }
 
     public static class MeshRendererUtils
@@ -442,7 +498,7 @@ namespace Iviz.Core
             PropBlock.SetColor(EmissiveColorPropId, color);
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
-        
+
         public static void SetPropertySmoothness([NotNull] this MeshRenderer meshRenderer, float smoothness, int id = 0)
         {
             if (meshRenderer == null)
@@ -454,7 +510,7 @@ namespace Iviz.Core
             PropBlock.SetFloat(SmoothnessPropId, smoothness);
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
-        
+
         public static void SetPropertyMetallic([NotNull] this MeshRenderer meshRenderer, float metallic, int id = 0)
         {
             if (meshRenderer == null)
@@ -465,9 +521,9 @@ namespace Iviz.Core
             meshRenderer.GetPropertyBlock(PropBlock, id);
             PropBlock.SetFloat(MetallicPropId, metallic);
             meshRenderer.SetPropertyBlock(PropBlock, id);
-        }        
+        }
 
-        public static void SetPropertyMainTexSt([NotNull] this MeshRenderer meshRenderer, 
+        public static void SetPropertyMainTexSt([NotNull] this MeshRenderer meshRenderer,
             in Vector2 xy, in Vector2 wh, int id = 0)
         {
             if (meshRenderer == null)
@@ -480,17 +536,5 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static CancellationToken LinkTo(this CancellationToken token, [NotNull] CancellationTokenSource other)
-        {
-            return token == default
-                ? other.Token
-                : CancellationTokenSource.CreateLinkedTokenSource(token, other.Token).Token;
-        }
-
-        public static bool IsUsable(this Pose pose)
-        {
-            const int maxPoseMagnitude = 10000;
-            return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
-        }
     }
 }

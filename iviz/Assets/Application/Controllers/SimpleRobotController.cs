@@ -338,7 +338,7 @@ namespace Iviz.Controllers
                 const int timeoutInMs = 800;
                 (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
             }
-            catch (TaskCanceledException)
+            catch (OperationCanceledException)
             {
                 HelpText = "<b>Error:</b> Task cancelled";
                 return;
@@ -372,7 +372,7 @@ namespace Iviz.Controllers
             config.SourceParameter = value;
         }
 
-        public void TryLoadSavedRobot([CanBeNull] string robotName)
+        public async void TryLoadSavedRobot([CanBeNull] string robotName)
         {
             config.SavedRobotName = "";
             Robot = null;
@@ -384,7 +384,8 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (!Resource.TryGetRobot(robotName, out string robotDescription))
+            (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
+            if (!result)
             {
                 Debug.Log("SimpleRobotController: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
@@ -419,7 +420,6 @@ namespace Iviz.Controllers
 
             robotLoadingTask = Robot.StartAsync(ConnectionManager.ServiceProvider);
             HelpText = "[Loading Robot...]";
-            Debug.Log("Robot load was synchronous: " + robotLoadingTask.RanToCompletion());
             CheckRobotStartTask();
             return true;
         }

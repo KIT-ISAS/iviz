@@ -4,7 +4,9 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -42,17 +44,17 @@ namespace Iviz.Controllers
 
         readonly TfConfiguration config = new TfConfiguration();
         readonly AsyncLock mutex = new AsyncLock();
-        readonly List<(TransformStamped frame, bool isStatic)> frameBuffer = new List<(TransformStamped, bool)>();
-        readonly List<(TransformStamped frame, bool isStatic)> frameList = new List<(TransformStamped, bool)>();
+        readonly List<(TFMessage frame, bool isStatic)> tmpMessageList = new List<(TFMessage, bool)>(4096);
+        readonly List<(TFMessage frame, bool isStatic)> messageList = new List<(TFMessage, bool)>();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         [NotNull] readonly FrameNode keepAllListener;
         [NotNull] readonly FrameNode staticListener;
         [NotNull] readonly FrameNode fixedFrameListener;
-        
+
         [NotNull] readonly TfFrame mapFrame;
         [NotNull] readonly TfFrame rootFrame;
         [NotNull] readonly TfFrame originFrame;
-        [NotNull] readonly TfFrame unityFrame;        
+        [NotNull] readonly TfFrame unityFrame;
 
         [NotNull] public TfFrame FixedFrame { get; private set; }
 
@@ -253,61 +255,66 @@ namespace Iviz.Controllers
 
         void ProcessMessages()
         {
-            foreach ((TransformStamped t, bool isStatic) in frameList)
+            foreach ((TFMessage frame, bool isStatic) in messageList)
             {
-                if (t.Transform.HasNaN() || t.ChildFrameId.Length == 0)
+                foreach (TransformStamped t in frame.Transforms)
                 {
-                    continue;
-                }
+                    var ((_, _, frameId), childFrameId, transform) = t;
 
-                const int maxPoseMagnitude = 10000;
-                if (t.Transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
-                {
-                    continue; // TODO: Find better way to handle this
-                }
-
-                // remove starting '/' from tf v1
-                string childId = t.ChildFrameId[0] != '/'
-                    ? t.ChildFrameId
-                    : t.ChildFrameId.Substring(1);
-
-                TfFrame child;
-                if (isStatic)
-                {
-                    child = GetOrCreateFrame(childId, staticListener);
-                    if (config.KeepAllFrames)
+                    if (transform.HasNaN() || childFrameId.Length == 0)
                     {
-                        child.AddListener(keepAllListener);
+                        continue;
                     }
-                }
-                else if (config.KeepAllFrames)
-                {
-                    child = GetOrCreateFrame(childId, keepAllListener);
-                }
-                else if (!TryGetFrameImpl(childId, out child))
-                {
-                    continue;
-                }
 
-                string parentId = t.Header.FrameId.Length == 0 || t.Header.FrameId[0] != '/'
-                    ? t.Header.FrameId
-                    : t.Header.FrameId.Substring(1);
-
-                if (parentId.Length == 0)
-                {
-                    child.SetParent(OriginFrame);
-                    child.SetPose(t.Transform.Ros2Unity());
-                }
-                else if (!(child.Parent is null) && parentId == child.Parent.Id)
-                {
-                    child.SetPose(t.Transform.Ros2Unity());
-                }
-                else
-                {
-                    TfFrame parent = GetOrCreateFrame(parentId);
-                    if (child.SetParent(parent))
+                    const int maxPoseMagnitude = 10000;
+                    if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
                     {
-                        child.SetPose(t.Transform.Ros2Unity());
+                        continue; // TODO: Find better way to handle this
+                    }
+
+                    // remove starting '/' from tf v1
+                    string childId = childFrameId[0] != '/'
+                        ? childFrameId
+                        : childFrameId.Substring(1);
+
+                    TfFrame child;
+                    if (isStatic)
+                    {
+                        child = GetOrCreateFrame(childId, staticListener);
+                        if (config.KeepAllFrames)
+                        {
+                            child.AddListener(keepAllListener);
+                        }
+                    }
+                    else if (config.KeepAllFrames)
+                    {
+                        child = GetOrCreateFrame(childId, keepAllListener);
+                    }
+                    else if (!TryGetFrameImpl(childId, out child))
+                    {
+                        continue;
+                    }
+
+                    string parentId = frameId.Length == 0 || frameId[0] != '/'
+                        ? frameId
+                        : frameId.Substring(1);
+
+                    if (parentId.Length == 0)
+                    {
+                        child.SetParent(OriginFrame);
+                        child.SetPose(transform.Ros2Unity());
+                    }
+                    else if (!(child.Parent is null) && parentId == child.Parent.Id)
+                    {
+                        child.SetPose(transform.Ros2Unity());
+                    }
+                    else
+                    {
+                        TfFrame parent = GetOrCreateFrame(parentId);
+                        if (child.SetParent(parent))
+                        {
+                            child.SetPose(transform.Ros2Unity());
+                        }
                     }
                 }
             }
@@ -319,7 +326,7 @@ namespace Iviz.Controllers
 
             ListenerStatic?.Reset();
             Publisher.Reset();
-            
+
             bool prevKeepAllFrames = KeepAllFrames;
             KeepAllFrames = false;
 
@@ -412,37 +419,34 @@ namespace Iviz.Controllers
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            AddAll(msg.Transforms, false);
+            AddAll(msg, false);
             return true;
         }
 
         bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            AddAll(msg.Transforms, true);
+            AddAll(msg, true);
             return true;
         }
 
-        async void AddAll([NotNull] TransformStamped[] transforms, bool isStatic)
+        async void AddAll([NotNull] TFMessage msg, bool isStatic)
         {
             using (await mutex.LockAsync())
             {
-                foreach (TransformStamped ts in transforms)
-                {
-                    frameBuffer.Add((ts, isStatic));
-                }
+                tmpMessageList.Add((msg, isStatic));
             }
         }
 
         async void ProcessAll()
         {
+            messageList.Clear();
             using (await mutex.LockAsync())
             {
-                frameList.AddRange(frameBuffer);
-                frameBuffer.Clear();
+                messageList.AddRange(tmpMessageList);
+                tmpMessageList.Clear();
             }
 
             ProcessMessages();
-            frameList.Clear();
         }
 
         public void MarkAsDead([NotNull] TfFrame frame)
@@ -484,7 +488,7 @@ namespace Iviz.Controllers
             Transform originFrame = OriginFrame.Transform;
             return originFrame.InverseTransformPoint(unityPosition);
         }
-        
+
         public static Vector3 RelativePositionToFixedFrame(in Vector3 unityPosition)
         {
             Transform fixedFrame = Instance.FixedFrame.Transform;

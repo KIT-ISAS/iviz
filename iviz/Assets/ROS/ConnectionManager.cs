@@ -66,14 +66,16 @@ namespace Iviz.Ros
         void LogMessage(in LogMessage msg)
         {
             logSender.Publish(new Log
-            {
-                Header = (logSeq++, ""),
-                Level = (byte) msg.Level,
-                Name = Connection.MyId ?? "/iviz",
-                Msg = msg.Message,
-                File = Path.GetFileName(msg.File),
-                Line = (uint) msg.Line
-            });
+            (
+                Header: (logSeq++, ""),
+                Level: (byte) msg.Level,
+                Name: Connection.MyId ?? "/iviz",
+                Msg: msg.Message,
+                File: Path.GetFileName(msg.File),
+                Function: "",
+                Line: (uint) msg.Line,
+                Topics: Array.Empty<string>()
+            ));
         }
 
         internal static void ReportBandwidthUp(long size)

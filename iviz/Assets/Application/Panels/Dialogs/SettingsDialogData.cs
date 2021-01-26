@@ -1,5 +1,6 @@
 using System;
 using Iviz.Core;
+using Iviz.Resources;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -95,7 +96,7 @@ namespace Iviz.App
                 SettingsManager.BackgroundColor = c;
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
-
+            
             panel.TargetFps.ValueChanged += (i, _) =>
             {
                 switch (i)
@@ -142,6 +143,30 @@ namespace Iviz.App
             };
 
             panel.Close.Clicked += Close;
+            
+            panel.ClearModelCacheClicked += () =>
+            {
+                Logger.Info("Settings: Clearing model cache.");
+                Resource.External.ClearModelCache();
+            };
+
+            panel.ClearHostHistoryClicked += () =>
+            {
+                Logger.Info("Settings: Clearing cache of master uris.");
+                ModuleListPanel.Instance.ClearMastersFromSimpleConfiguration();
+            };
+            
+            panel.ClearSavedFilesClicked += () =>
+            {
+                Logger.Info("Settings: Clearing saved files.");
+                ModuleListPanel.ClearSavedFiles();
+            };
+            
+            panel.ResetModelServiceClicked += () =>
+            {
+                Logger.Info("Settings: Resetting model service.");
+                ModuleListPanel.Instance.RestartModelService();
+            };
         }
     }
 }

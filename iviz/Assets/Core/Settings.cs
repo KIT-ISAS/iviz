@@ -87,8 +87,8 @@ namespace Iviz.Core
             true;
 #else
             false;
-#endif        
-        
+#endif
+
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -102,22 +102,44 @@ namespace Iviz.Core
 #else
             false;
 #endif
-        [NotNull] public static string PersistentDataPath => Application.persistentDataPath;
-        [NotNull] public static string SavedFolder => PersistentDataPath + "/saved";
-        [NotNull] public static string SimpleConfigurationPath => PersistentDataPath + "/connection.json";
-        [NotNull] public static string ResourcesPath => PersistentDataPath + "/resources";
-        [NotNull] public static string SavedRobotsPath => PersistentDataPath + "/robots";
-        [NotNull] public static string ResourcesFilePath => PersistentDataPath + "/resources.json";
+        static string persistentDataPath;
+        static string savedFolder;
+        static string simpleConfigurationPath;
+        static string resourcesPath;
+        static string savedRobotsPath;
+        static string resourcesFilePath;
+
+
+        [NotNull]
+        public static string PersistentDataPath =>
+            persistentDataPath ?? (persistentDataPath = Application.persistentDataPath);
+
+        [NotNull] public static string SavedFolder => savedFolder ?? (savedFolder = PersistentDataPath + "/saved");
+
+        [NotNull]
+        public static string SimpleConfigurationPath =>
+            simpleConfigurationPath ?? (simpleConfigurationPath = $"{PersistentDataPath}/connection.json");
+
+        [NotNull]
+        public static string ResourcesPath => resourcesPath ?? (resourcesPath = $"{PersistentDataPath}/resources");
+
+        [NotNull]
+        public static string SavedRobotsPath => savedRobotsPath ?? (savedRobotsPath = $"{PersistentDataPath}/robots");
+
+        [NotNull]
+        public static string ResourcesFilePath =>
+            resourcesFilePath ?? (resourcesFilePath = $"{PersistentDataPath}/resources.json");
 
         [CanBeNull] static Camera mainCamera;
 
         [NotNull]
         public static Camera MainCamera
         {
-            get => mainCamera.SafeNull() ??
-                   (mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
-                       .GetComponent<Camera>());
-            set => mainCamera = value.SafeNull() ?? throw new NullReferenceException("Camera cannot be null!");
+            get => mainCamera != null
+                ? mainCamera
+                : mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
+                    .GetComponent<Camera>();
+            set => mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
         }
 
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }

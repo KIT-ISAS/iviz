@@ -20,12 +20,13 @@ namespace Iviz.App
             itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
         }
 
+        public static IEnumerable<string> SavedFiles => Directory.GetFiles(Settings.SavedFolder)
+            .Where(x => Roslib.Utils.HasSuffix(x, Suffix));
+
         public override void SetupPanel()
         {
             files.Clear();
-            files.AddRange(Directory.GetFiles(Settings.SavedFolder)
-                .Where(x => Roslib.Utils.HasSuffix(x, Suffix))
-                .Select(GetFileName));
+            files.AddRange(SavedFiles.Select(GetFileName));
             itemList.Title = "Load Config File";
             itemList.Items = files;
             itemList.ItemClicked += OnItemClicked;

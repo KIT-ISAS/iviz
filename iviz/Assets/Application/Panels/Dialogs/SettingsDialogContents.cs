@@ -19,6 +19,7 @@ namespace Iviz.App
         [SerializeField] Button clearModelCache = null;
         [SerializeField] Button clearSavedFiles = null;
         [SerializeField] Button clearHostHistory = null;
+        [SerializeField] Button resetModelService = null;
 
         public TrashButtonWidget Close => close;
         public DropdownWidget QualityInView => qualityInView;
@@ -31,12 +32,14 @@ namespace Iviz.App
         public event Action ClearModelCacheClicked; 
         public event Action ClearSavedFilesClicked; 
         public event Action ClearHostHistoryClicked;
+        public event Action ResetModelServiceClicked;
 
         void Awake()
         {
             clearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
             clearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
             clearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
+            resetModelService.onClick.AddListener(() => ResetModelServiceClicked?.Invoke());
         }
 
         public bool Active
@@ -58,6 +61,7 @@ namespace Iviz.App
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;
             ClearSavedFilesClicked = null;
+            ResetModelServiceClicked = null;
         }        
     }
 }

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
-using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -19,11 +18,6 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
-    public interface IExternalResourceListener
-    {
-        void OnResourceArrived(Info<GameObject> resource);
-    }
-
     public class ExternalResourceManager
     {
         const string ModelServiceName = "/iviz/get_model_resource";
@@ -38,6 +32,9 @@ namespace Iviz.Displays
             "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
         const string StrResourceFailedWithError = "ExternalResourceManager: Loading resource {0} failed with error {1}";
+
+        const string StrLocalResourceFailedWithError =
+            "ExternalResourceManager: Loading local resource '{0}' failed with error {1}";
 
         [DataContract]
         public class ResourceFiles
@@ -72,8 +69,10 @@ namespace Iviz.Displays
 
         readonly AsyncLock mutex = new AsyncLock();
 
+        CancellationTokenSource runningTs = new CancellationTokenSource();
 
-        public GameObject Node { get; }
+
+        GameObject Node { get; }
 
         readonly Model modelGenerator = new Model();
         readonly Scene sceneGenerator = new Scene();
@@ -97,7 +96,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error($"{this}: Error creating directories", e);
             }
 
             if (!File.Exists(Settings.ResourcesFilePath))
@@ -115,21 +114,51 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error(e);
+                Logger.Error($"{this}: Error reading config file", e);
             }
         }
 
-        void WriteResourceFile()
+        public async void ClearModelCache(CancellationToken token = default)
         {
-            try
+            runningTs.Cancel();
+            runningTs = new CancellationTokenSource();
+
+            var allFiles = resourceFiles.Models.Values
+                .Concat(resourceFiles.Scenes.Values)
+                .Concat(resourceFiles.Textures.Values)
+                .Concat(resourceFiles.RobotDescriptions.Values);
+            
+            Logger.Debug($"{this}: Removing all files in {Settings.SavedRobotsPath}");
+            Logger.Debug($"{this}: Removing all files in {Settings.ResourcesPath}");
+            
+            foreach (string path in allFiles)
             {
-                File.WriteAllText(Settings.ResourcesFilePath,
-                    JsonConvert.SerializeObject(resourceFiles, Formatting.Indented));
+                try
+                {
+                    File.Delete(path);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"ExternalResourceManager: Failed to delete file '{path}' :", e);
+                }
             }
-            catch (IOException e)
-            {
-                Logger.Warn("ExternalResourceManager: Failed to write resource file! " + e);
-            }
+            
+            resourceFiles.Models.Clear();
+            resourceFiles.Scenes.Clear();
+            resourceFiles.Textures.Clear();
+            resourceFiles.RobotDescriptions.Clear();
+
+            loadedModels.Clear();
+            loadedScenes.Clear();
+            loadedTextures.Clear();
+
+            await WriteResourceFileAsync(token);
+        }
+
+        async Task WriteResourceFileAsync(CancellationToken token)
+        {
+            await FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
+                JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);
         }
 
         [NotNull]
@@ -158,8 +187,8 @@ namespace Iviz.Displays
             return resourceFiles.RobotDescriptions.ContainsKey(robotName);
         }
 
-        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
-        public bool TryGetRobot([NotNull] string robotName, out string robotDescription)
+        public async Task<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
+            CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -168,34 +197,34 @@ namespace Iviz.Displays
 
             if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
             {
-                robotDescription = null;
-                return false;
+                return default;
             }
 
-            string absolutePath = $"{Settings.SavedRobotsPath}/{localPath}";
-            if (!File.Exists(absolutePath))
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
             {
-                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
-                resourceFiles.RobotDescriptions.Remove(robotName);
-                WriteResourceFile();
-                robotDescription = null;
-                return false;
-            }
+                string absolutePath = $"{Settings.SavedRobotsPath}/{localPath}";
+                if (!File.Exists(absolutePath))
+                {
+                    Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
+                    resourceFiles.RobotDescriptions.Remove(robotName);
+                    await WriteResourceFileAsync(tokenSource.Token);
+                    return default;
+                }
 
-            try
-            {
-                robotDescription = File.ReadAllText(absolutePath);
-                return true;
-            }
-            catch (IOException e)
-            {
-                Logger.Debug("ExternalResourceManager: Failed to read robot '" + robotName + "' : " + e);
-                robotDescription = null;
-                return false;
+                try
+                {
+                    return (true, await FileUtils.ReadAllTextAsync(absolutePath, tokenSource.Token));
+                }
+                catch (IOException e)
+                {
+                    Logger.Error($"ExternalResourceManager: Failed to read robot '{robotName}' :", e);
+                    return default;
+                }
             }
         }
 
-        public void AddRobotResource([NotNull] string robotName, [NotNull] string robotDescription)
+        public async void AddRobotResourceAsync([NotNull] string robotName, [NotNull] string robotDescription,
+            CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -209,14 +238,18 @@ namespace Iviz.Displays
 
             string localPath = SanitizeForFilename(robotName);
 
-            File.WriteAllText($"{Settings.SavedRobotsPath}/{localPath}", robotDescription);
-            Logger.Debug($"Saving to {Settings.SavedRobotsPath}/{localPath}");
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
+            {
+                await FileUtils.WriteAllTextAsync($"{Settings.SavedRobotsPath}/{localPath}", robotDescription,
+                    tokenSource.Token);
+                Logger.Debug($"Saving to {Settings.SavedRobotsPath}/{localPath}");
 
-            resourceFiles.RobotDescriptions[robotName] = localPath;
-            WriteResourceFile();
+                resourceFiles.RobotDescriptions[robotName] = localPath;
+                await WriteResourceFileAsync(tokenSource.Token);
+            }
         }
 
-        public void RemoveRobotResource([NotNull] string robotName)
+        public async void RemoveRobotResource([NotNull] string robotName, CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
             {
@@ -240,7 +273,10 @@ namespace Iviz.Displays
             }
 
             resourceFiles.RobotDescriptions.Remove(robotName);
-            WriteResourceFile();
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
+            {
+                await WriteResourceFileAsync(tokenSource.Token);
+            }
         }
 
         #endregion
@@ -253,7 +289,7 @@ namespace Iviz.Displays
 
         [NotNull, ItemCanBeNull]
         public async Task<Info<GameObject>> TryGetGameObjectAsync([NotNull] string uriString,
-            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
+            [CanBeNull] IExternalServiceProvider provider, CancellationToken token = default)
         {
             if (uriString is null)
             {
@@ -281,12 +317,13 @@ namespace Iviz.Displays
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
 
-            using (await mutex.LockAsync(token))
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
+            using (await mutex.LockAsync(tokenSource.Token))
             {
                 var resource =
                     fileType == ".SDF" || fileType == ".WORLD"
-                        ? await TryGetSceneAsync(uriString, provider, token)
-                        : await TryGetModelAsync(uriString, provider, token);
+                        ? await TryGetSceneAsync(uriString, provider, tokenSource.Token)
+                        : await TryGetModelAsync(uriString, provider, tokenSource.Token);
 
                 if (resource == null)
                 {
@@ -304,42 +341,40 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        Task<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
+        async Task<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (loadedModels.TryGetValue(uriString, out Info<GameObject> resource))
             {
-                return Task.FromResult(resource);
+                return resource;
             }
 
             if (temporaryBlacklist.ContainsKey(uriString))
             {
-                return Task.FromResult<Info<GameObject>>(null);
+                return null;
             }
 
             if (resourceFiles.Models.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
-                    return LoadLocalModelAsync(uriString, localPath, provider, token);
+                    return await LoadLocalModelAsync(uriString, localPath, provider, token);
                 }
 
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.Models.Remove(uriString);
-                WriteResourceFile();
+                await WriteResourceFileAsync(token);
             }
 
             return provider == null
-                ? Task.FromResult<Info<GameObject>>(null)
-                : TryGetModelFromServerAsync(uriString, provider, token);
+                ? null
+                : await TryGetModelFromServerAsync(uriString, provider, token);
         }
 
         [NotNull, ItemCanBeNull]
         async Task<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            token.ThrowIfCancellationRequested();
-
             GetModelResource msg = new GetModelResource
             {
                 Request =
@@ -362,13 +397,13 @@ namespace Iviz.Displays
                     return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
                 }
             }
-            catch (Exception e)
+            catch (OperationCanceledException)
             {
-                if (!(e is OperationCanceledException))
-                {
-                    temporaryBlacklist[uriString] = Time.time;
-                }
-
+                throw;
+            }
+            catch (Exception)
+            {
+                temporaryBlacklist[uriString] = Time.time;
                 throw;
             }
 
@@ -391,37 +426,35 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        Task<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
+        async Task<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (loadedScenes.TryGetValue(uriString, out Info<GameObject> resource))
             {
-                return Task.FromResult(resource);
+                return resource;
             }
 
             if (resourceFiles.Scenes.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
                 {
-                    return LoadLocalSceneAsync(uriString, localPath, provider, token);
+                    return await LoadLocalSceneAsync(uriString, localPath, provider, token);
                 }
 
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.Scenes.Remove(uriString);
-                WriteResourceFile();
+                await WriteResourceFileAsync(token);
             }
 
             return provider == null
-                ? Task.FromResult<Info<GameObject>>(null)
-                : TryGetSceneFromServerAsync(uriString, provider, token);
+                ? null
+                : await TryGetSceneFromServerAsync(uriString, provider, token);
         }
 
         [NotNull, ItemCanBeNull]
         async Task<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            token.ThrowIfCancellationRequested();
-
             GetSdf msg = new GetSdf
             {
                 Request =
@@ -448,7 +481,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        public Task<Info<Texture2D>> TryGetTextureAsync([NotNull] string uriString,
+        public async Task<Info<Texture2D>> TryGetTextureAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
@@ -461,7 +494,7 @@ namespace Iviz.Displays
             {
                 if (currentTime < insertionTime + 30)
                 {
-                    return Task.FromResult<Info<Texture2D>>(null);
+                    return null;
                 }
 
                 temporaryBlacklist.Remove(uriString);
@@ -469,33 +502,35 @@ namespace Iviz.Displays
 
             if (loadedTextures.TryGetValue(uriString, out var resource))
             {
-                return Task.FromResult(resource);
+                return resource;
             }
 
-            if (resourceFiles.Textures.TryGetValue(uriString, out string localPath))
+
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
             {
-                if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
+                if (resourceFiles.Textures.TryGetValue(uriString, out string localPath))
                 {
-                    return Task.FromResult(LoadLocalTexture(uriString, localPath));
+                    if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
+                    {
+                        return await LoadLocalTextureAsync(uriString, localPath, tokenSource.Token);
+                    }
+
+                    Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
+                    resourceFiles.Textures.Remove(uriString);
+                    await WriteResourceFileAsync(tokenSource.Token);
                 }
 
-                Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
-                resourceFiles.Textures.Remove(uriString);
-                WriteResourceFile();
+                return provider == null
+                    ? null
+                    : await TryGetTextureFromServerAsync(uriString, provider, tokenSource.Token, currentTime);
             }
-
-            return provider == null
-                ? Task.FromResult<Info<Texture2D>>(null)
-                : TryGetTextureFromServerAsync(uriString, provider, token, currentTime);
         }
 
         [NotNull, ItemCanBeNull]
         async Task<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
-            token.ThrowIfCancellationRequested();
-
-            GetModelTexture msg = new GetModelTexture()
+            GetModelTexture msg = new GetModelTexture
             {
                 Request =
                 {
@@ -505,7 +540,7 @@ namespace Iviz.Displays
 
             if (await provider.CallServiceAsync(TextureServiceName, msg, token) && msg.Response.Success)
             {
-                return ProcessTextureResponse(uriString, msg.Response);
+                return await ProcessTextureResponseAsync(uriString, msg.Response, token);
             }
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
@@ -530,7 +565,7 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
+                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             }
             catch (Exception e)
             {
@@ -539,7 +574,7 @@ namespace Iviz.Displays
             }
 
             Model msg = Msgs.Buffer.Deserialize(modelGenerator, buffer, buffer.Length);
-            
+
             GameObject obj = await CreateModelObjectAsync(uriString, msg, provider, token);
 
             Info<GameObject> resource = new Info<GameObject>(obj);
@@ -548,18 +583,19 @@ namespace Iviz.Displays
             return resource;
         }
 
-        [CanBeNull]
-        Info<Texture2D> LoadLocalTexture([NotNull] string uriString, [NotNull] string localPath)
+        [NotNull, ItemCanBeNull]
+        async Task<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
+            CancellationToken token)
         {
             byte[] buffer;
 
             try
             {
-                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
+                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             }
             catch (Exception e)
             {
-                Logger.Debug(e);
+                Debug.LogWarningFormat(StrLocalResourceFailedWithError, uriString, e);
                 return null;
             }
 
@@ -586,11 +622,11 @@ namespace Iviz.Displays
 
             try
             {
-                buffer = File.ReadAllBytes($"{Settings.ResourcesPath}/{localPath}");
+                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrResourceFailedWithError, uriString, e);
+                Debug.LogWarningFormat(StrLocalResourceFailedWithError, uriString, e);
                 return null;
             }
 
@@ -619,11 +655,11 @@ namespace Iviz.Displays
 
                 byte[] buffer = new byte[msg.Model.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Model, buffer);
-                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+                await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Models[uriString] = localPath;
-                WriteResourceFile();
+                await WriteResourceFileAsync(token);
 
                 return info;
             }
@@ -634,8 +670,9 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
-        Info<Texture2D> ProcessTextureResponse([NotNull] string uriString, [NotNull] GetModelTextureResponse msg)
+        [NotNull, ItemCanBeNull]
+        async Task<Info<Texture2D>> ProcessTextureResponseAsync([NotNull] string uriString,
+            [NotNull] GetModelTextureResponse msg, CancellationToken token)
         {
             try
             {
@@ -649,11 +686,12 @@ namespace Iviz.Displays
                 string localPath = SanitizeForFilename(uriString);
 
                 byte[] buffer = msg.Image.Data;
-                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+
+                await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Textures[uriString] = localPath;
-                WriteResourceFile();
+                await WriteResourceFileAsync(token);
 
                 return info;
             }
@@ -665,7 +703,8 @@ namespace Iviz.Displays
         }
 
         [ItemCanBeNull]
-        async Task<Info<GameObject>> ProcessSceneResponseAsync([NotNull] string uriString, [NotNull] GetSdfResponse msg,
+        async Task<Info<GameObject>> ProcessSceneResponseAsync([NotNull] string uriString,
+            [NotNull] GetSdfResponse msg,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             try
@@ -680,11 +719,11 @@ namespace Iviz.Displays
 
                 byte[] buffer = new byte[msg.Scene.RosMessageLength];
                 Msgs.Buffer.Serialize(msg.Scene, buffer);
-                File.WriteAllBytes($"{Settings.ResourcesPath}/{localPath}", buffer);
+                await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Scenes[uriString] = localPath;
-                WriteResourceFile();
+                await WriteResourceFileAsync(token);
 
                 return info;
             }

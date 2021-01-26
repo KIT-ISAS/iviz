@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
+using System.Threading;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
@@ -397,7 +398,12 @@ namespace Iviz.App
             ConnectionManager.Connection.KeepReconnecting = true;
         }
 
-        public void SaveStateConfiguration([NotNull] string file)
+        public void RestartModelService()
+        {
+            modelService.Restart();
+        }
+
+        public async void SaveStateConfiguration([NotNull] string file)
         {
             if (file == null)
             {
@@ -420,21 +426,19 @@ namespace Iviz.App
             {
                 Logger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText($"{Settings.SavedFolder}/{file}", text);
+                await FileUtils.WriteAllTextAsync($"{Settings.SavedFolder}/{file}", text, default);
                 Logger.Internal("Done.");
             }
-            catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+            catch (Exception e) 
             {
-                Logger.Error(e);
-                Logger.Internal("Error:", e);
+                Logger.Internal("Error saving state configuration", e);
                 return;
             }
 
             Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
         }
 
-        public void LoadStateConfiguration([NotNull] string file)
+        public async void LoadStateConfiguration([NotNull] string file, CancellationToken token = default)
         {
             if (file == null)
             {
@@ -446,7 +450,7 @@ namespace Iviz.App
             try
             {
                 Logger.Internal("Loading config file...");
-                text = File.ReadAllText(Settings.SavedFolder + "/" + file);
+                text = await FileUtils.ReadAllTextAsync(Settings.SavedFolder + "/" + file, token);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)
@@ -454,11 +458,9 @@ namespace Iviz.App
                 Logger.Internal("<b>Error:</b> Config file not found.");
                 return;
             }
-            catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+            catch (Exception e)
             {
-                Logger.Error(e);
-                Logger.Internal("<b>Error:</b>", e);
+                Logger.Internal("Error loading state configuration", e);
                 return;
             }
 
@@ -508,7 +510,7 @@ namespace Iviz.App
             {
                 Debug.Log("Using settings from " + path);
 
-                string text = File.ReadAllText(path);
+                string text = File.ReadAllText(path); // sync
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
                 connectionData.MasterUri = config.MasterUri;
                 connectionData.MyUri = config.MyUri;
@@ -530,7 +532,7 @@ namespace Iviz.App
             }
         }
 
-        void SaveSimpleConfiguration()
+        async void SaveSimpleConfiguration()
         {
             connectionData.UpdateLastMasterUris();
 
@@ -546,7 +548,7 @@ namespace Iviz.App
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(Settings.SimpleConfigurationPath, text);
+                await FileUtils.WriteAllTextAsync(Settings.SimpleConfigurationPath, text, default);
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -555,7 +557,7 @@ namespace Iviz.App
             }
         }
         
-        public void UpdateSimpleConfigurationSettings()
+        public static async void UpdateSimpleConfigurationSettings(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -565,11 +567,36 @@ namespace Iviz.App
 
             try
             {
-                string inText = File.ReadAllText(path);
+                string inText = await FileUtils.ReadAllTextAsync(path, token);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config; 
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
-                File.WriteAllText(path, outText);
+                await FileUtils.WriteAllTextAsync(path, outText, token);
+            }
+            catch (Exception e) when
+                (e is IOException || e is SecurityException || e is JsonException)
+            {
+            }
+        }
+        
+        public async void ClearMastersFromSimpleConfiguration(CancellationToken token = default)
+        {
+            string path = Settings.SimpleConfigurationPath;
+            if (Settings.SettingsManager == null || !File.Exists(path))
+            {
+                return;
+            }
+
+            connectionData.LastMasterUris = new List<Uri>();
+
+            try
+            {
+                string inText = await FileUtils.ReadAllTextAsync(path, token);
+                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
+                config.LastMasterUris = new List<Uri>(); 
+                
+                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                await FileUtils.WriteAllTextAsync(path, outText, token);
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -577,7 +604,23 @@ namespace Iviz.App
             }
         }
 
-        public void ResetAllModules()
+        public static void ClearSavedFiles()
+        {
+            foreach (string file in LoadConfigDialogData.SavedFiles)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"Error deleting file '{file}'", e);
+                }
+            }
+            
+        }
+
+        void ResetAllModules()
         {
             foreach (ModuleData m in moduleDatas)
             {

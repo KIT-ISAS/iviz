@@ -191,7 +191,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Logger.Error($"{this}: Error processing PNG", e);
                     GameThread.PostInListenerQueue(onFinished);                    
                 }
             });
@@ -273,7 +273,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Logger.Error($"{this}: Error processing JPG", e);
                     GameThread.PostInListenerQueue(onFinished);                    
                 }
             });

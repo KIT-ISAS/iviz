@@ -137,17 +137,18 @@ namespace Iviz.Resources
                    External.ContainsRobot(robotName);
         }
 
-        [NotNull]
+        [NotNull, ItemNotNull]
         public static IEnumerable<string> GetRobotNames()
         {
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
-        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
-        public static bool TryGetRobot([NotNull] string robotName, out string robotDescription)
+        public static Task<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
+            CancellationToken token = default)
         {
-            return Internal.TryGetRobot(robotName, out robotDescription) ||
-                   External.TryGetRobot(robotName, out robotDescription);
+            return Internal.TryGetRobot(robotName, out string robotDescription)
+                ? Task.FromResult((true, robotDescription))
+                : External.TryGetRobotAsync(robotName, token);
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
@@ -156,7 +157,7 @@ namespace Iviz.Resources
             return Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
         }
 
-        [ItemCanBeNull]
+        [NotNull, ItemCanBeNull]
         public static Task<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -165,7 +166,7 @@ namespace Iviz.Resources
                 : External.TryGetGameObjectAsync(uriString, provider, token);
         }
 
-        [ItemCanBeNull]
+        [NotNull, ItemCanBeNull]
         internal static Task<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {

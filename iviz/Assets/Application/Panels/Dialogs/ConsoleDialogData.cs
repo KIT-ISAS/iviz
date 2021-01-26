@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,7 +41,7 @@ namespace Iviz.App
         [NotNull] readonly ConsoleDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
 
-        readonly Queue<LogMessage> messageQueue = new Queue<LogMessage>();
+        readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
         bool queueIsDirty;
@@ -105,13 +106,13 @@ namespace Iviz.App
             messageQueue.Enqueue(log);
             if (messageQueue.Count > MaxMessages)
             {
-                messageQueue.Dequeue();
+                messageQueue.TryDequeue(out _);
             }
 
             queueIsDirty = true;
         }
 
-        void HandleMessage([NotNull] Log log)
+        void HandleMessage(Log log)
         {
             if (log.Name == ConnectionManager.MyId)
             {

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using Iviz.Core;
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
 using Iviz.ModelService;
@@ -11,7 +12,7 @@ namespace Iviz.Controllers
 {
     public sealed class ModelService
     {
-        public bool IsEnabled { get; }
+        public bool IsEnabled { get; private set; }
 
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
         ModelServer modelServer;
@@ -19,8 +20,15 @@ namespace Iviz.Controllers
 
         public ModelService()
         {
+            Restart();
+        }
+
+        public async void Restart(CancellationToken token = default)
+        {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
             //Logger.Internal("Trying to start embedded <b>Iviz.Model.Service</b>...");
+
+            IsEnabled = false;
 
             string homeFolder;
             switch (UnityEngine.Application.platform)
@@ -36,7 +44,7 @@ namespace Iviz.Controllers
                     homeFolder = Environment.GetEnvironmentVariable("%HOMEDRIVE%%HOMEPATH%");
                     break;
                 default:
-                    Logger.Internal("Iviz.Model.Service will not start, mobile platform detected. " +
+                    Logger.Info("Iviz.Model.Service will not start, mobile platform detected. " +
                                     "You will need to start it as an external node.");
                     return;
             }
@@ -58,7 +66,7 @@ namespace Iviz.Controllers
 
             try
             {
-                rosPackagePathExtras = File.ReadAllText(extrasPath);
+                rosPackagePathExtras = await FileUtils.ReadAllTextAsync(extrasPath, token);
             }
             catch (IOException e)
             {
@@ -89,7 +97,7 @@ namespace Iviz.Controllers
                 ModelServer.SdfServiceName, modelServer.SdfCallback);
 
             IsEnabled = true;
-            Logger.Internal($"Iviz.Model.Service started with {modelServer.NumPackages} paths.");
+            Logger.Info($"Iviz.Model.Service started with {modelServer.NumPackages} paths.");
 #endif
         }
     }

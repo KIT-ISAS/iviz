@@ -16,7 +16,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class SimpleRobotModuleData : ModuleData
     {
-        const string ParamSuffix = "_description";
+        const string ParamSubstring = "_description";
 
         [NotNull] readonly SimpleRobotPanelContents panel;
 
@@ -150,7 +150,7 @@ namespace Iviz.App
 
                 if (f)
                 {
-                    Resource.External.AddRobotResource(Robot.Robot.Name, Robot.Robot.Description);
+                    Resource.External.AddRobotResourceAsync(Robot.Robot.Name, Robot.Robot.Description);
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace Iviz.App
 
         [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterCandidates(CancellationToken token) =>
-            ConnectionManager.Connection.GetSystemParameterList(token).Where(x => x.HasSuffix(ParamSuffix));
+            ConnectionManager.Connection.GetSystemParameterList(token).Where(x => x.Contains(ParamSubstring));
 
         [NotNull, ItemNotNull]
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
@@ -202,21 +202,15 @@ namespace Iviz.App
                     case nameof(SimpleRobotConfiguration.Visible):
                         Robot.Visible = config.Visible;
                         break;
-                    case nameof(SimpleRobotConfiguration.SourceParameter):
-                        if (config.SourceParameter == Robot.Config.SourceParameter)
-                        {
-                            break;
-                        }
-
+                    case nameof(SimpleRobotConfiguration.SourceParameter) when config.SourceParameter != Robot.Config.SourceParameter:
                         hasSourceParameter = true;
                         break;
-                    case nameof(SimpleRobotConfiguration.SavedRobotName):
-                        if (config.SavedRobotName == Robot.Config.SavedRobotName)
-                        {
-                            break;
-                        }
-
+                    case nameof(SimpleRobotConfiguration.SourceParameter):
+                        break;
+                    case nameof(SimpleRobotConfiguration.SavedRobotName) when config.SavedRobotName != Robot.Config.SavedRobotName:
                         hasRobotName = true;
+                        break;
+                    case nameof(SimpleRobotConfiguration.SavedRobotName):
                         break;
                     case nameof(SimpleRobotConfiguration.FramePrefix):
                         Robot.FramePrefix = config.FramePrefix;
@@ -240,7 +234,7 @@ namespace Iviz.App
                         Robot.Smoothness = config.Smoothness;
                         break;
                     default:
-                        Core.Logger.Warn($"{this}: Unknown field '{field}'");
+                        Logger.Warn($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

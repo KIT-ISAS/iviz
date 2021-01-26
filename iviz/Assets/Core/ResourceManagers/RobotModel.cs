@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Urdf;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -36,7 +35,7 @@ namespace Iviz.Displays
             new List<(GameObject, Info<GameObject>)>();
 
         readonly Robot robot;
-        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
         bool occlusionOnly;
         bool visible = true;
@@ -72,9 +71,12 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true)
+        /// <param name="token">An optional cancellation token.</param>
+        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true,
+            CancellationToken token = default)
         {
             IsStarting = true;
+            CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
 
             try
             {
@@ -84,22 +86,9 @@ namespace Iviz.Displays
                     rootMaterials[material.Name] = material;
                 }
 
-                try
+                foreach (var link in robot.Links)
                 {
-                    foreach (var link in robot.Links)
-                    {
-                        await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    Logger.Debug($"{this}: Start was cancelled!");
-                    return;
-                }
-                catch (Exception e)
-                {
-                    Logger.Error($"{this}: Start stopped with exception", e);
-                    return;
+                    await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token);
                 }
 
                 foreach (var joint in robot.Joints)
@@ -132,24 +121,28 @@ namespace Iviz.Displays
                 Metallic = metallic;
                 ApplyAnyValidConfiguration();
 
-                Logger.Info(
-                    $"Robot: Finished constructing '{Name}' with {LinkObjects.Count} links and {Joints.Count} joints.");
+                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count} " +
+                            $"links and {Joints.Count} joints.");
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
-                Logger.Error($"Robot: Failed to construct '{Name}'", e);
-                Debug.Log(e);
+                Logger.Error($"{this}: Failed to construct '{Name}'", e);
                 throw;
             }
             finally
             {
                 IsStarting = false;
+                tokenSource.Dispose();
             }
         }
 
         public void Cancel()
         {
-            tokenSource.Cancel();
+            runningTs.Cancel();
         }
 
         public string Name { get; }
@@ -231,7 +224,8 @@ namespace Iviz.Displays
         async Task ProcessLinkAsync(bool keepMeshMaterials,
             [NotNull] Link link,
             [NotNull] IReadOnlyDictionary<string, Material> rootMaterials,
-            [CanBeNull] IExternalServiceProvider provider)
+            [CanBeNull] IExternalServiceProvider provider,
+            CancellationToken token)
         {
             var linkObject = new GameObject("Link:" + link.Name);
             linkObject.transform.parent = BaseLinkObject.transform;
@@ -240,8 +234,6 @@ namespace Iviz.Displays
 
             foreach (var visual in link.Visuals)
             {
-                tokenSource.Token.ThrowIfCancellationRequested();
-
                 var geometry = visual.Geometry;
 
                 var visualObject = new GameObject
@@ -260,8 +252,7 @@ namespace Iviz.Displays
                     Info<GameObject> info;
                     try
                     {
-                        info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider,
-                            tokenSource.Token);
+                        info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
                     }
                     catch (OperationCanceledException)
                     {
@@ -270,7 +261,7 @@ namespace Iviz.Displays
                     catch (Exception e)
                     {
                         Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
-                        return;
+                        throw;
                     }
 
                     if (info == null)

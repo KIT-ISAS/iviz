@@ -26,8 +26,6 @@ namespace Iviz.Ros
         readonly SemaphoreSlim signalNoAwait = new SemaphoreSlim(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
-        readonly ConcurrentQueue<Action> toDosNoAwait = new ConcurrentQueue<Action>();
-
         readonly CancellationTokenSource connectionTs = new CancellationTokenSource();
 
         protected RosConnection()
@@ -75,13 +73,6 @@ namespace Iviz.Ros
             Signal();
         }
 
-        protected void AddTaskNoAwait(Action a)
-        {
-            toDosNoAwait.Enqueue(a);
-            //Debug.Log("A +1: " + toDosNoAwait.Count);
-            signalNoAwait.Release();
-        }
-
         protected void ClearTaskQueue()
         {
             while (toDos.TryDequeue(out _))
@@ -97,7 +88,6 @@ namespace Iviz.Ros
         async Task Run()
         {
             DateTime lastConnectionTry = DateTime.MinValue;
-            Task executeTask = ExecuteTasksNoAwait();
             try
             {
                 while (!connectionTs.IsCancellationRequested)
@@ -140,7 +130,6 @@ namespace Iviz.Ros
             }
 
             connectionTs.Cancel();
-            await executeTask.AwaitNoThrow(this);
         }
 
         async Task ExecuteTasks()
@@ -149,18 +138,6 @@ namespace Iviz.Ros
             {
                 await action().AwaitNoThrow(this);
                 //Debug.Log("-1: " + toDos.Count);
-            }
-        }
-
-        async Task ExecuteTasksNoAwait()
-        {
-            while (!connectionTs.IsCancellationRequested)
-            {
-                await signalNoAwait.WaitAsync(connectionTs.Token);
-                while (toDosNoAwait.TryDequeue(out var action))
-                {
-                    action();
-                }
             }
         }
 

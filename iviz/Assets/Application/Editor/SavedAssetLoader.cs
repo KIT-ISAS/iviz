@@ -28,7 +28,7 @@ namespace Iviz.Editor
                 await CreateAssetAsync(new Uri(uri), manager);
             }
 
-            CreateRobots(manager);
+            await CreateRobotsAsync(manager);
             AssetDatabase.Refresh();
 
             Debug.Log("SavedAssetLoader: Done!");
@@ -58,7 +58,7 @@ namespace Iviz.Editor
         */
 
 
-        static void CreateRobots([NotNull] ExternalResourceManager manager)
+        static async Task CreateRobotsAsync([NotNull] ExternalResourceManager manager)
         {
             string unityDirectory = "Resources/Package/iviz/robots";
             string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";
@@ -77,7 +77,7 @@ namespace Iviz.Editor
 
             foreach (string robotName in manager.GetRobotNames())
             {
-                manager.TryGetRobot(robotName, out string robotDescription);
+                var(_, robotDescription) = await manager.TryGetRobotAsync(robotName);
                 string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
                 File.WriteAllText(absolutePath + "/" + filename + ".txt", robotDescription);
             }
