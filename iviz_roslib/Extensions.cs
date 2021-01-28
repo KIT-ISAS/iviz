@@ -9,7 +9,13 @@ namespace Iviz.Roslib
 {
     public static class Extensions
     {
-        public static void WaitForService(this RosClient client, string service, int timeoutInMs = 5000)
+        public static void WaitForService(this RosClient client, string service, int timeoutInMs)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            client.WaitForService(service, tokenSource.Token);
+        }
+
+        public static void WaitForService(this RosClient client, string service, CancellationToken token = default)
         {
             if (client == null)
             {
@@ -21,9 +27,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(service));
             }
 
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            Task.Run(() => client.WaitForServiceAsync(service, tokenSource.Token), tokenSource.Token)
-                .WaitAndRethrow();
+            Task.Run(() => client.WaitForServiceAsync(service, token), token).WaitAndRethrow();
         }
 
         public static async Task WaitForServiceAsync(this RosClient client, string service,
@@ -57,16 +61,20 @@ namespace Iviz.Roslib
             }
         }
 
-        public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs = 5000)
+        public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            publisher.WaitForAnySubscriber(tokenSource.Token);
+        }
+
+        public static void WaitForAnySubscriber(this IRosPublisher publisher, CancellationToken token = default)
         {
             if (publisher == null)
             {
                 throw new ArgumentNullException(nameof(publisher));
             }
 
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            Task.Run(() => publisher.WaitForAnySubscriberAsync(tokenSource.Token), tokenSource.Token)
-                .WaitAndRethrow();
+            Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
         }
 
         public static async Task WaitForAnySubscriberAsync(this IRosPublisher publisher,
@@ -77,22 +85,29 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(publisher));
             }
 
+            using CancellationTokenSource linkedSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
+
             while (publisher.GetState().Senders.Count == 0)
             {
-                await Task.Delay(200, token);
+                await Task.Delay(200, linkedSource.Token);
             }
         }
 
-        public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs = 5000)
+        public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            subscriber.WaitForAnyPublisher(tokenSource.Token);
+        }
+
+        public static void WaitForAnyPublisher(this IRosSubscriber subscriber, CancellationToken token = default)
         {
             if (subscriber == null)
             {
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            Task.Run(() => subscriber.WaitForAnyPublisherAsync(tokenSource.Token), tokenSource.Token)
-                .WaitAndRethrow();
+            Task.Run(() => subscriber.WaitForAnyPublisherAsync(token), token).WaitAndRethrow();
         }
 
         public static async Task WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
@@ -103,13 +118,22 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
+            using CancellationTokenSource linkedSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
+            
             while (subscriber.GetState().Receivers.Count == 0)
             {
-                await Task.Delay(200, token);
+                await Task.Delay(200, linkedSource.Token);
             }
         }
 
-        public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs = 5000)
+        public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            client.WaitForTopic(topic, tokenSource.Token);
+        }
+
+        public static void WaitForTopic(this RosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {
@@ -121,9 +145,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            Task.Run(() => client.WaitForTopicAsync(topic, tokenSource.Token), tokenSource.Token)
-                .WaitAndRethrow();
+            Task.Run(() => client.WaitForTopicAsync(topic, token), token).WaitAndRethrow();
         }
 
         public static async Task WaitForTopicAsync(this RosClient client, string topic,

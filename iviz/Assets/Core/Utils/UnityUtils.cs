@@ -371,30 +371,6 @@ namespace Iviz.Core
             return result;
         }
 
-        public static IEnumerable<(TA First, TB Second)> Zip<TA, TB>(
-            [NotNull] this IEnumerable<TA> a,
-            [NotNull] IEnumerable<TB> b)
-        {
-            if (a == null)
-            {
-                throw new ArgumentNullException(nameof(a));
-            }
-
-            if (b == null)
-            {
-                throw new ArgumentNullException(nameof(b));
-            }
-
-            using (var enumA = a.GetEnumerator())
-            using (var enumB = b.GetEnumerator())
-            {
-                while (enumA.MoveNext() && enumB.MoveNext())
-                {
-                    yield return (enumA.Current, enumB.Current);
-                }
-            }
-        }
-
         static readonly Plane[] PlaneCache = new Plane[6];
 
         public static bool IsVisibleFromMainCamera(this Bounds bounds)

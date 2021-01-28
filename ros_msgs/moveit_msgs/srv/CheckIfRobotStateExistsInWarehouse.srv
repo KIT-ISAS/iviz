@@ -1,0 +1,6 @@
+string name
+string robot
+
+---
+
+bool exists

@@ -527,5 +527,18 @@ namespace Iviz.Roslib
         
         public static RefEnumerable<T>.RefEnumerator RefEnumerator<T>(this T[] a) =>
             new RefEnumerable<T>.RefEnumerator(a ?? throw new ArgumentNullException(nameof(a)));
+
+        public delegate void RefAction<T>(ref T t);
+        
+        public static T[] ForEach<T>(this T[] a, RefAction<T> del)
+        {
+            foreach (ref T t in a.Ref())
+            {
+                del(ref t);
+            }
+
+            return a;
+        }
+
     }
 }

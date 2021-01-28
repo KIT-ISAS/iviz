@@ -1,0 +1,10 @@
+RobotState robot_state
+string group_name
+Constraints constraints
+
+---
+
+bool valid
+ContactInformation[] contacts
+CostSource[] cost_sources
+ConstraintEvalResult[] constraint_result

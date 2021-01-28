@@ -73,7 +73,7 @@ namespace Iviz.Core
     public static class RosUtils
     {
         const string BaseFrameId = "map";
-        
+
         public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
         public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
 
@@ -200,12 +200,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Msgs.GeometryMsgs.Point ToRosPoint(this Vector3 p)
         {
-            return new Msgs.GeometryMsgs.Point
-            (
-                X: p.x,
-                Y: p.y,
-                Z: p.z
-            );
+            return new Msgs.GeometryMsgs.Point(p.x, p.y, p.z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -229,13 +224,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Msgs.GeometryMsgs.Quaternion ToRos(this Quaternion p)
         {
-            return new Msgs.GeometryMsgs.Quaternion
-            (
-                X: p.x,
-                Y: p.y,
-                Z: p.z,
-                W: p.w
-            );
+            return new Msgs.GeometryMsgs.Quaternion(p.x, p.y, p.z, p.w);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -273,7 +262,7 @@ namespace Iviz.Core
         {
             return new Msgs.GeometryMsgs.Transform(p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
         {
@@ -284,14 +273,14 @@ namespace Iviz.Core
         public static bool IsInvalid(this float f)
         {
             return float.IsNaN(f) || float.IsInfinity(f);
-        }      
-        
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this double f)
         {
             return double.IsNaN(f) || double.IsInfinity(f);
-        } 
-        
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
@@ -328,7 +317,7 @@ namespace Iviz.Core
         {
             return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this Msgs.GeometryMsgs.Transform transform)
         {

@@ -1,0 +1,6 @@
+string regex
+string robot
+
+---
+
+string[] states

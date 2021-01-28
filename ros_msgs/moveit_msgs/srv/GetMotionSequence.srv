@@ -1,0 +1,6 @@
+# Planning request with a list of motion commands
+MotionSequenceRequest request
+
+---
+# Response to the planning request
+MotionSequenceResponse response
