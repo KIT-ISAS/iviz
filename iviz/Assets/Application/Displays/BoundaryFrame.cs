@@ -2,6 +2,7 @@
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -10,38 +11,26 @@ namespace Iviz.Controllers
     [RequireComponent(typeof(BoxCollider))]
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {
+        static readonly Vector3[] Directions =
+        {
+            Vector3.right, Vector3.forward, Vector3.up
+        };
+
         readonly GameObject[] frames = new GameObject[8];
 
         Bounds bounds;
         GameObject holder;
-        Billboard labelBillboard;
-        TextMarkerResource labelObject;
-        TextMesh labelObjectText;
         Color color;
 
         float frameAxisLength;
         float frameAxisWidth;
 
-        public Vector3 LabelOffset
-        {
-            get => labelBillboard.offset;
-            set => labelBillboard.offset = value;
-        }
-
         void Awake()
         {
-            Color = Color.green.WithAlpha(0.3f);
+            Color = Color.green;
             FrameAxisLength = 0.33f;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
-
-            labelObject = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(transform);
-            labelObject.Name = "Frame Axis Label";
-            labelObjectText = labelObject.GetComponent<TextMesh>();
-            labelObject.transform.SetParentLocal(transform);
-            labelObject.Visible = false;
-
-            labelBillboard = labelObject.GetComponent<Billboard>();
 
             Name = "Boundary Frame";
         }
@@ -127,12 +116,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ColliderEnabled
-        {
-            get => false;
-            set { }
-        }
-
         public void Suspend()
         {
         }
@@ -140,10 +123,6 @@ namespace Iviz.Controllers
         public void SplitForRecycle()
         {
             DestroySelectionFrame();
-            ResourcePool.DisposeDisplay(labelObject);
-            labelObject = null;
-            labelObjectText = null;
-            labelBillboard = null;
         }
 
         void DestroySelectionFrame()
@@ -192,12 +171,20 @@ namespace Iviz.Controllers
                 CreateFrameLink(frameLinkHolder)
             };
 
+            foreach (var (frameLink, direction) in frameLinks.Zip(Directions))
+            {
+                frameLink.transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
+                frameLink.transform.localPosition = -0.5f * frameAxisLength * direction;
+            }
+
+            /*
             frameLinks[0].transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
             frameLinks[0].transform.localPosition = -0.5f * frameAxisLength * Vector3.right;
             frameLinks[1].transform.localScale = new Vector3(frameAxisWidth, frameAxisWidth, frameAxisLength);
             frameLinks[1].transform.localPosition = -0.5f * frameAxisLength * Vector3.forward;
             frameLinks[2].transform.localScale = new Vector3(frameAxisWidth, frameAxisLength, frameAxisWidth);
             frameLinks[2].transform.localPosition = 0.5f * frameAxisLength * Vector3.up;
+            */
 
             return frameLinkHolder;
         }
@@ -205,9 +192,10 @@ namespace Iviz.Controllers
         [NotNull]
         GameObject CreateFrameLink([NotNull] GameObject frameLinkHolder)
         {
-            var frameLink = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
+            var frameLink =
+                ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
             frameLink.Name = "Cube";
-            frameLink.EmissiveColor = Color / 2;
+            frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;
             return frameLink.gameObject;
         }
