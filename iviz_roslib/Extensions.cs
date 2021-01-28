@@ -39,7 +39,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(service));
             }
 
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 try
                 {
@@ -139,7 +139,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 try
                 {
