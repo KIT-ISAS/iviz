@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <LangVersion>8</LangVersion>
+    <LangVersion>9</LangVersion>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
   </PropertyGroup>
