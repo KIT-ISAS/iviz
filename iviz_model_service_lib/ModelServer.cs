@@ -23,7 +23,7 @@ namespace Iviz.ModelService
         readonly Dictionary<string, List<string>> packagePaths = new Dictionary<string, List<string>>();
 
         public int NumPackages => packagePaths.Count;
-        public bool IsFileSchemaEnabled { get; }
+        public bool IsFileSchemaEnabled { get; set; }
 
         public ModelServer(string additionalPaths = null, bool enableFileSchema = false)
         {
@@ -168,7 +168,7 @@ namespace Iviz.ModelService
                 if (!IsFileSchemaEnabled)
                 {
                     msg.Response.Success = false;
-                    msg.Response.Message = $"File schema is disabled";
+                    msg.Response.Message = "File schema is disabled";
                     return;
                 }
                 
@@ -197,8 +197,7 @@ namespace Iviz.ModelService
             }
             catch (AssimpException e)
             {
-                Logger.LogError("EE Assimp exception loading '" + modelPath + "':");
-                Logger.LogError(e);
+                Logger.LogErrorFormat("EE Assimp exception loading '{0}': {1}", modelPath, e);
 
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
@@ -297,7 +296,7 @@ namespace Iviz.ModelService
                 XmlDocument doc = new XmlDocument();
                 doc.Load(fileName);
                 var nodeList = doc.GetElementsByTagName("up_axis");
-                if (nodeList.Count != 0)
+                if (nodeList.Count != 0 && nodeList[0] != null)
                 {
                     orientationHint = nodeList[0].InnerText ?? "";
                 }
