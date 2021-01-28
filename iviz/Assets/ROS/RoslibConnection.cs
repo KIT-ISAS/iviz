@@ -34,11 +34,14 @@ namespace Iviz.Ros
         [NotNull] CancellationTokenSource connectionTs = new CancellationTokenSource();
 
         Task watchdogTask;
-
         Uri masterUri;
         string myId;
         Uri myUri;
 
+        public bool Connected => client != null;
+
+        [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
+        
         [CanBeNull]
         public Uri MasterUri
         {
@@ -118,7 +121,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 750;
 
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -850,6 +853,31 @@ namespace Iviz.Ros
                 {
                     Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
                     return (null, "Unknown error");
+                }
+            }
+        }
+
+        [NotNull]
+        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs, CancellationToken token = default)
+        {
+            using (CancellationTokenSource tokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            {
+                tokenSource.CancelAfter(timeoutInMs);
+
+                try
+                {
+                    if (client?.Parameters == null)
+                    {
+                        return null;
+                    }
+
+                    return await client.GetSystemStateAsync(tokenSource.Token);
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
+                    return null;
                 }
             }
         }
