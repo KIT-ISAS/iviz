@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using Iviz.Msgs;
 
@@ -115,14 +116,6 @@ namespace Iviz.XmlRpc
                     XmlNode? data = primitive.FirstChild;
                     Assert(data?.Name, "data");
                     return data!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray();
-                /*
-                object?[] children = new object[data.ChildNodes.Count];
-                for (int i = 0; i < data.ChildNodes.Count; i++)
-                {
-                    children[i] = Parse(data.ChildNodes[i]);
-                }
-                */
-
                 case "dateTime.iso8601":
                     return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
@@ -180,7 +173,7 @@ namespace Iviz.XmlRpc
 
         static string CreateRequest(string method, IEnumerable<Arg> args)
         {
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder buffer = new StringBuilder(200);
             buffer.AppendLine("<?xml version=\"1.0\"?>");
             buffer.AppendLine("<methodCall>");
             buffer.Append("<methodName>").Append(method).AppendLine("</methodName>");
@@ -370,12 +363,13 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(methods));
             }
 
-            string inData = await httpContext.GetRequest(token: token).Caf();
+            string inData = await httpContext.GetRequestAsync(token: token).Caf();
 
             try
             {
                 var (methodName, args) = ParseResponseXml(inData);
 
+                //Console.WriteLine(methodName);
                 if (!methods.TryGetValue(methodName, out var method))
                 {
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
@@ -383,18 +377,16 @@ namespace Iviz.XmlRpc
 
                 Arg response = (Arg) method(args);
 
-                StringBuilder buffer = new StringBuilder();
-                buffer.AppendLine("<?xml version=\"1.0\"?>");
-                buffer.AppendLine("<methodResponse>");
-                buffer.AppendLine("<params>");
-                buffer.AppendLine("<param>");
-                buffer.AppendLine(response);
-                buffer.AppendLine("</param>");
-                buffer.AppendLine("</params>");
-                buffer.AppendLine("</methodResponse>");
-                buffer.AppendLine();
-
-                string outData = buffer.ToString();
+                string outData = string.Format("<?xml version=\"1.0\"?>\n" +
+                                               "<methodResponse>\n" +
+                                               "<params>\n" +
+                                               "<param>\n" +
+                                               "{0}\n" +
+                                               "</param>\n" +
+                                               "</params>\n" +
+                                               "</methodResponse>\n" +
+                                               "\n",
+                    response.ToString());
 
                 await httpContext.RespondAsync(outData, token: token).Caf();
 
@@ -406,22 +398,23 @@ namespace Iviz.XmlRpc
             }
             catch (ParseException e)
             {
-                StringBuilder buffer = new StringBuilder();
-                buffer.AppendLine("<?xml version=\"1.0\"?>");
-                buffer.AppendLine("<methodResponse>");
-                buffer.AppendLine("<fault>");
-                buffer.AppendLine(new Arg(e.Message));
-                buffer.AppendLine("</fault>");
-                buffer.AppendLine("</methodResponse>");
+                string buffer = string.Format("<?xml version=\"1.0\"?>\n" +
+                                              "<methodResponse>\n" +
+                                              "<fault>\n" +
+                                              "{0}\n" +
+                                              "</fault>\n" +
+                                              "</methodResponse>\n",
+                    new Arg(e.Message).ToString());
 
-                await httpContext.RespondAsync(buffer.ToString(), token: token).Caf();
+                await httpContext.RespondAsync(buffer, token: token).Caf();
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Logger.LogErrorFormat("XmlRpcService: Error during parsing {0}", e.ToString());
                 await httpContext.RespondWithUnexpectedErrorAsync(token: token).Caf();
                 throw;
             }

@@ -267,15 +267,15 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             if (token.IsCancellationRequested || runningTs.IsCancellationRequested)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            return manager.PublisherUpdateRpcAsync(publisherUris, tokenSource.Token).AwaitNoThrow(this);
+            await manager.PublisherUpdateRpcAsync(publisherUris, tokenSource.Token).AwaitNoThrow(this);
         }
 
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)

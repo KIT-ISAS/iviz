@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
 using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
@@ -54,7 +55,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            content = $"<value>{f}</value>\n";
+            content = $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
         }
 
         public Arg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
@@ -80,7 +81,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(100);
             builder.Append("<value><array><data>");
             foreach (Arg arg in f)
             {
@@ -112,7 +113,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(100);
             builder.Append("<value><struct>");
             foreach (var (name, arg) in f)
             {
@@ -130,7 +131,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(100);
             builder.Append("<value><struct>");
             foreach (var (name, obj) in f)
             {

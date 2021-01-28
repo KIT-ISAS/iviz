@@ -40,7 +40,8 @@ namespace Iviz.Roslib.XmlRpc
                 ["paramUpdate"] = ParamUpdate,
                 ["publisherUpdate"] = PublisherUpdate,
                 ["requestTopic"] = RequestTopic,
-                ["getPid"] = GetPid
+                ["getPid"] = GetPid,
+                ["system.multicall"] = SystemMulticall,
             };
 
             lateCallbacks = new Dictionary<string, Func<object[], CancellationToken, Task>>
@@ -126,16 +127,16 @@ namespace Iviz.Roslib.XmlRpc
         {
             return new Arg[] {StatusCode.Success, "ok", arg};
         }
+        
+        static Arg[] ErrorResponse(string msg)
+        {
+            return new Arg[] {StatusCode.Error, msg, 0};
+        }        
 
-        Arg[] GetBusStats(object[] _)
+        static Arg[] GetBusStats(object[] _)
         {
             Logger.Log("Was called: getBusStats");
-            return new Arg[]
-            {
-                StatusCode.Error,
-                "error=NYI",
-                Array.Empty<Arg>()
-            };
+            return ErrorResponse("Not implemented yet");
         }
 
         Arg[] GetBusInfo(object[] _)
@@ -269,7 +270,7 @@ namespace Iviz.Roslib.XmlRpc
                 !(args[1] is string topic) ||
                 !(args[2] is object[] protocols))
             {
-                return new Arg[] {StatusCode.Error, "Failed to parse arguments", 0};
+                return ErrorResponse("Failed to parse arguments");
             }
 
             if (protocols.Length == 0)
@@ -304,5 +305,76 @@ namespace Iviz.Roslib.XmlRpc
                 ? new Arg[] {StatusCode.Error, "Internal error [duplicate request]", 0}
                 : OkResponse(new Arg[] {"TCPROS", endpoint.Hostname, endpoint.Port});
         }
+        
+        Arg[] SystemMulticall(object[] args)
+        {
+            if (args.Length != 1 ||
+                !(args[0] is object[] calls))
+            {
+                return ErrorResponse("Failed to parse arguments");
+            }
+
+            List<Arg> responses = new List<Arg>(calls.Length);
+            foreach (var callObject in calls)
+            {
+                if (!(callObject is List<(string ElementName, object Element)> call))
+                {
+                    return ErrorResponse("Failed to parse arguments");
+                }
+
+                string? methodName = null;
+                object[]? arguments = null;
+                foreach ((string elementName, object element) in call)
+                {
+                    switch (elementName)
+                    {
+                        case "methodName":
+                        {
+                            if (!(element is string elementStr))
+                            {
+                                return ErrorResponse("Failed to parse method name");
+                            }
+
+                            methodName = elementStr;
+                            break;
+                        }
+                        case "params":
+                        {
+                            if (!(element is object[] elementObjs) ||
+                                elementObjs.Length == 0)
+                            {
+                                return ErrorResponse("Failed to parse arguments");
+                            }
+
+                            arguments = elementObjs;
+                            break;
+                        }
+                        default:
+                            return ErrorResponse("Failed to parse struct array");
+                    }
+                }
+                
+                if (methodName == null || arguments == null)
+                {
+                    return ErrorResponse("'methodname' or 'params' missing");
+                }
+                    
+                if (!methods.TryGetValue(methodName, out var method))
+                {
+                    return ErrorResponse("Method not found");
+                }
+                    
+                Arg response = (Arg) method(arguments);
+                responses.Add(response);
+                    
+                if (lateCallbacks != null &&
+                    lateCallbacks.TryGetValue(methodName, out var lateCallback))
+                {
+                    lateCallback(args, default);
+                }                    
+            }
+
+            return responses.ToArray();
+        }        
     }
 }

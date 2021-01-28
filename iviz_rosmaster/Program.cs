@@ -32,7 +32,7 @@ namespace Iviz.RosMaster
             
             Logger.Log = Console.WriteLine;
             Logger.LogError = Console.Error.WriteLine;
-            Logger.LogDebug = Console.Error.WriteLine;
+            //Logger.LogDebug = Console.Error.WriteLine;
             
             masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
             using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);    

@@ -26,7 +26,7 @@ namespace Iviz.XmlRpc
 
         public void Start(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
         {
-            Task.Run(async () => await StartAsync(timeoutInMs, token), token).WaitAndRethrow();
+            Task.Run(() => StartAsync(timeoutInMs, token), token).WaitAndRethrow();
         }
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
@@ -41,11 +41,7 @@ namespace Iviz.XmlRpc
 #endif
             if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
             {
-                if (token.IsCancellationRequested)
-                {
-                    throw new TaskCanceledException();
-                }
-
+                token.ThrowIfCanceled();
                 if (task.IsFaulted)
                 {
                     ExceptionDispatchInfo.Capture(task.Exception!.InnerException!).Throw();
@@ -57,16 +53,13 @@ namespace Iviz.XmlRpc
 
         string CreateRequest(string msgIn)
         {
-            StringBuilder str = new StringBuilder();
-            string path = Uri.UnescapeDataString(uri.AbsolutePath);
-            str.Append($"POST {path} HTTP/1.0\r\n");
-            str.Append("User-Agent: iviz XML-RPC\r\n");
-            str.Append($"Host: {callerUri.Host}\r\n");
-            str.Append("Content-Length: ").Append(BuiltIns.UTF8.GetByteCount(msgIn)).Append("\r\n");
-            str.Append("Content-Type: text/xml; charset=utf-8\r\n");
-            str.Append("\r\n");
-            str.Append(msgIn).Append("\r\n");
-            return str.ToString();
+            return string.Format("POST {0} HTTP/1.0\r\n" +
+                                 "User-Agent: iviz XML-RPC\r\n" +
+                                 "Host: {1}\r\n" +
+                                 "Content-Length: {2}\r\n" +
+                                 "Content-Type: text/xml; charset=utf-8\r\n" +
+                                 "\r\n{3}\r\n",
+                Uri.UnescapeDataString(uri.AbsolutePath), callerUri.Host, BuiltIns.UTF8.GetByteCount(msgIn), msgIn);
         }
 
         static string ProcessResponse(string response)
@@ -126,11 +119,7 @@ namespace Iviz.XmlRpc
                 if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
                 {
                     writer.Close();
-                    if (token.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-
+                    token.ThrowIfCanceled();
                     if (writeTask.IsFaulted)
                     {
                         ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
@@ -146,17 +135,13 @@ namespace Iviz.XmlRpc
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
                     reader.Close();
-                    if (token.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-
+                    token.ThrowIfCanceled();
                     if (readTask.IsFaulted)
                     {
                         ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
                     }
 
-                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);                    
+                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);
                 }
 
                 response = readTask.Result;

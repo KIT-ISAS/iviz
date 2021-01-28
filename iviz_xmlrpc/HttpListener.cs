@@ -111,7 +111,7 @@ namespace Iviz.XmlRpc
                     async Task CreateContextTask()
                     {
                         using var context = new HttpListenerContext(client);
-                        await handler(context, runningTs.Token).Caf();
+                        await handler(context, runningTs.Token);
                     }
 
                     if (runInBackground)
