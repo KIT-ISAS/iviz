@@ -9,10 +9,6 @@ namespace Iviz.App
     [DataContract]
     public sealed class StateConfiguration
     {
-        [DataMember] public Uri MasterUri { get; set; }
-        [DataMember] public Uri MyUri { get; set; }
-        [DataMember] public string MyId { get; set; }
-
         [DataMember] public List<string> Entries { get; set; } = new List<string>();
 
         [DataMember] public TfConfiguration Tf { get; set; }

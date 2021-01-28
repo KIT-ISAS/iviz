@@ -73,6 +73,8 @@ namespace Iviz.App
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
 
+        const bool EnableFileSchema = false; // NYI
+        
         int frameCounter;
         bool allGuiVisible = true;
 
@@ -328,7 +330,7 @@ namespace Iviz.App
             UpdateFpsStats();
 
             controllerService = new ControllerService();
-            modelService = new Controllers.ModelService();
+            modelService = new Controllers.ModelService(EnableFileSchema);
 
             menuDialog = menuObject.GetComponent<IMenuDialogContents>();
             menuObject.SetActive(false);
@@ -400,7 +402,7 @@ namespace Iviz.App
 
         public void RestartModelService()
         {
-            modelService.Restart();
+            modelService.Restart(EnableFileSchema);
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -412,9 +414,6 @@ namespace Iviz.App
 
             StateConfiguration config = new StateConfiguration
             {
-                MasterUri = connectionData.MasterUri,
-                MyUri = connectionData.MyUri,
-                MyId = connectionData.MyId,
                 Entries = moduleDatas.Select(x => x.Configuration.Id).ToList()
             };
             foreach (var moduleData in moduleDatas)
@@ -445,12 +444,12 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(file));
             }
 
-            Logger.Debug("DisplayListPanel: Reading config from " + Settings.SavedFolder + "/" + file);
+            Logger.Debug($"DisplayListPanel: Reading config from {Settings.SavedFolder}/{file}");
             string text;
             try
             {
                 Logger.Internal("Loading config file...");
-                text = await FileUtils.ReadAllTextAsync(Settings.SavedFolder + "/" + file, token);
+                text = await FileUtils.ReadAllTextAsync($"{Settings.SavedFolder}/{file}", token);
                 Logger.Internal("Done.");
             }
             catch (FileNotFoundException)
@@ -472,11 +471,6 @@ namespace Iviz.App
 
             StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
-            // TODO: should we store connection data at all?
-            //connectionData.MasterUri = stateConfig.MasterUri;
-            //connectionData.MyUri = stateConfig.MyUri;
-            //connectionData.MyId = stateConfig.MyId;
-
             TfData.UpdateConfiguration(stateConfig.Tf);
 
             var configurations = stateConfig.CreateListOfEntries()
@@ -487,15 +481,6 @@ namespace Iviz.App
             {
                 CreateModule(config.ModuleType, configuration: config);
             }
-
-            /*
-            if (connectionData.MasterUri != null &&
-                connectionData.MyUri != null &&
-                connectionData.MyId != null)
-            {
-                KeepReconnecting = true;
-            }
-            */
         }
 
         void LoadSimpleConfiguration()

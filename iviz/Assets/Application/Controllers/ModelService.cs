@@ -18,12 +18,12 @@ namespace Iviz.Controllers
         ModelServer modelServer;
 #endif
 
-        public ModelService()
+        public ModelService(bool enableFileSchema)
         {
-            Restart();
+            Restart(enableFileSchema);
         }
 
-        public async void Restart(CancellationToken token = default)
+        public async void Restart(bool enableFileSchema, CancellationToken token = default)
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
             //Logger.Internal("Trying to start embedded <b>Iviz.Model.Service</b>...");
@@ -45,7 +45,7 @@ namespace Iviz.Controllers
                     break;
                 default:
                     Logger.Info("Iviz.Model.Service will not start, mobile platform detected. " +
-                                    "You will need to start it as an external node.");
+                                "You will need to start it as an external node.");
                     return;
             }
 
@@ -75,7 +75,14 @@ namespace Iviz.Controllers
                 return;
             }
 
-            modelServer = new ModelServer(rosPackagePathExtras, true);
+            if (enableFileSchema)
+            {
+                Logger.Warn(
+                    "Iviz.ModelService: Uris starting with 'file://' are now enabled." +
+                    " This grants access to all files from the outside");
+            }
+
+            modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema);
             if (modelServer.NumPackages == 0)
             {
                 IsEnabled = false;
