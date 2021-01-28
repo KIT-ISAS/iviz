@@ -836,7 +836,7 @@ namespace Iviz.MsgsGen
 
         public string ToCsString()
         {
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new StringBuilder(200);
 
             str.AppendLine("/* This file was created automatically, do not edit! */");
             str.AppendLine();
@@ -1033,7 +1033,7 @@ namespace Iviz.MsgsGen
             var dependencies = new List<ClassInfo>();
             AddDependencies(dependencies);
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(100);
             builder.AppendLine(fullMessageText);
 
             foreach (ClassInfo classInfo in dependencies)
@@ -1050,7 +1050,7 @@ namespace Iviz.MsgsGen
 
         string CalculateMd5()
         {
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new StringBuilder(100);
 
             var md5Constants = elements
                 .OfType<ConstantElement>()
@@ -1085,7 +1085,7 @@ namespace Iviz.MsgsGen
         internal static string GetMd5Hash(MD5 md5Hash, string input)
         {
             var data = md5Hash.ComputeHash(Utf8.GetBytes(input));
-            StringBuilder sBuilder = new StringBuilder();
+            StringBuilder sBuilder = new StringBuilder(data.Length * 2);
             foreach (byte b in data)
             {
                 sBuilder.Append(b.ToString("x2", Culture));

@@ -140,7 +140,7 @@ namespace Iviz.MsgsGen
                 return md5;
             }
 
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new StringBuilder(200);
 
             string[] constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
 
@@ -251,7 +251,7 @@ namespace Iviz.MsgsGen
 
         public string ToCsString()
         {
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new StringBuilder(200);
 
             str.AppendLine("using System.Runtime.Serialization;");
 
