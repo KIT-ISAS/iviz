@@ -858,7 +858,7 @@ namespace Iviz.Ros
         }
 
         [NotNull]
-        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs, CancellationToken token = default)
+        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))

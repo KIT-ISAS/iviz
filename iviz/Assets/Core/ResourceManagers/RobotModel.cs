@@ -151,6 +151,12 @@ namespace Iviz.Displays
         public string Name { get; }
         public string BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
+
+        public string UnityName
+        {
+            get => BaseLinkObject.name;
+            set => BaseLinkObject.name = value;
+        }
         public string Description { get; }
 
         public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
@@ -499,9 +505,9 @@ namespace Iviz.Displays
             WriteJoints(state.Name.Zip(state.Position));
         }
 
-        public void WriteJoints(JointTrajectory trajectory)
+        public void WriteJoints(string[] names, double[] positions)
         {
-            WriteJoints(trajectory.JointNames.Zip(trajectory.Points.Last().Positions));
+            WriteJoints(names.Zip(positions));
         }
 
         public void WriteJoints(IEnumerable<(string name, double position)> jointPositions)
