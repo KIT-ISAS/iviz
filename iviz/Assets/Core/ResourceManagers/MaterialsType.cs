@@ -46,16 +46,16 @@ namespace Iviz.Resources
             FontMaterialZWrite = new Info<Material>(assetHolder.FontMaterialZWrite);
 
             Lit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/White")
+                ? new Info<Material>("Hololens Materials/Holo White")
                 : new Info<Material>(assetHolder.Lit);
             TexturedLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Textured Lit")
+                ? new Info<Material>("Hololens Materials/Holo Textured Lit")
                 : new Info<Material>(assetHolder.TexturedLit);
             TransparentLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Transparent Lit")
+                ? new Info<Material>("Hololens Materials/Holo Transparent Lit")
                 : new Info<Material>(assetHolder.TransparentLit);
             TransparentTexturedLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Transparent Textured Lit")
+                ? new Info<Material>("Hololens Materials/Holo Transparent Textured Lit")
                 : new Info<Material>(assetHolder.TransparentTexturedLit);
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             GridInterior = new Info<Material>("Materials/Grid Interior");

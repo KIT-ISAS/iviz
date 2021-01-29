@@ -2,6 +2,7 @@
 using System.Linq;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.App

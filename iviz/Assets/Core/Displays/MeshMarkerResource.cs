@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Iviz.Displays
 {
@@ -103,6 +106,20 @@ namespace Iviz.Displays
             Smoothness = smoothness;
 
             MainRenderer.SetPropertyMainTexSt(Vector2.zero, Vector2.one);
+            
+            if (Settings.IsHololens)
+            {
+                var materials = MainRenderer.materials.ToArray();
+                foreach (ref var material in materials.Ref()) 
+                {
+                    if (material.name == "White") // bug: fix this!
+                    {
+                        material = Resource.Materials.Lit.Object;
+                    }
+                }
+
+                MainRenderer.materials = materials;
+            }
         }
 
         public bool OcclusionOnly

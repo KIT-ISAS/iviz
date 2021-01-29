@@ -3,6 +3,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 

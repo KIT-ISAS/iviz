@@ -121,7 +121,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 750;
 
 #if LOG_ENABLED
-                //Logger.LogDebug = Core.Logger.Debug;
+                Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -237,8 +237,8 @@ namespace Iviz.Ros
             if (sender.NumSubscribers == 0)
             {
                 Core.Logger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
-                                     "It is possible that iviz cannot receive outside connections, which we need in order to publish messages. " +
-                                     "Check that your address is correct, that it is accessible to other nodes, and that your firewall isn't blocking connections.");
+                                     "Maybe /rosout hasn't seen us yet. " +
+                                     "But it also may be that a firewall is limiting incoming connections.");
             }
         }
 

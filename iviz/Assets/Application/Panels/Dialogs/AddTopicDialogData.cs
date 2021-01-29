@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -103,7 +104,7 @@ namespace Iviz.App
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
 
-            panel.Items =  (IEnumerable<string>) topics.Select(x => x.ToString());
+            panel.Items =  topics.Select(x => x.ToString());
 
             if (panel.ShowAll.Value)
             {

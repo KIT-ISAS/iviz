@@ -14,6 +14,7 @@ using UnityEngine;
 using Logger = Iviz.Core.Logger;
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit;
+
 #endif
 
 namespace Iviz.Hololens
@@ -23,8 +24,11 @@ namespace Iviz.Hololens
     {
         static readonly Pose InfinitePose = new Pose(new Vector3(5000, 5000, 5000), Quaternion.identity);
 
+        static HololensManager instance;
         static MarkerResourcePool resourcePool;
-        public static MarkerResourcePool ResourcePool => resourcePool ?? (resourcePool = new MarkerResourcePool());
+
+        public static MarkerResourcePool ResourcePool =>
+            resourcePool ?? (resourcePool = new MarkerResourcePool(instance.gameObject));
 
         [SerializeField] FloorFrameObject floorFrame = null;
         [SerializeField] GameObject floorHelper = null;
@@ -42,6 +46,11 @@ namespace Iviz.Hololens
         static TfFrame RootFrame => TfListener.RootFrame;
         static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
         static string MyId => ConnectionManager.Connection.MyId;
+
+        void Awake()
+        {
+            instance = this;
+        }
 
         void Start()
         {
@@ -72,13 +81,8 @@ namespace Iviz.Hololens
                 floorFrame.OkClicked += StartWorld;
 
 
-                if (resourcePool == null)
-                {
-                    resourcePool = new MarkerResourcePool();
-                }
-
                 ModuleListPanel.Instance.MenuDialog = markerMenu;
-                
+
                 //StartLog();
                 StartRosConnection();
                 StartHandMenu();
@@ -87,7 +91,7 @@ namespace Iviz.Hololens
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Logger.Error("Error initializing Hololens Manager", e);
             }
         }
 
@@ -110,12 +114,6 @@ namespace Iviz.Hololens
             Logger.LogInternal += AddToQueue;
             ConnectionManager.LogMessageArrived += message =>
             {
-                if (message == null)
-                {
-                    Logger.Debug("HololensManager: Got null log message!");
-                    return;
-                }
-
                 string messageTime = message.Header.Stamp == default
                     ? ""
                     : message.Header.Stamp.ToDateTime().ToLocalTime().ToString("HH:mm:ss");
@@ -191,10 +189,12 @@ namespace Iviz.Hololens
             const string myUri = "http://141.3.59.11:7613";
             const string myId = "/iviz_win_hololens";
 #else
-            const string myUri = "http://141.3.59.45:7613";
+            //const string myUri = "http://141.3.59.45:7613";
+            const string myUri = "http://192.168.20.5:7613";
             const string myId = "/iviz_hololens";
 #endif
             const string masterUri = "http://141.3.59.5:11311";
+            //const string masterUri = "http://192.168.20.7:11311";
             ModuleListPanel.Instance.SetConnectionData(masterUri, myUri, myId);
         }
 
@@ -298,10 +298,25 @@ namespace Iviz.Hololens
                 TfListener.FixedFrameId = frameId;
             }
 
+            const int maxLevel = 3;
             List<TfFrame> candidates = new List<TfFrame>();
-            candidates.AddRange(TfListener.OriginFrame.Children);
-            candidates.AddRange(TfListener.OriginFrame.Children.SelectMany(child => child.Children));
 
+            void AddFrame(TfFrame frame, int level)
+            {
+                candidates.Add(frame);
+                if (level == maxLevel)
+                {
+                    return;
+                }
+
+                foreach (TfFrame child in frame.Children)
+                {
+                    AddFrame(child, level + 1);
+                }
+            }
+
+
+            AddFrame(TfListener.OriginFrame, 0);
             hololensHandMenu.SetPalm(candidates.Select(
                 frame => new HololensMenuEntry(frame.Id, () => MenuListClick(frame.Id))));
         }
@@ -401,10 +416,11 @@ namespace Iviz.Hololens
                 new Info<GameObject>("Hololens Assets/HololensControl");
 
             readonly Queue<GameObject> markers = new Queue<GameObject>();
-            readonly GameObject root = GameObject.Find("HololensResourcePool");
+            readonly GameObject root;
 
-            public MarkerResourcePool()
+            public MarkerResourcePool(GameObject parent)
             {
+                root = parent.transform.parent.Find("HololensResourcePool").gameObject;
                 root.SetActive(false);
                 CreateMarkerPool();
             }

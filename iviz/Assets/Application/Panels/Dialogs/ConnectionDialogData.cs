@@ -4,6 +4,7 @@ using System.Net;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.App
