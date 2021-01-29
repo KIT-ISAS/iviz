@@ -294,7 +294,7 @@ namespace Iviz.Roslib
             }
 
 
-            Logger.LogFormat("** {0}: Initialized.", this);
+            Logger.LogDebugFormat("** {0}: Initialized.", this);
 
             if (ensureCleanSlate)
             {
@@ -1483,7 +1483,7 @@ namespace Iviz.Roslib
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
-            Utils.AddRange(tasks, publishers.Select(async publisher =>
+            EnumeratorUtils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this).Caf();
@@ -1492,7 +1492,7 @@ namespace Iviz.Roslib
             var subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
-            Utils.AddRange(tasks, subscribers.Select(async subscriber =>
+            EnumeratorUtils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
                 await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this).Caf();
@@ -1509,7 +1509,7 @@ namespace Iviz.Roslib
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
-            Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
+            EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
                 await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
@@ -1594,7 +1594,7 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-        public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+        public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
             where T : IService
         {
             using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);

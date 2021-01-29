@@ -483,11 +483,13 @@ namespace Iviz.RosMaster
             using var myLock = rosLock.Lock();
 
             var publishers = publishersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                .ToArray();
             var subscribers = subscribersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                .ToArray();
             var providers = serviceProviders.Select(
-                pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value.Id})});
+                pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value.Id})}).ToArray();
 
             return OkResponse(new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)});
         }
@@ -589,7 +591,7 @@ namespace Iviz.RosMaster
                 return ErrorResponse($"Parameter '{key}' is not set");
             }
 
-            arg = new Arg(Enumerable.Select(candidates, pair => (pair.Key, pair.Value)));
+            arg = new Arg(candidates.Select(pair => (pair.Key, pair.Value)).ToList());
             return OkResponse(arg);
         }
 
