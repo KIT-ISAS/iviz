@@ -114,7 +114,7 @@ namespace Iviz.Roslib
         public void Start(Uri remoteUri, bool persistent)
         {
             // just call the async version from sync
-            Task.Run(async () => { await StartAsync(remoteUri, persistent).Caf(); }).WaitNoThrow(this);
+            Task.Run(() => StartAsync(remoteUri, persistent)).WaitNoThrow(this);
         }
 
         async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
@@ -143,35 +143,17 @@ namespace Iviz.Roslib
             return length;
         }
 
-        public async Task<bool> ExecuteAsync(T service, CancellationToken token)
+        public async Task ExecuteAsync(T service, CancellationToken token)
         {
-            bool success;
-            try
-            {
-                success = await ExecuteImplAsync(service, token).Caf();
-            }
-            catch (Exception e)
-            {
-                if (e is OperationCanceledException)
-                {
-                    throw;
-                }
-
-                throw new RosRpcException("Error during service call", e);
-            }
-
-            return success;
+            await ExecuteImplAsync(service, token).Caf();
         }
 
-        public bool Execute(T service, CancellationToken token)
+        public void Execute(T service, CancellationToken token)
         {
-            bool result = false;
-            // just call the async version from sync
-            Task.Run(async () => result = await ExecuteAsync(service, token).Caf(), token).WaitAndRethrow();
-            return result;
+            Task.Run(() => ExecuteAsync(service, token), token).WaitAndRethrow();
         }
 
-        async Task<bool> ExecuteImplAsync(T service, CancellationToken token)
+        async Task ExecuteImplAsync(T service, CancellationToken token)
         {
             if (tcpClient == null)
             {
@@ -214,12 +196,10 @@ namespace Iviz.Roslib
 
             if (statusByte == ErrorByte)
             {
-                Logger.LogFormat(Utils.GenericExceptionFormat, this, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
-                return false;
+                throw new RosServiceCallFailed(serviceInfo.Service, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
             }
 
             service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-            return true;
         }
     }
 }
