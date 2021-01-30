@@ -8,12 +8,6 @@
 
     SubShader
     {
-        Tags
-        {
-            "RenderType"="Opaque"
-        }
-        LOD 200
-
         CGPROGRAM
         #pragma surface surf NoLighting noforwardadd noambient vertex:vert
 

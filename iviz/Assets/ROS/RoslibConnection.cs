@@ -34,11 +34,14 @@ namespace Iviz.Ros
         [NotNull] CancellationTokenSource connectionTs = new CancellationTokenSource();
 
         Task watchdogTask;
-
         Uri masterUri;
         string myId;
         Uri myUri;
 
+        public bool Connected => client != null;
+
+        [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
+        
         [CanBeNull]
         public Uri MasterUri
         {
@@ -234,8 +237,8 @@ namespace Iviz.Ros
             if (sender.NumSubscribers == 0)
             {
                 Core.Logger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
-                                     "It is possible that iviz cannot receive outside connections, which we need in order to publish messages. " +
-                                     "Check that your address is correct, that it is accessible to other nodes, and that your firewall isn't blocking connections.");
+                                     "Maybe /rosout hasn't seen us yet. " +
+                                     "But it also may be that a firewall is limiting incoming connections.");
             }
         }
 
@@ -850,6 +853,31 @@ namespace Iviz.Ros
                 {
                     Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
                     return (null, "Unknown error");
+                }
+            }
+        }
+
+        [NotNull]
+        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        {
+            using (CancellationTokenSource tokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            {
+                tokenSource.CancelAfter(timeoutInMs);
+
+                try
+                {
+                    if (client?.Parameters == null)
+                    {
+                        return null;
+                    }
+
+                    return await client.GetSystemStateAsync(tokenSource.Token);
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
+                    return null;
                 }
             }
         }

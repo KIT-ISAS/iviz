@@ -50,9 +50,9 @@ namespace Iviz.Roslib.MarkerHelper
             publisher.Start(client, topic);
         }
 
-        public async Task StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
+        public Task StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
         {
-            await publisher.StartAsync(client, topic, token);
+            return publisher.StartAsync(client, topic, token);
         }
 
         public void Dispose()

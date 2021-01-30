@@ -60,9 +60,7 @@ namespace Iviz.Roslib
 
         public (IMessage msg, int id) ReadWithIndex(CancellationToken token = default)
         {
-            using CancellationTokenSource stopTokenCts = new CancellationTokenSource();
-            using CancellationTokenSource linkedCts =
-                CancellationTokenSource.CreateLinkedTokenSource(stopTokenCts.Token, token);
+            using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             Task[] tasks = sources
                 .Select(async queue => { await queue.WaitToReadAsync(linkedCts.Token); })
@@ -112,7 +110,7 @@ namespace Iviz.Roslib
         {
             Task[] tasks = new Task[sources.Length];
 
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
@@ -138,7 +136,7 @@ namespace Iviz.Roslib
         {
             Task<bool>[] tasks = new Task<bool>[sources.Length];
 
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 

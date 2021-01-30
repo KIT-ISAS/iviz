@@ -294,7 +294,7 @@ namespace Iviz.Roslib
             }
 
 
-            Logger.LogFormat("{0}: Initialized.", this);
+            Logger.LogDebugFormat("** {0}: Initialized.", this);
 
             if (ensureCleanSlate)
             {
@@ -359,7 +359,7 @@ namespace Iviz.Roslib
             }
 
 
-            Logger.LogFormat("{0}: Initialized.", client);
+            Logger.LogFormat("** {0}: Initialized.", client);
 
             if (ensureCleanSlate)
             {
@@ -533,7 +533,7 @@ namespace Iviz.Roslib
                     return uri;
                 }
 
-                Logger.LogFormat("RosClient: Environment variable for master uri '{0}' is not a valid uri!", envStr);
+                Logger.LogErrorFormat("EE Environment variable for master uri '{0}' is not a valid uri!", envStr);
                 return null;
             }
         }
@@ -1416,7 +1416,7 @@ namespace Iviz.Roslib
         {
             if (!TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
-                Logger.LogFormat("{0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
+                Logger.LogDebugFormat("** {0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
                 return;
             }
 
@@ -1430,7 +1430,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: PublisherUpdateRcp failed: {1}", this, e);
+                Logger.LogErrorFormat("EE {0}: PublisherUpdateRcp failed: {1}", this, e);
             }
         }
 
@@ -1438,7 +1438,7 @@ namespace Iviz.Roslib
         {
             if (!TryGetPublisher(topic, out IRosPublisher publisher))
             {
-                Logger.LogFormat("{0}: '{1} is requesting topic '{2}' but we don't publish it", this,
+                Logger.LogDebugFormat("{0}: '{1} is requesting topic '{2}' but we don't publish it", this,
                     remoteCallerId, topic);
                 return null;
             }
@@ -1449,7 +1449,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: RequestTopicRpc failed: {1}", this, e);
+                Logger.LogErrorFormat("EE {0}: RequestTopicRpc failed: {1}", this, e);
                 return null;
             }
         }
@@ -1483,7 +1483,7 @@ namespace Iviz.Roslib
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
-            Utils.AddRange(tasks, publishers.Select(async publisher =>
+            EnumeratorUtils.AddRange(tasks, publishers.Select(async publisher =>
             {
                 await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this).Caf();
@@ -1492,7 +1492,7 @@ namespace Iviz.Roslib
             var subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
-            Utils.AddRange(tasks, subscribers.Select(async subscriber =>
+            EnumeratorUtils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
                 await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this).Caf();
@@ -1509,7 +1509,7 @@ namespace Iviz.Roslib
             IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
             advertisedServicesByName.Clear();
 
-            Utils.AddRange(tasks, serviceManagers.Select(async senderManager =>
+            EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
                 await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
@@ -1520,7 +1520,7 @@ namespace Iviz.Roslib
             Task finalTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask).Caf();
             if (finalTask == timeoutTask)
             {
-                Logger.LogErrorFormat("{0}: Close() tasks timed out.", this);
+                Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
             }
         }
 
@@ -1561,7 +1561,7 @@ namespace Iviz.Roslib
                         }
                         catch (Exception e)
                         {
-                            Logger.LogFormat("{0}: LookupNode for {1} failed: {2}", this, sender.RemoteId, e);
+                            Logger.LogDebugFormat("{0}: LookupNode for {1} failed: {2}", this, sender.RemoteId, e);
                             continue;
                         }
 
@@ -1578,7 +1578,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: GetBusInfoRcp failed: {1}", this, e);
+                Logger.LogErrorFormat("EE {0}: GetBusInfoRcp failed: {1}", this, e);
             }
 
             return busInfos;
@@ -1594,7 +1594,7 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-        public void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
+        public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
             where T : IService
         {
             using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);

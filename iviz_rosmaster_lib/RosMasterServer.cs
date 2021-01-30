@@ -18,7 +18,8 @@ namespace Iviz.RosMaster
         public const int DefaultPort = 11311;
 
         readonly HttpListener listener;
-        AsyncLock roslock = new AsyncLock();
+
+        readonly AsyncLock rosLock = new AsyncLock();
 
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
 
@@ -30,7 +31,7 @@ namespace Iviz.RosMaster
         readonly Dictionary<string, Dictionary<string, Uri>> subscribersByTopic =
             new Dictionary<string, Dictionary<string, Uri>>();
 
-        readonly Dictionary<string, Uri> serviceProviders = new Dictionary<string, Uri>();
+        readonly Dictionary<string, (string Id, Uri Uri)> serviceProviders = new Dictionary<string, (string, Uri)>();
 
         readonly Dictionary<string, string> topicTypes = new Dictionary<string, string>();
 
@@ -56,6 +57,7 @@ namespace Iviz.RosMaster
 
             methods = new Dictionary<string, Func<object[], Arg[]>>
             {
+                ["getPid"] = GetPid,
                 ["getUri"] = GetUri,
                 ["registerPublisher"] = RegisterPublisher,
                 ["registerSubscriber"] = RegisterSubscriber,
@@ -76,6 +78,7 @@ namespace Iviz.RosMaster
                 ["lookupService"] = LookupService,
                 ["unregisterPublisher"] = UnregisterPublisher,
                 ["unregisterSubscriber"] = UnregisterSubscriber,
+                ["system.multicall"] = SystemMulticall,
             };
 
             lateCallbacks = new Dictionary<string, Func<object[], CancellationToken, Task>>
@@ -123,7 +126,8 @@ namespace Iviz.RosMaster
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            using CancellationTokenSource linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using CancellationTokenSource linkedTs =
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             try
             {
@@ -131,7 +135,7 @@ namespace Iviz.RosMaster
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: {1}", this, e);
+                Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
             }
         }
 
@@ -173,6 +177,16 @@ namespace Iviz.RosMaster
             return new Arg[] {StatusCode.Error, msg, 0};
         }
 
+        static Arg[] GetPid(object[] _)
+        {
+#if NET5_0
+            int id = Environment.ProcessId;
+#else
+            int id = System.Diagnostics.Process.GetCurrentProcess().Id;
+#endif
+            return OkResponse(id);
+        }
+
         Arg[] GetUri(object[] _)
         {
             return OkResponse(MasterUri);
@@ -180,7 +194,7 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterPublisher(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
             if (args.Length != 4 ||
                 !(args[0] is string callerId) ||
                 !(args[1] is string topic) ||
@@ -221,7 +235,7 @@ namespace Iviz.RosMaster
             Dictionary<string, Uri> subscribers;
 
             {
-                using var myLock = await roslock.LockAsync(token);
+                using var myLock = await rosLock.LockAsync(token);
 
                 if (!(args[1] is string topic) ||
                     !subscribersByTopic.TryGetValue(topic, out subscribers))
@@ -258,7 +272,7 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterSubscriber(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 4 ||
                 !(args[0] is string callerId) ||
@@ -291,7 +305,7 @@ namespace Iviz.RosMaster
 
         Arg[] UnregisterSubscriber(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 3 ||
                 !(args[0] is string callerId) ||
@@ -323,7 +337,7 @@ namespace Iviz.RosMaster
 
         Arg[] UnregisterPublisher(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 3 ||
                 !(args[0] is string callerId) ||
@@ -360,9 +374,10 @@ namespace Iviz.RosMaster
 
         Arg[] RegisterService(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 4 ||
+                !(args[0] is string callerId) ||
                 !(args[1] is string service) ||
                 !(args[2] is string serviceApi))
             {
@@ -376,14 +391,14 @@ namespace Iviz.RosMaster
 
             Logger.Log($"++ Service: {service}");
 
-            serviceProviders[service] = serviceUri;
+            serviceProviders[service] = (callerId, serviceUri);
 
             return DefaultOkResponse;
         }
 
         Arg[] UnregisterService(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 3 ||
                 !(args[1] is string service) ||
@@ -397,18 +412,19 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Service api is not an uri");
             }
 
-            if (!serviceProviders.TryGetValue(service, out Uri currentServiceUri) || serviceUri != currentServiceUri)
+            if (!serviceProviders.TryGetValue(service, out var currentService) || serviceUri != currentService.Uri)
             {
                 return DefaultOkResponse;
             }
 
+            Logger.Log($"-- Service: {service}");
             serviceProviders.Remove(service);
             return OkResponse(1);
         }
 
         Arg[] LookupNode(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 2 ||
                 !(args[1] is string node))
@@ -431,7 +447,7 @@ namespace Iviz.RosMaster
 
         Arg[] LookupService(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 2 ||
                 !(args[1] is string service))
@@ -439,14 +455,14 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            return serviceProviders.TryGetValue(service, out Uri providerUri)
-                ? OkResponse(providerUri)
+            return serviceProviders.TryGetValue(service, out var provider)
+                ? OkResponse(provider.Uri)
                 : ErrorResponse($"No service with name '{service}'");
         }
 
         Arg[] GetPublishedTopics(object[] _)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
@@ -455,7 +471,7 @@ namespace Iviz.RosMaster
 
         Arg[] GetTopicTypes(object[] _)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
 
@@ -464,21 +480,23 @@ namespace Iviz.RosMaster
 
         Arg[] GetSystemState(object[] _)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             var publishers = publishersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                .ToArray();
             var subscribers = subscribersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Value))});
+                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                .ToArray();
             var providers = serviceProviders.Select(
-                pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value})});
+                pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value.Id})}).ToArray();
 
             return OkResponse(new[] {new Arg(publishers), new Arg(subscribers), new Arg(providers)});
         }
 
         Arg[] DeleteParam(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 2 ||
                 !(args[1] is string key))
@@ -492,13 +510,11 @@ namespace Iviz.RosMaster
 
         Arg[] SetParam(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
-            Arg arg;
 
             if (args.Length != 3 ||
-                !(args[1] is string key) ||
-                !(arg = Arg.Create(args[2])).IsValid)
+                !(args[1] is string key))
             {
                 return ErrorResponse("Failed to parse arguments");
             }
@@ -513,13 +529,33 @@ namespace Iviz.RosMaster
                 key = "/" + key;
             }
 
-            parameters[key] = arg;
+            if (args[2] is object[] argObj && 
+                argObj.Length != 0 && 
+                argObj[0] is List<(string, object)>)
+            {
+                foreach ((string name, object value) in argObj.SelectMany(obj => (List<(string, object)>) obj))
+                {
+                    Arg arg = Arg.Create(value);
+                    parameters[$"{key}/{name}"] = arg;
+                }
+            }
+            else
+            {
+                Arg arg = Arg.Create(args[2]);
+                if (!arg.IsValid)
+                {
+                    return ErrorResponse("Failed to parse arguments");
+                }
+
+                parameters[key] = arg;
+            }
+
             return DefaultOkResponse;
         }
 
         Arg[] GetParam(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 2 ||
                 !(args[1] is string key))
@@ -551,28 +587,34 @@ namespace Iviz.RosMaster
             var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
             if (candidates.Length == 0)
             {
+                //Console.WriteLine("key " + key + " is missing");
                 return ErrorResponse($"Parameter '{key}' is not set");
             }
 
-            arg = new Arg(Enumerable.Select(candidates, pair => (pair.Key, pair.Value)));
+            arg = new Arg(candidates.Select(pair => (pair.Key, pair.Value)).ToList());
             return OkResponse(arg);
         }
 
         Arg[] GetParamNames(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             return OkResponse(new Arg(parameters.Keys));
         }
 
         Arg[] HasParam(object[] args)
         {
-            using var myLock = roslock.Lock();
+            using var myLock = rosLock.Lock();
 
             if (args.Length != 2 ||
                 !(args[1] is string key))
             {
                 return ErrorResponse("Failed to parse arguments");
+            }
+
+            if (!parameters.ContainsKey(key))
+            {
+                Console.WriteLine("key " + key + " is missing");
             }
 
             return OkResponse(parameters.ContainsKey(key));
@@ -591,6 +633,78 @@ namespace Iviz.RosMaster
         static Arg[] SearchParam(object[] _)
         {
             return ErrorResponse("Not implemented yet");
+        }
+
+        Arg[] SystemMulticall(object[] args)
+        {
+            if (args.Length != 1 ||
+                !(args[0] is object[] calls))
+            {
+                return ErrorResponse("Failed to parse arguments");
+            }
+
+            List<Arg> responses = new List<Arg>(calls.Length);
+            foreach (var callObject in calls)
+            {
+                if (!(callObject is List<(string ElementName, object Element)> call))
+                {
+                    return ErrorResponse("Failed to parse arguments");
+                }
+
+                string methodName = null;
+                object[] arguments = null;
+                foreach ((string elementName, object element) in call)
+                {
+                    switch (elementName)
+                    {
+                        case "methodName":
+                        {
+                            if (!(element is string elementStr))
+                            {
+                                return ErrorResponse("Failed to parse methodname");
+                            }
+
+                            methodName = elementStr;
+                            break;
+                        }
+                        case "params":
+                        {
+                            if (!(element is object[] elementObjs) ||
+                                elementObjs.Length == 0)
+                            {
+                                return ErrorResponse("Failed to parse params");
+                            }
+
+                            arguments = elementObjs;
+                            break;
+                        }
+                        default:
+                            return ErrorResponse("Failed to parse struct array");
+                    }
+                }
+
+                if (methodName == null || arguments == null)
+                {
+                    return ErrorResponse("methodname or params missing");
+                }
+
+                Console.WriteLine("-- " + methodName);
+                if (!methods.TryGetValue(methodName, out var method))
+                {
+                    return ErrorResponse("Method not found");
+                }
+
+                Arg response = (Arg) method(arguments);
+                responses.Add(response);
+
+                if (lateCallbacks != null &&
+                    lateCallbacks.TryGetValue(methodName, out var lateCallback))
+                {
+                    lateCallback(args, default);
+                }
+            }
+
+            return new[] {(Arg) responses.ToArray()};
         }
     }
 }

@@ -5,10 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using UnityEngine;
+using Iviz.Msgs.TrajectoryMsgs;
+using Iviz.XmlRpc;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
 using Logger = Iviz.Core.Logger;
@@ -72,7 +76,7 @@ namespace Iviz.Displays
         /// of replacing them with the provided colors.
         /// </param>
         /// <param name="token">An optional cancellation token.</param>
-        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider, bool keepMeshMaterials = true,
+        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider = null, bool keepMeshMaterials = true,
             CancellationToken token = default)
         {
             IsStarting = true;
@@ -148,6 +152,12 @@ namespace Iviz.Displays
         public string Name { get; }
         public string BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
+
+        public string UnityName
+        {
+            get => BaseLinkObject.name;
+            set => BaseLinkObject.name = value;
+        }
         public string Description { get; }
 
         public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
@@ -449,17 +459,16 @@ namespace Iviz.Displays
             {
                 if (joint.Value.Limit.Lower > 0)
                 {
-                    TryWriteJoint(joint.Key, joint.Value.Limit.Lower, out _);
+                    TryWriteJoint(joint.Key, joint.Value.Limit.Lower);
                 }
                 else if (joint.Value.Limit.Upper < 0)
                 {
-                    TryWriteJoint(joint.Key, joint.Value.Limit.Upper, out _);
+                    TryWriteJoint(joint.Key, joint.Value.Limit.Upper);
                 }
             }
         }
 
-        public bool TryWriteJoint([NotNull] string jointName, float value, out Pose unityPose,
-            bool onlyCalculatePose = false)
+        public bool TryWriteJoint([NotNull] string jointName, float value)
         {
             if (jointName == null)
             {
@@ -468,10 +477,10 @@ namespace Iviz.Displays
 
             if (!joints.TryGetValue(jointName, out var joint))
             {
-                unityPose = default;
                 return false;
             }
 
+            Pose unityPose;
             switch (joint.Type)
             {
                 case Joint.JointType.Revolute:
@@ -483,19 +492,31 @@ namespace Iviz.Displays
                     unityPose = Pose.identity.WithPosition(joint.Axis.Xyz.ToVector3() * value);
                     break;
                 default:
-                    unityPose = Pose.identity;
                     return false;
-            }
-
-            if (onlyCalculatePose)
-            {
-                return true;
             }
 
             var jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(unityPose);
 
             return true;
+        }
+
+        public void WriteJoints(JointState state)
+        {
+            WriteJoints(state.Name.Zip(state.Position));
+        }
+
+        public void WriteJoints(string[] names, double[] positions)
+        {
+            WriteJoints(names.Zip(positions));
+        }
+
+        public void WriteJoints(IEnumerable<(string name, double position)> jointPositions)
+        {
+            foreach ((string name, double position) in jointPositions)
+            {
+                TryWriteJoint(name, (float) position);
+            }
         }
 
         [NotNull]

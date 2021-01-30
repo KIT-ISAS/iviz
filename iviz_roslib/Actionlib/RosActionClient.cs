@@ -40,7 +40,7 @@ namespace Iviz.Roslib.Actionlib
         where TAFeedback : class, IActionFeedback, IDeserializable<TAFeedback>, new()
         where TAResult : class, IActionResult, IDeserializable<TAResult>, new()
     {
-        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
         string? actionName;
         string? callerId;
@@ -90,12 +90,12 @@ namespace Iviz.Roslib.Actionlib
                 return; // not started
             }
 
-            tokenSource.Cancel();
+            runningTs.Cancel();
             goalPublisher!.Dispose();
             cancelPublisher!.Dispose();
             feedbackSubscriber!.Dispose();
             resultSubscriber!.Dispose();
-            tokenSource.Dispose();
+            runningTs.Dispose();
         }
 
         public async Task DisposeAsync()
@@ -112,12 +112,12 @@ namespace Iviz.Roslib.Actionlib
                 return; // not started
             }
 
-            tokenSource.Cancel();
+            runningTs.Cancel();
             await goalPublisher.DisposeAsync();
             await cancelPublisher!.DisposeAsync();
             await feedbackSubscriber!.DisposeAsync();
             await resultSubscriber!.DisposeAsync();
-            tokenSource.Dispose();
+            runningTs.Dispose();
         }
 
 #if !NETSTANDARD2_0
@@ -295,12 +295,12 @@ namespace Iviz.Roslib.Actionlib
 
             State = RosActionClientState.WaitingForGoalAck;
         }
-        
+
         public Task SetGoalAsync<TGoal>(TGoal goal) where TGoal : IGoal<TAGoal>
         {
             SetGoal(goal);
             return Task.CompletedTask; // TODO!
-        }        
+        }
 
         public void Cancel()
         {
@@ -335,12 +335,20 @@ namespace Iviz.Roslib.Actionlib
 
         public void WaitForServer(int timeoutInMs)
         {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            WaitForServer(tokenSource.Token);
+        }
+
+        public void WaitForServer(CancellationToken token = default)
+        {
             if (goalPublisher == null)
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            goalPublisher.Publisher.WaitForAnySubscriber(timeoutInMs);
+            CancellationTokenSource linkedSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
         public Task WaitForServerAsync(CancellationToken token = default)
@@ -350,7 +358,9 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            return goalPublisher.Publisher.WaitForAnySubscriberAsync(token);
+            CancellationTokenSource linkedSource =
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            return goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
         }
 
 
@@ -362,7 +372,7 @@ namespace Iviz.Roslib.Actionlib
             }
 
             using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             return ReadAllImpl(channelReader.ReadAll(linkedSource.Token));
         }
@@ -429,7 +439,7 @@ namespace Iviz.Roslib.Actionlib
             }
 
             using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, tokenSource.Token);
+                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
             {

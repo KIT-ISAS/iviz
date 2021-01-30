@@ -54,7 +54,7 @@ namespace Iviz.Roslib
             tcpClient.Dispose();
         }
 
-        async Task SendHeaderAsync(NetworkStream stream, bool persistent, CancellationToken token)
+        Task SendHeaderAsync(NetworkStream stream, bool persistent, CancellationToken token)
         {
             string[] contents =
             {
@@ -66,7 +66,7 @@ namespace Iviz.Roslib
                 persistent ? "persistent=1" : "persistent=0",
             };
 
-            await Utils.WriteHeaderAsync(stream, contents, token).Caf();
+            return Utils.WriteHeaderAsync(stream, contents, token);
         }
 
         async Task ProcessHandshake(NetworkStream stream, bool persistent, CancellationToken token)

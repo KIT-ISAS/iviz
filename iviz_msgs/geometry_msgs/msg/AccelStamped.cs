@@ -72,7 +72,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTWvbQBC961cM+JCk2CokpYdAD4HSNodCIKHXMN4dS0ukXXV3ZEf99X27spWGXnpo" +
+                "H4sIAAAAAAAAA71UTWvbQBC961cM+JCk2CokpYdAD4HSNodCIKHXMN4dS0ukXXV3ZEf99X27spWGXnpo" +
                 "awTWx8ybeW/e7IpuPLEx0tHBaUtRdhLFGyETQrTOswrtIvdC7C2p6yUp90P1RdhKpLb8VTcFoeBU1Ye/" +
                 "/Ku+3n++pqT2sU9NejtXrlZ0r2iJo6VelC0r0y6gI9e0Ejed7NFR6VUsla86DZJqJD60LhGuRrxE7rqJ" +
                 "xoQgDSDd96N3JrNeuJ7ykekgFg0c1Zmx4/ibSBkdV5LvYxHx9uM1YnwSM6pDQxMQTBROzjf4SNXovF5d" +

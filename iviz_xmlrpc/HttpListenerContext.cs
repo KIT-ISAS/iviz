@@ -42,7 +42,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ParseException">The HTTP request could not be understood</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public async Task<string> GetRequest(int timeoutInMs = 2000, CancellationToken token = default)
+        public async Task<string> GetRequestAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
 
@@ -52,17 +52,18 @@ namespace Iviz.XmlRpc
                 Task<string?> readTask = stream.ReadLineAsync();
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-
+                    token.ThrowIfCanceled();
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
                 string? line = await readTask;
                 if (line == null)
                 {
+                    if (!client.Connected)
+                    {
+                        throw new RpcConnectionException("Partner closed the connection.");
+                    }
+
                     throw new ParseException("Read line returned empty value!");
                 }
 
@@ -88,19 +89,16 @@ namespace Iviz.XmlRpc
             int numRead = 0;
             while (BuiltIns.UTF8.GetByteCount(buffer, 0, numRead) < length)
             {
-                Task<int> readTask = stream.ReadAsync(buffer, 0, length - numRead);
+                Task<int> readTask = stream.ReadAsync(buffer, numRead, length - numRead);
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        throw new TaskCanceledException();
-                    }
-                    
+                    token.ThrowIfCanceled();
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
                 numRead += await readTask;
             }
+
 
             return new string(buffer, 0, numRead);
         }
@@ -153,24 +151,20 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(msgOut));
             }
 
-            StringBuilder str = new StringBuilder();
-            str.Append("HTTP/1.0 200 OK\r\n");
-            str.Append("Server: iviz XML-RPC\r\n");
-            str.Append("Connection: close\r\n");
-            str.Append("Content-Type: text/xml; charset=utf-8\r\n");
-            str.Append($"Content-Length: {BuiltIns.UTF8.GetByteCount(msgOut)}\r\n");
-            str.Append("\r\n");
-            str.Append(msgOut);
+            int msgOutLength = BuiltIns.UTF8.GetByteCount(msgOut);
+            string str = string.Format("HTTP/1.0 200 OK\r\n" +
+                                       "Server: iviz XML-RPC\r\n" +
+                                       "Connection: close\r\n" +
+                                       "Content-Type: text/xml; charset=utf-8\r\n" +
+                                       "Content-Length: {0}\r\n\r\n" +
+                                       "{1}",
+                msgOutLength, msgOut);
 
             using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
-            Task writeTask = writer.WriteAsync(str.ToString());
+            Task writeTask = writer.WriteAsync(str);
             if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
             {
-                if (token.IsCancellationRequested)
-                {
-                    throw new TaskCanceledException();
-                }
-
+                token.ThrowIfCanceled();
                 throw new TimeoutException("Write response timed out!", writeTask.Exception);
             }
         }
@@ -198,11 +192,7 @@ namespace Iviz.XmlRpc
             Task writeTask = writer.WriteAsync(errorMsg);
             if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
             {
-                if (token.IsCancellationRequested)
-                {
-                    throw new TaskCanceledException();
-                }
-
+                token.ThrowIfCanceled();
                 throw new TimeoutException("Write response timed out!", writeTask.Exception);
             }
         }

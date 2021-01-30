@@ -236,10 +236,10 @@ namespace Iviz.Roslib
         /// Waits until a message arrives.
         /// </summary>
         /// <returns>False if the channel has been disposed</returns>
-        public Task<bool> WaitToReadAsync(int timeoutInMs)
+        public async Task<bool> WaitToReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return WaitToReadAsync(ts.Token);
+            return await WaitToReadAsync(ts.Token);
         }
 
         /// <summary>
@@ -294,10 +294,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public Task<T> ReadAsync(int timeoutInMs)
+        public async Task<T> ReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return ReadAsync(ts.Token);
+            return await ReadAsync(ts.Token);
         }
 
         /// <summary>

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.App

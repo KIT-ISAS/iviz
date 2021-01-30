@@ -10,6 +10,7 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;

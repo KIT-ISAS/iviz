@@ -272,7 +272,7 @@ namespace Iviz.Controllers
                 throw new InvalidOperationException("There is no robot to set joints to!");
             }
             
-            return Robot.TryWriteJoint(joint, value, out _);
+            return Robot.TryWriteJoint(joint, value);
         }
 
         public bool AttachedToTf

@@ -216,5 +216,13 @@ namespace Iviz.XmlRpc
 
             return default;
         }
+        
+        public static void ThrowIfCanceled(this CancellationToken t)
+        {
+            if (t.IsCancellationRequested)
+            {
+                throw new TaskCanceledException();
+            }
+        }
     }
 }

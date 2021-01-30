@@ -1,0 +1,11 @@
+# A service call to carry out an inverse kinematics computation
+# The inverse kinematics request
+PositionIKRequest ik_request
+
+---
+
+# The returned solution 
+# (in the same order as the list of joints specified in the IKRequest message)
+RobotState solution
+
+MoveItErrorCodes error_code
