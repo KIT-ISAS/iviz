@@ -58,19 +58,28 @@ namespace Iviz.XmlRpc
             content = $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
         }
 
-        public Arg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+        public Arg(string[] f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
-        public Arg(string[][] f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+        public Arg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
-        Arg((string, string) f) : this(new Arg[] {ThrowIfNull(f.Item1), ThrowIfNull(f.Item2)})
+        public Arg(string[][] f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
-        public Arg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+        Arg((string A, string B) f) : this(new Arg[] {ThrowIfNull(f.A), ThrowIfNull(f.B)})
+        {
+            
+        }
+
+        public Arg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
+        {
+        }
+
+        public Arg((string, string)[] f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
@@ -81,6 +90,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
+            
             StringBuilder builder = new StringBuilder(100);
             builder.Append("<value><array><data>");
             foreach (Arg arg in f)
@@ -89,10 +99,29 @@ namespace Iviz.XmlRpc
             }
 
             builder.Append("</data></array></value>");
+
             content = builder.ToString();
         }
+        
+        public Arg(Arg[] f)
+        {
+            if (f == null)
+            {
+                throw new ArgumentNullException(nameof(f));
+            }
 
-        public Arg(IEnumerable<Arg[]> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+            string?[] fs = new string[f.Length + 2];
+            fs[0] = "<value><array><data>";
+            for (int i = 0; i < f.Length; i++)
+            {
+                fs[i + 1] = f[i].content;
+            }
+            fs[f.Length + 1] = "</data></array></value>";
+
+            content = string.Concat(fs);
+        }
+
+        public Arg(Arg[][] f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
@@ -106,7 +135,7 @@ namespace Iviz.XmlRpc
             content = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
-        public Arg(IEnumerable<(string name, Arg value)> f)
+        public Arg(List<(string name, Arg value)> f)
         {
             if (f == null)
             {
@@ -124,7 +153,7 @@ namespace Iviz.XmlRpc
             content = builder.ToString();
         }
 
-        public Arg(IEnumerable<(string name, object value)> f)
+        public Arg(List<(string name, object value)> f)
         {
             if (f == null)
             {
@@ -234,7 +263,7 @@ namespace Iviz.XmlRpc
                 double i => new Arg(i),
                 int i => new Arg(i),
                 string i => new Arg(i),
-                object[] i => new Arg(i.Select(Create)),
+                object[] i => new Arg(i.Select(Create).ToArray()),
                 byte[] i => new Arg(i),
                 DateTime i => new Arg(i),
                 List<(string, object)> i => new Arg(i),

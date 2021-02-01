@@ -157,7 +157,7 @@ namespace Iviz.XmlRpc
                          "Connection: close\r\n" +
                          "Content-Type: text/xml; charset=utf-8\r\n" + 
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
-                         $"{msgOut}";
+                         msgOut;
 
             using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
             Task writeTask = writer.WriteAsync(str);

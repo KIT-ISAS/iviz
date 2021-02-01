@@ -40,7 +40,9 @@ namespace Iviz.XmlRpc
                    "User-Agent: iviz XML-RPC\r\n" +
                    $"Host: {callerUri.Host}\r\n" +
                    $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
-                   "Content-Type: text/xml; charset=utf-8\r\n" + $"\r\n{msgIn}\r\n";
+                   "Content-Type: text/xml; charset=utf-8\r\n" + 
+                   $"\r\n{msgIn}" +
+                   "\r\n";
         }
 
         static string ProcessResponse(string response)
