@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class ApplyPlanningSceneRequest : IRequest, IDeserializable<ApplyPlanningSceneRequest>
+    public sealed class ApplyPlanningSceneRequest : IRequest<ApplyPlanningScene, ApplyPlanningSceneResponse>, IDeserializable<ApplyPlanningSceneRequest>
     {
         [DataMember (Name = "scene")] public PlanningScene Scene { get; set; }
     

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetSdfRequest : IRequest, IDeserializable<GetSdfRequest>
+    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializable<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.world

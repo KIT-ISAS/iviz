@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestRequestOnlyRequest : IRequest, IDeserializable<TestRequestOnlyRequest>
+    public sealed class TestRequestOnlyRequest : IRequest<TestRequestOnly, TestRequestOnlyResponse>, IDeserializable<TestRequestOnlyRequest>
     {
         [DataMember (Name = "data")] public int Data { get; set; }
     

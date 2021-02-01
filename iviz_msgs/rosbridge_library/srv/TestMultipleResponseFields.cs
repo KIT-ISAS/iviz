@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestMultipleResponseFieldsRequest : IRequest, IDeserializable<TestMultipleResponseFieldsRequest>
+    public sealed class TestMultipleResponseFieldsRequest : IRequest<TestMultipleResponseFields, TestMultipleResponseFieldsResponse>, IDeserializable<TestMultipleResponseFieldsRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

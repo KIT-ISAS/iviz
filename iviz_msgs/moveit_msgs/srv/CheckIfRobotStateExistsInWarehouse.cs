@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class CheckIfRobotStateExistsInWarehouseRequest : IRequest, IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>
+    public sealed class CheckIfRobotStateExistsInWarehouseRequest : IRequest<CheckIfRobotStateExistsInWarehouse, CheckIfRobotStateExistsInWarehouseResponse>, IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "robot")] public string Robot { get; set; }

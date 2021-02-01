@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class AddModuleFromTopicRequest : IRequest, IDeserializable<AddModuleFromTopicRequest>
+    public sealed class AddModuleFromTopicRequest : IRequest<AddModuleFromTopic, AddModuleFromTopicResponse>, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
         [DataMember (Name = "topic")] public string Topic { get; set; } // Name of the topic

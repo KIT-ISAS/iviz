@@ -49,7 +49,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class BoundingBoxQueryRequest : IRequest, IDeserializable<BoundingBoxQueryRequest>
+    public sealed class BoundingBoxQueryRequest : IRequest<BoundingBoxQuery, BoundingBoxQueryResponse>, IDeserializable<BoundingBoxQueryRequest>
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
         // minimum corner point of axis-aligned bounding box in global frame

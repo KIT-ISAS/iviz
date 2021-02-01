@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class ChangeDriftDimensionsRequest : IRequest, IDeserializable<ChangeDriftDimensionsRequest>
+    public sealed class ChangeDriftDimensionsRequest : IRequest<ChangeDriftDimensions, ChangeDriftDimensionsResponse>, IDeserializable<ChangeDriftDimensionsRequest>
     {
         // For use with moveit_jog_arm Cartesian planner
         //

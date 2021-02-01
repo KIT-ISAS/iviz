@@ -49,7 +49,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class ProcessFileRequest : IRequest, IDeserializable<ProcessFileRequest>
+    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
         [DataMember (Name = "file_path")] public string FilePath { get; set; }

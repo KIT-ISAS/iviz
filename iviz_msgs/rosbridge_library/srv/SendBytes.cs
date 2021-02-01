@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class SendBytesRequest : IRequest, IDeserializable<SendBytesRequest>
+    public sealed class SendBytesRequest : IRequest<SendBytes, SendBytesResponse>, IDeserializable<SendBytesRequest>
     {
         [DataMember (Name = "count")] public long Count { get; set; }
     

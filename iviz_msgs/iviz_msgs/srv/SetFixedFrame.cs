@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class SetFixedFrameRequest : IRequest, IDeserializable<SetFixedFrameRequest>
+    public sealed class SetFixedFrameRequest : IRequest<SetFixedFrame, SetFixedFrameResponse>, IDeserializable<SetFixedFrameRequest>
     {
         // Sets the fixed frame
         [DataMember (Name = "id")] public string Id { get; set; } // Id of the frame

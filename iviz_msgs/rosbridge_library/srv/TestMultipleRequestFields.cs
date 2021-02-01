@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestMultipleRequestFieldsRequest : IRequest, IDeserializable<TestMultipleRequestFieldsRequest>
+    public sealed class TestMultipleRequestFieldsRequest : IRequest<TestMultipleRequestFields, TestMultipleRequestFieldsResponse>, IDeserializable<TestMultipleRequestFieldsRequest>
     {
         [DataMember (Name = "int")] public int @int { get; set; }
         [DataMember (Name = "float")] public float @float { get; set; }

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetUUIDRequest : IRequest, IDeserializable<GetUUIDRequest>
+    public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializable<GetUUIDRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

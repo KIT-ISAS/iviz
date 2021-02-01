@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestArrayRequestRequest : IRequest, IDeserializable<TestArrayRequestRequest>
+    public sealed class TestArrayRequestRequest : IRequest<TestArrayRequest, TestArrayRequestResponse>, IDeserializable<TestArrayRequestRequest>
     {
         [DataMember (Name = "int")] public int[] @int { get; set; }
     

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestNestedServiceRequest : IRequest, IDeserializable<TestNestedServiceRequest>
+    public sealed class TestNestedServiceRequest : IRequest<TestNestedService, TestNestedServiceResponse>, IDeserializable<TestNestedServiceRequest>
     {
         //request definition
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }

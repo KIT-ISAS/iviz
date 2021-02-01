@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Tf
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : IRequest, IDeserializable<FrameGraphRequest>
+    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

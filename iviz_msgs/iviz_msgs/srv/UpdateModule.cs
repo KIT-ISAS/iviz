@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateModuleRequest : IRequest, IDeserializable<UpdateModuleRequest>
+    public sealed class UpdateModuleRequest : IRequest<UpdateModule, UpdateModuleResponse>, IDeserializable<UpdateModuleRequest>
     {
         // Updates a module
         [DataMember (Name = "id")] public string Id { get; set; } // Id of the module

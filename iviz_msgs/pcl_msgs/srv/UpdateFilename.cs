@@ -49,7 +49,7 @@ namespace Iviz.Msgs.PclMsgs
     }
 
     [DataContract]
-    public sealed class UpdateFilenameRequest : IRequest, IDeserializable<UpdateFilenameRequest>
+    public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializable<UpdateFilenameRequest>
     {
         [DataMember (Name = "filename")] public string Filename { get; set; }
     

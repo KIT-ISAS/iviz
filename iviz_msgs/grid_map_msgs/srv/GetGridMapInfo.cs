@@ -49,7 +49,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapInfoRequest : IRequest, IDeserializable<GetGridMapInfoRequest>
+    public sealed class GetGridMapInfoRequest : IRequest<GetGridMapInfo, GetGridMapInfoResponse>, IDeserializable<GetGridMapInfoRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

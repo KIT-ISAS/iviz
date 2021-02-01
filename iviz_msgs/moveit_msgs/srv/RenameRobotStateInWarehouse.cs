@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class RenameRobotStateInWarehouseRequest : IRequest, IDeserializable<RenameRobotStateInWarehouseRequest>
+    public sealed class RenameRobotStateInWarehouseRequest : IRequest<RenameRobotStateInWarehouse, RenameRobotStateInWarehouseResponse>, IDeserializable<RenameRobotStateInWarehouseRequest>
     {
         [DataMember (Name = "old_name")] public string OldName { get; set; }
         [DataMember (Name = "new_name")] public string NewName { get; set; }

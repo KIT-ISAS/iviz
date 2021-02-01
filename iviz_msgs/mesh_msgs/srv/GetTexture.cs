@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetTextureRequest : IRequest, IDeserializable<GetTextureRequest>
+    public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializable<GetTextureRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
         [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }

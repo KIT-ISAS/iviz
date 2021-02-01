@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GraspPlanningRequest : IRequest, IDeserializable<GraspPlanningRequest>
+    public sealed class GraspPlanningRequest : IRequest<GraspPlanning, GraspPlanningResponse>, IDeserializable<GraspPlanningRequest>
     {
         // Requests that grasp planning be performed for the target object
         // returns a list of candidate grasps to be tested and executed

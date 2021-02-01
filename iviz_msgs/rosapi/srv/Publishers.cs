@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class PublishersRequest : IRequest, IDeserializable<PublishersRequest>
+    public sealed class PublishersRequest : IRequest<Publishers, PublishersResponse>, IDeserializable<PublishersRequest>
     {
         [DataMember (Name = "topic")] public string Topic { get; set; }
     

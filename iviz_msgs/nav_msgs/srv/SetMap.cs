@@ -49,7 +49,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class SetMapRequest : IRequest, IDeserializable<SetMapRequest>
+    public sealed class SetMapRequest : IRequest<SetMap, SetMapResponse>, IDeserializable<SetMapRequest>
     {
         // Set a new map together with an initial pose
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map { get; set; }

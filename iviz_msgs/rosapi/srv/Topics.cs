@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class TopicsRequest : IRequest, IDeserializable<TopicsRequest>
+    public sealed class TopicsRequest : IRequest<Topics, TopicsResponse>, IDeserializable<TopicsRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

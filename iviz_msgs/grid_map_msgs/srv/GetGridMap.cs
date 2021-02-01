@@ -49,7 +49,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapRequest : IRequest, IDeserializable<GetGridMapRequest>
+    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
         [DataMember (Name = "frame_id")] public string FrameId { get; set; }

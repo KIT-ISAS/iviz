@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class ExecuteKnownTrajectoryRequest : IRequest, IDeserializable<ExecuteKnownTrajectoryRequest>
+    public sealed class ExecuteKnownTrajectoryRequest : IRequest<ExecuteKnownTrajectory, ExecuteKnownTrajectoryResponse>, IDeserializable<ExecuteKnownTrajectoryRequest>
     {
         // This service is deprecated and will go away at some point. For new development use the ExecuteTrajectory action.
         // Effective since: Indigo 0.7.4, Jade and Kinetic 0.8.3

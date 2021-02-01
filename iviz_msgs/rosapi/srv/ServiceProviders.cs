@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class ServiceProvidersRequest : IRequest, IDeserializable<ServiceProvidersRequest>
+    public sealed class ServiceProvidersRequest : IRequest<ServiceProviders, ServiceProvidersResponse>, IDeserializable<ServiceProvidersRequest>
     {
         [DataMember (Name = "service")] public string Service { get; set; }
     

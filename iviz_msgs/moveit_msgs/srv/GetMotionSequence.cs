@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetMotionSequenceRequest : IRequest, IDeserializable<GetMotionSequenceRequest>
+    public sealed class GetMotionSequenceRequest : IRequest<GetMotionSequence, GetMotionSequenceResponse>, IDeserializable<GetMotionSequenceRequest>
     {
         // Planning request with a list of motion commands
         [DataMember (Name = "request")] public MotionSequenceRequest Request { get; set; }

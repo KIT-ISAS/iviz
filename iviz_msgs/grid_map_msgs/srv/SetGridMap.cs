@@ -49,7 +49,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class SetGridMapRequest : IRequest, IDeserializable<SetGridMapRequest>
+    public sealed class SetGridMapRequest : IRequest<SetGridMap, SetGridMapResponse>, IDeserializable<SetGridMapRequest>
     {
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }

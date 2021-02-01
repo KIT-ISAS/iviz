@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class SearchParamRequest : IRequest, IDeserializable<SearchParamRequest>
+    public sealed class SearchParamRequest : IRequest<SearchParam, SearchParamResponse>, IDeserializable<SearchParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
     

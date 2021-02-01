@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class LoadMapRequest : IRequest, IDeserializable<LoadMapRequest>
+    public sealed class LoadMapRequest : IRequest<LoadMap, LoadMapResponse>, IDeserializable<LoadMapRequest>
     {
         [DataMember (Name = "filename")] public string Filename { get; set; }
     

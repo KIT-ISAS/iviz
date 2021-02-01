@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelTextureRequest : IRequest, IDeserializable<GetModelTextureRequest>
+    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializable<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri { get; set; }
     

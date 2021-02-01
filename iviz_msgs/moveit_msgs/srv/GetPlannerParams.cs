@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetPlannerParamsRequest : IRequest, IDeserializable<GetPlannerParamsRequest>
+    public sealed class GetPlannerParamsRequest : IRequest<GetPlannerParams, GetPlannerParamsResponse>, IDeserializable<GetPlannerParamsRequest>
     {
         // Name of planning config
         [DataMember (Name = "planner_config")] public string PlannerConfig { get; set; }

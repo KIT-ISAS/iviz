@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetTimeRequest : IRequest, IDeserializable<GetTimeRequest>
+    public sealed class GetTimeRequest : IRequest<GetTime, GetTimeResponse>, IDeserializable<GetTimeRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

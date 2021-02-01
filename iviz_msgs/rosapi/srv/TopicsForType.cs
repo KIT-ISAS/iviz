@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class TopicsForTypeRequest : IRequest, IDeserializable<TopicsForTypeRequest>
+    public sealed class TopicsForTypeRequest : IRequest<TopicsForType, TopicsForTypeResponse>, IDeserializable<TopicsForTypeRequest>
     {
         [DataMember (Name = "type")] public string Type { get; set; }
     

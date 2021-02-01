@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetGeometryRequest : IRequest, IDeserializable<GetGeometryRequest>
+    public sealed class GetGeometryRequest : IRequest<GetGeometry, GetGeometryResponse>, IDeserializable<GetGeometryRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     

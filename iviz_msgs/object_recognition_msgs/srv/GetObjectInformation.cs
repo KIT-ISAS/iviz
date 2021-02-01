@@ -49,7 +49,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     }
 
     [DataContract]
-    public sealed class GetObjectInformationRequest : IRequest, IDeserializable<GetObjectInformationRequest>
+    public sealed class GetObjectInformationRequest : IRequest<GetObjectInformation, GetObjectInformationResponse>, IDeserializable<GetObjectInformationRequest>
     {
         // Retrieve extra data from the DB for a given object
         // The type of the object to retrieve info from

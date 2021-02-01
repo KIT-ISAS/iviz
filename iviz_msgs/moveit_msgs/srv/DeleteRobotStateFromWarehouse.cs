@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class DeleteRobotStateFromWarehouseRequest : IRequest, IDeserializable<DeleteRobotStateFromWarehouseRequest>
+    public sealed class DeleteRobotStateFromWarehouseRequest : IRequest<DeleteRobotStateFromWarehouse, DeleteRobotStateFromWarehouseResponse>, IDeserializable<DeleteRobotStateFromWarehouseRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "robot")] public string Robot { get; set; }

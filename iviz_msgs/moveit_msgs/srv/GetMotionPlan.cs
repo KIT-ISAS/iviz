@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetMotionPlanRequest : IRequest, IDeserializable<GetMotionPlanRequest>
+    public sealed class GetMotionPlanRequest : IRequest<GetMotionPlan, GetMotionPlanResponse>, IDeserializable<GetMotionPlanRequest>
     {
         // This service contains the definition for a request to the motion
         // planner and the output it provides

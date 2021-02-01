@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerRequest : IRequest, IDeserializable<TriggerRequest>
+    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializable<TriggerRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class AddTwoIntsRequest : IRequest, IDeserializable<AddTwoIntsRequest>
+    public sealed class AddTwoIntsRequest : IRequest<AddTwoInts, AddTwoIntsResponse>, IDeserializable<AddTwoIntsRequest>
     {
         [DataMember (Name = "a")] public long A { get; set; }
         [DataMember (Name = "b")] public long B { get; set; }

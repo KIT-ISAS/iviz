@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFramePoseRequest : IRequest, IDeserializable<GetFramePoseRequest>
+    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializable<GetFramePoseRequest>
     {
         // Gets the absolute pose of a TF frame w.r.t. the map frame
         [DataMember (Name = "frames")] public string[] Frames { get; set; } // Frame ids

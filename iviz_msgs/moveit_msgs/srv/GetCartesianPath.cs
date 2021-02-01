@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetCartesianPathRequest : IRequest, IDeserializable<GetCartesianPathRequest>
+    public sealed class GetCartesianPathRequest : IRequest<GetCartesianPath, GetCartesianPathResponse>, IDeserializable<GetCartesianPathRequest>
     {
         // Define the frame for the specified waypoints
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }

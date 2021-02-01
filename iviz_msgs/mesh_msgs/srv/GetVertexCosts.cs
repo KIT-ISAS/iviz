@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetVertexCostsRequest : IRequest, IDeserializable<GetVertexCostsRequest>
+    public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializable<GetVertexCostsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     

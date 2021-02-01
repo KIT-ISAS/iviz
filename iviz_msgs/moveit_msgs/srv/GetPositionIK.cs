@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetPositionIKRequest : IRequest, IDeserializable<GetPositionIKRequest>
+    public sealed class GetPositionIKRequest : IRequest<GetPositionIK, GetPositionIKResponse>, IDeserializable<GetPositionIKRequest>
     {
         // A service call to carry out an inverse kinematics computation
         // The inverse kinematics request

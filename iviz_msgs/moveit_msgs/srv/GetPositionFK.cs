@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetPositionFKRequest : IRequest, IDeserializable<GetPositionFKRequest>
+    public sealed class GetPositionFKRequest : IRequest<GetPositionFK, GetPositionFKResponse>, IDeserializable<GetPositionFKRequest>
     {
         // A service definition for a standard forward kinematics service
         // The frame_id in the header message is the frame in which 

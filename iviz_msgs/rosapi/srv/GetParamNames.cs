@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetParamNamesRequest : IRequest, IDeserializable<GetParamNamesRequest>
+    public sealed class GetParamNamesRequest : IRequest<GetParamNames, GetParamNamesResponse>, IDeserializable<GetParamNamesRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

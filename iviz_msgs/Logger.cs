@@ -213,14 +213,17 @@ namespace Iviz.Msgs
                 return "[null exception]";
             }
 
-            var str = new StringBuilder();
+            var str = new StringBuilder(100);
             Exception? subException = e;
-            
+
+            bool firstException = true;
             while (subException != null)
             {
                 if (!(subException is AggregateException))
                 {
-                    str.Append("\n[").Append(subException.GetType()).Append("] ").Append(subException.Message);
+                    str.Append(firstException ? "\n[" : "\n   [");
+                    str.Append(subException.GetType()).Append("] ").Append(subException.Message);
+                    firstException = false;
                 }
 
                 subException = subException.InnerException;

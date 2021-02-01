@@ -49,7 +49,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetMapRequest : IRequest, IDeserializable<GetMapRequest>
+    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializable<GetMapRequest>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class SelfTestRequest : IRequest, IDeserializable<SelfTestRequest>
+    public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializable<SelfTestRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetActionServersRequest : IRequest, IDeserializable<GetActionServersRequest>
+    public sealed class GetActionServersRequest : IRequest<GetActionServers, GetActionServersResponse>, IDeserializable<GetActionServersRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class EmptyRequest : IRequest, IDeserializable<EmptyRequest>
+    public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializable<EmptyRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

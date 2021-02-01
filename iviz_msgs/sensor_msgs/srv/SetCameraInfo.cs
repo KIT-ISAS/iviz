@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
     }
 
     [DataContract]
-    public sealed class SetCameraInfoRequest : IRequest, IDeserializable<SetCameraInfoRequest>
+    public sealed class SetCameraInfoRequest : IRequest<SetCameraInfo, SetCameraInfoResponse>, IDeserializable<SetCameraInfoRequest>
     {
         // This service requests that a camera stores the given CameraInfo 
         // as that camera's calibration information.

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class AddModuleRequest : IRequest, IDeserializable<AddModuleRequest>
+    public sealed class AddModuleRequest : IRequest<AddModule, AddModuleResponse>, IDeserializable<AddModuleRequest>
     {
         // Adds a module by type
         [DataMember (Name = "module_type")] public string ModuleType { get; set; } // Module type

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class QueryPlannerInterfacesRequest : IRequest, IDeserializable<QueryPlannerInterfacesRequest>
+    public sealed class QueryPlannerInterfacesRequest : IRequest<QueryPlannerInterfaces, QueryPlannerInterfacesResponse>, IDeserializable<QueryPlannerInterfacesRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

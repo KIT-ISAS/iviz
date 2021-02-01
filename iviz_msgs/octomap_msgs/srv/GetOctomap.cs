@@ -49,7 +49,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class GetOctomapRequest : IRequest, IDeserializable<GetOctomapRequest>
+    public sealed class GetOctomapRequest : IRequest<GetOctomap, GetOctomapResponse>, IDeserializable<GetOctomapRequest>
     {
         // Get the map as a octomap
     

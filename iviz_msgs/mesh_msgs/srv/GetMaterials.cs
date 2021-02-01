@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetMaterialsRequest : IRequest, IDeserializable<GetMaterialsRequest>
+    public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializable<GetMaterialsRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     

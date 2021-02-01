@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class SetBoolRequest : IRequest, IDeserializable<SetBoolRequest>
+    public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializable<SetBoolRequest>
     {
         [DataMember (Name = "data")] public bool Data { get; set; } // e.g. for hardware enabling / disabling
     

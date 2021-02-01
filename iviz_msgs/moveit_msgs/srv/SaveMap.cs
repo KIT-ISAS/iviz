@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class SaveMapRequest : IRequest, IDeserializable<SaveMapRequest>
+    public sealed class SaveMapRequest : IRequest<SaveMap, SaveMapResponse>, IDeserializable<SaveMapRequest>
     {
         [DataMember (Name = "filename")] public string Filename { get; set; }
     

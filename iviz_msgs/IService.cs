@@ -38,6 +38,10 @@ namespace Iviz.Msgs
     {
     }
 
+    public interface IRequest<TT, TU> : IRequest where TT : IService, new() where TU : IResponse
+    {
+    }
+    
     /// <summary>
     /// Interface for all ROS service responses.
     /// All classes representing ROS responses derive from this.

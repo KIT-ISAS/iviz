@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetPlanningSceneRequest : IRequest, IDeserializable<GetPlanningSceneRequest>
+    public sealed class GetPlanningSceneRequest : IRequest<GetPlanningScene, GetPlanningSceneResponse>, IDeserializable<GetPlanningSceneRequest>
     {
         // Get parts of the planning scene that are of interest
         // All scene components are returned if none are specified

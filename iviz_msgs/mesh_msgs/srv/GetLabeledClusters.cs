@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MeshMsgs
     }
 
     [DataContract]
-    public sealed class GetLabeledClustersRequest : IRequest, IDeserializable<GetLabeledClustersRequest>
+    public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializable<GetLabeledClustersRequest>
     {
         [DataMember (Name = "uuid")] public string Uuid { get; set; }
     
