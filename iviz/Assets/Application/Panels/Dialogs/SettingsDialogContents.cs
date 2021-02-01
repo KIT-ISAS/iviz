@@ -7,19 +7,24 @@ namespace Iviz.App
     public class SettingsDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
-        
+
         [SerializeField] DropdownWidget qualityInView = null;
         [SerializeField] DropdownWidget qualityInAr = null;
         [SerializeField] DropdownWidget targetFps = null;
         [SerializeField] DropdownWidget networkProcessing = null;
-        
+
         [SerializeField] ColorPickerWidget backgroundColor = null;
         [SerializeField] SliderWidget sunDirection = null;
 
         [SerializeField] Button clearModelCache = null;
         [SerializeField] Button clearSavedFiles = null;
         [SerializeField] Button clearHostHistory = null;
-        [SerializeField] Button resetModelService = null;
+        [SerializeField] DropdownWidget modelService = null;
+
+        [SerializeField] Text modelCacheLabel = null;
+        [SerializeField] Text savedFilesLabel = null;
+        [SerializeField] Text hostHistoryLabel = null;
+
 
         public TrashButtonWidget Close => close;
         public DropdownWidget QualityInView => qualityInView;
@@ -28,18 +33,20 @@ namespace Iviz.App
         public DropdownWidget NetworkProcessing => networkProcessing;
         public ColorPickerWidget BackgroundColor => backgroundColor;
         public SliderWidget SunDirection => sunDirection;
+        public DropdownWidget ModelService => modelService;
+        public Text ModelCacheLabel => modelCacheLabel;
+        public Text SavedFilesLabel => savedFilesLabel;
+        public Text HostHistoryLabel => hostHistoryLabel;
 
-        public event Action ClearModelCacheClicked; 
-        public event Action ClearSavedFilesClicked; 
+        public event Action ClearModelCacheClicked;
+        public event Action ClearSavedFilesClicked;
         public event Action ClearHostHistoryClicked;
-        public event Action ResetModelServiceClicked;
-
+        
         void Awake()
         {
             clearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
             clearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
             clearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
-            resetModelService.onClick.AddListener(() => ResetModelServiceClicked?.Invoke());
         }
 
         public bool Active
@@ -57,11 +64,11 @@ namespace Iviz.App
             backgroundColor.ClearSubscribers();
             close.ClearSubscribers();
             sunDirection.ClearSubscribers();
+            modelService.ClearSubscribers();
 
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;
             ClearSavedFilesClicked = null;
-            ResetModelServiceClicked = null;
-        }        
+        }
     }
 }

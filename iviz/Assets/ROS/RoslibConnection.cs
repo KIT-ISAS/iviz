@@ -143,19 +143,25 @@ namespace Iviz.Ros
                 AddTask(async () =>
                 {
                     Core.Logger.Internal("Resubscribing and readvertising...");
-                    token.ThrowIfCancellationRequested();
+                    token.ThrowIfCanceled();
 
+                    (bool success, object hosts) = await client.Parameters.GetParameterAsync("/iviz/hosts", token);
+                    if (success)
+                    {
+                        ParseHostsParam(hosts);
+                    }
+                    
                     Core.Logger.Debug("*** ReAdvertising...");
                     await Task.WhenAll(publishersByTopic.Values.Select(
                         topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)));
 
-                    token.ThrowIfCancellationRequested();
+                    token.ThrowIfCanceled();
                     Core.Logger.Debug("*** Done ReAdvertising");
                     Core.Logger.Debug("*** Resubscribing...");
                     await Task.WhenAll(subscribersByTopic.Values.Select(
                         topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)));
 
-                    token.ThrowIfCancellationRequested();
+                    token.ThrowIfCanceled();
                     Core.Logger.Debug("*** Done Resubscribing");
                     Core.Logger.Debug("*** Requesting topics...");
                     cachedTopics = await newClient.GetSystemPublishedTopicsAsync(token);
@@ -163,7 +169,7 @@ namespace Iviz.Ros
 
                     Core.Logger.Debug("*** Advertising services...");
 
-                    token.ThrowIfCancellationRequested();
+                    token.ThrowIfCanceled();
                     await Task.WhenAll(servicesByTopic.Values.Select(
                         topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)));
                     Core.Logger.Debug("*** Done Advertising services!");
@@ -217,6 +223,50 @@ namespace Iviz.Ros
             return false;
         }
 
+        static void ParseHostsParam(object hostsObj)
+        {
+            try
+            {
+                if (hostsObj == null)
+                {
+                    return;
+                }
+
+                if (!(hostsObj is object[] array))
+                {
+                    Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
+                    return;
+                }
+
+                Dictionary<string, string> hosts = new Dictionary<string, string>();
+                foreach (object entry in array)
+                {
+                    if (!(entry is object[] pair) ||
+                        pair.Length != 2 ||
+                        !(pair[0] is string hostname) ||
+                        !(pair[1] is string address))
+                    {
+                        Core.Logger.Error(
+                            "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
+                        return;
+                    }
+
+                    hosts[hostname] = address;
+                }
+
+                ConnectionUtils.GlobalResolver.Clear();
+                foreach (var pair in hosts)
+                {
+                    Core.Logger.Info($"Adding custom host {pair.Key} -> {pair.Value}");
+                    ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Unexpected exception in ParseHostParams", e);
+            }
+        }
+
         static async void LogConnectionCheck(CancellationToken token)
         {
             try
@@ -250,7 +300,7 @@ namespace Iviz.Ros
         {
             const int maxTimeMasterUnseenInMs = 10000;
             RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
-            DateTime lastMasterAccess = DateTime.Now;
+            DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
             Uri lastRosOutUri = null;
             var instance = ConnectionManager.Connection;
@@ -259,7 +309,7 @@ namespace Iviz.Ros
             {
                 while (!token.IsCancellationRequested)
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = GameThread.Now;
                     try
                     {
                         LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);

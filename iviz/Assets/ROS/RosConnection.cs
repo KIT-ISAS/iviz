@@ -92,7 +92,7 @@ namespace Iviz.Ros
             {
                 while (!connectionTs.IsCancellationRequested)
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = GameThread.Now;
                     if (KeepReconnecting
                         && ConnectionState != ConnectionState.Connected
                         && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)

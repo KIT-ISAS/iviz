@@ -2,6 +2,7 @@ using System;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using UnityEngine.PlayerLoop;
 
 namespace Iviz.App
 {
@@ -9,6 +10,15 @@ namespace Iviz.App
     {
         static readonly string[] TargetFpsOptions = {"Default", "60", "30", "15"};
         static readonly string[] NetworkProcessingOptions = {"Every Frame", "Every Second", "Every Fourth"};
+
+        enum ModelServerModes
+        {
+            Off,
+            On,
+            OnWithFile
+        }
+
+        static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
 
         [NotNull] readonly SettingsDialogContents panel;
         public override IDialogPanelContents Panel => panel;
@@ -79,7 +89,15 @@ namespace Iviz.App
                     panel.NetworkProcessing.Index = 2;
                     break;
             }
-            
+
+            panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.LoadedModelsCount} files";
+            panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles} files";
+            panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
+
+            panel.ModelService.Options = ModelServerModesNames;
+            panel.ModelService.Label = UpdateModelServiceLabel();
+            panel.ModelService.Interactable = !Settings.IsMobile;
+
             panel.QualityInView.ValueChanged += (f, _) =>
             {
                 SettingsManager.QualityInView = (QualityType) f;
@@ -90,13 +108,13 @@ namespace Iviz.App
                 SettingsManager.QualityInAr = (QualityType) f;
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
-            
+
             panel.BackgroundColor.ValueChanged += c =>
             {
                 SettingsManager.BackgroundColor = c;
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
-            
+
             panel.TargetFps.ValueChanged += (i, _) =>
             {
                 switch (i)
@@ -114,7 +132,7 @@ namespace Iviz.App
                         SettingsManager.TargetFps = 15;
                         break;
                 }
-                
+
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             };
 
@@ -143,30 +161,70 @@ namespace Iviz.App
             };
 
             panel.Close.Clicked += Close;
-            
-            panel.ClearModelCacheClicked += () =>
+
+            panel.ClearModelCacheClicked += async () =>
             {
                 Logger.Info("Settings: Clearing model cache.");
-                Resource.External.ClearModelCache();
+                await Resource.External.ClearModelCacheAsync();
+                panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.LoadedModelsCount} files";
             };
 
-            panel.ClearHostHistoryClicked += () =>
+            panel.ClearHostHistoryClicked += async () =>
             {
                 Logger.Info("Settings: Clearing cache of master uris.");
-                ModuleListPanel.Instance.ClearMastersFromSimpleConfiguration();
+                await ModuleListPanel.Instance.ClearMastersCacheAsync();
+                panel.HostHistoryLabel.text =
+                    $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
             };
-            
+
             panel.ClearSavedFilesClicked += () =>
             {
                 Logger.Info("Settings: Clearing saved files.");
                 ModuleListPanel.ClearSavedFiles();
+                panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles} files";
             };
-            
-            panel.ResetModelServiceClicked += () =>
+
+            panel.ModelService.ValueChanged += async (i, s) =>
             {
-                Logger.Info("Settings: Resetting model service.");
-                ModuleListPanel.Instance.RestartModelService();
+                switch ((ModelServerModes) i)
+                {
+                    case ModelServerModes.Off:
+                        ModuleListPanel.ModelService.Dispose();
+                        break;
+                    case ModelServerModes.On:
+                        await ModuleListPanel.ModelService.Restart(false);
+                        break;
+                    case ModelServerModes.OnWithFile:
+                        await ModuleListPanel.ModelService.Restart(true);
+                        break;
+                    default:
+                        break;
+                }
+
+                panel.ModelService.Label = UpdateModelServiceLabel();
             };
+        }
+
+        string UpdateModelServiceLabel()
+        {
+            if (Settings.IsMobile)
+            {
+                return "<b>Model Service:</b> Off (Mobile)";
+            }
+
+            var modelService = ModuleListPanel.ModelService;
+            if (!modelService.IsEnabled)
+            {
+                return "<b>Model Service:</b> Off";
+            }
+
+            if (modelService.IsFileSchemaEnabled)
+            {
+                return "<b>Model Service:</b> " + modelService.NumPackages +
+                       " packages\n<b>[File schema enabled]</b>";
+            }
+
+            return "<b>Model Service:</b> " + modelService.NumPackages + " packages";
         }
     }
 }

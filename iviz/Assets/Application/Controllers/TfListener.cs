@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -43,9 +44,8 @@ namespace Iviz.Controllers
         static uint tfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
-        readonly AsyncLock mutex = new AsyncLock();
-        readonly List<(TFMessage frame, bool isStatic)> tmpMessageList = new List<(TFMessage, bool)>(4096);
-        readonly List<(TFMessage frame, bool isStatic)> messageList = new List<(TFMessage, bool)>();
+        //readonly AsyncLock mutex = new AsyncLock();
+        readonly ConcurrentQueue<(TFMessage frame, bool isStatic)> messageList = new ConcurrentQueue<(TFMessage, bool)>();
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         [NotNull] readonly FrameNode keepAllListener;
         [NotNull] readonly FrameNode staticListener;
@@ -255,8 +255,10 @@ namespace Iviz.Controllers
 
         void ProcessMessages()
         {
-            foreach ((TFMessage frame, bool isStatic) in messageList)
+            //foreach ((TFMessage frame, bool isStatic) in messageList)
+            while (messageList.TryDequeue(out var value))
             {
+                (TFMessage frame, bool isStatic) = value;
                 foreach (TransformStamped t in frame.Transforms)
                 {
                     var ((_, _, frameId), childFrameId, transform) = t;
@@ -419,34 +421,18 @@ namespace Iviz.Controllers
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            AddAll(msg, false);
+            messageList.Enqueue((msg, false));
             return true;
         }
 
         bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            AddAll(msg, true);
+            messageList.Enqueue((msg, true));
             return true;
         }
 
-        async void AddAll([NotNull] TFMessage msg, bool isStatic)
+        void AddAll([NotNull] TFMessage msg, bool isStatic)
         {
-            using (await mutex.LockAsync())
-            {
-                tmpMessageList.Add((msg, isStatic));
-            }
-        }
-
-        async void ProcessAll()
-        {
-            messageList.Clear();
-            using (await mutex.LockAsync())
-            {
-                messageList.AddRange(tmpMessageList);
-                tmpMessageList.Clear();
-            }
-
-            ProcessMessages();
         }
 
         public void MarkAsDead([NotNull] TfFrame frame)
@@ -464,8 +450,7 @@ namespace Iviz.Controllers
 
         void LateUpdate()
         {
-            ProcessAll();
-
+            ProcessMessages();
             OriginFrame.Transform.SetLocalPose(FixedFrame.WorldPose.Inverse());
         }
 

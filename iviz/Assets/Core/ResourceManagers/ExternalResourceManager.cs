@@ -71,6 +71,7 @@ namespace Iviz.Displays
 
         CancellationTokenSource runningTs = new CancellationTokenSource();
 
+        public int LoadedModelsCount => loadedModels.Count;
 
         GameObject Node { get; }
 
@@ -118,7 +119,7 @@ namespace Iviz.Displays
             }
         }
 
-        public async void ClearModelCache(CancellationToken token = default)
+        public async Task ClearModelCacheAsync(CancellationToken token = default)
         {
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();

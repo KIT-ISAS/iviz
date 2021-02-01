@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -20,7 +21,7 @@ namespace Iviz.App
             Me,
             OnlyId
         }
-        
+
         const int MaxMessageLength = 250;
         const int MaxMessages = 50;
 
@@ -85,7 +86,7 @@ namespace Iviz.App
         }
 
         void HandleMessage(in LogMessage log)
-        {  
+        {
             if (log.SourceId != null)
             {
                 ids.Add(log.SourceId);
@@ -97,17 +98,18 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             if (log.SourceId != null && log.Level < minLogLevel)
             {
                 return;
             }
 
-            messageQueue.Enqueue(log);
-            if (messageQueue.Count > MaxMessages)
+            if (messageQueue.Count >= MaxMessages)
             {
                 messageQueue.TryDequeue(out _);
             }
+
+            messageQueue.Enqueue(log);
 
             queueIsDirty = true;
         }
@@ -207,7 +209,7 @@ namespace Iviz.App
             }
 
             LogMessage[] messages = messageQueue.ToArray();
-            
+
             foreach (var message in messages)
             {
                 var messageLevel = message.Level;
@@ -221,7 +223,7 @@ namespace Iviz.App
                 {
                     continue;
                 }
-                
+
                 if (message.Stamp == default)
                 {
                     description.Append("<b>[] ");

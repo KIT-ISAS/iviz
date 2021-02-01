@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
@@ -25,7 +26,7 @@ namespace Iviz.App
         IListener listener;
         bool queueIsDirty;
 
-        class TopicEntry
+        class TopicEntry : IComparable<TopicEntry>
         {
             [CanBeNull] public string Topic { get; }
             [CanBeNull] public string RosMsgType { get; }
@@ -48,7 +49,14 @@ namespace Iviz.App
 
                 int lastSlash = RosMsgType.LastIndexOf('/');
                 string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType.Substring(lastSlash + 1);
-                Description = $"<color=grey>{shortType}</color> {topic}";
+                Description = $"{topic} <color=grey>[{shortType}]</color>";
+            }
+
+            public int CompareTo(TopicEntry other)
+            {
+                if (ReferenceEquals(this, other)) return 0;
+                if (ReferenceEquals(null, other)) return 1;
+                return string.Compare(Topic, other.Topic, StringComparison.Ordinal);
             }
         }
 
@@ -115,11 +123,13 @@ namespace Iviz.App
                 Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
+            
+            entries.Sort();
         }
 
         void Handler(IMessage msg)
         {
-            string time = $"<b>{DateTime.Now.ToString("HH:mm:ss")}</b> ";
+            string time = $"<b>{GameThread.Now.ToString("HH:mm:ss")}</b> ";
             messageQueue.Enqueue((time, msg));
             if (messageQueue.Count > MaxMessages)
             {
@@ -172,8 +182,8 @@ namespace Iviz.App
             }
             else
             {
-                dialog.Publishers.text = $"{listener.NumPublishers} publishers";
-                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} mps";
+                dialog.Publishers.text = $"{listener.NumPublishers.Active.ToString()}/{listener.NumPublishers.Total.ToString()} publishers";
+                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} mps";
                 long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
             }

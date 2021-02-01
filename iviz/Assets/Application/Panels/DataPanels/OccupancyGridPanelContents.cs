@@ -34,11 +34,11 @@ namespace Iviz.App
                         .SetIndex((int)Resource.ColormapId.gray);
             FlipColors = p.AddToggle("Colormap Flip Min/Max");
             ShowTexture = p.AddToggle("Show As Textured Plane");
-            ShowCubes = p.AddToggle("Show As Bars");
-            ScaleZ = p.AddSlider("Height").SetMinValue(0.01f).SetMaxValue(5.0f).SetNumberOfSteps(49);
 
             Tint = p.AddColorPicker("Tint");
             //Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
+            ShowCubes = p.AddToggle("Show As Bars");
+            ScaleZ = p.AddSlider("Height").SetMinValue(0.01f).SetMaxValue(5.0f).SetNumberOfSteps(49);
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
 
             CloseButton = p.AddTrashButton();

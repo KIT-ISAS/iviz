@@ -21,7 +21,7 @@ namespace Iviz.Core
         public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
         {
             SourceId = null;
-            Stamp = DateTime.Now;
+            Stamp = GameThread.Now;
             Level = level;
             Message = message;
             File = file;
@@ -81,7 +81,7 @@ namespace Iviz.Core
 
         public static void Internal([CanBeNull] string msg)
         {
-            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? NullMessage}";
+            var msgTxt = $"<b>[{GameThread.Now:HH:mm:ss}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }
@@ -90,7 +90,7 @@ namespace Iviz.Core
         {
             var str = new StringBuilder();
             str.Append("<b>[")
-                .AppendFormat("{0:HH:mm:ss}", DateTime.Now)
+                .AppendFormat("{0:HH:mm:ss}", GameThread.Now)
                 .Append("]</b> ")
                 .Append(msg ?? NullMessage);
 

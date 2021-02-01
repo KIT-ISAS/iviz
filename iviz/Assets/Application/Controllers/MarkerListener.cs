@@ -139,7 +139,7 @@ namespace Iviz.Controllers
 
         void CheckDeadMarkers()
         {
-            DateTime now = DateTime.Now;
+            DateTime now = GameThread.Now;
             var deadEntries = markers
                 .Where(entry => entry.Value.ExpirationTime < now)
                 .ToArray();

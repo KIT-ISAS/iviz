@@ -29,6 +29,18 @@ namespace Iviz.Resources
             }
 
             int usableWidth = maxWidth - dotWidth;
+            
+            int totalWidth = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                totalWidth += CharWidth(s[i]);
+            }
+
+            if (totalWidth <= usableWidth)
+            {
+                return s;
+            }
+
             StringBuilder str = new StringBuilder();
             int usedWidth = 0;
             int numLines = 0;

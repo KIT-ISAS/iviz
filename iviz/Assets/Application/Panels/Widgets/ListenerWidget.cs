@@ -1,4 +1,6 @@
-﻿using Iviz.Core;
+﻿using System;
+using System.Text;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using Iviz.Resources;
@@ -41,35 +43,42 @@ namespace Iviz.App
         }
 
         [CanBeNull] string Topic => Listener?.Topic;
-        (int Active, int Total) NumPublishers => (!ConnectionManager.IsConnected || Listener == null) ? (-1, -1) : Listener.NumPublishers;
+
+        (int Active, int Total) NumPublishers =>
+            (!ConnectionManager.IsConnected || Listener == null) ? (-1, -1) : Listener.NumPublishers;
+
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
         int Dropped => Listener?.Stats.Dropped ?? 0;
         bool Subscribed => Listener?.Subscribed ?? false;
 
+        readonly StringBuilder str = new StringBuilder(100);
+
         void UpdateStats()
         {
-            string subscriberStatus;
-            var(numActivePublishers, numPublishers) = NumPublishers;
+            str.Length = 0;
+            str.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
+
+            (int numActivePublishers, int numPublishers) = NumPublishers;
             if (numPublishers == -1)
             {
-                subscriberStatus = "Off";
+                str.Append("Off");
             }
             else if (!Subscribed)
             {
-                subscriberStatus = "PAUSED";
+                str.Append("PAUSED");
             }
             else
             {
-                subscriberStatus = $"{numActivePublishers.ToString()}/{numPublishers.ToString()}↓ ";
+                str.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
             }
 
-            string messagesPerSecond = MessagesPerSecond.ToString(UnityUtils.Culture);
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            string dropped = Dropped.ToString(UnityUtils.Culture);
+            str.Append(" | ").Append(MessagesPerSecond).Append(" Hz | ")
+                .Append(kbPerSecond).Append(" kB/s | ")
+                .Append(Dropped).Append(" dr</b>");
 
-            text.text = $"{Resource.Font.Split(Topic ?? "", Size)}\n" +
-                        $"<b>{subscriberStatus} | {messagesPerSecond} Hz | {kbPerSecond} kB/s | {dropped} dr</b>";
+            text.text = str.ToString();
 
             if (listener == null)
             {

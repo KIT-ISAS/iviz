@@ -234,7 +234,7 @@ namespace Iviz.Controllers
 
             description.Append("</b>").AppendLine();
 
-            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
+            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : GameThread.Now + msg.Lifetime.ToTimeSpan();
 
             if (msg.Lifetime == default)
             {
@@ -243,7 +243,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                ExpirationTime = DateTime.Now + msg.Lifetime.ToTimeSpan();
+                ExpirationTime = GameThread.Now + msg.Lifetime.ToTimeSpan();
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 

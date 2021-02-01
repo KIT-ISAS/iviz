@@ -28,6 +28,8 @@ namespace Iviz.Core
         }
 
         public static float GameTime { get; private set; }
+        
+        public static DateTime Now { get; private set; }
 
         void Awake()
         {
@@ -38,7 +40,7 @@ namespace Iviz.Core
         void Update()
         {
             EveryFrame?.Invoke();
-
+            Now = DateTime.Now;
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
             {

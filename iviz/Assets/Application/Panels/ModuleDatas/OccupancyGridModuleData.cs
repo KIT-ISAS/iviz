@@ -57,6 +57,9 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
             panel.Description.Label = listener.Description;
+
+            panel.OcclusionOnlyMode.Interactable = listener.CubesVisible;
+            panel.ScaleZ.Interactable = listener.CubesVisible;
             //panel.Alpha.Value = listener.Tint.a;
 
             panel.Tint.ValueChanged += f =>
@@ -86,6 +89,8 @@ namespace Iviz.App
             panel.ShowCubes.ValueChanged += f =>
             {
                 listener.CubesVisible = f;
+                panel.OcclusionOnlyMode.Interactable = f;
+                panel.ScaleZ.Interactable = f;
             };
 
             panel.Colormap.ValueChanged += (i, _) =>

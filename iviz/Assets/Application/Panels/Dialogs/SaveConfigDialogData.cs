@@ -31,7 +31,7 @@ namespace Iviz.App
             panel.ItemClicked += OnItemClicked;
             panel.CloseClicked += Close;
             panel.EmptyText = "No Config Files Found";
-            panel.Input.Value = DateTime.Now.ToString("MM_dd_yyyy HH_mm");
+            panel.Input.Value = GameThread.Now.ToString("MM_dd_yyyy HH_mm");
 
             panel.SaveButton.Clicked += OnSaveClicked;
         }
