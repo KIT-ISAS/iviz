@@ -152,13 +152,12 @@ namespace Iviz.XmlRpc
             }
 
             int msgOutLength = BuiltIns.UTF8.GetByteCount(msgOut);
-            string str = string.Format("HTTP/1.0 200 OK\r\n" +
-                                       "Server: iviz XML-RPC\r\n" +
-                                       "Connection: close\r\n" +
-                                       "Content-Type: text/xml; charset=utf-8\r\n" +
-                                       "Content-Length: {0}\r\n\r\n" +
-                                       "{1}",
-                msgOutLength, msgOut);
+            string str = "HTTP/1.0 200 OK\r\n" + 
+                         "Server: iviz XML-RPC\r\n" + 
+                         "Connection: close\r\n" +
+                         "Content-Type: text/xml; charset=utf-8\r\n" + 
+                         $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
+                         $"{msgOut}";
 
             using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
             Task writeTask = writer.WriteAsync(str);

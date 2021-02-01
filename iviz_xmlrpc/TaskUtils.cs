@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -45,7 +48,7 @@ namespace Iviz.XmlRpc
             {
                 return;
             }
-            
+
             Task result = await Task.WhenAny(task, Task.Delay(timeoutInMs, token)).Caf();
             if (result != task)
             {
@@ -104,7 +107,7 @@ namespace Iviz.XmlRpc
                 }
             }
         }
-        
+
         public static T WaitNoThrow<T>(this Task<T>? t, object caller)
         {
             if (t == null)
@@ -126,8 +129,8 @@ namespace Iviz.XmlRpc
                 return default!;
             }
         }
-        
-        
+
+
         /// <summary>
         /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
         /// </summary>
@@ -151,8 +154,8 @@ namespace Iviz.XmlRpc
             {
                 ExceptionDispatchInfo.Capture(e.InnerException)?.Throw();
             }
-        }        
-        
+        }
+
         public static T WaitAndRethrow<T>(this Task<T>? t)
         {
             if (t == null)
@@ -173,7 +176,7 @@ namespace Iviz.XmlRpc
                 ExceptionDispatchInfo.Capture(e.InnerException)?.Throw();
                 throw;
             }
-        }  
+        }
 
         public static async Task AwaitNoThrow(this Task? t, object caller)
         {
@@ -216,13 +219,59 @@ namespace Iviz.XmlRpc
 
             return default;
         }
-        
+
         public static void ThrowIfCanceled(this CancellationToken t)
         {
             if (t.IsCancellationRequested)
             {
                 throw new TaskCanceledException();
             }
+        }
+    }
+
+    public static class ConnectionUtils
+    {
+        public static readonly Dictionary<string, string> GlobalResolver = new Dictionary<string, string>();
+
+        public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
+            CancellationToken token, int timeoutInMs)
+        {
+            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
+            {
+                hostname = resolvedHostname;
+            }
+#if NET5_0
+            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+            tokenSource.CancelAfter(timeoutInMs);
+            try
+            {
+                await client.ConnectAsync(hostname, port, tokenSource.Token).AsTask();
+            }
+            catch (OperationCanceledException)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    throw;
+                }
+
+                throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
+            }
+#else
+            Task connectionTask = client.ConnectAsync(hostname, port);
+            Task timeoutTask = Task.Delay(timeoutInMs, token);
+            Task resultTask = await Task.WhenAny(timeoutTask, connectionTask);
+            if (resultTask == timeoutTask)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    throw new TaskCanceledException(timeoutTask);
+                }
+
+                throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
+            }
+
+            await connectionTask;
+#endif
         }
     }
 }

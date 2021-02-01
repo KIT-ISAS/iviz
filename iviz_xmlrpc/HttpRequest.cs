@@ -31,35 +31,16 @@ namespace Iviz.XmlRpc
 
         public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
         {
-            string hostname = uri.Host;
-            int port = uri.Port;
-
-#if NET5_0
-            Task task = client.ConnectAsync(hostname, port, token).AsTask();
-#else
-            Task task = client.ConnectAsync(hostname, port);
-#endif
-            if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
-            {
-                token.ThrowIfCanceled();
-                if (task.IsFaulted)
-                {
-                    ExceptionDispatchInfo.Capture(task.Exception!.InnerException!).Throw();
-                }
-
-                throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
-            }
+            await client.TryConnectAsync(uri.Host, uri.Port, token, timeoutInMs);
         }
 
         string CreateRequest(string msgIn)
         {
-            return string.Format("POST {0} HTTP/1.0\r\n" +
-                                 "User-Agent: iviz XML-RPC\r\n" +
-                                 "Host: {1}\r\n" +
-                                 "Content-Length: {2}\r\n" +
-                                 "Content-Type: text/xml; charset=utf-8\r\n" +
-                                 "\r\n{3}\r\n",
-                Uri.UnescapeDataString(uri.AbsolutePath), callerUri.Host, BuiltIns.UTF8.GetByteCount(msgIn), msgIn);
+            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" + 
+                   "User-Agent: iviz XML-RPC\r\n" +
+                   $"Host: {callerUri.Host}\r\n" +
+                   $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
+                   "Content-Type: text/xml; charset=utf-8\r\n" + $"\r\n{msgIn}\r\n";
         }
 
         static string ProcessResponse(string response)
