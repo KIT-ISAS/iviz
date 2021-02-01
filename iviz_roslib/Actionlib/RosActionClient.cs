@@ -346,23 +346,22 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            CancellationTokenSource linkedSource =
+            using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
-        public Task WaitForServerAsync(CancellationToken token = default)
+        public async Task WaitForServerAsync(CancellationToken token = default)
         {
             if (goalPublisher == null)
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            CancellationTokenSource linkedSource =
+            using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            return goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
+            await goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
         }
-
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAll(CancellationToken token = default)
         {
@@ -371,10 +370,20 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
+            return token == default
+                ? ReadAllImpl(channelReader.ReadAll(runningTs.Token))
+                : ReadAllWithToken(token);
+        }
+
+        IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllWithToken(CancellationToken token)
+        {
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-
-            return ReadAllImpl(channelReader.ReadAll(linkedSource.Token));
+            var source = channelReader!.ReadAll(linkedSource.Token);
+            foreach (var msg in ReadAllImpl(source))
+            {
+                yield return msg;
+            }
         }
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> TryReadAll()

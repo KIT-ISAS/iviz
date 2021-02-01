@@ -325,6 +325,7 @@ namespace Iviz.Roslib
             CancellationToken token = default)
         {
             RosClient client = new RosClient(masterUri, callerId, callerUri, namespaceOverride);
+
             try
             {
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
@@ -357,7 +358,6 @@ namespace Iviz.Roslib
                 client.RosMasterApi = new RosMasterApi(client.MasterUri, client.CallerId, client.CallerUri);
                 client.Parameters = new ParameterClient(client.MasterUri, client.CallerId, client.CallerUri);
             }
-
 
             Logger.LogFormat("** {0}: Initialized.", client);
 
@@ -1468,8 +1468,8 @@ namespace Iviz.Roslib
         public async Task CloseAsync(CancellationToken token = default)
         {
             const int timeoutInMs = 3000;
-            using var timeoutTokenSource = new CancellationTokenSource(timeoutInMs);
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutTokenSource.Token);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+            tokenSource.CancelAfter(timeoutInMs);
             var innerToken = tokenSource.Token;
 
             List<Task> tasks = new List<Task>();
@@ -1601,6 +1601,15 @@ namespace Iviz.Roslib
             CallService(serviceName, service, persistent, timeoutTs.Token);
         }
 
+        public TU CallService<TT, TU>(string serviceName, IRequest<TT, TU> request,
+            bool persistent = false, CancellationToken token = default)
+            where TT : IService, new() where TU : IResponse
+        {
+            TT service = new TT {Request = request};
+            CallService(serviceName, service, persistent, token);
+            return (TU) service.Response;
+        }        
+        
         /// <summary>
         /// Calls the given ROS service.
         /// </summary>
@@ -1665,14 +1674,14 @@ namespace Iviz.Roslib
                 if (persistent)
                 {
                     var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    serviceCaller.Start(serviceUri, persistent);
+                    serviceCaller.Start(serviceUri, persistent, token);
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     serviceCaller.Execute(service, token);
                 }
                 else
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    serviceCaller.Start(serviceUri, persistent);
+                    serviceCaller.Start(serviceUri, persistent, token);
                     serviceCaller.Execute(service, token);
                 }
             }
@@ -1697,12 +1706,22 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <exception cref="TaskCanceledException">Thrown if the timeout expired.</exception>
         /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-            int timeoutInMs = 5000) where T : IService
+        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
+            int timeoutInMs) where T : IService
         {
             using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
             await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
         }
+
+        public async Task<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
+            bool persistent = false, CancellationToken token = default)
+            where TT : IService, new() where TU : IResponse
+        {
+            TT service = new TT {Request = request};
+            await CallServiceAsync(serviceName, service, persistent, token);
+            return (TU) service.Response;
+        }
+
 
         /// <summary>
         /// Calls the given ROS service.
@@ -1715,7 +1734,7 @@ namespace Iviz.Roslib
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">Thrown if the token expired.</exception>
         /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
+        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
             CancellationToken token = default)
             where T : IService
         {
@@ -1822,10 +1841,10 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            async Task Wrapper(T x)
+            Task Wrapper(T x)
             {
                 callback(x);
-                await Task.CompletedTask;
+                return Task.CompletedTask;
             }
 
             ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
@@ -1845,6 +1864,20 @@ namespace Iviz.Roslib
 
             return true;
         }
+
+        public Task<bool> AdvertiseServiceAsync<T>(string serviceName, Action<T> callback,
+            CancellationToken token = default)
+            where T : IService, new()
+        {
+            Task Wrapper(T x)
+            {
+                callback(x);
+                return Task.CompletedTask;
+            }
+
+            return AdvertiseServiceAsync<T>(serviceName, Wrapper, token);
+        }
+
 
         /// <summary>
         /// Advertises the given service.

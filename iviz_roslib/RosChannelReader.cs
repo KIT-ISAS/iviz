@@ -131,7 +131,7 @@ namespace Iviz.Roslib
         {
             return GetEnumerator();
         }
-
+        
         IMessage IRosChannelReader.Read(CancellationToken token)
         {
             return Read(token);
@@ -281,7 +281,7 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public T Read(CancellationToken token = default)
+        public T  Read(CancellationToken token = default)
         {
             ThrowIfNotStarted();
             return messageQueue.Dequeue(token);
@@ -412,18 +412,20 @@ namespace Iviz.Roslib
         public async IAsyncEnumerable<T> ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token = default)
         {
+            ThrowIfNotStarted();
             while (true)
             {
-                yield return await ReadAsync(token);
+                yield return await messageQueue.DequeueAsync(token);
             }
         }
 
         async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token)
         {
+            ThrowIfNotStarted();
             while (true)
             {
-                yield return await ReadAsync(token);
+                yield return await messageQueue.DequeueAsync(token);
             }
         }
         

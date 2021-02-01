@@ -101,18 +101,8 @@ namespace Iviz.Roslib
 
             try
             {
-#if NET5_0
-                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token)
-                    .AsTask();
-#else
-                Task connectionTask = client.ConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port);
-#endif
-
-                if (await connectionTask.WaitFor(connectionTimeoutInMs, runningTs.Token).Caf() &&
-                    connectionTask.RanToCompletion())
-                {
-                    return client;
-                }
+                await client.TryConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token, connectionTimeoutInMs);
+                return client;
             }
             catch (Exception e)
             {
@@ -120,10 +110,10 @@ namespace Iviz.Roslib
                 {
                     Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
                 }
-            }
 
-            client.Dispose();
-            return null;
+                client.Dispose();
+                return null;
+            }
         }
 
         async Task<TcpClient?> KeepReconnecting()
@@ -172,7 +162,7 @@ namespace Iviz.Roslib
             };
         }
 
-        async Task SendHeader()
+        Task SendHeader()
         {
             string[] contents =
             {
@@ -184,7 +174,7 @@ namespace Iviz.Roslib
                 requestNoDelay ? "tcp_nodelay=1" : "tcp_nodelay=0"
             };
 
-            await Utils.WriteHeaderAsync(stream!, contents, runningTs.Token).Caf();
+            return Utils.WriteHeaderAsync(stream!, contents, runningTs.Token);
         }
 
 
@@ -216,7 +206,7 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            if (!await stream!.ReadChunkAsync(readBuffer, length, runningTs.Token))
+            if (!await stream!.ReadChunkAsync(readBuffer, length, runningTs.Token).Caf())
             {
                 return -1;
             }
@@ -396,6 +386,7 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                runningTs.Token.ThrowIfCancellationRequested();
                 manager.MessageCallback(message);
 
                 numReceived++;

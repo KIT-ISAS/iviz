@@ -89,32 +89,19 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token = default)
+        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token)
         {
             string remoteHostname = remoteUri.Host;
             int remotePort = remoteUri.Port;
-#if NET5_0
-            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort, token).AsTask();
-#else
-            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort);
-#endif
-            if (!await task.WaitFor(DefaultTimeoutInMs, token) || !task.RanToCompletion())
-            {
-                if (task.IsFaulted)
-                {
-                    await task; // rethrow
-                }
 
-                throw new TimeoutException($"{this}: Host {remoteHostname}:{remotePort} timed out");
-            }
-
+            await tcpClient.TryConnectAsync(remoteHostname, remotePort, token, DefaultTimeoutInMs);
             await ProcessHandshake(tcpClient.GetStream(), persistent, token);
         }
 
-        public void Start(Uri remoteUri, bool persistent)
+        public void Start(Uri remoteUri, bool persistent, CancellationToken token)
         {
             // just call the async version from sync
-            Task.Run(() => StartAsync(remoteUri, persistent)).WaitNoThrow(this);
+            Task.Run(() => StartAsync(remoteUri, persistent, token), token).WaitNoThrow(this);
         }
 
         async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)

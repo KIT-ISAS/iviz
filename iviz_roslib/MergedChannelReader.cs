@@ -16,10 +16,10 @@ namespace Iviz.Roslib
     /// <summary>
     /// A subscriber queue that merges two or more <see cref="RosChannelReader{T}"/>
     /// </summary>
-    public class MergedChannelReader : IEnumerable<IMessage>
+    public sealed class MergedChannelReader : IEnumerable<IMessage>
 #if !NETSTANDARD2_0
         , IAsyncEnumerable<IMessage>
-#endif
+#endif    
     {
         readonly IRosChannelReader[] sources;
 
@@ -53,107 +53,75 @@ namespace Iviz.Roslib
             }
         }
 
-        public IMessage Read(CancellationToken token = default)
-        {
-            return ReadWithIndex(token).msg;
-        }
-
-        public (IMessage msg, int id) ReadWithIndex(CancellationToken token = default)
-        {
-            using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-            Task[] tasks = sources
-                .Select(async queue => { await queue.WaitToReadAsync(linkedCts.Token); })
-                .ToArray();
-            int readyTask = Task.WaitAny(tasks, token);
-            linkedCts.Cancel();
-
-            IMessage msg = sources[readyTask].Read(token);
-            return (msg, readyTask);
-        }
-
-        public async Task<IMessage> ReadAsync(CancellationToken token = default)
-        {
-            return (await ReadWithIndexAsync(token)).msg;
-        }
-
-        public async Task<(IMessage msg, int index)> ReadWithIndexAsync(CancellationToken token = default)
-        {
-            using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-            Task<bool>[] tasks = sources.Select(queue => queue.WaitToReadAsync(linkedCts.Token)).ToArray();
-            Task<bool> readyTask = await Task.WhenAny(tasks);
-            linkedCts.Cancel();
-
-            for (int i = 0; i < tasks.Length; i++)
-            {
-                if (tasks[i] == readyTask)
-                {
-                    return (await sources[i].ReadAsync(token), i);
-                }
-            }
-
-            return default; // shouldn't happen
-        }
-
-        public IEnumerator<IMessage> GetEnumerator()
-        {
-            yield return Read();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         public IEnumerable<IMessage> ReadAll(CancellationToken token = default)
         {
             Task[] tasks = new Task[sources.Length];
 
+            for (int i = 0; i < sources.Length; i++)
+            {
+                tasks[i] = sources[i].WaitToReadAsync(token);
+            }
+
             while (true)
             {
-                using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-                for (int i = 0; i < sources.Length; i++)
+                int readyTaskId = Task.WaitAny(tasks, token);
+                var readyTask = (Task<bool>) tasks[readyTaskId];
+                if (readyTask.IsCanceled)
                 {
-                    tasks[i] = sources[i].WaitToReadAsync(linkedCts.Token);
+                    throw new TaskCanceledException(readyTask);
                 }
 
-                int readyTask = Task.WaitAny(tasks, token);
-                linkedCts.Cancel();
+                if (!readyTask.Result)
+                {
+                    throw new ObjectDisposedException($"Channel {readyTaskId} has been disposed!");
+                }
 
-                yield return sources[readyTask].Read(token);
+                yield return sources[readyTaskId].Read(token);
+                tasks[readyTaskId] = sources[readyTaskId].WaitToReadAsync(token);
             }
         }
 
         public IEnumerable<IMessage> TryReadAll()
         {
             return sources.SelectMany(source => source.TryReadAll());
-        }        
+        }
         
+        public IEnumerator<IMessage> GetEnumerator()
+        {
+            return ReadAll().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }        
+
 #if !NETSTANDARD2_0
         public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
         {
             Task<bool>[] tasks = new Task<bool>[sources.Length];
+            for (int i = 0; i < sources.Length; i++)
+            {
+                tasks[i] = sources[i].WaitToReadAsync(token);
+            }
 
             while (true)
             {
-                using CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
-                for (int i = 0; i < sources.Length; i++)
-                {
-                    tasks[i] = sources[i].WaitToReadAsync(linkedCts.Token);
-                }
-
                 Task<bool> readyTask = await Task.WhenAny(tasks);
-                linkedCts.Cancel();
-
                 for (int i = 0; i < tasks.Length; i++)
                 {
-                    if (tasks[i] == readyTask)
+                    if (tasks[i] != readyTask)
                     {
-                        yield return await sources[i].ReadAsync(token);
+                        continue;
                     }
+
+                    if (!await readyTask)
+                    {
+                        throw new ObjectDisposedException($"Channel {i} has been disposed!");
+                    }
+
+                    yield return await sources[i].ReadAsync(token);
+                    tasks[i] = sources[i].WaitToReadAsync(token);
                 }
             }
         }
@@ -163,5 +131,6 @@ namespace Iviz.Roslib
             return ReadAllAsync(token).GetAsyncEnumerator(token);
         }
 #endif
+
     }
 }

@@ -241,11 +241,6 @@ namespace Iviz.Roslib
             }
         }
 
-        public static bool IsAlive(this IRosPublisher t)
-        {
-            return !t.CancellationToken.IsCancellationRequested;
-        }
-
         static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)

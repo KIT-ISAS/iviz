@@ -179,8 +179,24 @@ namespace Iviz.Roslib
             ids.Clear();
             await manager.StopAsync().AwaitNoThrow(this);
             NumSubscribersChanged = null;
+            runningTs.Dispose();
         }
 
+        void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            runningTs.Cancel();
+            ids.Clear();
+            manager.Stop();
+            NumSubscribersChanged = null;
+            runningTs.Dispose();
+        }        
+        
         public string Advertise()
         {
             AssertIsAlive();
@@ -265,20 +281,6 @@ namespace Iviz.Roslib
             string newId = totalPublishers == 0 ? Topic : $"{Topic}-{totalPublishers}";
             totalPublishers++;
             return newId;
-        }
-
-        void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            runningTs.Cancel();
-            ids.Clear();
-            manager.Stop();
-            NumSubscribersChanged = null;
         }
 
         bool RemoveId(string topicId)

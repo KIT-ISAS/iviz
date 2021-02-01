@@ -120,6 +120,7 @@ namespace Iviz.Roslib
             disposed = true;
             keepGoing = false;
 
+            // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
             using (TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
             {
                 await client.ConnectAsync(IPAddress.Loopback, Uri.Port);

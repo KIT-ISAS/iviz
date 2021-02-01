@@ -67,7 +67,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPidResponse(response);
         }
 
-        object[]? MethodCall(string function, IEnumerable<Arg> args)
+        object[]? MethodCall(string function, Arg[] args)
         {
             object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -79,7 +79,7 @@ namespace Iviz.Roslib.XmlRpc
             return null;
         }
 
-        async Task<object[]?> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
+        async Task<object[]?> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
         {
             object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs, token).Caf();
             if (tmp is object[] result)

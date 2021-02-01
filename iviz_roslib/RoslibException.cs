@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     /// <summary>
     /// Thrown when the provided message type is not correct.
     /// </summary>
@@ -55,7 +55,7 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
@@ -109,7 +109,7 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     public class RosHandshakeException : RosRpcException
     {
         public RosHandshakeException(string message) : base(message)
@@ -123,44 +123,41 @@ namespace Iviz.Roslib
         public RosHandshakeException(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }    
-    
+    }
+
     public class RosServiceNotFoundException : RoslibException
     {
         public string ServiceName { get; }
         public string ErrorMessage { get; }
-        
-        public RosServiceNotFoundException(string service, string message) 
+
+        public RosServiceNotFoundException(string service, string message)
             : base($"Failed to call service {service}: {message}")
         {
             ServiceName = service;
             ErrorMessage = message;
         }
-        
-        public RosServiceNotFoundException(string service, string message, Exception innerException) 
+
+        public RosServiceNotFoundException(string service, string message, Exception innerException)
             : base($"Failed to call service {service}: {message}", innerException)
         {
             ServiceName = service;
             ErrorMessage = message;
         }
-        
-    }  
-    
+    }
+
     public class RosServiceCallFailed : RoslibException
     {
-        public RosServiceCallFailed(string message) : base(message)
-        {
-        }
+        public string ServiceName { get; }
+        public string ServerMessage { get; }
 
-        public RosServiceCallFailed()
+        public RosServiceCallFailed(string service, string message) : base(
+            $"Service call to '{service}' failed: {message}")
         {
+            ServiceName = service;
+            ServerMessage = message;
         }
+    }
 
-        public RosServiceCallFailed(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }      
-    
     public class RosInvalidPackageSizeException : RoslibException
     {
         public RosInvalidPackageSizeException(string message) : base(message)
@@ -174,8 +171,8 @@ namespace Iviz.Roslib
         public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }    
-    
+    }
+
     public class RosQueueOverflowException : RoslibException
     {
         public RosQueueOverflowException(string message) : base(message)
@@ -189,6 +186,5 @@ namespace Iviz.Roslib
         public RosQueueOverflowException(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }    
-    
+    }
 }

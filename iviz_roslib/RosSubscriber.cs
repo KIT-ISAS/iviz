@@ -146,6 +146,7 @@ namespace Iviz.Roslib
             callbacks = Array.Empty<Action<T>>();
             NumPublishersChanged = null;
             manager.Stop();
+            runningTs.Dispose();
         }
 
         public async Task DisposeAsync()
@@ -161,6 +162,7 @@ namespace Iviz.Roslib
             callbacks = Array.Empty<Action<T>>();
             NumPublishersChanged = null;
             await manager.StopAsync();
+            runningTs.Dispose();
         }
 
         public bool MessageTypeMatches(Type type)

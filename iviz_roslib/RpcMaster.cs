@@ -338,7 +338,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterServiceResponse(response);
         }
 
-        object[] MethodCall(string function, IEnumerable<Arg> args)
+        object[] MethodCall(string function, Arg[] args)
         {
             object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -349,7 +349,7 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
+        async Task<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
         {
             object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
                 .Caf();

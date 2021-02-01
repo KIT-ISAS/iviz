@@ -39,7 +39,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             value.ThrowIfEmpty();
-            return SetParam(key, value).Code == StatusCode.Success;
+            return SetParam(key, value).IsValid;
         }
 
         public async Task<bool> SetParameterAsync(string key, Arg value, CancellationToken token = default)
@@ -50,7 +50,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             value.ThrowIfEmpty();
-            return (await SetParamAsync(key, value, token).Caf()).Code == StatusCode.Success;
+            return (await SetParamAsync(key, value, token).Caf()).IsValid;
         }
 
         public bool GetParameter(string key, out object? value)
@@ -61,7 +61,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             var response = GetParam(key);
-            bool success = response.Code == StatusCode.Success;
+            bool success = response.IsValid;
             value = success ? response.ParameterValue : null;
             return success;
         }
@@ -75,7 +75,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             var response = await GetParamAsync(key, token).Caf();
-            bool success = response.Code == StatusCode.Success;
+            bool success = response.IsValid;
             return (success, success ? response.ParameterValue : null);
         }
 
@@ -109,7 +109,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return DeleteParam(key).Code == StatusCode.Success;
+            return DeleteParam(key).IsValid;
         }
 
         public async Task<bool> DeleteParameterAsync(string key, CancellationToken token = default)
@@ -119,7 +119,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await DeleteParamAsync(key, token).Caf()).Code == StatusCode.Success;
+            return (await DeleteParamAsync(key, token).Caf()).IsValid;
         }
 
         public bool HasParameter(string key)
@@ -149,7 +149,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return SubscribeParam(key).Code == StatusCode.Success;
+            return SubscribeParam(key).IsValid;
         }
 
         public async Task<bool> SubscribeParameterAsync(string key, CancellationToken token = default)
@@ -159,7 +159,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await SubscribeParamAsync(key, token).Caf()).Code == StatusCode.Success;
+            return (await SubscribeParamAsync(key, token).Caf()).IsValid;
         }
 
         public bool UnsubscribeParameter(string key)
@@ -169,7 +169,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return UnsubscribeParam(key).Code == StatusCode.Success;
+            return UnsubscribeParam(key).IsValid;
         }
 
         public async Task<bool> UnsubscribeParameterAsync(string key, CancellationToken token = default)
@@ -179,7 +179,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await UnsubscribeParamAsync(key, token).Caf()).Code == StatusCode.Success;
+            return (await UnsubscribeParamAsync(key, token).Caf()).IsValid;
         }
 
         DefaultResponse DeleteParam(string key)
@@ -199,7 +199,7 @@ namespace Iviz.Roslib.XmlRpc
         DefaultResponse SetParam(string key, Arg value)
         {
             Arg[] args = {CallerId, key, value};
-            object response = MethodCall( "setParam", args);
+            object response = MethodCall("setParam", args);
             return new DefaultResponse((object[]) response);
         }
 
@@ -213,7 +213,7 @@ namespace Iviz.Roslib.XmlRpc
         GetParamResponse GetParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = MethodCall( "getParam", args);
+            object response = MethodCall("getParam", args);
             return new GetParamResponse((object[]) response);
         }
 
@@ -270,7 +270,7 @@ namespace Iviz.Roslib.XmlRpc
         HasParamResponse HasParam(string key)
         {
             Arg[] args = {CallerId, key};
-            object response = MethodCall( "hasParam", args);
+            object response = MethodCall("hasParam", args);
             return new HasParamResponse((object[]) response);
         }
 
@@ -295,7 +295,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetParamNamesResponse((object[]) response);
         }
 
-        object[] MethodCall(string function, IEnumerable<Arg> args)
+        object[] MethodCall(string function, Arg[] args)
         {
             object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -306,9 +306,10 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
+        async Task<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
         {
-            object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
+            object tmp = await XmlRpcService
+                .MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
                 .Caf();
             if (tmp is object[] result)
             {
@@ -342,13 +343,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is string parameterValue))
-            {
-                MarkError();
-                return;
-            }
-
-            ParameterValue = parameterValue;
+            ParameterValue = a[2];
         }
     }
 
