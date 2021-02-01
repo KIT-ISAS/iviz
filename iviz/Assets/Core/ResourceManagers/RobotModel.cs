@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.Roslib;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using UnityEngine;
-using Iviz.Msgs.TrajectoryMsgs;
 using Iviz.XmlRpc;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
@@ -125,11 +123,15 @@ namespace Iviz.Displays
                 Metallic = metallic;
                 ApplyAnyValidConfiguration();
 
+                string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors} errors.";
                 Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count} " +
-                            $"links and {Joints.Count} joints.");
+                            $"links and {Joints.Count} joints. {errorStr}");
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
+                Logger.Error($"{this}: Robot building canceled");
+                Debug.Log(runningTs.IsCancellationRequested);
+                Debug.Log(e);
                 throw;
             }
             catch (Exception e)
@@ -165,6 +167,7 @@ namespace Iviz.Displays
         public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
 
         public bool IsStarting { get; private set; }
+        public int NumErrors { get; private set; }
 
         public bool OcclusionOnly
         {
@@ -276,7 +279,8 @@ namespace Iviz.Displays
 
                     if (info == null)
                     {
-                        Debug.Log($"{this}: Failed to retrieve '{uri}'");
+                        Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                        NumErrors++;
                         continue;
                     }
 

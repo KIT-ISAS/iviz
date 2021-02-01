@@ -20,10 +20,12 @@ namespace Iviz.Controllers
 
         ModelServer modelServer;
 #else
-        public const bool IsEnabled = false;
-        public const int NumPackages = 0;
-        public const bool IsFileSchemaEnabled = false;
+        public bool IsEnabled => false;
+        public int NumPackages => 0;
+        public bool IsFileSchemaEnabled => false;
+
 #endif
+
 
         public async Task Restart(bool enableFileSchema, CancellationToken token = default)
         {
@@ -113,8 +115,10 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
             modelServer?.Dispose();
             modelServer = null;
+#endif
         }
     }
 }

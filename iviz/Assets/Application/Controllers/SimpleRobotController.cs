@@ -439,6 +439,7 @@ namespace Iviz.Controllers
                     robotLoadingTask = null;
                     return;
                 case TaskStatus.Canceled:
+                    HelpText = "[Robot Task canceled.]";
                     robotLoadingTask = null;
                     return;
                 case TaskStatus.RanToCompletion:
