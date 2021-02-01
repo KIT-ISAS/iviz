@@ -29,7 +29,7 @@ namespace Iviz.Core
 
         public static float GameTime { get; private set; }
         
-        public static DateTime Now { get; private set; }
+        public static DateTime Now { get; private set; } = DateTime.Now;
 
         void Awake()
         {
