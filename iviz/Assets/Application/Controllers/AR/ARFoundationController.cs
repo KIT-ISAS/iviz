@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
@@ -51,7 +52,7 @@ namespace Iviz.Controllers
                 {
                     return "(No AR Subsystem)";
                 }
-                
+
                 string trackingState;
                 switch (arSession.subsystem.trackingState)
                 {
@@ -67,14 +68,14 @@ namespace Iviz.Controllers
                 }
 
                 string numPlanes =
-                    planeManager.trackables.count == 0 
-                        ? "Planes: None" 
+                    planeManager.trackables.count == 0
+                        ? "Planes: None"
                         : "Planes: " + planeManager.trackables.count;
 
                 return trackingState + "\n" + numPlanes;
             }
         }
-        
+
         public override OcclusionQualityType OcclusionQuality
         {
             get => base.OcclusionQuality;
@@ -106,8 +107,8 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
-        
+
+
         public override bool Visible
         {
             get => base.Visible;
@@ -121,6 +122,19 @@ namespace Iviz.Controllers
                 ArSet.Visible = value;
                 Settings.MainCamera = value ? arCamera : mainCamera;
                 canvas.worldCamera = Settings.MainCamera;
+
+                if (value)
+                {
+                    RenderSettings.ambientMode = AmbientMode.Flat;
+                }
+                else
+                {
+                    RenderSettings.ambientMode = AmbientMode.Trilight;
+                    if (Settings.SettingsManager != null)
+                    {
+                        Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
+                    }
+                }
             }
         }
 
@@ -430,26 +444,17 @@ namespace Iviz.Controllers
         }
 
 
-        void UpdateLights(in ARLightEstimationData lightEstimation)
+        static void UpdateLights(in ARLightEstimationData lightEstimation)
         {
-            arLight.intensity = 1;
-
-            if (lightEstimation.mainLightDirection.HasValue)
+            if (!lightEstimation.averageColorTemperature.HasValue || !lightEstimation.averageBrightness.HasValue)
             {
-                arLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+                return;
             }
 
-            if (lightEstimation.mainLightColor.HasValue)
-            {
-                arLight.color = lightEstimation.mainLightColor.Value;
-            }
-
-            if (lightEstimation.ambientSphericalHarmonics.HasValue)
-            {
-                var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
-                RenderSettings.ambientMode = AmbientMode.Skybox;
-                RenderSettings.ambientProbe = sphericalHarmonics.Value;
-            }
+            RenderSettings.ambientMode = AmbientMode.Flat;
+            RenderSettings.ambientLight =
+                Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value) *
+                lightEstimation.averageBrightness.Value;
         }
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)

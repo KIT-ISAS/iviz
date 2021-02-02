@@ -374,16 +374,6 @@ namespace Iviz.Controllers
             UpdateWorldPose(unityPose, mover);
         }
 
-        /*
-        void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
-        {
-            WorldPosition = unityPosition;
-            WorldAngle = angle;
-            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-            UpdateWorldPose(new Pose(unityPosition, rotation), mover);
-        }
-        */
-
         void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
         {
             WorldPosition = unityPosition;

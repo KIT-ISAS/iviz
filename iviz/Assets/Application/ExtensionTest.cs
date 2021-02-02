@@ -21,8 +21,6 @@ namespace Iviz.App
 {
     public class ExtensionTest : MonoBehaviour
     {
-        static RoslibConnection Connection => ConnectionManager.Connection;
-
         RobotModel robot;
         RobotModel planRobot;
 
@@ -34,6 +32,7 @@ namespace Iviz.App
         bool hasNewTrajectory;
         [CanBeNull] JointTrajectory newTrajectory;
 
+        /*
         void Awake()
         {
             // wait until the GUI finishes initializing
@@ -60,21 +59,23 @@ namespace Iviz.App
             // make TF frames invisible
             TfListener.Instance.FramesVisible = false;
         }
+        */
 
+        RosClient connectionClient;
+        
         // this gets called when we're connected to the master
-        async void OnConnectionStateChanged(ConnectionState state)
+        async void Start()
         {
-            if (state != ConnectionState.Connected)
-            {
-                return;
-            }
-
+            Uri masterUri = new Uri("http://141.3.59.5:11311");
+            Uri myUri = RosClient.TryGetCallerUriFor(masterUri, 7635) ?? RosClient.TryGetCallerUri(7635);
+            connectionClient = await RosClient.CreateAsync(masterUri, "/iviz_test", myUri); 
+            
             Debug.Log($"{this}: Connected!");
             while (true)
             {
                 // keep checking whether the moveit_test node is on
                 const string trajectoryService = "/moveit_test/calculate_trajectory";
-                var systemState = await Connection.GetSystemStateAsync();
+                var systemState = await connectionClient.GetSystemStateAsync();
                 bool hasService = systemState.Services.Any(service => service.Topic == trajectoryService);
                 if (hasService)
                 {
@@ -93,7 +94,7 @@ namespace Iviz.App
             // start listening to the joints topic
             // thes joints apply only for 'robot'. 
             jointsListener = new RosChannelReader<JointState>();
-            await jointsListener.StartAsync(Connection.Client, "/joint_states");
+            await jointsListener.StartAsync(connectionClient, "/joint_states");
             
             // tell Update() we're finished
             initialized = true;
@@ -138,7 +139,7 @@ namespace Iviz.App
             };
             
             Debug.Log($"{this}: Setting target pose.");
-            await Connection.Client.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true).AwaitNoThrow(this);
+            await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true).AwaitNoThrow(this);
             
             if (srv.Response.Success)
             {
