@@ -285,7 +285,7 @@ namespace Iviz.XmlRpc
             {
                 throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
-
+            
             return ProcessResponse(inData);
         }
 
@@ -301,7 +301,7 @@ namespace Iviz.XmlRpc
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, Arg[] args,
-            int timeoutInMs = 2000)
+            int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (remoteUri is null)
             {
@@ -324,7 +324,7 @@ namespace Iviz.XmlRpc
             using HttpRequest request = new HttpRequest(callerUri, remoteUri);
             try
             {
-                request.Start(timeoutInMs);
+                request.Start(timeoutInMs, token);
                 inData = request.Request(outData, timeoutInMs);
             }
             catch (OperationCanceledException)
