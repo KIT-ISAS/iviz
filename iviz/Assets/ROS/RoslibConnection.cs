@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace Iviz.Ros
         public bool Connected => client != null;
 
         [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
-        
+
         [CanBeNull]
         public Uri MasterUri
         {
@@ -150,7 +151,7 @@ namespace Iviz.Ros
                     {
                         ParseHostsParam(hosts);
                     }
-                    
+
                     Core.Logger.Debug("*** ReAdvertising...");
                     await Task.WhenAll(publishersByTopic.Values.Select(
                         topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)));
@@ -563,6 +564,11 @@ namespace Iviz.Ros
             if (srv == null)
             {
                 throw new ArgumentNullException(nameof(srv));
+            }
+
+            if (client == null || connectionTs.IsCancellationRequested)
+            {
+                return false;
             }
 
             bool hasClient = false;
