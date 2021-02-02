@@ -88,7 +88,7 @@ namespace Iviz.Core
 
         public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
         {
-            var str = new StringBuilder();
+            var str = new StringBuilder(100);
             str.Append("<b>[")
                 .AppendFormat("{0:HH:mm:ss}", GameThread.Now)
                 .Append("]</b> ")
@@ -96,7 +96,7 @@ namespace Iviz.Core
 
             if (e == null)
             {
-                str.AppendLine().Append($"<color=red>→ ").Append(NullException).Append("</color>");
+                str.AppendLine().Append($"<color=red>→ " + NullException + "</color>");
             }
             else
             {
@@ -142,17 +142,9 @@ namespace Iviz.Core
             }
         }
 
-        /*
-        public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
-        {
-            ExternalImpl(msg, e, file, line);
-        }
-        */
-
         static void ExternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, string file, int line)
         {
-            var str = new StringBuilder();
+            var str = new StringBuilder(100);
             str.Append(msg ?? NullMessage);
 
             if (e == null)

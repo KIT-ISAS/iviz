@@ -23,7 +23,8 @@ namespace Iviz.Ros
         static RoslibConnection connection;
 
         Listener<Log> logListener;
-        public static event Action<Log> LogMessageArrived;
+        public delegate void LogDelegate(in Log log);
+        public static event LogDelegate LogMessageArrived;
 
 
         long frameBandwidthDown;

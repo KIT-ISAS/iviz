@@ -23,7 +23,8 @@ namespace Iviz.App
         }
 
         const int MaxMessageLength = 250;
-        const int MaxMessages = 50;
+        // TMP does not have a limit of 65000 but it's a nice threshold anyway
+        const int MaxMessages = 65000 / 4 / MaxMessageLength; 
 
         const string AllString = "[All]";
         const string NoneString = "[None]";
@@ -114,7 +115,7 @@ namespace Iviz.App
             queueIsDirty = true;
         }
 
-        void HandleMessage(Log log)
+        void HandleMessage(in Log log)
         {
             if (log.Name == ConnectionManager.MyId)
             {

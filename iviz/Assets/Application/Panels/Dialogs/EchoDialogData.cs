@@ -28,17 +28,17 @@ namespace Iviz.App
 
         class TopicEntry : IComparable<TopicEntry>
         {
-            [CanBeNull] public string Topic { get; }
+            [NotNull] public string Topic { get; }
             [CanBeNull] public string RosMsgType { get; }
             [NotNull] public Type CsType { get; }
             [NotNull] public string Description { get; }
 
             public TopicEntry()
             {
-                Topic = null;
+                Topic = "";
                 RosMsgType = null;
                 CsType = typeof(object);
-                Description = $"<color=grey>(None)</color>";
+                Description = "<color=grey>(None)</color>";
             }
 
             public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
@@ -54,9 +54,9 @@ namespace Iviz.App
 
             public int CompareTo(TopicEntry other)
             {
-                if (ReferenceEquals(this, other)) return 0;
-                if (ReferenceEquals(null, other)) return 1;
-                return string.Compare(Topic, other.Topic, StringComparison.Ordinal);
+                return ReferenceEquals(this, other) 
+                    ? 0 
+                    : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
             }
         }
 
@@ -198,7 +198,7 @@ namespace Iviz.App
 
             messageBuffer.Length = 0;
 
-            (string time, IMessage msg)[] messages = messageQueue.ToArray();
+            var messages = messageQueue.ToArray();
             foreach ((string time, IMessage msg) in messages)
             {
                 string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
