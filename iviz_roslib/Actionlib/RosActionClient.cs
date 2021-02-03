@@ -335,8 +335,27 @@ namespace Iviz.Roslib.Actionlib
 
         public void WaitForServer(int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            WaitForServer(tokenSource.Token);
+            if (goalPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
+
+            try
+            {
+                using CancellationTokenSource linkedSource =
+                    CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
+                linkedSource.CancelAfter(timeoutInMs);
+                goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
+            }
+            catch (OperationCanceledException e)
+            {
+                if (e.CancellationToken == runningTs.Token)
+                {
+                    throw new ObjectDisposedException("Client was disposed.");
+                }
+
+                throw new TimeoutException("Wait for server timed out");
+            }
         }
 
         public void WaitForServer(CancellationToken token = default)

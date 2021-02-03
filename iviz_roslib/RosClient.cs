@@ -267,7 +267,7 @@ namespace Iviz.Roslib
                     throw;
                 }
 
-                throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
+                throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
             try
@@ -277,7 +277,7 @@ namespace Iviz.Roslib
             }
             catch (SocketException e)
             {
-                throw new UriBindingException($"Failed to bind to local URI '{callerUri}'", e);
+                throw new RosUriBindingException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
             // Start the XmlRpc server.
@@ -333,7 +333,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                throw new ConnectionException($"Failed to contact the master URI '{masterUri}'", e);
+                throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
             try
@@ -343,7 +343,7 @@ namespace Iviz.Roslib
             }
             catch (SocketException e)
             {
-                throw new UriBindingException($"Failed to bind to local URI '{callerUri}'", e);
+                throw new RosUriBindingException($"Failed to bind to local URI '{callerUri}'", e);
             }
 
             client.listener.Start();
@@ -609,7 +609,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
+                throw new RosConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
         }
 
@@ -645,7 +645,7 @@ namespace Iviz.Roslib
                     throw;
                 }
 
-                throw new ConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
+                throw new RosConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
         }
 
@@ -663,7 +663,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                throw new UnreachableUriException($"The given own uri '{CallerUri}' is not reachable.", e);
+                throw new RosUnreachableUriException($"The given own uri '{CallerUri}' is not reachable.", e);
             }
 
             static int GetProcessId()
@@ -682,7 +682,7 @@ namespace Iviz.Roslib
             }
             else if (response.Pid != GetProcessId())
             {
-                throw new UnreachableUriException(
+                throw new RosUnreachableUriException(
                     $"The given own uri '{CallerUri}' appears to belong to another node.");
             }
         }
@@ -800,7 +800,7 @@ namespace Iviz.Roslib
             }
 
             RosSubscriber<T>? newSubscriber = baseSubscriber as RosSubscriber<T>;
-            subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+            subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
                 $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
             return subscriber.Subscribe(callback);
         }
@@ -845,20 +845,20 @@ namespace Iviz.Roslib
                 MethodInfo? method = baseMethod?.MakeGenericMethod(msgType);
                 if (method == null)
                 {
-                    throw new InvalidMessageTypeException("Type is not a message object");
+                    throw new RosInvalidMessageTypeException("Type is not a message object");
                 }
 
                 object? subscriberObj = method.Invoke(this, flags, null,
                     new object[] {resolvedTopic, requestNoDelay}, BuiltIns.Culture);
 
                 subscriber = (IRosSubscriber?) subscriberObj ??
-                             throw new InvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
+                             throw new RosInvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
             }
             else
             {
                 if (!baseSubscriber.MessageTypeMatches(msgType))
                 {
-                    throw new InvalidMessageTypeException(
+                    throw new RosInvalidMessageTypeException(
                         $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
                 }
 
@@ -894,7 +894,7 @@ namespace Iviz.Roslib
             }
 
             var newSubscriber = baseSubscriber as RosSubscriber<T>;
-            RosSubscriber<T> subscriber = newSubscriber ?? throw new InvalidMessageTypeException(
+            RosSubscriber<T> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
                 $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
             return (subscriber.Subscribe(callback), subscriber);
         }
@@ -1078,7 +1078,7 @@ namespace Iviz.Roslib
             else
             {
                 var newPublisher = basePublisher as RosPublisher<T>;
-                publisher = newPublisher ?? throw new InvalidMessageTypeException(
+                publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
                     $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
             }
 
@@ -1112,7 +1112,7 @@ namespace Iviz.Roslib
             else
             {
                 var newPublisher = basePublisher as RosPublisher<T>;
-                publisher = newPublisher ?? throw new InvalidMessageTypeException(
+                publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
                     $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
             }
 
@@ -1141,18 +1141,18 @@ namespace Iviz.Roslib
                 MethodInfo? method = baseMethod?.MakeGenericMethod(msgType);
                 if (method == null)
                 {
-                    throw new InvalidMessageTypeException($"Type {msgType} is not a message object");
+                    throw new RosInvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
                 object? publisherObj = method.Invoke(this, flags, null, new object[] {resolvedTopic}, BuiltIns.Culture);
                 publisher = (IRosPublisher?) publisherObj ??
-                            throw new InvalidMessageTypeException("Failed to call 'CreatePublisher'!");
+                            throw new RosInvalidMessageTypeException("Failed to call 'CreatePublisher'!");
             }
             else
             {
                 if (!basePublisher.MessageTypeMatches(msgType))
                 {
-                    throw new InvalidMessageTypeException(
+                    throw new RosInvalidMessageTypeException(
                         $"Type {msgType} does not match existing publisher type {basePublisher.TopicType}.");
                 }
 
@@ -1180,14 +1180,14 @@ namespace Iviz.Roslib
                 MethodInfo? method = baseMethod?.MakeGenericMethod(msgType);
                 if (method == null)
                 {
-                    throw new InvalidMessageTypeException($"Type {msgType} is not a message object");
+                    throw new RosInvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
                 object? result = method.Invoke(this, flags, null, new object[] {resolvedTopic, token},
                     BuiltIns.Culture);
                 if (result == null)
                 {
-                    throw new InvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
+                    throw new RosInvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
                 }
 
                 Task<IRosPublisher> task = (Task<IRosPublisher>) result;
@@ -1197,7 +1197,7 @@ namespace Iviz.Roslib
             {
                 if (!basePublisher.MessageTypeMatches(msgType))
                 {
-                    throw new InvalidMessageTypeException(
+                    throw new RosInvalidMessageTypeException(
                         $"Type {msgType} does not match existing publisher type {basePublisher.TopicType}.");
                 }
 
@@ -1608,8 +1608,8 @@ namespace Iviz.Roslib
             TT service = new TT {Request = request};
             CallService(serviceName, service, persistent, token);
             return (TU) service.Response;
-        }        
-        
+        }
+
         /// <summary>
         /// Calls the given ROS service.
         /// </summary>
@@ -1631,7 +1631,7 @@ namespace Iviz.Roslib
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
-                    throw new InvalidMessageTypeException(
+                    throw new RosInvalidMessageTypeException(
                         $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
                         "does not match the new given type.");
                 }
@@ -1710,7 +1710,14 @@ namespace Iviz.Roslib
             int timeoutInMs) where T : IService
         {
             using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
-            await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
+            try
+            {
+                await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token).Caf();
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException("Call to '" + serviceName + "' timed out");
+            }
         }
 
         public async Task<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
@@ -1718,7 +1725,7 @@ namespace Iviz.Roslib
             where TT : IService, new() where TU : IResponse
         {
             TT service = new TT {Request = request};
-            await CallServiceAsync(serviceName, service, persistent, token);
+            await CallServiceAsync(serviceName, service, persistent, token).Caf();
             return (TU) service.Response;
         }
 
@@ -1744,7 +1751,7 @@ namespace Iviz.Roslib
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
-                    throw new InvalidMessageTypeException(
+                    throw new RosInvalidMessageTypeException(
                         $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
                         "does not match the new given type.");
                 }
@@ -1754,7 +1761,7 @@ namespace Iviz.Roslib
                 {
                     try
                     {
-                        await existingReceiver.ExecuteAsync(service, token);
+                        await existingReceiver.ExecuteAsync(service, token).Caf();
                     }
                     catch (Exception e)
                     {
@@ -1818,7 +1825,7 @@ namespace Iviz.Roslib
 
             if (!(existingSender is ServiceRequestManager<T>))
             {
-                throw new InvalidMessageTypeException(
+                throw new RosInvalidMessageTypeException(
                     $"Existing advertised service type {existingSender.ServiceType} for {serviceName} does not match the given type.");
             }
 

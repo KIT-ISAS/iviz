@@ -23,17 +23,17 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when the provided message type is not correct.
     /// </summary>
-    public class InvalidMessageTypeException : RoslibException
+    public class RosInvalidMessageTypeException : RoslibException
     {
-        public InvalidMessageTypeException(string message) : base(message)
+        public RosInvalidMessageTypeException(string message) : base(message)
         {
         }
 
-        public InvalidMessageTypeException()
+        public RosInvalidMessageTypeException()
         {
         }
 
-        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
+        public RosInvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -41,17 +41,17 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
-    public class ConnectionException : RoslibException
+    public class RosConnectionException : RoslibException
     {
-        public ConnectionException(string message, Exception innerException) : base(message, innerException)
+        public RosConnectionException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public ConnectionException()
+        public RosConnectionException()
         {
         }
 
-        public ConnectionException(string message) : base(message)
+        public RosConnectionException(string message) : base(message)
         {
         }
     }
@@ -59,17 +59,17 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
-    public class UriBindingException : ConnectionException
+    public class RosUriBindingException : RosConnectionException
     {
-        public UriBindingException(string message, Exception innerException) : base(message, innerException)
+        public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public UriBindingException()
+        public RosUriBindingException()
         {
         }
 
-        public UriBindingException(string message) : base(message)
+        public RosUriBindingException(string message) : base(message)
         {
         }
     }
@@ -77,17 +77,17 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when the uri provided for the caller (this node) is not reachable.
     /// </summary>
-    public class UnreachableUriException : RoslibException
+    public class RosUnreachableUriException : RoslibException
     {
-        public UnreachableUriException(string message) : base(message)
+        public RosUnreachableUriException(string message) : base(message)
         {
         }
 
-        public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
+        public RosUnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public UnreachableUriException()
+        public RosUnreachableUriException()
         {
         }
     }
@@ -187,4 +187,22 @@ namespace Iviz.Roslib
         {
         }
     }
+    
+    /// <summary>
+    /// Thrown when an error happened during the connection.
+    /// </summary>
+    public class RosServiceRequestTimeout : RoslibException
+    {
+        public RosServiceRequestTimeout(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public RosServiceRequestTimeout()
+        {
+        }
+
+        public RosServiceRequestTimeout(string message) : base(message)
+        {
+        }
+    }    
 }

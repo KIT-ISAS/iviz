@@ -12,7 +12,14 @@ namespace Iviz.Roslib
         public static void WaitForService(this RosClient client, string service, int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            client.WaitForService(service, tokenSource.Token);
+            try
+            {
+                client.WaitForService(service, tokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait for service '{service}' timed out");
+            }
         }
 
         public static void WaitForService(this RosClient client, string service, CancellationToken token = default)
@@ -64,7 +71,14 @@ namespace Iviz.Roslib
         public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            publisher.WaitForAnySubscriber(tokenSource.Token);
+            try
+            {
+                publisher.WaitForAnySubscriber(tokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait for subscriber timed out");
+            }
         }
 
         public static void WaitForAnySubscriber(this IRosPublisher publisher, CancellationToken token = default)
@@ -97,7 +111,14 @@ namespace Iviz.Roslib
         public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            subscriber.WaitForAnyPublisher(tokenSource.Token);
+            try
+            {
+                subscriber.WaitForAnyPublisher(tokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException("Wait for publisher timed out");
+            }
         }
 
         public static void WaitForAnyPublisher(this IRosSubscriber subscriber, CancellationToken token = default)
@@ -120,7 +141,7 @@ namespace Iviz.Roslib
 
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
-            
+
             while (subscriber.GetState().Receivers.Count == 0)
             {
                 await Task.Delay(200, linkedSource.Token);
@@ -130,7 +151,14 @@ namespace Iviz.Roslib
         public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            client.WaitForTopic(topic, tokenSource.Token);
+            try
+            {
+                client.WaitForTopic(topic, tokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait for topic '{topic}' timed out");
+            }
         }
 
         public static void WaitForTopic(this RosClient client, string topic, CancellationToken token = default)

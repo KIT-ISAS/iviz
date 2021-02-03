@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -87,6 +88,17 @@ namespace Iviz.XmlRpc
             return task.ConfigureAwait(false);
         }
 
+#if !NETSTANDARD2_0
+        public static ConfiguredValueTaskAwaitable Caf(this ValueTask task)
+        {
+            return task.ConfigureAwait(false);
+        }
+
+        public static ConfiguredValueTaskAwaitable<T> Caf<T>(this ValueTask<T> task)
+        {
+            return task.ConfigureAwait(false);
+        }
+#endif
 
         public static void WaitNoThrow(this Task? t, object caller)
         {
@@ -220,15 +232,37 @@ namespace Iviz.XmlRpc
             return default;
         }
 
-        public static void ThrowIfCanceled(this CancellationToken t)
+        public static void ThrowIfCanceled(this CancellationToken t, Task? task = null)
         {
             if (t.IsCancellationRequested)
             {
-                throw new TaskCanceledException();
+                throw new TaskCanceledException(task);
             }
         }
     }
 
+    public static class StreamUtils
+    {
+        internal static async Task WriteChunkAsync(this StreamWriter writer, string text,
+            CancellationToken token, int timeoutInMs = -1)
+        {
+#if !NETSTANDARD2_0
+            await writer.WriteAsync(text.AsMemory(), token).Caf();
+#else
+            Task timeoutTask = Task.Delay(timeoutInMs, token);
+            Task writeTask = writer.WriteAsync(text);
+            Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
+            if (resultTask == timeoutTask)
+            {
+                token.ThrowIfCanceled(timeoutTask);
+                throw new TimeoutException($"Writing operation timed out");
+            }
+
+            await writeTask.Caf();
+#endif
+        }        
+    }
+    
     public static class ConnectionUtils
     {
         public static readonly Dictionary<string, string> GlobalResolver = new Dictionary<string, string>();
@@ -259,7 +293,7 @@ namespace Iviz.XmlRpc
 #else
             Task connectionTask = client.ConnectAsync(hostname, port);
             Task timeoutTask = Task.Delay(timeoutInMs, token);
-            Task resultTask = await Task.WhenAny(timeoutTask, connectionTask);
+            Task resultTask = await Task.WhenAny(timeoutTask, connectionTask).Caf();
             if (resultTask == timeoutTask)
             {
                 if (token.IsCancellationRequested)
@@ -270,7 +304,7 @@ namespace Iviz.XmlRpc
                 throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
             }
 
-            await connectionTask;
+            await connectionTask.Caf();
 #endif
         }
     }

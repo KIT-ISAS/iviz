@@ -164,11 +164,10 @@ namespace Iviz.Roslib
             uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
 
             var stream = tcpClient.GetStream();
-            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4, token).Caf();
-            await stream.WriteAsync(writeBuffer, 0, (int) sendLength, token).Caf();
+            await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token).Caf();
+            await stream.WriteChunkAsync(writeBuffer, (int) sendLength, token).Caf();
 
-            int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1, token);
-            if (rcvLengthH == 0)
+            if (!await stream.ReadChunkAsync(readBuffer, 1, token))
             {
                 throw new IOException("Partner closed the connection");
             }

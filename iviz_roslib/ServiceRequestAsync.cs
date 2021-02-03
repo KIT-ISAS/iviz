@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -29,10 +30,12 @@ namespace Iviz.Roslib
         readonly Task task;
         readonly TcpClient tcpClient;
 
-        bool keepRunning;
+        bool KeepRunning => !runningTs.IsCancellationRequested;
         string? remoteCallerId;
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
+
+        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
         internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
             Func<TService, Task> callback)
@@ -43,8 +46,7 @@ namespace Iviz.Roslib
             this.remoteEndPoint = remoteEndPoint;
             this.serviceInfo = serviceInfo;
 
-            keepRunning = true;
-            task = Task.Run(Run);
+            task = Task.Run(Run, runningTs.Token);
         }
 
         public bool IsAlive => !task.IsCompleted;
@@ -52,16 +54,17 @@ namespace Iviz.Roslib
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Hostname;
 
-        public Task StopAsync()
+        public async Task StopAsync()
         {
-            keepRunning = false;
             tcpClient.Close();
-            return task.WaitForWithTimeout(2000).AwaitNoThrow(this);
+            runningTs.Cancel();
+            await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
+            runningTs.Dispose();
         }
 
         async Task<int> ReceivePacket()
         {
-            if (!await stream.ReadChunkAsync(readBuffer, 4))
+            if (!await stream.ReadChunkAsync(readBuffer, 4, runningTs.Token))
             {
                 return -1;
             }
@@ -77,7 +80,7 @@ namespace Iviz.Roslib
                 readBuffer = new byte[length + BufferSizeIncrease];
             }
 
-            if (!await stream.ReadChunkAsync(readBuffer, length))
+            if (!await stream.ReadChunkAsync(readBuffer, length, runningTs.Token))
             {
                 return -1;
             }
@@ -203,7 +206,7 @@ namespace Iviz.Roslib
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
-                keepRunning = false;
+                runningTs.Cancel();
                 return;
             }
 
@@ -220,7 +223,7 @@ namespace Iviz.Roslib
 
             byte[] statusByte = {0};
 
-            while (keepRunning)
+            while (KeepRunning)
             {
                 try
                 {
@@ -240,7 +243,16 @@ namespace Iviz.Roslib
 
                     try
                     {
-                        await callback(serviceMsg).Caf();
+                        Task userTask = callback(serviceMsg);
+                        Task timeoutTask = Task.Delay(10000, runningTs.Token);
+                        Task resultTask = await Task.WhenAny(userTask, timeoutTask);
+                        if (resultTask == timeoutTask)
+                        {
+                            runningTs.Token.ThrowIfCanceled(timeoutTask);
+                            throw new RosServiceRequestTimeout("User callback took too long!");
+                        }
+
+                        await userTask;
                         serviceMsg.Response.RosValidate();
                         errorInResponse = false;
                     }
@@ -273,17 +285,18 @@ namespace Iviz.Roslib
 
                         uint sendLength = Buffer.Serialize(responseMsg, writeBuffer);
 
-                        await stream.WriteAsync(statusByte, 0, 1).Caf();
-                        await stream.WriteAsync(ToLengthArray(sendLength), 0, 4).Caf();
-                        await stream.WriteAsync(writeBuffer, 0, (int) sendLength).Caf();
+                        await stream.WriteChunkAsync(statusByte, 1, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(ToLengthArray(sendLength), 4, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(writeBuffer, (int) sendLength, runningTs.Token).Caf();
                     }
                     else
                     {
-                        await stream.WriteAsync(statusByte, 0, 1).Caf();
-                        await stream.WriteAsync(BitConverter.GetBytes(errorMessage.Length), 0, 4).Caf();
+                        await stream.WriteChunkAsync(statusByte, 1, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token)
+                            .Caf();
 
                         byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
-                        await stream.WriteAsync(tmpBuffer, 0, tmpBuffer.Length).Caf();
+                        await stream.WriteChunkAsync(tmpBuffer, tmpBuffer.Length, runningTs.Token).Caf();
                     }
                 }
                 catch (Exception e)
