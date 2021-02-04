@@ -137,12 +137,12 @@ namespace Iviz.MsgsGen
             {
                 case NotAnArray:
                     result = isInStruct
-                        ? $"public {CsClassName} {CsFieldName} {{ get; }}"
+                        ? $"public {CsClassName} {CsFieldName};"
                         : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
                     break;
                 case DynamicSizeArray:
                     result = isInStruct
-                        ? $"public {CsClassName}[] {CsFieldName} {{ get; }}"
+                        ? $"public {CsClassName}[] {CsFieldName};"
                         : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
                     break;
                 default:

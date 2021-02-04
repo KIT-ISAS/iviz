@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Transform")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
+    public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
-        [DataMember (Name = "translation")] public Vector3 Translation { get; }
-        [DataMember (Name = "rotation")] public Quaternion Rotation { get; }
+        [DataMember (Name = "translation")] public Vector3 Translation;
+        [DataMember (Name = "rotation")] public Quaternion Rotation;
     
         /// <summary> Explicit constructor. </summary>
         public Transform(in Vector3 Translation, in Quaternion Rotation)
@@ -84,8 +84,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Transform operator *(in Transform t, in Transform q) =>
                 new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
         public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;
+        public static Point operator *(in Transform t, in Point q) => t.Rotation * q + t.Translation;
+        public static Vector3 operator *(in Transform t, in (double X, double Y, double Z) q) => t * (Vector3) q;
         public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
         public static Transform RotateAround(in Quaternion q, in Point p) => new Transform(p - q * p, q);
-        public static implicit operator Transform((Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
+        public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
     }
 }

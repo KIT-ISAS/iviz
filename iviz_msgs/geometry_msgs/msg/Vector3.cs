@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Vector3")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
+    public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -15,9 +15,9 @@ namespace Iviz.Msgs.GeometryMsgs
         // generic rigid transformation to a Vector3, tf2 will only apply the
         // rotation). If you want your data to be translatable too, use the
         // geometry_msgs/Point message instead.
-        [DataMember (Name = "x")] public double X { get; }
-        [DataMember (Name = "y")] public double Y { get; }
-        [DataMember (Name = "z")] public double Z { get; }
+        [DataMember (Name = "x")] public double X;
+        [DataMember (Name = "y")] public double Y;
+        [DataMember (Name = "z")] public double Z;
     
         /// <summary> Explicit constructor. </summary>
         public Vector3(double X, double Y, double Z)
@@ -101,6 +101,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
         public readonly Vector3 Normalized => this / Norm;
         public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
-        public static implicit operator Vector3((double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);
+        public static implicit operator Vector3(in (double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);
     }
 }

@@ -801,7 +801,7 @@ namespace Iviz.MsgsGen
                             $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
                     }
 
-                    if (!variable.IsArray && variable.RosClassName != "string")
+                    if (!variable.IsArray && !variable.ClassIsStruct && variable.RosClassName != "string")
                     {
                         lines.Add($"    {variable.CsFieldName}.RosValidate();");
                     }
@@ -916,8 +916,8 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
-                    ? $"public unsafe readonly struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>"
-                    : $"public readonly struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>");
+                    ? $"public unsafe struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>"
+                    : $"public struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>");
             }
             else
             {

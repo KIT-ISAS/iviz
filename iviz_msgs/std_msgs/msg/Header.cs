@@ -7,21 +7,21 @@ namespace Iviz.Msgs.StdMsgs
 {
     [Preserve, DataContract (Name = "std_msgs/Header")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Header : IMessage, System.IEquatable<Header>, IDeserializable<Header>
+    public struct Header : IMessage, System.IEquatable<Header>, IDeserializable<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
         // in a particular coordinate frame.
         // 
         // sequence ID: consecutively increasing ID 
-        [DataMember (Name = "seq")] public uint Seq { get; }
+        [DataMember (Name = "seq")] public uint Seq;
         //Two-integer timestamp that is expressed as:
         // * stamp.sec: seconds (stamp_secs) since epoch (in Python the variable is called 'secs')
         // * stamp.nsec: nanoseconds since stamp_secs (in Python the variable is called 'nsecs')
         // time-handling sugar is provided by the client library
-        [DataMember (Name = "stamp")] public time Stamp { get; }
+        [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
-        [DataMember (Name = "frame_id")] public string FrameId { get; }
+        [DataMember (Name = "frame_id")] public string FrameId;
     
         /// <summary> Explicit constructor. </summary>
         public Header(uint Seq, time Stamp, string FrameId)

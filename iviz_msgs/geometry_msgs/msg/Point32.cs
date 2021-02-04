@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Point32")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
+    public struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -16,9 +16,9 @@ namespace Iviz.Msgs.GeometryMsgs
         //
         // This message is designed to take up less space when sending
         // lots of points at once, as in the case of a PointCloud.  
-        [DataMember (Name = "x")] public float X { get; }
-        [DataMember (Name = "y")] public float Y { get; }
-        [DataMember (Name = "z")] public float Z { get; }
+        [DataMember (Name = "x")] public float X;
+        [DataMember (Name = "y")] public float Y;
+        [DataMember (Name = "z")] public float Z;
     
         /// <summary> Explicit constructor. </summary>
         public Point32(float X, float Y, float Z)

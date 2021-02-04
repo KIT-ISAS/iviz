@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/TransformStamped")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct TransformStamped : IMessage, System.IEquatable<TransformStamped>, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessage, System.IEquatable<TransformStamped>, IDeserializable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -15,9 +15,9 @@ namespace Iviz.Msgs.GeometryMsgs
         // This message is mostly used by the 
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; }
-        [DataMember (Name = "child_frame_id")] public string ChildFrameId { get; } // the frame id of the child frame
-        [DataMember (Name = "transform")] public Transform Transform { get; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "child_frame_id")] public string ChildFrameId; // the frame id of the child frame
+        [DataMember (Name = "transform")] public Transform Transform;
     
         /// <summary> Explicit constructor. </summary>
         public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)

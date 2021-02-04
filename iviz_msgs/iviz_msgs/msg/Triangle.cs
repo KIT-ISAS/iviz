@@ -7,11 +7,11 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
+    public struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {
-        [DataMember (Name = "a")] public uint A { get; }
-        [DataMember (Name = "b")] public uint B { get; }
-        [DataMember (Name = "c")] public uint C { get; }
+        [DataMember (Name = "a")] public uint A;
+        [DataMember (Name = "b")] public uint B;
+        [DataMember (Name = "c")] public uint C;
     
         /// <summary> Explicit constructor. </summary>
         public Triangle(uint A, uint B, uint C)

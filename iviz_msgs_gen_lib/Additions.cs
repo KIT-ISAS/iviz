@@ -20,7 +20,7 @@ namespace Iviz.MsgsGen
                 "public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);",
                 "public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);",
                 "public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);",
-                "public static implicit operator Point((double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);",
+                "public static implicit operator Point(in (double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);",
             },
 
             ["geometry_msgs/Vector3"] = new[]
@@ -42,7 +42,7 @@ namespace Iviz.MsgsGen
                 "public readonly double Norm => System.Math.Sqrt(SquaredNorm);",
                 "public readonly Vector3 Normalized => this / Norm;",
                 "public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
-                "public static implicit operator Vector3((double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);",
+                "public static implicit operator Vector3(in (double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);",
             },
             
             ["geometry_msgs/Quaternion"] = new[]
@@ -50,12 +50,14 @@ namespace Iviz.MsgsGen
                 "public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);", 
                 "public static readonly Quaternion Identity = (0, 0, 0, 1);", 
                 "public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;",
-                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);",
+                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q.XYZ, q.W, v);",
+                "public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;",
                 "public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;",
                 "public readonly Quaternion Normalized => Extensions.Normalize(this);",
-                "public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);",
-                "public static implicit operator Quaternion((Vector3 XYZ, double W) p) => new Quaternion(p.XYZ.X, p.XYZ.Y, p.XYZ.Z, p.W);",
-                "public static Quaternion AngleAxis(double angleInRad, Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);",            
+                "public Vector3 XYZ { readonly get => (X, Y, Z); set => (X, Y, Z) = value; }",
+                "public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);",
+                "public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);",
+                "public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);",            
             },
             
             ["geometry_msgs/Transform"] = new[]
@@ -66,22 +68,24 @@ namespace Iviz.MsgsGen
                 "public static Transform operator *(in Transform t, in Transform q) =>",
                 "        new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);",
                 "public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;", 
+                "public static Point operator *(in Transform t, in Point q) => t.Rotation * q + t.Translation;",
+                "public static Vector3 operator *(in Transform t, in (double X, double Y, double Z) q) => t * (Vector3) q;",
                 "public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;", 
                 "public static Transform RotateAround(in Quaternion q, in Point p) => new Transform(p - q * p, q);",
-                "public static implicit operator Transform((Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);",
+                "public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);",
             },    
             
             ["geometry_msgs/Pose"] = new[]
             {
                 "public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);", 
                 "public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);",
-                "public static implicit operator Pose((Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);",
+                "public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);",
             },          
 
             ["geometry_msgs/Twist"] = new[]
             {
                 "public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);", 
-                "public static implicit operator Twist((Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);",
+                "public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);",
             },          
 
             ["std_msgs/ColorRGBA"] = new[]
@@ -96,7 +100,10 @@ namespace Iviz.MsgsGen
                 "public static readonly ColorRGBA Magenta = (1, 0, 1, 1);", 
                 "public static readonly ColorRGBA Grey = (0.5f, 0.5f, 0.5f, 1);", 
                 "public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);",
-                "public static implicit operator ColorRGBA((float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);",
+                "public static implicit operator ColorRGBA(in (float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);",
+                "public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new ColorRGBA(q.p.R, q.p.G, q.p.B, q.A);",
+                "public static implicit operator ColorRGBA(in (float R, float G, float B) p) => new ColorRGBA(p.R, p.G, p.B, 1);",
+                "public (float R, float G, float B) RGB { readonly get => (R, G, B); set => (R, G, B) = value; }",
             },      
             
             ["iviz_msgs/Vector3f"] = new[]

@@ -7,11 +7,11 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = "iviz_msgs/Vector3f")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Vector3f : IMessage, System.IEquatable<Vector3f>, IDeserializable<Vector3f>
+    public struct Vector3f : IMessage, System.IEquatable<Vector3f>, IDeserializable<Vector3f>
     {
-        [DataMember (Name = "x")] public float X { get; }
-        [DataMember (Name = "y")] public float Y { get; }
-        [DataMember (Name = "z")] public float Z { get; }
+        [DataMember (Name = "x")] public float X;
+        [DataMember (Name = "y")] public float Y;
+        [DataMember (Name = "z")] public float Z;
     
         /// <summary> Explicit constructor. </summary>
         public Vector3f(float X, float Y, float Z)

@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Twist")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
+    public struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
-        [DataMember (Name = "linear")] public Vector3 Linear { get; }
-        [DataMember (Name = "angular")] public Vector3 Angular { get; }
+        [DataMember (Name = "linear")] public Vector3 Linear;
+        [DataMember (Name = "angular")] public Vector3 Angular;
     
         /// <summary> Explicit constructor. </summary>
         public Twist(in Vector3 Linear, in Vector3 Angular)
@@ -79,6 +79,6 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);
-        public static implicit operator Twist((Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
+        public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
     }
 }
