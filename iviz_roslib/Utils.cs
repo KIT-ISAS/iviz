@@ -176,7 +176,7 @@ namespace Iviz.Roslib
         }
 
         internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
-            CancellationToken token = default)
+            CancellationToken token)
         {
             int numRead = 0;
 #if !NETSTANDARD2_0
@@ -184,7 +184,10 @@ namespace Iviz.Roslib
             {
                 int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token).Caf();
 #else
-            Task timeoutTask = Task.Delay(-1, token);
+            var timeout = new TaskCompletionSource<object>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(timeout.SetCanceled);
+            
             while (numRead < toRead)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
@@ -214,7 +217,10 @@ namespace Iviz.Roslib
 #if !NETSTANDARD2_0
             await stream.WriteAsync(buffer.AsMemory(0, count), token).Caf();
 #else
-            Task timeoutTask = Task.Delay(-1, token);
+            var timeout = new TaskCompletionSource<object>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(timeout.SetCanceled);
+            
             Task writeTask = stream.WriteAsync(buffer, 0, count, token);
             Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
             if (resultTask == timeoutTask)
