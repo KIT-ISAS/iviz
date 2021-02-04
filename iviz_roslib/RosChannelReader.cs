@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -11,7 +12,7 @@ using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using Nito.AsyncEx.Synchronous;
-
+using TaskExtensions = System.Threading.Tasks.TaskExtensions;
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -30,12 +31,19 @@ namespace Iviz.Roslib
 #endif
         where T : IMessage, IDeserializable<T>, new()
     {
-        readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
+        readonly ConcurrentQueue<T> backQueue = new();
+        readonly AsyncCollection<T> messageQueue;
         CancellationTokenRegistration subscriberToken;
         bool disposed;
         string? subscriberId;
         IRosSubscriber<T>? subscriber;
 
+        /// <summary>
+        /// Tentative number of elements. This number may become outdated right after calling this property.
+        /// Use this only as an estimate for the number of elements.
+        /// </summary>
+        public int Count => backQueue.Count;
+        
         public IRosSubscriber<T> Subscriber =>
             subscriber ?? throw new InvalidOperationException("Channel has not been started!");
 
@@ -45,6 +53,7 @@ namespace Iviz.Roslib
 
         public RosChannelReader()
         {
+            messageQueue = new AsyncCollection<T>(backQueue);
         }
 
         /// <summary>
@@ -54,6 +63,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to.</param>
         public RosChannelReader(IRosClient client, string topic)
         {
+            messageQueue = new AsyncCollection<T>(backQueue);
             Start(client, topic);
         }
 
@@ -209,7 +219,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Enqueue(t);
+            messageQueue.Add(t);
         }
 
         /// <summary>
@@ -218,7 +228,7 @@ namespace Iviz.Roslib
         /// <returns>False if the channel has been disposed</returns>
         public bool WaitToRead(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             return WaitToRead(ts.Token);
         }
 
@@ -238,7 +248,7 @@ namespace Iviz.Roslib
         /// <returns>False if the channel has been disposed</returns>
         public async Task<bool> WaitToReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             return await WaitToReadAsync(ts.Token);
         }
 
@@ -262,7 +272,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             return Read(ts.Token);
         }
 
@@ -284,7 +294,7 @@ namespace Iviz.Roslib
         public T  Read(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return messageQueue.Dequeue(token);
+            return messageQueue.Take(token);
         }
 
         /// <summary>
@@ -296,7 +306,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async Task<T> ReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             return await ReadAsync(ts.Token);
         }
 
@@ -310,7 +320,7 @@ namespace Iviz.Roslib
         public Task<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return messageQueue.DequeueAsync(token);
+            return messageQueue.TakeAsync(token);
         }
 
 
@@ -323,8 +333,8 @@ namespace Iviz.Roslib
         public bool TryRead(out T t)
         {
             ThrowIfNotStarted();
-            Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
-            if (!task.RanToCompletion())
+
+            if (backQueue.Count == 0)
             {
                 t = default!;
                 return false;
@@ -332,7 +342,7 @@ namespace Iviz.Roslib
             
             try
             {
-                t = messageQueue.Dequeue(new CancellationToken(true));
+                t = messageQueue.Take(new CancellationToken(true));
                 return true;
             }
             catch (OperationCanceledException)
@@ -366,20 +376,17 @@ namespace Iviz.Roslib
 
         public IEnumerable<T> TryReadAll()
         {
-            IEnumerable<T> enumerable = messageQueue.GetConsumingEnumerable(new CancellationToken(true));
-            using IEnumerator<T> enumerator = enumerable.GetEnumerator();
             while (true)
             {
-                Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
-                if (!task.RanToCompletion())
+                if (backQueue.Count == 0)
                 {
                     yield break;
                 }
 
-                bool canMoveNext;
+                T element;
                 try
                 {
-                    canMoveNext = enumerator.MoveNext();
+                    element = messageQueue.Take(new CancellationToken(true));
                 }
                 catch (OperationCanceledException)
                 {
@@ -387,12 +394,7 @@ namespace Iviz.Roslib
                     yield break;
                 }
 
-                if (!canMoveNext)
-                {
-                    yield break;
-                }
-
-                yield return enumerator.Current!;
+                yield return element!;
             }
         }
         
@@ -415,7 +417,7 @@ namespace Iviz.Roslib
             ThrowIfNotStarted();
             while (true)
             {
-                yield return await messageQueue.DequeueAsync(token);
+                yield return await messageQueue.TakeAsync(token);
             }
         }
 
@@ -425,7 +427,7 @@ namespace Iviz.Roslib
             ThrowIfNotStarted();
             while (true)
             {
-                yield return await messageQueue.DequeueAsync(token);
+                yield return await messageQueue.TakeAsync(token);
             }
         }
         
