@@ -36,11 +36,11 @@ namespace Iviz.XmlRpc
 
         string CreateRequest(string msgIn)
         {
-            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" + 
+            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" +
                    "User-Agent: iviz XML-RPC\r\n" +
                    $"Host: {callerUri.Host}\r\n" +
                    $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
-                   "Content-Type: text/xml; charset=utf-8\r\n" + 
+                   "Content-Type: text/xml; charset=utf-8\r\n" +
                    $"\r\n{msgIn}" +
                    "\r\n";
         }
@@ -98,17 +98,14 @@ namespace Iviz.XmlRpc
             using (Stream stream = client.GetStream())
             {
                 StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
-                Task writeTask = writer.WriteAsync(CreateRequest(msgIn));
-                if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
+                try
+                {
+                    await writer.WriteChunkAsync(CreateRequest(msgIn), token, timeoutInMs);
+                }
+                catch (Exception)
                 {
                     writer.Close();
-                    token.ThrowIfCanceled();
-                    if (writeTask.IsFaulted)
-                    {
-                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
-                    }
-
-                    throw new TimeoutException("HttpRequest: Request writing timed out!", writeTask.Exception);
+                    throw;
                 }
 
                 await writer.FlushAsync().Caf();
@@ -121,10 +118,10 @@ namespace Iviz.XmlRpc
                     token.ThrowIfCanceled();
                     if (readTask.IsFaulted)
                     {
-                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(readTask.Exception!.InnerException!).Throw();
                     }
 
-                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);
+                    throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
                 }
 
                 response = readTask.Result;

@@ -89,7 +89,7 @@ namespace Iviz.Roslib
 
             if (!MessageTypeMatches(message.GetType()))
             {
-                throw new InvalidMessageTypeException("Type does not match publisher.");
+                throw new RosInvalidMessageTypeException("Type does not match publisher.");
             }
 
             message.RosValidate();
@@ -106,7 +106,7 @@ namespace Iviz.Roslib
 
             if (!MessageTypeMatches(message.GetType()))
             {
-                throw new InvalidMessageTypeException("Type does not match publisher.");
+                throw new RosInvalidMessageTypeException("Type does not match publisher.");
             }
 
             return PublishAsync((T) message, policy, token);
@@ -118,7 +118,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
         public void Publish(T message)
         {
             if (message == null)

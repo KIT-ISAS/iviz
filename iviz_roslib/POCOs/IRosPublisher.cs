@@ -47,7 +47,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(IMessage message);
         
         /// <summary>
@@ -55,7 +55,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         public Task PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);      
         
         /// <summary>

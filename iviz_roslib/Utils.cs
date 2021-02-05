@@ -176,15 +176,29 @@ namespace Iviz.Roslib
         }
 
         internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
-            CancellationToken token = default)
+            CancellationToken token)
         {
             int numRead = 0;
+#if !NETSTANDARD2_0
             while (numRead < toRead)
             {
-#if !NETSTANDARD2_0
-                int readNow = await stream.ReadAsync(new Memory<byte>(buffer, numRead, toRead - numRead), token);
+                int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token).Caf();
 #else
-                int readNow = await stream.ReadAsync(buffer, numRead, toRead - numRead, token).Caf();
+            var timeout = new TaskCompletionSource<object>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(timeout.SetCanceled);
+            
+            while (numRead < toRead)
+            {
+                Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
+                Task resultTask = await Task.WhenAny(readTask, timeoutTask);
+                if (resultTask == timeoutTask)
+                {
+                    token.ThrowIfCanceled(timeoutTask);
+                    throw new TimeoutException($"Reading operation timed out");
+                }
+
+                int readNow = await readTask.Caf();
 #endif
                 if (readNow == 0)
                 {
@@ -195,6 +209,28 @@ namespace Iviz.Roslib
             }
 
             return true;
+        }
+
+        internal static async Task WriteChunkAsync(this NetworkStream stream, byte[] buffer, int count,
+            CancellationToken token)
+        {
+#if !NETSTANDARD2_0
+            await stream.WriteAsync(buffer.AsMemory(0, count), token).Caf();
+#else
+            var timeout = new TaskCompletionSource<object>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(timeout.SetCanceled);
+            
+            Task writeTask = stream.WriteAsync(buffer, 0, count, token);
+            Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
+            if (resultTask == timeoutTask)
+            {
+                token.ThrowIfCanceled(timeoutTask);
+                throw new TimeoutException($"Writing operation timed out");
+            }
+
+            await writeTask.Caf();
+#endif
         }
 
         internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents,
@@ -213,7 +249,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            await stream.WriteAsync(array, 0, array.Length, token).Caf();
+            await stream.WriteChunkAsync(array, array.Length, token).Caf();
         }
 
 

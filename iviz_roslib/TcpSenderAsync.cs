@@ -358,7 +358,7 @@ namespace Iviz.Roslib
             {
                 await signal.WaitAsync(runningTs.Token);
 
-                int totalQueueSizeInBytes = ReadFromQueueWithoutBlocking(tmpQueue);
+                int totalQueueSizeInBytes = ReadFromQueue(tmpQueue);
 
                 int startIndex, newBytesDropped;
                 if (tmpQueue.Count <= MaxSizeInPacketsWithoutConstraint ||
@@ -392,7 +392,7 @@ namespace Iviz.Roslib
 
                     uint sendLength = Buffer.Serialize(message, writeBuffer, 4);
                     WriteLengthToBuffer(sendLength);
-                    await stream!.WriteAsync(writeBuffer, 0, (int) sendLength + 4, runningTs.Token).Caf();
+                    await stream!.WriteChunkAsync(writeBuffer, (int) sendLength + 4, runningTs.Token).Caf();
 
                     numSent++;
                     bytesSent += (int) sendLength + 4;
@@ -434,7 +434,7 @@ namespace Iviz.Roslib
             }
         }
 
-        int ReadFromQueueWithoutBlocking(ICollection<(T msg, int msgLength, SemaphoreSlim? signal)> result)
+        int ReadFromQueue(ICollection<(T msg, int msgLength, SemaphoreSlim? signal)> result)
         {
             int totalQueueSizeInBytes = 0;
 
