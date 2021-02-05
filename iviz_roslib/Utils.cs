@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -118,7 +117,7 @@ namespace Iviz.Roslib
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
         {
-            return new ReadOnlyCollection<T>(t);
+            return new(t);
         }
 
         public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u)
@@ -161,7 +160,7 @@ namespace Iviz.Roslib
             int numRead = 0;
             int toRead = totalLength != -1 ? totalLength : readBuffer.Length;
 
-            List<string> contents = new List<string>();
+            List<string> contents = new();
             while (numRead < toRead)
             {
                 int length = BitConverter.ToInt32(readBuffer, numRead);
@@ -191,7 +190,7 @@ namespace Iviz.Roslib
             while (numRead < toRead)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
-                Task resultTask = await Task.WhenAny(readTask, timeoutTask);
+                Task resultTask = await Task.WhenAny(readTask, timeoutTask).Caf();
                 if (resultTask == timeoutTask)
                 {
                     token.ThrowIfCanceled(timeoutTask);
@@ -233,13 +232,12 @@ namespace Iviz.Roslib
 #endif
         }
 
-        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents,
-            CancellationToken token = default)
+        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents, CancellationToken token)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
             byte[] array = new byte[totalLength + 4];
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
+            using (BinaryWriter writer = new(new MemoryStream(array)))
             {
                 writer.Write(totalLength);
                 foreach (string t in contents)

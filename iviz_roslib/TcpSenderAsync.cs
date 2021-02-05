@@ -29,9 +29,9 @@ namespace Iviz.Roslib
         const int MaxSizeInPacketsWithoutConstraint = 2;
         const int MaxConnectionRetries = 3;
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0);
-        readonly ConcurrentQueue<(T, SemaphoreSlim?)> messageQueue = new ConcurrentQueue<(T, SemaphoreSlim?)>();
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly SemaphoreSlim signal = new(0);
+        readonly ConcurrentQueue<(T, SemaphoreSlim?)> messageQueue = new();
+        readonly CancellationTokenSource runningTs = new();
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
 
@@ -84,7 +84,7 @@ namespace Iviz.Roslib
         public int MaxQueueSizeInBytes { get; set; } = 50000;
 
         public PublisherSenderState State =>
-            new PublisherSenderState(
+            new(
                 IsAlive, latching, status,
                 endpoint, RemoteCallerId, remoteEndpoint,
                 0, MaxQueueSizeInBytes,
@@ -172,7 +172,7 @@ namespace Iviz.Roslib
                 };
             }
 
-            await Utils.WriteHeaderAsync(stream!, contents).Caf();
+            await Utils.WriteHeaderAsync(stream!, contents, runningTs.Token).Caf();
         }
 
         string? ProcessRemoteHeader(List<string> fields)
@@ -182,7 +182,7 @@ namespace Iviz.Roslib
                 return "error=Expected at least 5 fields, closing connection";
             }
 
-            Dictionary<string, string> values = new Dictionary<string, string>();
+            Dictionary<string, string> values = new();
             foreach (string field in fields)
             {
                 int index = field.IndexOf('=');
@@ -270,7 +270,7 @@ namespace Iviz.Roslib
                 {
                     Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
 
-                    managerSignal?.Release();
+                    TryRelease(managerSignal);
                     managerSignal = null;
 
                     if (!KeepRunning)
@@ -335,6 +335,17 @@ namespace Iviz.Roslib
             }
         }
 
+        static void TryRelease(SemaphoreSlim? s)
+        {
+            try
+            {
+                s?.Release();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+        }
+
         void WriteLengthToBuffer(uint i)
         {
             writeBuffer[0] = (byte) i;
@@ -347,7 +358,7 @@ namespace Iviz.Roslib
         {
             await ProcessHandshake().Caf();
 
-            List<(T msg, int msgLength, SemaphoreSlim? signal)> tmpQueue = new List<(T, int, SemaphoreSlim?)>();
+            List<(T msg, int msgLength, SemaphoreSlim? signal)> tmpQueue = new();
 
             if (BuiltIns.TryGetFixedSize(typeof(T), out int fixedSize))
             {
@@ -420,7 +431,7 @@ namespace Iviz.Roslib
                 numDropped++;
             }
 
-            SemaphoreSlim msgSignal = new SemaphoreSlim(0);
+            SemaphoreSlim msgSignal = new(0);
             messageQueue.Enqueue((message, msgSignal));
             signal.Release();
 

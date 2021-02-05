@@ -1,14 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
-using Iviz.Msgs.StdMsgs;
-using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.Actionlib
 {
@@ -40,7 +36,7 @@ namespace Iviz.Roslib.Actionlib
         where TAFeedback : class, IActionFeedback, IDeserializable<TAFeedback>, new()
         where TAResult : class, IActionResult, IDeserializable<TAResult>, new()
     {
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
 
         string? actionName;
         string? callerId;
@@ -283,7 +279,7 @@ namespace Iviz.Roslib.Actionlib
                 Stamp = now
             };
 
-            TAGoal actionGoal = new TAGoal
+            TAGoal actionGoal = new()
             {
                 GoalId = goalId
             };
@@ -514,7 +510,7 @@ namespace Iviz.Roslib.Actionlib
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
             where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
-            return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>(client, actionName);
+            return new(client, actionName);
         }
 
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
@@ -526,7 +522,7 @@ namespace Iviz.Roslib.Actionlib
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
             where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
-            return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
+            return new();
         }
     }
 }

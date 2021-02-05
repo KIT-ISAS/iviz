@@ -24,14 +24,14 @@ namespace Iviz.XmlRpc
             client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
         }
 
-        public void Start(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
+        public void Start(int timeoutInMs, CancellationToken token)
         {
-            Task.Run(() => StartAsync(timeoutInMs, token), token).WaitAndRethrow();
+            Task.Run(() => StartAsync(timeoutInMs, token).Caf(), token).WaitAndRethrow();
         }
 
-        public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
+        public Task StartAsync(int timeoutInMs, CancellationToken token)
         {
-            await client.TryConnectAsync(uri.Host, uri.Port, token, timeoutInMs);
+            return client.TryConnectAsync(uri.Host, uri.Port, token, timeoutInMs);
         }
 
         string CreateRequest(string msgIn)
@@ -72,7 +72,7 @@ namespace Iviz.XmlRpc
             return response.Substring(index);
         }
 
-        internal string Request(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        internal string Request(string msgIn, int timeoutInMs)
         {
             string response;
             using (Stream stream = client.GetStream())
@@ -91,8 +91,7 @@ namespace Iviz.XmlRpc
             return ProcessResponse(response);
         }
 
-        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs,
-            CancellationToken token = default)
+        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs, CancellationToken token)
         {
             string response;
             using (Stream stream = client.GetStream())

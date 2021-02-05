@@ -14,9 +14,9 @@ namespace Iviz.Roslib
     public class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     {
         readonly RosClient client;
-        readonly List<string> ids = new List<string>();
+        readonly List<string> ids = new();
         readonly TcpSenderManager<T> manager;
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
         bool disposed;
         int totalPublishers;
 

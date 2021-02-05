@@ -13,8 +13,8 @@ namespace Iviz.Roslib
     /// </summary>
     public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly Dictionary<string, Action<T>> callbacksById = new();
+        readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
         readonly TcpReceiverManager<T> manager;
 

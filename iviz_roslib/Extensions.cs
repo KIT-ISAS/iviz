@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
@@ -11,7 +10,7 @@ namespace Iviz.Roslib
     {
         public static void WaitForService(this RosClient client, string service, int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource tokenSource = new(timeoutInMs);
             try
             {
                 client.WaitForService(service, tokenSource.Token);
@@ -70,7 +69,7 @@ namespace Iviz.Roslib
 
         public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource tokenSource = new(timeoutInMs);
             try
             {
                 publisher.WaitForAnySubscriber(tokenSource.Token);
@@ -110,7 +109,7 @@ namespace Iviz.Roslib
 
         public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource tokenSource = new(timeoutInMs);
             try
             {
                 subscriber.WaitForAnyPublisher(tokenSource.Token);
@@ -150,7 +149,7 @@ namespace Iviz.Roslib
 
         public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource tokenSource = new(timeoutInMs);
             try
             {
                 client.WaitForTopic(topic, tokenSource.Token);

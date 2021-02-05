@@ -508,7 +508,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<string> nameList = new List<string>();
+            List<string> nameList = new();
             foreach (var objName in objNameList)
             {
                 if (!(objName is string name))

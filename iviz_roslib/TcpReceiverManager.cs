@@ -8,7 +8,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
@@ -19,10 +18,10 @@ namespace Iviz.Roslib
     {
         const int DefaultTimeoutInMs = 5000;
 
-        readonly AsyncLock mutex = new AsyncLock();
+        readonly AsyncLock mutex = new();
 
         readonly ConcurrentDictionary<Uri, TcpReceiverAsync<T>> connectionsByUri =
-            new ConcurrentDictionary<Uri, TcpReceiverAsync<T>>();
+            new();
 
         readonly RosClient client;
         readonly RosSubscriber<T> subscriber;
@@ -40,7 +39,7 @@ namespace Iviz.Roslib
         public string Topic => topicInfo.Topic;
         public string TopicType => topicInfo.Type;
 
-        HashSet<Uri> allPublisherUris = new HashSet<Uri>();
+        HashSet<Uri> allPublisherUris = new();
 
         public int NumConnections => connectionsByUri.Count;
 
@@ -48,7 +47,7 @@ namespace Iviz.Roslib
 
         public int GetTotalActiveConnections(int timeoutInMs = 500)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource tokenSource = new(timeoutInMs);
             return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token), tokenSource.Token)
                 .WaitNoThrow(this);
         }
@@ -157,7 +156,7 @@ namespace Iviz.Roslib
         void CreateConnection(Endpoint? remoteEndpoint, Uri remoteUri)
         {
             TcpReceiverAsync<T> connection =
-                new TcpReceiverAsync<T>(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay);
+                new(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay);
 
             connectionsByUri[remoteUri] = connection;
             connection.Start(TimeoutInMs);
@@ -169,7 +168,7 @@ namespace Iviz.Roslib
 
             using (await mutex.LockAsync(token))
             {
-                HashSet<Uri> newPublishers = new HashSet<Uri>(publisherUris);
+                HashSet<Uri> newPublishers = new(publisherUris);
                 allPublisherUris = newPublishers;
 
                 IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));

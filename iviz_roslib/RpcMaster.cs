@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Design.Serialization;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -349,7 +347,7 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
+        async Task<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
         {
             object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
                 .Caf();
@@ -447,7 +445,7 @@ namespace Iviz.Roslib.XmlRpc
                 return Empty;
             }
 
-            List<TopicTuple> result = new List<TopicTuple>();
+            List<TopicTuple> result = new();
             foreach (var objTuple in objTuples)
             {
                 if (!(objTuple is object[] tuple) ||
@@ -592,7 +590,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<(string, string)> topics = new List<(string, string)>();
+            List<(string, string)> topics = new();
             foreach (var objTopic in objTopics)
             {
                 if (!(objTopic is object[] topic) ||
@@ -643,7 +641,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
 
-            List<Uri> publishers = new List<Uri>();
+            List<Uri> publishers = new();
             foreach (var objUriStr in objUriStrings)
             {
                 if (!(objUriStr is string uriStr) ||
@@ -726,7 +724,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<string> subscribers = new List<string>();
+            List<string> subscribers = new();
             foreach (var objSubscriberStr in objSubscriberStrs)
             {
                 if (!(objSubscriberStr is string subscriberStr))

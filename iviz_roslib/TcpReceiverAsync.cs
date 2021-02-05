@@ -7,7 +7,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.MsgsGen;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
@@ -33,7 +32,7 @@ namespace Iviz.Roslib
         string? errorDescription;
         int connectionTimeoutInMs;
 
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
         bool KeepRunning => !runningTs.IsCancellationRequested;
         public bool IsConnected => tcpClient != null && tcpClient.Connected;
 
@@ -58,7 +57,7 @@ namespace Iviz.Roslib
         string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted;
 
-        public SubscriberReceiverState State => new SubscriberReceiverState(
+        public SubscriberReceiverState State => new(
             IsAlive, IsConnected, requestNoDelay, endpoint,
             RemoteUri, remoteEndpoint,
             numReceived, bytesReceived,
@@ -97,7 +96,7 @@ namespace Iviz.Roslib
 
         async Task<TcpClient?> TryToConnect(Endpoint tryEndpoint)
         {
-            TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
+            TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
 
             try
             {

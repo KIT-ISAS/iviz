@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
 using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
@@ -35,7 +33,7 @@ namespace Iviz.Roslib
         byte[] readBuffer = new byte[1024];
         byte[] writeBuffer = new byte[1024];
 
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
 
         internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
             Func<TService, Task> callback)
@@ -95,7 +93,7 @@ namespace Iviz.Roslib
                 return "error=Expected at least 3 fields, closing connection";
             }
 
-            Dictionary<string, string> values = new Dictionary<string, string>();
+            Dictionary<string, string> values = new();
             foreach (string entry in fields)
             {
                 int index = entry.IndexOf('=');
@@ -175,7 +173,7 @@ namespace Iviz.Roslib
                 };
             }
 
-            await Utils.WriteHeaderAsync(stream!, contents).Caf();
+            await Utils.WriteHeaderAsync(stream!, contents, runningTs.Token).Caf();
         }
 
         async Task ProcessHandshake()

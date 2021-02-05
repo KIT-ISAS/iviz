@@ -18,7 +18,7 @@ namespace Iviz.Roslib.XmlRpc
         readonly HttpListener listener;
 
         readonly Dictionary<string, Func<object[], Arg[]>> methods;
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
 
         Task? task;
         bool disposed;
@@ -235,7 +235,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<Uri> publisherUris = new List<Uri>();
+            List<Uri> publisherUris = new();
             foreach (object publisherObj in publishers)
             {
                 if (!(publisherObj is string publisherStr) ||
@@ -314,7 +314,7 @@ namespace Iviz.Roslib.XmlRpc
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            List<Arg> responses = new List<Arg>(calls.Length);
+            List<Arg> responses = new(calls.Length);
             foreach (var callObject in calls)
             {
                 if (!(callObject is List<(string ElementName, object Element)> call))

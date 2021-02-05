@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
-using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -64,16 +63,16 @@ namespace Iviz.Roslib
         NodeServer? listener;
 
         readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic =
-            new ConcurrentDictionary<string, IRosSubscriber>();
+            new();
 
         readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic =
-            new ConcurrentDictionary<string, IRosPublisher>();
+            new();
 
         readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName =
-            new ConcurrentDictionary<string, IServiceCaller>();
+            new();
 
         readonly ConcurrentDictionary<string, IServiceRequestManager> advertisedServicesByName =
-            new ConcurrentDictionary<string, IServiceRequestManager>();
+            new();
 
         readonly string namespacePrefix;
 
@@ -324,7 +323,7 @@ namespace Iviz.Roslib
             Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
             CancellationToken token = default)
         {
-            RosClient client = new RosClient(masterUri, callerId, callerUri, namespaceOverride);
+            RosClient client = new(masterUri, callerId, callerUri, namespaceOverride);
 
             try
             {
@@ -494,7 +493,7 @@ namespace Iviz.Roslib
         /// <returns>A list of possible caller uris.</returns>
         public static ReadOnlyCollection<Uri> GetCallerUriCandidates(int usingPort = AnyPort)
         {
-            List<Uri> candidates = new List<Uri>();
+            List<Uri> candidates = new();
             string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
@@ -621,7 +620,7 @@ namespace Iviz.Roslib
         public async Task EnsureCleanSlateAsync(CancellationToken token = default)
         {
             SystemState state = await GetSystemStateAsync(token).Caf();
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             tasks.AddRange(
                 state.Subscribers
                     .Where(tuple => tuple.Members.Contains(CallerId))
@@ -689,17 +688,17 @@ namespace Iviz.Roslib
 
         internal NodeClient CreateTalker(Uri otherUri)
         {
-            return new NodeClient(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
+            return new(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
         }
 
         (string id, RosSubscriber<T> subscriber)
             CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback)
             where T : IMessage, IDeserializable<T>, new()
         {
-            TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
+            TopicInfo<T> topicInfo = new(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
-            RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
+            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
             string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
@@ -721,10 +720,10 @@ namespace Iviz.Roslib
                 CancellationToken token)
             where T : IMessage, IDeserializable<T>, new()
         {
-            TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic, new T());
+            TopicInfo<T> topicInfo = new(CallerId, topic, new T());
             int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
 
-            RosSubscriber<T> subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs);
+            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
 
             string id = subscription.Subscribe(firstCallback);
 
@@ -998,8 +997,8 @@ namespace Iviz.Roslib
 
         RosPublisher<T> CreatePublisher<T>(string topic) where T : IMessage
         {
-            TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
+            TopicInfo<T> topicInfo = new(CallerId, topic);
+            RosPublisher<T> publisher = new(this, topicInfo)
                 {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
 
             publishersByTopic[topic] = publisher;
@@ -1026,8 +1025,8 @@ namespace Iviz.Roslib
 
         async Task<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token) where T : IMessage
         {
-            TopicInfo<T> topicInfo = new TopicInfo<T>(CallerId, topic);
-            RosPublisher<T> publisher = new RosPublisher<T>(this, topicInfo)
+            TopicInfo<T> topicInfo = new(CallerId, topic);
+            RosPublisher<T> publisher = new(this, topicInfo)
                 {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
 
             publishersByTopic[topic] = publisher;
@@ -1472,7 +1471,7 @@ namespace Iviz.Roslib
             tokenSource.CancelAfter(timeoutInMs);
             var innerToken = tokenSource.Token;
 
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
 
             if (listener != null)
             {
@@ -1526,17 +1525,17 @@ namespace Iviz.Roslib
 
         public SubscriberState GetSubscriberStatistics()
         {
-            return new SubscriberState(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
+            return new(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
         }
 
         public PublisherState GetPublisherStatistics()
         {
-            return new PublisherState(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
+            return new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
         }
 
         internal IEnumerable<BusInfo> GetBusInfoRcp()
         {
-            List<BusInfo> busInfos = new List<BusInfo>();
+            List<BusInfo> busInfos = new();
 
             SubscriberState state = GetSubscriberStatistics();
             foreach (var topic in state.Topics)
@@ -1570,7 +1569,7 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        BusInfo busInfo = new BusInfo(busInfos.Count, response.Uri!, BusInfo.DirectionType.Out,
+                        BusInfo busInfo = new(busInfos.Count, response.Uri!, BusInfo.DirectionType.Out,
                             topic.Topic, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
@@ -1597,7 +1596,7 @@ namespace Iviz.Roslib
         public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
             where T : IService
         {
-            using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource timeoutTs = new(timeoutInMs);
             CallService(serviceName, service, persistent, timeoutTs.Token);
         }
 
@@ -1605,7 +1604,7 @@ namespace Iviz.Roslib
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
-            TT service = new TT {Request = request};
+            TT service = new() {Request = request};
             CallService(serviceName, service, persistent, token);
             return (TU) service.Response;
         }
@@ -1668,7 +1667,7 @@ namespace Iviz.Roslib
             }
 
             Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
+            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
             try
             {
                 if (persistent)
@@ -1709,7 +1708,7 @@ namespace Iviz.Roslib
         public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
             int timeoutInMs) where T : IService
         {
-            using CancellationTokenSource timeoutTs = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource timeoutTs = new(timeoutInMs);
             try
             {
                 await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token).Caf();
@@ -1724,7 +1723,7 @@ namespace Iviz.Roslib
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
-            TT service = new TT {Request = request};
+            TT service = new() {Request = request};
             await CallServiceAsync(serviceName, service, persistent, token).Caf();
             return (TU) service.Response;
         }
@@ -1788,7 +1787,7 @@ namespace Iviz.Roslib
             }
 
             Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
+            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
             try
             {
                 if (persistent)
@@ -1854,7 +1853,7 @@ namespace Iviz.Roslib
                 return Task.CompletedTask;
             }
 
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
+            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName, new T());
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, Wrapper);
 
             advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
@@ -1904,7 +1903,7 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            ServiceInfo<T> serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName, new T());
+            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName, new T());
 
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
 

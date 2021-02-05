@@ -15,7 +15,7 @@ namespace Iviz.Roslib
         const int DefaultTimeoutInMs = 5000;
 
         readonly ConcurrentDictionary<string, TcpSenderAsync<TMessage>> connectionsByCallerId =
-            new ConcurrentDictionary<string, TcpSenderAsync<TMessage>>();
+            new();
 
         readonly RosPublisher<TMessage> publisher;
         readonly TopicInfo<TMessage> topicInfo;
@@ -102,10 +102,10 @@ namespace Iviz.Roslib
             Task cleanupTask = TryToCleanup();
 
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
-            TcpSenderAsync<TMessage> newSender = new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync<TMessage> newSender = new(remoteCallerId, topicInfo, Latching);
 
             Endpoint endPoint;
-            using (SemaphoreSlim managerSignal = new SemaphoreSlim(0))
+            using (SemaphoreSlim managerSignal = new(0))
             {
                 endPoint = newSender.Start(TimeoutInMs, managerSignal);
 
@@ -206,7 +206,7 @@ namespace Iviz.Roslib
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()
         {
-            return new ReadOnlyCollection<PublisherSenderState>(
+            return new(
                 connectionsByCallerId.Values.Select(sender => sender.State).ToArray()
             );
         }

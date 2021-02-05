@@ -2,17 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
-using TaskExtensions = System.Threading.Tasks.TaskExtensions;
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -228,7 +223,7 @@ namespace Iviz.Roslib
         /// <returns>False if the channel has been disposed</returns>
         public bool WaitToRead(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             try
             {
                 return WaitToRead(ts.Token);
@@ -255,7 +250,7 @@ namespace Iviz.Roslib
         /// <returns>False if the channel has been disposed</returns>
         public async Task<bool> WaitToReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             try
             {
                 return await WaitToReadAsync(ts.Token);
@@ -286,7 +281,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             try
             {
                 return Read(ts.Token);
@@ -327,7 +322,7 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public async Task<T> ReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
+            using CancellationTokenSource ts = new(timeoutInMs);
             try
             {
                 return await ReadAsync(ts.Token);

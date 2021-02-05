@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.Rosapi;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -130,14 +128,14 @@ namespace Iviz.Roslib
             return length;
         }
 
-        public async Task ExecuteAsync(T service, CancellationToken token)
+        public Task ExecuteAsync(T service, CancellationToken token)
         {
-            await ExecuteImplAsync(service, token).Caf();
+            return ExecuteImplAsync(service, token);
         }
 
         public void Execute(T service, CancellationToken token)
         {
-            Task.Run(() => ExecuteAsync(service, token), token).WaitAndRethrow();
+            Task.Run(() => ExecuteAsync(service, token).Caf(), token).WaitAndRethrow();
         }
 
         async Task ExecuteImplAsync(T service, CancellationToken token)
