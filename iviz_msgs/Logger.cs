@@ -30,7 +30,7 @@ namespace Iviz.Msgs
         {
             if (LogDebug != None)
             {
-                LogDebug(string.Format(format, ParseException(arg1)));
+                LogDebug(string.Format(format, ExceptionToString(arg1)));
             }
         }        
         
@@ -46,7 +46,7 @@ namespace Iviz.Msgs
         {
             if (LogDebug != None)
             {
-                LogDebug(string.Format(format, arg1, ParseException(arg2)));
+                LogDebug(string.Format(format, arg1, ExceptionToString(arg2)));
             }
         }
 
@@ -62,7 +62,7 @@ namespace Iviz.Msgs
         {
             if (LogDebug != None)
             {
-                LogDebug(string.Format(format, arg1, arg2, ParseException(arg3)));
+                LogDebug(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
         }        
 
@@ -91,7 +91,7 @@ namespace Iviz.Msgs
         {
             if (Log != None)
             {
-                Log(string.Format(format, ParseException(arg1)));
+                Log(string.Format(format, ExceptionToString(arg1)));
             }
         }
 
@@ -107,7 +107,7 @@ namespace Iviz.Msgs
         {
             if (Log != None)
             {
-                Log(string.Format(format, arg1, ParseException(arg2)));
+                Log(string.Format(format, arg1, ExceptionToString(arg2)));
             }
         }        
 
@@ -123,7 +123,7 @@ namespace Iviz.Msgs
         {
             if (Log != None)
             {
-                Log(string.Format(format, arg1, arg2, ParseException(arg3)));
+                Log(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
         }        
 
@@ -152,7 +152,7 @@ namespace Iviz.Msgs
         {
             if (LogError != None)
             {
-                LogError(string.Format(format, ParseException(arg1)));
+                LogError(string.Format(format, ExceptionToString(arg1)));
             }
         }
 
@@ -168,7 +168,7 @@ namespace Iviz.Msgs
         {
             if (LogError != None)
             {
-                LogError(string.Format(format, arg1, ParseException(arg2)));
+                LogError(string.Format(format, arg1, ExceptionToString(arg2)));
             }
         }        
 
@@ -184,7 +184,7 @@ namespace Iviz.Msgs
         {
             if (LogError != None)
             {
-                LogError(string.Format(format, arg1, arg2, ParseException(arg3)));
+                LogError(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
         }        
 
@@ -206,7 +206,7 @@ namespace Iviz.Msgs
             LogError = None;
         }
 
-        static string ParseException(Exception? e)
+        public static string ExceptionToString(Exception? e)
         {
             if (e == null)
             {
