@@ -1,11 +1,11 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v3.1",
+    "name": ".NETCoreApp,Version=v5.0",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
-    ".NETCoreApp,Version=v3.1": {
+    ".NETCoreApp,Version=v5.0": {
       "Iviz.ModelService/1.0.0": {
         "dependencies": {
           "AssimpNet": "4.1.0",
@@ -772,20 +772,34 @@
         "dependencies": {
           "AssimpNet": "4.1.0",
           "Iviz.Msgs": "1.0.0",
-          "Iviz.Urdf": "1.0.0"
+          "Iviz.Urdf": "1.0.0",
+          "Iviz.XmlRpc": "1.0.0"
         },
         "runtime": {
           "Iviz.ModelService.Lib.dll": {}
         }
       },
       "Iviz.Msgs/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3"
+        },
         "runtime": {
           "Iviz.Msgs.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.Lib.dll": {}
         }
       },
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
           "Nito.AsyncEx.Coordination": "5.1.0",
@@ -1386,6 +1400,11 @@
       "sha512": ""
     },
     "Iviz.Msgs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

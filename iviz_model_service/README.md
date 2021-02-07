@@ -11,4 +11,10 @@ You can either:
 ```bash
 dotnet run -c Release
 ```
+* Run the dll directly
+```bash
+dotnet Publish/Iviz.ModelService.dll
+```
 Make sure that ROS_MASTER_URI and ROS_PACKAGE_PATH are both set.
+
+If you want to enable URIs that start with 'file://', use the _--enable-file-schema_ argument.
