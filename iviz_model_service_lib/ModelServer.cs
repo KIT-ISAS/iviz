@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using Assimp;
-using Assimp.Configs;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
-
+using Iviz.XmlRpc;
 
 namespace Iviz.ModelService
 {
@@ -153,38 +151,40 @@ namespace Iviz.ModelService
             }
 
             string modelPath;
-            if (uri.Scheme == "package")
+            switch (uri.Scheme)
             {
-                modelPath = ResolvePath(uri);
-                if (modelPath is null)
+                case "package":
                 {
-                    msg.Response.Success = false;
-                    msg.Response.Message = "Failed to find resource path";
-                    return;
+                    modelPath = ResolvePath(uri);
+                    if (modelPath is null)
+                    {
+                        msg.Response.Success = false;
+                        msg.Response.Message = "Failed to find resource path";
+                        return;
+                    }
+
+                    break;
                 }
-            }
-            else if (uri.Scheme == "file")
-            {
-                if (!IsFileSchemaEnabled)
-                {
+                case "file" when !IsFileSchemaEnabled:
                     msg.Response.Success = false;
                     msg.Response.Message = "File schema is disabled";
                     return;
-                }
-                
-                modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
-                if (!File.Exists(modelPath))
+                case "file":
                 {
-                    msg.Response.Success = false;
-                    msg.Response.Message = $"File '{modelPath}' does not exist";
-                    return;
+                    modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
+                    if (!File.Exists(modelPath))
+                    {
+                        msg.Response.Success = false;
+                        msg.Response.Message = $"File '{modelPath}' does not exist";
+                        return;
+                    }
+
+                    break;
                 }
-            }
-            else
-            {
-                msg.Response.Success = false;
-                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
-                return;
+                default:
+                    msg.Response.Success = false;
+                    msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                    return;
             }
 
             Logger.Log("** Requesting " + modelPath);
@@ -229,38 +229,40 @@ namespace Iviz.ModelService
             }
 
             string texturePath;
-            if (uri.Scheme == "package")
+            switch (uri.Scheme)
             {
-                texturePath = ResolvePath(uri);
-                if (string.IsNullOrWhiteSpace(texturePath))
+                case "package":
                 {
-                    msg.Response.Success = false;
-                    msg.Response.Message = "Failed to find resource path";
-                    return;
-                }
-            }
-            else if (uri.Scheme == "file")
-            {
-                if (!IsFileSchemaEnabled)
-                {
-                    msg.Response.Success = false;
-                    msg.Response.Message = $"File schema is disabled";
-                    return;
-                }
+                    texturePath = ResolvePath(uri);
+                    if (string.IsNullOrWhiteSpace(texturePath))
+                    {
+                        msg.Response.Success = false;
+                        msg.Response.Message = "Failed to find resource path";
+                        return;
+                    }
 
-                texturePath = Uri.UnescapeDataString(uri.AbsolutePath);
-                if (!File.Exists(texturePath))
-                {
-                    msg.Response.Success = false;
-                    msg.Response.Message = $"File '{texturePath}' does not exist";
-                    return;
+                    break;
                 }
-            }
-            else
-            {
-                msg.Response.Success = false;
-                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
-                return;
+                case "file" when !IsFileSchemaEnabled:
+                    msg.Response.Success = false;
+                    msg.Response.Message = "File schema is disabled";
+                    return;
+                case "file":
+                {
+                    texturePath = Uri.UnescapeDataString(uri.AbsolutePath);
+                    if (!File.Exists(texturePath))
+                    {
+                        msg.Response.Success = false;
+                        msg.Response.Message = $"File '{texturePath}' does not exist";
+                        return;
+                    }
+
+                    break;
+                }
+                default:
+                    msg.Response.Success = false;
+                    msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                    return;
             }
 
             byte[] data;
@@ -349,13 +351,13 @@ namespace Iviz.ModelService
                 Msgs.IvizMsgs.Mesh dstMesh = new Msgs.IvizMsgs.Mesh
                 (
                     Name: srcMesh.Name ?? "[mesh]",
-                    Vertices: srcMesh.Vertices.Select(x => ToVector3(x)).ToArray(),
-                    Normals: srcMesh.Normals.Select(x => ToVector3(x)).ToArray(),
+                    Vertices: srcMesh.Vertices.Select(ToVector3).ToArray(),
+                    Normals: srcMesh.Normals.Select(ToVector3).ToArray(),
                     TexCoords: srcMesh.HasTextureCoords(0)
-                        ? srcMesh.TextureCoordinateChannels[0].Select(x => ToVector2(x)).ToArray()
+                        ? srcMesh.TextureCoordinateChannels[0].Select(ToVector2).ToArray()
                         : Array.Empty<Vector2f>(),
                     Colors: srcMesh.HasVertexColors(0)
-                        ? srcMesh.VertexColorChannels[0].Select(x => ToColor(x)).ToArray()
+                        ? srcMesh.VertexColorChannels[0].Select(ToColor).ToArray()
                         : Array.Empty<Color32>(),
                     Faces: faces.ToArray(),
                     MaterialIndex: (uint) srcMesh.MaterialIndex
@@ -412,17 +414,17 @@ namespace Iviz.ModelService
             }
         }
 
-        static Vector3f ToVector3(in Vector3D v)
+        static Vector3f ToVector3(Vector3D v)
         {
             return new Vector3f(v.X, v.Y, v.Z);
         }
 
-        static Vector2f ToVector2(in Vector3D v)
+        static Vector2f ToVector2(Vector3D v)
         {
             return new Vector2f(v.X, 1 - v.Y);
         }
 
-        static Color32 ToColor(in Color4D color)
+        static Color32 ToColor(Color4D color)
         {
             int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
             int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
