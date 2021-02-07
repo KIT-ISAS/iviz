@@ -191,10 +191,10 @@ namespace Iviz.Ros
             {
                 switch (e)
                 {
-                    case UnreachableUriException _:
+                    case RosUnreachableUriException _:
                         Core.Logger.Internal($"<b>Error:</b> Own uri validation failed. Reason: {e.Message}");
                         break;
-                    case UriBindingException _:
+                    case RosUriBindingException _:
                         Core.Logger.Internal(
                             $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
                         break;
@@ -798,7 +798,9 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync(token);
+                    cachedTopics = client == null 
+                        ? EmptyTopics 
+                        : await client.GetSystemPublishedTopicsAsync(token);
                 }
                 catch (OperationCanceledException)
                 {

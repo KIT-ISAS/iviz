@@ -23,7 +23,6 @@ namespace Iviz.Ros
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0);
-        readonly SemaphoreSlim signalNoAwait = new SemaphoreSlim(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
         readonly CancellationTokenSource connectionTs = new CancellationTokenSource();

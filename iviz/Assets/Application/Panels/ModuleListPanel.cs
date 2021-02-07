@@ -558,6 +558,15 @@ namespace Iviz.App
             }
         }
 
+        public void UpdateSettings()
+        {
+            UpdateSimpleConfigurationSettings();
+            foreach (var gridModuleData in moduleDatas.OfType<GridModuleData>())
+            {
+                gridModuleData.GridController.OnSettingsChanged();
+            }
+        }
+
         public int NumMastersInCache => connectionData.LastMasterUris.Count;   
         
         public async Task ClearMastersCacheAsync(CancellationToken token = default)

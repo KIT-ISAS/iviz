@@ -325,6 +325,14 @@ namespace Iviz.Controllers
             */
         }
 
+        public void OnSettingsChanged()
+        {
+            if (Settings.SettingsManager != null)
+            {
+                reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
+            }
+        }
+
 
         /*
         int ticks;

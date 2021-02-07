@@ -101,18 +101,18 @@ namespace Iviz.App
             panel.QualityInView.ValueChanged += (f, _) =>
             {
                 SettingsManager.QualityInView = (QualityType) f;
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
             panel.QualityInAr.ValueChanged += (f, _) =>
             {
                 SettingsManager.QualityInAr = (QualityType) f;
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
 
             panel.BackgroundColor.ValueChanged += c =>
             {
                 SettingsManager.BackgroundColor = c;
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
 
             panel.TargetFps.ValueChanged += (i, _) =>
@@ -133,7 +133,7 @@ namespace Iviz.App
                         break;
                 }
 
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
 
             panel.NetworkProcessing.ValueChanged += (i, _) =>
@@ -151,13 +151,13 @@ namespace Iviz.App
                         break;
                 }
 
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
 
             panel.SunDirection.ValueChanged += f =>
             {
                 SettingsManager.SunDirection = (int) f;
-                ModuleListPanel.UpdateSimpleConfigurationSettings();
+                ModuleListPanel.UpdateSettings();
             };
 
             panel.Close.Clicked += Close;
