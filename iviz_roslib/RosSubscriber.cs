@@ -13,12 +13,14 @@ namespace Iviz.Roslib
     /// </summary>
     public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        readonly Dictionary<string, Action<T>> callbacksById = new();
+        static readonly Action<T, IRosTcpReceiver<T>>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver<T>>>();
+
+        readonly Dictionary<string, Action<T, IRosTcpReceiver<T>>> callbacksById = new();
         readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
         readonly TcpReceiverManager<T> manager;
 
-        Action<T>[] callbacks = Array.Empty<Action<T>>(); // cache to iterate through callbacks quickly
+        Action<T, IRosTcpReceiver<T>>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
         int totalSubscribers;
         bool disposed;
 
@@ -72,13 +74,13 @@ namespace Iviz.Roslib
                 {TimeoutInMs = timeoutInMs};
         }
 
-        internal void MessageCallback(in T msg)
+        internal void MessageCallback(in T msg, IRosTcpReceiver<T> receiver)
         {
-            foreach (Action<T> callback in callbacks)
+            foreach (var callback in callbacks)
             {
                 try
                 {
-                    callback(msg);
+                    callback(msg, receiver);
                 }
                 catch (Exception e)
                 {
@@ -143,7 +145,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = Array.Empty<Action<T>>();
+            callbacks = EmptyCallback;
             NumPublishersChanged = null;
             manager.Stop();
             runningTs.Dispose();
@@ -159,7 +161,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = Array.Empty<Action<T>>();
+            callbacks = EmptyCallback;
             NumPublishersChanged = null;
             await manager.StopAsync();
             runningTs.Dispose();
@@ -180,7 +182,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            callbacksById.Add(id, t => callback(t));
+            callbacksById.Add(id, (t, _) => callback(t));
             callbacks = callbacksById.Values.ToArray();
             return id;
         }
@@ -202,10 +204,25 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            callbacksById.Add(id, callback);
+            callbacksById.Add(id, (t, _) => callback(t));
             callbacks = callbacksById.Values.ToArray();
             return id;
         }
+        
+        public string Subscribe(Action<T, IRosTcpReceiver<T>> callback)
+        {
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            AssertIsAlive();
+
+            string id = GenerateId();
+            callbacksById.Add(id, callback);
+            callbacks = callbacksById.Values.ToArray();
+            return id;
+        }        
 
         public bool ContainsId(string id)
         {
@@ -260,7 +277,7 @@ namespace Iviz.Roslib
             }
             else
             {
-                callbacks = Array.Empty<Action<T>>();
+                callbacks = EmptyCallback;
                 Task disposeTask = DisposeAsync().AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
                 await Task.WhenAll(disposeTask, unsubscribeTask).Caf();

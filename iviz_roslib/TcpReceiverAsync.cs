@@ -13,7 +13,17 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpReceiverAsync<T> where T : IMessage
+    public interface IRosTcpReceiver<T> where T : IMessage
+    {
+        string Topic { get; }
+        Uri RemoteUri { get; }
+        public Endpoint? RemoteEndpoint { get; }
+        public Endpoint? Endpoint { get; }
+        public IReadOnlyList<string>? TcpHeader { get;}
+        public SubscriberReceiverState State { get; }
+    }
+    
+    internal sealed class TcpReceiverAsync<T> : IRosTcpReceiver<T> where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
@@ -22,10 +32,13 @@ namespace Iviz.Roslib
         readonly TcpReceiverManager<T> manager;
 
         TopicInfo<T> topicInfo;
+        
         readonly bool requestNoDelay;
 
-        Endpoint? remoteEndpoint;
-        Endpoint? endpoint;
+        public Endpoint? RemoteEndpoint { get; private set; }
+        public Endpoint? Endpoint { get; private set; }
+        public IReadOnlyList<string>? TcpHeader { get; private set; }
+        
         long numReceived;
         long bytesReceived;
 
@@ -33,8 +46,6 @@ namespace Iviz.Roslib
         int connectionTimeoutInMs;
 
         readonly CancellationTokenSource runningTs = new();
-        bool KeepRunning => !runningTs.IsCancellationRequested;
-        public bool IsConnected => tcpClient != null && tcpClient.Connected;
 
         byte[] readBuffer = new byte[4];
         NetworkStream? stream;
@@ -42,24 +53,27 @@ namespace Iviz.Roslib
         TcpClient? tcpClient;
         bool disposed;
 
+        bool KeepRunning => !runningTs.IsCancellationRequested;
+        public bool IsConnected => tcpClient != null && tcpClient.Connected;
+
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
             Uri remoteUri, Endpoint? remoteEndpoint, TopicInfo<T> topicInfo,
             bool requestNoDelay)
         {
             RemoteUri = remoteUri;
-            this.remoteEndpoint = remoteEndpoint;
+            RemoteEndpoint = remoteEndpoint;
             this.topicInfo = topicInfo;
             this.manager = manager;
             this.requestNoDelay = requestNoDelay;
         }
 
         public Uri RemoteUri { get; }
-        string Topic => topicInfo.Topic;
+        public string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted;
 
         public SubscriberReceiverState State => new(
-            IsAlive, IsConnected, requestNoDelay, endpoint,
-            RemoteUri, remoteEndpoint,
+            IsAlive, IsConnected, requestNoDelay, Endpoint,
+            RemoteUri, RemoteEndpoint,
             numReceived, bytesReceived,
             errorDescription
         );
@@ -119,9 +133,9 @@ namespace Iviz.Roslib
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
-                if (remoteEndpoint != null)
+                if (RemoteEndpoint != null)
                 {
-                    TcpClient? client = await TryToConnect(remoteEndpoint).Caf();
+                    TcpClient? client = await TryToConnect(RemoteEndpoint).Caf();
                     if (client != null)
                     {
                         return client;
@@ -139,13 +153,13 @@ namespace Iviz.Roslib
 
                 Endpoint? newEndpoint =
                     await manager.RequestConnectionFromPublisherAsync(RemoteUri, runningTs.Token).Caf();
-                if (newEndpoint == null || newEndpoint.Equals(remoteEndpoint))
+                if (newEndpoint == null || newEndpoint.Equals(RemoteEndpoint))
                 {
                     continue;
                 }
 
-                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, remoteEndpoint, newEndpoint);
-                remoteEndpoint = newEndpoint;
+                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, RemoteEndpoint, newEndpoint);
+                RemoteEndpoint = newEndpoint;
             }
 
             return null;
@@ -217,7 +231,7 @@ namespace Iviz.Roslib
         {
             await SendHeader().Caf();
 
-            int receivedLength = await ReceivePacket();
+            int receivedLength = await ReceivePacket().Caf();
             if (receivedLength == -1)
             {
                 throw new IOException("Connection closed during handshake");
@@ -231,13 +245,15 @@ namespace Iviz.Roslib
                 throw new RosHandshakeException($"Failed handshake: {errorMsg}");
             }
 
+            TcpHeader = responses.AsReadOnly();
+
             if (DynamicMessage.IsDynamic<T>())
             {
                 GenerateDynamicTopicInfo(responses);
             }
         }
 
-        void GenerateDynamicTopicInfo(IReadOnlyCollection<string> responses)
+        void GenerateDynamicTopicInfo(List<string> responses)
         {
             const string typePrefix = "type=";
             const string definitionPrefix = "message_definition=";
@@ -277,7 +293,7 @@ namespace Iviz.Roslib
                     break;
                 }
 
-                endpoint = new Endpoint(newEndPoint);
+                Endpoint = new Endpoint(newEndPoint);
                 Logger.LogDebugFormat("{0}: Connected!", this);
                 errorDescription = null;
 
@@ -366,7 +382,7 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, fixedSize, 4);
-                manager.MessageCallback(message);
+                manager.MessageCallback(message, this);
 
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
@@ -385,8 +401,7 @@ namespace Iviz.Roslib
                 }
 
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
-                runningTs.Token.ThrowIfCancellationRequested();
-                manager.MessageCallback(message);
+                manager.MessageCallback(message, this);
 
                 numReceived++;
                 bytesReceived += rcvLength + 4;
@@ -396,7 +411,7 @@ namespace Iviz.Roslib
         public override string ToString()
         {
             return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
-                   $"PartnerSocket={remoteEndpoint?.Hostname ?? "(none)"}:{remoteEndpoint?.Port ?? -1}]";
+                   $"PartnerSocket={RemoteEndpoint?.Hostname ?? "(none)"}:{RemoteEndpoint?.Port ?? -1}]";
         }
     }
 }

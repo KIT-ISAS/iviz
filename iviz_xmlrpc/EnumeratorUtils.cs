@@ -172,7 +172,7 @@ namespace Iviz.XmlRpc
                 TB[] array = new TB[a.Count];
                 for (int i = 0; i < a.Count; i++)
                 {
-                    array[i] = this[i];
+                    array[i] = f(a[i]);
                 }
 
                 return array;

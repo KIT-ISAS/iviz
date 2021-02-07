@@ -19,10 +19,7 @@ namespace Iviz.Roslib
         const int DefaultTimeoutInMs = 5000;
 
         readonly AsyncLock mutex = new();
-
-        readonly ConcurrentDictionary<Uri, TcpReceiverAsync<T>> connectionsByUri =
-            new();
-
+        readonly ConcurrentDictionary<Uri, TcpReceiverAsync<T>> connectionsByUri = new();
         readonly RosClient client;
         readonly RosSubscriber<T> subscriber;
         readonly TopicInfo<T> topicInfo;
@@ -45,14 +42,14 @@ namespace Iviz.Roslib
 
         public int NumActiveConnections => connectionsByUri.Count(pair => pair.Value.IsConnected);
 
-        public int GetTotalActiveConnections(int timeoutInMs = 500)
+        public int GetTotalActiveConnections(int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new(timeoutInMs);
             return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token), tokenSource.Token)
                 .WaitNoThrow(this);
         }
 
-        public async Task<int> GetTotalActiveConnectionsAsync(CancellationToken token = default)
+        public async Task<int> GetTotalActiveConnectionsAsync(CancellationToken token)
         {
             int numActiveConnections = NumActiveConnections;
             if (!NeedsCleanup())
@@ -128,9 +125,9 @@ namespace Iviz.Roslib
             return new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
         }
 
-        internal void MessageCallback(in T msg)
+        internal void MessageCallback(in T msg, IRosTcpReceiver<T> receiver)
         {
-            subscriber.MessageCallback(msg);
+            subscriber.MessageCallback(msg, receiver);
         }
 
         async Task<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
