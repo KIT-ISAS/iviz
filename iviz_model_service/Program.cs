@@ -19,7 +19,7 @@ namespace Iviz.ModelService
             }
             catch (Exception e)
             {
-                Console.Error.Write("EE Fatal error: " + Logger.ExceptionToString(e));
+                Console.Error.WriteLine("EE Fatal error: " + Logger.ExceptionToString(e));
             }
         }
 
