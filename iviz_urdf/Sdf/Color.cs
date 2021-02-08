@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Xml;
 using Iviz.Urdf;
 
@@ -18,16 +19,16 @@ namespace Iviz.Sdf
                 throw new MalformedSdfException();
             }
             
-            string[] elems = node.InnerText.Split(Vector3f.Separator, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = node.InnerText.Split(Vector3d.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 4)
             {
                 throw new MalformedSdfException(node);
             }
 
-            R = double.Parse(elems[0], Utils.Culture);
-            G = double.Parse(elems[1], Utils.Culture);
-            B = double.Parse(elems[2], Utils.Culture);            
-            A = double.Parse(elems[3], Utils.Culture);            
+            R = double.Parse(elems[0], NumberStyles.Any, Utils.Culture);
+            G = double.Parse(elems[1], NumberStyles.Any, Utils.Culture);
+            B = double.Parse(elems[2], NumberStyles.Any, Utils.Culture);            
+            A = double.Parse(elems[3], NumberStyles.Any, Utils.Culture);            
         }
 
         internal Color(double R, double G, double B, double A)

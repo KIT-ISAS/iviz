@@ -6,7 +6,7 @@ namespace Iviz.Sdf
     public sealed class Mesh
     {
         public Uri Uri { get; }
-        public Vector3f Scale { get; } = Vector3f.One; 
+        public Vector3d Scale { get; } = Vector3d.One; 
 
         internal Mesh(XmlNode node)
         {
@@ -19,7 +19,7 @@ namespace Iviz.Sdf
                         uri = new Uri(child);
                         break;
                     case "scale":
-                        Scale = new Vector3f(child);
+                        Scale = new Vector3d(child);
                         break;
                 }
             }
@@ -27,7 +27,7 @@ namespace Iviz.Sdf
             Uri = uri ?? throw new MalformedSdfException(node, "Expected mesh!");
         }
 
-        internal Mesh(Uri uri, Vector3f scale)
+        internal Mesh(Uri uri, Vector3d scale)
         {
             Uri = uri;
             Scale = scale;
