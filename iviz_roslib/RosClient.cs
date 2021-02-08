@@ -40,7 +40,8 @@ namespace Iviz.Roslib
                 CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new();
 
-        bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new();
+        bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
+            where T : IService, new();
 
         Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
             CancellationToken token = default) where T : IService, new();
@@ -62,17 +63,10 @@ namespace Iviz.Roslib
 
         NodeServer? listener;
 
-        readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic =
-            new();
-
-        readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic =
-            new();
-
-        readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName =
-            new();
-
-        readonly ConcurrentDictionary<string, IServiceRequestManager> advertisedServicesByName =
-            new();
+        readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic = new();
+        readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
+        readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName = new();
+        readonly ConcurrentDictionary<string, IServiceRequestManager> advertisedServicesByName = new();
 
         readonly string namespacePrefix;
 
@@ -591,25 +585,9 @@ namespace Iviz.Roslib
         /// <summary>
         /// Asks the master which topics we advertise and are subscribed to, and removes them.
         /// </summary>
-        public void EnsureCleanSlate()
+        public void EnsureCleanSlate(CancellationToken token = default)
         {
-            try
-            {
-                SystemState state = GetSystemState();
-                foreach (TopicTuple tuple in state.Subscribers.Where(tuple => tuple.Members.Contains(CallerId)))
-                {
-                    RosMasterApi.UnregisterSubscriber(tuple.Topic);
-                }
-
-                foreach (TopicTuple tuple in state.Publishers.Where(tuple => tuple.Members.Contains(CallerId)))
-                {
-                    RosMasterApi.UnregisterPublisher(tuple.Topic);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new RosConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
-            }
+            Task.Run(() => EnsureCleanSlateAsync(token), token).WaitAndRethrow();
         }
 
 
@@ -1241,16 +1219,10 @@ namespace Iviz.Roslib
             return publisher != null && await publisher.UnadvertiseAsync(topicId).Caf();
         }
 
-        internal void RemovePublisher(IRosPublisher publisher)
+        internal Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            RosMasterApi.UnregisterPublisher(publisher.Topic);
-        }
-
-        internal async Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
-        {
-            publishersByTopic.TryRemove(publisher.Topic, out _);
-            await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, token).Caf();
+            return RosMasterApi.UnregisterPublisherAsync(publisher.Topic, token);
         }
 
         /// <summary>
@@ -1624,75 +1596,7 @@ namespace Iviz.Roslib
             CancellationToken token = default)
             where T : IService
         {
-            string resolvedServiceName = ResolveResourceName(serviceName);
-
-            if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
-            {
-                if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
-                {
-                    throw new RosInvalidMessageTypeException(
-                        $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
-                        "does not match the new given type.");
-                }
-
-                // is there a persistent connection? use it
-                if (existingReceiver.IsAlive)
-                {
-                    try
-                    {
-                        existingReceiver.Execute(service, token);
-                    }
-                    catch (Exception e)
-                    {
-                        if (e is OperationCanceledException || e is RosServiceCallFailed)
-                        {
-                            throw;
-                        }
-
-                        throw new RoslibException($"Service call {serviceName} failed", e);
-                    }
-
-                    return;
-                }
-
-                existingReceiver.Dispose();
-                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-            }
-
-            // otherwise, create a new transient one
-            LookupServiceResponse response = RosMasterApi.LookupService(resolvedServiceName);
-            if (!response.IsValid)
-            {
-                throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
-            }
-
-            Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
-            try
-            {
-                if (persistent)
-                {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    serviceCaller.Start(serviceUri, persistent, token);
-                    subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
-                    serviceCaller.Execute(service, token);
-                }
-                else
-                {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    serviceCaller.Start(serviceUri, persistent, token);
-                    serviceCaller.Execute(service, token);
-                }
-            }
-            catch (Exception e)
-            {
-                if (e is OperationCanceledException || e is RosServiceCallFailed)
-                {
-                    throw;
-                }
-
-                throw new RoslibException($"Service call {serviceName} failed", e);
-            }
+            Task.Run(() => CallServiceAsync(serviceName, service, persistent, token), token).WaitAndRethrow();
         }
 
         /// <summary>
@@ -1715,7 +1619,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException("Call to '" + serviceName + "' timed out");
+                throw new TimeoutException($"Call to '{serviceName}' timed out");
             }
         }
 
@@ -1769,7 +1673,7 @@ namespace Iviz.Roslib
                             throw;
                         }
 
-                        throw new RoslibException($"Service call {serviceName} failed", e);
+                        throw new RoslibException($"Service call '{serviceName}' to {existingReceiver.RemoteUri} failed", e);
                     }
 
                     return;
@@ -1811,7 +1715,7 @@ namespace Iviz.Roslib
                     throw;
                 }
 
-                throw new RoslibException($"Service call {serviceName} failed", e);
+                throw new RoslibException($"Service call '{serviceName}' to {serviceUri} failed", e);
             }
         }
 
@@ -1836,39 +1740,13 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="serviceName">Name of the ROS service.</param>
         /// <param name="callback">Function to be called when a service request arrives. The response should be written in the response field.</param>
+        /// <param name="token">An optional cancellation token.</param>
         /// <returns>Whether the advertisement was new. If false, the service already existed, but can still be used.</returns>
         /// <typeparam name="T">Service type.</typeparam>
-        public bool AdvertiseService<T>(string serviceName, Action<T> callback) where T : IService, new()
+        public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
+            where T : IService, new()
         {
-            string resolvedServiceName = ResolveResourceName(serviceName);
-
-            if (ServiceAlreadyAdvertised<T>(resolvedServiceName))
-            {
-                return false;
-            }
-
-            Task Wrapper(T x)
-            {
-                callback(x);
-                return Task.CompletedTask;
-            }
-
-            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName, new T());
-            var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, Wrapper);
-
-            advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
-
-            try
-            {
-                RosMasterApi.RegisterService(resolvedServiceName, advertisedService.Uri);
-            }
-            catch (Exception e)
-            {
-                advertisedServicesByName.TryRemove(resolvedServiceName, out _);
-                throw new RosRpcException("Failed to advertise service", e);
-            }
-
-            return true;
+            return Task.Run(() => AdvertiseServiceAsync(serviceName, callback, token), token).WaitAndRethrow();
         }
 
         public Task<bool> AdvertiseServiceAsync<T>(string serviceName, Action<T> callback,
@@ -1916,10 +1794,9 @@ namespace Iviz.Roslib
             catch (Exception e)
             {
                 advertisedServicesByName.TryRemove(resolvedServiceName, out _);
-                throw new RosRpcException("Failed to advertise service", e);
+                throw new RosRpcException($"Failed to advertise service '{serviceName}'", e);
             }
 
-            //Logger.LogDebug("Register service out!");
             return true;
         }
 
@@ -1928,39 +1805,30 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="name">Name of the service</param>
         /// <exception cref="ArgumentException">Thrown if name is null</exception>
-        public void UnadvertiseService(string name)
+        public void UnadvertiseService(string name, CancellationToken token = default)
         {
-            string resolvedServiceName = ResolveResourceName(name);
-
-            if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
-            {
-                throw new ArgumentException("Service does not exist", nameof(name));
-            }
-
-            advertisedServicesByName.TryRemove(resolvedServiceName, out _);
-
-            advertisedService.Dispose();
-            RosMasterApi.UnregisterService(resolvedServiceName, advertisedService.Uri);
+            Task.Run(() => UnadvertiseServiceAsync(name, token), token).WaitAndRethrow();
         }
 
         /// <summary>
         /// Unadvertises the service.
         /// </summary>
         /// <param name="name">Name of the service</param>
+        /// <param name="token">An optional cancellation token</param>
         /// <exception cref="ArgumentException">Thrown if name is null</exception>        
-        public async Task UnadvertiseServiceAsync(string name)
+        public async Task UnadvertiseServiceAsync(string name, CancellationToken token = default)
         {
             string resolvedServiceName = ResolveResourceName(name);
 
             if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
             {
-                throw new ArgumentException("Service does not exist", nameof(name));
+                throw new ArgumentException($"Service '{name}' does not exist", nameof(name));
             }
 
             advertisedServicesByName.TryRemove(resolvedServiceName, out _);
 
             await advertisedService.DisposeAsync();
-            await RosMasterApi.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri);
+            await RosMasterApi.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
         }
 
         public void Dispose()

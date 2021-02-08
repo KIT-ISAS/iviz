@@ -63,7 +63,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>        
-        public bool Unadvertise(string id);
+        public bool Unadvertise(string id, CancellationToken token = default);
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.

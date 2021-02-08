@@ -27,6 +27,7 @@ namespace Iviz.Roslib
 
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
+        public Uri? RemoteUri { get; private set; }
 
         public ServiceCallerAsync(ServiceInfo<T> serviceInfo, bool requestNoDelay = true)
         {
@@ -67,7 +68,7 @@ namespace Iviz.Roslib
             return Utils.WriteHeaderAsync(stream, contents, token);
         }
 
-        async Task ProcessHandshake(NetworkStream stream, bool persistent, CancellationToken token)
+        async Task ProcessHandshakeAsync(NetworkStream stream, bool persistent, CancellationToken token)
         {
             await SendHeaderAsync(stream, persistent, token).Caf();
 
@@ -89,17 +90,12 @@ namespace Iviz.Roslib
 
         public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token)
         {
+            RemoteUri = remoteUri;
             string remoteHostname = remoteUri.Host;
             int remotePort = remoteUri.Port;
 
             await tcpClient.TryConnectAsync(remoteHostname, remotePort, token, DefaultTimeoutInMs);
-            await ProcessHandshake(tcpClient.GetStream(), persistent, token);
-        }
-
-        public void Start(Uri remoteUri, bool persistent, CancellationToken token)
-        {
-            // just call the async version from sync
-            Task.Run(() => StartAsync(remoteUri, persistent, token), token).WaitNoThrow(this);
+            await ProcessHandshakeAsync(tcpClient.GetStream(), persistent, token);
         }
 
         async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
@@ -128,17 +124,7 @@ namespace Iviz.Roslib
             return length;
         }
 
-        public Task ExecuteAsync(T service, CancellationToken token)
-        {
-            return ExecuteImplAsync(service, token);
-        }
-
-        public void Execute(T service, CancellationToken token)
-        {
-            Task.Run(() => ExecuteAsync(service, token).Caf(), token).WaitAndRethrow();
-        }
-
-        async Task ExecuteImplAsync(T service, CancellationToken token)
+        public async Task ExecuteAsync(T service, CancellationToken token)
         {
             if (tcpClient == null)
             {

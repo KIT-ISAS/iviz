@@ -206,7 +206,7 @@ namespace Iviz.Roslib
             return id;
         }
 
-        public bool Unadvertise(string id)
+        public bool Unadvertise(string id, CancellationToken token = default)
         {
             if (!IsAlive)
             {
@@ -217,8 +217,7 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Dispose();
-                client.RemovePublisher(this);
+                Task.Run(() => RemovePublisherAsync(token), token).WaitAndRethrow();
             }
 
             return removed;
@@ -235,12 +234,17 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Task disposeTask = DisposeAsync().AwaitNoThrow(this);
-                Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-                await Task.WhenAll(disposeTask, unadvertiseTask).Caf();
+                await RemovePublisherAsync(token).Caf();
             }
 
             return removed;
+        }
+
+        async Task RemovePublisherAsync(CancellationToken token)
+        {
+            Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+            Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
+            await Task.WhenAll(disposeTask, unadvertiseTask).Caf();            
         }
 
         public bool ContainsId(string id)
