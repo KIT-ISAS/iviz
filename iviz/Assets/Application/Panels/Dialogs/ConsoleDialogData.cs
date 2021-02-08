@@ -22,7 +22,7 @@ namespace Iviz.App
             OnlyId
         }
 
-        const int MaxMessageLength = 250;
+        const int MaxMessageLength = 300;
         // TMP does not have a limit of 65000 but it's a nice threshold anyway
         const int MaxMessages = 65000 / 4 / MaxMessageLength; 
 

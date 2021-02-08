@@ -32,7 +32,6 @@ namespace Iviz.Displays
             }
 
             token.ThrowIfCancellationRequested();
-
             GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
 
             try
@@ -66,7 +65,6 @@ namespace Iviz.Displays
             foreach (var mesh in msg.Meshes)
             {
                 token.ThrowIfCancellationRequested();
-
                 GameObject obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
@@ -114,8 +112,7 @@ namespace Iviz.Displays
                     string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
                     string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
                     
-                    var task = Resource.GetTextureResourceAsync(textureUri, provider, token);
-                    var textureInfo = task.RanToCompletion() ? task.Result : await task;
+                    var textureInfo = await Resource.GetTextureResourceAsync(textureUri, provider, token);
                     if (textureInfo != null)
                     {
                         r.Texture = textureInfo.Object;
@@ -138,6 +135,7 @@ namespace Iviz.Displays
 
             foreach (var node in msg.Nodes)
             {
+                token.ThrowIfCancellationRequested();
                 GameObject nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
 

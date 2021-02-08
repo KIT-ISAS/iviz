@@ -90,7 +90,7 @@ namespace Iviz.App
                     break;
             }
 
-            panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.LoadedModelsCount} files";
+            panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount} files";
             panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles} files";
             panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
 
@@ -166,7 +166,7 @@ namespace Iviz.App
             {
                 Logger.Info("Settings: Clearing model cache.");
                 await Resource.External.ClearModelCacheAsync();
-                panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.LoadedModelsCount} files";
+                panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount} files";
             };
 
             panel.ClearHostHistoryClicked += async () =>

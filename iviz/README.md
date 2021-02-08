@@ -169,8 +169,9 @@ There are two ways to enable the model service:
   ```bash
   dotnet iviz_model_service/Publish/Iviz.ModelService.dll
     ```
+**Note:** The iviz_model_service app requires .NET 5.0
 
-There are two ways to run the model service:
+There are two ways to run the model service, depending on whether you use 'file://' or 'package://' URIs.
 * *Enabling the file schema*: This allows you to access any file on the PC using the 'file://' schema.
   * When using iviz as the model service, open the **Settings** menu and select _Model Service: On + File_
   * When using the model service app, call it using 

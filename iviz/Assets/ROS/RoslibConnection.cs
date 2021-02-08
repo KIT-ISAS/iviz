@@ -578,6 +578,7 @@ namespace Iviz.Ros
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
+                tokenSource.CancelAfter(3000);
                 AddTask(async () =>
                 {
                     try
@@ -590,6 +591,12 @@ namespace Iviz.Ros
                         hasClient = true;
                         await client.CallServiceAsync(service, srv, true, tokenSource.Token);
                     }
+                    catch (TaskCanceledException e)
+                    {
+                        exception = tokenSource.IsCancellationRequested
+                            ? (Exception) new TimeoutException($"Service call to '{service}' timed out")
+                            : e;
+                    }
                     catch (Exception e)
                     {
                         exception = e;
@@ -600,12 +607,13 @@ namespace Iviz.Ros
                     }
                 });
                 await signal.WaitAsync(tokenSource.Token);
+
+                if (exception != null)
+                {
+                    throw exception;
+                }
             }
 
-            if (exception != null)
-            {
-                throw exception;
-            }
 
             return hasClient;
         }
@@ -798,8 +806,8 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    cachedTopics = client == null 
-                        ? EmptyTopics 
+                    cachedTopics = client == null
+                        ? EmptyTopics
                         : await client.GetSystemPublishedTopicsAsync(token);
                 }
                 catch (OperationCanceledException)
