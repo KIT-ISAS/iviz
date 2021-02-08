@@ -34,8 +34,9 @@ namespace Iviz.ModelService
                 return;
             }
 
-            await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service");
-
+            Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
+            await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
+                        
             bool enableFileSchema;
             if (args.Length != 0 && args[0] == "--enable-file-schema")
             {

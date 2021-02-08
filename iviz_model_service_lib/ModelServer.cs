@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Assimp;
 using Iviz.Msgs;
@@ -419,6 +420,11 @@ namespace Iviz.ModelService
             return new Vector3f(v.X, v.Y, v.Z);
         }
 
+        static Vector3f ToVector3(Sdf.Vector3d v)
+        {
+            return new Vector3f((float) v.X, (float) v.Y, (float) v.Z);
+        }
+
         static Vector2f ToVector2(Vector3D v)
         {
             return new Vector2f(v.X, 1 - v.Y);
@@ -531,7 +537,8 @@ namespace Iviz.ModelService
             Sdf.SdfFile file;
             try
             {
-                file = Sdf.SdfFile.CreateFromXml(data).ResolveIncludes(modelPaths);
+                var srcFile = Sdf.SdfFile.CreateFromXml(data);
+                file = srcFile.ResolveIncludes(modelPaths);
             }
             catch (Exception e) when (e is IOException || e is Sdf.MalformedSdfException)
             {
@@ -548,8 +555,17 @@ namespace Iviz.ModelService
             {
                 Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
                 Filename = uri.ToString(),
-                Includes = includes.ToArray()
+                Includes = includes.ToArray(),
+                Lights = file.Lights.Select(ToLight).ToArray()
             };
+        }
+
+        static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+        {
+            return new Msgs.IvizMsgs.Light(
+                light.Name ?? "", (byte) light.Type, light.CastShadows, ToColor(light.Diffuse), 0,
+                ToVector3(light.Pose.Position), ToVector3(light.Direction),
+                (float) light.Spot.InnerAngle, (float) light.Spot.OuterAngle);
         }
 
         static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
