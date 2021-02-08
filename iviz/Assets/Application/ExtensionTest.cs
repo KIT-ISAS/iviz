@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -15,6 +16,7 @@ using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Msgs.Logger;
 using Pose = UnityEngine.Pose;
 
 namespace Iviz.App
@@ -71,7 +73,7 @@ namespace Iviz.App
             connectionClient = await RosClient.CreateAsync(masterUri, "/iviz_test", myUri); 
             
             Debug.Log($"{this}: Connected!");
-            while (true)
+            while (gameObject != null)
             {
                 // keep checking whether the moveit_test node is on
                 const string trajectoryService = "/moveit_test/calculate_trajectory";
@@ -94,7 +96,7 @@ namespace Iviz.App
             // start listening to the joints topic
             // thes joints apply only for 'robot'. 
             jointsListener = new RosChannelReader<JointState>();
-            await jointsListener.StartAsync(connectionClient, "/joint_states");
+            await jointsListener.StartAsync(connectionClient, "/joint_states").Caf();
             
             // tell Update() we're finished
             initialized = true;
@@ -139,7 +141,13 @@ namespace Iviz.App
             };
             
             Debug.Log($"{this}: Setting target pose.");
-            await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true).AwaitNoThrow(this);
+
+
+            Logger.LogDebug = Debug.Log;
+            Logger.Log = Debug.Log;
+            Logger.LogError = Debug.LogWarning;
+            //await Task.Run(async () => await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true, 3000).Caf());
+            await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true, 3000);
             
             if (srv.Response.Success)
             {

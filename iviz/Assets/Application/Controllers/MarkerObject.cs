@@ -59,6 +59,9 @@ namespace Iviz.Controllers
 
         readonly StringBuilder description = new StringBuilder(250);
 
+        [CanBeNull] CancellationTokenSource runningTs;
+
+        /*
         class TaskInfo
         {
             [NotNull] readonly Task task;
@@ -72,9 +75,13 @@ namespace Iviz.Controllers
                 TokenSource = tokenSource;
                 Uri = uri;
             }
-        }
 
-        [CanBeNull] TaskInfo taskInfo;
+            public bool IsRunning => !task.IsCompleted;
+        }
+        */
+
+
+        //[CanBeNull] TaskInfo taskInfo;
 
         (string Ns, int Id) id;
 
@@ -205,7 +212,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Set([NotNull] Marker msg)
+        public async void Set([NotNull] Marker msg)
         {
             if (msg == null)
             {
@@ -247,15 +254,24 @@ namespace Iviz.Controllers
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
-            UpdateResource(msg);
+            try
+            {
+                await UpdateResource(msg);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
 
             if (resource == null)
             {
-                if (msg.Type() == MarkerType.MeshResource)
+                if (msg.Type() != MarkerType.MeshResource)
                 {
-                    description.Append(ErrorStr).Append("Mesh resource not found").AppendLine();
-                    numErrors++;
+                    return;
                 }
+
+                description.Append(ErrorStr).Append("Mesh resource not found").AppendLine();
+                numErrors++;
 
                 return;
             }
@@ -753,9 +769,9 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateResource([NotNull] Marker msg)
+        async Task UpdateResource([NotNull] Marker msg)
         {
-            var newResourceInfo = GetRequestedResource(msg);
+            Info<GameObject> newResourceInfo = await GetRequestedResource(msg);
             if (newResourceInfo == resourceInfo)
             {
                 return;
@@ -782,7 +798,6 @@ namespace Iviz.Controllers
                         .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
                         .AppendLine();
                     numWarnings++;
-                    //Logger.Warn($"MarkerObject: Unknown mesh resource '{msg.MeshResource}'");
                 }
 
                 return;
@@ -811,17 +826,6 @@ namespace Iviz.Controllers
 
         void UpdateTransform([NotNull] Marker msg)
         {
-            /*
-            if (msg.FrameLocked)
-            {
-                AttachTo(msg.Header.FrameId);
-                description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
-            }
-            else
-            {
-                AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-            }
-            */
             AttachTo(msg.Header.FrameId);
             description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
 
@@ -849,8 +853,8 @@ namespace Iviz.Controllers
             transform.SetLocalPose(currentPose = newPose);
         }
 
-        [CanBeNull]
-        Info<GameObject> GetRequestedResource([NotNull] Marker msg)
+        [ItemCanBeNull]
+        async Task<Info<GameObject>> GetRequestedResource([NotNull] Marker msg)
         {
             if (msg.Type() != MarkerType.MeshResource)
             {
@@ -888,65 +892,36 @@ namespace Iviz.Controllers
                         return newResourceInfo;
                     }
 
-                    if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
+                    try
                     {
                         StopLoadResourceTask();
-                        CancellationTokenSource tokenSource = new CancellationTokenSource();
-                        taskInfo = new TaskInfo(LoadResourceAsync(msg.MeshResource, tokenSource), tokenSource,
-                            msg.MeshResource);
+                        runningTs = new CancellationTokenSource();
+                        description.Append(WarnStr).Append("Mesh is being downloaded...").AppendLine();
+                        numWarnings++;
+                        
+                        return await Resource.GetGameObjectResourceAsync(msg.MeshResource,
+                            ConnectionManager.ServiceProvider, runningTs.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"{this}: LoadResourceAsync failed for '{msg.MeshResource}'", e);
+                        return null;
                     }
 
-                    return taskInfo.ResourceInfo;
                 default:
                     return null;
             }
         }
 
+
         void StopLoadResourceTask()
         {
-            taskInfo?.TokenSource.Cancel();
-            taskInfo = null;
-        }
-
-        async Task LoadResourceAsync(string uriString, CancellationTokenSource tokenSource)
-        {
-            Info<GameObject> newResourceInfo;
-            try
-            {
-                var task = Resource.GetGameObjectResourceAsync(uriString,
-                    ConnectionManager.ServiceProvider,
-                    tokenSource.Token);
-                newResourceInfo = task.RanToCompletion() ? task.Result : await task;
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"{this}: LoadResourceAsync failed for '{uriString}'", e);
-                return;
-            }
-
-            if (tokenSource.IsCancellationRequested || newResourceInfo == null)
-            {
-                return;
-            }
-
-            GameObject resourceGameObject = ResourcePool.GetOrCreate(newResourceInfo, transform);
-            var newResource = resourceGameObject.GetComponent<IDisplay>();
-            if (newResource != null)
-            {
-                newResource.Layer = LayerType.IgnoreRaycast;
-            }
-
-            if (taskInfo != null)
-            {
-                taskInfo.ResourceInfo = resourceInfo;
-            }
-
-            resourceInfo = newResourceInfo;
-            resource = newResource;
+            runningTs?.Cancel();
+            runningTs = null;
         }
 
         [NotNull]

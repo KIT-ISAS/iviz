@@ -40,13 +40,18 @@ namespace Iviz.Displays
             }
             catch (Exception)
             {
-                Object.Destroy(root);
+                if (root != null)
+                {
+                    Object.Destroy(root);
+                }
+
                 throw;
             }
         }
 
-        static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, Model msg,
-            IExternalServiceProvider provider, CancellationToken token, GameObject root)
+        [ItemNotNull]
+        static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
+            IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
             switch (msg.OrientationHint.ToUpperInvariant())
             {

@@ -571,51 +571,27 @@ namespace Iviz.Ros
                 return false;
             }
 
-            bool hasClient = false;
-            Exception exception = null;
+            token.ThrowIfCancellationRequested();
 
-            using (var signal = new SemaphoreSlim(0))
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
                 tokenSource.CancelAfter(3000);
-                AddTask(async () =>
+                try
                 {
-                    try
-                    {
-                        if (client == null)
-                        {
-                            return;
-                        }
-
-                        hasClient = true;
-                        await client.CallServiceAsync(service, srv, true, tokenSource.Token);
-                    }
-                    catch (TaskCanceledException e)
-                    {
-                        exception = tokenSource.IsCancellationRequested
-                            ? (Exception) new TimeoutException($"Service call to '{service}' timed out")
-                            : e;
-                    }
-                    catch (Exception e)
-                    {
-                        exception = e;
-                    }
-                    finally
-                    {
-                        signal.Release();
-                    }
-                });
-                await signal.WaitAsync(tokenSource.Token);
-
-                if (exception != null)
+                    await client.CallServiceAsync(service, srv, true, tokenSource.Token).Caf();
+                    return true;
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested ||
+                                                         connectionTs.IsCancellationRequested)
                 {
-                    throw exception;
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException($"Service call to '{service}' timed out");
                 }
             }
-
-
-            return hasClient;
         }
 
         internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage
