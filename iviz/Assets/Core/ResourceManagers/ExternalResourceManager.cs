@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
@@ -682,6 +683,10 @@ namespace Iviz.Displays
 
                 return info;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 Logger.Error($"{this}: Error processing model response: ", e);
@@ -714,6 +719,10 @@ namespace Iviz.Displays
                 await WriteResourceFileAsync(token);
 
                 return info;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -748,6 +757,10 @@ namespace Iviz.Displays
 
                 return info;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 Logger.Error($"{this}: Error processing scene response: ", e);
@@ -769,6 +782,13 @@ namespace Iviz.Displays
             return model;
         }
 
+        enum SdfLightType
+        {
+            Point,
+            Directional,
+            Spot
+        }        
+        
         [NotNull]
         [ItemNotNull]
         async Task<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
@@ -794,10 +814,11 @@ namespace Iviz.Displays
                     m[i] = include.Pose.M[i];
                 }
 
-                child.transform.SetParent(node.transform, false);
-                child.transform.localRotation = m.rotation.Ros2Unity();
-                child.transform.localPosition = ((Vector3) m.GetColumn(3)).Ros2Unity();
-                child.transform.localScale = m.lossyScale;
+                var childTransform = child.transform;
+                childTransform.SetParent(node.transform, false);
+                childTransform.localRotation = m.rotation.Ros2Unity();
+                childTransform.localPosition = ((Vector3) m.GetColumn(3)).Ros2Unity();
+                childTransform.localScale = m.lossyScale;
 
                 Info<GameObject> includeResource =
                     await Resource.GetGameObjectResourceAsync(include.Uri, provider, token);
@@ -809,6 +830,35 @@ namespace Iviz.Displays
 
                 includeResource.Instantiate(child.transform);
             }
+            
+            foreach (Msgs.IvizMsgs.Light source in scene.Lights)
+            {
+                GameObject lightObject = new GameObject("Light:" + source.Name);
+                lightObject.transform.parent = node.transform;
+                UnityEngine.Light light = lightObject.AddComponent<UnityEngine.Light>();
+                light.color = source.Diffuse.ToColor32();
+                light.lightmapBakeType = LightmapBakeType.Mixed;
+                light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
+                lightObject.transform.localPosition = source.Position.ToVector3();
+                light.range = source.Range != 0 ? source.Range : 20;
+                switch ((SdfLightType) source.Type)
+                {
+                    default:
+                        light.type = LightType.Point;
+                        break;
+                    case SdfLightType.Spot:
+                        light.type = LightType.Spot;
+                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        light.spotAngle = source.OuterAngle * Mathf.Rad2Deg;
+                        light.innerSpotAngle = source.InnerAngle * Mathf.Rad2Deg;
+                        break;
+                    case SdfLightType.Directional:
+                        light.type = LightType.Directional;
+                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        break;
+                }
+            }
+            
 
             return node;
         }

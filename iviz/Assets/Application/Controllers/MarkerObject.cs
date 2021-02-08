@@ -270,7 +270,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                description.Append(ErrorStr).Append("Mesh resource not found").AppendLine();
+                description.Append(ErrorStr).Append("Failed to load mesh resource").AppendLine();
                 numErrors++;
 
                 return;

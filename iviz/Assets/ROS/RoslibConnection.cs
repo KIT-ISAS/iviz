@@ -122,7 +122,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 750;
 
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif

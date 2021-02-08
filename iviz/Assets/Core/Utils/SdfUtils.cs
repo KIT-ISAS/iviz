@@ -23,5 +23,16 @@ namespace Iviz.Core
         {
             return new Color((float)v.R, (float)v.G, (float)v.B, (float)v.A);
         }
+        
+        public static Color32 ToColor32(this Msgs.IvizMsgs.Color32 v)
+        {
+            return new Color32(v.R, v.G, v.B, v.A);
+        }
+        
+        public static Vector3 ToVector3(this Msgs.IvizMsgs.Vector3f v)
+        {
+            return new Vector3(v.X, v.Y, v.Z).Ros2Unity();
+        }
+        
     }
 }
