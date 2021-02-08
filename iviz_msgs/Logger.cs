@@ -222,7 +222,7 @@ namespace Iviz.Msgs
                 if (!(subException is AggregateException))
                 {
                     str.Append(firstException ? "\n[" : "\n   [");
-                    str.Append(subException.GetType()).Append("] ").Append(subException.Message);
+                    str.Append(subException.GetType().Name).Append("] ").Append(subException.Message);
                     firstException = false;
                 }
 
