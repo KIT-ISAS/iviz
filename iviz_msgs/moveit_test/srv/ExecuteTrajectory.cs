@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitTest
     }
 
     [DataContract]
-    public sealed class ExecuteTrajectoryRequest : IRequest, IDeserializable<ExecuteTrajectoryRequest>
+    public sealed class ExecuteTrajectoryRequest : IRequest<ExecuteTrajectory, ExecuteTrajectoryResponse>, IDeserializable<ExecuteTrajectoryRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>

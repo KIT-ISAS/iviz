@@ -135,6 +135,11 @@ namespace Iviz.MsgsGen
             string result;
             switch (ArraySize)
             {
+                case NotAnArray when CsClassName == "string":
+                    result = isInStruct
+                        ? $"public string? {CsFieldName};"
+                        : $"public string {CsFieldName} {{ get; set; }}";
+                    break;
                 case NotAnArray:
                     result = isInStruct
                         ? $"public {CsClassName} {CsFieldName};"
@@ -142,7 +147,7 @@ namespace Iviz.MsgsGen
                     break;
                 case DynamicSizeArray:
                     result = isInStruct
-                        ? $"public {CsClassName}[] {CsFieldName};"
+                        ? $"public {CsClassName}[]? {CsFieldName};"
                         : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
                     break;
                 default:

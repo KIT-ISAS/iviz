@@ -370,7 +370,9 @@ namespace Iviz.MsgsGen
                         else if (variable.CsClassName == "string")
                         {
                             fieldSize += 4;
-                            fieldsWithSize.Add($"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
+                            fieldsWithSize.Add(forceStruct
+                                ? $"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName} ?? string.Empty);"
+                                : $"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
                         }
                         else if (variable.ClassIsBlittable)
                         {

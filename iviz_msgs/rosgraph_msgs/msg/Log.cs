@@ -22,12 +22,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "level")] public byte Level;
-        [DataMember (Name = "name")] public string Name; // name of the node
-        [DataMember (Name = "msg")] public string Msg; // message 
-        [DataMember (Name = "file")] public string File; // file the message came from
-        [DataMember (Name = "function")] public string Function; // function the message came from
+        [DataMember (Name = "name")] public string? Name; // name of the node
+        [DataMember (Name = "msg")] public string? Msg; // message 
+        [DataMember (Name = "file")] public string? File; // file the message came from
+        [DataMember (Name = "function")] public string? Function; // function the message came from
         [DataMember (Name = "line")] public uint Line; // line the message came from
-        [DataMember (Name = "topics")] public string[] Topics; // topic names that the node publishes
+        [DataMember (Name = "topics")] public string[]? Topics; // topic names that the node publishes
     
         /// <summary> Explicit constructor. </summary>
         public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
@@ -100,10 +100,10 @@ namespace Iviz.Msgs.RosgraphMsgs
             get {
                 int size = 25;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Msg);
-                size += BuiltIns.UTF8.GetByteCount(File);
-                size += BuiltIns.UTF8.GetByteCount(Function);
+                size += BuiltIns.UTF8.GetByteCount(Name ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(Msg ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(File ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(Function ?? string.Empty);
                 size += 4 * Topics.Length;
                 foreach (string s in Topics)
                 {
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
+                "H4sIAAAAAAAAA61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
                 "hwWDZN9zzv06yfMsz+mZd+xUGEnjoqmyxgdhgkcsK8fAtLx79/m+uKZccjk0E2yKPDyunooborxhw07o" +
                 "09iXxfqxeIPYXjijzG+8u/X6aV3cUs7OWXcaWS02iw/F9VvKaxGEvqpQmaqOynmqeKVYy1TfexaSHbXp" +
                 "mBQmoA8u5jSiY8qnw9YUWiZjJR/CnW8Q7dh70TAdvtZKR1I6IuMQr6JK7Wx3BA6mCsqaCD5c/0wYlAmv" +

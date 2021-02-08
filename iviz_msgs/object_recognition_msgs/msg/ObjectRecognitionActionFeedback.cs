@@ -79,7 +79,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVptkzZJPaODKimOMk7ssdVePSC4ItGCoAqAkvXv+xakKMqx" +
+                "H4sIAAAAAAAAA71WTXPbNhC981dgRofYnVptkzZJPaODKimOMk7ssdVePSC4ItGCoAqAkvXv+xakKMqx" +
                 "Gh2SaGTrC3j78PbtYt+TzMiJIr4kUgVdWaPTh9Ln/qerSpr7IEPthY8vyU36N6lwR6rKrea174iyVKp/" +
                 "xLJ9k4y+8iP5eH91ifhZw+l9w3QgQMxm0mWipCAzGaRYVjiIzgtyF4bWZJh0uaJMxF/DdkV+iI2LQnuB" +
                 "Z06WnDRmK2qPRaESqirL2molA4mgSzrYj53aCilW0gWtaiMd1lcu05aXL50sidHx9PRvTVaRmE8vscZ6" +

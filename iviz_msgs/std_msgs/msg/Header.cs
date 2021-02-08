@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         // time-handling sugar is provided by the client library
         [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
-        [DataMember (Name = "frame_id")] public string FrameId;
+        [DataMember (Name = "frame_id")] public string? FrameId;
     
         /// <summary> Explicit constructor. </summary>
         public Header(uint Seq, time Stamp, string FrameId)
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(FrameId);
+                size += BuiltIns.UTF8.GetByteCount(FrameId ?? string.Empty);
                 return size;
             }
         }
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
+                "H4sIAAAAAAAAA42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
                 "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
                 "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +
                 "PRw0orZi6XMUqq1OrHvLeLg1tzP23vyWEiqsl39Hu9YNWIiVQGPxEdZW+dussWQDElxQGE+JGtjbBIy6" +

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitTest
     }
 
     [DataContract]
-    public sealed class SetManipulatorPoseRequest : IRequest, IDeserializable<SetManipulatorPoseRequest>
+    public sealed class SetManipulatorPoseRequest : IRequest<SetManipulatorPose, SetManipulatorPoseResponse>, IDeserializable<SetManipulatorPoseRequest>
     {
         [DataMember (Name = "target_pose")] public GeometryMsgs.Pose TargetPose { get; set; }
     
