@@ -107,7 +107,7 @@ namespace Iviz.Core
                     {
                         str.AppendLine()
                             .Append("<color=red>")
-                            .Append(childException.GetType())
+                            .Append(childException.GetType().Name)
                             .Append("</color> ")
                             .Append(childException.Message);
                     }
@@ -159,7 +159,7 @@ namespace Iviz.Core
                     if (!(childException is AggregateException))
                     {
                         str.AppendLine();
-                        str.Append("[").Append(childException.GetType()).Append("] ").Append(childException.Message);
+                        str.Append("[").Append(childException.GetType().Name).Append("] ").Append(childException.Message);
                     }
 
                     childException = childException.InnerException;

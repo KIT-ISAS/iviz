@@ -837,7 +837,6 @@ namespace Iviz.Displays
                 lightObject.transform.parent = node.transform;
                 UnityEngine.Light light = lightObject.AddComponent<UnityEngine.Light>();
                 light.color = source.Diffuse.ToColor32();
-                light.lightmapBakeType = LightmapBakeType.Mixed;
                 light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
                 lightObject.transform.localPosition = source.Position.ToVector3();
                 light.range = source.Range != 0 ? source.Range : 20;

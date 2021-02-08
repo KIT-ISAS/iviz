@@ -444,17 +444,33 @@ namespace Iviz.Controllers
         }
 
 
-        static void UpdateLights(in ARLightEstimationData lightEstimation)
+        void UpdateLights(in ARLightEstimationData lightEstimation)
         {
-            if (!lightEstimation.averageColorTemperature.HasValue || !lightEstimation.averageBrightness.HasValue)
+            if (lightEstimation.averageColorTemperature.HasValue && lightEstimation.averageBrightness.HasValue)
             {
-                return;
+                RenderSettings.ambientMode = AmbientMode.Flat;
+                RenderSettings.ambientLight =
+                    Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value) *
+                    lightEstimation.averageBrightness.Value;
             }
 
-            RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight =
-                Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value) *
-                lightEstimation.averageBrightness.Value;
+            if (lightEstimation.mainLightDirection.HasValue)
+            {
+                arLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+            }
+            
+            if (lightEstimation.mainLightColor.HasValue)
+            {
+                arLight.color = lightEstimation.mainLightColor.Value;
+            }
+
+            if (lightEstimation.ambientSphericalHarmonics.HasValue)
+            {
+                var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
+                RenderSettings.ambientMode = AmbientMode.Skybox;
+                RenderSettings.ambientProbe = sphericalHarmonics.Value;
+            }            
+
         }
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)

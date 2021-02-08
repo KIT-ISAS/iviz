@@ -270,7 +270,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                description.Append(ErrorStr).Append("Failed to load mesh resource").AppendLine();
+                description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
                 numErrors++;
 
                 return;
@@ -896,11 +896,12 @@ namespace Iviz.Controllers
                     {
                         StopLoadResourceTask();
                         runningTs = new CancellationTokenSource();
-                        description.Append(WarnStr).Append("Mesh is being downloaded...").AppendLine();
-                        numWarnings++;
+                        description.Append("-- Mesh is being downloaded --").AppendLine();
                         
-                        return await Resource.GetGameObjectResourceAsync(msg.MeshResource,
+                        var result = await Resource.GetGameObjectResourceAsync(msg.MeshResource,
                             ConnectionManager.ServiceProvider, runningTs.Token);
+                        description.Append("Download finished.").AppendLine();
+                        return result;
                     }
                     catch (OperationCanceledException)
                     {

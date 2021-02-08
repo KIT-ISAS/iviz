@@ -124,6 +124,7 @@ namespace Iviz.App
                     return;
                 }
 
+                HideGuiButton.State = value;                     
                 parentCanvas.gameObject.SetActive(value);
             }
         }
