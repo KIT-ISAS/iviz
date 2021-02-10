@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
@@ -23,6 +24,7 @@ namespace Iviz.Controllers
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool TrailVisible { get; set; } = false;
+        [DataMember] public bool AngleVisible { get; set; } = false;
         [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool VectorVisible { get; set; } = true;
@@ -41,11 +43,10 @@ namespace Iviz.Controllers
         ArrowResource arrow;
         AngleAxisResource angleAxis;
 
-        public override IModuleData ModuleData { get; }
-
-        public override TfFrame Frame => frameNode.Parent;
-
         readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
+
+        public override IModuleData ModuleData { get; }
+        public override TfFrame Frame => frameNode.Parent;
 
         public MagnitudeConfiguration Config
         {
@@ -57,6 +58,7 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 Scale = value.Scale;
                 TrailVisible = value.TrailVisible;
+                AngleVisible = value.AngleVisible;
                 FrameVisible = value.FrameVisible;
                 VectorVisible = value.VectorVisible;
                 VectorScale = value.VectorScale;
@@ -71,20 +73,25 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (!(axis is null))
+                if (axis != null)
                 {
                     axis.Visible = value && FrameVisible;
                 }
 
-                if (!(sphere is null))
+                if (sphere != null)
                 {
                     sphere.Visible = value && FrameVisible;
                 }
 
                 trail.Visible = value && TrailVisible;
-                if (!(arrow is null))
+                if (arrow != null)
                 {
                     arrow.Visible = value && VectorVisible;
+                }
+
+                if (angleAxis != null)
+                {
+                    angleAxis.Visible = value && AngleVisible;
                 }
             }
         }
@@ -105,12 +112,12 @@ namespace Iviz.Controllers
             set
             {
                 config.FrameVisible = value;
-                if (!(axis is null))
+                if (axis != null)
                 {
                     axis.Visible = value && Visible;
                 }
 
-                if (!(sphere is null))
+                if (sphere != null)
                 {
                     sphere.Visible = value && Visible;
                 }
@@ -123,9 +130,22 @@ namespace Iviz.Controllers
             set
             {
                 config.VectorVisible = value;
-                if (!(arrow is null))
+                if (arrow != null)
                 {
                     arrow.Visible = value && Visible;
+                }
+            }
+        }
+        
+        public bool AngleVisible
+        {
+            get => config.AngleVisible;
+            set
+            {
+                config.AngleVisible = value;
+                if (angleAxis != null)
+                {
+                    angleAxis.Visible = value && Visible;
                 }
             }
         }
@@ -137,12 +157,12 @@ namespace Iviz.Controllers
             {
                 config.Color = value;
                 trail.Color = value;
-                if (!(sphere is null))
+                if (sphere != null)
                 {
                     sphere.Color = value;
                 }
 
-                if (!(arrow is null))
+                if (arrow != null)
                 {
                     arrow.Color = value;
                 }
@@ -190,10 +210,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            //name = "Magnitude:" + config.Topic;
             frameNode.name = $"[{config.Topic}]";
             frameNode.AttachTo("");
-            //displayNode.DisplayData = DisplayData;
 
             switch (config.Type)
             {
@@ -344,27 +362,17 @@ namespace Iviz.Controllers
             Handler(msg.Twist);
         }
 
-        static Quaternion AngularToQuaternion(float angularX, float angularY, float angularZ)
-        {
-            //Debug.Log("In message: " + angularX + " " + angularY + " " + angularZ);
-            /*
-            return Quaternion.AngleAxis(angularX * Mathf.Rad2Deg, Vector3.right) *
-                   Quaternion.AngleAxis(angularY * Mathf.Rad2Deg, Vector3.up) *
-                   Quaternion.AngleAxis(angularZ * Mathf.Rad2Deg, Vector3.forward);
-                   */
-            return new Vector3(angularX, angularY, angularZ).RosRpy2Unity();
-        }
-
         void Handler(Twist msg)
         {
-            if (msg.Angular.HasNaN() || msg.Linear.HasNaN())
+            var (linear, angular) = msg;
+            if (angular.HasNaN() || linear.HasNaN())
             {
                 return;
             }
 
-            Vector3 dir = msg.Linear.Ros2Unity();
+            Vector3 dir = linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
-            angleAxis.Set(AngularToQuaternion((float) msg.Angular.X, (float) msg.Angular.Y, (float) msg.Angular.Z));
+            angleAxis.Set(angular.RosRpy2Unity());
             trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
         }
 
@@ -387,19 +395,24 @@ namespace Iviz.Controllers
 
             Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
-            angleAxis.Set(AngularToQuaternion(
-                (float) msg.Twist.Twist.Angular.X,
-                (float) msg.Twist.Twist.Angular.Y,
-                (float) msg.Twist.Twist.Angular.Z));
+            angleAxis.Set(msg.Twist.Twist.Angular.RosRpy2Unity());
             trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
         }
 
         public override void ResetController()
         {
             base.ResetController();
-            arrow?.Reset();
+            if (arrow != null)
+            {
+                arrow.Reset();
+            }
+
             trail.Reset();
-            angleAxis?.Reset();
+
+            if (angleAxis != null)
+            {
+                angleAxis.Reset();
+            }
         }
 
         public override void StopController()
@@ -411,7 +424,7 @@ namespace Iviz.Controllers
             frameNode.Stop();
             UnityEngine.Object.Destroy(frameNode.gameObject);
 
-            trail?.DisposeDisplay();
+            trail.DisposeDisplay();
 
             if (childNode != null)
             {
@@ -419,10 +432,10 @@ namespace Iviz.Controllers
                 UnityEngine.Object.Destroy(childNode.gameObject);
             }
 
-            axis?.DisposeDisplay();
-            angleAxis?.DisposeDisplay();
-            arrow?.DisposeDisplay();
-            sphere?.DisposeResource(Resource.Displays.Sphere);
+            axis.DisposeDisplay();
+            angleAxis.DisposeDisplay();
+            arrow.DisposeDisplay();
+            sphere.DisposeResource(Resource.Displays.Sphere);
         }
     }
 }

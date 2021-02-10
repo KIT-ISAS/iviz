@@ -106,6 +106,9 @@ namespace Iviz.Core
         public static Quaternion RosRpy2Unity(this Vector3 v) => Quaternion.Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Quaternion RosRpy2Unity(this Msgs.GeometryMsgs.Vector3 v) => v.ToUnity().RosRpy2Unity();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
             return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
@@ -118,7 +121,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p)
+        public static  Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p)
         {
             return p.ToUnity().Ros2Unity();
         }
