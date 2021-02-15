@@ -13,6 +13,8 @@ namespace Iviz.Resources
         public Info<Material> TexturedLit { get; }
         public Info<Material> TransparentLit { get; }
         public Info<Material> TransparentTexturedLit { get; }
+        public Info<Material> BumpLit { get; }
+        public Info<Material> TransparentBumpLit { get; }
         public Info<Material> ImagePreview { get; }
         public Info<Material> PointCloud { get; }
         public Info<Material> PointCloudWithColormap { get; }
@@ -57,6 +59,8 @@ namespace Iviz.Resources
             TransparentTexturedLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Holo Transparent Textured Lit")
                 : new Info<Material>(assetHolder.TransparentTexturedLit);
+            BumpLit = new Info<Material>(assetHolder.BumpLit);
+            TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");

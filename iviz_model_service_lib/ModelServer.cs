@@ -18,8 +18,8 @@ namespace Iviz.ModelService
         public const string FileServiceName = "/iviz/get_file";
         public const string SdfServiceName = "/iviz/get_sdf";
 
-        readonly AssimpContext importer = new AssimpContext();
-        readonly Dictionary<string, List<string>> packagePaths = new Dictionary<string, List<string>>();
+        readonly AssimpContext importer = new();
+        readonly Dictionary<string, List<string>> packagePaths = new();
 
         public int NumPackages => packagePaths.Count;
         public bool IsFileSchemaEnabled { get; set; }
@@ -296,7 +296,7 @@ namespace Iviz.ModelService
             string orientationHint = "";
             if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
             {
-                XmlDocument doc = new XmlDocument();
+                XmlDocument doc = new();
                 doc.Load(fileName);
                 var nodeList = doc.GetElementsByTagName("up_axis");
                 if (nodeList.Count != 0 && nodeList[0] != null)
@@ -307,7 +307,7 @@ namespace Iviz.ModelService
 
             Assimp.Scene scene = importer.ImportFile(fileName,
                 PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
-            Model msg = new Model
+            Model msg = new()
             {
                 Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
                 OrientationHint = orientationHint
@@ -349,20 +349,18 @@ namespace Iviz.ModelService
                     }
                 }
 
-                Msgs.IvizMsgs.Mesh dstMesh = new Msgs.IvizMsgs.Mesh
-                (
-                    Name: srcMesh.Name ?? "[mesh]",
-                    Vertices: srcMesh.Vertices.Select(ToVector3).ToArray(),
-                    Normals: srcMesh.Normals.Select(ToVector3).ToArray(),
-                    TexCoords: srcMesh.HasTextureCoords(0)
-                        ? srcMesh.TextureCoordinateChannels[0].Select(ToVector2).ToArray()
-                        : Array.Empty<Vector2f>(),
-                    Colors: srcMesh.HasVertexColors(0)
-                        ? srcMesh.VertexColorChannels[0].Select(ToColor).ToArray()
-                        : Array.Empty<Color32>(),
-                    Faces: faces.ToArray(),
-                    MaterialIndex: (uint) srcMesh.MaterialIndex
-                );
+                Msgs.IvizMsgs.Mesh dstMesh = new()
+                {
+                    Name = srcMesh.Name ?? "[mesh]",
+                    Vertices = srcMesh.Vertices.Select(ToVector3).ToArray(),
+                    Normals = srcMesh.Normals.Select(ToVector3).ToArray(),
+                    Tangents = srcMesh.Tangents.Select(ToVector3).ToArray(),
+                    BiTangents = srcMesh.BiTangents.Select(ToVector3).ToArray(),
+                    TexCoords = srcMesh.TextureCoordinateChannels.Select(ToTexCoords).ToArray(),
+                    ColorChannels = srcMesh.VertexColorChannels.Select(ToColorChannel).ToArray(),
+                    Faces = faces.ToArray(),
+                    MaterialIndex = (uint) srcMesh.MaterialIndex,
+                };
 
                 msg.Meshes[i] = dstMesh;
             }
@@ -372,16 +370,19 @@ namespace Iviz.ModelService
             {
                 Assimp.Material srcMaterial = scene.Materials[i];
                 msg.Materials[i] = new Msgs.IvizMsgs.Material
-                (
-                    Name: srcMaterial.Name ?? "[material]",
-                    Ambient: ToColor(srcMaterial.ColorAmbient),
-                    Diffuse: ToColor(srcMaterial.ColorDiffuse),
-                    Emissive: ToColor(srcMaterial.ColorEmissive),
-                    DiffuseTexture: new Texture
-                    {
-                        Path = srcMaterial.TextureDiffuse.FilePath ?? ""
-                    }
-                );
+                {
+                    Name = srcMaterial.Name ?? "[material]",
+                    Ambient = ToColor(srcMaterial.ColorAmbient),
+                    Diffuse = ToColor(srcMaterial.ColorDiffuse),
+                    Emissive = ToColor(srcMaterial.ColorEmissive),
+                    Opacity = srcMaterial.Opacity,
+                    BumpScaling = srcMaterial.BumpScaling,
+                    Shininess = srcMaterial.Shininess,
+                    ShininessStrength = srcMaterial.ShininessStrength,
+                    Reflectivity = srcMaterial.Reflectivity,
+                    BlendMode = (byte) srcMaterial.BlendMode,
+                    Textures = srcMaterial.GetAllMaterialTextures().Select(ToTexture).ToArray()
+                };
             }
 
             List<Msgs.IvizMsgs.Node> nodes = new List<Msgs.IvizMsgs.Node>();
@@ -417,33 +418,58 @@ namespace Iviz.ModelService
 
         static Vector3f ToVector3(Vector3D v)
         {
-            return new Vector3f(v.X, v.Y, v.Z);
+            return new(v.X, v.Y, v.Z);
         }
 
         static Vector3f ToVector3(Sdf.Vector3d v)
         {
-            return new Vector3f((float) v.X, (float) v.Y, (float) v.Z);
+            return new((float) v.X, (float) v.Y, (float) v.Z);
         }
 
-        static Vector2f ToVector2(Vector3D v)
+        static Vector3f ToVector3UV(Vector3D v)
         {
-            return new Vector2f(v.X, 1 - v.Y);
+            return new(v.X, 1 - v.Y, v.Z);
         }
+
 
         static Color32 ToColor(Color4D color)
         {
             int r = (int) (Math.Max(Math.Min(color.R, 1), 0) * 255);
             int g = (int) (Math.Max(Math.Min(color.G, 1), 0) * 255);
             int b = (int) (Math.Max(Math.Min(color.B, 1), 0) * 255);
-
             int a = (int) (Math.Max(Math.Min(color.A, 1), 0) * 255);
             return new Color32((byte) r, (byte) g, (byte) b, (byte) a);
         }
 
+        static ColorChannel ToColorChannel(List<Color4D> colorChannel)
+        {
+            return new(colorChannel.Select(ToColor).ToArray());
+        }
+
+        static TexCoords ToTexCoords(List<Vector3D> texCoords)
+        {
+            return new(texCoords.Select(ToVector3UV).ToArray());
+        }
+        
+        static Texture ToTexture(TextureSlot texture)
+        {
+            return new()
+            {
+                Path = texture.FilePath,
+                Index = texture.TextureIndex,
+                BlendFactor = texture.BlendFactor,
+                Mapping = (byte) texture.Mapping,
+                Operation = (byte) texture.Operation,
+                Type = (byte) texture.TextureType,
+                UvIndex = texture.UVIndex,
+                WrapModeU = (byte) texture.WrapModeU,
+                WrapModeV = (byte) texture.WrapModeV
+            };
+        }
 
         static Matrix4 ToMatrix(in Matrix4x4 v)
         {
-            return new Matrix4(new[]
+            return new(new[]
             {
                 v.A1, v.B1, v.C1, v.D1,
                 v.A2, v.B2, v.C2, v.D2,
@@ -562,10 +588,16 @@ namespace Iviz.ModelService
 
         static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
         {
-            return new Msgs.IvizMsgs.Light(
-                light.Name ?? "", (byte) light.Type, light.CastShadows, ToColor(light.Diffuse), 0,
-                ToVector3(light.Pose.Position), ToVector3(light.Direction),
-                (float) light.Spot.InnerAngle, (float) light.Spot.OuterAngle);
+            return new(
+                light.Name ?? "",
+                (byte) light.Type,
+                light.CastShadows,
+                ToColor(light.Diffuse),
+                0,
+                ToVector3(light.Pose.Position),
+                ToVector3(light.Direction),
+                (float) light.Spot.InnerAngle,
+                (float) light.Spot.OuterAngle);
         }
 
         static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
@@ -640,7 +672,7 @@ namespace Iviz.ModelService
 
             if (visual.Geometry.Box != null)
             {
-                Vector3D diag = new Vector3D(
+                Vector3D diag = new(
                     (float) visual.Geometry.Box.Scale.X,
                     (float) visual.Geometry.Box.Scale.Y,
                     (float) visual.Geometry.Box.Scale.Z
@@ -656,7 +688,7 @@ namespace Iviz.ModelService
             }
             else if (visual.Geometry.Cylinder != null)
             {
-                Vector3D diag = new Vector3D(
+                Vector3D diag = new(
                     (float) visual.Geometry.Cylinder.Radius,
                     (float) visual.Geometry.Cylinder.Radius,
                     (float) visual.Geometry.Cylinder.Length
@@ -672,7 +704,7 @@ namespace Iviz.ModelService
             }
             else if (visual.Geometry.Sphere != null)
             {
-                Vector3D diag = new Vector3D((float) visual.Geometry.Sphere.Radius);
+                Vector3D diag = new((float) visual.Geometry.Sphere.Radius);
                 pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
                 includes.Add(new Include
@@ -683,7 +715,7 @@ namespace Iviz.ModelService
             }
             else if (visual.Geometry.Mesh != null)
             {
-                Vector3D diag = new Vector3D(
+                Vector3D diag = new(
                     (float) visual.Geometry.Mesh.Scale.X,
                     (float) visual.Geometry.Mesh.Scale.Y,
                     (float) visual.Geometry.Mesh.Scale.Z

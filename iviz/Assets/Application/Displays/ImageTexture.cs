@@ -18,7 +18,7 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-        byte[] pngBuffer;
+        byte[] bitmapBuffer;
 
         public event Action<Texture2D> TextureChanged;
         public event Action<Texture2D> ColormapChanged;
@@ -163,9 +163,9 @@ namespace Iviz.Displays
                     if (png.RowOffset != 0)
                     {
                         int reqSize = png.Height * png.RowSize;
-                        if (pngBuffer == null || pngBuffer.Length < reqSize)
+                        if (bitmapBuffer == null || bitmapBuffer.Length < reqSize)
                         {
-                            pngBuffer = new byte[reqSize];
+                            bitmapBuffer = new byte[reqSize];
                         }
 
                         int srcOffset = png.RowOffset;
@@ -173,10 +173,10 @@ namespace Iviz.Displays
                         int rowSize = png.RowSize;
                         for (int i = png.Height; i != 0; i--, srcOffset += png.RowStep, dstOffset += rowSize)
                         {
-                            Buffer.BlockCopy(png.Data, srcOffset, pngBuffer, dstOffset, rowSize);
+                            Buffer.BlockCopy(png.Data, srcOffset, bitmapBuffer, dstOffset, rowSize);
                         }
 
-                        newData = pngBuffer;
+                        newData = bitmapBuffer;
                     }
                     else
                     {
@@ -258,16 +258,16 @@ namespace Iviz.Displays
                     const int bmpHeaderLength = 54;
                     reqSize += bmpHeaderLength;
 
-                    if (pngBuffer == null || pngBuffer.Length < reqSize)
+                    if (bitmapBuffer == null || bitmapBuffer.Length < reqSize)
                     {
-                        pngBuffer = new byte[reqSize];
+                        bitmapBuffer = new byte[reqSize];
                     }
 
-                    Stream outStream = new MemoryStream(pngBuffer);
+                    Stream outStream = new MemoryStream(bitmapBuffer);
                     image.WriteBitmap(outStream);
                     GameThread.PostInListenerQueue(() =>
                     {
-                        Set(image.Width, image.Height, encoding, pngBuffer.AsSegment(bmpHeaderLength));
+                        Set(image.Width, image.Height, encoding, bitmapBuffer.AsSegment(bmpHeaderLength));
                         onFinished();
                     });
                 }
@@ -279,7 +279,7 @@ namespace Iviz.Displays
             });
         }
 
-        public void Set(int width, int height, string encoding, byte[] data, bool generateMipmaps = false)
+        public void Set(int width, int height, string encoding, byte[] data)
         {
             Set(width, height, encoding, data.AsSegment());
         }
@@ -341,42 +341,43 @@ namespace Iviz.Displays
         void ApplyTexture(int width, int height, in ArraySegment<byte> data, string type, int length,
             bool generateMipmaps)
         {
+            Texture2D texture;
             switch (type)
             {
                 case "rgb8":
                 case "bgr8":
                 case "8SC3":
-                    EnsureSize(width, height, TextureFormat.RGB24);
+                    texture = EnsureSize(width, height, TextureFormat.RGB24);
                     break;
                 case "rgba8":
                 case "bgra8":
                 case "8SC4":
-                    EnsureSize(width, height, TextureFormat.RGBA32);
+                    texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     break;
                 case "mono16":
                 case "16UC1":
-                    EnsureSize(width, height, TextureFormat.R16);
+                    texture = EnsureSize(width, height, TextureFormat.R16);
                     break;
                 case "mono8":
                 case "8UC1":
-                    EnsureSize(width, height, TextureFormat.R8);
+                    texture = EnsureSize(width, height, TextureFormat.R8);
                     break;
                 default:
                     return;
             }
 
-            NativeArray<byte>.Copy(data.Array, data.Offset, Texture.GetRawTextureData<byte>(), 0, length);
-            Texture.Apply(generateMipmaps, false);
+            NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
+            texture.Apply(generateMipmaps, false);
         }
 
-        void EnsureSize(int width, int height, TextureFormat format)
+        [NotNull] Texture2D EnsureSize(int width, int height, TextureFormat format)
         {
             if (Texture != null &&
                 Texture.width == width &&
                 Texture.height == height &&
                 Texture.format == format)
             {
-                return;
+                return Texture;
             }
 
             if (Texture != null)
@@ -387,6 +388,7 @@ namespace Iviz.Displays
             Texture = new Texture2D(width, height, format, false);
             Material.SetTexture(MainTexID, Texture);
             TextureChanged?.Invoke(Texture);
+            return Texture;
         }
 
         public void Stop()

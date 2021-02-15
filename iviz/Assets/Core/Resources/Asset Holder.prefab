@@ -63,6 +63,8 @@ MonoBehaviour:
   TransparentLit: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
   TransparentTexturedLit: {fileID: 2100000, guid: 05f42792aba3d440e9fe1a51161b5d26,
     type: 2}
+  BumpLit: {fileID: 2100000, guid: 0bce27334cfee4a669387e1b34632fe4, type: 2}
+  TransparentBumpLit: {fileID: 2100000, guid: 0c593f5d1e1c247d6b030d4c98ebb0f8, type: 2}
   PointCloud: {fileID: 2100000, guid: b03b21172f7085346ae7aa04334ae0f6, type: 2}
   PointCloudWithColormap: {fileID: 2100000, guid: 5f2ef28c70bc04853b522597ec8b1738,
     type: 2}

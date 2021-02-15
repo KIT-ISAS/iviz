@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -432,7 +433,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                     .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numErrors++;
                 return;
             }
@@ -440,7 +441,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(msg.Color.A, 0))
             {
                 description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numWarnings++;
                 return;
             }
@@ -448,7 +449,7 @@ namespace Iviz.Controllers
             if (msg.Color.HasNaN())
             {
                 description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numWarnings++;
                 return;
             }
@@ -457,7 +458,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
                     .Append(" needs to be a multiple of 3").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numErrors++;
                 return;
             }
@@ -476,27 +477,32 @@ namespace Iviz.Controllers
             }
 
             meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
-            var points = new Vector3[msg.Points.Length];
-            for (int i = 0; i < points.Length; i++)
-            {
-                points[i] = msg.Points[i].Ros2Unity();
-            }
 
-            meshTriangles.FlipWinding = TriangleListFlipWinding;
-
-            if (msg.Colors.Length != 0)
+            using (var points = new Rent<Vector3>(msg.Points.Length))
             {
-                var colors = new Color[msg.Colors.Length];
-                for (int i = 0; i < colors.Length; i++)
+                for (int i = 0; i < points.Count; i++)
                 {
-                    colors[i] = msg.Colors[i].ToUnityColor();
+                    points.Array[i] = msg.Points[i].Ros2Unity();
                 }
 
-                meshTriangles.Set(points, colors);
-            }
-            else
-            {
-                meshTriangles.Set(points);
+                meshTriangles.FlipWinding = TriangleListFlipWinding;
+
+                if (msg.Colors.Length != 0)
+                {
+                    using (var colors = new Rent<Color>(msg.Colors.Length))
+                    {
+                        for (int i = 0; i < colors.Count; i++)
+                        {
+                            colors.Array[i] = msg.Colors[i].ToUnityColor();
+                        }
+
+                        meshTriangles.Set(points, colors);
+                    }
+                }
+                else
+                {
+                    meshTriangles.Set(points);
+                }
             }
         }
 
@@ -536,7 +542,6 @@ namespace Iviz.Controllers
 
             if (HasSameHash(msg))
             {
-                //Debug.Log("Same message!");
                 return;
             }
 

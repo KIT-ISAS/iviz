@@ -189,6 +189,51 @@ namespace Iviz.Core
         {
             return new ArraySegment<T>(ts, offset, count);
         }
+        
+        public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
+        {
+            mesh.SetVertices(ps.Array, 0, ps.Count);
+        }
+        
+        public static void SetNormals([NotNull] this Mesh mesh, Rent<Vector3> ps)
+        {
+            mesh.SetNormals(ps.Array, 0, ps.Count);
+        }
+
+        public static void SetTangents([NotNull] this Mesh mesh, Rent<Vector4> ps)
+        {
+            mesh.SetTangents(ps.Array, 0, ps.Count);
+        }
+
+        public static void SetIndices([NotNull] this Mesh mesh, Rent<int> ps, MeshTopology topology, int subMesh)
+        {
+            mesh.SetIndices(ps.Array, 0, ps.Count, topology, subMesh);
+        }
+        
+        public static void SetColors([NotNull] this Mesh mesh, Rent<Color> ps)
+        {
+            mesh.SetColors(ps.Array, 0, ps.Count);
+        }
+
+        public static void SetColors([NotNull] this Mesh mesh, Rent<Color32> ps)
+        {
+            mesh.SetColors(ps.Array, 0, ps.Count);
+        }
+        
+        public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector2> ps)
+        {
+            mesh.SetUVs(channel, ps.Array, 0, ps.Count);
+        }
+
+        public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector3> ps)
+        {
+            mesh.SetUVs(channel, ps.Array, 0, ps.Count);
+        }
+
+        public static void SetTriangles([NotNull] this Mesh mesh, Rent<int> ps, int subMesh = 0)
+        {
+            mesh.SetTriangles(ps.Array, 0, ps.Count, subMesh);
+        }
 
         public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {

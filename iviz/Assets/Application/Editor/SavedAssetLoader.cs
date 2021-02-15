@@ -16,6 +16,7 @@ namespace Iviz.Editor
 {
     public class SavedAssetLoader : UnityEditor.Editor
     {
+#if false
         [MenuItem("Iviz/Import Saved Assets To Unity")]
         public static async void CreateAllAssets()
         {
@@ -382,5 +383,6 @@ namespace Iviz.Editor
 
             return linkObject;
         }
+#endif
     }
 }

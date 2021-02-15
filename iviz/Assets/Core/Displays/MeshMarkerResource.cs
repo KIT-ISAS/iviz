@@ -6,6 +6,7 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -17,7 +18,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
-        [SerializeField] Texture2D texture;
+        [SerializeField] Texture2D diffuseTexture;
+        [SerializeField] Texture2D bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
         [SerializeField] Color tint = Color.white;
@@ -37,22 +39,41 @@ namespace Iviz.Displays
         MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
 
         [CanBeNull]
-        public Texture2D Texture
+        public Texture2D DiffuseTexture
         {
-            get => texture;
+            get => diffuseTexture;
             set
             {
-                if (texture == value)
+                if (diffuseTexture == value)
                 {
                     return;
                 }
 
                 textureMaterial = null;
                 textureMaterialAlpha = null;
-                texture = value;
+                diffuseTexture = value;
                 SetEffectiveColor();
             }
         }
+
+        [CanBeNull]
+        public Texture2D BumpTexture
+        {
+            get => bumpTexture;
+            set
+            {
+                if (bumpTexture == value)
+                {
+                    return;
+                }
+
+                textureMaterial = null;
+                textureMaterialAlpha = null;
+                bumpTexture = value;
+                SetEffectiveColor();                
+            }
+        }
+
 
         public Color EmissiveColor
         {
@@ -160,18 +181,13 @@ namespace Iviz.Displays
 
         void SetEffectiveColor()
         {
-            if (MainRenderer == null)
-            {
-                return;
-            }
-
-            if (OcclusionOnly)
+            if (MainRenderer == null || OcclusionOnly)
             {
                 return;
             }
 
             var effectiveColor = Color * Tint;
-            if (Texture == null)
+            if (DiffuseTexture == null && BumpTexture == null)
             {
                 var material = effectiveColor.a > 254f / 255f
                     ? Resource.Materials.Lit.Object
@@ -182,16 +198,16 @@ namespace Iviz.Displays
             {
                 if (textureMaterial == null)
                 {
-                    textureMaterial = Resource.TexturedMaterials.Get(Texture);
+                    textureMaterial = Resource.TexturedMaterials.Get(DiffuseTexture, BumpTexture);
                 }
 
-                MainRenderer.material = textureMaterial;
+                MainRenderer.sharedMaterial = textureMaterial;
             }
             else
             {
                 if (textureMaterialAlpha == null)
                 {
-                    textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(Texture);
+                    textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(DiffuseTexture, BumpTexture);
                 }
 
                 MainRenderer.sharedMaterial = textureMaterialAlpha;
@@ -203,7 +219,7 @@ namespace Iviz.Displays
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {
-            this.texture = texture;
+            this.diffuseTexture = texture;
             this.emissiveColor = emissiveColor;
             this.color = color;
             this.tint = tint;

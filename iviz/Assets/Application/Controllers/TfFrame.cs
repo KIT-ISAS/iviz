@@ -311,7 +311,7 @@ namespace Iviz.Controllers
         {
             if (listeners.RemoveWhere(listener => listener == null) != 0)
             {
-                Debug.LogWarning($"Frame '{id}' had a listener that was previosly destroyed.");
+                Debug.LogWarning($"Frame '{id}' had a listener that was previously destroyed.");
             }
             
             if (HasNoListeners && IsChildless)

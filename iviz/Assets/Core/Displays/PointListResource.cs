@@ -132,6 +132,10 @@ namespace Iviz.Displays
                         callback(ref pointBuffer);
                         isDirty = true;
                     }
+                    catch (Exception e)
+                    {
+                        Logger.Error("Error while parsing point list resource", e);
+                    }
                     finally
                     {
                         processing = false;

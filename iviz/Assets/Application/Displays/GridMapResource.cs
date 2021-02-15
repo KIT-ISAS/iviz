@@ -1,8 +1,8 @@
 using System;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
-using Unity.Collections;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -94,39 +94,44 @@ namespace Iviz.Displays
             cellsY = newHeight;
 
             int verticesSize = (cellsX + 1) * (cellsY + 1);
-            Vector3[] points = new Vector3[verticesSize];
-            float stepX = 1f / cellsX;
-            float stepY = 1f / cellsY;
-            for (int v = 0, off = 0; v <= cellsY; v++)
-            {
-                for (int u = 0; u <= cellsX; u++, off++)
-                {
-                    points[off] = new Vector3(
-                        u * stepX,
-                        v * stepY,
-                        0
-                    ).Ros2Unity();
-                }
-            }
-
             int indexSize = cellsX * cellsY;
-            int[] indices = new int[indexSize * 4];
-            for (int v = 0; v < cellsY; v++)
-            {
-                int iOffset = v * cellsX * 4;
-                int pOffset = v * (cellsX + 1);
-                for (int u = 0; u < cellsX; u++, iOffset += 4, pOffset++)
-                {
-                    indices[iOffset + 3] = pOffset;
-                    indices[iOffset + 2] = pOffset + 1;
-                    indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
-                    indices[iOffset + 0] = pOffset + (cellsX + 1);
-                }
-            }
 
-            mesh.vertices = points;
-            mesh.SetIndices(indices, MeshTopology.Quads, 0);
-            mesh.Optimize();
+            using (var pointsArray = new Rent<Vector3>(verticesSize))
+            using (var indicesArray = new Rent<int>(indexSize * 4))
+            {
+                Vector3[] points = pointsArray.Array;
+                float stepX = 1f / cellsX;
+                float stepY = 1f / cellsY;
+                for (int v = 0, off = 0; v <= cellsY; v++)
+                {
+                    for (int u = 0; u <= cellsX; u++, off++)
+                    {
+                        points[off] = new Vector3(
+                            u * stepX,
+                            v * stepY,
+                            0
+                        ).Ros2Unity();
+                    }
+                }
+
+                int[] indices = indicesArray.Array;
+                for (int v = 0; v < cellsY; v++)
+                {
+                    int iOffset = v * cellsX * 4;
+                    int pOffset = v * (cellsX + 1);
+                    for (int u = 0; u < cellsX; u++, iOffset += 4, pOffset++)
+                    {
+                        indices[iOffset + 3] = pOffset;
+                        indices[iOffset + 2] = pOffset + 1;
+                        indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
+                        indices[iOffset + 0] = pOffset + (cellsX + 1);
+                    }
+                }
+
+                mesh.SetVertices(pointsArray);
+                mesh.SetIndices(indicesArray, MeshTopology.Quads, 0);
+                mesh.Optimize();
+            }
 
             if (inputTexture != null)
             {
@@ -136,15 +141,6 @@ namespace Iviz.Displays
             inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
             material.SetTexture(PropInputTexture, inputTexture);
             material.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
-
-            /*
-            if (intensityTexture != null)
-            {
-                Destroy(intensityTexture);
-            }
-            intensityTexture = new Texture2D(Width, Height, TextureFormat.RFloat, false);
-            material.SetTexture("_IntensityTexture", intensityTexture);
-            */
         }
 
         void OnDestroy()
