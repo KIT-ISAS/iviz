@@ -402,21 +402,38 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (variable.CsClassName == "string")
+                            string ind;
+                            if (forceStruct)
                             {
-                                fieldsWithSize.Add($"size += 4 * {variable.CsFieldName}.Length;");
-                                fieldsWithSize.Add($"foreach (string s in {variable.CsFieldName})");
-                                fieldsWithSize.Add("{");
-                                fieldsWithSize.Add("    size += BuiltIns.UTF8.GetByteCount(s);");
-                                fieldsWithSize.Add("}");
+                                fieldsWithSize.Add($"if ({variable.CsFieldName} != null)");
+                                fieldsWithSize.Add($"{{");
+                                ind = "    ";
                             }
                             else
                             {
-                                fieldsWithSize.Add($"foreach (var i in {variable.CsFieldName})");
-                                fieldsWithSize.Add("{");
-                                fieldsWithSize.Add("    size += i.RosMessageLength;");
-                                fieldsWithSize.Add("}");
+                                ind = "";
                             }
+
+                            if (variable.CsClassName == "string")
+                            {
+                                fieldsWithSize.Add($"{ind}size += 4 * {variable.CsFieldName}.Length;");
+                                fieldsWithSize.Add($"{ind}foreach (string s in {variable.CsFieldName})");
+                                fieldsWithSize.Add($"{ind}{{");
+                                fieldsWithSize.Add($"{ind}    size += BuiltIns.UTF8.GetByteCount(s);");
+                                fieldsWithSize.Add($"{ind}}}");
+                            }
+                            else
+                            {
+                                fieldsWithSize.Add($"{ind}foreach (var i in {variable.CsFieldName})");
+                                fieldsWithSize.Add($"{ind}{{");
+                                fieldsWithSize.Add($"{ind}    size += i.RosMessageLength;");
+                                fieldsWithSize.Add($"{ind}}}");
+                            }
+                            if (forceStruct)
+                            {
+                                fieldsWithSize.Add($"}}");
+                            }
+                            
                         }
                     }
                 }
@@ -811,23 +828,37 @@ namespace Iviz.MsgsGen
 
                 if (variable.IsArray)
                 {
+                    string ind;
+                    if (forceStruct)
+                    {
+                        lines.Add($"    if ({variable.CsFieldName} != null)");
+                        lines.Add($"    {{");
+                        ind = "    ";
+                    }
+                    else
+                    {
+                        ind = "";
+                    }
                     if (variable.RosClassName == "string")
                     {
-                        lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
-                        lines.Add("    {");
-                        lines.Add(
-                            $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
-                        lines.Add("    }");
+                        lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
+                        lines.Add($"{ind}    {{");
+                        lines.Add($"{ind}        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                        lines.Add($"{ind}    }}");
                     }
                     else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsStruct)
                     {
-                        lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
-                        lines.Add("    {");
-                        lines.Add(
-                            $"        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
-                        lines.Add($"        {variable.CsFieldName}[i].RosValidate();");
-                        lines.Add("    }");
+                        lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
+                        lines.Add($"{ind}    {{");
+                        lines.Add($"{ind}        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                        lines.Add($"{ind}        {variable.CsFieldName}[i].RosValidate();");
+                        lines.Add($"{ind}    }}");
                     }
+
+                    if (forceStruct)
+                    {
+                        lines.Add($"    }}");
+                    }                    
                 }
             }
 

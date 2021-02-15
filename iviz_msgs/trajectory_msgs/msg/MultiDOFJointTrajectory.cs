@@ -103,7 +103,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
+                "H4sIAAAAAAAAE71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
                 "TR9AmzV84Gve33yjFe0rpop1zp5MoC5wTtFRaDkzRU8Rt5lzPjdWR6bC64ZJ2zxdeC7Ys82YosFx4Xw6" +
                 "jl5/4Cw631PeeR2Ns0H9NJgYLCm1ou8h3noObGN6Qq4gTU1XR3OTY/3BGRvPda1ZZxW16RiearmzAUab" +
                 "JL+Bzh+WF7p2trx252TqmozN6i6XKEh7r3sx3Lpgkp+3D1y7DGsOtzrLuOYpgBWU6UiVDklrkETUbMtY" +

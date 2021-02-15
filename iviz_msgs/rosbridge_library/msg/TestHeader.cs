@@ -64,7 +64,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA62RQWscMQyF7/4Vgj0kKWwKzW2ht9Kmh0IhuS9aW5kReOyJpdl0/n2eZ2na3HroYDAe" +
+                "H4sIAAAAAAAAE62RQWscMQyF7/4Vgj0kKWwKzW2ht9Kmh0IhuS9aW5kReOyJpdl0/n2eZ2na3HroYDAe" +
                 "v/c9WTJPx8kG+3gvnKTRuG3h83/+wo+Hbwey92FhRw/OJXFLNIlzYmd6qihCh1HaPstZMkw8zZJou/V1" +
                 "FruF8XFUI6xBijTOeaXFIPJKsU7TUjSyC7lO8s4PpxZimrm5xiVzg762pKXLnxpP0ulYJs+LlCj0/csB" +
                 "mmISF1cUtIIQm7BpGXBJYdHid5+6IeweX+oeRxnQyrdw8pG9Fyu/5ibW62Q7IOPD5XG3YKM5gpRkdL39" +

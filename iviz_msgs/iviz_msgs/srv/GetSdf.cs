@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/GetSdf";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "920692c7a5a3dd3789f2d8f444a0bf8f";
+        [Preserve] public const string RosMd5Sum = "4268e0641c7ff6b587e46790f433e3ba";
     }
 
     [DataContract]

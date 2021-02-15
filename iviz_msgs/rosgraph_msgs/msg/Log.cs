@@ -89,9 +89,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public readonly void RosValidate()
         {
-            for (int i = 0; i < Topics.Length; i++)
+            if (Topics != null)
             {
-                if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                for (int i = 0; i < Topics.Length; i++)
+                {
+                    if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                }
             }
         }
     
@@ -104,10 +107,13 @@ namespace Iviz.Msgs.RosgraphMsgs
                 size += BuiltIns.UTF8.GetByteCount(Msg ?? string.Empty);
                 size += BuiltIns.UTF8.GetByteCount(File ?? string.Empty);
                 size += BuiltIns.UTF8.GetByteCount(Function ?? string.Empty);
-                size += 4 * Topics.Length;
-                foreach (string s in Topics)
+                if (Topics != null)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(s);
+                    size += 4 * Topics.Length;
+                    foreach (string s in Topics)
+                    {
+                        size += BuiltIns.UTF8.GetByteCount(s);
+                    }
                 }
                 return size;
             }
@@ -123,7 +129,7 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
+                "H4sIAAAAAAAAE61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
                 "hwWDZN9zzv06yfMsz+mZd+xUGEnjoqmyxgdhgkcsK8fAtLx79/m+uKZccjk0E2yKPDyunooborxhw07o" +
                 "09iXxfqxeIPYXjijzG+8u/X6aV3cUs7OWXcaWS02iw/F9VvKaxGEvqpQmaqOynmqeKVYy1TfexaSHbXp" +
                 "mBQmoA8u5jSiY8qnw9YUWiZjJR/CnW8Q7dh70TAdvtZKR1I6IuMQr6JK7Wx3BA6mCsqaCD5c/0wYlAmv" +

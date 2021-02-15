@@ -84,7 +84,7 @@ namespace Iviz.Msgs.TurtleActionlib
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA8VXXW/bNhR9168gkIcmw5Ju7T66AH7wEjfLkLZB7O3VoMUriRtFeiQVx/9+51KybLf2" +
+                "H4sIAAAAAAAAE8VXXW/bNhR9168gkIcmw5Ju7T66AH7wEjfLkLZB7O3VoMUriRtFeiQVx/9+51KybLf2" +
                 "YgxNYjixZV2ee+731biScxrmUTt75aQRMn2dlviejdf37ig0Jq7u+nS1ef89kZrJ/O+VRNFdZ4Ov/Mo+" +
                 "jK/ORWx8NDRtlRk9ez3eNiP7jaQiL6r0kfVy0zqU4TVLXF8KtnGqVWtGMj5Z/TSMQ1St8pZZdiTGUVol" +
                 "vRI1RalklKJwYKzLivypoXsyOCTrOSmR7sblnMIZDk4qHQTeJVny0pilaAKEohO5q+vG6lxGElHXtHUe" +

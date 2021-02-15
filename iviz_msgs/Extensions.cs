@@ -99,28 +99,28 @@ namespace Iviz.Msgs
             Angular = t.Angular;
         }
 
-        public static Header WithNextSeq(this Header h) => new Header(h.Seq + 1, time.Now(), h.FrameId);
+        public static Header WithNextSeq(this Header h) => new Header(h.Seq + 1, time.Now(), h.FrameId ?? "");
 
         public static void Deconstruct(this Header h, out uint Seq, out time Stamp, out string FrameId) =>
-            (Seq, Stamp, FrameId) = (h.Seq, h.Stamp, h.FrameId);
+            (Seq, Stamp, FrameId) = (h.Seq, h.Stamp, h.FrameId ?? "");
 
         public static TransformStamped WithTransform(this TransformStamped ts, in Transform t) =>
-            new TransformStamped(ts.Header, ts.ChildFrameId, t);
+            new TransformStamped(ts.Header, ts.ChildFrameId ?? "", t);
 
         public static TransformStamped WithNextTransform(this TransformStamped ts, in Transform t) =>
-            new TransformStamped(ts.Header.WithNextSeq(), ts.ChildFrameId, t);
+            new TransformStamped(ts.Header.WithNextSeq(), ts.ChildFrameId ?? "", t);
 
         public static TransformStamped WithHeader(this TransformStamped ts, in Header h) =>
-            new TransformStamped(h, ts.ChildFrameId, ts.Transform);
+            new TransformStamped(h, ts.ChildFrameId ?? "", ts.Transform);
 
-        public static TransformStamped WithChildFrameId(this TransformStamped ts, string s) =>
-            new TransformStamped(ts.Header, s, ts.Transform);
+        public static TransformStamped WithChildFrameId(this TransformStamped ts, string? s) =>
+            new TransformStamped(ts.Header, s ?? "", ts.Transform);
 
         public static void Deconstruct(this TransformStamped t, out StdMsgs.Header Header, out string ChildFrameId,
             out Transform Transform)
         {
             Header = t.Header;
-            ChildFrameId = t.ChildFrameId;
+            ChildFrameId = t.ChildFrameId ?? "";
             Transform = t.Transform;
         }
     }
