@@ -13,14 +13,14 @@ namespace Iviz.Resources
         static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
-        public Material Get([CanBeNull] Texture diffuse = null, Texture bump = null)
+        public Material Get([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
             if (diffuse is null)
             {
                 throw new ArgumentNullException(nameof(diffuse));
             }
 
-            var key = (diffuse, bump,  false);
+            var key = (diffuse, bump, false);
             if (materialsByTexture.TryGetValue(key, out Material existingMaterial))
             {
                 return existingMaterial;
@@ -45,7 +45,7 @@ namespace Iviz.Resources
             return material;
         }
 
-        public Material GetAlpha([CanBeNull] Texture diffuse = null, Texture bump = null)
+        public Material GetAlpha([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
             if (diffuse is null)
             {

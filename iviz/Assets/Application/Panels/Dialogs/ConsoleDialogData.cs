@@ -231,7 +231,10 @@ namespace Iviz.App
                 }
                 else
                 {
-                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", message.Stamp);
+                    description.AppendFormat(
+                        message.Stamp.Date == GameThread.Now.Date
+                            ? "<b>[{0:HH:mm:ss}] "
+                            : "<b>[{0:yy-MM-dd HH:mm:ss}] ", message.Stamp);
                 }
 
                 string levelColor = ColorFromLevel(messageLevel);

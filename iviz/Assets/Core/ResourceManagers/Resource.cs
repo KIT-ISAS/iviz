@@ -143,6 +143,7 @@ namespace Iviz.Resources
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
+        [NotNull]
         public static Task<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
             CancellationToken token = default)
         {

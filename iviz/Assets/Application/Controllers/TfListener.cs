@@ -255,7 +255,6 @@ namespace Iviz.Controllers
 
         void ProcessMessages()
         {
-            //foreach ((TFMessage frame, bool isStatic) in messageList)
             while (messageList.TryDequeue(out var value))
             {
                 (TFMessage frame, bool isStatic) = value;
@@ -371,13 +370,6 @@ namespace Iviz.Controllers
             string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
 
             TfFrame frame = Instance.GetOrCreateFrameImpl(frameId);
-            /*
-            if (frame.Id != frameId)
-            {
-                // shouldn't happen!
-                Debug.LogWarning($"Error: Broken resource pool! Requested {frameId}, received {frame.Id}");
-            }
-            */
 
             if (!(listener is null))
             {
@@ -429,10 +421,6 @@ namespace Iviz.Controllers
         {
             messageList.Enqueue((msg, true));
             return true;
-        }
-
-        void AddAll([NotNull] TFMessage msg, bool isStatic)
-        {
         }
 
         public void MarkAsDead([NotNull] TfFrame frame)

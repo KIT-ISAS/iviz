@@ -137,7 +137,7 @@ namespace Iviz.Displays
             {
                 GameThread.PostImmediate(() =>
                 {
-                    Visible = false;
+                    MeshRenderer.enabled = false;
                     IsProcessing = false;
                 });
 
@@ -148,7 +148,7 @@ namespace Iviz.Displays
 
             GameThread.PostImmediate(() =>
             {
-                Visible = true;
+                MeshRenderer.enabled = true;
 
                 Transform mTransform = transform;
                 //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
@@ -217,6 +217,12 @@ namespace Iviz.Displays
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            MeshRenderer.enabled = true;
         }
 
         static unsafe void CreateMipmaps([NotNull] sbyte[] array, int width, int height)

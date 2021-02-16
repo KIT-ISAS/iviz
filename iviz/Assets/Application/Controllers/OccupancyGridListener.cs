@@ -103,6 +103,11 @@ namespace Iviz.Controllers
                 {
                     grid.Visible = value;
                 }
+
+                foreach (var texture in textureTiles)
+                {
+                    texture.Visible = value;
+                }
             }
         }
 
@@ -350,6 +355,7 @@ namespace Iviz.Controllers
                     {
                         textureTiles.Add(
                             ResourcePool.GetOrCreateDisplay<OccupancyGridTextureResource>(textureNode.transform));
+                        textureTiles[j].Visible = Visible;
                         textureTiles[j].Colormap = Colormap;
                         textureTiles[j].FlipMinMax = FlipMinMax;
                     }
@@ -358,7 +364,7 @@ namespace Iviz.Controllers
                 {
                     for (int j = tileTotalSize; j < textureTiles.Count; j++)
                     {
-                        ResourcePool.DisposeDisplay(textureTiles[j]);
+                        textureTiles[j].DisposeDisplay();
                         textureTiles[j] = null;
                     }
 

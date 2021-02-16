@@ -25,7 +25,7 @@ namespace Iviz.App
 
         static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
 
-        const float MinShadowDistance = 10;
+        const float MinShadowDistance = 4;
 
         public static GuiInputModule Instance { get; private set; }
 

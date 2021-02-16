@@ -140,7 +140,8 @@ namespace Iviz.App
             }
         }
 
-        GameObject CreatePanelObject(string panelName)
+        [NotNull]
+        GameObject CreatePanelObject([NotNull] string panelName)
         {
             GameObject o = Instantiate(UnityEngine.Resources.Load<GameObject>("Widgets/Data Panel"), transform);
             o.name = panelName;

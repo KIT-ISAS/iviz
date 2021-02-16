@@ -65,7 +65,9 @@ namespace Iviz.Resources
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");
-            OccupancyGridTexture = new Info<Material>("Materials/OccupancyGrid");
+            OccupancyGridTexture = (Settings.IsMobile || Settings.IsHololens)
+                ? new Info<Material>("Materials/OccupancyGrid") 
+                : new Info<Material>("Materials/OccupancyGrid Clip");
 
             PointCloud = new Info<Material>(assetHolder.PointCloud);
             Line = new Info<Material>(assetHolder.LineMaterial);

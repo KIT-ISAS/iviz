@@ -12,6 +12,7 @@ namespace Iviz.Displays
         
         Pose billboardStartPose;
         ImageTexture texture;
+        Vector3 offset;
 
         public ImageTexture Texture
         {
@@ -42,15 +43,19 @@ namespace Iviz.Displays
                 billboard.enabled = value;
                 if (!value)
                 {
-                    billboard.transform.SetLocalPose(billboardStartPose);
+                    billboard.transform.SetLocalPose(new Pose(Offset, billboardStartPose.rotation));
                 }
             }
         }
 
         public Vector3 Offset
         {
-            get => billboard.transform.localPosition;
-            set => billboard.transform.localPosition = value;
+            get => offset;
+            set
+            {
+                offset = value;
+                billboard.transform.localPosition = value;
+            }
         }
 
         public float Scale
@@ -78,12 +83,18 @@ namespace Iviz.Displays
 
         public void Set(int width, int height, int bpp, in ArraySegment<byte> data, bool generateMipmaps = false)
         {
-            if (Texture == null) Texture = new ImageTexture();
+            if (Texture == null)
+            {
+                Texture = new ImageTexture();
+            }
 
             switch (bpp)
             {
                 case 1:
                     Texture.Set(width, height, "mono8", data, generateMipmaps);
+                    break;
+                case 2:
+                    Texture.Set(width, height, "mono16", data, generateMipmaps);
                     break;
                 case 3:
                     Texture.Set(width, height, "rgb8", data, generateMipmaps);

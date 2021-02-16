@@ -14,8 +14,8 @@ namespace Iviz.Core
         [CanBeNull, DataMember] public string SourceId { get; }
         [DataMember] public DateTime Stamp { get; }
         [DataMember] public LogLevel Level { get; }
-        [NotNull] [DataMember] public string Message { get; }
-        [NotNull] [DataMember] public string File { get; }
+        [NotNull, DataMember] public string Message { get; }
+        [NotNull, DataMember] public string File { get; }
         [DataMember] public int Line { get; }
 
         public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
@@ -33,8 +33,8 @@ namespace Iviz.Core
             SourceId = msg.Name;
             Stamp = msg.Header.Stamp.ToDateTime();
             Level = (LogLevel) msg.Level;
-            Message = msg.Msg;
-            File = msg.File;
+            Message = msg.Msg ?? "";
+            File = msg.File ?? "";
             Line = (int) msg.Line;
         }
     }

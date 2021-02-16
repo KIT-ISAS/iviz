@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.XmlRpc;
@@ -567,11 +569,20 @@ namespace Iviz.Displays
         async Task<Info<GameObject>> LoadLocalModelAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            byte[] buffer;
+            Model msg;
 
             try
             {
-                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
+                using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
+                {
+                    if (buffer.Count < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Model.RosMd5Sum)
+                    {
+                        Logger.Warn($"{this}: Resource {uriString} is out of date");
+                        return null;
+                    }
+
+                    msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Count, 32);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -579,11 +590,9 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrResourceFailedWithError, uriString, e);
+                Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
             }
-
-            Model msg = Msgs.Buffer.Deserialize(modelGenerator, buffer, buffer.Length);
 
             GameObject obj = await CreateModelObjectAsync(uriString, msg, provider, token);
 
@@ -597,11 +606,14 @@ namespace Iviz.Displays
         async Task<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
             CancellationToken token)
         {
-            byte[] buffer;
+            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, true);
 
             try
             {
-                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
+                using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
+                {
+                    texture.LoadImage(buffer.Array);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -609,16 +621,12 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrLocalResourceFailedWithError, uriString, e);
+                Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
-            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, false);
-            texture.LoadImage(buffer);
-            if (!Application.isEditor)
-            {
-                texture.Compress(true);
-            }
+            Debug.Log(texture.mipmapCount);
+            texture.Compress(true);
 
             texture.name = uriString;
 
@@ -632,11 +640,20 @@ namespace Iviz.Displays
         async Task<Info<GameObject>> LoadLocalSceneAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            byte[] buffer;
+            Scene msg;
 
             try
             {
-                buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
+                using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
+                {
+                    if (buffer.Count < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Scene.RosMd5Sum)
+                    {
+                        Logger.Warn($"{this}: Resource {uriString} is out of date");
+                        return null;
+                    }
+
+                    msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Count, 32);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -644,11 +661,10 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Debug.LogWarningFormat(StrLocalResourceFailedWithError, uriString, e);
+                Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
-            Scene msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer, buffer.Length);
             GameObject obj = await CreateSceneNodeAsync(msg, provider, token);
 
             Info<GameObject> resource = new Info<GameObject>(obj);
@@ -673,9 +689,13 @@ namespace Iviz.Displays
 
                 string localPath = SanitizeForFilename(uriString);
 
-                byte[] buffer = new byte[msg.Model.RosMessageLength];
-                Msgs.Buffer.Serialize(msg.Model, buffer);
-                await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
+                using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + 32))
+                {
+                    BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, 32, buffer.Array, 0);
+                    Msgs.Buffer.Serialize(msg.Model, buffer.Array, 32);
+                    await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
+                }
+
                 Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Models[uriString] = localPath;
@@ -747,10 +767,13 @@ namespace Iviz.Displays
 
                 string localPath = SanitizeForFilename(uriString);
 
-                byte[] buffer = new byte[msg.Scene.RosMessageLength];
-                Msgs.Buffer.Serialize(msg.Scene, buffer);
-                await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
-                Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
+                using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + 32))
+                {
+                    BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, 32, buffer.Array, 0);
+                    Msgs.Buffer.Serialize(msg.Scene, buffer.Array, 32);
+                    await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
+                    Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
+                }
 
                 resourceFiles.Scenes[uriString] = localPath;
                 await WriteResourceFileAsync(token);
@@ -787,8 +810,8 @@ namespace Iviz.Displays
             Point,
             Directional,
             Spot
-        }        
-        
+        }
+
         [NotNull]
         [ItemNotNull]
         async Task<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
@@ -830,7 +853,7 @@ namespace Iviz.Displays
 
                 includeResource.Instantiate(child.transform);
             }
-            
+
             foreach (Msgs.IvizMsgs.Light source in scene.Lights)
             {
                 GameObject lightObject = new GameObject("Light:" + source.Name);
@@ -857,7 +880,7 @@ namespace Iviz.Displays
                         break;
                 }
             }
-            
+
 
             return node;
         }

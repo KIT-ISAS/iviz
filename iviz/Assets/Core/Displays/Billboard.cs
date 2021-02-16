@@ -5,26 +5,30 @@ namespace Iviz.Displays
 {
     public sealed class Billboard : MonoBehaviour
     {
-        public Transform parent;
-        public Vector3 offset;
+        Transform mTransform;
+        [SerializeField] Transform parent;
+        [SerializeField] Vector3 offset;
+
+        public Transform Parent { get; set; }
+        public Vector3 Offset { get; set; }
 
         public bool UseAbsoluteOffset { get; set; } = true;
 
         void Start()
         {
+            mTransform = transform;
             if (parent == null)
             {
-                parent = transform.parent;
+                parent = mTransform.parent;
             }
         }
 
         void LateUpdate()
         {
-            GameObject mainCamera = Settings.MainCamera.gameObject;
-            transform.LookAt(2 * transform.position - mainCamera.transform.position, Vector3.up);
+            mTransform.LookAt(2 * mTransform.position - Settings.MainCameraTransform.position, Vector3.up);
             if (UseAbsoluteOffset && parent != null)
             {
-                transform.position = parent.position + offset;
+                mTransform.position = parent.position + offset;
             } 
         }
     }

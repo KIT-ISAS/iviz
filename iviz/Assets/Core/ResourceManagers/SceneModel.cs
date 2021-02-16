@@ -124,7 +124,7 @@ namespace Iviz.Displays
                     for (int i = 0; i < mesh.Tangents.Length; i++)
                     {
                         var tangent = mesh.Tangents[i];
-                        tangents.Array[i] = new Vector4(tangent.X, tangent.Y, tangent.Z, 1);
+                        tangents.Array[i] = new Vector4(tangent.X, tangent.Y, tangent.Z, -1);
                     }
 
                     meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);

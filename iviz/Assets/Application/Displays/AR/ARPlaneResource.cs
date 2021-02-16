@@ -136,7 +136,7 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            ResourcePool.DisposeDisplay(lines);
+            lines.DisposeDisplay();
             lines = null;
             ARController.ARModeChanged -= OnARModeChanged;
         }

@@ -47,8 +47,8 @@ namespace Iviz.Displays
 
         public Vector3 BillboardOffset
         {
-            get => Billboard.offset;
-            set => Billboard.offset = value;
+            get => Billboard.Offset;
+            set => Billboard.Offset = value;
         }
         
         public float ElementSize

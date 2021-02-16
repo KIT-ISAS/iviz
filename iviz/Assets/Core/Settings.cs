@@ -131,6 +131,12 @@ namespace Iviz.Core
             resourcesFilePath ?? (resourcesFilePath = $"{PersistentDataPath}/resources.json");
 
         [CanBeNull] static Camera mainCamera;
+        [CanBeNull] static Transform mainCameraTransform;
+
+        [NotNull]
+        public static Transform MainCameraTransform => mainCameraTransform != null
+            ? mainCameraTransform
+            : (mainCameraTransform = MainCamera.transform);
 
         [NotNull]
         public static Camera MainCamera
@@ -139,7 +145,11 @@ namespace Iviz.Core
                 ? mainCamera
                 : mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
                     .GetComponent<Camera>();
-            set => mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
+            set
+            {
+                mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
+                mainCameraTransform = value.transform;
+            }
         }
 
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }

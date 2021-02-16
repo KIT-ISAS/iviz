@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         TfFrame parent;
 
         Transform mTransform;
-        public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
 
         IFrameNodeOwner owner;
         
@@ -32,6 +32,7 @@ namespace Iviz.Controllers
             set => SetParent(value, true);
         }
 
+        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -62,7 +63,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void AttachTo([CanBeNull] string parentId, Msgs.time _ = default)
+        public void AttachTo([CanBeNull] string parentId, in Msgs.time _ = default)
         {
             if (parentId == null)
             {

@@ -127,6 +127,7 @@ namespace Iviz.App
 
         static readonly string[] OwnPublishedTopicName = {"clicked_point"};
         
+        [NotNull]
         IEnumerable<string> GetTopicHints()
         {
             string ownResolvedTopic =

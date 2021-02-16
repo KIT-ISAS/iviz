@@ -25,14 +25,15 @@ namespace Iviz.Resources
         [NotNull] readonly ReadOnlyDictionary<string, string> robotDescriptions;
 
         [NotNull, ItemNotNull]
-        public IEnumerable<string> GetRobotNames() => robotDescriptions.Keys;
+        public IEnumerable<string> GetRobotNames() =>
+            robotDescriptions.Keys ?? (IEnumerable<string>) Array.Empty<string>();
 
         public InternalResourceManager()
         {
             string robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
             if (string.IsNullOrEmpty(robotsFile))
             {
-                Logger.Debug("InternalResourceManager: Empty resource file!");
+                Logger.Warn($"{this}: Empty resource file!");
                 robotDescriptions = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
                 return;
             }
@@ -45,7 +46,7 @@ namespace Iviz.Resources
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + pair.Value)?.text;
                 if (string.IsNullOrEmpty(robotDescription))
                 {
-                    Logger.Debug("InternalResourceManager: Empty or null description file " + pair.Value + "!");
+                    Logger.Info($"{this}: Empty or null description file {pair.Value}!");
                     continue;
                 }
 
@@ -88,7 +89,7 @@ namespace Iviz.Resources
             return TryGet(uriString, textures, negTextures, out info);
         }
 
-        static bool TryGet<T>([NotNull] string uriString,
+        bool TryGet<T>([NotNull] string uriString,
             [NotNull] Dictionary<string, Info<T>> repository,
             [NotNull] HashSet<string> negRepository,
             out Info<T> info)
@@ -111,7 +112,7 @@ namespace Iviz.Resources
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
-                Logger.Warn($"[InternalResourceManager]: Uri '{uriString}' is not a valid uri!");
+                Logger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
                 negRepository.Add(uriString);
                 return false;
             }

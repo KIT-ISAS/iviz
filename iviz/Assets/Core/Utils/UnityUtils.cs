@@ -189,12 +189,12 @@ namespace Iviz.Core
         {
             return new ArraySegment<T>(ts, offset, count);
         }
-        
+
         public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
             mesh.SetVertices(ps.Array, 0, ps.Count);
         }
-        
+
         public static void SetNormals([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
             mesh.SetNormals(ps.Array, 0, ps.Count);
@@ -209,7 +209,7 @@ namespace Iviz.Core
         {
             mesh.SetIndices(ps.Array, 0, ps.Count, topology, subMesh);
         }
-        
+
         public static void SetColors([NotNull] this Mesh mesh, Rent<Color> ps)
         {
             mesh.SetColors(ps.Array, 0, ps.Count);
@@ -219,7 +219,7 @@ namespace Iviz.Core
         {
             mesh.SetColors(ps.Array, 0, ps.Count);
         }
-        
+
         public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector2> ps)
         {
             mesh.SetUVs(channel, ps.Array, 0, ps.Count);
@@ -454,35 +454,51 @@ namespace Iviz.Core
 
     public static class FileUtils
     {
-        public static async Task WriteAllBytesAsync(string filePath, byte[] bytes, CancellationToken token)
+        public static async Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes,
+            CancellationToken token)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Create,
                 FileAccess.Write, FileShare.None, 4096, true))
             {
-                await stream.WriteAsync(bytes, 0 ,bytes.Length, token);
-            }                
-        }    
-        
-        public static async Task<byte[]> ReadAllBytesAsync(string filePath, CancellationToken token)
+                await stream.WriteAsync(bytes, 0, bytes.Length, token);
+            }
+        }
+
+        public static async Task WriteAllBytesAsync([NotNull] string filePath, Rent<byte> bytes,
+            CancellationToken token)
+        {
+            using (FileStream stream = new FileStream(filePath, FileMode.Create,
+                FileAccess.Write, FileShare.None, 4096, true))
+            {
+                await stream.WriteAsync(bytes.Array, 0, bytes.Count, token);
+            }
+        }
+
+        public static async Task<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Open,
                 FileAccess.Read, FileShare.None, 4096, true))
             {
-                byte[] bytes = new byte[stream.Length];
-                await stream.ReadAsync(bytes, 0, bytes.Length, token);
-                return bytes;
-            }                
+                var rent = new Rent<byte>((int) stream.Length);
+                await stream.ReadAsync(rent.Array, 0, rent.Count, token);
+                return rent;
+            }
         }
-        
-        public static Task WriteAllTextAsync(string filePath, string text, CancellationToken token)
+
+        [NotNull]
+        public static Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text, CancellationToken token)
         {
             return WriteAllBytesAsync(filePath, BuiltIns.UTF8.GetBytes(text), token);
-        }    
-        
-        public static async Task<string> ReadAllTextAsync(string filePath, CancellationToken token)
+        }
+
+        [ItemNotNull]
+        public static async Task<string> ReadAllTextAsync([NotNull] string filePath, CancellationToken token)
         {
-            return BuiltIns.UTF8.GetString(await ReadAllBytesAsync(filePath, token));
-        }         
+            using (var bytes = await ReadAllBytesAsync(filePath, token))
+            {
+                return BuiltIns.UTF8.GetString(bytes.Array);
+            }
+        }
     }
 
     public static class MeshRendererUtils
@@ -493,6 +509,7 @@ namespace Iviz.Core
         static readonly int ColorPropId = Shader.PropertyToID("_Color");
         static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
         static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
+        static readonly int BumpMapStPropId = Shader.PropertyToID("_BumpMap_ST_");
         static readonly int SmoothnessPropId = Shader.PropertyToID("_Smoothness");
         static readonly int MetallicPropId = Shader.PropertyToID("_Metallic");
 
@@ -544,18 +561,17 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertyMainTexSt([NotNull] this MeshRenderer meshRenderer,
-            in Vector2 xy, in Vector2 wh, int id = 0)
+        public static void ResetPropertyTextureScale([NotNull] this MeshRenderer meshRenderer)
         {
             if (meshRenderer == null)
             {
                 throw new ArgumentNullException(nameof(meshRenderer));
             }
 
-            meshRenderer.GetPropertyBlock(PropBlock, id);
-            PropBlock.SetVector(MainTexStPropId, new Vector4(wh.x, wh.y, xy.x, xy.y));
-            meshRenderer.SetPropertyBlock(PropBlock, id);
+            meshRenderer.GetPropertyBlock(PropBlock, 0);
+            PropBlock.SetVector(MainTexStPropId, new Vector4(1, 1, 0, 0));
+            PropBlock.SetVector(BumpMapStPropId, new Vector4(1, 1, 0, 0));
+            meshRenderer.SetPropertyBlock(PropBlock, 0);
         }
-
     }
 }

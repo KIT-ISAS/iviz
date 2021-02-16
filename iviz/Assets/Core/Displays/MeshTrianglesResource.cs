@@ -138,7 +138,7 @@ namespace Iviz.Displays
             in Rent<Vector3> normals,
             in Rent<Vector4> tangents,
             in Rent<Vector3> diffuseTexCoords,
-            in Rent<Vector3> normalTexCoords,
+            in Rent<Vector3> bumpTexCoords,
             in Rent<int> triangles,
             in Rent<Color32> colors = default)
         {
@@ -171,9 +171,9 @@ namespace Iviz.Displays
                 ownMesh.SetUVs(0, diffuseTexCoords);
             }
 
-            if (normalTexCoords.Count != 0)
+            if (bumpTexCoords.Count != 0)
             {
-                ownMesh.SetUVs(1, normalTexCoords);
+                ownMesh.SetUVs(1, bumpTexCoords);
             }
 
             if (colors.Count != 0)
@@ -183,17 +183,22 @@ namespace Iviz.Displays
 
             ownMesh.SetTriangles(triangles);
 
+            
             if (normals.Count == 0)
             {
                 ownMesh.RecalculateNormals();
             }
             
+            
             if (tangents.Count != 0)
             {
-                ownMesh.SetNormals(normals);
+                ownMesh.SetTangents(tangents);
             }
-
-            ownMesh.Optimize();
+            else
+            {
+                ownMesh.RecalculateTangents();
+            }
+            
             LocalBounds = ownMesh.bounds;
         }
 

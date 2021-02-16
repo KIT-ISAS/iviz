@@ -8,6 +8,7 @@ using Iviz.ModelService;
 #endif
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Ros;
+using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -69,6 +70,7 @@ namespace Iviz.Controllers
 #endif
         }
 
+        [ItemCanBeNull]
         static async Task<string> GetPathExtras(CancellationToken token)
         {
             string homeFolder;

@@ -18,7 +18,7 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
-        [SerializeField] Texture2D diffuseTexture;
+        [FormerlySerializedAs("texture")] [SerializeField] Texture2D diffuseTexture;
         [SerializeField] Texture2D bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
@@ -120,13 +120,20 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
+
+            var sharedMaterial = MainRenderer.sharedMaterial;
+            if (diffuseTexture == null && sharedMaterial != null && sharedMaterial.mainTexture != null)
+            {
+                diffuseTexture = (Texture2D) sharedMaterial.mainTexture;
+            }
+            
             Color = color;
             EmissiveColor = emissiveColor;
             Tint = tint;
             Metallic = metallic;
             Smoothness = smoothness;
 
-            MainRenderer.SetPropertyMainTexSt(Vector2.zero, Vector2.one);
+            MainRenderer.ResetPropertyTextureScale();
             
             if (Settings.IsHololens)
             {
@@ -219,7 +226,7 @@ namespace Iviz.Displays
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {
-            this.diffuseTexture = texture;
+            diffuseTexture = texture;
             this.emissiveColor = emissiveColor;
             this.color = color;
             this.tint = tint;

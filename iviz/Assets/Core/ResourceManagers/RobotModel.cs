@@ -100,6 +100,7 @@ namespace Iviz.Displays
 
                 if (linkObjects.Count == 0)
                 {
+                    Logger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
                     return;
                 }
 

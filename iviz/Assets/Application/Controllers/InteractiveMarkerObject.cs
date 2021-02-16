@@ -302,7 +302,7 @@ namespace Iviz.Controllers
             controls.Clear();
             controlsToDelete.Clear();
 
-            ResourcePool.DisposeDisplay(text);
+            text.DisposeDisplay();
 
             Destroy(controlNode.gameObject);
         }

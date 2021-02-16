@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -144,7 +143,7 @@ namespace Iviz.Ros
                 AddTask(async () =>
                 {
                     Core.Logger.Internal("Resubscribing and readvertising...");
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
 
                     (bool success, object hosts) = await client.Parameters.GetParameterAsync("/iviz/hosts", token);
                     if (success)
@@ -156,13 +155,13 @@ namespace Iviz.Ros
                     await Task.WhenAll(publishersByTopic.Values.Select(
                         topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)));
 
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done ReAdvertising");
                     Core.Logger.Debug("*** Resubscribing...");
                     await Task.WhenAll(subscribersByTopic.Values.Select(
                         topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)));
 
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done Resubscribing");
                     Core.Logger.Debug("*** Requesting topics...");
                     cachedTopics = await newClient.GetSystemPublishedTopicsAsync(token);
@@ -170,7 +169,7 @@ namespace Iviz.Ros
 
                     Core.Logger.Debug("*** Advertising services...");
 
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     await Task.WhenAll(servicesByTopic.Values.Select(
                         topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)));
                     Core.Logger.Debug("*** Done Advertising services!");
@@ -224,7 +223,7 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void ParseHostsParam(object hostsObj)
+        static void ParseHostsParam([CanBeNull] object hostsObj)
         {
             try
             {
@@ -899,7 +898,7 @@ namespace Iviz.Ros
             }
         }
 
-        [NotNull]
+        [NotNull, ItemCanBeNull]
         public async Task<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =

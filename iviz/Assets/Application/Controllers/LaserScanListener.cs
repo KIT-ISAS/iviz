@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
@@ -212,8 +213,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            resource.Suspend();
-            ResourcePool.DisposeDisplay(resource);
+            resource.DisposeDisplay();
 
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);

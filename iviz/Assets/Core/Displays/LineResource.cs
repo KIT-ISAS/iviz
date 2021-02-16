@@ -27,7 +27,7 @@ namespace Iviz.Displays
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
-        readonly CapsuleLinesHelper capsuleHelper = new CapsuleLinesHelper();
+        //readonly CapsuleLinesHelper capsuleHelper = new CapsuleLinesHelper();
 
         NativeList<float4x2> lineBuffer;
         [CanBeNull] ComputeBuffer lineComputeBuffer;
@@ -289,8 +289,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            capsuleHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale);
-            capsuleHelper.UpdateMesh(mesh);
+            //capsuleHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale);
+            //capsuleHelper.UpdateMesh(mesh);
+            CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, mesh);
 
             CalculateBounds();
 

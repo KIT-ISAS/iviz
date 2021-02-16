@@ -2,9 +2,6 @@
 {
 	Properties
 	{
-		_Color("Diffuse Color", Color) = (1,1,1,1)
-		_Smoothness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metalness", Range(0,1)) = 0.5
 	}
 		SubShader
 	{
