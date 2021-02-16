@@ -78,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         
         ServiceResponseDetailsRequest IDeserializable<ServiceResponseDetailsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ServiceResponseDetailsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.Rosapi
         
         ServiceResponseDetailsResponse IDeserializable<ServiceResponseDetailsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ServiceResponseDetailsResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

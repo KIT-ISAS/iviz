@@ -123,7 +123,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetCartesianPathRequest IDeserializable<GetCartesianPathRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetCartesianPathRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -211,7 +211,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetCartesianPathResponse IDeserializable<GetCartesianPathResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetCartesianPathResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         FluidPressure IDeserializable<FluidPressure>.RosDeserialize(ref Buffer b)
         {
-            return new FluidPressure(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

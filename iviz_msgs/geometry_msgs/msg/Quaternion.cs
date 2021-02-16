@@ -37,7 +37,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Quaternion IDeserializable<Quaternion>.RosDeserialize(ref Buffer b)
         {
-            return new Quaternion(ref b);
+            return new(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
         /// Custom iviz code
-        public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
+        public readonly Quaternion Inverse => new(-X, -Y, -Z, W);
         public static readonly Quaternion Identity = (0, 0, 0, 1);
         public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;
         public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q.XYZ, q.W, v);
@@ -86,8 +86,8 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;
         public readonly Quaternion Normalized => Extensions.Normalize(this);
         public Vector3 XYZ { readonly get => (X, Y, Z); set => (X, Y, Z) = value; }
-        public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
-        public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
+        public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new(p.X, p.Y, p.Z, p.W);
+        public static implicit operator Quaternion(in (Vector3 p, double W) q) => new(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
     }
 }

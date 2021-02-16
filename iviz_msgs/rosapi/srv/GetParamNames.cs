@@ -72,7 +72,7 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly GetParamNamesRequest Singleton = new GetParamNamesRequest();
+        public static readonly GetParamNamesRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
         
         GetParamNamesResponse IDeserializable<GetParamNamesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetParamNamesResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

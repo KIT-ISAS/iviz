@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         public string Topic { get; }
         public bool Connected { get; }
 
-        public BusInfo(int id, Uri destinationId, DirectionType direction, string topic, bool status = true, string transport = "TCPROS")
+        public BusInfo(int id, Uri? destinationId, DirectionType direction, string topic, bool status = true, string transport = "TCPROS")
         {
             ConnectionId = id;
             DestinationId = destinationId ?? throw new ArgumentNullException(nameof(destinationId));

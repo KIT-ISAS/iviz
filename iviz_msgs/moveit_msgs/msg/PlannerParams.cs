@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlannerParams IDeserializable<PlannerParams>.RosDeserialize(ref Buffer b)
         {
-            return new PlannerParams(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

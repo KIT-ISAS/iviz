@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PickupActionResult IDeserializable<PickupActionResult>.RosDeserialize(ref Buffer b)
         {
-            return new PickupActionResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

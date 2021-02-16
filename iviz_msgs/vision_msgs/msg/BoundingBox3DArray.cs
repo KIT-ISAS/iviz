@@ -41,7 +41,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         BoundingBox3DArray IDeserializable<BoundingBox3DArray>.RosDeserialize(ref Buffer b)
         {
-            return new BoundingBox3DArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

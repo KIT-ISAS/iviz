@@ -114,7 +114,7 @@ namespace Iviz.XmlRpc
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
                     reader.Close();
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     if (readTask.IsFaulted)
                     {
                         ExceptionDispatchInfo.Capture(readTask.Exception!.InnerException!).Throw();

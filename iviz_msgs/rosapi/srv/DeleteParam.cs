@@ -78,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         
         DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new DeleteParamRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
+        public static readonly DeleteParamResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshGeometryStamped IDeserializable<MeshGeometryStamped>.RosDeserialize(ref Buffer b)
         {
-            return new MeshGeometryStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

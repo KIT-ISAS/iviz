@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GripperTranslation IDeserializable<GripperTranslation>.RosDeserialize(ref Buffer b)
         {
-            return new GripperTranslation(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

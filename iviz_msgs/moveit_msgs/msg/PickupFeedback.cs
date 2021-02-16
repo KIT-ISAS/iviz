@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PickupFeedback IDeserializable<PickupFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new PickupFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

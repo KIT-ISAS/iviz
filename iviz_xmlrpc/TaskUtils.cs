@@ -33,7 +33,7 @@ namespace Iviz.XmlRpc
 
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(timeout.SetCanceled);
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
 
             Task result = await Task.WhenAny(task, timeoutTask).Caf();
             return result == task;
@@ -62,7 +62,7 @@ namespace Iviz.XmlRpc
 
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(timeout.SetCanceled);
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
             
             Task result = await Task.WhenAny(task, timeoutTask).Caf();
             if (result != task)
@@ -246,7 +246,7 @@ namespace Iviz.XmlRpc
             return default;
         }
 
-        public static void ThrowIfCanceled(this CancellationToken t, Task? task = null)
+        public static void ThrowIfCanceled(this CancellationToken t, Task task)
         {
             if (t.IsCancellationRequested)
             {
@@ -268,7 +268,7 @@ namespace Iviz.XmlRpc
 #else
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(timeout.SetCanceled);
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
             
             Task writeTask = writer.WriteAsync(text);
             Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
@@ -304,13 +304,13 @@ namespace Iviz.XmlRpc
             }
             catch (OperationCanceledException)
             {
-                token.ThrowIfCanceled();
+                token.ThrowIfCancellationRequested();
                 throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
             }
 #else
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(timeout.SetCanceled);
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
 
             Task connectionTask = client.ConnectAsync(hostname, port);
             Task resultTask = await Task.WhenAny(timeoutTask, connectionTask).Caf();

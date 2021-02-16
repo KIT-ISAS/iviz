@@ -47,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         JoyFeedback IDeserializable<JoyFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new JoyFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -80,7 +80,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         GetObjectInformationRequest IDeserializable<GetObjectInformationRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetObjectInformationRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         GetObjectInformationResponse IDeserializable<GetObjectInformationResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetObjectInformationResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

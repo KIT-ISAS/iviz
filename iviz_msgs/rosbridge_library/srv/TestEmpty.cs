@@ -72,7 +72,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
+        public static readonly TestEmptyRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
+        public static readonly TestEmptyResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

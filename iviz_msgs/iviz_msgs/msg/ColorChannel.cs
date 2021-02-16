@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         ColorChannel IDeserializable<ColorChannel>.RosDeserialize(ref Buffer b)
         {
-            return new ColorChannel(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

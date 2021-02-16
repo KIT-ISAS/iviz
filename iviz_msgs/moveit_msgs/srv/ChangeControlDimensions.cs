@@ -96,7 +96,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ChangeControlDimensionsRequest IDeserializable<ChangeControlDimensionsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ChangeControlDimensionsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ChangeControlDimensionsResponse IDeserializable<ChangeControlDimensionsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ChangeControlDimensionsResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

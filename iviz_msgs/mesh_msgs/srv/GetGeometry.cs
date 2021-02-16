@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetGeometryRequest IDeserializable<GetGeometryRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetGeometryRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetGeometryResponse IDeserializable<GetGeometryResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetGeometryResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

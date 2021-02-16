@@ -48,7 +48,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         Table IDeserializable<Table>.RosDeserialize(ref Buffer b)
         {
-            return new Table(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

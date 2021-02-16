@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         AccelWithCovariance IDeserializable<AccelWithCovariance>.RosDeserialize(ref Buffer b)
         {
-            return new AccelWithCovariance(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

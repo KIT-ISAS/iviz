@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshFaceCluster IDeserializable<MeshFaceCluster>.RosDeserialize(ref Buffer b)
         {
-            return new MeshFaceCluster(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -75,7 +75,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         PointCloud2 IDeserializable<PointCloud2>.RosDeserialize(ref Buffer b)
         {
-            return new PointCloud2(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

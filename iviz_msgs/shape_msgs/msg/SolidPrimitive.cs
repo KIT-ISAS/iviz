@@ -65,7 +65,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         SolidPrimitive IDeserializable<SolidPrimitive>.RosDeserialize(ref Buffer b)
         {
-            return new SolidPrimitive(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

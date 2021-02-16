@@ -55,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         RobotState IDeserializable<RobotState>.RosDeserialize(ref Buffer b)
         {
-            return new RobotState(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

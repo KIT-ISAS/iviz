@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Matrix4 IDeserializable<Matrix4>.RosDeserialize(ref Buffer b)
         {
-            return new Matrix4(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

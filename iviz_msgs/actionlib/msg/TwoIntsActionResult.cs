@@ -41,7 +41,7 @@ namespace Iviz.Msgs.Actionlib
         
         TwoIntsActionResult IDeserializable<TwoIntsActionResult>.RosDeserialize(ref Buffer b)
         {
-            return new TwoIntsActionResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

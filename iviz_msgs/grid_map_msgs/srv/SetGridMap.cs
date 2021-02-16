@@ -79,7 +79,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         SetGridMapRequest IDeserializable<SetGridMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetGridMapRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.GridMapMsgs
             return Singleton;
         }
         
-        public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
+        public static readonly SetGridMapResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

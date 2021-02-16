@@ -43,7 +43,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         ObjectHypothesis IDeserializable<ObjectHypothesis>.RosDeserialize(ref Buffer b)
         {
-            return new ObjectHypothesis(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

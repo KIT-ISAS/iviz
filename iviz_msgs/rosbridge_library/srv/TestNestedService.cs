@@ -78,7 +78,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestNestedServiceRequest IDeserializable<TestNestedServiceRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TestNestedServiceRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestNestedServiceResponse IDeserializable<TestNestedServiceResponse>.RosDeserialize(ref Buffer b)
         {
-            return new TestNestedServiceResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

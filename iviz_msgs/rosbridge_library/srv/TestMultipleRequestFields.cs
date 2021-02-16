@@ -87,7 +87,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestMultipleRequestFieldsRequest IDeserializable<TestMultipleRequestFieldsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TestMultipleRequestFieldsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
+        public static readonly TestMultipleRequestFieldsResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

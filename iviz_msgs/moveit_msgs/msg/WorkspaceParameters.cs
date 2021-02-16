@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         WorkspaceParameters IDeserializable<WorkspaceParameters>.RosDeserialize(ref Buffer b)
         {
-            return new WorkspaceParameters(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

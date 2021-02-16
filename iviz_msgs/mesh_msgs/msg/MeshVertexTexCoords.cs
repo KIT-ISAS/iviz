@@ -37,7 +37,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexTexCoords IDeserializable<MeshVertexTexCoords>.RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexTexCoords(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

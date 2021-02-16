@@ -13,14 +13,14 @@ namespace Iviz.Roslib
     /// </summary>
     public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        static readonly Action<T, IRosTcpReceiver<T>>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver<T>>>();
+        static readonly Action<T, IRosTcpReceiver>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver>>();
 
-        readonly Dictionary<string, Action<T, IRosTcpReceiver<T>>> callbacksById = new();
+        readonly Dictionary<string, Action<T, IRosTcpReceiver>> callbacksById = new();
         readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
         readonly TcpReceiverManager<T> manager;
 
-        Action<T, IRosTcpReceiver<T>>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
+        Action<T, IRosTcpReceiver>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
         int totalSubscribers;
         bool disposed;
 
@@ -74,7 +74,7 @@ namespace Iviz.Roslib
                 {TimeoutInMs = timeoutInMs};
         }
 
-        internal void MessageCallback(in T msg, IRosTcpReceiver<T> receiver)
+        internal void MessageCallback(in T msg, IRosTcpReceiver receiver)
         {
             foreach (var callback in callbacks)
             {
@@ -209,7 +209,7 @@ namespace Iviz.Roslib
             return id;
         }
         
-        public string Subscribe(Action<T, IRosTcpReceiver<T>> callback)
+        public string Subscribe(Action<T, IRosTcpReceiver> callback)
         {
             if (callback is null)
             {

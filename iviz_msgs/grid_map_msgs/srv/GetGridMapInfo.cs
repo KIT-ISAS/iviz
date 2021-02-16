@@ -72,7 +72,7 @@ namespace Iviz.Msgs.GridMapMsgs
             return Singleton;
         }
         
-        public static readonly GetGridMapInfoRequest Singleton = new GetGridMapInfoRequest();
+        public static readonly GetGridMapInfoRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         GetGridMapInfoResponse IDeserializable<GetGridMapInfoResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetGridMapInfoResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

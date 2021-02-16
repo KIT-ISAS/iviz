@@ -83,7 +83,7 @@ namespace Iviz.Msgs.NavMsgs
         
         SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetMapRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.NavMsgs
         
         SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SetMapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

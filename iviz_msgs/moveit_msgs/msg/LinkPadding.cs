@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         LinkPadding IDeserializable<LinkPadding>.RosDeserialize(ref Buffer b)
         {
-            return new LinkPadding(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -72,7 +72,7 @@ namespace Iviz.Msgs.MoveitMsgs
             return Singleton;
         }
         
-        public static readonly QueryPlannerInterfacesRequest Singleton = new QueryPlannerInterfacesRequest();
+        public static readonly QueryPlannerInterfacesRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         QueryPlannerInterfacesResponse IDeserializable<QueryPlannerInterfacesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new QueryPlannerInterfacesResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -13,17 +13,17 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
-    public interface IRosTcpReceiver<T> where T : IMessage
+    public interface IRosTcpReceiver
     {
         string Topic { get; }
         Uri RemoteUri { get; }
-        public Endpoint? RemoteEndpoint { get; }
-        public Endpoint? Endpoint { get; }
-        public IReadOnlyList<string>? TcpHeader { get;}
-        public SubscriberReceiverState State { get; }
+        Endpoint? RemoteEndpoint { get; }
+        Endpoint? Endpoint { get; }
+        IReadOnlyList<string>? TcpHeader { get; }
+        SubscriberReceiverState State { get; }
     }
-    
-    internal sealed class TcpReceiverAsync<T> : IRosTcpReceiver<T> where T : IMessage
+
+    internal sealed class TcpReceiverAsync<T> : IRosTcpReceiver where T : IMessage
     {
         const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
@@ -32,13 +32,13 @@ namespace Iviz.Roslib
         readonly TcpReceiverManager<T> manager;
 
         TopicInfo<T> topicInfo;
-        
+
         readonly bool requestNoDelay;
 
         public Endpoint? RemoteEndpoint { get; private set; }
         public Endpoint? Endpoint { get; private set; }
         public IReadOnlyList<string>? TcpHeader { get; private set; }
-        
+
         long numReceived;
         long bytesReceived;
 
@@ -47,7 +47,6 @@ namespace Iviz.Roslib
 
         readonly CancellationTokenSource runningTs = new();
 
-        byte[] readBuffer = new byte[4];
         NetworkStream? stream;
         Task? task;
         TcpClient? tcpClient;
@@ -71,12 +70,17 @@ namespace Iviz.Roslib
         public string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted;
 
-        public SubscriberReceiverState State => new(
-            IsAlive, IsConnected, requestNoDelay, Endpoint,
-            RemoteUri, RemoteEndpoint,
-            numReceived, bytesReceived,
-            errorDescription
-        );
+        public SubscriberReceiverState State => new(RemoteUri)
+        {
+            IsAlive = IsAlive,
+            IsConnected = IsConnected,
+            RequestNoDelay = requestNoDelay,
+            EndPoint = Endpoint,
+            RemoteEndpoint = RemoteEndpoint,
+            NumReceived = numReceived,
+            BytesReceived = bytesReceived,
+            ErrorDescription = errorDescription
+        };
 
         public async Task DisposeAsync()
         {
@@ -96,7 +100,6 @@ namespace Iviz.Roslib
                     .AwaitNoThrow(this);
             }
 
-            readBuffer = Array.Empty<byte>();
             task = null;
             runningTs.Dispose();
         }
@@ -114,7 +117,8 @@ namespace Iviz.Roslib
 
             try
             {
-                await client.TryConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token, connectionTimeoutInMs);
+                await client.TryConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token,
+                    connectionTimeoutInMs);
                 return client;
             }
             catch (Exception e)
@@ -190,19 +194,14 @@ namespace Iviz.Roslib
             return Utils.WriteHeaderAsync(stream!, contents, runningTs.Token);
         }
 
-
-#if !NETSTANDARD2_0
-        async ValueTask<int> ReceivePacket()
-#else
-        async Task<int> ReceivePacket()
-#endif
+        async Task<int> ReceivePacket(ResizableRent<byte> readBuffer)
         {
-            if (!await stream!.ReadChunkAsync(readBuffer, 4, runningTs.Token))
+            if (!await stream!.ReadChunkAsync(readBuffer.Array, 4, runningTs.Token))
             {
                 return -1;
             }
 
-            int length = BitConverter.ToInt32(readBuffer, 0);
+            int length = BitConverter.ToInt32(readBuffer.Array, 0);
             if (length == 0)
             {
                 return 0;
@@ -214,12 +213,8 @@ namespace Iviz.Roslib
                 throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
             }
 
-            if (readBuffer.Length < length)
-            {
-                readBuffer = new byte[length + BufferSizeIncrease];
-            }
-
-            if (!await stream!.ReadChunkAsync(readBuffer, length, runningTs.Token).Caf())
+            readBuffer.EnsureCapability(length);
+            if (!await stream!.ReadChunkAsync(readBuffer.Array, length, runningTs.Token).Caf())
             {
                 return -1;
             }
@@ -231,13 +226,16 @@ namespace Iviz.Roslib
         {
             await SendHeader().Caf();
 
-            int receivedLength = await ReceivePacket().Caf();
+            using ResizableRent<byte> readBuffer = new(4);
+
+            int receivedLength = await ReceivePacket(readBuffer).Caf();
             if (receivedLength == -1)
             {
                 throw new IOException("Connection closed during handshake");
             }
 
-            List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
+
+            List<string> responses = Utils.ParseHeader(readBuffer.Array, receivedLength);
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
@@ -334,9 +332,7 @@ namespace Iviz.Roslib
             {
                 runningTs.Cancel();
             }
-            catch (ObjectDisposedException)
-            {
-            }
+            catch (ObjectDisposedException) { }
 
             Logger.LogDebugFormat("{0}: Stopped!", this);
         }
@@ -360,28 +356,25 @@ namespace Iviz.Roslib
         async Task ProcessLoopFixed(int fixedSize)
         {
             int fixedSizeWithHeader = 4 + fixedSize;
-            if (readBuffer.Length < fixedSizeWithHeader)
-            {
-                readBuffer = new byte[fixedSizeWithHeader];
-            }
+            using var readBuffer = new Rent<byte>(fixedSizeWithHeader); 
 
             while (KeepRunning)
             {
-                bool success = await stream!.ReadChunkAsync(readBuffer, fixedSizeWithHeader, runningTs.Token);
+                bool success = await stream!.ReadChunkAsync(readBuffer.Array, fixedSizeWithHeader, runningTs.Token);
                 if (!success)
                 {
                     Logger.LogDebugFormat("{0}: Partner closed connection", this);
                     return;
                 }
 
-                int receivedSize = BitConverter.ToInt32(readBuffer, 0);
+                int receivedSize = BitConverter.ToInt32(readBuffer.Array, 0);
                 if (receivedSize != fixedSize)
                 {
                     throw new RosInvalidPackageSizeException(
                         $"Receiver expected packet with fixed size of {fixedSize} bytes, but got a packet of size {receivedSize}!");
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, fixedSize, 4);
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSize, 4);
                 manager.MessageCallback(message, this);
 
                 numReceived++;
@@ -391,16 +384,17 @@ namespace Iviz.Roslib
 
         async Task ProcessLoopVariable()
         {
+            using ResizableRent<byte> readBuffer = new(4); 
             while (KeepRunning)
             {
-                int rcvLength = await ReceivePacket();
+                int rcvLength = await ReceivePacket(readBuffer);
                 if (rcvLength == -1)
                 {
                     Logger.LogDebugFormat("{0}: Partner closed connection", this);
                     return;
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer, rcvLength);
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
                 manager.MessageCallback(message, this);
 
                 numReceived++;

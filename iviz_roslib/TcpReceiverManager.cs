@@ -125,7 +125,7 @@ namespace Iviz.Roslib
             return new Endpoint(response.Protocol.Hostname, response.Protocol.Port);
         }
 
-        internal void MessageCallback(in T msg, IRosTcpReceiver<T> receiver)
+        internal void MessageCallback(in T msg, IRosTcpReceiver receiver)
         {
             subscriber.MessageCallback(msg, receiver);
         }

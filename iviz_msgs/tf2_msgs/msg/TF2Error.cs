@@ -44,7 +44,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b)
         {
-            return new TF2Error(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

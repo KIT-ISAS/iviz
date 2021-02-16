@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         Plane IDeserializable<Plane>.RosDeserialize(ref Buffer b)
         {
-            return new Plane(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

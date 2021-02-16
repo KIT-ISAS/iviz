@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Tf2Msgs
             return Singleton;
         }
         
-        public static readonly LookupTransformFeedback Singleton = new LookupTransformFeedback();
+        public static readonly LookupTransformFeedback Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

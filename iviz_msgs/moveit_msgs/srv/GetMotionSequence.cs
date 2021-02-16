@@ -79,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetMotionSequenceRequest IDeserializable<GetMotionSequenceRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetMotionSequenceRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetMotionSequenceResponse IDeserializable<GetMotionSequenceResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetMotionSequenceResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

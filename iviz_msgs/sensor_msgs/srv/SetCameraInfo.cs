@@ -85,7 +85,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetCameraInfoRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SetCameraInfoResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

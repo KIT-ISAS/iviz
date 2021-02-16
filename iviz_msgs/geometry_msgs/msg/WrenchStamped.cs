@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         WrenchStamped IDeserializable<WrenchStamped>.RosDeserialize(ref Buffer b)
         {
-            return new WrenchStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

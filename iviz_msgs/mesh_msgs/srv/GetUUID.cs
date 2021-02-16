@@ -72,7 +72,7 @@ namespace Iviz.Msgs.MeshMsgs
             return Singleton;
         }
         
-        public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
+        public static readonly GetUUIDRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetUUIDResponse IDeserializable<GetUUIDResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetUUIDResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

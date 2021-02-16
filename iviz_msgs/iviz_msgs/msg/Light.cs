@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Light IDeserializable<Light>.RosDeserialize(ref Buffer b)
         {
-            return new Light(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

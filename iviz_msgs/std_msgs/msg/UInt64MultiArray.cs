@@ -40,7 +40,7 @@ namespace Iviz.Msgs.StdMsgs
         
         UInt64MultiArray IDeserializable<UInt64MultiArray>.RosDeserialize(ref Buffer b)
         {
-            return new UInt64MultiArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

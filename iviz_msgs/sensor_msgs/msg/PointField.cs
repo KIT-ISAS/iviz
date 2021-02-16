@@ -53,7 +53,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         PointField IDeserializable<PointField>.RosDeserialize(ref Buffer b)
         {
-            return new PointField(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

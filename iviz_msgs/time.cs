@@ -17,7 +17,7 @@ namespace Iviz.Msgs
             Nsecs = nsecs;
         }
 
-        static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         public time(in DateTime time)
         {
@@ -28,7 +28,7 @@ namespace Iviz.Msgs
 
         public static time Now()
         {
-            return new time(DateTime.UtcNow);
+            return new(DateTime.UtcNow);
         }
 
         public DateTime ToDateTime()
@@ -84,7 +84,7 @@ namespace Iviz.Msgs
 
         public time WithSecs(uint secs)
         {
-            return new time(secs, Nsecs);
+            return new(secs, Nsecs);
         }
 
         public override string ToString()

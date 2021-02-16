@@ -33,7 +33,7 @@ namespace Iviz.Msgs.StdMsgs
         
         Bool IDeserializable<Bool>.RosDeserialize(ref Buffer b)
         {
-            return new Bool(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

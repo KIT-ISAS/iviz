@@ -83,7 +83,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         AddModuleFromTopicRequest IDeserializable<AddModuleFromTopicRequest>.RosDeserialize(ref Buffer b)
         {
-            return new AddModuleFromTopicRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -146,7 +146,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         AddModuleFromTopicResponse IDeserializable<AddModuleFromTopicResponse>.RosDeserialize(ref Buffer b)
         {
-            return new AddModuleFromTopicResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

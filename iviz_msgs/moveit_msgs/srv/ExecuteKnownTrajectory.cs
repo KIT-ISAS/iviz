@@ -85,7 +85,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ExecuteKnownTrajectoryRequest IDeserializable<ExecuteKnownTrajectoryRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ExecuteKnownTrajectoryRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ExecuteKnownTrajectoryResponse IDeserializable<ExecuteKnownTrajectoryResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ExecuteKnownTrajectoryResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

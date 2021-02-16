@@ -43,7 +43,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         LookupTransformAction IDeserializable<LookupTransformAction>.RosDeserialize(ref Buffer b)
         {
-            return new LookupTransformAction(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

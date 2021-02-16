@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         RenameRobotStateInWarehouseRequest IDeserializable<RenameRobotStateInWarehouseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new RenameRobotStateInWarehouseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.MoveitMsgs
             return Singleton;
         }
         
-        public static readonly RenameRobotStateInWarehouseResponse Singleton = new RenameRobotStateInWarehouseResponse();
+        public static readonly RenameRobotStateInWarehouseResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

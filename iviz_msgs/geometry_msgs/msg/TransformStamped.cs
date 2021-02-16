@@ -42,7 +42,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly TransformStamped IDeserializable<TransformStamped>.RosDeserialize(ref Buffer b)
         {
-            return new TransformStamped(ref b);
+            return new(ref b);
         }
         
         public override readonly int GetHashCode() => (Header, ChildFrameId, Transform).GetHashCode();

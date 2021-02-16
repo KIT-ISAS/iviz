@@ -38,7 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         VectorField IDeserializable<VectorField>.RosDeserialize(ref Buffer b)
         {
-            return new VectorField(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

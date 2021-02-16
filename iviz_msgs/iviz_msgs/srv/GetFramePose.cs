@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFramePoseRequest IDeserializable<GetFramePoseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetFramePoseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -144,7 +144,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFramePoseResponse IDeserializable<GetFramePoseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetFramePoseResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

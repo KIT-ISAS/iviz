@@ -34,7 +34,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestChar IDeserializable<TestChar>.RosDeserialize(ref Buffer b)
         {
-            return new TestChar(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

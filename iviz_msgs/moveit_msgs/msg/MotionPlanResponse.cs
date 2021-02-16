@@ -55,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         MotionPlanResponse IDeserializable<MotionPlanResponse>.RosDeserialize(ref Buffer b)
         {
-            return new MotionPlanResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

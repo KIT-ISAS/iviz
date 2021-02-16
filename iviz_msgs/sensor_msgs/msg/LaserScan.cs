@@ -76,7 +76,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         LaserScan IDeserializable<LaserScan>.RosDeserialize(ref Buffer b)
         {
-            return new LaserScan(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

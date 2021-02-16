@@ -60,7 +60,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         AttachedCollisionObject IDeserializable<AttachedCollisionObject>.RosDeserialize(ref Buffer b)
         {
-            return new AttachedCollisionObject(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -82,7 +82,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         NavSatFix IDeserializable<NavSatFix>.RosDeserialize(ref Buffer b)
         {
-            return new NavSatFix(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModelResourceRequest IDeserializable<GetModelResourceRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetModelResourceRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModelResourceResponse IDeserializable<GetModelResourceResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetModelResourceResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

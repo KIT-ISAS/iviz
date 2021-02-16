@@ -40,7 +40,7 @@ namespace Iviz.Msgs.StdMsgs
         
         MultiArrayDimension IDeserializable<MultiArrayDimension>.RosDeserialize(ref Buffer b)
         {
-            return new MultiArrayDimension(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         LinkScale IDeserializable<LinkScale>.RosDeserialize(ref Buffer b)
         {
-            return new LinkScale(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

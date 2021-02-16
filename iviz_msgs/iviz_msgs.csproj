@@ -15,7 +15,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9</LangVersion>
     <DefineConstants>TRACE;ENABLE_PROFILER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

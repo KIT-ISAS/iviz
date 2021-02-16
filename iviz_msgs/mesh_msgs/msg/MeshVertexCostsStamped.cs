@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexCostsStamped IDeserializable<MeshVertexCostsStamped>.RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexCostsStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

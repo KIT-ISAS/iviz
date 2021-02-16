@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshTexture IDeserializable<MeshTexture>.RosDeserialize(ref Buffer b)
         {
-            return new MeshTexture(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

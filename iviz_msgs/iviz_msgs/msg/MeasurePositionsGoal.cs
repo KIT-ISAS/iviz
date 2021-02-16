@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         MeasurePositionsGoal IDeserializable<MeasurePositionsGoal>.RosDeserialize(ref Buffer b)
         {
-            return new MeasurePositionsGoal(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

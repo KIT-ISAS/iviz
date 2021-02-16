@@ -41,7 +41,7 @@ namespace Iviz.Msgs.Actionlib
         
         TestActionGoal IDeserializable<TestActionGoal>.RosDeserialize(ref Buffer b)
         {
-            return new TestActionGoal(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

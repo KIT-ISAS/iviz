@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPlannerParamsRequest IDeserializable<GetPlannerParamsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetPlannerParamsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPlannerParamsResponse IDeserializable<GetPlannerParamsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetPlannerParamsResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

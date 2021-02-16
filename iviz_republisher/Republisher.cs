@@ -178,7 +178,7 @@ namespace Iviz.Republisher
                 //Console.WriteLine($"** Starting writer for '{topic}'...");
                 await writer.StartAsync(destClient, topic);
                 //Console.WriteLine($"** Transferring '{topic}'!");
-                await writer.WriteAllAsync(reader.ReadAllAsync(Token));
+                await writer.WriteAllAsync(reader.ReadAllAsync(Token), token: Token);
                 Console.WriteLine($"** Circuit for '{topic}' closed.");
             }
             catch (Exception e)

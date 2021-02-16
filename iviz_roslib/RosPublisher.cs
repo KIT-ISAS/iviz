@@ -97,7 +97,7 @@ namespace Iviz.Roslib
             manager.Publish((T) message);
         }
 
-        Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        Task<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -131,7 +131,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public Task<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -148,11 +148,11 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return Task.CompletedTask;
+                    return Task.FromResult(true);
                 case RosPublishPolicy.WaitUntilSent:
                     return manager.PublishAndWaitAsync(message, linkedToken.Token);
                 default:
-                    return Task.CompletedTask;
+                    return Task.FromResult(false);
             }
         }
 

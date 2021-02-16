@@ -100,7 +100,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         GetGridMapRequest IDeserializable<GetGridMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetGridMapRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -169,7 +169,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         GetGridMapResponse IDeserializable<GetGridMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetGridMapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

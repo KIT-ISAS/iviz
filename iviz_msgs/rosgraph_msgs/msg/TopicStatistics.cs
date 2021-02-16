@@ -86,7 +86,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         TopicStatistics IDeserializable<TopicStatistics>.RosDeserialize(ref Buffer b)
         {
-            return new TopicStatistics(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

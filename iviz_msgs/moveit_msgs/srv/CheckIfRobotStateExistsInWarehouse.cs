@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         CheckIfRobotStateExistsInWarehouseRequest IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new CheckIfRobotStateExistsInWarehouseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         CheckIfRobotStateExistsInWarehouseResponse IDeserializable<CheckIfRobotStateExistsInWarehouseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new CheckIfRobotStateExistsInWarehouseResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -64,7 +64,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         GridMap IDeserializable<GridMap>.RosDeserialize(ref Buffer b)
         {
-            return new GridMap(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

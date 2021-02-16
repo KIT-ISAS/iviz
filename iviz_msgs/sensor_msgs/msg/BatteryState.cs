@@ -112,7 +112,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         BatteryState IDeserializable<BatteryState>.RosDeserialize(ref Buffer b)
         {
-            return new BatteryState(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -5,45 +5,18 @@ namespace Iviz.Roslib
 {
     public sealed class PublisherSenderState : JsonToString
     {
-        public bool IsAlive { get; }
-        public bool Latching { get; }
-        public SenderStatus Status { get; }
-        public Endpoint? Endpoint { get; }
-        public string RemoteId { get; }
-        public Endpoint? RemoteEndpoint { get; }
-        public int CurrentQueueSize { get; }
-        public int MaxQueueSize { get; }
-        public long NumSent { get; }
-        public long BytesSent { get; }
-        public long NumDropped { get; }
-        public long BytesDropped { get; }
-
-        internal PublisherSenderState(bool isAlive,
-                           bool latching,
-                           SenderStatus status,
-                           Endpoint? endpoint,
-                           string remoteId,
-                           Endpoint? remoteEndpoint,
-                           int currentQueueSize,
-                           int maxQueueSize,
-                           long numSent,
-                           long bytesSent,
-                           long numDropped, 
-                           long bytesDropped)
-        {
-            IsAlive = isAlive;
-            Latching = latching;
-            Status = status;
-            Endpoint = endpoint;
-            RemoteId = remoteId;
-            RemoteEndpoint = remoteEndpoint;
-            CurrentQueueSize = currentQueueSize;
-            MaxQueueSize = maxQueueSize;
-            NumSent = numSent;
-            BytesSent = bytesSent;
-            NumDropped = numDropped;
-            BytesDropped = bytesDropped;
-        }
+        public bool IsAlive { get; internal set; }
+        public bool Latching { get; internal set; }
+        public SenderStatus Status { get; internal set; }
+        public Endpoint? Endpoint { get; internal set; }
+        public string RemoteId { get; internal set; } = "";
+        public Endpoint? RemoteEndpoint { get; internal set; }
+        public int CurrentQueueSize { get; internal set; }
+        public int MaxQueueSize { get; internal set; }
+        public long NumSent { get; internal set; }
+        public long BytesSent { get; internal set; }
+        public long NumDropped { get; internal set; }
+        public long BytesDropped { get; internal set; }
     }
 
     public sealed class PublisherTopicState : JsonToString
@@ -53,7 +26,8 @@ namespace Iviz.Roslib
         public ReadOnlyCollection<string> TopicIds { get; }
         public ReadOnlyCollection<PublisherSenderState> Senders { get; }
 
-        internal PublisherTopicState(string topic, string type, IList<string> topicIds, IList<PublisherSenderState> senders)
+        internal PublisherTopicState(string topic, string type, IList<string> topicIds,
+            IList<PublisherSenderState> senders)
         {
             Topic = topic;
             Type = type;

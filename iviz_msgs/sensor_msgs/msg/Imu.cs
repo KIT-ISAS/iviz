@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Imu IDeserializable<Imu>.RosDeserialize(ref Buffer b)
         {
-            return new Imu(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

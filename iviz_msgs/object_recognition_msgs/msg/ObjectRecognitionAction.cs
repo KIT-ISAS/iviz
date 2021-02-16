@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         ObjectRecognitionAction IDeserializable<ObjectRecognitionAction>.RosDeserialize(ref Buffer b)
         {
-            return new ObjectRecognitionAction(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

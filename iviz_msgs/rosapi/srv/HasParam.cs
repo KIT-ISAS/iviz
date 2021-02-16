@@ -78,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         
         HasParamRequest IDeserializable<HasParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new HasParamRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.Rosapi
         
         HasParamResponse IDeserializable<HasParamResponse>.RosDeserialize(ref Buffer b)
         {
-            return new HasParamResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

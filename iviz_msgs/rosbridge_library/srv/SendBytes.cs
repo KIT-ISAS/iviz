@@ -77,7 +77,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         SendBytesRequest IDeserializable<SendBytesRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SendBytesRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         SendBytesResponse IDeserializable<SendBytesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SendBytesResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

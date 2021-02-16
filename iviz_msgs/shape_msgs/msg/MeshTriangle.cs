@@ -35,7 +35,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         MeshTriangle IDeserializable<MeshTriangle>.RosDeserialize(ref Buffer b)
         {
-            return new MeshTriangle(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

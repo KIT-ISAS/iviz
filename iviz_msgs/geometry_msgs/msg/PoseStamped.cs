@@ -37,7 +37,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PoseStamped IDeserializable<PoseStamped>.RosDeserialize(ref Buffer b)
         {
-            return new PoseStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

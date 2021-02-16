@@ -71,7 +71,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         Detection3D IDeserializable<Detection3D>.RosDeserialize(ref Buffer b)
         {
-            return new Detection3D(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

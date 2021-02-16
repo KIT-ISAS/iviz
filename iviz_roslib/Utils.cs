@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -15,20 +16,11 @@ using Newtonsoft.Json;
 
 namespace Iviz.Roslib
 {
-    /// <summary>
-    /// Simple class that overrides the ToString() method to produce a JSON representation. 
-    /// </summary>
-    public abstract class JsonToString
-    {
-        public override string ToString()
-        {
-            return Utils.ToJsonString(this);
-        }
-    }
-
     public static class Utils
     {
         public const string GenericExceptionFormat = "{0}: {1}";
+
+        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool HasPrefix(this string check, string prefix)
         {
@@ -155,10 +147,14 @@ namespace Iviz.Roslib
             return false;
         }
 
-        internal static List<string> ParseHeader(byte[] readBuffer, int totalLength = -1)
+        internal static List<string> ParseHeader(in Rent<byte> readBuffer)
+        {
+            return ParseHeader(readBuffer.Array, readBuffer.Count);
+        }
+
+        internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
         {
             int numRead = 0;
-            int toRead = totalLength != -1 ? totalLength : readBuffer.Length;
 
             List<string> contents = new();
             while (numRead < toRead)
@@ -183,18 +179,18 @@ namespace Iviz.Roslib
             {
                 int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token).Caf();
 #else
-            var timeout = new TaskCompletionSource<object>();
-            var timeoutTask = timeout.Task;
-            using var registration = token.Register(timeout.SetCanceled);
-            
+            var tokenTaskSource = new TaskCompletionSource<object>();
+            var tokenTask = tokenTaskSource.Task;
+            using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
+
             while (numRead < toRead)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
-                Task resultTask = await Task.WhenAny(readTask, timeoutTask).Caf();
-                if (resultTask == timeoutTask)
+                Task resultTask = await Task.WhenAny(readTask, tokenTask).Caf();
+                if (resultTask == tokenTask)
                 {
-                    token.ThrowIfCanceled(timeoutTask);
-                    throw new TimeoutException($"Reading operation timed out");
+                    token.ThrowIfCanceled(tokenTask);
+                    throw new TimeoutException("Reading operation timed out");
                 }
 
                 int readNow = await readTask.Caf();
@@ -216,16 +212,16 @@ namespace Iviz.Roslib
 #if !NETSTANDARD2_0
             await stream.WriteAsync(buffer.AsMemory(0, count), token).Caf();
 #else
-            var timeout = new TaskCompletionSource<object>();
-            var timeoutTask = timeout.Task;
-            using var registration = token.Register(timeout.SetCanceled);
-            
+            var tokenTaskSource = new TaskCompletionSource<object>();
+            var tokenTask = tokenTaskSource.Task;
+            using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
+
             Task writeTask = stream.WriteAsync(buffer, 0, count, token);
-            Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
-            if (resultTask == timeoutTask)
+            Task resultTask = await Task.WhenAny(writeTask, tokenTask).Caf();
+            if (resultTask == tokenTask)
             {
-                token.ThrowIfCanceled(timeoutTask);
-                throw new TimeoutException($"Writing operation timed out");
+                token.ThrowIfCanceled(tokenTask);
+                throw new TimeoutException("Writing operation timed out");
             }
 
             await writeTask.Caf();
@@ -236,23 +232,22 @@ namespace Iviz.Roslib
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
-            byte[] array = new byte[totalLength + 4];
-            using (BinaryWriter writer = new(new MemoryStream(array)))
+            using var array = new Rent<byte>(totalLength + 4);
+            using var writer = new BinaryWriter(new MemoryStream(array.Array));
+
+            writer.Write(totalLength);
+            foreach (string t in contents)
             {
-                writer.Write(totalLength);
-                foreach (string t in contents)
-                {
-                    writer.Write(t.Length);
-                    writer.Write(BuiltIns.UTF8.GetBytes(t));
-                }
+                writer.Write(t.Length);
+                writer.Write(BuiltIns.UTF8.GetBytes(t));
             }
 
-            await stream.WriteChunkAsync(array, array.Length, token).Caf();
+            await stream.WriteChunkAsync(array.Array, array.Count, token).Caf();
         }
 
 
         /// <summary>
-        /// A string hash that does not change every run unlike GetHashCode
+        ///     A string hash that does not change every run unlike GetHashCode
         /// </summary>
         /// <param name="str">String to calculate the hash from</param>
         /// <returns>A hash integer</returns>
@@ -267,15 +262,16 @@ namespace Iviz.Roslib
                 {
                     hash1 = ((hash1 << 5) + hash1) ^ str[i];
                     if (i == str.Length - 1)
+                    {
                         break;
+                    }
+
                     hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
                 }
 
-                return hash1 + (hash2 * 1566083941);
+                return hash1 + hash2 * 1566083941;
             }
         }
-
-        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {
@@ -300,6 +296,57 @@ namespace Iviz.Roslib
         {
             UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+        }
+    }
+
+    /// <summary>
+    ///     Simple class that overrides the ToString() method to produce a JSON representation.
+    /// </summary>
+    public abstract class JsonToString
+    {
+        public override string ToString()
+        {
+            return Utils.ToJsonString(this);
+        }
+    }
+
+    internal sealed class ResizableRent<T> : IDisposable where T : struct
+    {
+        bool disposed;
+        Rent<T> buffer;
+
+        public T[] Array => buffer.Array;
+
+        public ResizableRent(int size)
+        {
+            buffer = new Rent<T>(size);
+        }
+
+        public void EnsureCapability(int size)
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("Dispose() has already been called on this object.");
+            }
+            
+            if (buffer.Array.Length >= size)
+            {
+                return;
+            }
+
+            buffer.Dispose();
+            buffer = new Rent<T>(size);
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            buffer.Dispose();
         }
     }
 }

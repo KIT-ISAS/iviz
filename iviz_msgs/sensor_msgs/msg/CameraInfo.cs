@@ -175,7 +175,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         CameraInfo IDeserializable<CameraInfo>.RosDeserialize(ref Buffer b)
         {
-            return new CameraInfo(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

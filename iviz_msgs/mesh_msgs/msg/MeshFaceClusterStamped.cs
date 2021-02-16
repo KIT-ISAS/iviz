@@ -48,7 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshFaceClusterStamped IDeserializable<MeshFaceClusterStamped>.RosDeserialize(ref Buffer b)
         {
-            return new MeshFaceClusterStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

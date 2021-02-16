@@ -90,7 +90,7 @@ namespace Iviz.Msgs.NavMsgs
         
         GetPlanRequest IDeserializable<GetPlanRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetPlanRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -149,7 +149,7 @@ namespace Iviz.Msgs.NavMsgs
         
         GetPlanResponse IDeserializable<GetPlanResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetPlanResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

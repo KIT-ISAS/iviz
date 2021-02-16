@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ListRobotStatesInWarehouseRequest IDeserializable<ListRobotStatesInWarehouseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ListRobotStatesInWarehouseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -138,7 +138,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ListRobotStatesInWarehouseResponse IDeserializable<ListRobotStatesInWarehouseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ListRobotStatesInWarehouseResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

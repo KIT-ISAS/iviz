@@ -37,7 +37,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         TwistStamped IDeserializable<TwistStamped>.RosDeserialize(ref Buffer b)
         {
-            return new TwistStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

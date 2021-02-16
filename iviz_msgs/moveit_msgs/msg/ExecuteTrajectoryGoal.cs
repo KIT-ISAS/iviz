@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ExecuteTrajectoryGoal IDeserializable<ExecuteTrajectoryGoal>.RosDeserialize(ref Buffer b)
         {
-            return new ExecuteTrajectoryGoal(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

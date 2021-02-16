@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         SetFixedFrameRequest IDeserializable<SetFixedFrameRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetFixedFrameRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         SetFixedFrameResponse IDeserializable<SetFixedFrameResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SetFixedFrameResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

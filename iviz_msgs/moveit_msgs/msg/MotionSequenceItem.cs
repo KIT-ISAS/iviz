@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         MotionSequenceItem IDeserializable<MotionSequenceItem>.RosDeserialize(ref Buffer b)
         {
-            return new MotionSequenceItem(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         
         TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b)
         {
-            return new TypeDef(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlaceFeedback IDeserializable<PlaceFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new PlaceFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

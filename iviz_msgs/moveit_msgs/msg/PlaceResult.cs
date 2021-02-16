@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlaceResult IDeserializable<PlaceResult>.RosDeserialize(ref Buffer b)
         {
-            return new PlaceResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -93,7 +93,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SetPlannerParamsRequest IDeserializable<SetPlannerParamsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetPlannerParamsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.MoveitMsgs
             return Singleton;
         }
         
-        public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
+        public static readonly SetPlannerParamsResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

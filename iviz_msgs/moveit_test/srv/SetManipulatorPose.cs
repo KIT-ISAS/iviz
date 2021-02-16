@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MoveitTest
         
         SetManipulatorPoseRequest IDeserializable<SetManipulatorPoseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetManipulatorPoseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.MoveitTest
         
         SetManipulatorPoseResponse IDeserializable<SetManipulatorPoseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SetManipulatorPoseResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

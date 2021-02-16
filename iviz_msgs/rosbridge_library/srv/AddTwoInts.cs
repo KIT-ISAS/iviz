@@ -80,7 +80,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         AddTwoIntsRequest IDeserializable<AddTwoIntsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new AddTwoIntsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         AddTwoIntsResponse IDeserializable<AddTwoIntsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new AddTwoIntsResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

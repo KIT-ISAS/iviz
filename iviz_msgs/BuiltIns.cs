@@ -5,14 +5,13 @@ using System.IO.Compression;
 using System.Text;
 
 #if !NETSTANDARD2_0
-
 #endif
 
 namespace Iviz.Msgs
 {
     public static class BuiltIns
     {
-        public static UTF8Encoding UTF8 { get; } = new UTF8Encoding(false);
+        public static UTF8Encoding UTF8 { get; } = new(false);
 
         public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
 
@@ -91,8 +90,8 @@ namespace Iviz.Msgs
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
-            }            
-            
+            }
+
             int? constant = (int?) type.GetField("RosFixedMessageLength")?.GetRawConstantValue();
             if (constant == null)
             {
@@ -119,17 +118,16 @@ namespace Iviz.Msgs
             string dependenciesBase64 = GetDependenciesBase64(type);
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
-            StringBuilder str = new StringBuilder();
-            byte[] outputBytes = new byte[32];
-
+            StringBuilder str = new();
+            using var outputBytes = new Rent<byte>(32);
             using var inputStream = new MemoryStream(inputBytes);
             using var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
             int read;
             do
             {
-                read = gZipStream.Read(outputBytes, 0, outputBytes.Length);
-                str.Append(UTF8.GetString(outputBytes, 0, read));
+                read = gZipStream.Read(outputBytes.Array, 0, outputBytes.Count);
+                str.Append(UTF8.GetString(outputBytes.Array, 0, read));
             } while (read != 0);
 
             return str.ToString();
@@ -142,7 +140,7 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(name));
             }
 
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new();
             str.Append(char.ToUpper(name[0], Culture));
             for (int i = 1; i < name.Length; i++)
             {

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         KinematicSolverInfo IDeserializable<KinematicSolverInfo>.RosDeserialize(ref Buffer b)
         {
-            return new KinematicSolverInfo(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

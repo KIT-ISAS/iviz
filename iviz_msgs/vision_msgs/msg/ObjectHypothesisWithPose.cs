@@ -55,7 +55,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         ObjectHypothesisWithPose IDeserializable<ObjectHypothesisWithPose>.RosDeserialize(ref Buffer b)
         {
-            return new ObjectHypothesisWithPose(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

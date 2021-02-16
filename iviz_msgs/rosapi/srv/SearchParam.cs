@@ -78,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         
         SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SearchParamRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.Rosapi
         
         SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SearchParamResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

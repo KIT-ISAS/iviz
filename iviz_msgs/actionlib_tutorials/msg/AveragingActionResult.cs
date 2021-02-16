@@ -41,7 +41,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         AveragingActionResult IDeserializable<AveragingActionResult>.RosDeserialize(ref Buffer b)
         {
-            return new AveragingActionResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

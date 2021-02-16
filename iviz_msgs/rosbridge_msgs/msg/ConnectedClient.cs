@@ -37,7 +37,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         ConnectedClient IDeserializable<ConnectedClient>.RosDeserialize(ref Buffer b)
         {
-            return new ConnectedClient(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

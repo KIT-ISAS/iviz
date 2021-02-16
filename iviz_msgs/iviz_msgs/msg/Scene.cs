@@ -55,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Scene IDeserializable<Scene>.RosDeserialize(ref Buffer b)
         {
-            return new Scene(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

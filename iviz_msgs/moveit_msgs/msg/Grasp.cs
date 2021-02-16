@@ -96,7 +96,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         Grasp IDeserializable<Grasp>.RosDeserialize(ref Buffer b)
         {
-            return new Grasp(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

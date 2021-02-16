@@ -35,7 +35,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Polygon IDeserializable<Polygon>.RosDeserialize(ref Buffer b)
         {
-            return new Polygon(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

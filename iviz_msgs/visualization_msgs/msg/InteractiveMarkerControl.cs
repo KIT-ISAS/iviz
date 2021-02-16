@@ -114,7 +114,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerControl IDeserializable<InteractiveMarkerControl>.RosDeserialize(ref Buffer b)
         {
-            return new InteractiveMarkerControl(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

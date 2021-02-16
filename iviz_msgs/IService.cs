@@ -75,7 +75,7 @@ namespace Iviz.Msgs
 
             EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer _)
             {
-                return new EmptyRequest();
+                return new();
             }
         }
 
@@ -102,7 +102,7 @@ namespace Iviz.Msgs
 
             EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer _)
             {
-                return new EmptyResponse();
+                return new();
             }
         }
     }

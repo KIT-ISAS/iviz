@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         TexCoords IDeserializable<TexCoords>.RosDeserialize(ref Buffer b)
         {
-            return new TexCoords(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

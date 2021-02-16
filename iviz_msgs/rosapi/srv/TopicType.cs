@@ -78,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         
         TopicTypeRequest IDeserializable<TopicTypeRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TopicTypeRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.Rosapi
         
         TopicTypeResponse IDeserializable<TopicTypeResponse>.RosDeserialize(ref Buffer b)
         {
-            return new TopicTypeResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

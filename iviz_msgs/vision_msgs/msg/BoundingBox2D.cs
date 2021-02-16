@@ -48,7 +48,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         BoundingBox2D IDeserializable<BoundingBox2D>.RosDeserialize(ref Buffer b)
         {
-            return new BoundingBox2D(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

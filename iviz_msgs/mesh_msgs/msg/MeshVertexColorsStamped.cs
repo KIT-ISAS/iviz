@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexColorsStamped IDeserializable<MeshVertexColorsStamped>.RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexColorsStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

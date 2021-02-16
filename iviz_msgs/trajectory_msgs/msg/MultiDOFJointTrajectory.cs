@@ -50,7 +50,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         MultiDOFJointTrajectory IDeserializable<MultiDOFJointTrajectory>.RosDeserialize(ref Buffer b)
         {
-            return new MultiDOFJointTrajectory(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -37,7 +37,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         TriangleMeshStamped IDeserializable<TriangleMeshStamped>.RosDeserialize(ref Buffer b)
         {
-            return new TriangleMeshStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

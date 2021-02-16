@@ -48,7 +48,7 @@ namespace Iviz.Msgs.PclMsgs
         
         PolygonMesh IDeserializable<PolygonMesh>.RosDeserialize(ref Buffer b)
         {
-            return new PolygonMesh(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

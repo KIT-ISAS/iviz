@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         Constraints IDeserializable<Constraints>.RosDeserialize(ref Buffer b)
         {
-            return new Constraints(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

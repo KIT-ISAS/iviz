@@ -57,7 +57,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         RegionOfInterest IDeserializable<RegionOfInterest>.RosDeserialize(ref Buffer b)
         {
-            return new RegionOfInterest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

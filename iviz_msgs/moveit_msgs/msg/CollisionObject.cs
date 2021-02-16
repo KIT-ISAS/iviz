@@ -98,7 +98,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         CollisionObject IDeserializable<CollisionObject>.RosDeserialize(ref Buffer b)
         {
-            return new CollisionObject(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

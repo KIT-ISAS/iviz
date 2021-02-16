@@ -72,7 +72,7 @@ namespace Iviz.Msgs.MoveitTest
             return Singleton;
         }
         
-        public static readonly ExecuteTrajectoryRequest Singleton = new ExecuteTrajectoryRequest();
+        public static readonly ExecuteTrajectoryRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.MoveitTest
         
         ExecuteTrajectoryResponse IDeserializable<ExecuteTrajectoryResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ExecuteTrajectoryResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

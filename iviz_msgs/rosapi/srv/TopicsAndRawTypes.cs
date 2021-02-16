@@ -72,7 +72,7 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly TopicsAndRawTypesRequest Singleton = new TopicsAndRawTypesRequest();
+        public static readonly TopicsAndRawTypesRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         
         TopicsAndRawTypesResponse IDeserializable<TopicsAndRawTypesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new TopicsAndRawTypesResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

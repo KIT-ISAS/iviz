@@ -72,7 +72,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             return Singleton;
         }
         
-        public static readonly SelfTestRequest Singleton = new SelfTestRequest();
+        public static readonly SelfTestRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         SelfTestResponse IDeserializable<SelfTestResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SelfTestResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

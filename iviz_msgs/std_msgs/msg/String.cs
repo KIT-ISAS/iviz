@@ -34,7 +34,7 @@ namespace Iviz.Msgs.StdMsgs
         
         String IDeserializable<String>.RosDeserialize(ref Buffer b)
         {
-            return new String(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

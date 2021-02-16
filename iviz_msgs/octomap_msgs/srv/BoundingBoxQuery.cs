@@ -83,7 +83,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b)
         {
-            return new BoundingBoxQueryRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.OctomapMsgs
             return Singleton;
         }
         
-        public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
+        public static readonly BoundingBoxQueryResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

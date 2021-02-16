@@ -107,7 +107,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PickupGoal IDeserializable<PickupGoal>.RosDeserialize(ref Buffer b)
         {
-            return new PickupGoal(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

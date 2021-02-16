@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -1541,7 +1542,7 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        BusInfo busInfo = new(busInfos.Count, response.Uri!, BusInfo.DirectionType.Out,
+                        BusInfo busInfo = new(busInfos.Count, response.Uri, BusInfo.DirectionType.Out,
                             topic.Topic, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
@@ -1638,7 +1639,10 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="serviceName">Name of the ROS service</param>
         /// <param name="service">Service message. The response will be written in the response field.</param>
-        /// <param name="persistent">Whether a persistent connection with the provider should be maintained.</param>
+        /// <param name="persistent">
+        /// Whether a persistent connection with the provider should be maintained.
+        /// The connection will be stopped if any exception is thrown or the token is canceled.
+        /// </param>
         /// <param name="token">A cancellation token</param>
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
@@ -1650,7 +1654,7 @@ namespace Iviz.Roslib
         {
             string resolvedServiceName = ResolveResourceName(serviceName);
 
-            if (subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
+            if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
                 if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
                 {
@@ -1659,30 +1663,28 @@ namespace Iviz.Roslib
                         "does not match the new given type.");
                 }
 
-                // is there a persistent connection? use it
-                if (existingReceiver.IsAlive)
+                if (!existingReceiver.IsAlive)
                 {
+                    existingReceiver.Dispose();
+                    subscribedServicesByName.TryRemove(resolvedServiceName, out _);
+                    // continue below
+                }
+                else
+                {
+                    // is there a persistent connection? use it
                     try
                     {
                         await existingReceiver.ExecuteAsync(service, token).Caf();
+                        return;
                     }
                     catch (Exception e)
                     {
-                        if (e is OperationCanceledException || e is RosServiceCallFailed)
-                        {
-                            throw;
-                        }
-
-                        throw new RoslibException($"Service call '{serviceName}' to {existingReceiver.RemoteUri} failed", e);
+                        existingReceiver.Dispose();
+                        subscribedServicesByName.TryRemove(resolvedServiceName, out _);
+                        ThrowExceptionHelper(e, resolvedServiceName, existingReceiver.RemoteUri);
                     }
-
-                    return;
                 }
-
-                existingReceiver.Dispose();
-                subscribedServicesByName.TryRemove(resolvedServiceName, out _);
             }
-
 
             LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token).Caf();
             if (!response.IsValid)
@@ -1692,31 +1694,45 @@ namespace Iviz.Roslib
 
             Uri serviceUri = response.ServiceUrl!;
             ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
-            try
+            if (persistent)
             {
-                if (persistent)
+                ServiceCallerAsync<T> serviceCaller = new(serviceInfo);
+                try
                 {
-                    var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
+                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     await serviceCaller.ExecuteAsync(service, token).Caf();
                 }
-                else
+                catch (Exception e)
+                {
+                    serviceCaller.Dispose();
+                    subscribedServicesByName.TryRemove(resolvedServiceName, out _);
+                    ThrowExceptionHelper(e, resolvedServiceName, serviceUri);
+                }
+            }
+            else
+            {
+                try
                 {
                     using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
                     await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     await serviceCaller.ExecuteAsync(service, token).Caf();
                 }
-            }
-            catch (Exception e)
-            {
-                if (e is OperationCanceledException || e is RosServiceCallFailed)
+                catch (Exception e) when (!(e is OperationCanceledException || e is RosServiceCallFailed))
                 {
-                    throw;
+                    throw new RoslibException($"Service call '{resolvedServiceName}' to {serviceUri} failed", e);
                 }
-
-                throw new RoslibException($"Service call '{serviceName}' to {serviceUri} failed", e);
             }
+        }
+
+        static void ThrowExceptionHelper(Exception e, string name, Uri? uri)
+        {
+            if (e is OperationCanceledException || e is RosServiceCallFailed)
+            {
+                ExceptionDispatchInfo.Capture(e).Throw();
+            }
+
+            throw new RoslibException($"Service call '{name}' to {uri?.ToString() ?? "[unknown]"} failed", e);
         }
 
         bool ServiceAlreadyAdvertised<T>(string serviceName) where T : IService
@@ -1762,7 +1778,6 @@ namespace Iviz.Roslib
             return AdvertiseServiceAsync<T>(serviceName, Wrapper, token);
         }
 
-
         /// <summary>
         /// Advertises the given service.
         /// </summary>
@@ -1805,9 +1820,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="name">Name of the service</param>
         /// <exception cref="ArgumentException">Thrown if name is null</exception>
-        public void UnadvertiseService(string name, CancellationToken token = default)
+        public bool UnadvertiseService(string name, CancellationToken token = default)
         {
-            Task.Run(() => UnadvertiseServiceAsync(name, token), token).WaitAndRethrow();
+            return Task.Run(() => UnadvertiseServiceAsync(name, token), token).WaitAndRethrow();
         }
 
         /// <summary>
@@ -1816,19 +1831,20 @@ namespace Iviz.Roslib
         /// <param name="name">Name of the service</param>
         /// <param name="token">An optional cancellation token</param>
         /// <exception cref="ArgumentException">Thrown if name is null</exception>        
-        public async Task UnadvertiseServiceAsync(string name, CancellationToken token = default)
+        public async Task<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default)
         {
             string resolvedServiceName = ResolveResourceName(name);
 
             if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
             {
-                throw new ArgumentException($"Service '{name}' does not exist", nameof(name));
+                return false;
             }
 
             advertisedServicesByName.TryRemove(resolvedServiceName, out _);
 
             await advertisedService.DisposeAsync();
             await RosMasterApi.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
+            return true;
         }
 
         public void Dispose()

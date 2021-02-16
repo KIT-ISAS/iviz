@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PoseWithCovarianceStamped IDeserializable<PoseWithCovarianceStamped>.RosDeserialize(ref Buffer b)
         {
-            return new PoseWithCovarianceStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

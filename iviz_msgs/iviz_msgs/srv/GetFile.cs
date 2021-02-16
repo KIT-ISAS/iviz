@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFileRequest IDeserializable<GetFileRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetFileRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFileResponse IDeserializable<GetFileResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetFileResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

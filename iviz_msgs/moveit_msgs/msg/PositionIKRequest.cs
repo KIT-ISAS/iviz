@@ -100,7 +100,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PositionIKRequest IDeserializable<PositionIKRequest>.RosDeserialize(ref Buffer b)
         {
-            return new PositionIKRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

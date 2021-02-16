@@ -33,7 +33,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         MeasurePositionsFeedback IDeserializable<MeasurePositionsFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new MeasurePositionsFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

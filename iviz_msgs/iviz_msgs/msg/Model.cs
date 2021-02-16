@@ -66,7 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Model IDeserializable<Model>.RosDeserialize(ref Buffer b)
         {
-            return new Model(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

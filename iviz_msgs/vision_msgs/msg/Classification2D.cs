@@ -54,7 +54,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         Classification2D IDeserializable<Classification2D>.RosDeserialize(ref Buffer b)
         {
-            return new Classification2D(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

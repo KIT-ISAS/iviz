@@ -33,7 +33,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestHeaderTwo IDeserializable<TestHeaderTwo>.RosDeserialize(ref Buffer b)
         {
-            return new TestHeaderTwo(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

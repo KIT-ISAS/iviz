@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetLabeledClustersRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -135,7 +135,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetLabeledClustersResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

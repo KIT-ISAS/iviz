@@ -44,7 +44,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Pose2D IDeserializable<Pose2D>.RosDeserialize(ref Buffer b)
         {
-            return new Pose2D(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         CompressedImage IDeserializable<CompressedImage>.RosDeserialize(ref Buffer b)
         {
-            return new CompressedImage(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

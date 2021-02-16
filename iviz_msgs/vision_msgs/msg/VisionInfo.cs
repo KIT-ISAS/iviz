@@ -76,7 +76,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         VisionInfo IDeserializable<VisionInfo>.RosDeserialize(ref Buffer b)
         {
-            return new VisionInfo(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

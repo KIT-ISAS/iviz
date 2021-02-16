@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         AllowedCollisionEntry IDeserializable<AllowedCollisionEntry>.RosDeserialize(ref Buffer b)
         {
-            return new AllowedCollisionEntry(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetSdfRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetSdfResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

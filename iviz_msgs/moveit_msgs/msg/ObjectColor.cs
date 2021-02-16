@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ObjectColor IDeserializable<ObjectColor>.RosDeserialize(ref Buffer b)
         {
-            return new ObjectColor(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

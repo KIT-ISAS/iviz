@@ -64,7 +64,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         JointLimits IDeserializable<JointLimits>.RosDeserialize(ref Buffer b)
         {
-            return new JointLimits(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

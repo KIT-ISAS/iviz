@@ -72,7 +72,7 @@ namespace Iviz.Msgs.Tf2Msgs
             return Singleton;
         }
         
-        public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
+        public static readonly FrameGraphRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b)
         {
-            return new FrameGraphResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

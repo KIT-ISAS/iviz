@@ -13,7 +13,6 @@ namespace Iviz.Roslib
     {
         readonly Func<T, Task> callback;
         readonly HashSet<ServiceRequestAsync<T>> requests = new();
-
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
         readonly Task task;

@@ -93,7 +93,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         AddDiagnosticsRequest IDeserializable<AddDiagnosticsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new AddDiagnosticsRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -154,7 +154,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         AddDiagnosticsResponse IDeserializable<AddDiagnosticsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new AddDiagnosticsResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

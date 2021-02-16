@@ -78,7 +78,7 @@ namespace Iviz.Msgs.PclMsgs
         
         UpdateFilenameRequest IDeserializable<UpdateFilenameRequest>.RosDeserialize(ref Buffer b)
         {
-            return new UpdateFilenameRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.PclMsgs
         
         UpdateFilenameResponse IDeserializable<UpdateFilenameResponse>.RosDeserialize(ref Buffer b)
         {
-            return new UpdateFilenameResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

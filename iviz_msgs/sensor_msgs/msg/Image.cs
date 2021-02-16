@@ -68,7 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Image IDeserializable<Image>.RosDeserialize(ref Buffer b)
         {
-            return new Image(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -54,7 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         MagneticField IDeserializable<MagneticField>.RosDeserialize(ref Buffer b)
         {
-            return new MagneticField(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

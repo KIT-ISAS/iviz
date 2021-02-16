@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionFKRequest IDeserializable<GetPositionFKRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetPositionFKRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -171,7 +171,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionFKResponse IDeserializable<GetPositionFKResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetPositionFKResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

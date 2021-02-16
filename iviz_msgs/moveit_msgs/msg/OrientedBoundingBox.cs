@@ -38,7 +38,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         OrientedBoundingBox IDeserializable<OrientedBoundingBox>.RosDeserialize(ref Buffer b)
         {
-            return new OrientedBoundingBox(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

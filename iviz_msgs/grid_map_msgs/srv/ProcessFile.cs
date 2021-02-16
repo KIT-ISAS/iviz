@@ -84,7 +84,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         ProcessFileRequest IDeserializable<ProcessFileRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ProcessFileRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -140,7 +140,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         ProcessFileResponse IDeserializable<ProcessFileResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ProcessFileResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

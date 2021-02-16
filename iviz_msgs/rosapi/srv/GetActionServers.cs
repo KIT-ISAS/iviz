@@ -72,7 +72,7 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly GetActionServersRequest Singleton = new GetActionServersRequest();
+        public static readonly GetActionServersRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
         
         GetActionServersResponse IDeserializable<GetActionServersResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetActionServersResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

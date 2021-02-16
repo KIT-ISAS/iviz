@@ -73,7 +73,7 @@ namespace Iviz.Msgs.NavMsgs
             return Singleton;
         }
         
-        public static readonly GetMapRequest Singleton = new GetMapRequest();
+        public static readonly GetMapRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.NavMsgs
         
         GetMapResponse IDeserializable<GetMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetMapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

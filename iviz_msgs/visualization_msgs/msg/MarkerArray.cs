@@ -38,7 +38,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         MarkerArray IDeserializable<MarkerArray>.RosDeserialize(ref Buffer b)
         {
-            return new MarkerArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

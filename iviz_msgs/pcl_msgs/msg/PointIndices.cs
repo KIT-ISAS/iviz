@@ -37,7 +37,7 @@ namespace Iviz.Msgs.PclMsgs
         
         PointIndices IDeserializable<PointIndices>.RosDeserialize(ref Buffer b)
         {
-            return new PointIndices(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

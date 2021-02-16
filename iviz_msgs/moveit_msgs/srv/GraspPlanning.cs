@@ -111,7 +111,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GraspPlanningRequest IDeserializable<GraspPlanningRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GraspPlanningRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -211,7 +211,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GraspPlanningResponse IDeserializable<GraspPlanningResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GraspPlanningResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

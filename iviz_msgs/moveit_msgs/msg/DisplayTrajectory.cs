@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         DisplayTrajectory IDeserializable<DisplayTrajectory>.RosDeserialize(ref Buffer b)
         {
-            return new DisplayTrajectory(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlanningSceneComponents IDeserializable<PlanningSceneComponents>.RosDeserialize(ref Buffer b)
         {
-            return new PlanningSceneComponents(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

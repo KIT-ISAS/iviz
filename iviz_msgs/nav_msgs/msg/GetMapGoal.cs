@@ -29,7 +29,7 @@ namespace Iviz.Msgs.NavMsgs
             return Singleton;
         }
         
-        public static readonly GetMapGoal Singleton = new GetMapGoal();
+        public static readonly GetMapGoal Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

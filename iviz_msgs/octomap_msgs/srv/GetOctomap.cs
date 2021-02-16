@@ -73,7 +73,7 @@ namespace Iviz.Msgs.OctomapMsgs
             return Singleton;
         }
         
-        public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
+        public static readonly GetOctomapRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetOctomapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

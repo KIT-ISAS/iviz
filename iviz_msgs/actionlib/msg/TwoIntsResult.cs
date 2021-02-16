@@ -33,7 +33,7 @@ namespace Iviz.Msgs.Actionlib
         
         TwoIntsResult IDeserializable<TwoIntsResult>.RosDeserialize(ref Buffer b)
         {
-            return new TwoIntsResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

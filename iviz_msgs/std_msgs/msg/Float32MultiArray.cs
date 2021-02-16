@@ -40,7 +40,7 @@ namespace Iviz.Msgs.StdMsgs
         
         Float32MultiArray IDeserializable<Float32MultiArray>.RosDeserialize(ref Buffer b)
         {
-            return new Float32MultiArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

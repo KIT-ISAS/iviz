@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         readonly Triangle IDeserializable<Triangle>.RosDeserialize(ref Buffer b)
         {
-            return new Triangle(ref b);
+            return new(ref b);
         }
         
         public override readonly int GetHashCode() => (A, B, C).GetHashCode();

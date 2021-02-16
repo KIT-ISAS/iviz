@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         JointState IDeserializable<JointState>.RosDeserialize(ref Buffer b)
         {
-            return new JointState(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

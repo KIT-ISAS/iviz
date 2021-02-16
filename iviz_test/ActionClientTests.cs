@@ -16,11 +16,7 @@ namespace iviz_test
             using var actionClient = RosActionClient.Create(client, "fibonacci", default(FibonacciAction));
 
             Console.WriteLine("** Waiting for server...");
-            if (!actionClient.WaitForServer(150000))
-            {
-                Console.WriteLine("EE Gave up waiting for the server");
-                return;
-            }
+            actionClient.WaitForServer(150000);
 
             Console.WriteLine("** Setting goal...");
             actionClient.SetGoal(new FibonacciGoal
@@ -52,7 +48,7 @@ namespace iviz_test
             Progress<FibonacciFeedback> fp = new Progress<FibonacciFeedback>(FeedbackCallback);
             Progress<FibonacciResult> rp = new Progress<FibonacciResult>(ResultCallback);
 
-            actionClient.WaitForResult(fp, rp);
+            //actionClient.WaitForResult(fp, rp);
 
             Console.WriteLine("** Done!");
         }        

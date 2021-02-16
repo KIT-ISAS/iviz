@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PolygonStamped IDeserializable<PolygonStamped>.RosDeserialize(ref Buffer b)
         {
-            return new PolygonStamped(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

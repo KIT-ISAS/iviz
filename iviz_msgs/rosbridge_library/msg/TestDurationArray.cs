@@ -34,7 +34,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestDurationArray IDeserializable<TestDurationArray>.RosDeserialize(ref Buffer b)
         {
-            return new TestDurationArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

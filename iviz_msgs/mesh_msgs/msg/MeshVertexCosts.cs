@@ -35,7 +35,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexCosts IDeserializable<MeshVertexCosts>.RosDeserialize(ref Buffer b)
         {
-            return new MeshVertexCosts(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

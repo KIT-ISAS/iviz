@@ -57,7 +57,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         ChannelFloat32 IDeserializable<ChannelFloat32>.RosDeserialize(ref Buffer b)
         {
-            return new ChannelFloat32(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

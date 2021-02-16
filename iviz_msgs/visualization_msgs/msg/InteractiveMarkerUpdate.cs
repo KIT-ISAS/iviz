@@ -78,7 +78,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerUpdate IDeserializable<InteractiveMarkerUpdate>.RosDeserialize(ref Buffer b)
         {
-            return new InteractiveMarkerUpdate(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

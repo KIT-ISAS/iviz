@@ -61,7 +61,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         MoveItErrorCodes IDeserializable<MoveItErrorCodes>.RosDeserialize(ref Buffer b)
         {
-            return new MoveItErrorCodes(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

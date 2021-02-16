@@ -102,12 +102,13 @@ namespace Iviz.Roslib
             Task cleanupTask = TryToCleanup();
 
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
-            TcpSenderAsync<TMessage> newSender = new(remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync<TMessage> newSender; //= new(remoteCallerId, topicInfo, Latching);
 
-            Endpoint endPoint;
             using (SemaphoreSlim managerSignal = new(0))
             {
-                endPoint = newSender.Start(TimeoutInMs, managerSignal);
+                newSender =
+                    new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching, TimeoutInMs, managerSignal);
+                //endPoint = newSender.Start(TimeoutInMs, managerSignal);
 
                 connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
                 {
@@ -141,7 +142,8 @@ namespace Iviz.Roslib
             cleanupTask.WaitNoThrow(this);
 
             // return null if this connection got killed, which gets translated later as an error response
-            return !newSender.IsAlive ? null : endPoint;
+            //return !newSender.IsAlive ? null : endPoint;
+            return !newSender.IsAlive ? null : newSender.Endpoint;
         }
 
         Task TryToCleanup()
@@ -181,17 +183,23 @@ namespace Iviz.Roslib
                 pair.Value.Publish(msg);
             }
         }
-        
-        public async Task PublishAndWaitAsync(TMessage msg, CancellationToken token)
+
+        public async Task<bool> PublishAndWaitAsync(TMessage msg, CancellationToken token)
         {
             if (Latching)
             {
                 hasLatchedMessage = true;
                 latchedMessage = msg;
             }
-            
-            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAndWaitAsync(msg, token))).AwaitNoThrow(this);
-        }        
+
+            if (connectionsByCallerId.IsEmpty)
+            {
+                return false;
+            }
+
+            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAndWaitAsync(msg, token)));
+            return true;
+        }
 
         public void Stop()
         {
@@ -209,6 +217,11 @@ namespace Iviz.Roslib
             return new(
                 connectionsByCallerId.Values.Select(sender => sender.State).ToArray()
             );
+        }
+
+        public ReadOnlyCollection<IRosTcpSender> GetConnections()
+        {
+            return connectionsByCallerId.Values.Cast<IRosTcpSender>().ToArray().AsReadOnly();
         }
 
         public override string ToString()

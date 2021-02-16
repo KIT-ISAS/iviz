@@ -77,7 +77,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestRequestOnlyRequest IDeserializable<TestRequestOnlyRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TestRequestOnlyRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestRequestOnlyResponse Singleton = new TestRequestOnlyResponse();
+        public static readonly TestRequestOnlyResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

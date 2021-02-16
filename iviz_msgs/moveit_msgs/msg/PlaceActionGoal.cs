@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlaceActionGoal IDeserializable<PlaceActionGoal>.RosDeserialize(ref Buffer b)
         {
-            return new PlaceActionGoal(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

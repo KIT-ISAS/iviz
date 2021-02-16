@@ -72,7 +72,7 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly TriggerRequest Singleton = new TriggerRequest();
+        public static readonly TriggerRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.StdSrvs
         
         TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b)
         {
-            return new TriggerResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

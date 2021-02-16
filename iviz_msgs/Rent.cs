@@ -7,31 +7,30 @@ namespace Iviz.Msgs
     {
         static readonly ArrayPool<T> Shared = ArrayPool<T>.Shared;
 
-        public int Count { get; }
-        public T[] Array { get; }
+        public readonly int Count;
+        public readonly T[] Array;
 
-        public ArraySegment<T> Segment => new ArraySegment<T>(Array, 0, Count);
+        public ArraySegment<T> Segment => new(Array, 0, Count);
 
 #if !NETSTANDARD2_0
-        public Span<T> Span => new Span<T>(Array, 0, Count);
+        public Span<T> Span => new(Array, 0, Count);
 #endif
 
         public Rent(int count)
         {
-            if (count < 0)
+            switch (count)
             {
-                throw new ArgumentException("Count cannot be negative", nameof(count));
+                case < 0:
+                    throw new ArgumentException("Count cannot be negative", nameof(count));
+                case 0:
+                    Array = System.Array.Empty<T>();
+                    Count = 0;
+                    break;
+                default:
+                    Array = Shared.Rent(count);
+                    Count = count;
+                    break;
             }
-
-            if (count == 0)
-            {
-                Array = System.Array.Empty<T>();
-                Count = 0;
-                return;
-            }
-
-            Array = Shared.Rent(count);
-            Count = count;
         }
 
         public void Dispose()
@@ -40,6 +39,11 @@ namespace Iviz.Msgs
             {
                 Shared.Return(Array);
             }
+        }
+
+        public override string ToString()
+        {
+            return $"[Rent Type={typeof(T).Name} Count={Count} RealSize={(Array != null ? Array.Length : 0)}]";
         }
     }
 }

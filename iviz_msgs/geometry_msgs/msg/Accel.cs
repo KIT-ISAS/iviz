@@ -37,7 +37,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Accel IDeserializable<Accel>.RosDeserialize(ref Buffer b)
         {
-            return new Accel(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

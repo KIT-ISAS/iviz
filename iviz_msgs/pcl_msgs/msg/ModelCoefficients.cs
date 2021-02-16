@@ -37,7 +37,7 @@ namespace Iviz.Msgs.PclMsgs
         
         ModelCoefficients IDeserializable<ModelCoefficients>.RosDeserialize(ref Buffer b)
         {
-            return new ModelCoefficients(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

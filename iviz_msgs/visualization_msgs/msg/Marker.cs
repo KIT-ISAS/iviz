@@ -103,7 +103,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         Marker IDeserializable<Marker>.RosDeserialize(ref Buffer b)
         {
-            return new Marker(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

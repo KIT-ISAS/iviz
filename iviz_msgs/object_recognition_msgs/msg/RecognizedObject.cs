@@ -79,7 +79,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         RecognizedObject IDeserializable<RecognizedObject>.RosDeserialize(ref Buffer b)
         {
-            return new RecognizedObject(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

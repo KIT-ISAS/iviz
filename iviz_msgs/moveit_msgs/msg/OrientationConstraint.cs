@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         OrientationConstraint IDeserializable<OrientationConstraint>.RosDeserialize(ref Buffer b)
         {
-            return new OrientationConstraint(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -16,29 +16,24 @@ namespace Iviz.Roslib
     /// <typeparam name="TService">The service type</typeparam>
     internal sealed class ServiceRequestAsync<TService> where TService : IService
     {
-        const int BufferSizeIncrease = 1024;
-
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
 
         readonly Func<TService, Task> callback;
         readonly Endpoint remoteEndPoint;
         readonly ServiceInfo<TService> serviceInfo;
-        readonly NetworkStream stream;
         readonly Task task;
         readonly TcpClient tcpClient;
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
+
         string? remoteCallerId;
-        byte[] readBuffer = new byte[1024];
-        byte[] writeBuffer = new byte[1024];
 
         readonly CancellationTokenSource runningTs = new();
 
         internal ServiceRequestAsync(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
             Func<TService, Task> callback)
         {
-            stream = tcpClient.GetStream();
             this.tcpClient = tcpClient;
             this.callback = callback;
             this.remoteEndPoint = remoteEndPoint;
@@ -60,30 +55,35 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        async Task<int> ReceivePacket()
+        static async Task<Rent<byte>> ReceivePacket(NetworkStream stream, CancellationToken token)
         {
-            if (!await stream.ReadChunkAsync(readBuffer, 4, runningTs.Token))
+            byte[] lengthBuffer = new byte[4];
+            if (!await stream.ReadChunkAsync(lengthBuffer, 4, token))
             {
-                return -1;
+                throw new IOException("Partner closed connection.");
             }
 
-            int length = BitConverter.ToInt32(readBuffer, 0);
+            int length = BitConverter.ToInt32(lengthBuffer, 0);
             if (length == 0)
             {
-                return 0;
+                return new Rent<byte>(0);
             }
 
-            if (readBuffer.Length < length)
+            var readBuffer = new Rent<byte>(length);
+            try
             {
-                readBuffer = new byte[length + BufferSizeIncrease];
+                if (!await stream.ReadChunkAsync(readBuffer.Array, length, token))
+                {
+                    throw new IOException("Partner closed connection.");
+                }
             }
-
-            if (!await stream.ReadChunkAsync(readBuffer, length, runningTs.Token))
+            catch (Exception)
             {
-                return -1;
+                readBuffer.Dispose();
+                throw;
             }
 
-            return length;
+            return readBuffer;
         }
 
         string? ProcessRemoteHeader(List<string> fields)
@@ -154,7 +154,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task SendHeader(string? errorMessage)
+        async Task SendHeader(NetworkStream stream, string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -173,21 +173,20 @@ namespace Iviz.Roslib
                 };
             }
 
-            await Utils.WriteHeaderAsync(stream!, contents, runningTs.Token).Caf();
+            await Utils.WriteHeaderAsync(stream, contents, runningTs.Token).Caf();
         }
 
-        async Task ProcessHandshake()
+        async Task ProcessHandshake(NetworkStream stream)
         {
-            int totalLength = await ReceivePacket().Caf();
-            if (totalLength == -1)
+            List<string> fields;
+            using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
             {
-                throw new IOException("Connection closed during handshake.");
+                fields = Utils.ParseHeader(readBuffer);
             }
 
-            List<string> fields = Utils.ParseHeader(readBuffer, totalLength);
             string? errorMessage = ProcessRemoteHeader(fields);
 
-            await SendHeader(errorMessage).Caf();
+            await SendHeader(stream, errorMessage).Caf();
 
             if (errorMessage != null)
             {
@@ -197,9 +196,11 @@ namespace Iviz.Roslib
 
         async Task Run()
         {
+            NetworkStream stream = tcpClient.GetStream();
+            
             try
             {
-                await ProcessHandshake().Caf();
+                await ProcessHandshake(stream).Caf();
             }
             catch (Exception e)
             {
@@ -208,32 +209,17 @@ namespace Iviz.Roslib
                 return;
             }
 
-            byte[] lengthArray = new byte[4];
-
-            byte[] ToLengthArray(uint i)
-            {
-                lengthArray[0] = (byte) i;
-                lengthArray[1] = (byte) (i >> 8);
-                lengthArray[2] = (byte) (i >> 0x10);
-                lengthArray[3] = (byte) (i >> 0x18);
-                return lengthArray;
-            }
-
-            byte[] statusByte = {0};
 
             while (KeepRunning)
             {
                 try
                 {
-                    int rcvLength = await ReceivePacket().Caf();
-                    if (rcvLength == -1)
+                    TService serviceMsg;
+                    using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
                     {
-                        Logger.LogDebugFormat("{0}: closed remotely.", this);
-                        break;
+                        serviceMsg = (TService) serviceInfo.Generator.Create();
+                        serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Count);
                     }
-
-                    TService serviceMsg = (TService) serviceInfo.Generator.Create();
-                    serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer, rcvLength);
 
                     byte resultStatus;
                     string? errorMessage;
@@ -272,23 +258,19 @@ namespace Iviz.Roslib
                         errorMessage = null;
                     }
 
-                    statusByte[0] = resultStatus;
                     if (errorMessage == null)
                     {
                         int msgLength = responseMsg.RosMessageLength;
-                        if (writeBuffer.Length < msgLength)
-                        {
-                            writeBuffer = new byte[msgLength + BufferSizeIncrease];
-                        }
+                        using var writeBuffer = new Rent<byte>(msgLength + 5);
 
-                        uint sendLength = Buffer.Serialize(responseMsg, writeBuffer);
+                        WriteHeader(writeBuffer.Array, resultStatus, msgLength);
+                        Buffer.Serialize(responseMsg, writeBuffer.Array, 5);
 
-                        await stream.WriteChunkAsync(statusByte, 1, runningTs.Token).Caf();
-                        await stream.WriteChunkAsync(ToLengthArray(sendLength), 4, runningTs.Token).Caf();
-                        await stream.WriteChunkAsync(writeBuffer, (int) sendLength, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Count, runningTs.Token).Caf();
                     }
                     else
                     {
+                        byte[] statusByte = {resultStatus};
                         await stream.WriteChunkAsync(statusByte, 1, runningTs.Token).Caf();
                         await stream.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token)
                             .Caf();
@@ -300,10 +282,23 @@ namespace Iviz.Roslib
                 catch (Exception e)
                 {
                     Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                    if (e is IOException || e is SocketException)
+                    {
+                        break;
+                    }
                 }
             }
 
             tcpClient.Close();
+        }
+
+        static void WriteHeader(byte[] lengthArray, byte status, int i)
+        {
+            lengthArray[4] = (byte) (i >> 0x18);
+            lengthArray[0] = status;
+            lengthArray[1] = (byte) i;
+            lengthArray[2] = (byte) (i >> 8);
+            lengthArray[3] = (byte) (i >> 0x10);
         }
 
         public override string ToString()

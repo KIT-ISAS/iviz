@@ -42,7 +42,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         DiagnosticArray IDeserializable<DiagnosticArray>.RosDeserialize(ref Buffer b)
         {
-            return new DiagnosticArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         TrajectoryConstraints IDeserializable<TrajectoryConstraints>.RosDeserialize(ref Buffer b)
         {
-            return new TrajectoryConstraints(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

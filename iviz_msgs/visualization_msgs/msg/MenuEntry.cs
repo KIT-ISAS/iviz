@@ -89,7 +89,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         MenuEntry IDeserializable<MenuEntry>.RosDeserialize(ref Buffer b)
         {
-            return new MenuEntry(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

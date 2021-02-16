@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetStateValidityRequest IDeserializable<GetStateValidityRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetStateValidityRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -170,7 +170,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetStateValidityResponse IDeserializable<GetStateValidityResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetStateValidityResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

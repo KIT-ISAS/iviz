@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         JointConstraint IDeserializable<JointConstraint>.RosDeserialize(ref Buffer b)
         {
-            return new JointConstraint(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

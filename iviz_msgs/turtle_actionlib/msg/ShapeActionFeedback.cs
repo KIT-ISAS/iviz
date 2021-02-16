@@ -41,7 +41,7 @@ namespace Iviz.Msgs.TurtleActionlib
         
         ShapeActionFeedback IDeserializable<ShapeActionFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new ShapeActionFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -45,7 +45,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         RelativeHumidity IDeserializable<RelativeHumidity>.RosDeserialize(ref Buffer b)
         {
-            return new RelativeHumidity(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

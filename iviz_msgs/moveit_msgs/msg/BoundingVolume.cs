@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         BoundingVolume IDeserializable<BoundingVolume>.RosDeserialize(ref Buffer b)
         {
-            return new BoundingVolume(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -43,7 +43,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         CostSource IDeserializable<CostSource>.RosDeserialize(ref Buffer b)
         {
-            return new CostSource(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

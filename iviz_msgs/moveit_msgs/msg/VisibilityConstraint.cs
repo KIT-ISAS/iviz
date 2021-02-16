@@ -95,7 +95,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         VisibilityConstraint IDeserializable<VisibilityConstraint>.RosDeserialize(ref Buffer b)
         {
-            return new VisibilityConstraint(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

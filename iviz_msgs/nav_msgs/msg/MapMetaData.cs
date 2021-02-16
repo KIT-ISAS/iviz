@@ -52,7 +52,7 @@ namespace Iviz.Msgs.NavMsgs
         
         MapMetaData IDeserializable<MapMetaData>.RosDeserialize(ref Buffer b)
         {
-            return new MapMetaData(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

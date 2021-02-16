@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PoseArray IDeserializable<PoseArray>.RosDeserialize(ref Buffer b)
         {
-            return new PoseArray(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -48,7 +48,7 @@ namespace Iviz.Msgs.NavMsgs
         
         Odometry IDeserializable<Odometry>.RosDeserialize(ref Buffer b)
         {
-            return new Odometry(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

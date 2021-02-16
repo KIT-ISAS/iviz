@@ -13,7 +13,6 @@ namespace Iviz.Roslib
     internal sealed class ServiceCallerAsync<T> : IServiceCaller where T : IService
     {
         const int DefaultTimeoutInMs = 5000;
-        const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
 
         readonly bool requestNoDelay;
@@ -21,9 +20,6 @@ namespace Iviz.Roslib
         readonly TcpClient tcpClient;
 
         bool disposed;
-
-        byte[] readBuffer = new byte[16];
-        byte[] writeBuffer = new byte[16];
 
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
@@ -72,13 +68,12 @@ namespace Iviz.Roslib
         {
             await SendHeaderAsync(stream, persistent, token).Caf();
 
-            int receivedLength = await ReceivePacketAsync(stream, token).Caf();
-            if (receivedLength == -1)
+            List<string> responses;
+            using (var readBuffer = await ReceivePacketAsync(stream, token).Caf())
             {
-                throw new IOException("Connection closed during handshake");
+                responses = Utils.ParseHeader(readBuffer);
             }
 
-            List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
@@ -98,30 +93,36 @@ namespace Iviz.Roslib
             await ProcessHandshakeAsync(tcpClient.GetStream(), persistent, token);
         }
 
-        async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
+        static async Task<Rent<byte>> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
         {
-            if (!await stream.ReadChunkAsync(readBuffer, 4, token))
+            byte[] lengthBuffer = new byte[4];
+            if (!await stream.ReadChunkAsync(lengthBuffer, 4, token))
             {
-                return -1;
+                throw new IOException("Partner closed connection");
             }
 
-            int length = BitConverter.ToInt32(readBuffer, 0);
+            int length = BitConverter.ToInt32(lengthBuffer, 0);
+
             if (length == 0)
             {
-                return 0;
+                return new Rent<byte>(0);
             }
 
-            if (readBuffer.Length < length)
+            var readBuffer = new Rent<byte>(length);
+            try
             {
-                readBuffer = new byte[length + BufferSizeIncrease];
+                if (!await stream.ReadChunkAsync(readBuffer.Array, length, token))
+                {
+                    throw new IOException("Partner closed connection");
+                }
             }
-
-            if (!await stream.ReadChunkAsync(readBuffer, length, token))
+            catch (Exception)
             {
-                return -1;
+                readBuffer.Dispose();
+                throw;
             }
 
-            return length;
+            return readBuffer;
         }
 
         public async Task ExecuteAsync(T service, CancellationToken token)
@@ -140,36 +141,30 @@ namespace Iviz.Roslib
 
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
-            if (writeBuffer.Length < msgLength)
-            {
-                writeBuffer = new byte[msgLength + BufferSizeIncrease];
-            }
 
-            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
+            using var writeBuffer = new Rent<byte>(msgLength);
+
+            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer.Array);
 
             var stream = tcpClient.GetStream();
             await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token).Caf();
-            await stream.WriteChunkAsync(writeBuffer, (int) sendLength, token).Caf();
+            await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token).Caf();
 
-            if (!await stream.ReadChunkAsync(readBuffer, 1, token))
+            var statusBuffer = new byte[1];
+            if (!await stream.ReadChunkAsync(statusBuffer, 1, token))
             {
                 throw new IOException("Partner closed the connection");
             }
 
-            byte statusByte = readBuffer[0];
+            using var readBuffer = await ReceivePacketAsync(stream, token);
 
-            int rcvLength = await ReceivePacketAsync(stream, token);
-            if (rcvLength == -1)
+            if (statusBuffer[0] == ErrorByte)
             {
-                throw new IOException("Partner closed the connection");
+                throw new RosServiceCallFailed(serviceInfo.Service,
+                    BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Count));
             }
 
-            if (statusByte == ErrorByte)
-            {
-                throw new RosServiceCallFailed(serviceInfo.Service, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
-            }
-
-            service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
+            service.Response = Buffer.Deserialize(service.Response, readBuffer.Array, readBuffer.Count);
         }
     }
 }

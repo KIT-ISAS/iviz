@@ -78,7 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModelTextureRequest IDeserializable<GetModelTextureRequest>.RosDeserialize(ref Buffer b)
         {
-            return new GetModelTextureRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -138,7 +138,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModelTextureResponse IDeserializable<GetModelTextureResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetModelTextureResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

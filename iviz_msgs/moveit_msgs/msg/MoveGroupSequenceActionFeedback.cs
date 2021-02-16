@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         MoveGroupSequenceActionFeedback IDeserializable<MoveGroupSequenceActionFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new MoveGroupSequenceActionFeedback(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -72,7 +72,7 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly EmptyRequest Singleton = new EmptyRequest();
+        public static readonly EmptyRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly EmptyResponse Singleton = new EmptyResponse();
+        public static readonly EmptyResponse Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

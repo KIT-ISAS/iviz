@@ -42,7 +42,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         TwistWithCovariance IDeserializable<TwistWithCovariance>.RosDeserialize(ref Buffer b)
         {
-            return new TwistWithCovariance(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

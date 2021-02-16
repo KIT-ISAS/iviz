@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         LoadMapRequest IDeserializable<LoadMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new LoadMapRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         LoadMapResponse IDeserializable<LoadMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new LoadMapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         readonly Vector2f IDeserializable<Vector2f>.RosDeserialize(ref Buffer b)
         {
-            return new Vector2f(ref b);
+            return new(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y).GetHashCode();

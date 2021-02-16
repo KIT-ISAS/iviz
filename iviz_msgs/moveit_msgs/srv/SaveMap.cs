@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveMapRequest IDeserializable<SaveMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SaveMapRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveMapResponse IDeserializable<SaveMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SaveMapResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

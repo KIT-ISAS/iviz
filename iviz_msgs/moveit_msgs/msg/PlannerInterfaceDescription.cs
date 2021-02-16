@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlannerInterfaceDescription IDeserializable<PlannerInterfaceDescription>.RosDeserialize(ref Buffer b)
         {
-            return new PlannerInterfaceDescription(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

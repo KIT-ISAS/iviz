@@ -59,7 +59,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         GoalStatus IDeserializable<GoalStatus>.RosDeserialize(ref Buffer b)
         {
-            return new GoalStatus(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

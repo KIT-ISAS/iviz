@@ -41,7 +41,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         FibonacciActionResult IDeserializable<FibonacciActionResult>.RosDeserialize(ref Buffer b)
         {
-            return new FibonacciActionResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

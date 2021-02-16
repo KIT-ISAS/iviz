@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ApplyPlanningSceneRequest IDeserializable<ApplyPlanningSceneRequest>.RosDeserialize(ref Buffer b)
         {
-            return new ApplyPlanningSceneRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ApplyPlanningSceneResponse IDeserializable<ApplyPlanningSceneResponse>.RosDeserialize(ref Buffer b)
         {
-            return new ApplyPlanningSceneResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

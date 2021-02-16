@@ -173,20 +173,27 @@ namespace Iviz.Roslib
         }
     }
 
-    public class RosQueueOverflowException : RoslibException
+    public class RosQueueOverflowException : RosQueueException
     {
-        public RosQueueOverflowException(string message) : base(message)
-        {
-        }
-
-        public RosQueueOverflowException()
-        {
-        }
-
-        public RosQueueOverflowException(string message, Exception innerException) : base(message, innerException)
+        public RosQueueOverflowException(string message, IRosTcpSender sender) : base(message, sender)
         {
         }
     }
+    
+    public class RosQueueException : RoslibException
+    {
+        public IRosTcpSender Sender { get; }
+        
+        public RosQueueException(string message, IRosTcpSender sender) : base(message)
+        {
+            Sender = sender;
+        }
+
+        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message, innerException)
+        {
+            Sender = sender;
+        }
+    }    
     
     /// <summary>
     /// Thrown when an error happened during the connection.

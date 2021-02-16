@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
             return Singleton;
         }
         
-        public static readonly GetModulesRequest Singleton = new GetModulesRequest();
+        public static readonly GetModulesRequest Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModulesResponse IDeserializable<GetModulesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new GetModulesResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

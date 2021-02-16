@@ -77,7 +77,7 @@ namespace Iviz.Msgs.StdSrvs
         
         SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b)
         {
-            return new SetBoolRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.StdSrvs
         
         SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b)
         {
-            return new SetBoolResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

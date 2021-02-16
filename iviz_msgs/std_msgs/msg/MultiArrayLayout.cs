@@ -63,7 +63,7 @@ namespace Iviz.Msgs.StdMsgs
         
         MultiArrayLayout IDeserializable<MultiArrayLayout>.RosDeserialize(ref Buffer b)
         {
-            return new MultiArrayLayout(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

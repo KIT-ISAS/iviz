@@ -87,7 +87,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Texture IDeserializable<Texture>.RosDeserialize(ref Buffer b)
         {
-            return new Texture(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

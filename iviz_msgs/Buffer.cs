@@ -301,12 +301,12 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            if (offset < 0)
+            if (offset < 0 || buffer.Length < offset)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (buffer.Length < offset + size || size < -1)
+            if (size != -1 && buffer.Length < size)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
@@ -324,7 +324,7 @@ namespace Iviz.Msgs
         {
             fixed (byte* bPtr = buffer)
             {
-                int span = (size == -1) ? buffer.Length - offset : size;
+                int span = (size == -1) ? buffer.Length : size;
                 Buffer b = new Buffer(bPtr + offset, bPtr + span);
                 return generator.RosDeserialize(ref b);
             }
@@ -351,7 +351,7 @@ namespace Iviz.Msgs
 
             fixed (byte* bPtr = buffer)
             {
-                Buffer b = new Buffer(bPtr + offset, bPtr + buffer.Length - offset);
+                Buffer b = new Buffer(bPtr + offset, bPtr + buffer.Length);
                 message.RosSerialize(ref b);
                 return (uint) (b.ptr - bPtr - offset);
             }

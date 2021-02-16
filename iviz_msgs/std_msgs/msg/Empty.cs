@@ -27,7 +27,7 @@ namespace Iviz.Msgs.StdMsgs
             return Singleton;
         }
         
-        public static readonly Empty Singleton = new Empty();
+        public static readonly Empty Singleton = new();
     
         public void RosSerialize(ref Buffer b)
         {

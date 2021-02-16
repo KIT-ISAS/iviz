@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         TimeReference IDeserializable<TimeReference>.RosDeserialize(ref Buffer b)
         {
-            return new TimeReference(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

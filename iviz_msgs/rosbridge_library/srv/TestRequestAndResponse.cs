@@ -77,7 +77,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestRequestAndResponseRequest IDeserializable<TestRequestAndResponseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new TestRequestAndResponseRequest(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestRequestAndResponseResponse IDeserializable<TestRequestAndResponseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new TestRequestAndResponseResponse(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

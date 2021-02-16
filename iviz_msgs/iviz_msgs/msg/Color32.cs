@@ -36,7 +36,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         readonly Color32 IDeserializable<Color32>.RosDeserialize(ref Buffer b)
         {
-            return new Color32(ref b);
+            return new(ref b);
         }
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();

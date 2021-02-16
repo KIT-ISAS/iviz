@@ -71,7 +71,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Material IDeserializable<Material>.RosDeserialize(ref Buffer b)
         {
-            return new Material(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         MoveGroupResult IDeserializable<MoveGroupResult>.RosDeserialize(ref Buffer b)
         {
-            return new MoveGroupResult(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)

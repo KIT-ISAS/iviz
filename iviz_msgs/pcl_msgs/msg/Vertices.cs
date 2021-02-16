@@ -35,7 +35,7 @@ namespace Iviz.Msgs.PclMsgs
         
         Vertices IDeserializable<Vertices>.RosDeserialize(ref Buffer b)
         {
-            return new Vertices(ref b);
+            return new(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
