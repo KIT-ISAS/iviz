@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Imu IDeserializable<Imu>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Imu(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -79,6 +79,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.SerializeStructArray(AngularVelocityCovariance, 9);
             LinearAcceleration.RosSerialize(ref b);
             b.SerializeStructArray(LinearAccelerationCovariance, 9);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

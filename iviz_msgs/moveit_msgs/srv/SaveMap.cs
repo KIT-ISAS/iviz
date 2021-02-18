@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (SaveMapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public SaveMapRequest()
         {
-            Filename = "";
+            Filename = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveMapRequest IDeserializable<SaveMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SaveMapRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Filename);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -130,12 +140,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveMapResponse IDeserializable<SaveMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SaveMapResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

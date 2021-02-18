@@ -37,12 +37,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         LaserEcho IDeserializable<LaserEcho>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new LaserEcho(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Echoes, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

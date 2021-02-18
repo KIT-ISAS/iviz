@@ -18,7 +18,7 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
         {
-            ChildFrameId = "";
+            ChildFrameId = string.Empty;
             Pose = new GeometryMsgs.PoseWithCovariance();
             Twist = new GeometryMsgs.TwistWithCovariance();
         }
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.NavMsgs
         
         Odometry IDeserializable<Odometry>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Odometry(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.NavMsgs
             b.Serialize(ChildFrameId);
             Pose.RosSerialize(ref b);
             Twist.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

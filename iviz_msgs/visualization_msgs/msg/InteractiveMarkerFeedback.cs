@@ -44,9 +44,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()
         {
-            ClientId = "";
-            MarkerName = "";
-            ControlName = "";
+            ClientId = string.Empty;
+            MarkerName = string.Empty;
+            ControlName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerFeedback IDeserializable<InteractiveMarkerFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new InteractiveMarkerFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -98,6 +98,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(MenuEntryId);
             MousePoint.RosSerialize(ref b);
             b.Serialize(MousePointValid);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

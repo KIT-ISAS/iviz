@@ -18,7 +18,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerPose IDeserializable<InteractiveMarkerPose>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new InteractiveMarkerPose(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -52,6 +52,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             Header.RosSerialize(ref b);
             Pose.RosSerialize(ref b);
             b.Serialize(Name);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

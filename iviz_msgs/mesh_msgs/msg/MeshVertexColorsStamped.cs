@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColorsStamped()
         {
-            Uuid = "";
+            Uuid = string.Empty;
             MeshVertexColors = new MeshMsgs.MeshVertexColors();
         }
         
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexColorsStamped IDeserializable<MeshVertexColorsStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshVertexColorsStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.MeshMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
             MeshVertexColors.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

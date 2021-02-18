@@ -28,9 +28,13 @@ namespace Iviz.Msgs.Actionlib
             return Singleton;
         }
         
-        public static readonly TwoIntsFeedback Singleton = new();
+        public static readonly TwoIntsFeedback Singleton = new TwoIntsFeedback();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

@@ -50,13 +50,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         NavSatStatus IDeserializable<NavSatStatus>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new NavSatStatus(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Status);
             b.Serialize(Service);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

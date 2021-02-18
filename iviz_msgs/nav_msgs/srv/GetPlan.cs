@@ -39,6 +39,12 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (GetPlanResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -90,7 +96,7 @@ namespace Iviz.Msgs.NavMsgs
         
         GetPlanRequest IDeserializable<GetPlanRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPlanRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -98,6 +104,10 @@ namespace Iviz.Msgs.NavMsgs
             Start.RosSerialize(ref b);
             Goal.RosSerialize(ref b);
             b.Serialize(Tolerance);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -149,12 +159,16 @@ namespace Iviz.Msgs.NavMsgs
         
         GetPlanResponse IDeserializable<GetPlanResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPlanResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Plan.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

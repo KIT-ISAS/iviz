@@ -13,8 +13,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public KeyValue()
         {
-            Key = "";
-            Value = "";
+            Key = string.Empty;
+            Value = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -38,13 +38,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         KeyValue IDeserializable<KeyValue>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new KeyValue(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Key);
             b.Serialize(Value);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

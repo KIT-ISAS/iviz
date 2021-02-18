@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         TriangleIndices IDeserializable<TriangleIndices>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TriangleIndices(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(VertexIndices, 3);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

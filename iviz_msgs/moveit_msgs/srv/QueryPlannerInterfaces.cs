@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (QueryPlannerInterfacesResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.MoveitMsgs
             return Singleton;
         }
         
-        public static readonly QueryPlannerInterfacesRequest Singleton = new();
+        public static readonly QueryPlannerInterfacesRequest Singleton = new QueryPlannerInterfacesRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -123,12 +133,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         QueryPlannerInterfacesResponse IDeserializable<QueryPlannerInterfacesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new QueryPlannerInterfacesResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(PlannerInterfaces, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

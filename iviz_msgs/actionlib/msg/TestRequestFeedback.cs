@@ -28,9 +28,13 @@ namespace Iviz.Msgs.Actionlib
             return Singleton;
         }
         
-        public static readonly TestRequestFeedback Singleton = new();
+        public static readonly TestRequestFeedback Singleton = new TestRequestFeedback();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

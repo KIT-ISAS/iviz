@@ -43,7 +43,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         OctomapWithPose IDeserializable<OctomapWithPose>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new OctomapWithPose(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -51,6 +51,10 @@ namespace Iviz.Msgs.OctomapMsgs
             Header.RosSerialize(ref b);
             Origin.RosSerialize(ref b);
             Octomap.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

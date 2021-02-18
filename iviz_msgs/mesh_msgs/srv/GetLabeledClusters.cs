@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetLabeledClustersResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersRequest()
         {
-            Uuid = "";
+            Uuid = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetLabeledClustersRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uuid);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -135,12 +145,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetLabeledClustersResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Clusters, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

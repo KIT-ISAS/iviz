@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (SendBytesResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -77,12 +83,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         SendBytesRequest IDeserializable<SendBytesRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SendBytesRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Count);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -103,7 +113,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Constructor for empty message. </summary>
         public SendBytesResponse()
         {
-            Data = "";
+            Data = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -125,12 +135,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         SendBytesResponse IDeserializable<SendBytesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SendBytesResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

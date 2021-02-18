@@ -36,12 +36,16 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         Clock IDeserializable<Clock>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Clock(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Clock_);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Pose IDeserializable<Pose>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Pose(ref b);
         }
         
         public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -77,7 +81,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);
-        public static implicit operator Transform(in Pose p) => new(p.Position, p.Orientation);
-        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);
+        public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);
+        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);
     }
 }

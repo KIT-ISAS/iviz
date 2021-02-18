@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestNestedServiceResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestNestedServiceRequest IDeserializable<TestNestedServiceRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestNestedServiceRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Pose.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -127,12 +137,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestNestedServiceResponse IDeserializable<TestNestedServiceResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestNestedServiceResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Data.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

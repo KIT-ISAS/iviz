@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Joy IDeserializable<Joy>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Joy(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Axes, 0);
             b.SerializeStructArray(Buttons, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

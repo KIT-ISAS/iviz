@@ -13,12 +13,11 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeasurePositionsGoal()
         {
-            Header = new StdMsgs.Header();
             Points = System.Array.Empty<GeometryMsgs.Point>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public MeasurePositionsGoal(StdMsgs.Header Header, GeometryMsgs.Point[] Points)
+        public MeasurePositionsGoal(in StdMsgs.Header Header, GeometryMsgs.Point[] Points)
         {
             this.Header = Header;
             this.Points = Points;
@@ -38,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         MeasurePositionsGoal IDeserializable<MeasurePositionsGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeasurePositionsGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -47,10 +46,12 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Points, 0);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
-            //if (Header is null) throw new System.NullReferenceException(nameof(Header));
-            Header.RosValidate();
             if (Points is null) throw new System.NullReferenceException(nameof(Points));
         }
     

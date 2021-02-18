@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetPositionIKResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -80,12 +86,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionIKRequest IDeserializable<GetPositionIKRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPositionIKRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             IkRequest.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -140,13 +150,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionIKResponse IDeserializable<GetPositionIKResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPositionIKResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Solution.RosSerialize(ref b);
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

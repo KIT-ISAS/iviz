@@ -36,13 +36,17 @@ namespace Iviz.Msgs.Actionlib
         
         TwoIntsGoal IDeserializable<TwoIntsGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TwoIntsGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(A);
             b.Serialize(B);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

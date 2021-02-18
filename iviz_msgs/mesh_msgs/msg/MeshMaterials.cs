@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshMaterials IDeserializable<MeshMaterials>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshMaterials(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -68,6 +68,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeArray(Materials, 0);
             b.SerializeStructArray(ClusterMaterials, 0);
             b.SerializeArray(VertexTexCoords, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -19,7 +19,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()
         {
-            Uuid = "";
+            Uuid = string.Empty;
             Cluster = new MeshFaceCluster();
         }
         
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshFaceClusterStamped IDeserializable<MeshFaceClusterStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshFaceClusterStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(Uuid);
             Cluster.RosSerialize(ref b);
             b.Serialize(@override);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

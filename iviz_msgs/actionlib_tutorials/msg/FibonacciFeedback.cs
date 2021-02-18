@@ -35,12 +35,16 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         FibonacciFeedback IDeserializable<FibonacciFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new FibonacciFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Sequence, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

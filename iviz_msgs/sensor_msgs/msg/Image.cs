@@ -33,7 +33,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public Image()
         {
-            Encoding = "";
+            Encoding = string.Empty;
             Data = System.Array.Empty<byte>();
         }
         
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Image IDeserializable<Image>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Image(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -80,6 +80,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(IsBigendian);
             b.Serialize(Step);
             b.SerializeStructArray(Data, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

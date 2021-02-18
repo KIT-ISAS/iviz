@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (DeleteParamResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public DeleteParamRequest()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.Rosapi
         
         DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new DeleteParamRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -125,9 +135,13 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly DeleteParamResponse Singleton = new();
+        public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

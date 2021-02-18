@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Temperature IDeserializable<Temperature>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Temperature(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Temperature_);
             b.Serialize(Variance);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

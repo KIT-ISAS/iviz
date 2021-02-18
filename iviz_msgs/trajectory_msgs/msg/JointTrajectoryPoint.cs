@@ -52,7 +52,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         JointTrajectoryPoint IDeserializable<JointTrajectoryPoint>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new JointTrajectoryPoint(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -62,6 +62,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.SerializeStructArray(Accelerations, 0);
             b.SerializeStructArray(Effort, 0);
             b.Serialize(TimeFromStart);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

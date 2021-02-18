@@ -44,7 +44,7 @@ namespace Iviz.Msgs.NavMsgs
         
         GridCells IDeserializable<GridCells>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GridCells(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -53,6 +53,10 @@ namespace Iviz.Msgs.NavMsgs
             b.Serialize(CellWidth);
             b.Serialize(CellHeight);
             b.SerializeStructArray(Cells, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

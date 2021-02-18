@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (GetTimeResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.Rosapi
             return Singleton;
         }
         
-        public static readonly GetTimeRequest Singleton = new();
+        public static readonly GetTimeRequest Singleton = new GetTimeRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -117,12 +127,16 @@ namespace Iviz.Msgs.Rosapi
         
         GetTimeResponse IDeserializable<GetTimeResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetTimeResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Time);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

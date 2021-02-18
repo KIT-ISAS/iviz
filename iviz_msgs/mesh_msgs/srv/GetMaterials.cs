@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetMaterialsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsRequest()
         {
-            Uuid = "";
+            Uuid = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetMaterialsRequest IDeserializable<GetMaterialsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetMaterialsRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uuid);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -131,12 +141,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetMaterialsResponse IDeserializable<GetMaterialsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetMaterialsResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             MeshMaterialsStamped.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

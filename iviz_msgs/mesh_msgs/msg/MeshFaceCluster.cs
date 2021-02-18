@@ -16,7 +16,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFaceCluster()
         {
             FaceIndices = System.Array.Empty<uint>();
-            Label = "";
+            Label = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -40,13 +40,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshFaceCluster IDeserializable<MeshFaceCluster>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshFaceCluster(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(FaceIndices, 0);
             b.Serialize(Label);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

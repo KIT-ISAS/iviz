@@ -35,7 +35,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Point IDeserializable<Point>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Point(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
@@ -51,6 +51,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -76,18 +80,18 @@ namespace Iviz.Msgs.GeometryMsgs
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         /// Custom iviz code
-        public static readonly Point Zero = new(0, 0, 0);
-        public static readonly Point One = new(1, 1, 1);
-        public static readonly Point UnitX = new(1, 0, 0);
-        public static readonly Point UnitY = new(0, 1, 0);
-        public static readonly Point UnitZ = new(0, 0, 1);
-        public static implicit operator Vector3(in Point p) => new(p.X, p.Y, p.Z);
-        public static Point operator +(in Point v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
-        public static Point operator -(in Point v, in Vector3 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
-        public static Point operator *(double f, in Point v) => new(f * v.X, f * v.Y, f * v.Z);
-        public static Point operator *(in Point v, double f) => new(f * v.X, f * v.Y, f * v.Z);
-        public static Point operator /(in Point v, double f) => new(v.X / f, v.Y / f, v.Z / f);
-        public static Point operator -(in Point v) => new(-v.X, -v.Y, -v.Z);
-        public static implicit operator Point(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);
+        public static readonly Point Zero = new Point(0, 0, 0);
+        public static readonly Point One = new Point(1, 1, 1);
+        public static readonly Point UnitX = new Point(1, 0, 0);
+        public static readonly Point UnitY = new Point(0, 1, 0);
+        public static readonly Point UnitZ = new Point(0, 0, 1);
+        public static implicit operator Vector3(in Point p) => new Vector3(p.X, p.Y, p.Z);
+        public static Point operator +(in Point v, in Vector3 w) => new Point(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Point operator -(in Point v, in Vector3 w) => new Point(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Point operator *(double f, in Point v) => new Point(f * v.X, f * v.Y, f * v.Z);
+        public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);
+        public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);
+        public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);
+        public static implicit operator Point(in (double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);
     }
 }

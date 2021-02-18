@@ -37,13 +37,17 @@ namespace Iviz.Msgs.TurtleActionlib
         
         ShapeGoal IDeserializable<ShapeGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ShapeGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Edges);
             b.Serialize(Radius);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

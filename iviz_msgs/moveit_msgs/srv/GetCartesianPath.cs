@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetCartesianPathResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -82,8 +88,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetCartesianPathRequest()
         {
             StartState = new RobotState();
-            GroupName = "";
-            LinkName = "";
+            GroupName = string.Empty;
+            LinkName = string.Empty;
             Waypoints = System.Array.Empty<GeometryMsgs.Pose>();
             PathConstraints = new Constraints();
         }
@@ -123,7 +129,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetCartesianPathRequest IDeserializable<GetCartesianPathRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetCartesianPathRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -137,6 +143,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(JumpThreshold);
             b.Serialize(AvoidCollisions);
             PathConstraints.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -211,7 +221,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetCartesianPathResponse IDeserializable<GetCartesianPathResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetCartesianPathResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -220,6 +230,10 @@ namespace Iviz.Msgs.MoveitMsgs
             Solution.RosSerialize(ref b);
             b.Serialize(Fraction);
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

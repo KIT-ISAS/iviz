@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PlaceFeedback()
         {
-            State = "";
+            State = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlaceFeedback IDeserializable<PlaceFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PlaceFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(State);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

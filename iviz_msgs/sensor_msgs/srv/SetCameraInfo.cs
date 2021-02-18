@@ -39,6 +39,12 @@ namespace Iviz.Msgs.SensorMsgs
             set => Response = (SetCameraInfoResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -85,12 +91,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetCameraInfoRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             CameraInfo.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -118,7 +128,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public SetCameraInfoResponse()
         {
-            StatusMessage = "";
+            StatusMessage = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -142,13 +152,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetCameraInfoResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
             b.Serialize(StatusMessage);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

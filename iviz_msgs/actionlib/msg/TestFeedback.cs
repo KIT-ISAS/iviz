@@ -33,12 +33,16 @@ namespace Iviz.Msgs.Actionlib
         
         TestFeedback IDeserializable<TestFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Feedback);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

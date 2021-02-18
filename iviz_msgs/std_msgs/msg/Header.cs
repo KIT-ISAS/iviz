@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdMsgs
         
         readonly Header IDeserializable<Header>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Header(ref b);
         }
         
         public override readonly int GetHashCode() => (Seq, Stamp, FrameId).GetHashCode();
@@ -64,6 +64,10 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(Seq);
             b.Serialize(Stamp);
             b.Serialize(FrameId ?? string.Empty);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -97,8 +101,8 @@ namespace Iviz.Msgs.StdMsgs
                 "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
                 
         /// Custom iviz code
-        public static implicit operator Header((uint seqId, string frameId) p) => new(p.seqId, time.Now(), p.frameId);
-        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new(p.seqId, p.stamp, p.frameId);
-        public static implicit operator Header(string frameId) => new(0, time.Now(), frameId);
+        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
+        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);
+        public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);
     }
 }

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()
         {
-            Name = "";
+            Name = string.Empty;
             Values = System.Array.Empty<float>();
         }
         
@@ -57,13 +57,17 @@ namespace Iviz.Msgs.SensorMsgs
         
         ChannelFloat32 IDeserializable<ChannelFloat32>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ChannelFloat32(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
             b.SerializeStructArray(Values, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

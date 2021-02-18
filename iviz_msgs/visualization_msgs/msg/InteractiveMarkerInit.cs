@@ -23,7 +23,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerInit()
         {
-            ServerId = "";
+            ServerId = string.Empty;
             Markers = System.Array.Empty<InteractiveMarker>();
         }
         
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerInit IDeserializable<InteractiveMarkerInit>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new InteractiveMarkerInit(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -62,6 +62,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
             b.SerializeArray(Markers, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -128,7 +128,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()
         {
-            DistortionModel = "";
+            DistortionModel = string.Empty;
             D = System.Array.Empty<double>();
             K = new double[9];
             R = new double[9];
@@ -175,7 +175,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         CameraInfo IDeserializable<CameraInfo>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new CameraInfo(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -191,6 +191,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(BinningX);
             b.Serialize(BinningY);
             Roi.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

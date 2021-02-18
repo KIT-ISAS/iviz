@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         AllowedCollisionEntry IDeserializable<AllowedCollisionEntry>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AllowedCollisionEntry(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Enabled, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -67,8 +71,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NWKM9ILclILVLIL1LIyy9RSM7PyckszszPU0jOSE3OzsxLV8gsVkjNS0zKSU3hSsrP" +
-                "z4mOhXO5AEjNYe0/AAAA";
+                "H4sIAAAAAAAAE1NWKM9ILclILVLIL1LIyy9RSM7PyckszszPU0jOSE3OzsxLV8gsVkjNS0zKSU3h5UrK" +
+                "z8+JjkXwuQA9A8VxQQAAAA==";
                 
     }
 }

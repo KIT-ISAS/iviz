@@ -38,13 +38,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PolygonStamped IDeserializable<PolygonStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PolygonStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Polygon.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

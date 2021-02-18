@@ -82,7 +82,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         NavSatFix IDeserializable<NavSatFix>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new NavSatFix(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -94,6 +94,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Altitude);
             b.SerializeStructArray(PositionCovariance, 9);
             b.Serialize(PositionCovarianceType);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

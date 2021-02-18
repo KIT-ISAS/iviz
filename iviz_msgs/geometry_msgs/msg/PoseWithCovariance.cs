@@ -42,13 +42,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PoseWithCovariance IDeserializable<PoseWithCovariance>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PoseWithCovariance(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Pose.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -38,13 +38,17 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         ObjectRecognitionGoal IDeserializable<ObjectRecognitionGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ObjectRecognitionGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(UseRoi);
             b.SerializeStructArray(FilterLimits, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

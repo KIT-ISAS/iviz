@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexCosts IDeserializable<MeshVertexCosts>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshVertexCosts(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Costs, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

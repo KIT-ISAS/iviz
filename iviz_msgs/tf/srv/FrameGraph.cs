@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Tf
             set => Response = (FrameGraphResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.Tf
             return Singleton;
         }
         
-        public static readonly FrameGraphRequest Singleton = new();
+        public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -96,7 +106,7 @@ namespace Iviz.Msgs.Tf
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
         {
-            DotGraph = "";
+            DotGraph = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -118,12 +128,16 @@ namespace Iviz.Msgs.Tf
         
         FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new FrameGraphResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(DotGraph);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

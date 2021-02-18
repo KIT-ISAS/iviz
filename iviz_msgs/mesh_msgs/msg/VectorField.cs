@@ -38,13 +38,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         VectorField IDeserializable<VectorField>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new VectorField(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Positions, 0);
             b.SerializeStructArray(Vectors, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

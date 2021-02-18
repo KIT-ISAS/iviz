@@ -49,11 +49,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public Marker()
         {
-            Ns = "";
+            Ns = string.Empty;
             Points = System.Array.Empty<GeometryMsgs.Point>();
             Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
-            Text = "";
-            MeshResource = "";
+            Text = string.Empty;
+            MeshResource = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         Marker IDeserializable<Marker>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Marker(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -123,6 +123,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Text);
             b.Serialize(MeshResource);
             b.Serialize(MeshUseEmbeddedMaterials);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

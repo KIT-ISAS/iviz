@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshGeometry IDeserializable<MeshGeometry>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshGeometry(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -55,6 +55,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(VertexNormals, 0);
             b.SerializeArray(Faces, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -14,7 +14,7 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayDimension()
         {
-            Label = "";
+            Label = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.StdMsgs
         
         MultiArrayDimension IDeserializable<MultiArrayDimension>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MultiArrayDimension(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -48,6 +48,10 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(Label);
             b.Serialize(Size);
             b.Serialize(Stride);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

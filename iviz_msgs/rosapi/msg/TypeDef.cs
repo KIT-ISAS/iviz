@@ -18,7 +18,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()
         {
-            Type = "";
+            Type = string.Empty;
             Fieldnames = System.Array.Empty<string>();
             Fieldtypes = System.Array.Empty<string>();
             Fieldarraylen = System.Array.Empty<int>();
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         
         TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TypeDef(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -70,6 +70,10 @@ namespace Iviz.Msgs.Rosapi
             b.SerializeArray(Examples, 0);
             b.SerializeArray(Constnames, 0);
             b.SerializeArray(Constvalues, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -16,8 +16,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()
         {
-            Uuid = "";
-            Type = "";
+            Uuid = string.Empty;
+            Type = string.Empty;
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts();
         }
         
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexCostsStamped IDeserializable<MeshVertexCostsStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshVertexCostsStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -55,6 +55,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(Uuid);
             b.Serialize(Type);
             MeshVertexCosts.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

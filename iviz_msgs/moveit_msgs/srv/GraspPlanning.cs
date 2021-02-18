@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GraspPlanningResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -69,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public GraspPlanningRequest()
         {
-            GroupName = "";
+            GroupName = string.Empty;
             Target = new CollisionObject();
             SupportSurfaces = System.Array.Empty<string>();
             CandidateGrasps = System.Array.Empty<Grasp>();
@@ -111,7 +117,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GraspPlanningRequest IDeserializable<GraspPlanningRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GraspPlanningRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -121,6 +127,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(SupportSurfaces, 0);
             b.SerializeArray(CandidateGrasps, 0);
             b.SerializeArray(MovableObstacles, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -211,13 +221,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GraspPlanningResponse IDeserializable<GraspPlanningResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GraspPlanningResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Grasps, 0);
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (SetBoolResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -77,12 +83,16 @@ namespace Iviz.Msgs.StdSrvs
         
         SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetBoolRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -104,7 +114,7 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Constructor for empty message. </summary>
         public SetBoolResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -128,13 +138,17 @@ namespace Iviz.Msgs.StdSrvs
         
         SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetBoolResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

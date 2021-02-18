@@ -39,6 +39,12 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (EmptyResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly EmptyRequest Singleton = new();
+        public static readonly EmptyRequest Singleton = new EmptyRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -112,9 +122,13 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly EmptyResponse Singleton = new();
+        public static readonly EmptyResponse Singleton = new EmptyResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

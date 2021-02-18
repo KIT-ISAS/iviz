@@ -39,6 +39,12 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (TriggerResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.StdSrvs
             return Singleton;
         }
         
-        public static readonly TriggerRequest Singleton = new();
+        public static readonly TriggerRequest Singleton = new TriggerRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -97,7 +107,7 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Constructor for empty message. </summary>
         public TriggerResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -121,13 +131,17 @@ namespace Iviz.Msgs.StdSrvs
         
         TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TriggerResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

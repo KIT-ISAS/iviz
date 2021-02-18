@@ -19,7 +19,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// <summary> Constructor for empty message. </summary>
         public GoalID()
         {
-            Id = "";
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -43,13 +43,17 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         GoalID IDeserializable<GoalID>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GoalID(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Stamp);
             b.Serialize(Id);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

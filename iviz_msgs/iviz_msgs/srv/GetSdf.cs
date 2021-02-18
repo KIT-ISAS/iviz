@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetSdfResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -57,7 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetSdfRequest()
         {
-            Uri = "";
+            Uri = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -79,12 +85,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetSdfRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uri);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -113,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetSdfResponse()
         {
             Scene = new Scene();
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -139,7 +149,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetSdfResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -147,6 +157,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             Scene.RosSerialize(ref b);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

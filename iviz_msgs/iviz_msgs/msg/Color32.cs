@@ -36,7 +36,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         readonly Color32 IDeserializable<Color32>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Color32(ref b);
         }
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
@@ -52,6 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -73,7 +77,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
+                "H4sIAAAAAAAAEyvNzCuxUCji5SoFM9JhjCQYI5GXiwsAD3pnqiUAAAA=";
                 
     }
 }

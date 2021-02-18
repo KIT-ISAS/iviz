@@ -37,13 +37,17 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         AveragingGoal IDeserializable<AveragingGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AveragingGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Edges);
             b.Serialize(Radius);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

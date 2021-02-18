@@ -37,13 +37,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Vector3Stamped IDeserializable<Vector3Stamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Vector3Stamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Vector.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -29,9 +29,13 @@ namespace Iviz.Msgs.ActionlibTutorials
             return Singleton;
         }
         
-        public static readonly AveragingFeedback Singleton = new();
+        public static readonly AveragingFeedback Singleton = new AveragingFeedback();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

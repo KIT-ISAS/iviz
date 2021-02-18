@@ -13,7 +13,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClient()
         {
-            IpAddress = "";
+            IpAddress = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -37,13 +37,17 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         ConnectedClient IDeserializable<ConnectedClient>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ConnectedClient(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(IpAddress);
             b.Serialize(ConnectionTime);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

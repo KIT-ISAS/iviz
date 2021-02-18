@@ -41,13 +41,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         Feature IDeserializable<Feature>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Feature(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Location.RosSerialize(ref b);
             b.SerializeArray(Descriptor, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

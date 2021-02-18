@@ -25,7 +25,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public PointField()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         PointField IDeserializable<PointField>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PointField(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -62,6 +62,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Offset);
             b.Serialize(Datatype);
             b.Serialize(Count);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

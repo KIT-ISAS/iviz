@@ -23,9 +23,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public DiagnosticStatus()
         {
-            Name = "";
-            Message = "";
-            HardwareId = "";
+            Name = string.Empty;
+            Message = string.Empty;
+            HardwareId = string.Empty;
             Values = System.Array.Empty<KeyValue>();
         }
         
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         DiagnosticStatus IDeserializable<DiagnosticStatus>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new DiagnosticStatus(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -70,6 +70,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Serialize(Message);
             b.Serialize(HardwareId);
             b.SerializeArray(Values, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

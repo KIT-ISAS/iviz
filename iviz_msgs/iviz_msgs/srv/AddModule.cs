@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (AddModuleResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -58,8 +64,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddModuleRequest()
         {
-            ModuleType = "";
-            Id = "";
+            ModuleType = string.Empty;
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -83,13 +89,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         AddModuleRequest IDeserializable<AddModuleRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AddModuleRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(ModuleType);
             b.Serialize(Id);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -119,8 +129,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddModuleResponse()
         {
-            Message = "";
-            Id = "";
+            Message = string.Empty;
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -146,7 +156,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         AddModuleResponse IDeserializable<AddModuleResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AddModuleResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -154,6 +164,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.Serialize(Message);
             b.Serialize(Id);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

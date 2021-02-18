@@ -15,7 +15,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public Node()
         {
-            Name = "";
+            Name = string.Empty;
             Transform = new Matrix4();
             Meshes = System.Array.Empty<int>();
         }
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Node IDeserializable<Node>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Node(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -54,6 +54,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Parent);
             Transform.RosSerialize(ref b);
             b.SerializeStructArray(Meshes, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

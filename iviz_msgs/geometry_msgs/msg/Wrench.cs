@@ -38,13 +38,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Wrench IDeserializable<Wrench>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Wrench(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Force.RosSerialize(ref b);
             Torque.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

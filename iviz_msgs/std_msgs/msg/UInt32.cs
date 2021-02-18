@@ -33,12 +33,16 @@ namespace Iviz.Msgs.StdMsgs
         
         UInt32 IDeserializable<UInt32>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new UInt32(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -40,7 +40,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Vector3(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
@@ -56,6 +56,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -84,23 +88,23 @@ namespace Iviz.Msgs.GeometryMsgs
                 "0nqk3+YP1MrAiH8BAAA=";
                 
         /// Custom iviz code
-        public static readonly Vector3 Zero = new(0, 0, 0);
-        public static readonly Vector3 One = new(1, 1, 1);
-        public static readonly Vector3 UnitX = new(1, 0, 0);
-        public static readonly Vector3 UnitY = new(0, 1, 0);
-        public static readonly Vector3 UnitZ = new(0, 0, 1);
-        public static implicit operator Point(in Vector3 p) => new(p.X, p.Y, p.Z);
-        public static Vector3 operator +(in Vector3 v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
-        public static Vector3 operator -(in Vector3 v, in Vector3 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
-        public static Vector3 operator *(double f, in Vector3 v) => new(f * v.X, f * v.Y, f * v.Z);
-        public static Vector3 operator *(in Vector3 v, double f) => new(f * v.X, f * v.Y, f * v.Z);
-        public static Vector3 operator /(in Vector3 v, double f) => new(v.X / f, v.Y / f, v.Z / f);
-        public static Vector3 operator -(in Vector3 v) => new(-v.X, -v.Y, -v.Z);
+        public static readonly Vector3 Zero = new Vector3(0, 0, 0);
+        public static readonly Vector3 One = new Vector3(1, 1, 1);
+        public static readonly Vector3 UnitX = new Vector3(1, 0, 0);
+        public static readonly Vector3 UnitY = new Vector3(0, 1, 0);
+        public static readonly Vector3 UnitZ = new Vector3(0, 0, 1);
+        public static implicit operator Point(in Vector3 p) => new Point(p.X, p.Y, p.Z);
+        public static Vector3 operator +(in Vector3 v, in Vector3 w) => new Vector3(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Vector3 operator -(in Vector3 v, in Vector3 w) => new Vector3(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Vector3 operator *(double f, in Vector3 v) => new Vector3(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3 operator *(in Vector3 v, double f) => new Vector3(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3 operator /(in Vector3 v, double f) => new Vector3(v.X / f, v.Y / f, v.Z / f);
+        public static Vector3 operator -(in Vector3 v) => new Vector3(-v.X, -v.Y, -v.Z);
         public readonly double Dot(in Vector3 v) => X * v.X + Y * v.Y + Z * v.Z;
         public readonly double SquaredNorm => Dot(this);
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
         public readonly Vector3 Normalized => this / Norm;
-        public readonly Vector3 Cross(in Vector3 v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
-        public static implicit operator Vector3(in (double X, double Y, double Z) p) => new(p.X, p.Y, p.Z);
+        public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+        public static implicit operator Vector3(in (double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);
     }
 }

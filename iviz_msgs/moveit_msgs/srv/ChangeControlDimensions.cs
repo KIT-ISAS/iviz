@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ChangeControlDimensionsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -96,7 +102,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ChangeControlDimensionsRequest IDeserializable<ChangeControlDimensionsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ChangeControlDimensionsRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -107,6 +113,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(ControlXRotation);
             b.Serialize(ControlYRotation);
             b.Serialize(ControlZRotation);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -148,12 +158,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ChangeControlDimensionsResponse IDeserializable<ChangeControlDimensionsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ChangeControlDimensionsResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

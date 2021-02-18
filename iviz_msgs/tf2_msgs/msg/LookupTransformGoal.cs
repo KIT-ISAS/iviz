@@ -21,9 +21,9 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public LookupTransformGoal()
         {
-            TargetFrame = "";
-            SourceFrame = "";
-            FixedFrame = "";
+            TargetFrame = string.Empty;
+            SourceFrame = string.Empty;
+            FixedFrame = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         LookupTransformGoal IDeserializable<LookupTransformGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new LookupTransformGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -69,6 +69,10 @@ namespace Iviz.Msgs.Tf2Msgs
             b.Serialize(TargetTime);
             b.Serialize(FixedFrame);
             b.Serialize(Advanced);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

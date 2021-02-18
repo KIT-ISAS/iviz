@@ -38,13 +38,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         PoseArray IDeserializable<PoseArray>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PoseArray(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Poses, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

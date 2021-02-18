@@ -33,12 +33,16 @@ namespace Iviz.Msgs.StdMsgs
         
         Time IDeserializable<Time>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Time(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

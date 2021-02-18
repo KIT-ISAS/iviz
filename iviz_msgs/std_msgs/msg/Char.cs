@@ -33,12 +33,16 @@ namespace Iviz.Msgs.StdMsgs
         
         Char IDeserializable<Char>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Char(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

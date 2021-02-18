@@ -38,13 +38,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         AccelWithCovarianceStamped IDeserializable<AccelWithCovarianceStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AccelWithCovarianceStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Accel.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

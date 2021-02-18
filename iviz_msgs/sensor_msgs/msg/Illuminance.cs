@@ -52,7 +52,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Illuminance IDeserializable<Illuminance>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Illuminance(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -60,6 +60,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Illuminance_);
             b.Serialize(Variance);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

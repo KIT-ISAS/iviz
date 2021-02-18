@@ -72,9 +72,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerControl()
         {
-            Name = "";
+            Name = string.Empty;
             Markers = System.Array.Empty<Marker>();
-            Description = "";
+            Description = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         InteractiveMarkerControl IDeserializable<InteractiveMarkerControl>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new InteractiveMarkerControl(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -127,6 +127,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.SerializeArray(Markers, 0);
             b.Serialize(IndependentMarkerOrientation);
             b.Serialize(Description);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

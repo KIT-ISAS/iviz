@@ -37,13 +37,17 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         AveragingResult IDeserializable<AveragingResult>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new AveragingResult(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(InteriorAngle);
             b.Serialize(Apothem);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

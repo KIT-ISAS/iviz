@@ -34,12 +34,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         MeasurePositionsResult IDeserializable<MeasurePositionsResult>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeasurePositionsResult(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Measurements, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

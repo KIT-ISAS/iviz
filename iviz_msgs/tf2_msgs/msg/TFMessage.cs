@@ -38,12 +38,16 @@ namespace Iviz.Msgs.Tf2Msgs
         
         TFMessage IDeserializable<TFMessage>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TFMessage(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Transforms, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

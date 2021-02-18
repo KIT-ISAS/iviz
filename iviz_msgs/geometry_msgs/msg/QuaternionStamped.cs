@@ -37,13 +37,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         QuaternionStamped IDeserializable<QuaternionStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new QuaternionStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Quaternion.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -33,12 +33,16 @@ namespace Iviz.Msgs.Actionlib
         
         TwoIntsResult IDeserializable<TwoIntsResult>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TwoIntsResult(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Sum);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

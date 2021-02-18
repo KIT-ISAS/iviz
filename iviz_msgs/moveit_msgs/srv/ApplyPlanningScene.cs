@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ApplyPlanningSceneResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ApplyPlanningSceneRequest IDeserializable<ApplyPlanningSceneRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ApplyPlanningSceneRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Scene.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -131,12 +141,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ApplyPlanningSceneResponse IDeserializable<ApplyPlanningSceneResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ApplyPlanningSceneResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

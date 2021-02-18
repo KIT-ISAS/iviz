@@ -23,7 +23,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public Light()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Light IDeserializable<Light>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Light(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -75,6 +75,10 @@ namespace Iviz.Msgs.IvizMsgs
             Direction.RosSerialize(ref b);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -101,10 +105,10 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
-                "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
-                "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +
-                "1l4bryev/P8fGc4UDvEI7hlcD/AC0NcUX98BAAA=";
+                "H4sIAAAAAAAAE72QTQrCMBCF94HcITfwbyNCF6IiBW2LitsSbVMH2kxJUrWe3lEa6wHEZPPy5c0w8zhr" +
+                "QLupSOIwOohADHkHluFutTiEcTTfEB55vE/il23MGWfWGdCF0LLK/bdra9InxFKcpXWpvcgMb5azBZZo" +
+                "JmORgVKNJY8qUToCRuqCnsf87MigRI0WHKD+QhkYkm/mq0Dr3KRUWn61wsb18HVZ8OPDtvv1TMAVHmll" +
+                "CzvotuqWNz6FwouTF/IPw/i8Pnnc+2jaXj5olCeOnAp59gEAAA==";
                 
     }
 }

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetTextureResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -57,7 +63,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetTextureRequest()
         {
-            Uuid = "";
+            Uuid = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -81,13 +87,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetTextureRequest IDeserializable<GetTextureRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetTextureRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -135,12 +145,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetTextureResponse IDeserializable<GetTextureResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetTextureResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Texture.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

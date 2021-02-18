@@ -34,12 +34,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestChar IDeserializable<TestChar>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestChar(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Data, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

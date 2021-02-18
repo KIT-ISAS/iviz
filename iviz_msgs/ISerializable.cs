@@ -13,7 +13,7 @@ namespace Iviz.Msgs
     /// <summary>
     /// Establishes that the class can be (de-)serialized as a ROS binary stream. 
     /// </summary>
-    public interface ISerializable
+    public interface ISerializable : IDisposable
     {
         /// <summary>
         /// Serializes this message into the buffer.

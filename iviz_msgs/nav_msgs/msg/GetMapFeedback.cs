@@ -29,9 +29,13 @@ namespace Iviz.Msgs.NavMsgs
             return Singleton;
         }
         
-        public static readonly GetMapFeedback Singleton = new();
+        public static readonly GetMapFeedback Singleton = new GetMapFeedback();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

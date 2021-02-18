@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetModulesResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -73,9 +79,13 @@ namespace Iviz.Msgs.IvizMsgs
             return Singleton;
         }
         
-        public static readonly GetModulesRequest Singleton = new();
+        public static readonly GetModulesRequest Singleton = new GetModulesRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -119,12 +129,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetModulesResponse IDeserializable<GetModulesResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetModulesResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Configs, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

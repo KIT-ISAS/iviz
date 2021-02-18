@@ -37,13 +37,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         InertiaStamped IDeserializable<InertiaStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new InertiaStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Inertia.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

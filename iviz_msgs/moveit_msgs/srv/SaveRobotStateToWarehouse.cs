@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (SaveRobotStateToWarehouseResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -58,8 +64,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public SaveRobotStateToWarehouseRequest()
         {
-            Name = "";
-            Robot = "";
+            Name = string.Empty;
+            Robot = string.Empty;
             State = new MoveitMsgs.RobotState();
         }
         
@@ -86,7 +92,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveRobotStateToWarehouseRequest IDeserializable<SaveRobotStateToWarehouseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SaveRobotStateToWarehouseRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -94,6 +100,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Name);
             b.Serialize(Robot);
             State.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -145,12 +155,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         SaveRobotStateToWarehouseResponse IDeserializable<SaveRobotStateToWarehouseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SaveRobotStateToWarehouseResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

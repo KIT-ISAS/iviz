@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshFeatures()
         {
-            MapUuid = "";
+            MapUuid = string.Empty;
             Features = System.Array.Empty<MeshMsgs.Feature>();
         }
         
@@ -42,13 +42,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshFeatures IDeserializable<MeshFeatures>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshFeatures(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(MapUuid);
             b.SerializeArray(Features, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

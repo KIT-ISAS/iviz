@@ -60,7 +60,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Inertia(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -73,6 +73,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(Iyy);
             b.Serialize(Iyz);
             b.Serialize(Izz);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

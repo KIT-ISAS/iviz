@@ -41,7 +41,7 @@ namespace Iviz.Msgs.TurtleActionlib
         
         ShapeActionFeedback IDeserializable<ShapeActionFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ShapeActionFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.TurtleActionlib
             Header.RosSerialize(ref b);
             Status.RosSerialize(ref b);
             Feedback.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

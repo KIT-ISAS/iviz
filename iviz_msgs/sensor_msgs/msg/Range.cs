@@ -75,7 +75,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         Range IDeserializable<Range>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Range(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -86,6 +86,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(MinRange);
             b.Serialize(MaxRange);
             b.Serialize(Range_);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

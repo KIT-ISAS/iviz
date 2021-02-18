@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         KinematicSolverInfo IDeserializable<KinematicSolverInfo>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new KinematicSolverInfo(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(JointNames, 0);
             b.SerializeArray(Limits, 0);
             b.SerializeArray(LinkNames, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -111,12 +115,13 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE62SP0/DQAzF93wKSywwIBbEgMTAhIRggg2hyE3c1vTuHJ0vVfn2OH+a5GjZyHZnv+ef" +
-                "X+4CHsGxJpA1fAmHpMAB0pZgx4E8Jq4gRaJCU+Sw+fgcusqAnrS4+K22k2fzqCRG0kZCbSJI0jsOHYPS" +
-                "y544lV43evPc3b/0QvMfHDJrx2GnZoEpJ1MIUhM0UfZck4KKaxNLUFhLnIk7+QhcPPzzV7y+Pd3DH9vY" +
-                "Eu9bVrDJihuyVEJCDl3EBtitIAFwJe2Umy2L0GC05VqHcYzsUmKvjeKgZk9BTXg1Lrj4IYUNTLEl4PUi" +
-                "8C0qNKLcTxvTXYlZWaE8FsqxYA7eHgCGGjweTnRrJ5jubrueSTpf4mG+XKDMGHtyUnH6PsE4FpYYNj7v" +
-                "zwYdSwPwdASLG1VbT3X37FYE11n3WSysKnIU8WxCy2I5Pc6O7lSWES7LI2WmOE+aqYofqZinDp8DAAA=";
+                "H4sIAAAAAAAAE62SMU/DQAyF90j9D5a6wIBYEAMSAxMSggk2hCI3cVvT3Dk6X6ry7/GlvZKjZSPb3fOz" +
+                "P7/cHB6gY40gS/gU9lGBPcQ1wYY9OYzcQAxEs0pjYL96/9iX1R4d6aya//bbybF1aSQE0l58ay6IMvbc" +
+                "VxysTrbEsXa60uunJDyPTpuwb1E279hv1JpgLOkUvLQEfZAtt6Sg0g2RxSssJUyokz9DV/f//FUvr493" +
+                "8MdCtsbbmhVstOKKLBkfkX0K2hDTEuIBFzIcs7N1EXoMtt7QYTjEdiFh9AbpoGVHXs14mVec/JZZlaKL" +
+                "YSDg5ST3NSr0ojwOzBkvxNqZUmelzkpq4uwxoG/B4e7UuuwE4+1NKjq6J7e4m9xOiX5ottRJw/HrlCYr" +
+                "JY1RlJZyXNYO5MczWPqoOjhq00tcEFyV5efpsGmoo4Dn85qq9c+LTYynxpJzqmfWwnOet7RV3wbsJSa7" +
+                "AwAA";
                 
     }
 }

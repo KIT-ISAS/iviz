@@ -33,7 +33,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatus()
         {
             GoalId = new GoalID();
-            Text = "";
+            Text = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         GoalStatus IDeserializable<GoalStatus>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GoalStatus(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -67,6 +67,10 @@ namespace Iviz.Msgs.ActionlibMsgs
             GoalId.RosSerialize(ref b);
             b.Serialize(Status);
             b.Serialize(Text);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

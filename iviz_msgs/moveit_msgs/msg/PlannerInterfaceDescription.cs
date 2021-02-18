@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PlannerInterfaceDescription()
         {
-            Name = "";
+            Name = string.Empty;
             PlannerIds = System.Array.Empty<string>();
         }
         
@@ -40,13 +40,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PlannerInterfaceDescription IDeserializable<PlannerInterfaceDescription>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PlannerInterfaceDescription(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
             b.SerializeArray(PlannerIds, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -83,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NWCMlIVchLzE1VyE9TKAGyC3IS8/JSixQy80pSi9ISk1O5ikuKMvPSwYq4uJThGoox" +
-                "dKQUK5RnlmRk5oGF0Q2IjoWpjAeq5OICAIb3GGd7AAAA";
+                "H4sIAAAAAAAAE1NWCMlIVchLzE1VyE9TKAGyC3IS8/JSixQy80pSi9ISk1N5uYpLijLz0sGqeLl4uZTh" +
+                "eooxNKUUK5RnlmRk5oGFMcyIjoUpjQcq5eXiAgAeWsvngAAAAA==";
                 
     }
 }

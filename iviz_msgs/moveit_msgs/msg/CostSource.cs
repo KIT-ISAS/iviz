@@ -43,7 +43,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         CostSource IDeserializable<CostSource>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new CostSource(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -51,6 +51,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(CostDensity);
             AabbMin.RosSerialize(ref b);
             AabbMax.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -72,13 +76,13 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE62SwUrEQAyG7/MUAS8KawUVD4IHvYgHQVC8LmmbdoPtpExSd+vTm+kuVUE82VOayfcn" +
-                "+WeO4GVDUFNUtgmkAfPfStRAZUwVhaYTtKvLObc+1IVwNGPv0o09/UIBKyQaEilFoxpQAaNDuGM9xY7b" +
-                "6MlSxlhzbD3YwfHt7d3dyUE3x1lCB6q44Vw7gW0ld2JTkGEQnyO3TJGShtCS9GRpWvfa6tkrVSbpAhDL" +
-                "ct1z/PscdyHc/PMXHp/vr+HXrvOO3/1xb+B9PgOO0CQiXxwrKsBLHywbIbGboCeMBiZfpIM1J0dZYpGd" +
-                "S9RIopWbBLWQQhRzjR7fXNKvjjKNw+BiCJYwaoeZzWlHjqloixVsNxT3VflyME/RktvMFSRuud6T3qhf" +
-                "YITDciuw5hy23HX7mffN/HW4SBKbgZMCHhqYZIRtXsiDBDUaZqGSlrmw7PK8soIxDz5L/DT0Sdj5nlSx" +
-                "9ScX1QjrIixPdrdE0xJ9hE9Jgca98gIAAA==";
+                "H4sIAAAAAAAAE62SQUvkUAzH74X5DgEvCmMX3MWD4EEvi4cFQdnrkLZpDdu+lJfUme6n36TjVgXBiz3l" +
+                "pfn980/eO4HHJ4KGkrLNIC2YH2tRA5Up17Qp2l7QLn8syd1L4abYFCcL+Sz9NNAHILBCpjGTUjJqABUw" +
+                "BYUH1nPsuUuerWRKDafOgwOc3tzc3p79V45DiOhINbccxTPYXqIXm4KMo7iXaJoTZQ1PHclAlufdoJ1+" +
+                "+021Sf4OiFW1Gzh9VoGHTVFcf/FX/Hr4eQUftl0GfbsmXxE8L/+AE7SZyKfHmkrw0juLbUjqZxgIk4HJ" +
+                "K+lgw9lRllTG+jK1kmnrm4JGSCGJucaAf1zS75CCxnF0MQTLmLTHYCPtyCmVXbmF/ROlY1VcEYaLjnzX" +
+                "XEPmjpsj6Y2GFUZ4GW4L1l7Anvv+6PnYzB+Ji2SxBTgr4a6FWSbYx0AeZGjQMIQqWn1h1Ydf2cIUxheJ" +
+                "9wu9F3Z+IFXs/OUlNcKmLNa3e1ijeY3+Fv8AiLiga/wCAAA=";
                 
     }
 }

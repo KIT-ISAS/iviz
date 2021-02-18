@@ -35,12 +35,16 @@ namespace Iviz.Msgs.GeometryMsgs
         
         Polygon IDeserializable<Polygon>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Polygon(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Points, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

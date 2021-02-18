@@ -42,13 +42,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         DiagnosticArray IDeserializable<DiagnosticArray>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new DiagnosticArray(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(Status, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -33,12 +33,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         Num IDeserializable<Num>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Num(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Num_);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

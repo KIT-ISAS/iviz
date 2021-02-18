@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetMotionSequenceResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -79,12 +85,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetMotionSequenceRequest IDeserializable<GetMotionSequenceRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetMotionSequenceRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Request.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -134,12 +144,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetMotionSequenceResponse IDeserializable<GetMotionSequenceResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetMotionSequenceResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Response.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

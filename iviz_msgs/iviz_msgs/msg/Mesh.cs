@@ -20,7 +20,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public Mesh()
         {
-            Name = "";
+            Name = string.Empty;
             Vertices = System.Array.Empty<Vector3f>();
             Normals = System.Array.Empty<Vector3f>();
             Tangents = System.Array.Empty<Vector3f>();
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         Mesh IDeserializable<Mesh>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Mesh(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -87,6 +87,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeArray(ColorChannels, 0);
             b.SerializeStructArray(Faces, 0);
             b.Serialize(MaterialIndex);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -143,10 +147,10 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71SOw7CMAzdc4rcAKldEBJTByYmEAtCkZu6JVLqSEmoSk9PCknU7kAWPz/H8ufZeauo" +
-                "4wQ9sgtKb2zZXm98QOuVRLfkyNge9IryQB2SX3G1Epk+41gZYxs3/8VRyLfDKqONre5AhDpE5OwK+fFD" +
-                "klUhX2OItDD38FDky4L34DGEtFDU4MjY/suPHU+HHVeDmkTvOrdJM7FWG5gbGDN6ZjT9vo+8xOWW4yZ/" +
-                "Xnwp1Ue3skiS/at8WbxPYMtttF20dbTwBxHiUaZjhATqBCRjL5ZmGPZNAwAA";
+                "H4sIAAAAAAAAE72SwQrCMAyG74W9Q99A2C4ieNrBkyfFi0jJajYLXQptHdOnt5tG3V2305c/XZPmT4je" +
+                "UCMJWszEAXV0vqiPJ9mhj0ZjmIjkfAt2qkWgBilOxcqoj77HvnTOn8NwGnulxyATpbPOlxcgQptSegiV" +
+                "fsbDb96kKyymVA1jJ1dDschlCxFTzipDZ+wzIdY//sR2t1lJ05m7akMTFvwwUVsHQwepKOPtg/cZWnnP" +
+                "8nvaPNC/V/927GlfkbNzs9Uv8nERltJnL2gYKgaYw4rXfvJaAkPFoIV4AOu1w8ZfAwAA";
                 
     }
 }

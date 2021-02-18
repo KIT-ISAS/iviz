@@ -12,7 +12,7 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor for empty message. </summary>
         public String()
         {
-            Data = "";
+            Data = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -34,12 +34,16 @@ namespace Iviz.Msgs.StdMsgs
         
         String IDeserializable<String>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new String(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Data);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetPlannerParamsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -59,8 +65,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetPlannerParamsRequest()
         {
-            PlannerConfig = "";
-            Group = "";
+            PlannerConfig = string.Empty;
+            Group = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -84,13 +90,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPlannerParamsRequest IDeserializable<GetPlannerParamsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPlannerParamsRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(PlannerConfig);
             b.Serialize(Group);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -141,12 +151,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPlannerParamsResponse IDeserializable<GetPlannerParamsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPlannerParamsResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Params.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

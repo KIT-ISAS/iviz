@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Transform IDeserializable<Transform>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Transform(ref b);
         }
         
         public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -79,15 +83,15 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public static readonly Transform Identity = (Vector3.Zero, Quaternion.Identity);
-        public static implicit operator Pose(in Transform p) => new(p.Translation, p.Rotation);
-        public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);
+        public static implicit operator Pose(in Transform p) => new Pose(p.Translation, p.Rotation);
+        public readonly Transform Inverse => new Transform(-(Rotation.Inverse * Translation), Rotation.Inverse);
         public static Transform operator *(in Transform t, in Transform q) =>
-                new(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
+                new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
         public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;
         public static Point operator *(in Transform t, in Point q) => t.Rotation * q + t.Translation;
         public static Vector3 operator *(in Transform t, in (double X, double Y, double Z) q) => t * (Vector3) q;
         public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
-        public static Transform RotateAround(in Quaternion q, in Point p) => new(p - q * p, q);
-        public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new(p.translation, p.rotation);
+        public static Transform RotateAround(in Quaternion q, in Point p) => new Transform(p - q * p, q);
+        public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
     }
 }

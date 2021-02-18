@@ -34,12 +34,16 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         FibonacciGoal IDeserializable<FibonacciGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new FibonacciGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Order);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

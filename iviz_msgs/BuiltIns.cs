@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 #if !NETSTANDARD2_0
@@ -126,7 +127,7 @@ namespace Iviz.Msgs
             int read;
             do
             {
-                read = gZipStream.Read(outputBytes.Array, 0, outputBytes.Count);
+                read = gZipStream.Read(outputBytes.Array, 0, outputBytes.Length);
                 str.Append(UTF8.GetString(outputBytes.Array, 0, read));
             } while (read != 0);
 
@@ -166,6 +167,52 @@ namespace Iviz.Msgs
         {
             string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
             return Type.GetType(guessName);
+        }
+
+        public static void DisposeElements<T>(this UniqueRef<T> tt) where T : IDisposable
+        {
+            foreach (var t in tt)
+            {
+                t.Dispose();
+            }
+        }
+
+        public static void DisposeElements<T>(this T[] tt) where T : IDisposable
+        {
+        }
+
+        public static UniqueRef<StringRef> AsRef(this string[] tt, UniqueRef<StringRef> _)
+        {
+            var uref = new UniqueRef<StringRef>(tt.Length);
+            for (int i = 0; i < tt.Length; i++)
+            {
+                uref[i] = tt[i];
+            }
+
+            return uref;
+        }
+
+        public static string[] AsRef(this string[] tt, string[] _)
+        {
+            return tt;
+        }
+
+        public static string[] AsArray(this UniqueRef<StringRef> tt)
+        {
+            var array = new string[tt.Length];
+            for (int i = 0; i < tt.Length; i++)
+            {
+                array[i] = tt[i];
+            }
+
+            return array;
+        }
+
+        public static Rent<byte> AsRent(this string text)
+        {
+            var bytes = new Rent<byte>(UTF8.GetByteCount(text));
+            UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
+            return bytes;
         }
     }
 }

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestEmptyResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -72,9 +78,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestEmptyRequest Singleton = new();
+        public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -112,9 +122,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
             return Singleton;
         }
         
-        public static readonly TestEmptyResponse Singleton = new();
+        public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

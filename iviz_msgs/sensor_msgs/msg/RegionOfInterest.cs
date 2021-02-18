@@ -57,7 +57,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         RegionOfInterest IDeserializable<RegionOfInterest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new RegionOfInterest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -67,6 +67,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(DoRectify);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ExecuteKnownTrajectoryResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -85,13 +91,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ExecuteKnownTrajectoryRequest IDeserializable<ExecuteKnownTrajectoryRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ExecuteKnownTrajectoryRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Trajectory.RosSerialize(ref b);
             b.Serialize(WaitForExecution);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -141,12 +151,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ExecuteKnownTrajectoryResponse IDeserializable<ExecuteKnownTrajectoryResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ExecuteKnownTrajectoryResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -31,7 +31,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public ImageMarker()
         {
-            Ns = "";
+            Ns = string.Empty;
             Points = System.Array.Empty<GeometryMsgs.Point>();
             OutlineColors = System.Array.Empty<StdMsgs.ColorRGBA>();
         }
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         ImageMarker IDeserializable<ImageMarker>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ImageMarker(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -97,6 +97,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Lifetime);
             b.SerializeStructArray(Points, 0);
             b.SerializeStructArray(OutlineColors, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

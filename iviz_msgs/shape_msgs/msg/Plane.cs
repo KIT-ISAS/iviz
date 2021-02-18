@@ -39,12 +39,16 @@ namespace Iviz.Msgs.ShapeMsgs
         
         Plane IDeserializable<Plane>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Plane(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Coef, 4);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (UpdateModuleResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -59,9 +65,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public UpdateModuleRequest()
         {
-            Id = "";
+            Id = string.Empty;
             Fields = System.Array.Empty<string>();
-            Config = "";
+            Config = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -87,7 +93,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         UpdateModuleRequest IDeserializable<UpdateModuleRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new UpdateModuleRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -95,6 +101,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
             b.SerializeArray(Fields, 0);
             b.Serialize(Config);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -133,7 +143,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public UpdateModuleResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -157,13 +167,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         UpdateModuleResponse IDeserializable<UpdateModuleResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new UpdateModuleResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

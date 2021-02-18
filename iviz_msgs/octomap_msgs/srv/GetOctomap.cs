@@ -39,6 +39,12 @@ namespace Iviz.Msgs.OctomapMsgs
             set => Response = (GetOctomapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -73,9 +79,13 @@ namespace Iviz.Msgs.OctomapMsgs
             return Singleton;
         }
         
-        public static readonly GetOctomapRequest Singleton = new();
+        public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -119,12 +129,16 @@ namespace Iviz.Msgs.OctomapMsgs
         
         GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetOctomapResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Map.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

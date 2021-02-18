@@ -20,7 +20,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public TF2Error()
         {
-            ErrorString = "";
+            ErrorString = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -44,13 +44,17 @@ namespace Iviz.Msgs.Tf2Msgs
         
         TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TF2Error(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Error);
             b.Serialize(ErrorString);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

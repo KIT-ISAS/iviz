@@ -72,7 +72,7 @@ namespace Iviz.Msgs.StereoMsgs
         
         DisparityImage IDeserializable<DisparityImage>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new DisparityImage(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -85,6 +85,10 @@ namespace Iviz.Msgs.StereoMsgs
             b.Serialize(MinDisparity);
             b.Serialize(MaxDisparity);
             b.Serialize(DeltaD);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -34,12 +34,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestUInt8FixedSizeArray16 IDeserializable<TestUInt8FixedSizeArray16>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestUInt8FixedSizeArray16(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Data, 16);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

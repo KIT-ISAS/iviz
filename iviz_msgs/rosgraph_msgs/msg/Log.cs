@@ -62,7 +62,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         readonly Log IDeserializable<Log>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Log(ref b);
         }
         
         public override readonly int GetHashCode() => (Header, Level, Name, Msg, File, Function, Line, Topics).GetHashCode();
@@ -85,6 +85,10 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(Function ?? string.Empty);
             b.Serialize(Line);
             b.SerializeArray(Topics ?? System.Array.Empty<string>(), 0);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()

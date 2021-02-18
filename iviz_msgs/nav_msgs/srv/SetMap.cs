@@ -39,6 +39,12 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (SetMapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,13 +89,17 @@ namespace Iviz.Msgs.NavMsgs
         
         SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetMapRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Map.RosSerialize(ref b);
             InitialPose.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -140,12 +150,16 @@ namespace Iviz.Msgs.NavMsgs
         
         SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SetMapResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

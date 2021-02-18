@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (SearchParamResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public SearchParamRequest()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.Rosapi
         
         SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SearchParamRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -109,7 +119,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public SearchParamResponse()
         {
-            GlobalName = "";
+            GlobalName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -131,12 +141,16 @@ namespace Iviz.Msgs.Rosapi
         
         SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new SearchParamResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(GlobalName);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

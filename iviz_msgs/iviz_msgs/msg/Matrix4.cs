@@ -34,12 +34,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         Matrix4 IDeserializable<Matrix4>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Matrix4(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(M, 16);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

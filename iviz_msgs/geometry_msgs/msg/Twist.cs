@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Twist IDeserializable<Twist>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Twist(ref b);
         }
         
         public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()
@@ -79,6 +83,6 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);
-        public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new(p.linear, p.angular);
+        public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
     }
 }

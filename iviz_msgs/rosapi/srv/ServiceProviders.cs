@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (ServiceProvidersResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public ServiceProvidersRequest()
         {
-            Service = "";
+            Service = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.Rosapi
         
         ServiceProvidersRequest IDeserializable<ServiceProvidersRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ServiceProvidersRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Service);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -131,12 +141,16 @@ namespace Iviz.Msgs.Rosapi
         
         ServiceProvidersResponse IDeserializable<ServiceProvidersResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ServiceProvidersResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Providers, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

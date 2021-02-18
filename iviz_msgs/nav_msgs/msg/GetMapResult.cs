@@ -34,12 +34,16 @@ namespace Iviz.Msgs.NavMsgs
         
         GetMapResult IDeserializable<GetMapResult>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetMapResult(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Map.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.NavMsgs
         
         OccupancyGrid IDeserializable<OccupancyGrid>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new OccupancyGrid(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -54,6 +54,10 @@ namespace Iviz.Msgs.NavMsgs
             Header.RosSerialize(ref b);
             Info.RosSerialize(ref b);
             b.SerializeStructArray(Data, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.OctomapMsgs
             set => Response = (BoundingBoxQueryResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,13 +89,17 @@ namespace Iviz.Msgs.OctomapMsgs
         
         BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new BoundingBoxQueryRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Min.RosSerialize(ref b);
             Max.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -126,9 +136,13 @@ namespace Iviz.Msgs.OctomapMsgs
             return Singleton;
         }
         
-        public static readonly BoundingBoxQueryResponse Singleton = new();
+        public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

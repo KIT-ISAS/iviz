@@ -37,13 +37,17 @@ namespace Iviz.Msgs.TurtleActionlib
         
         ShapeResult IDeserializable<ShapeResult>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ShapeResult(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(InteriorAngle);
             b.Serialize(Apothem);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

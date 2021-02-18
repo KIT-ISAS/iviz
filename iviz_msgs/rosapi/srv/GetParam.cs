@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (GetParamResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -57,8 +63,8 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public GetParamRequest()
         {
-            Name = "";
-            @default = "";
+            Name = string.Empty;
+            @default = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -82,13 +88,17 @@ namespace Iviz.Msgs.Rosapi
         
         GetParamRequest IDeserializable<GetParamRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetParamRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
             b.Serialize(@default);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -116,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public GetParamResponse()
         {
-            Value = "";
+            Value = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -138,12 +148,16 @@ namespace Iviz.Msgs.Rosapi
         
         GetParamResponse IDeserializable<GetParamResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetParamResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Value);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

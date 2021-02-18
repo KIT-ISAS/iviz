@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         TriangleMesh IDeserializable<TriangleMesh>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TriangleMesh(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -98,6 +98,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeArray(FaceMaterials, 0);
             b.SerializeArray(Textures, 0);
             b.SerializeArray(Clusters, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

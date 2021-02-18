@@ -22,7 +22,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()
         {
-            Format = "";
+            Format = string.Empty;
             Data = System.Array.Empty<byte>();
         }
         
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         CompressedImage IDeserializable<CompressedImage>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new CompressedImage(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Format);
             b.SerializeStructArray(Data, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

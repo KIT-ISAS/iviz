@@ -53,7 +53,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         PointCloud IDeserializable<PointCloud>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PointCloud(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -61,6 +61,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeStructArray(Points, 0);
             b.SerializeArray(Channels, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

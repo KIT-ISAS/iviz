@@ -34,12 +34,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         ColorChannel IDeserializable<ColorChannel>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ColorChannel(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(Colors, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -66,8 +70,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE3POz8kvMjaKjlVIBrGKubhsqQy4fIPdrRQyyzKr4nOL04v1nSE2cpVm5pVYKBRB6XQo" +
-                "nQSlE7m4AEmfKA6bAAAA";
+                "H4sIAAAAAAAAE3POz8kvMjaKjlVIBrGKebm4bKkMuHyD3a0UMssyq+Jzi9OL9Z0hVnKVZuaVWCgU8UIZ" +
+                "6TBGEoyRCHQMAJCXA7KgAAAA";
                 
     }
 }

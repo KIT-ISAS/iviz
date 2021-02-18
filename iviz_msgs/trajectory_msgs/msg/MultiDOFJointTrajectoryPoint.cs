@@ -48,7 +48,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         MultiDOFJointTrajectoryPoint IDeserializable<MultiDOFJointTrajectoryPoint>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MultiDOFJointTrajectoryPoint(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
             b.SerializeStructArray(Velocities, 0);
             b.SerializeStructArray(Accelerations, 0);
             b.Serialize(TimeFromStart);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

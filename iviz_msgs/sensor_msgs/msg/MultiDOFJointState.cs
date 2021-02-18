@@ -72,7 +72,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         MultiDOFJointState IDeserializable<MultiDOFJointState>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MultiDOFJointState(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -82,6 +82,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.SerializeStructArray(Transforms, 0);
             b.SerializeStructArray(Twist, 0);
             b.SerializeArray(Wrench, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

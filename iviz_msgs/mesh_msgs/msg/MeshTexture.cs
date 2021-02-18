@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshTexture()
         {
-            Uuid = "";
+            Uuid = string.Empty;
             Image = new SensorMsgs.Image();
         }
         
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshTexture IDeserializable<MeshTexture>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshTexture(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
             Image.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -21,7 +21,7 @@ namespace Iviz.Msgs.OctomapMsgs
         /// <summary> Constructor for empty message. </summary>
         public Octomap()
         {
-            Id = "";
+            Id = string.Empty;
             Data = System.Array.Empty<sbyte>();
         }
         
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         Octomap IDeserializable<Octomap>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Octomap(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -62,6 +62,10 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Serialize(Id);
             b.Serialize(Resolution);
             b.SerializeStructArray(Data, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

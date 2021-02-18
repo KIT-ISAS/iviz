@@ -37,13 +37,17 @@ namespace Iviz.Msgs.MeshMsgs
         
         VectorFieldStamped IDeserializable<VectorFieldStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new VectorFieldStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             VectorField.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetPositionFKResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -90,7 +96,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionFKRequest IDeserializable<GetPositionFKRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPositionFKRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -98,6 +104,10 @@ namespace Iviz.Msgs.MoveitMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(FkLinkNames, 0);
             RobotState.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -171,7 +181,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         GetPositionFKResponse IDeserializable<GetPositionFKResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetPositionFKResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -179,6 +189,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(PoseStamped, 0);
             b.SerializeArray(FkLinkNames, 0);
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

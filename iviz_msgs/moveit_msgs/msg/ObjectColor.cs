@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public ObjectColor()
         {
-            Id = "";
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -39,13 +39,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         ObjectColor IDeserializable<ObjectColor>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ObjectColor(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Id);
             Color.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -72,9 +76,9 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
-                "KuLiUgbrKkvMKQXqTVMoAXJgalLic4vTi/WdQdwgdydHqASXLZUBl2+wu5UCpn1caTn5iSXGRgpFcFY6" +
-                "nJUEZyVycQEAkGygffsAAAA=";
+                "H4sIAAAAAAAAE1NWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+LlKi4pysxL" +
+                "B6ri5eLlUgZrLEvMKQVqT1MoAXLgylLic4vTi/WdQfwgdydHmAyXLZUBl2+wu5UCpoVcaTn5iSXGRgpF" +
+                "cFY6nJUEZyVycQEAejtuLQABAAA=";
                 
     }
 }

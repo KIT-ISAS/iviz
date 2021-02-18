@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterialsStamped()
         {
-            Uuid = "";
+            Uuid = string.Empty;
             MeshMaterials = new MeshMsgs.MeshMaterials();
         }
         
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshMaterialsStamped IDeserializable<MeshMaterialsStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshMaterialsStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.MeshMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Uuid);
             MeshMaterials.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

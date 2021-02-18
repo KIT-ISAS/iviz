@@ -29,9 +29,13 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             return Singleton;
         }
         
-        public static readonly ObjectRecognitionFeedback Singleton = new();
+        public static readonly ObjectRecognitionFeedback Singleton = new ObjectRecognitionFeedback();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

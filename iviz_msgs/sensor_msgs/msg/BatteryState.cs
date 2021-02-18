@@ -59,8 +59,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             CellVoltage = System.Array.Empty<float>();
             CellTemperature = System.Array.Empty<float>();
-            Location = "";
-            SerialNumber = "";
+            Location = string.Empty;
+            SerialNumber = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         BatteryState IDeserializable<BatteryState>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new BatteryState(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -133,6 +133,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.SerializeStructArray(CellTemperature, 0);
             b.Serialize(Location);
             b.Serialize(SerialNumber);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

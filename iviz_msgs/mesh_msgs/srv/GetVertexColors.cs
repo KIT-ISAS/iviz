@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetVertexColorsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -56,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsRequest()
         {
-            Uuid = "";
+            Uuid = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -78,12 +84,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetVertexColorsRequest IDeserializable<GetVertexColorsRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetVertexColorsRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uuid);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -131,12 +141,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         GetVertexColorsResponse IDeserializable<GetVertexColorsResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetVertexColorsResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             MeshVertexColorsStamped.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -36,9 +36,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// <summary> Constructor for empty message. </summary>
         public TopicStatistics()
         {
-            Topic = "";
-            NodePub = "";
-            NodeSub = "";
+            Topic = string.Empty;
+            NodePub = string.Empty;
+            NodeSub = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -86,7 +86,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         TopicStatistics IDeserializable<TopicStatistics>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TopicStatistics(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -105,6 +105,10 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(StampAgeMean);
             b.Serialize(StampAgeStddev);
             b.Serialize(StampAgeMax);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

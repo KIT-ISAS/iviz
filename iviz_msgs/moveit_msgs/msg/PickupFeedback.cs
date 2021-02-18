@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PickupFeedback()
         {
-            State = "";
+            State = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MoveitMsgs
         
         PickupFeedback IDeserializable<PickupFeedback>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new PickupFeedback(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(State);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

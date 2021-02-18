@@ -38,13 +38,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         OrientedBoundingBox IDeserializable<OrientedBoundingBox>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new OrientedBoundingBox(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Pose.RosSerialize(ref b);
             Extents.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -66,14 +70,14 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTUvDQBC9768Y8KJQKrTiQfAgHsSDoOhdtsk0GUx24s7Gpv31zm4+aulBEGlOk52P" +
-                "fe/NzJ5BKBEaFgReJ3vFnSmQawx++15LIZfP0RtDjDlLIdgFdEF+ZMzAirQ1uSKdZOpGDyRgQzpgTwW5" +
-                "o7rkwnIxljPm9p8/8/T6cAPHZJTGHXhsPIpebAOxi1ySCuRg7RFBGpvhDDKu43E++CnFWpdHRmPuHEyi" +
-                "MgWYl9Yqf5fq7uNORVChKMO3UuXPWO8mJ2OXaeRq9S9CPqBr1hXbcH0F3WRtJ2t3Gvh76UYOU6N0mg70" +
-                "PAQf/z73uq/Z13PzC6PR2pywNcvF35pzvqFQgq7LivrVU1UyEk25mGvFxwBJKx3YGnMd2MDQ6jz3k7kp" +
-                "0eOXrqReI7SqoloS0Ka5HmDNAbTOXvVUyeWD1BILNp5rDjFZZeYGvV1RRWGbUsfMGkVsgTElR6HC9WCC" +
-                "/UBoG6jUPXRMUTnQzub6bmh2xQOxiCc9HeziDlqJSqR3xfbvlO0x31fc5vHuvpGqTTdZ28namW/1kU6A" +
-                "5QQAAA==";
+                "H4sIAAAAAAAAE71US0vDQBC+L/Q/DPSiIBFa8SB4EA/iQVD0Lttkmg4mO3FnYx+/3tnNo5YeBJHmNNl5" +
+                "7Pd9M7NTCCuEhgWBl8le8GZiSuQag9++11LK5XN0x5iJmZhpisJNQBfkR9IFWJG2Jlemk1zd6IEEbEgH" +
+                "7Kkkd1yaXJjPhnoTY27/+TNPrw83cExIidyBx8aj6M02ELvIJklBDpYeEaSxOV5AznU8Lno/pVjrishp" +
+                "yM3AJC5jgHlprSrgUt193KkIKhRl+LbSBuSsd5OTodU0cLX6FyEf0DXLim24voLNaG1Ha3ca+HvpBg5j" +
+                "o3SeDvQ8BB//Pve6L9nXmfmF0WCtT9ia+exvzTlbU1iB7suCuuVTVXISTTnPtOJjgKSVDmyNhQ5sYGh1" +
+                "nrvJXK/Q45cupV4jtKiiWhLQprnuYWUAWmeveqrkil5qiQUbzzWHmKwyc4PeLqiisE2pQ2aNIrbEmFKg" +
+                "UOk6MMF+ILQNVOruO6aoHGhnC305NLvinljEkx4PdnEHrUQl0stiu8fKdpjvK26LeHfXSNVmM1rb0dqZ" +
+                "bzYQi7bqBAAA";
                 
     }
 }

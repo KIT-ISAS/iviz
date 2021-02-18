@@ -35,12 +35,16 @@ namespace Iviz.Msgs.MeshMsgs
         
         MeshVertexColors IDeserializable<MeshVertexColors>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MeshVertexColors(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(VertexColors, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

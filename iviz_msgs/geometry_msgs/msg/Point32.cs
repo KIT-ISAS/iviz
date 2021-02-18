@@ -41,7 +41,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         readonly Point32 IDeserializable<Point32>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new Point32(ref b);
         }
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
@@ -57,6 +57,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref Buffer b)
         {
             b.Serialize(this);
+        }
+        
+        public readonly void Dispose()
+        {
         }
         
         public readonly void RosValidate()

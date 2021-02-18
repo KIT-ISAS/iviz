@@ -38,13 +38,17 @@ namespace Iviz.Msgs.GeometryMsgs
         
         TwistWithCovarianceStamped IDeserializable<TwistWithCovarianceStamped>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TwistWithCovarianceStamped(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
             Twist.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

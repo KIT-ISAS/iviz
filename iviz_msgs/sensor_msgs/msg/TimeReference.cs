@@ -16,7 +16,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()
         {
-            Source = "";
+            Source = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         TimeReference IDeserializable<TimeReference>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TimeReference(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(TimeRef);
             b.Serialize(Source);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

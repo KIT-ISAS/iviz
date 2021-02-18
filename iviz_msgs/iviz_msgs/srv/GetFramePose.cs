@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetFramePoseResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -79,12 +85,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFramePoseRequest IDeserializable<GetFramePoseRequest>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetFramePoseRequest(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Frames, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -144,13 +154,17 @@ namespace Iviz.Msgs.IvizMsgs
         
         GetFramePoseResponse IDeserializable<GetFramePoseResponse>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new GetFramePoseResponse(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(IsValid, 0);
             b.SerializeStructArray(Poses, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -38,12 +38,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         TestHeaderArray IDeserializable<TestHeaderArray>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestHeaderArray(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Header, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

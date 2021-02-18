@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public LinkPadding()
         {
-            LinkName = "";
+            LinkName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -39,13 +39,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         LinkPadding IDeserializable<LinkPadding>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new LinkPadding(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(LinkName);
             b.Serialize(Padding);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -72,8 +76,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygoFiSkpIMGSfIXEgoKcShAD" +
-                "riEtJz+xxMwEpoiLCwCaqbVAVQAAAA==";
+                "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+blKi4pysxLB3PiQdK8XLxcygoFiSkpIOGSfIXEgoKc" +
+                "ShADoSctJz+xxMwEpoqXiwsA/NhbM1oAAAA=";
                 
     }
 }

@@ -25,7 +25,7 @@ namespace Iviz.Msgs.Actionlib
         /// <summary> Constructor for empty message. </summary>
         public TestRequestGoal()
         {
-            ResultText = "";
+            ResultText = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.Actionlib
         
         TestRequestGoal IDeserializable<TestRequestGoal>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new TestRequestGoal(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -74,6 +74,10 @@ namespace Iviz.Msgs.Actionlib
             b.Serialize(DelayAccept);
             b.Serialize(DelayTerminate);
             b.Serialize(PauseStatus);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -58,8 +58,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public MenuEntry()
         {
-            Title = "";
-            Command = "";
+            Title = string.Empty;
+            Command = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         MenuEntry IDeserializable<MenuEntry>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new MenuEntry(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -99,6 +99,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Title);
             b.Serialize(Command);
             b.Serialize(CommandType);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

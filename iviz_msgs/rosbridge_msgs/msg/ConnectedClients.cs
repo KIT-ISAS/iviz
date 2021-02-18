@@ -38,12 +38,16 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         ConnectedClients IDeserializable<ConnectedClients>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new ConnectedClients(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Clients, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

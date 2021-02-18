@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         FluidPressure IDeserializable<FluidPressure>.RosDeserialize(ref Buffer b)
         {
-            return new(ref b);
+            return new FluidPressure(ref b);
         }
     
         public void RosSerialize(ref Buffer b)
@@ -52,6 +52,10 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(FluidPressure_);
             b.Serialize(Variance);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
