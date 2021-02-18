@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Iviz.Msgs;
+using System.Text;
 
 namespace Iviz.MsgsGen
 {
@@ -16,7 +16,7 @@ namespace Iviz.MsgsGen
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("EE Fatal error: " + Logger.ExceptionToString(e));
+                Console.Error.WriteLine("EE Fatal error: " + ExceptionToString(e));
             }
         }
 
@@ -324,5 +324,32 @@ namespace Iviz.MsgsGen
 
             Console.WriteLine("** Done!");
         }
+        
+        // copied from Iviz.Msgs to avoid depending on that project 
+        static string ExceptionToString(Exception? e)
+        {
+            if (e == null)
+            {
+                return "[null exception]";
+            }
+
+            var str = new StringBuilder(100);
+            Exception? subException = e;
+
+            bool firstException = true;
+            while (subException != null)
+            {
+                if (!(subException is AggregateException))
+                {
+                    str.Append(firstException ? "\n[" : "\n   [");
+                    str.Append(subException.GetType().Name).Append("] ").Append(subException.Message);
+                    firstException = false;
+                }
+
+                subException = subException.InnerException;
+            }
+
+            return str.ToString();
+        }         
     }
 }

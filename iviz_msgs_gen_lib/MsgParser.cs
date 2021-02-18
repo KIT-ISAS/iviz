@@ -27,7 +27,7 @@ namespace Iviz.MsgsGen
 
         internal static string CsIfiy(string name)
         {
-            return Msgs.BuiltIns.RosNameToCs(name);
+            return BuiltIns.RosNameToCs(name);
         }
 
 
