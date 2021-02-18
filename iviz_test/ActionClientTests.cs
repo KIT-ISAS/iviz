@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Iviz.Msgs.ActionlibTutorials;
 using Iviz.Roslib;
 using Iviz.Roslib.Actionlib;
@@ -13,7 +14,7 @@ namespace iviz_test
         {
             Console.WriteLine("** Starting Fibonacci action test!");
             using RosClient client = new RosClient(RosMasterUri, callerUri: RosClient.TryGetCallerUri(7632));
-            using var actionClient = RosActionClient.Create(client, "fibonacci", default(FibonacciAction));
+            using var actionClient = default(FibonacciAction).Create(client, "fibonacci");
 
             Console.WriteLine("** Waiting for server...");
             actionClient.WaitForServer(150000);
@@ -27,28 +28,25 @@ namespace iviz_test
             Console.WriteLine("** Waiting for results...");
             
             int n = 0;
-            void FeedbackCallback(FibonacciFeedback f)
-            {
-                Console.WriteLine($"Feedback: {f.ToJsonString()}");
 
-                n++;
-                if (n == 5 && withCancel)
+            using var maxTimeout = new CancellationTokenSource(10000);
+            foreach (var (feedback, result) in actionClient.ReadAll(maxTimeout.Token))
+            {
+                if (feedback != null)
                 {
-                    // suddenly a cancel!
-                    actionClient.Cancel();
+                    Console.WriteLine($"Feedback: {feedback.ToJsonString()}");
+
+                    n++;
+                    if (n == 5 && withCancel)
+                    {
+                        // suddenly a cancel!
+                        actionClient.Cancel();
+                    }
+                } else if (result != null)
+                {
+                    Console.WriteLine($"Result: {result.ToJsonString()}");
                 }
             }
-
-            static void ResultCallback(FibonacciResult f)
-            {
-                Console.WriteLine($"Result: {f.ToJsonString()}");
-            }
-
-            // callbacks are called in the same thread
-            Progress<FibonacciFeedback> fp = new Progress<FibonacciFeedback>(FeedbackCallback);
-            Progress<FibonacciResult> rp = new Progress<FibonacciResult>(ResultCallback);
-
-            //actionClient.WaitForResult(fp, rp);
 
             Console.WriteLine("** Done!");
         }        
