@@ -44,8 +44,11 @@ namespace Iviz.Controllers
         static uint tfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
+
         //readonly AsyncLock mutex = new AsyncLock();
-        readonly ConcurrentQueue<(TFMessage frame, bool isStatic)> messageList = new ConcurrentQueue<(TFMessage, bool)>();
+        readonly ConcurrentQueue<(UniqueRef<TransformStamped> frame, bool isStatic)> messageList =
+            new ConcurrentQueue<(UniqueRef<TransformStamped>, bool)>();
+
         readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         [NotNull] readonly FrameNode keepAllListener;
         [NotNull] readonly FrameNode staticListener;
@@ -257,64 +260,67 @@ namespace Iviz.Controllers
         {
             while (messageList.TryDequeue(out var value))
             {
-                (TFMessage frame, bool isStatic) = value;
-                foreach (TransformStamped t in frame.Transforms)
+                bool isStatic = value.isStatic;
+                using (var frame = value.frame)
                 {
-                    var ((_, _, frameId), childFrameId, transform) = t;
-
-                    if (transform.HasNaN() || childFrameId.Length == 0)
+                    foreach (TransformStamped t in frame)
                     {
-                        continue;
-                    }
+                        var ((_, _, frameId), childFrameId, transform) = t;
 
-                    const int maxPoseMagnitude = 10000;
-                    if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
-                    {
-                        continue; // TODO: Find better way to handle this
-                    }
-
-                    // remove starting '/' from tf v1
-                    string childId = childFrameId[0] != '/'
-                        ? childFrameId
-                        : childFrameId.Substring(1);
-
-                    TfFrame child;
-                    if (isStatic)
-                    {
-                        child = GetOrCreateFrame(childId, staticListener);
-                        if (config.KeepAllFrames)
+                        if (transform.HasNaN() || childFrameId.Length == 0)
                         {
-                            child.AddListener(keepAllListener);
+                            continue;
                         }
-                    }
-                    else if (config.KeepAllFrames)
-                    {
-                        child = GetOrCreateFrame(childId, keepAllListener);
-                    }
-                    else if (!TryGetFrameImpl(childId, out child))
-                    {
-                        continue;
-                    }
 
-                    string parentId = frameId.Length == 0 || frameId[0] != '/'
-                        ? frameId
-                        : frameId.Substring(1);
+                        const int maxPoseMagnitude = 10000;
+                        if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
+                        {
+                            continue; // TODO: Find better way to handle this
+                        }
 
-                    if (parentId.Length == 0)
-                    {
-                        child.SetParent(OriginFrame);
-                        child.SetPose(transform.Ros2Unity());
-                    }
-                    else if (!(child.Parent is null) && parentId == child.Parent.Id)
-                    {
-                        child.SetPose(transform.Ros2Unity());
-                    }
-                    else
-                    {
-                        TfFrame parent = GetOrCreateFrame(parentId);
-                        if (child.SetParent(parent))
+                        // remove starting '/' from tf v1
+                        string childId = childFrameId[0] != '/'
+                            ? childFrameId
+                            : childFrameId.Substring(1);
+
+                        TfFrame child;
+                        if (isStatic)
+                        {
+                            child = GetOrCreateFrame(childId, staticListener);
+                            if (config.KeepAllFrames)
+                            {
+                                child.AddListener(keepAllListener);
+                            }
+                        }
+                        else if (config.KeepAllFrames)
+                        {
+                            child = GetOrCreateFrame(childId, keepAllListener);
+                        }
+                        else if (!TryGetFrameImpl(childId, out child))
+                        {
+                            continue;
+                        }
+
+                        string parentId = frameId.Length == 0 || frameId[0] != '/'
+                            ? frameId
+                            : frameId.Substring(1);
+
+                        if (parentId.Length == 0)
+                        {
+                            child.SetParent(OriginFrame);
+                            child.SetPose(transform.Ros2Unity());
+                        }
+                        else if (!(child.Parent is null) && parentId == child.Parent.Id)
                         {
                             child.SetPose(transform.Ros2Unity());
+                        }
+                        else
+                        {
+                            TfFrame parent = GetOrCreateFrame(parentId);
+                            if (child.SetParent(parent))
+                            {
+                                child.SetPose(transform.Ros2Unity());
+                            }
                         }
                     }
                 }
@@ -413,13 +419,13 @@ namespace Iviz.Controllers
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            messageList.Enqueue((msg, false));
+            messageList.Enqueue((msg.Transforms.Release(), false));
             return true;
         }
 
         bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            messageList.Enqueue((msg, true));
+            messageList.Enqueue((msg.Transforms.Release(), true));
             return true;
         }
 

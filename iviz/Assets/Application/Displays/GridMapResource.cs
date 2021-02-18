@@ -3,6 +3,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -22,7 +23,7 @@ namespace Iviz.Displays
         Mesh mesh;
         int cellsX;
         int cellsY;
-        
+
         [CanBeNull] MeshRenderer meshRenderer;
 
         [NotNull]
@@ -47,7 +48,7 @@ namespace Iviz.Displays
             // not needed
         }
 
-        public void Set(int newCellsX, int newCellsY, float width, float height, [NotNull] float[] data)
+        public void Set(int newCellsX, int newCellsY, float width, float height, [NotNull] float[] data, int length)
         {
             if (data == null)
             {
@@ -60,12 +61,14 @@ namespace Iviz.Displays
             mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs();
             mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
-            inputTexture.GetRawTextureData<float>().GetSubArray(0, newCellsX * newCellsY).CopyFrom(data);
+            NativeArray<float>.Copy(data, 0,
+                inputTexture.GetRawTextureData<float>().GetSubArray(0, length), 0, length);
             inputTexture.Apply();
 
             float min = float.MaxValue, max = float.MinValue;
-            foreach (float val in data)
+            for (int i = 0; i < length; i++)
             {
+                float val = data[i];
                 if (val < min)
                 {
                     min = val;
@@ -77,7 +80,7 @@ namespace Iviz.Displays
                 }
             }
 
-            
+
             BoxCollider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
             BoxCollider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
             IntensityBounds = new Vector2(min, max);

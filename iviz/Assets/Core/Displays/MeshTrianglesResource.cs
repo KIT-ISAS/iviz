@@ -87,30 +87,30 @@ namespace Iviz.Displays
 
         public void Set(in Rent<Vector3> points, in Rent<Color> colors = default)
         {
-            if (points.Count % 3 != 0)
+            if (points.Length % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Count}", nameof(points));
+                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (colors.Count != 0 && colors.Count != points.Count)
+            if (colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            Mesh ownMesh = EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             ownMesh.SetVertices(points);
-            if (colors.Count != 0)
+            if (colors.Length != 0)
             {
                 ownMesh.SetColors(colors);
             }
 
-            using (Rent<int> triangles = new Rent<int>(points.Count))
+            using (var triangles = new Rent<int>(points.Length))
             {
                 if (FlipWinding)
                 {
-                    for (int i = 0; i < triangles.Count; i += 3)
+                    for (int i = 0; i < triangles.Length; i += 3)
                     {
                         triangles.Array[i] = i;
                         triangles.Array[i + 1] = i + 2;
@@ -119,7 +119,7 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    for (int i = 0; i < triangles.Count; i++)
+                    for (int i = 0; i < triangles.Length; i++)
                     {
                         triangles.Array[i] = i;
                     }
@@ -142,41 +142,41 @@ namespace Iviz.Displays
             in Rent<int> triangles,
             in Rent<Color32> colors = default)
         {
-            if (triangles.Count % 3 != 0)
+            if (triangles.Length % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Count}", nameof(points));
+                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (normals.Count != 0 && normals.Count != points.Count)
+            if (normals.Length != 0 && normals.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent normals size!", nameof(normals));
             }
 
-            if (colors.Count != 0 && colors.Count != points.Count)
+            if (colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            Mesh ownMesh = EnsureOwnMesh(points.Count);
+            Mesh ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             ownMesh.SetVertices(points);
-            if (normals.Count != 0)
+            if (normals.Length != 0)
             {
                 ownMesh.SetNormals(normals);
             }
 
-            if (diffuseTexCoords.Count != 0)
+            if (diffuseTexCoords.Length != 0)
             {
                 ownMesh.SetUVs(0, diffuseTexCoords);
             }
 
-            if (bumpTexCoords.Count != 0)
+            if (bumpTexCoords.Length != 0)
             {
                 ownMesh.SetUVs(1, bumpTexCoords);
             }
 
-            if (colors.Count != 0)
+            if (colors.Length != 0)
             {
                 ownMesh.SetColors(colors);
             }
@@ -184,13 +184,13 @@ namespace Iviz.Displays
             ownMesh.SetTriangles(triangles);
 
             
-            if (normals.Count == 0)
+            if (normals.Length == 0)
             {
                 ownMesh.RecalculateNormals();
             }
             
             
-            if (tangents.Count != 0)
+            if (tangents.Length != 0)
             {
                 ownMesh.SetTangents(tangents);
             }

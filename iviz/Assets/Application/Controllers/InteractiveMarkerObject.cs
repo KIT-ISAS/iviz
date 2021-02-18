@@ -131,7 +131,7 @@ namespace Iviz.Controllers
             description.Append("<color=blue><b>**** InteractiveMarker '").Append(msg.Name).Append("'</b></color>")
                 .AppendLine();
             string msgDescription = msg.Description.Length != 0
-                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
@@ -161,7 +161,7 @@ namespace Iviz.Controllers
             int numUnnamed = 0;
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
-                string controlId = controlMsg.Name.Length != 0 ? controlMsg.Name : $"[Unnamed-{(numUnnamed++)}]";
+                string controlId = controlMsg.Name.Length != 0 ? controlMsg.Name.ToString() : $"[Unnamed-{(numUnnamed++)}]";
 
                 if (controls.TryGetValue(controlId, out var existingControl))
                 {

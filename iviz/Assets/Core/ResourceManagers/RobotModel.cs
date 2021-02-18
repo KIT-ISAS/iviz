@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Urdf;
@@ -506,17 +507,17 @@ namespace Iviz.Displays
             return true;
         }
 
-        public void WriteJoints(JointState state)
+        public void WriteJoints([NotNull] JointState state)
         {
             WriteJoints(state.Name.Zip(state.Position));
         }
 
-        public void WriteJoints(string[] names, double[] positions)
+        public void WriteJoints([NotNull] IReadOnlyList<StringRef> names, [NotNull] double[] positions)
         {
             WriteJoints(names.Zip(positions));
         }
 
-        public void WriteJoints(IEnumerable<(string name, double position)> jointPositions)
+        public void WriteJoints([NotNull] IEnumerable<(StringRef name, double position)> jointPositions)
         {
             foreach ((string name, double position) in jointPositions)
             {

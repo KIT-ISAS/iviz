@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers
@@ -61,6 +62,14 @@ namespace Iviz.Controllers
         public unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
+            {
+                return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
+            }
+        }
+
+        public unsafe uint Compute<T>([NotNull] UniqueRef<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        {
+            fixed (T* ptr = array.Array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
             }

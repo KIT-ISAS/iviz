@@ -759,10 +759,11 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            //long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            //bottomTime.text = $"{memBytesKb:N0} MB";
+            //Debug.Log(GC.GetTotalMemory(false) / (1024 * 1024);
+            long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
+            bottomTime.text = $"Mem {memBytesKb:N0}M";
 
-            bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
 
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
@@ -787,8 +788,8 @@ namespace Iviz.App
                 default:
                     int level = (int) (SystemInfo.batteryLevel * 100);
                     bottomBattery.text = state == BatteryStatus.Charging
-                        ? $"<color=#005500>{level}%</color>"
-                        : $"{level}%";
+                        ? $"<color=#005500>{level.ToString()}%</color>"
+                        : $"{level.ToString()}%";
                     break;
             }
         }
@@ -806,7 +807,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowMenu([NotNull] MenuEntryList menuEntries, Action<uint> callback, Vector3 unityPositionHint)
+        public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback, Vector3 unityPositionHint)
         {
             if (menuEntries == null)
             {

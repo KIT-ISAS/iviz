@@ -1264,9 +1264,19 @@ namespace Iviz.Ros
 
             void Callback(T msg)
             {
-                foreach (var listener in listeners)
+                using (var shared = new SharedMessage<T>(msg))
                 {
-                    listener.EnqueueMessage(msg);
+                    foreach (var listener in listeners)
+                    {
+                        try
+                        {
+                            listener.EnqueueMessage(shared.Share());
+                        }
+                        catch (Exception e)
+                        {
+                            Core.Logger.Error($"{this}: Error in callback", e);
+                        }
+                    }
                 }
             }
 

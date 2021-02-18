@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -11,6 +12,7 @@ namespace Iviz.App
         [SerializeField] DropdownWidget timeFormat = null;
         [SerializeField] DropdownWidget messageFormat = null;
         [SerializeField] TMP_Text text = null;
+        [SerializeField] Text bottomText = null;
 
         public TrashButtonWidget Close => close;
         public InputFieldWithHintsWidget FromField => fromField;
@@ -18,6 +20,7 @@ namespace Iviz.App
         public DropdownWidget TimeFormat => timeFormat;
         public DropdownWidget MessageFormat => messageFormat;
         public TMP_Text Text => text;
+        public Text BottomText => bottomText;
 
         public bool Active
         {

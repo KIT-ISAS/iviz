@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -280,18 +281,21 @@ namespace Iviz.Controllers
             numCellsY = (int) msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
-            if (CubesVisible)
+            using (var data = msg.Data.ReleaseAndShare())
             {
-                SetCubes(msg, origin);
-            }
+                if (CubesVisible)
+                {
+                    SetCubes(data, origin);
+                }
 
-            if (TextureVisible)
-            {
-                SetTextures(msg, origin);
+                if (TextureVisible)
+                {
+                    SetTextures(data, origin);
+                }
             }
         }
 
-        void SetCubes([NotNull] OccupancyGrid msg, Pose pose)
+        void SetCubes([NotNull] SharedRef<sbyte> data, Pose pose)
         {
             if (gridTiles.Length != 16)
             {
@@ -324,11 +328,16 @@ namespace Iviz.Controllers
                         yMin: v * numCellsY / 4,
                         yMax: (v + 1) * numCellsY / 4
                     );
+
+                    var sharedMsgData = data.Share();
                     Task.Run(() =>
                     {
                         try
                         {
-                            grid.SetOccupancy(msg.Data, rect, pose);
+                            using (sharedMsgData)
+                            {
+                                grid.SetOccupancy(sharedMsgData.Array, rect, pose);
+                            }
                         }
                         catch (Exception e)
                         {
@@ -338,10 +347,11 @@ namespace Iviz.Controllers
                 }
             }
 
+
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] OccupancyGrid msg, Pose pose)
+        void SetTextures([NotNull] SharedRef<sbyte> data, Pose pose)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -384,15 +394,19 @@ namespace Iviz.Controllers
                     OccupancyGridResource.Rect rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i];
+                    var sharedMsgData = data.Share();
                     Task.Run(() =>
                     {
                         try
                         {
-                            texture.Set(msg.Data, cellSize, numCellsX, numCellsY, rect, pose);
+                            using (sharedMsgData)
+                            {
+                                texture.Set(sharedMsgData.Array, cellSize, numCellsX, numCellsY, rect, pose);
+                            }
                         }
                         catch (Exception e)
                         {
-                            Debug.LogWarning(e);
+                            Logger.Error($"{this}: Error processing occupancy grid", e);
                         }
                     });
                 }

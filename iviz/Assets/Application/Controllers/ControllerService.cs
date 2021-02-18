@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -215,7 +216,7 @@ namespace Iviz.Controllers
 
         static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
         {
-            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
+            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields.AsArray(), srv.Request.Config);
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
@@ -280,7 +281,7 @@ namespace Iviz.Controllers
         static async Task GetModulesAsync([NotNull] GetModules srv)
         {
             string[] result = await GetModulesAsync();
-            srv.Response.Configs = result;
+            srv.Response.Configs = result.AsRef(srv.Response.Configs);
         }
 
         [ItemNotNull]
@@ -355,7 +356,7 @@ namespace Iviz.Controllers
 
         static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
         {
-            (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
+            (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames.AsArray());
             srv.Response.Poses = poses;
             srv.Response.IsValid = success;
         }

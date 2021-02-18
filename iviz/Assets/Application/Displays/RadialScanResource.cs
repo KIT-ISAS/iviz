@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -34,13 +35,13 @@ namespace Iviz.Displays
         bool colliderEnabled;
         bool visible = true;
         int layer;
-        
+
         [NotNull]
         public string Name
         {
             get => gameObject.name;
             set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }        
+        }
 
         public int Size
         {
@@ -234,8 +235,8 @@ namespace Iviz.Displays
             lines.DisposeDisplay();
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,
-            [NotNull] float[] intensities)
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, 
+            [NotNull] UniqueRef<float> ranges, [NotNull] UniqueRef<float> intensities)
         {
             if (ranges == null)
             {
@@ -297,17 +298,14 @@ namespace Iviz.Displays
 
             Size = pointBuffer.Count;
 
-            GameThread.PostImmediate(() =>
+            if (!UseLines)
             {
-                if (!UseLines)
-                {
-                    SetPoints();
-                }
-                else
-                {
-                    SetLines();
-                }
-            });
+                SetPoints();
+            }
+            else
+            {
+                SetLines();
+            }
         }
 
         void SetPoints()

@@ -175,6 +175,19 @@ namespace Iviz.Core
             return false;
         }
 
+        public static bool Any<T>([NotNull] this UniqueRef<T> ts, Predicate<T> predicate)
+        {
+            foreach (var t in ts)
+            {
+                if (predicate(t))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)
         {
             return new ArraySegment<T>(ts);
@@ -190,49 +203,55 @@ namespace Iviz.Core
             return new ArraySegment<T>(ts, offset, count);
         }
 
+        [NotNull]
+        public static SharedRef<T> ReleaseAndShare<T>([NotNull] this UniqueRef<T> value)
+        {
+            return new SharedRef<T>(value);
+        }
+
         public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
-            mesh.SetVertices(ps.Array, 0, ps.Count);
+            mesh.SetVertices(ps.Array, 0, ps.Length);
         }
 
         public static void SetNormals([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
-            mesh.SetNormals(ps.Array, 0, ps.Count);
+            mesh.SetNormals(ps.Array, 0, ps.Length);
         }
 
         public static void SetTangents([NotNull] this Mesh mesh, Rent<Vector4> ps)
         {
-            mesh.SetTangents(ps.Array, 0, ps.Count);
+            mesh.SetTangents(ps.Array, 0, ps.Length);
         }
 
         public static void SetIndices([NotNull] this Mesh mesh, Rent<int> ps, MeshTopology topology, int subMesh)
         {
-            mesh.SetIndices(ps.Array, 0, ps.Count, topology, subMesh);
+            mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
         }
 
         public static void SetColors([NotNull] this Mesh mesh, Rent<Color> ps)
         {
-            mesh.SetColors(ps.Array, 0, ps.Count);
+            mesh.SetColors(ps.Array, 0, ps.Length);
         }
 
         public static void SetColors([NotNull] this Mesh mesh, Rent<Color32> ps)
         {
-            mesh.SetColors(ps.Array, 0, ps.Count);
+            mesh.SetColors(ps.Array, 0, ps.Length);
         }
 
         public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector2> ps)
         {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Count);
+            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
         }
 
         public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector3> ps)
         {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Count);
+            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
         }
 
         public static void SetTriangles([NotNull] this Mesh mesh, Rent<int> ps, int subMesh = 0)
         {
-            mesh.SetTriangles(ps.Array, 0, ps.Count, subMesh);
+            mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
         }
 
         public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
@@ -424,6 +443,7 @@ namespace Iviz.Core
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
+        [CanBeNull]
         public static T SafeNull<T>(this T o) where T : UnityEngine.Object => o != null ? o : null;
 
         public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
@@ -436,7 +456,7 @@ namespace Iviz.Core
             return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
         }
 
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T t)
+        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, out T t)
         {
             using (var enumerator = enumerable.GetEnumerator())
             {
@@ -450,28 +470,37 @@ namespace Iviz.Core
                 return false;
             }
         }
+
+        public static bool LoadImage(this Texture2D texture, [NotNull] UniqueRef<byte> d)
+        {
+            return texture.LoadImage(d.Array, false);
+        }
     }
 
     public static class FileUtils
     {
-        public static async Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes,
+        static async Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes, int count,
             CancellationToken token)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Create,
                 FileAccess.Write, FileShare.None, 4096, true))
             {
-                await stream.WriteAsync(bytes, 0, bytes.Length, token);
+                await stream.WriteAsync(bytes, 0, count, token);
             }
         }
 
-        public static async Task WriteAllBytesAsync([NotNull] string filePath, Rent<byte> bytes,
+        [NotNull]
+        public static Task WriteAllBytesAsync([NotNull] string filePath, Rent<byte> bytes,
             CancellationToken token)
         {
-            using (FileStream stream = new FileStream(filePath, FileMode.Create,
-                FileAccess.Write, FileShare.None, 4096, true))
-            {
-                await stream.WriteAsync(bytes.Array, 0, bytes.Count, token);
-            }
+            return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
+        }
+
+        [NotNull]
+        public static Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] UniqueRef<byte> bytes,
+            CancellationToken token)
+        {
+            return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
         }
 
         public static async Task<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
@@ -480,15 +509,18 @@ namespace Iviz.Core
                 FileAccess.Read, FileShare.None, 4096, true))
             {
                 var rent = new Rent<byte>((int) stream.Length);
-                await stream.ReadAsync(rent.Array, 0, rent.Count, token);
+                await stream.ReadAsync(rent.Array, 0, rent.Length, token);
                 return rent;
             }
         }
 
         [NotNull]
-        public static Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text, CancellationToken token)
+        public static async Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text, CancellationToken token)
         {
-            return WriteAllBytesAsync(filePath, BuiltIns.UTF8.GetBytes(text), token);
+            using (var bytes = text.AsRent())
+            {
+                await WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
+            }
         }
 
         [ItemNotNull]

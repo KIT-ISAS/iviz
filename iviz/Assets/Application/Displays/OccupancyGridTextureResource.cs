@@ -1,6 +1,7 @@
 using System;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -101,6 +102,11 @@ namespace Iviz.Displays
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
+            }
+
+            if (values.Length < numCellsX * numCellsY)
+            {
+                throw new ArgumentException("Values argument is too small", nameof(values));
             }
 
             IsProcessing = true;

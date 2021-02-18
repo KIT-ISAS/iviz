@@ -32,11 +32,11 @@ namespace Iviz.Ros
     {
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
 
-        readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
+        readonly ConcurrentQueue<SharedMessage<T>> messageQueue = new ConcurrentQueue<SharedMessage<T>>();
         readonly Action<T> delayedHandler;
         readonly Func<T, bool> directHandler;
         readonly List<float> timesOfArrival = new List<float>();
-        readonly List<T> tmpMessageBag = new List<T>();
+        readonly List<SharedMessage<T>> tmpMessageBag = new List<SharedMessage<T>>();
         readonly bool callbackInGameThread;
 
         int dropped;
@@ -79,7 +79,7 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : 
+        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) :
             this(topic, (T t) => handler(t))
         {
         }
@@ -102,8 +102,8 @@ namespace Iviz.Ros
             Logger.Info($"Unsubscribing from {Topic}.");
             if (Subscribed)
             {
-                Connection.Unsubscribe(this);
                 Subscribed = false;
+                Connection.Unsubscribe(this);
             }
         }
 
@@ -135,19 +135,21 @@ namespace Iviz.Ros
             Unpause();
         }
 
-        internal void EnqueueMessage([NotNull] in T msg)
+        internal void EnqueueMessage([NotNull] SharedMessage<T> msg)
         {
-            if (msg == null)
+            if (!Subscribed)
             {
-                throw new ArgumentNullException(nameof(msg));
+                return;
             }
 
             if (callbackInGameThread)
             {
                 messageQueue.Enqueue(msg);
                 msgsInQueue++;
+                return;
             }
-            else
+
+            using (msg)
             {
                 CallHandlerDirect(msg);
             }
@@ -156,7 +158,7 @@ namespace Iviz.Ros
         void CallHandlerDelayed()
         {
             tmpMessageBag.Clear();
-            while (messageQueue.TryDequeue(out T t))
+            while (messageQueue.TryDequeue(out SharedMessage<T> t))
             {
                 tmpMessageBag.Add(t);
             }
@@ -164,21 +166,22 @@ namespace Iviz.Ros
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
             for (int i = start; i < tmpMessageBag.Count; i++)
             {
-                T msg = tmpMessageBag[i];
-                lastMsgBytes += msg.RosMessageLength;
-                
-                lock (timesOfArrival)
+                using (var msg = tmpMessageBag[i])
                 {
-                    timesOfArrival.Add(Time.time);
-                }
+                    lock (timesOfArrival)
+                    {
+                        timesOfArrival.Add(Time.time);
+                    }
 
-                try
-                {
-                    delayedHandler(msg);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
+                    try
+                    {
+                        lastMsgBytes += msg.Message.RosMessageLength;
+                        delayedHandler(msg.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError(e);
+                    }
                 }
             }
 
@@ -187,9 +190,8 @@ namespace Iviz.Ros
             msgsInQueue = 0;
         }
 
-        void CallHandlerDirect([NotNull] in T msg)
+        void CallHandlerDirect([NotNull] SharedMessage<T> msg)
         {
-            lastMsgBytes += msg.RosMessageLength;
             totalMsgCounter++;
 
             lock (timesOfArrival)
@@ -200,7 +202,8 @@ namespace Iviz.Ros
             bool processed;
             try
             {
-                processed = directHandler(msg);
+                lastMsgBytes += msg.Message.RosMessageLength;
+                processed = directHandler(msg.Message);
             }
             catch (Exception e)
             {

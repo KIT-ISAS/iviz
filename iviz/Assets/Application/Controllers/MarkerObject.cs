@@ -62,28 +62,6 @@ namespace Iviz.Controllers
 
         [CanBeNull] CancellationTokenSource runningTs;
 
-        /*
-        class TaskInfo
-        {
-            [NotNull] readonly Task task;
-            [NotNull] public CancellationTokenSource TokenSource { get; }
-            [NotNull] public string Uri { get; }
-            [CanBeNull] public Info<GameObject> ResourceInfo { get; set; }
-
-            public TaskInfo([NotNull] Task task, [NotNull] CancellationTokenSource tokenSource, [NotNull] string uri)
-            {
-                this.task = task;
-                TokenSource = tokenSource;
-                Uri = uri;
-            }
-
-            public bool IsRunning => !task.IsCompleted;
-        }
-        */
-
-
-        //[CanBeNull] TaskInfo taskInfo;
-
         (string Ns, int Id) id;
 
         int numErrors;
@@ -480,7 +458,7 @@ namespace Iviz.Controllers
 
             using (var points = new Rent<Vector3>(msg.Points.Length))
             {
-                for (int i = 0; i < points.Count; i++)
+                for (int i = 0; i < points.Length; i++)
                 {
                     points.Array[i] = msg.Points[i].Ros2Unity();
                 }
@@ -491,7 +469,7 @@ namespace Iviz.Controllers
                 {
                     using (var colors = new Rent<Color>(msg.Colors.Length))
                     {
-                        for (int i = 0; i < colors.Count; i++)
+                        for (int i = 0; i < colors.Length; i++)
                         {
                             colors.Array[i] = msg.Colors[i].ToUnityColor();
                         }

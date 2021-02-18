@@ -49,7 +49,13 @@ namespace Iviz.Ros
             logSender = new Sender<Log>("/rosout");
             Logger.LogExternal += LogMessage;
 
-            logListener = new Listener<Log>("/rosout_agg", msg => LogMessageArrived?.Invoke(msg));
+            logListener = new Listener<Log>("/rosout_agg", Handler);
+        }
+
+        static bool Handler(Log msg)
+        {
+            LogMessageArrived?.Invoke(msg);
+            return true;
         }
 
         void OnDestroy()
@@ -75,7 +81,7 @@ namespace Iviz.Ros
                 File: Path.GetFileName(msg.File),
                 Function: "",
                 Line: (uint) msg.Line,
-                Topics: Array.Empty<string>()
+                Topics: UniqueRef<StringRef>.Empty
             ));
         }
 

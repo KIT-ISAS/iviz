@@ -1,5 +1,6 @@
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -12,8 +13,8 @@ namespace Iviz.Controllers
 {
     internal class MarkerPointHelper
     {
-        Point[] points;
-        ColorRGBA[] colors;
+        UniqueRef<Point> points;
+        UniqueRef<ColorRGBA> colors;
         Color color;
 
         readonly PointListResource.DirectPointSetter singleColor;

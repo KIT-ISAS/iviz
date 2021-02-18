@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -207,7 +208,7 @@ namespace Iviz.Controllers
             }
 
             fieldNames.Clear();
-            fieldNames.AddRange(msg.Layers);
+            fieldNames.AddRange(msg.Layers.AsArray());
 
             int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
@@ -227,7 +228,8 @@ namespace Iviz.Controllers
             link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,
-                (float) msg.Info.LengthX, (float) msg.Info.LengthY, msg.Data[layer].Data);
+                (float) msg.Info.LengthX, (float) msg.Info.LengthY,
+                msg.Data[layer].Data.Array, length);
             MeasuredIntensityBounds = resource.IntensityBounds;
             if (ForceMinMax)
             {

@@ -90,7 +90,7 @@ namespace Iviz.Controllers
             description.Append("<color=navy><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
-                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
@@ -279,7 +279,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateMarkers([NotNull] Marker[] msg)
+        void UpdateMarkers([NotNull] IEnumerable<Marker> msg)
         {
             int numUnnamed = 0;
 

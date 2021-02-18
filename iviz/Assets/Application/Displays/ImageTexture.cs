@@ -3,10 +3,12 @@ using System.IO;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
+using Buffer = System.Buffer;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
@@ -151,15 +153,19 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void ProcessPng(byte[] data, [NotNull] Action onFinished)
+        public void ProcessPng(UniqueRef<byte> data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    byte[] newData;
-                    BigGustave.Png png = BigGustave.Png.Open(data);
+                    BigGustave.Png png;
+                    using (data)
+                    {
+                        png = BigGustave.Png.Open(data.Array);
+                    }
 
+                    byte[] newData;
                     if (png.RowOffset != 0)
                     {
                         int reqSize = png.Height * png.RowSize;
@@ -192,22 +198,25 @@ namespace Iviz.Displays
                 catch (Exception e)
                 {
                     Logger.Error($"{this}: Error processing PNG", e);
-                    GameThread.PostInListenerQueue(onFinished);                    
+                    GameThread.PostInListenerQueue(onFinished);
                 }
             });
         }
 
-        public void ProcessJpg(byte[] data, [NotNull] Action onFinished)
+        public void ProcessJpg(UniqueRef<byte> data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    Stream inStream = new MemoryStream(data);
-                    var image = new JpegImage(inStream);
+                    JpegImage image;                    
+                    using (data)
+                    {
+                        image = new JpegImage(new MemoryStream(data.Array));
+                    }
 
                     string encoding = null;
-                    
+
                     int reqSize = image.Height * image.Width;
                     switch (image.Colorspace)
                     {
@@ -274,12 +283,12 @@ namespace Iviz.Displays
                 catch (Exception e)
                 {
                     Logger.Error($"{this}: Error processing JPG", e);
-                    GameThread.PostInListenerQueue(onFinished);                    
+                    GameThread.PostInListenerQueue(onFinished);
                 }
             });
         }
 
-        public void Set(int width, int height, string encoding, byte[] data)
+        public void Set(int width, int height, string encoding, [NotNull] byte[] data)
         {
             Set(width, height, encoding, data.AsSegment());
         }
@@ -370,7 +379,8 @@ namespace Iviz.Displays
             texture.Apply(generateMipmaps, false);
         }
 
-        [NotNull] Texture2D EnsureSize(int width, int height, TextureFormat format)
+        [NotNull]
+        Texture2D EnsureSize(int width, int height, TextureFormat format)
         {
             if (Texture != null &&
                 Texture.width == width &&

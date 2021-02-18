@@ -6,6 +6,7 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -206,7 +207,7 @@ namespace Iviz.Controllers
             Listener.MaxQueueSize = (int) MaxQueueSize;
         }
 
-        bool HandlerCompressed(CompressedImage msg)
+        bool HandlerCompressed([NotNull] CompressedImage msg)
         {
             if (isProcessing)
             {
@@ -225,11 +226,11 @@ namespace Iviz.Controllers
             {
                 case "png":
                     descriptionOverride = null;
-                    ImageTexture.ProcessPng(msg.Data, PostProcess);
+                    ImageTexture.ProcessPng(msg.Data.Release(), PostProcess);
                     break;
                 case "jpeg":
                     descriptionOverride = null;
-                    ImageTexture.ProcessJpg(msg.Data, PostProcess);
+                    ImageTexture.ProcessJpg(msg.Data.Release(), PostProcess);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
@@ -241,13 +242,13 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void Handler(Image msg)
+        void Handler([NotNull] Image msg)
         {
             Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             int width = (int) msg.Width;
             int height = (int) msg.Height;
-            ImageTexture.Set(width, height, msg.Encoding, msg.Data);
+            ImageTexture.Set(width, height, msg.Encoding, msg.Data.Segment);
         }
 
         public override void StopController()

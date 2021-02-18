@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -23,8 +24,9 @@ namespace Iviz.App
         }
 
         const int MaxMessageLength = 300;
+
         // TMP does not have a limit of 65000 but it's a nice threshold anyway
-        const int MaxMessages = 65000 / 4 / MaxMessageLength; 
+        const int MaxMessages = 65000 / 4 / MaxMessageLength;
 
         const string AllString = "[All]";
         const string NoneString = "[None]";
@@ -46,6 +48,7 @@ namespace Iviz.App
         readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
         readonly StringBuilder description = new StringBuilder();
         readonly HashSet<string> ids = new HashSet<string>();
+
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
 
@@ -84,7 +87,42 @@ namespace Iviz.App
         {
             ProcessLog();
             dialog.FromField.Hints = ExtraFields.Concat(ids);
+            dialog.BottomText.text = UpdateStats();
         }
+        
+        [NotNull]
+        string UpdateStats()
+        {
+            var listener = ConnectionManager.LogListener;
+            if (listener == null)
+            {
+                return "Error: No Log Listener";
+            }
+            
+            (int numActivePublishers, int numPublishers) = listener.NumPublishers;
+
+            description.Length = 0;
+            description.Append(listener.Topic).Append(" ");
+            if (numPublishers == -1)
+            {
+                description.Append("Off");
+            }
+            else if (!listener.Subscribed)
+            {
+                description.Append("PAUSED");
+            }
+            else
+            {
+                description.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
+            }
+
+            string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
+            description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
+                .Append(kbPerSecond).Append(" kB/s");
+
+            return description.ToString();
+        }
+        
 
         void HandleMessage(in LogMessage log)
         {
@@ -117,12 +155,10 @@ namespace Iviz.App
 
         void HandleMessage(in Log log)
         {
-            if (log.Name == ConnectionManager.MyId)
+            if (log.Name != ConnectionManager.MyId)
             {
-                return;
+                HandleMessage(new LogMessage(log));
             }
-
-            HandleMessage(new LogMessage(log));
         }
 
         [NotNull]
@@ -209,49 +245,51 @@ namespace Iviz.App
                 return;
             }
 
-            LogMessage[] messages = messageQueue.ToArray();
-
-            foreach (var message in messages)
+            using (var messages = new Rent<LogMessage>(messageQueue.Count + 5))
             {
-                var messageLevel = message.Level;
-                if (messageLevel < minLogLevel)
+                messageQueue.CopyTo(messages.Array, 0);
+                foreach (var message in messages)
                 {
-                    continue;
-                }
+                    var messageLevel = message.Level;
+                    if (messageLevel < minLogLevel)
+                    {
+                        continue;
+                    }
 
-                if (idCode == FromIdCode.Me && message.SourceId != null ||
-                    idCode == FromIdCode.OnlyId && message.SourceId != id)
-                {
-                    continue;
-                }
+                    if (idCode == FromIdCode.Me && message.SourceId != null ||
+                        idCode == FromIdCode.OnlyId && message.SourceId != id)
+                    {
+                        continue;
+                    }
 
-                if (message.Stamp == default)
-                {
-                    description.Append("<b>[] ");
-                }
-                else
-                {
-                    description.AppendFormat(
-                        message.Stamp.Date == GameThread.Now.Date
-                            ? "<b>[{0:HH:mm:ss}] "
-                            : "<b>[{0:yy-MM-dd HH:mm:ss}] ", message.Stamp);
-                }
+                    if (message.Stamp == default)
+                    {
+                        description.Append("<b>[] ");
+                    }
+                    else
+                    {
+                        description.AppendFormat(
+                            message.Stamp.Date == GameThread.Now.Date
+                                ? "<b>[{0:HH:mm:ss}] "
+                                : "<b>[{0:yy-MM-dd HH:mm:ss}] ", message.Stamp);
+                    }
 
-                string levelColor = ColorFromLevel(messageLevel);
+                    string levelColor = ColorFromLevel(messageLevel);
 
-                description
-                    .Append("<color=").Append(levelColor).Append(">")
-                    .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
+                    description
+                        .Append("<color=").Append(levelColor).Append(">")
+                        .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
 
-                if (message.Message.Length < MaxMessageLength)
-                {
-                    description.Append(message.Message).AppendLine();
-                }
-                else
-                {
-                    description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
-                        .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                    if (message.Message.Length < MaxMessageLength)
+                    {
+                        description.Append(message.Message).AppendLine();
+                    }
+                    else
+                    {
+                        description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
+                            .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                    }
                 }
             }
 

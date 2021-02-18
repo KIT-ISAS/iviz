@@ -21,6 +21,7 @@ namespace Iviz.Displays
     public static class SceneModel
     {
         [NotNull]
+        [ItemNotNull]
         public static async Task<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
             [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -56,7 +57,7 @@ namespace Iviz.Displays
         static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
             IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
-            switch (msg.OrientationHint.ToUpperInvariant())
+            switch (msg.OrientationHint.ToString().ToUpperInvariant())
             {
                 case "Z_UP":
                     root.transform.localRotation = Quaternion.Euler(0, -90, 0);
@@ -83,24 +84,24 @@ namespace Iviz.Displays
 
                 meshResource.Name = mesh.Name;
 
-                Iviz.Msgs.IvizMsgs.Color32[] meshColors = mesh.ColorChannels.Length != 0
+                UniqueRef<Iviz.Msgs.IvizMsgs.Color32> meshColors = mesh.ColorChannels.Length != 0
                     ? mesh.ColorChannels[0].Colors
-                    : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
+                    : UniqueRef<Msgs.IvizMsgs.Color32>.Empty;
 
-                var material = msg.Materials[mesh.MaterialIndex];
+                var material = msg.Materials[(int) mesh.MaterialIndex];
                 Msgs.IvizMsgs.Texture diffuseTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_DIFFUSE);
                 Msgs.IvizMsgs.Texture bumpTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_NORMALS);
 
-                Vector3f[] meshDiffuseTexCoords =
+                UniqueRef<Vector3f> meshDiffuseTexCoords =
                     diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[diffuseTexture.UvIndex].Coords
-                        : Array.Empty<Vector3f>();
-                Vector3f[] meshBumpTexCoords =
+                        : UniqueRef<Vector3f>.Empty;
+                UniqueRef<Vector3f> meshBumpTexCoords =
                     bumpTexture != null && bumpTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
-                        : Array.Empty<Vector3f>();
+                        : UniqueRef<Vector3f>.Empty;
 
                 using (var vertices = new Rent<Vector3>(mesh.Vertices.Length))
                 using (var normals = new Rent<Vector3>(mesh.Normals.Length))
@@ -110,16 +111,16 @@ namespace Iviz.Displays
                 using (var tangents = new Rent<Vector4>(mesh.Tangents.Length))
                 using (var triangles = new Rent<int>(mesh.Faces.Length * 3))
                 {
-                    for (int i = 0; i < vertices.Count; i++)
+                    for (int i = 0; i < vertices.Length; i++)
                     {
                         vertices.Array[i] = Assimp2Unity(mesh.Vertices[i]);
                     }
 
-                    MemCopy(mesh.Normals, normals.Array, normals.Count * 3 * sizeof(float));
-                    MemCopy(meshColors, colors.Array, colors.Count * sizeof(int));
-                    MemCopy(meshDiffuseTexCoords, diffuseTexCoords.Array, diffuseTexCoords.Count * 3 * sizeof(float));
-                    MemCopy(meshBumpTexCoords, bumpTexCoords.Array, bumpTexCoords.Count * 3 * sizeof(float));
-                    MemCopy(mesh.Faces, triangles.Array, triangles.Count * sizeof(int));
+                    MemCopy(mesh.Normals, normals.Array, normals.Length * 3 * sizeof(float));
+                    MemCopy(meshColors, colors.Array, colors.Length * sizeof(int));
+                    MemCopy(meshDiffuseTexCoords, diffuseTexCoords.Array, diffuseTexCoords.Length * 3 * sizeof(float));
+                    MemCopy(meshBumpTexCoords, bumpTexCoords.Array, bumpTexCoords.Length * 3 * sizeof(float));
+                    MemCopy(mesh.Faces, triangles.Array, triangles.Length * sizeof(int));
 
                     for (int i = 0; i < mesh.Tangents.Length; i++)
                     {
@@ -256,6 +257,13 @@ namespace Iviz.Displays
 
         static Vector3 Assimp2Unity(in Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
+
+        static void MemCopy<TA, TB>([NotNull] UniqueRef<TA> src, [NotNull] TB[] dst, int sizeToCopy)
+            where TA : unmanaged
+            where TB : unmanaged
+        {
+            MemCopy(src.Array, dst, sizeToCopy);
+        }
 
         static void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)
             where TA : unmanaged

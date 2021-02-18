@@ -7,7 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.MoveitTest;
+//using Iviz.Msgs.MoveitTest;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.TrajectoryMsgs;
@@ -135,6 +135,7 @@ namespace Iviz.App
         // we use hasNewTrajectory to tell Update() we have a trajectory 
         async void SetTargetPose(Msgs.GeometryMsgs.Pose rosPose)
         {
+            /*
             SetManipulatorPose srv = new SetManipulatorPose
             {
                 Request = {TargetPose = rosPose}
@@ -162,6 +163,7 @@ namespace Iviz.App
             
             // tell Update() that we have a response
             hasNewTrajectory = true;
+            */
         }
 
         void Update()
@@ -187,7 +189,7 @@ namespace Iviz.App
                     // a trajectory is a sequence of joint values with timestamps
                     // but for visualization we're only interested in the final value
                     JointTrajectoryPoint lastJoints = newTrajectory.Points.Last();
-                    planRobot.WriteJoints(newTrajectory.JointNames, lastJoints.Positions);
+                    //planRobot.WriteJoints(newTrajectory.JointNames, lastJoints.Positions);
                 }
 
                 hasNewTrajectory = false;
