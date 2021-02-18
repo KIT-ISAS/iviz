@@ -24,6 +24,7 @@
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj" />
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
     <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />

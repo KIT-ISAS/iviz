@@ -681,11 +681,12 @@ namespace Iviz.Roslib.MarkerHelper
 
         public static InteractiveMarkerUpdate CreateMarkerErase(params string[] args)
         {
-            return new()
+            var erase = new InteractiveMarkerUpdate
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
-                Erases = args
             };
+            erase.Erases = args.AsRef(erase.Erases);
+            return erase;
         }
     }
 }

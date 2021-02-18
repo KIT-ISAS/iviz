@@ -161,10 +161,10 @@ namespace Iviz.Roslib
             if (statusBuffer[0] == ErrorByte)
             {
                 throw new RosServiceCallFailed(serviceInfo.Service,
-                    BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Count));
+                    BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Length));
             }
 
-            service.Response = Buffer.Deserialize(service.Response, readBuffer.Array, readBuffer.Count);
+            service.Response = Buffer.Deserialize(service.Response, readBuffer.Array, readBuffer.Length);
         }
     }
 }

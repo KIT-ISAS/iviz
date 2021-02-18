@@ -218,7 +218,7 @@ namespace Iviz.Roslib
                     using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
                     {
                         serviceMsg = (TService) serviceInfo.Generator.Create();
-                        serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Count);
+                        serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Length);
                     }
 
                     byte resultStatus;
@@ -266,7 +266,7 @@ namespace Iviz.Roslib
                         WriteHeader(writeBuffer.Array, resultStatus, msgLength);
                         Buffer.Serialize(responseMsg, writeBuffer.Array, 5);
 
-                        await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Count, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Length, runningTs.Token).Caf();
                     }
                     else
                     {

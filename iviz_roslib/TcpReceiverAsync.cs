@@ -356,7 +356,7 @@ namespace Iviz.Roslib
         async Task ProcessLoopFixed(int fixedSize)
         {
             int fixedSizeWithHeader = 4 + fixedSize;
-            using var readBuffer = new Rent<byte>(fixedSizeWithHeader); 
+            using var readBuffer = new Rent<byte>(fixedSizeWithHeader);
 
             while (KeepRunning)
             {
@@ -374,17 +374,17 @@ namespace Iviz.Roslib
                         $"Receiver expected packet with fixed size of {fixedSize} bytes, but got a packet of size {receivedSize}!");
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSize, 4);
-                manager.MessageCallback(message, this);
-
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
+
+                using T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
+                manager.MessageCallback(message, this);
             }
         }
 
         async Task ProcessLoopVariable()
         {
-            using ResizableRent<byte> readBuffer = new(4); 
+            using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
             {
                 int rcvLength = await ReceivePacket(readBuffer);
@@ -394,11 +394,11 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
-                manager.MessageCallback(message, this);
-
                 numReceived++;
                 bytesReceived += rcvLength + 4;
+
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
+                manager.MessageCallback(message, this);
             }
         }
 

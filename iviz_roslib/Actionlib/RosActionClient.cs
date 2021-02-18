@@ -502,9 +502,9 @@ namespace Iviz.Roslib.Actionlib
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
             (
+                this IAction<TActionGoal, TActionFeedback, TActionResult>? _,
                 RosClient client,
-                string actionName,
-                IAction<TActionGoal, TActionFeedback, TActionResult>? _
+                string actionName
             )
             where TActionGoal : class, IActionGoal, new()
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
@@ -516,7 +516,7 @@ namespace Iviz.Roslib.Actionlib
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
             (
-                IAction<TActionGoal, TActionFeedback, TActionResult>? _
+                this IAction<TActionGoal, TActionFeedback, TActionResult>? _
             )
             where TActionGoal : class, IActionGoal, new()
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()

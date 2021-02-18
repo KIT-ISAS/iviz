@@ -149,7 +149,7 @@ namespace Iviz.Roslib
 
         internal static List<string> ParseHeader(in Rent<byte> readBuffer)
         {
-            return ParseHeader(readBuffer.Array, readBuffer.Count);
+            return ParseHeader(readBuffer.Array, readBuffer.Length);
         }
 
         internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
@@ -242,7 +242,7 @@ namespace Iviz.Roslib
                 writer.Write(BuiltIns.UTF8.GetBytes(t));
             }
 
-            await stream.WriteChunkAsync(array.Array, array.Count, token).Caf();
+            await stream.WriteChunkAsync(array.Array, array.Length, token).Caf();
         }
 
 
