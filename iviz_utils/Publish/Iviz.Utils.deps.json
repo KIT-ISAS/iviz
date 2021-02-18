@@ -126,7 +126,6 @@
       },
       "Iviz.MsgsGen.Lib/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0",
           "Newtonsoft.Json": "12.0.3"
         },
         "runtime": {
@@ -140,7 +139,8 @@
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
           "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0"
+          "Nito.AsyncEx.Tasks": "5.1.0",
+          "iviz_dynamic_msg_lib": "1.0.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
@@ -171,6 +171,15 @@
         },
         "runtime": {
           "Iviz.XmlRpc.dll": {}
+        }
+      },
+      "iviz_dynamic_msg_lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0"
+        },
+        "runtime": {
+          "iviz_dynamic_msg_lib.dll": {}
         }
       }
     }
@@ -282,6 +291,11 @@
       "sha512": ""
     },
     "Iviz.XmlRpc/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "iviz_dynamic_msg_lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
