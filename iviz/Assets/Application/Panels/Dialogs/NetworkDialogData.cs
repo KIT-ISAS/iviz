@@ -8,7 +8,7 @@ namespace Iviz.App
     public sealed class NetworkDialogData : DialogData
     {
         [NotNull] readonly NetworkDialogContents panel;
-        readonly StringBuilder description = new StringBuilder();
+        readonly StringBuilder description = new StringBuilder(65536);
         public override IDialogPanelContents Panel => panel;
 
         public NetworkDialogData()
@@ -31,7 +31,6 @@ namespace Iviz.App
             }
             else
             {
-
                 try
                 {
                     ConnectionManager.Connection.GenerateReport(description);
@@ -44,7 +43,7 @@ namespace Iviz.App
 
             description.AppendLine().AppendLine();
 
-            panel.Text.text = description.ToString();
+            panel.Text.SetText(description);
         }
     }
 }

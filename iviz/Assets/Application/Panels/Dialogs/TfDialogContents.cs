@@ -5,11 +5,11 @@ namespace Iviz.App
     public sealed class TfDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
-        [SerializeField] TFLog tfLog = null;
+        [SerializeField] TfLog tfLog = null;
         [SerializeField] ToggleWidget showOnlyUsed = null;
 
         public TrashButtonWidget Close => close;
-        public TFLog TfLog => tfLog;
+        public TfLog TfLog => tfLog;
         public ToggleWidget ShowOnlyUsed => showOnlyUsed;
 
         public bool Active

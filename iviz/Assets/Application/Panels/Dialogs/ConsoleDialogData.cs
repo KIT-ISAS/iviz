@@ -46,8 +46,10 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => dialog;
 
         readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
-        readonly StringBuilder description = new StringBuilder();
-        readonly HashSet<string> ids = new HashSet<string>();
+        readonly StringBuilder description = new StringBuilder(65536);
+
+        readonly ConcurrentDictionary<string, object>
+            ids = new ConcurrentDictionary<string, object>(); // used as concurrent hashset
 
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
@@ -67,7 +69,7 @@ namespace Iviz.App
             dialog.Close.Clicked += Close;
             ProcessLog();
             dialog.FromField.Value = id;
-            dialog.FromField.Hints = ExtraFields.Concat(ids);
+            dialog.FromField.Hints = ExtraFields.Concat(ids.Keys);
             dialog.LogLevel.Options = LogLevelFields;
             dialog.LogLevel.Index = IndexFromLevel(minLogLevel);
             dialog.LogLevel.ValueChanged += (f, _) =>
@@ -86,10 +88,10 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             ProcessLog();
-            dialog.FromField.Hints = ExtraFields.Concat(ids);
+            dialog.FromField.Hints = ExtraFields.Concat(ids.Keys);
             dialog.BottomText.text = UpdateStats();
         }
-        
+
         [NotNull]
         string UpdateStats()
         {
@@ -98,7 +100,7 @@ namespace Iviz.App
             {
                 return "Error: No Log Listener";
             }
-            
+
             (int numActivePublishers, int numPublishers) = listener.NumPublishers;
 
             description.Length = 0;
@@ -122,13 +124,13 @@ namespace Iviz.App
 
             return description.ToString();
         }
-        
+
 
         void HandleMessage(in LogMessage log)
         {
             if (log.SourceId != null)
             {
-                ids.Add(log.SourceId);
+                ids[log.SourceId] = null;
             }
 
             if (idCode == FromIdCode.None ||
@@ -155,10 +157,15 @@ namespace Iviz.App
 
         void HandleMessage(in Log log)
         {
-            if (log.Name != ConnectionManager.MyId)
+            if (log.Level < (byte) minLogLevel
+                || idCode == FromIdCode.None
+                || idCode == FromIdCode.Me
+                || log.Name == ConnectionManager.MyId)
             {
-                HandleMessage(new LogMessage(log));
+                return;
             }
+
+            HandleMessage(new LogMessage(log));
         }
 
         [NotNull]
@@ -245,7 +252,7 @@ namespace Iviz.App
                 return;
             }
 
-            using (var messages = new Rent<LogMessage>(messageQueue.Count + 5))
+            using (var messages = new UniqueRef<LogMessage>(messageQueue.Count + 5, true))
             {
                 messageQueue.CopyTo(messages.Array, 0);
                 foreach (var message in messages)
@@ -268,10 +275,13 @@ namespace Iviz.App
                     }
                     else
                     {
-                        description.AppendFormat(
-                            message.Stamp.Date == GameThread.Now.Date
-                                ? "<b>[{0:HH:mm:ss}] "
-                                : "<b>[{0:yy-MM-dd HH:mm:ss}] ", message.Stamp);
+                        string dateAsStr = message.SourceId == null
+                            ? GameThread.NowFormatted
+                            : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
+                                ? "HH:mm:ss"
+                                : "yy-MM-dd HH:mm:ss");
+
+                        description.Append("<b>[").Append(dateAsStr).Append("] ");
                     }
 
                     string levelColor = ColorFromLevel(messageLevel);
@@ -293,7 +303,7 @@ namespace Iviz.App
                 }
             }
 
-            dialog.Text.text = description.ToString();
+            dialog.Text.SetText(description);
             queueIsDirty = false;
         }
     }

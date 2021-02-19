@@ -14,6 +14,7 @@ namespace Iviz.App
         const int Size = 200;
 
         static readonly Color EnabledColor = new Color(0.71f, 0.98f, 1, 0.733f);
+        static readonly StringBuilder CachedStr = new StringBuilder(100);
 
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
@@ -52,33 +53,32 @@ namespace Iviz.App
         int Dropped => Listener?.Stats.Dropped ?? 0;
         bool Subscribed => Listener?.Subscribed ?? false;
 
-        readonly StringBuilder str = new StringBuilder(100);
 
         void UpdateStats()
         {
-            str.Length = 0;
-            str.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
+            CachedStr.Length = 0;
+            CachedStr.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
 
             (int numActivePublishers, int numPublishers) = NumPublishers;
             if (numPublishers == -1)
             {
-                str.Append("Off");
+                CachedStr.Append("Off");
             }
             else if (!Subscribed)
             {
-                str.Append("PAUSED");
+                CachedStr.Append("PAUSED");
             }
             else
             {
-                str.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
+                CachedStr.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
             }
 
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            str.Append(" | ").Append(MessagesPerSecond).Append(" Hz | ")
+            CachedStr.Append(" | ").Append(MessagesPerSecond).Append(" Hz | ")
                 .Append(kbPerSecond).Append(" kB/s | ")
                 .Append(Dropped).Append(" dr</b>");
 
-            text.text = str.ToString();
+            text.text = CachedStr.ToString();
 
             if (listener == null)
             {

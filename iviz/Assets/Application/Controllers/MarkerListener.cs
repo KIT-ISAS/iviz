@@ -139,9 +139,8 @@ namespace Iviz.Controllers
 
         void CheckDeadMarkers()
         {
-            DateTime now = GameThread.Now;
             var deadEntries = markers
-                .Where(entry => entry.Value.ExpirationTime < now)
+                .Where(entry => entry.Value.ExpirationTime < GameThread.Now)
                 .ToArray();
             foreach (var entry in deadEntries)
             {
@@ -199,7 +198,7 @@ namespace Iviz.Controllers
                         markerStr = "<b>1 marker →</b>";
                         break;
                     default:
-                        markerStr = $"<b>{markers.Count} markers →</b>";
+                        markerStr = $"<b>{markers.Count.ToString()} markers →</b>";
                         break;
                 }
 

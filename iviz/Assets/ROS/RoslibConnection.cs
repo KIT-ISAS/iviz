@@ -965,7 +965,8 @@ namespace Iviz.Ros
             var publisherStats = mClient.GetPublisherStatistics();
             foreach (var stat in subscriberStats.Topics)
             {
-                builder.Append("<color=navy><b>** Subscribed to ").Append(stat.Topic).Append("</b></color>")
+                builder.Append("<color=#000080ff><b>** Subscribed to ")
+                    .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
@@ -1018,17 +1019,17 @@ namespace Iviz.Ros
                     }
                     else if (!isAlive)
                     {
-                        builder.Append(" <color=red>(dead)</color>");
+                        builder.Append(" <color=#ff0000ff>(dead)</color>");
                     }
                     else
                     {
-                        builder.Append(" <color=navy>(Trying to connect...)</color>");
+                        builder.Append(" <color=#000080ff>(Trying to connect...)</color>");
                     }
 
                     if (receiver.ErrorDescription != null)
                     {
                         builder.AppendLine();
-                        builder.Append("<color=brown>\"").Append(receiver.ErrorDescription).Append("\"</color>");
+                        builder.Append("<color=#a52a2aff>\"").Append(receiver.ErrorDescription).Append("\"</color>");
                     }
 
                     builder.AppendLine();
@@ -1039,7 +1040,7 @@ namespace Iviz.Ros
 
             foreach (var stat in publisherStats.Topics)
             {
-                builder.Append("<color=maroon><b>** Publishing to ").Append(stat.Topic).Append("</b></color>")
+                builder.Append("<color=#800000ff><b>** Publishing to ").Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
@@ -1085,7 +1086,7 @@ namespace Iviz.Ros
                     }
                     else
                     {
-                        builder.Append(" <color=red>(dead)</color>");
+                        builder.Append(" <color=#ff0000ff>(dead)</color>");
                     }
 
                     builder.AppendLine();
@@ -1107,7 +1108,7 @@ namespace Iviz.Ros
             void Invalidate();
         }
 
-        class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
+        sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
         {
             readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
             [NotNull] readonly string topic;
@@ -1202,7 +1203,7 @@ namespace Iviz.Ros
             void Invalidate();
         }
 
-        class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+        sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
         {
             readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
             [NotNull] readonly string topic;
@@ -1292,7 +1293,7 @@ namespace Iviz.Ros
             Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
         }
 
-        class AdvertisedService<T> : IAdvertisedService where T : IService, new()
+        sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
         {
             [NotNull] Func<T, Task> callback;
             [NotNull] readonly string service;

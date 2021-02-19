@@ -23,7 +23,7 @@ namespace Iviz.Core
     }
 
     [DataContract]
-    public class SettingsConfiguration : JsonToString
+    public sealed class SettingsConfiguration : JsonToString
     {
         [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
         [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;

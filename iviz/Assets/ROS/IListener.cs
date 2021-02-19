@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -33,7 +31,7 @@ namespace Iviz.Ros
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
 
         readonly ConcurrentQueue<SharedMessage<T>> messageQueue = new ConcurrentQueue<SharedMessage<T>>();
-        readonly Action<T> delayedHandler;
+        readonly Action<SharedMessage<T>> delayedHandler;
         readonly Func<T, bool> directHandler;
         readonly List<float> timesOfArrival = new List<float>();
         readonly List<SharedMessage<T>> tmpMessageBag = new List<SharedMessage<T>>();
@@ -62,7 +60,15 @@ namespace Iviz.Ros
 
         public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
         {
-            delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            delayedHandler = sharedRef =>
+            {
+                using (sharedRef) handler(sharedRef.Message);
+            };
             callbackInGameThread = true;
             GameThread.ListenersEveryFrame += CallHandlerDelayed;
 
@@ -79,10 +85,20 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) :
-            this(topic, (T t) => handler(t))
+        public Listener([NotNull] string topic, [NotNull] Action<SharedMessage<IMessage>> handler) : this(topic)
         {
+            delayedHandler = sharedRef =>
+            {
+                using (sharedRef) handler(sharedRef.ShareMsg());
+            };
+
+            callbackInGameThread = true;
+            GameThread.ListenersEveryFrame += CallHandlerDelayed;
+
+            Connection.Subscribe(this);
+            Subscribed = true;
         }
+
 
         public string Topic { get; }
         public string Type { get; }
@@ -166,22 +182,20 @@ namespace Iviz.Ros
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
             for (int i = start; i < tmpMessageBag.Count; i++)
             {
-                using (var msg = tmpMessageBag[i])
+                var msg = tmpMessageBag[i];
+                lock (timesOfArrival)
                 {
-                    lock (timesOfArrival)
-                    {
-                        timesOfArrival.Add(Time.time);
-                    }
+                    timesOfArrival.Add(Time.time);
+                }
 
-                    try
-                    {
-                        lastMsgBytes += msg.Message.RosMessageLength;
-                        delayedHandler(msg.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e);
-                    }
+                try
+                {
+                    lastMsgBytes += msg.Message.RosMessageLength;
+                    delayedHandler(msg);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
                 }
             }
 

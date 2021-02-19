@@ -530,7 +530,7 @@ namespace Iviz.Core
             {
                 return BuiltIns.UTF8.GetString(bytes.Array);
             }
-        }
+        }        
     }
 
     public static class MeshRendererUtils

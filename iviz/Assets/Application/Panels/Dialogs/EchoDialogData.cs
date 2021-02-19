@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -20,20 +20,24 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => dialog;
 
         readonly Dictionary<string, Type> topicTypes = new Dictionary<string, Type>();
-        readonly Queue<(string, IMessage)> messageQueue = new Queue<(string, IMessage)>();
+
+        readonly Queue<(string DateTime, SharedMessage<IMessage> Msg)> messageQueue =
+            new Queue<(string, SharedMessage<IMessage>)>();
+
         readonly List<TopicEntry> entries = new List<TopicEntry>();
-        readonly StringBuilder messageBuffer = new StringBuilder();
+        readonly StringBuilder messageBuffer = new StringBuilder(65536);
         IListener listener;
         bool queueIsDirty;
 
-        class TopicEntry : IComparable<TopicEntry>
+        sealed class TopicEntry : IComparable<TopicEntry>
         {
+            public static readonly TopicEntry Empty = new TopicEntry();
             [NotNull] public string Topic { get; }
             [CanBeNull] public string RosMsgType { get; }
             [NotNull] public Type CsType { get; }
             [NotNull] public string Description { get; }
 
-            public TopicEntry()
+            TopicEntry()
             {
                 Topic = "";
                 RosMsgType = null;
@@ -54,8 +58,8 @@ namespace Iviz.App
 
             public int CompareTo(TopicEntry other)
             {
-                return ReferenceEquals(this, other) 
-                    ? 0 
+                return ReferenceEquals(this, other)
+                    ? 0
                     : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
             }
         }
@@ -77,10 +81,9 @@ namespace Iviz.App
             {
                 return false;
             }
-            
+
             topicTypes.Add(rosMsgType, type);
             return true;
-
         }
 
         void CreateListener(string topicName, string rosMsgType, [NotNull] Type csType)
@@ -101,11 +104,10 @@ namespace Iviz.App
             }
             else
             {
-                Action<IMessage> handler = Handler;
+                Action<SharedMessage<IMessage>> handler = Handler;
                 Type listenerType = typeof(Listener<>).MakeGenericType(csType);
                 listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
             }
-            
         }
 
         void CreateTopicList()
@@ -113,7 +115,7 @@ namespace Iviz.App
             var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
             entries.Clear();
 
-            entries.Add(new TopicEntry());
+            entries.Add(TopicEntry.Empty);
 
             foreach (var entry in newTopics)
             {
@@ -123,17 +125,17 @@ namespace Iviz.App
                 Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
-            
+
             entries.Sort();
         }
 
-        void Handler(IMessage msg)
+        void Handler(SharedMessage<IMessage> msg)
         {
-            string time = $"<b>{GameThread.Now.ToString("HH:mm:ss")}</b> ";
-            messageQueue.Enqueue((time, msg));
+            messageQueue.Enqueue((GameThread.NowFormatted, msg));
             if (messageQueue.Count > MaxMessages)
             {
-                messageQueue.Dequeue();
+                var (_, oldMsg) = messageQueue.Dequeue();
+                oldMsg.Dispose();
             }
 
             queueIsDirty = true;
@@ -155,6 +157,11 @@ namespace Iviz.App
                 var entry = entries[i];
                 CreateListener(entry.Topic, entry.RosMsgType, entry.CsType);
 
+                foreach (var (_, msg) in messageQueue)
+                {
+                    msg.Dispose();
+                }
+
                 messageQueue.Clear();
                 queueIsDirty = false;
                 messageBuffer.Length = 0;
@@ -167,7 +174,7 @@ namespace Iviz.App
         void UpdateOptions()
         {
             CreateTopicList();
-            dialog.Topics.Options = Enumerable.Select(entries, entry => entry.Description);
+            dialog.Topics.Options = entries.Select(entry => entry.Description);
         }
 
         public override void UpdatePanel()
@@ -182,8 +189,9 @@ namespace Iviz.App
             }
             else
             {
-                dialog.Publishers.text = $"{listener.NumPublishers.Active.ToString()}/{listener.NumPublishers.Total.ToString()} publishers";
-                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} mps";
+                dialog.Publishers.text =
+                    $"{listener.NumPublishers.Active.ToString()}/{listener.NumPublishers.Total.ToString()} publishers";
+                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
                 long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
             }
@@ -197,17 +205,18 @@ namespace Iviz.App
             }
 
             messageBuffer.Length = 0;
-
-            var messages = messageQueue.ToArray();
-            foreach ((string time, IMessage msg) in messages)
+            foreach (var (timeFormatted, msg) in messageQueue)
             {
-                string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
-                    new ClampJsonConverter(MaxMessageLength));
-                messageBuffer.Append(time);
-                messageBuffer.Append(msgAsText).AppendLine();
+                using (msg)
+                {
+                    string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
+                        new ClampJsonConverter(MaxMessageLength));
+                    messageBuffer.Append("<b>").Append(timeFormatted).Append("</b> ");
+                    messageBuffer.Append(msgAsText).AppendLine();
+                }
             }
 
-            dialog.Text.text = messageBuffer.ToString();
+            dialog.Text.SetText(messageBuffer);
             queueIsDirty = false;
         }
     }

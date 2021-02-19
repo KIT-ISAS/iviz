@@ -96,7 +96,7 @@ namespace Iviz.Controllers
         bool HasLabelObjectText => labelObjectText != null;
         bool HasParentConnector => parentConnector != null;
 
-        [NotNull] public IEnumerable<TfFrame> Children => children.Values;
+        [NotNull] public Dictionary<string, TfFrame>.ValueCollection Children => children.Values;
 
         [NotNull]
         public string Id

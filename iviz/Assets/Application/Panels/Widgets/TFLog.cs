@@ -4,14 +4,18 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using System;
+using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class TFLog : MonoBehaviour, IWidget
+    public class TfLog : MonoBehaviour, IWidget
     {
+        static TfLog Instance;
+
         [SerializeField] TMP_Text tfText = null;
         [SerializeField] Text tfName = null;
         [SerializeField] GameObject content = null;
@@ -23,19 +27,17 @@ namespace Iviz.App
 
         //[SerializeField] Button lock1PV = null;
         [SerializeField] Text trailText = null;
-
         [SerializeField] Text lockPivotText = null;
 
         //[SerializeField] Text lock1PVText = null;
         [SerializeField] TFLink tfLink = null;
 
-        static TFLog Instance;
+        readonly StringBuilder str = new StringBuilder(65536);
+        FrameNode placeHolder;
+        bool isInitialized;
+        [CanBeNull] TfFrame selectedFrame;
 
         public event Action Close;
-
-        FrameNode placeHolder;
-
-        [CanBeNull] TfFrame selectedFrame;
 
         [CanBeNull]
         public TfFrame SelectedFrame
@@ -87,16 +89,14 @@ namespace Iviz.App
             Initialize();
         }
 
-        bool isAwake;
-
         void Initialize()
         {
-            if (isAwake)
+            if (isInitialized)
             {
                 return;
             }
 
-            isAwake = true;
+            isInitialized = true;
             Instance = this;
 
             tfLink.LinkClicked += OnTfLinkClicked;
@@ -122,60 +122,86 @@ namespace Iviz.App
                     : frame;
         }
 
-        class TfNode
+        readonly struct TfNode : IComparable<TfNode>
         {
-            string Name { get; }
-            List<TfNode> Children { get; }
-            Pose Pose { get; }
-            bool HasTrail { get; }
-            bool Selected { get; }
+            readonly string name;
+            readonly TfNode[] children;
+            readonly Pose pose;
+            readonly bool hasTrail;
+            readonly bool selected;
 
             public TfNode([NotNull] TfFrame frame)
             {
-                Name = frame.Id;
-                Children = new List<TfNode>();
-                Pose = frame.WorldPose;
-                HasTrail = frame.TrailVisible;
-                Selected = (frame == Instance.SelectedFrame);
+                name = frame.Id;
+                pose = frame.WorldPose;
+                hasTrail = frame.TrailVisible;
+                selected = (frame == Instance.SelectedFrame);
+                children = new TfNode[frame.Children.Count];
 
-                var childrenList = frame.Children;
-                foreach (TfFrame child in childrenList)
+                int i = 0;
+                foreach (var childFrame in frame.Children)
                 {
-                    Children.Add(new TfNode(child));
+                    children[i++] = new TfNode(childFrame);
                 }
 
-                Children.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
+                Array.Sort(children);
             }
 
             void Write([NotNull] StringBuilder str, int level)
             {
-                string tabs = new string(' ', level * 4);
+                str.Append(' ', level * 4);
+                str.Append("<link=").Append(name).Append("><u><font=Bold>");
 
-                Vector3 position = Pose.position.Unity2Ros();
+                Vector3 position = pose.position.Unity2Ros();
                 string x = position.x.ToString("#,0.###", UnityUtils.Culture);
                 string y = position.y.ToString("#,0.###", UnityUtils.Culture);
                 string z = position.z.ToString("#,0.###", UnityUtils.Culture);
 
-                string decoratedName = Name;
-                if (HasTrail)
+                if (selected)
                 {
-                    decoratedName = $"~{decoratedName}~";
+                    str.Append("<color=blue>");
+                    if (hasTrail)
+                    {
+                        str.Append("~");
+                    }
+
+                    str.Append(name);
+                    if (hasTrail)
+                    {
+                        str.Append("~");
+                    }
+
+                    str.Append("</color>");
+                }
+                else if (name == TfListener.FixedFrameId)
+                {
+                    str.Append("<color=green>");
+                    if (hasTrail)
+                    {
+                        str.Append("~");
+                    }
+
+                    str.Append(name);
+                    if (hasTrail)
+                    {
+                        str.Append("~");
+                    }
+
+                    str.Append("</color>");
+                }
+                else
+                {
+                    str.Append(name);
                 }
 
-                if (Selected)
-                {
-                    decoratedName = $"<color=blue>{decoratedName}</color>";
-                }
-                else if (Name == TfListener.FixedFrameId)
-                {
-                    decoratedName = $"<color=green>{decoratedName}</color>";
-                }
+                str.Append("</font></u> [")
+                    .Append(x).Append(", ")
+                    .Append(y).Append(", ")
+                    .Append(z)
+                    .Append("]</link>")
+                    .AppendLine();
 
-
-                str.Append(tabs)
-                    .AppendLine($"<link={Name}><u><font=Bold>{decoratedName}</font></u> [{x}, {y}, {z}]</link>");
-
-                foreach (TfNode node in Children)
+                foreach (TfNode node in children)
                 {
                     node.Write(str, level + 1);
                 }
@@ -183,31 +209,29 @@ namespace Iviz.App
 
             public void Write([NotNull] StringBuilder str)
             {
-                foreach (TfNode node in Children)
+                foreach (TfNode node in children)
                 {
                     node.Write(str, 0);
                 }
+            }
+
+            public int CompareTo(TfNode other)
+            {
+                return string.CompareOrdinal(name, other.name);
             }
         }
 
         public void Flush()
         {
-            /*
-            if (Settings.IsHololens)
-            {
-                return;
-            }
-            */
-
             Initialize();
 
-            TfNode root = new TfNode(TfListener.OriginFrame);
-
-            StringBuilder str = new StringBuilder();
-            root.Write(str);
+            str.Length = 0;
+            
+            new TfNode(TfListener.OriginFrame).Write(str);
+            
             str.AppendLine().AppendLine();
 
-            tfText.text = str.ToString();
+            tfText.SetText(str);
 
             RectTransform cTransform = (RectTransform) content.transform;
             cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);

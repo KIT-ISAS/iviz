@@ -22,7 +22,7 @@ namespace Iviz.App
             Back
         }
 
-        public class Entry
+        public sealed class Entry
         {
             [NotNull] readonly string title;
             public uint Id { get; }
@@ -61,7 +61,7 @@ namespace Iviz.App
             }
         }
 
-        public class EntryDescription
+        public sealed class EntryDescription
         {
             public Entry LinkedEntry { get; }
             public string Title { get; }

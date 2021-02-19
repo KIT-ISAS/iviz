@@ -761,7 +761,7 @@ namespace Iviz.App
         {
             //Debug.Log(GC.GetTotalMemory(false) / (1024 * 1024);
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            bottomTime.text = $"Mem {memBytesKb:N0}M";
+            bottomTime.text = $"Mem {memBytesKb.ToString()}M";
 
             //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
 
@@ -771,7 +771,7 @@ namespace Iviz.App
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             long downKb = downB / 1000;
             long upKb = upB / 1000;
-            bottomBandwidth.text = $"↓{downKb:N0}kB/s ↑{upKb:N0}kB/s";
+            bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
 
             var state = SystemInfo.batteryStatus;
             switch (SystemInfo.batteryLevel)
@@ -817,7 +817,7 @@ namespace Iviz.App
             menuDialog.Set(menuEntries, unityPositionHint, callback);
         }
 
-        class ModuleListButtons
+        sealed class ModuleListButtons
         {
             [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
             readonly GameObject contentObject;

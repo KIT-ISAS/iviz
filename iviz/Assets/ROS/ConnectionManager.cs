@@ -17,7 +17,7 @@ namespace Iviz.Ros
         Connected
     }
 
-    public class ConnectionManager : MonoBehaviour
+    public sealed class ConnectionManager : MonoBehaviour
     {
         static ConnectionManager instance;
         static RoslibConnection connection;

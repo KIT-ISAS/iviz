@@ -15,7 +15,7 @@ namespace Iviz.App
     public sealed class MarkerDialogData : DialogData
     {
         [NotNull] readonly MarkerDialogContents panel;
-        readonly StringBuilder description = new StringBuilder();
+        readonly StringBuilder description = new StringBuilder(65536);
         public override IDialogPanelContents Panel => panel;
 
         public MarkerDialogData()
@@ -39,9 +39,7 @@ namespace Iviz.App
                 Listener.Reset();
             };
 
-            description.Length = 0;
-            Listener.GenerateLog(description);
-            panel.Text.text = description.ToString();
+            UpdatePanel();
         }
 
         public override void UpdatePanel()
@@ -53,7 +51,7 @@ namespace Iviz.App
 
             description.Length = 0;
             Listener.GenerateLog(description);
-            panel.Text.text = description.ToString();
+            panel.Text.SetText(description);
         }
 
         

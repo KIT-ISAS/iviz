@@ -31,6 +31,9 @@ namespace Iviz.Core
 
         public static DateTime Now { get; private set; } = DateTime.Now;
 
+        [CanBeNull] static string nowFormatted;
+        [NotNull] public static string NowFormatted => nowFormatted ?? (nowFormatted = Now.ToString("HH:mm:ss"));
+
         void Awake()
         {
             Instance = this;
@@ -49,6 +52,7 @@ namespace Iviz.Core
             }
 
             Now = DateTime.Now;
+            nowFormatted = null;
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
             {

@@ -19,7 +19,7 @@ namespace Iviz.Controllers
             new Dictionary<string, InteractiveMarkerControlObject>();
 
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
-        readonly StringBuilder description = new StringBuilder();
+        readonly StringBuilder description = new StringBuilder(250);
         int numWarnings;
         int numErrors;
 

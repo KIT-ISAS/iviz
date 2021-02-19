@@ -610,7 +610,6 @@ namespace Iviz.Displays
                 return null;
             }
 
-            Debug.Log(texture.mipmapCount);
             texture.Compress(true);
 
             texture.name = uriString;
