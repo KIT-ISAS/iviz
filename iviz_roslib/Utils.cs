@@ -310,7 +310,7 @@ namespace Iviz.Roslib
         }
     }
 
-    internal sealed class ResizableRent<T> : IDisposable where T : struct
+    internal sealed class ResizableRent<T> : IDisposable where T : unmanaged
     {
         bool disposed;
         Rent<T> buffer;
