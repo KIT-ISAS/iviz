@@ -177,6 +177,14 @@ namespace Iviz.Msgs
             }
         }
 
+        public static void DisposeElements<T>(this SharedRef<T> tt) where T : IDisposable
+        {
+            foreach (var t in tt)
+            {
+                t.Dispose();
+            }
+        }
+
         public static void DisposeElements<T>(this T[] tt) where T : IDisposable
         {
         }

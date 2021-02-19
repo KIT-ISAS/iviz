@@ -61,6 +61,8 @@ namespace Iviz.Msgs
             reference.Dispose();
             cd.Dispose();
         }
+        
+        public RentEnumerator<T> GetEnumerator() => reference.GetEnumerator();
 
         public override string ToString()
         {

@@ -23,6 +23,7 @@ namespace Iviz.Msgs
         int length;
         T[]? array;
         bool ownArray;
+        bool clearArray;
 
         /// <summary>
         /// The length of the array. It is less or equal to the size of <see cref="Array"/>.
@@ -78,7 +79,8 @@ namespace Iviz.Msgs
         /// Rents a new array.
         /// </summary>
         /// <param name="length">The size of the rented array.</param>
-        public UniqueRef(uint length)
+        /// <param name="clearArray">Whether the array pool should clear the array after disposing.</param>
+        public UniqueRef(uint length, bool clearArray = false)
         {
             switch (length)
             {
@@ -91,8 +93,13 @@ namespace Iviz.Msgs
                     array = Pool.Rent((int) length);
                     this.length = (int) length;
                     ownArray = true;
+                    this.clearArray = clearArray;
                     break;
             }
+        }
+
+        public UniqueRef(int length, bool clearArray = false) : this((uint) length, clearArray)
+        {
         }
 
         /// <summary>
@@ -113,7 +120,7 @@ namespace Iviz.Msgs
                 return;
             }
 
-            Pool.Return(array, !typeof(T).IsValueType);
+            Pool.Return(array, clearArray || !typeof(T).IsValueType);
             array = null;
             ownArray = false;
             length = 0;

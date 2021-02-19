@@ -14,17 +14,21 @@ namespace Iviz.Msgs
         readonly CountdownEvent cd;
         bool disposed;
 
+        SharedMessage(T otherMessage, CountdownEvent otherCd)
+        {
+            Message = otherMessage;
+            cd = otherCd;
+            cd.AddCount();
+        }
+        
         public SharedMessage(T t)
         {
             Message = t;
             cd = new CountdownEvent(1);
         }
 
-        SharedMessage(SharedMessage<T> other)
+        SharedMessage(SharedMessage<T> other) : this(other.Message, other.cd)
         {
-            Message = other.Message;
-            cd = other.cd;
-            cd.AddCount();
         }
 
         public SharedMessage<T> Share()
@@ -32,6 +36,11 @@ namespace Iviz.Msgs
             return new(this);
         }
 
+        public SharedMessage<IMessage> ShareMsg()
+        {
+            return new (Message, cd);
+        }
+        
         public void Dispose()
         {
             if (disposed)

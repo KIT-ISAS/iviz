@@ -12,7 +12,7 @@ namespace Iviz.Msgs
     /// then you should probably use <see cref="UniqueRef{T}"/> or <see cref="SharedRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public readonly struct Rent<T> : IDisposable where T : struct
+    public readonly struct Rent<T> : IDisposable where T : unmanaged
     {
         static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
 
@@ -44,7 +44,7 @@ namespace Iviz.Msgs
         {
             if (Length > 0)
             {
-                Pool.Return(Array, !typeof(T).IsValueType);
+                Pool.Return(Array);
             }
         }
 
