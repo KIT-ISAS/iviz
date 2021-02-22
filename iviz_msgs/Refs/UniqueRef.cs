@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Iviz.Msgs
 {
@@ -17,13 +18,14 @@ namespace Iviz.Msgs
     public sealed class UniqueRef<T> : IDisposable, IReadOnlyList<T>
     {
         static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
+        static readonly bool TypeNeedsClear = !typeof(T).IsValueType;
 
         public static readonly UniqueRef<T> Empty = new();
 
         int length;
         T[]? array;
         bool ownArray;
-        bool clearArray;
+        readonly bool clearArray;
 
         /// <summary>
         /// The length of the array. It is less or equal to the size of <see cref="Array"/>.
@@ -93,7 +95,7 @@ namespace Iviz.Msgs
                     array = Pool.Rent((int) length);
                     this.length = (int) length;
                     ownArray = true;
-                    this.clearArray = clearArray;
+                    this.clearArray = clearArray | TypeNeedsClear;
                     break;
             }
         }
@@ -120,7 +122,7 @@ namespace Iviz.Msgs
                 return;
             }
 
-            Pool.Return(array, clearArray || !typeof(T).IsValueType);
+            Pool.Return(array, clearArray);
             array = null;
             ownArray = false;
             length = 0;
@@ -148,7 +150,6 @@ namespace Iviz.Msgs
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public RentEnumerator<T> GetEnumerator() => new(array!, length);
-
         public T this[int index]
         {
             get
@@ -189,5 +190,48 @@ namespace Iviz.Msgs
         }
 
         int IReadOnlyCollection<T>.Count => Length;
+    }
+
+    public sealed class DisposableRef<T> : IDisposable, IReadOnlyList<T> where T : IDisposable
+    {
+        readonly UniqueRef<T> uRef;
+        public DisposableRef(UniqueRef<T> uRef)
+        {
+            this.uRef = uRef;
+        }
+        
+        public T this[int index]
+        {
+            get => uRef[index];
+            set => uRef[index] = value;
+        }
+
+        public int Length => uRef.Length;
+        int IReadOnlyCollection<T>.Count => uRef.Length;
+
+        public void Dispose()
+        {
+            foreach (var child in uRef)
+            {
+                child.Dispose();
+            }
+            
+            uRef.Dispose();
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public RentEnumerator<T> GetEnumerator()
+        {
+            return uRef.GetEnumerator();
+        }
     }
 }

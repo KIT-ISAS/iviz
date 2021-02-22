@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Iviz.Msgs.SensorMsgs;
 
 namespace Iviz.Msgs
@@ -8,12 +9,16 @@ namespace Iviz.Msgs
     /// <summary>
     /// A wrapper around a <see cref="UniqueRef{T}"/> of bytes that represents a string.
     /// It contains functions to cast this ref to a string or vice-versa (assuming a UTF-8 encoding).
-    /// It is assumed that the contents of <see cref="Array"/> are read-only and will not be changed
-    /// after construction. If a StringRef is cast to a string, the resulting string will be cached
-    /// and reused in future casts. 
+    /// It is assumed that the contents of <see cref="Array"/> will not be changed after the
+    /// first cast to a string, in which case the resulting string will be
+    /// cached and reused in future casts. 
     /// </summary>
     public sealed class StringRef : IDisposable, IReadOnlyList<byte>
     {
+        public static long NumActive = 0;
+        public static long NumDisposed = 0;
+        public static long NumConverted = 0;
+        
         public static readonly StringRef Empty = new();
 
         readonly UniqueRef<byte> uRef;
@@ -50,6 +55,10 @@ namespace Iviz.Msgs
         internal StringRef(uint count)
         {
             uRef = new UniqueRef<byte>(count);
+            if (count != 0)
+            {
+                Interlocked.Increment(ref NumActive);
+            }
         }
 
         public byte this[int index]
@@ -62,6 +71,16 @@ namespace Iviz.Msgs
 
         public void Dispose()
         {
+            if (uRef.Length != 0)
+            {
+                Interlocked.Increment(ref NumDisposed);
+            }
+
+            if (cachedString != null)
+            {
+                Interlocked.Increment(ref NumConverted);
+            }
+
             uRef.Dispose();
             cachedString = null;
         }
@@ -72,7 +91,7 @@ namespace Iviz.Msgs
 
         public StringRef Release() => new(this);
         
-        public static implicit operator StringRef(string s)
+        public static implicit operator StringRef(string? s)
         {
             if (s == null || s.Length == 0)
             {
@@ -85,7 +104,7 @@ namespace Iviz.Msgs
             return array;
         }
 
-        public static implicit operator string(StringRef s)
+        public static implicit operator string(StringRef? s)
         {
             return s?.ToString() ?? "";
         }
