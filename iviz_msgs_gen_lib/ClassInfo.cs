@@ -184,9 +184,9 @@ namespace Iviz.MsgsGen
             RosPackage = package;
             CsPackage = MsgParser.CsIfiy(package);
             Name = messageName;
-            fullMessageText = messageDefinition;
+            fullMessageText = messageDefinition.Replace("\r\n", "\n");
 
-            var lines = fullMessageText.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var lines = fullMessageText.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
             elements = MsgParser.ParseFile(lines, Name).ToArray();
             Elements = new ReadOnlyCollection<IElement>(elements);
             variables = elements.OfType<VariableElement>().ToArray();
