@@ -91,7 +91,7 @@ namespace Iviz.XmlRpc
             return ProcessResponse(response);
         }
 
-        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs, CancellationToken token)
+        internal async ValueTask<string> RequestAsync(string msgIn, int timeoutInMs, CancellationToken token)
         {
             string response;
             using (Stream stream = client.GetStream())

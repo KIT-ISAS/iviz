@@ -13,7 +13,7 @@ namespace Iviz.Roslib
     {
         /// <summary>
         /// A cancellation token that gets canceled when the subscriber is disposed.
-        /// Used for external wrappers like <see cref="RosSubscriberChannelReader{T}"/>. 
+        /// Used for external wrappers like <see cref="RosChannelReader{T}"/>. 
         /// </summary>
         public CancellationToken CancellationToken { get; } 
         
@@ -82,7 +82,7 @@ namespace Iviz.Roslib
         /// <param name="id">The id to be unregistered.</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>Whether the id belonged to the subscriber.</returns>        
-        public Task<bool> UnsubscribeAsync(string id, CancellationToken token = default);
+        public ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default);
 
         internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
 

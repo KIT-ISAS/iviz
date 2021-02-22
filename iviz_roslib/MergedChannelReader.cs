@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-
+using Nito.AsyncEx;
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -59,7 +59,7 @@ namespace Iviz.Roslib
 
             for (int i = 0; i < sources.Length; i++)
             {
-                tasks[i] = sources[i].WaitToReadAsync(token);
+                tasks[i] = sources[i].WaitToReadAsync(token).AsTask();
             }
 
             while (true)
@@ -77,7 +77,7 @@ namespace Iviz.Roslib
                 }
 
                 yield return sources[readyTaskId].Read(token);
-                tasks[readyTaskId] = sources[readyTaskId].WaitToReadAsync(token);
+                tasks[readyTaskId] = sources[readyTaskId].WaitToReadAsync(token).AsTask();
             }
         }
 
@@ -102,12 +102,12 @@ namespace Iviz.Roslib
             Task<bool>[] tasks = new Task<bool>[sources.Length];
             for (int i = 0; i < sources.Length; i++)
             {
-                tasks[i] = sources[i].WaitToReadAsync(token);
+                tasks[i] = sources[i].WaitToReadAsync(token).AsTask();
             }
 
             while (true)
             {
-                Task<bool> readyTask = await Task.WhenAny(tasks);
+                Task<bool> readyTask = await tasks.WhenAny(token);
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     if (tasks[i] != readyTask)
@@ -121,7 +121,7 @@ namespace Iviz.Roslib
                     }
 
                     yield return await sources[i].ReadAsync(token);
-                    tasks[i] = sources[i].WaitToReadAsync(token);
+                    tasks[i] = sources[i].WaitToReadAsync(token).AsTask();
                 }
             }
         }

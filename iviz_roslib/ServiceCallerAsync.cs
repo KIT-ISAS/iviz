@@ -77,7 +77,7 @@ namespace Iviz.Roslib
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
-                throw new RosRpcException(index != -1
+                throw new RosHandshakeException(index != -1
                     ? $"Failed handshake: {responses[0].Substring(index + 1)}"
                     : $"Failed handshake: {responses[0]}");
             }
@@ -93,7 +93,7 @@ namespace Iviz.Roslib
             await ProcessHandshakeAsync(tcpClient.GetStream(), persistent, token);
         }
 
-        static async Task<Rent<byte>> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
+        static async ValueTask<Rent<byte>> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
         {
             byte[] lengthBuffer = new byte[4];
             if (!await stream.ReadChunkAsync(lengthBuffer, 4, token))

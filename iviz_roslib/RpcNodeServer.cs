@@ -303,7 +303,7 @@ namespace Iviz.Roslib.XmlRpc
 
             return endpoint?.Hostname == null
                 ? new Arg[] {StatusCode.Error, "Internal error [duplicate request]", 0}
-                : OkResponse(new Arg[] {"TCPROS", endpoint.Hostname, endpoint.Port});
+                : OkResponse(new Arg[] {"TCPROS", endpoint.Value.Hostname, endpoint.Value.Port});
         }
         
         Arg[] SystemMulticall(object[] args)

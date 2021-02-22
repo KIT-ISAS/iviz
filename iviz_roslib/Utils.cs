@@ -170,7 +170,7 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
+        internal static async ValueTask<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
             CancellationToken token)
         {
             int numRead = 0;
@@ -186,7 +186,7 @@ namespace Iviz.Roslib
             while (numRead < toRead)
             {
                 Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
-                Task resultTask = await Task.WhenAny(readTask, tokenTask).Caf();
+                Task resultTask = await (readTask, tokenTask).WhenAny().Caf();
                 if (resultTask == tokenTask)
                 {
                     token.ThrowIfCanceled(tokenTask);
@@ -217,7 +217,7 @@ namespace Iviz.Roslib
             using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
 
             Task writeTask = stream.WriteAsync(buffer, 0, count, token);
-            Task resultTask = await Task.WhenAny(writeTask, tokenTask).Caf();
+            Task resultTask = await (writeTask, tokenTask).WhenAny().Caf();
             if (resultTask == tokenTask)
             {
                 token.ThrowIfCanceled(tokenTask);
@@ -244,7 +244,6 @@ namespace Iviz.Roslib
 
             await stream.WriteChunkAsync(array.Array, array.Length, token).Caf();
         }
-
 
         /// <summary>
         ///     A string hash that does not change every run unlike GetHashCode
@@ -328,7 +327,7 @@ namespace Iviz.Roslib
             {
                 throw new ObjectDisposedException("Dispose() has already been called on this object.");
             }
-            
+
             if (buffer.Array.Length >= size)
             {
                 return;

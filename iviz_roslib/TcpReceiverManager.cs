@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,11 +48,11 @@ namespace Iviz.Roslib
         public int GetTotalActiveConnections(int timeoutInMs)
         {
             using CancellationTokenSource tokenSource = new(timeoutInMs);
-            return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token), tokenSource.Token)
+            return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token).AsTask(), tokenSource.Token)
                 .WaitNoThrow(this);
         }
 
-        public async Task<int> GetTotalActiveConnectionsAsync(CancellationToken token)
+        public async ValueTask<int> GetTotalActiveConnectionsAsync(CancellationToken token)
         {
             int numActiveConnections = NumActiveConnections;
             if (!NeedsCleanup())
@@ -81,7 +84,7 @@ namespace Iviz.Roslib
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
-        internal async Task<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri, CancellationToken token)
+        internal async ValueTask<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri, CancellationToken token)
         {
             NodeClient.RequestTopicResponse response;
             try
@@ -130,7 +133,7 @@ namespace Iviz.Roslib
             subscriber.MessageCallback(msg, receiver);
         }
 
-        async Task<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
+        async ValueTask<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
         {
             try
             {
@@ -176,10 +179,10 @@ namespace Iviz.Roslib
                     .ToArray();
 
                 var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync());
-                await Task.WhenAll(deleteTasks).AwaitNoThrow(this).Caf();
+                await deleteTasks.WhenAll().AwaitNoThrow(this).Caf();
 
-                var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token));
-                bool[]? results = await Task.WhenAll(addTasks).AwaitNoThrow(this).Caf();
+                var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
+                bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this).Caf();
                 numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync();
             }
 
@@ -194,7 +197,7 @@ namespace Iviz.Roslib
             return connectionsByUri.Values.Any(receiver => !receiver.IsAlive);
         }
 
-        async Task<bool> CleanupAsync()
+        async ValueTask<bool> CleanupAsync()
         {
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             if (toDelete.Length == 0)
@@ -209,7 +212,7 @@ namespace Iviz.Roslib
                 return receiver.DisposeAsync();
             });
 
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this).Caf();
 
             return true;
         }
@@ -223,7 +226,7 @@ namespace Iviz.Roslib
         {
             using (await mutex.LockAsync())
             {
-                await Task.WhenAll(connectionsByUri.Values.Select(receiver => receiver.DisposeAsync()));
+                await connectionsByUri.Values.Select(receiver => receiver.DisposeAsync()).WhenAll();
                 connectionsByUri.Clear();
                 subscriber.RaiseNumPublishersChanged();
             }

@@ -11,7 +11,7 @@ namespace Iviz.Roslib
     ///     Manager for a ROS publisher.
     /// </summary>
     /// <typeparam name="T">Topic type</typeparam>
-    public class RosPublisher<T> : IRosPublisher<T> where T : IMessage
+    public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     {
         readonly RosClient client;
         readonly List<string> ids = new();
@@ -97,7 +97,7 @@ namespace Iviz.Roslib
             manager.Publish((T) message);
         }
 
-        Task<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        ValueTask<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -131,7 +131,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public Task<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public async ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -148,18 +148,18 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return Task.FromResult(true);
+                    return true;
                 case RosPublishPolicy.WaitUntilSent:
-                    return manager.PublishAndWaitAsync(message, linkedToken.Token);
+                    return await manager.PublishAndWaitAsync(message, linkedToken.Token);
                 default:
-                    return Task.FromResult(false);
+                    return false;
             }
         }
 
         Endpoint? IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
             Endpoint? localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
-            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Port);
+            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Value.Port);
         }
 
         void IDisposable.Dispose()
@@ -223,7 +223,7 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        public async Task<bool> UnadvertiseAsync(string id, CancellationToken token = default)
+        public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
         {
             if (!IsAlive)
             {
@@ -244,7 +244,7 @@ namespace Iviz.Roslib
         {
             Task disposeTask = DisposeAsync().AwaitNoThrow(this);
             Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-            await Task.WhenAll(disposeTask, unadvertiseTask).Caf();            
+            await (disposeTask, unadvertiseTask).WhenAll().Caf();            
         }
 
         public bool ContainsId(string id)

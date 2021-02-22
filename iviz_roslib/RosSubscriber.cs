@@ -11,7 +11,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Manager for a subscription to a ROS topic.
     /// </summary>
-    public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
+    public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         static readonly Action<T, IRosTcpReceiver>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver>>();
 
@@ -41,7 +41,7 @@ namespace Iviz.Roslib
             return manager.GetTotalActiveConnections(timeoutInMs);
         }
 
-        public Task<int> GetTotalActivePublishersAsync(CancellationToken token = default)
+        public ValueTask<int> GetTotalActivePublishersAsync(CancellationToken token = default)
         {
             return manager.GetTotalActiveConnectionsAsync(token);
         }
@@ -258,7 +258,7 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        public async Task<bool> UnsubscribeAsync(string id, CancellationToken token = default)
+        public async ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default)
         {
             if (id is null)
             {
@@ -280,7 +280,7 @@ namespace Iviz.Roslib
                 callbacks = EmptyCallback;
                 Task disposeTask = DisposeAsync().AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
-                await Task.WhenAll(disposeTask, unsubscribeTask).Caf();
+                await (disposeTask, unsubscribeTask).WhenAll().Caf();
             }
 
             return removed;

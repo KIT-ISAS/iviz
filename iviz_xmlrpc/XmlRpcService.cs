@@ -250,7 +250,7 @@ namespace Iviz.XmlRpc
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
-        public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, Arg[] args,
+        public static async ValueTask<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, Arg[] args,
             int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (remoteUri is null)

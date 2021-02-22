@@ -66,7 +66,7 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public Task<bool> PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public ValueTask<bool> PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
@@ -82,7 +82,7 @@ namespace Iviz.Roslib
         /// <param name="id">The id to be unregistered.</param>
         /// <param name="token">An optional cancellation token.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>
-        public Task<bool> UnadvertiseAsync(string id, CancellationToken token = default);
+        public ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default);
 
         /// <summary>
         /// Generates a new advertisement id. Use this string for Unadvertise().
@@ -155,7 +155,7 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public Task<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
     }
 
 }

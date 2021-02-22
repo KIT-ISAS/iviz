@@ -29,7 +29,7 @@ namespace Iviz.Roslib
         string Topic { get; }
         string RemoteCallerId { get; }
         Endpoint? RemoteEndpoint { get; }
-        Endpoint? Endpoint { get; }
+        Endpoint Endpoint { get; }
         IReadOnlyList<string>? TcpHeader { get; }
         PublisherSenderState State { get; }
         bool IsAlive { get; }
@@ -137,7 +137,7 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        async Task<Rent<byte>> ReceivePacket(NetworkStream stream)
+        async ValueTask<Rent<byte>> ReceivePacket(NetworkStream stream)
         {
             if (!await stream.ReadChunkAsync(lengthBuffer, 4, runningTs.Token).Caf())
             {
@@ -245,14 +245,14 @@ namespace Iviz.Roslib
 
             if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
             {
-                if (receivedMd5Sum == "*")
-                {
-                    // OK
-                }
-                else
+                if (receivedMd5Sum != "*")
                 {
                     return
                         $"error=Expected md5 '{topicInfo.Md5Sum}' but partner provided '{receivedMd5Sum}', closing connection";
+                }
+                else
+                {
+                    // OK
                 }
             }
 
@@ -278,7 +278,7 @@ namespace Iviz.Roslib
 
             if (errorMessage != null)
             {
-                throw new RosRpcException("Failed handshake: " + errorMessage);
+                throw new RosHandshakeException($"Failed handshake: {errorMessage}");
             }
         }
 
@@ -372,6 +372,12 @@ namespace Iviz.Roslib
             }
         }
 
+        RosQueueException CreateQueueException(Exception e) =>
+            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
+
+        RosQueueOverflowException CreateOverflowException() =>
+            new($"Message could not be sent to node '{RemoteCallerId}'", this);
+
         async Task ProcessLoop(NetworkStream stream)
         {
             using ResizableRent<byte> writeBuffer = new(4);
@@ -415,8 +421,7 @@ namespace Iviz.Roslib
                 {
                     var (msg, _, msgSignal) = tmpQueue[i];
                     msg.Dispose();
-                    msgSignal?.TrySetException(
-                        new RosQueueOverflowException($"Message could not be sent to node '{RemoteCallerId}'", this));
+                    msgSignal?.TrySetException(CreateOverflowException());
                 }
 
                 for (int i = startIndex; i < tmpQueue.Count; i++)
@@ -441,14 +446,11 @@ namespace Iviz.Roslib
                     }
                     catch (Exception e)
                     {
-                        Exception queueException = new RosQueueException(
-                            $"An unexpected exception was thrown while sending to node '{RemoteCallerId}'",
-                            e, this);
                         for (int j = i; j < tmpQueue.Count; j++)
                         {
                             var (msg, _, msgSignal) = tmpQueue[j];
                             msg.Dispose();
-                            msgSignal?.TrySetException(queueException);
+                            msgSignal?.TrySetException(CreateQueueException(e));
                         }
 
                         throw;
@@ -465,7 +467,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Enqueue((message.Share(), null));
+            messageQueue.Enqueue((message, null));
             signal.Release();
         }
 
@@ -478,7 +480,7 @@ namespace Iviz.Roslib
             }
 
             TaskCompletionSource msgSignal = new();
-            messageQueue.Enqueue((message.Share(), msgSignal));
+            messageQueue.Enqueue((message, msgSignal));
             signal.Release();
 
             using var registration = token.Register(() => msgSignal.TrySetCanceled(token));
@@ -534,7 +536,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSender '{Topic}' :{Endpoint?.Port ?? -1} >>'{RemoteCallerId}']";
+            return $"[TcpSender '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
         }
     }
 }

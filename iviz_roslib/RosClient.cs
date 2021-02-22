@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -25,18 +26,18 @@ namespace Iviz.Roslib
         string CallerId { get; }
         string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
 
-        Task<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic, CancellationToken token = default)
+        ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic, CancellationToken token = default)
             where T : IMessage;
 
         string Advertise(string topic, Type msgType, out IRosPublisher publisher);
 
-        Task<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType,
+        ValueTask<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType,
             CancellationToken token = default);
 
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
             bool requestNoDelay = true) where T : IMessage, IDeserializable<T>, new();
 
-        Task<(string id, IRosSubscriber<T> subscriber)>
+        ValueTask<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
                 CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new();
@@ -44,7 +45,7 @@ namespace Iviz.Roslib
         bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
             where T : IService, new();
 
-        Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
+        ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
             CancellationToken token = default) where T : IService, new();
 
         void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
@@ -314,7 +315,7 @@ namespace Iviz.Roslib
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
         /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
         /// <param name="token">An optional cancellation token.</param>        
-        public static async Task<RosClient> CreateAsync(Uri? masterUri = null, string? callerId = null,
+        public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? callerId = null,
             Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
             CancellationToken token = default)
         {
@@ -603,18 +604,18 @@ namespace Iviz.Roslib
             tasks.AddRange(
                 state.Subscribers
                     .Where(tuple => tuple.Members.Contains(CallerId))
-                    .Select(tuple => (Task) RosMasterApi.UnregisterSubscriberAsync(tuple.Topic, token))
+                    .Select(tuple => RosMasterApi.UnregisterSubscriberAsync(tuple.Topic, token).AsTask())
             );
 
             tasks.AddRange(
                 state.Publishers
                     .Where(tuple => tuple.Members.Contains(CallerId))
-                    .Select(tuple => RosMasterApi.UnregisterPublisherAsync(tuple.Topic, token))
+                    .Select(tuple => RosMasterApi.UnregisterPublisherAsync(tuple.Topic, token).AsTask())
             );
 
             try
             {
-                await Task.WhenAll(tasks).Caf();
+                await tasks.WhenAll().Caf();
             }
             catch (Exception e)
             {
@@ -694,7 +695,7 @@ namespace Iviz.Roslib
             return (id, subscription);
         }
 
-        async Task<(string id, RosSubscriber<T> subscriber)>
+        async ValueTask<(string id, RosSubscriber<T> subscriber)>
             CreateSubscriberAsync<T>(string topic, bool requestNoDelay, Action<T> firstCallback,
                 CancellationToken token)
             where T : IMessage, IDeserializable<T>, new()
@@ -855,7 +856,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>A pair containing a token that can be used to unsubscribe from this topic, and the subscriber object.</returns>
-        public async Task<(string id, RosSubscriber<T> subscriber)>
+        public async ValueTask<(string id, RosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
                 CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new()
@@ -877,7 +878,7 @@ namespace Iviz.Roslib
             return (subscriber.Subscribe(callback), subscriber);
         }
 
-        async Task<(string id, IRosSubscriber<T> subscriber)>
+        async ValueTask<(string id, IRosSubscriber<T> subscriber)>
             IRosClient.SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay, CancellationToken token)
         {
             return await SubscribeAsync(topic, callback, requestNoDelay, token);
@@ -904,7 +905,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="topicId">Token returned by Subscribe().</param>
         /// <returns>Whether the unsubscription succeeded.</returns>
-        public async Task<bool> UnsubscribeAsync(string topicId)
+        public async ValueTask<bool> UnsubscribeAsync(string topicId)
         {
             if (topicId is null)
             {
@@ -1002,7 +1003,7 @@ namespace Iviz.Roslib
             throw new RosRpcException($"Error registering publisher: {response.StatusMessage}");
         }
 
-        async Task<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token) where T : IMessage
+        async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token) where T : IMessage
         {
             TopicInfo<T> topicInfo = new(CallerId, topic);
             RosPublisher<T> publisher = new(this, topicInfo)
@@ -1077,7 +1078,7 @@ namespace Iviz.Roslib
         /// <param name="topic">Name of the topic.</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>A pair containing a token that can be used to unadvertise from this publisher, and the publisher object.</returns>
-        public async Task<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
+        public async ValueTask<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
             CancellationToken token = default) where T : IMessage
         {
             string resolvedTopic = ResolveResourceName(topic);
@@ -1097,7 +1098,7 @@ namespace Iviz.Roslib
             return (publisher.Advertise(), publisher);
         }
 
-        async Task<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
+        async ValueTask<(string id, IRosPublisher<T> publisher)> IRosClient.AdvertiseAsync<T>(string topic,
             CancellationToken token)
         {
             return await AdvertiseAsync<T>(topic, token);
@@ -1140,7 +1141,7 @@ namespace Iviz.Roslib
             return publisher.Advertise();
         }
 
-        async Task<(string id, IRosPublisher publisher)> IRosClient.AdvertiseAsync(string topic, Type msgType,
+        async ValueTask<(string id, IRosPublisher publisher)> IRosClient.AdvertiseAsync(string topic, Type msgType,
             CancellationToken token)
         {
             string resolvedTopic = ResolveResourceName(topic);
@@ -1168,7 +1169,7 @@ namespace Iviz.Roslib
                     throw new RosInvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
                 }
 
-                Task<IRosPublisher> task = (Task<IRosPublisher>) result;
+                ValueTask<IRosPublisher> task = (ValueTask<IRosPublisher>) result;
                 publisher = await task;
             }
             else
@@ -1208,7 +1209,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="topicId">Token returned by Advertise().</param>
         /// <returns>Whether the unadvertisement succeeded.</returns>
-        public async Task<bool> UnadvertiseAsync(string topicId)
+        public async ValueTask<bool> UnadvertiseAsync(string topicId)
         {
             if (topicId is null)
             {
@@ -1220,10 +1221,10 @@ namespace Iviz.Roslib
             return publisher != null && await publisher.UnadvertiseAsync(topicId).Caf();
         }
 
-        internal Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
+        internal async Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            return RosMasterApi.UnregisterPublisherAsync(publisher.Topic, token);
+            await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, token);
         }
 
         /// <summary>
@@ -1261,14 +1262,14 @@ namespace Iviz.Roslib
         public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
         {
             var response = RosMasterApi.GetPublishedTopics();
-            if (response.IsValid)
+            if (!response.IsValid)
             {
-                return response.Topics
-                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-                    .ToArray().AsReadOnly();
+                throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
             }
 
-            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+            return response.Topics
+                .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                .ToArray().AsReadOnly();
         }
 
         /// <summary>
@@ -1276,18 +1277,19 @@ namespace Iviz.Roslib
         /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
+        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
             CancellationToken token = default)
         {
             var response = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
-            if (response.IsValid)
+            if (!response.IsValid)
             {
-                return response.Topics
-                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-                    .ToArray().AsReadOnly();
+                throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
             }
 
-            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+            return response.Topics
+                .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                .ToArray().AsReadOnly();
+
         }
 
         /// <summary>
@@ -1313,18 +1315,19 @@ namespace Iviz.Roslib
         /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
         /// </summary>
         /// <returns>List of topic names and message types.</returns>
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
+        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
             CancellationToken token = default)
         {
             var response = await RosMasterApi.GetTopicTypesAsync(token: token).Caf();
-            if (response.IsValid)
+            if (!response.IsValid)
             {
-                return response.Topics
-                    .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-                    .ToArray().AsReadOnly();
+                throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
             }
 
-            throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
+            return response.Topics
+                .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
+                .ToArray().AsReadOnly();
+
         }
 
 
@@ -1341,12 +1344,13 @@ namespace Iviz.Roslib
         public SystemState GetSystemState()
         {
             var response = RosMasterApi.GetSystemState();
-            if (response.IsValid)
+            if (!response.IsValid)
             {
-                return new SystemState(response.Publishers, response.Subscribers, response.Services);
+                throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
             }
 
-            throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
+            return new SystemState(response.Publishers, response.Subscribers, response.Services);
+
         }
 
         /// <summary>
@@ -1354,15 +1358,16 @@ namespace Iviz.Roslib
         /// Corresponds to the function 'getSystemState' in the ROS Master API.
         /// </summary>
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
-        public async Task<SystemState> GetSystemStateAsync(CancellationToken token = default)
+        public async ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default)
         {
             var response = await RosMasterApi.GetSystemStateAsync(token).Caf();
-            if (response.IsValid)
+            if (!response.IsValid)
             {
-                return new SystemState(response.Publishers, response.Subscribers, response.Services);
+                throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
             }
 
-            throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
+            return new SystemState(response.Publishers, response.Subscribers, response.Services);
+
         }
 
         /// <summary>
@@ -1489,7 +1494,7 @@ namespace Iviz.Roslib
             }));
 
             Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
-            Task finalTask = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask).Caf();
+            Task finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny().Caf();
             if (finalTask == timeoutTask)
             {
                 Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
@@ -1624,7 +1629,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
+        public async ValueTask<TU> CallServiceAsync<TT, TU>(string serviceName, IRequest<TT, TU> request,
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
@@ -1762,10 +1767,10 @@ namespace Iviz.Roslib
         public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
             where T : IService, new()
         {
-            return Task.Run(() => AdvertiseServiceAsync(serviceName, callback, token), token).WaitAndRethrow();
+            return Task.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token).WaitAndRethrow();
         }
 
-        public Task<bool> AdvertiseServiceAsync<T>(string serviceName, Action<T> callback,
+        public ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Action<T> callback,
             CancellationToken token = default)
             where T : IService, new()
         {
@@ -1785,7 +1790,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Function to be called when a service request arrives. The response should be written in the response field.</param>
         /// <param name="token">An optional cancellation token.</param>
         /// <typeparam name="T">Service type.</typeparam>
-        public async Task<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
+        public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
             CancellationToken token = default)
             where T : IService, new()
         {
@@ -1822,7 +1827,7 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentException">Thrown if name is null</exception>
         public bool UnadvertiseService(string name, CancellationToken token = default)
         {
-            return Task.Run(() => UnadvertiseServiceAsync(name, token), token).WaitAndRethrow();
+            return Task.Run(() => UnadvertiseServiceAsync(name, token).AsTask(), token).WaitAndRethrow();
         }
 
         /// <summary>
@@ -1831,7 +1836,7 @@ namespace Iviz.Roslib
         /// <param name="name">Name of the service</param>
         /// <param name="token">An optional cancellation token</param>
         /// <exception cref="ArgumentException">Thrown if name is null</exception>        
-        public async Task<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default)
+        public async ValueTask<bool> UnadvertiseServiceAsync(string name, CancellationToken token = default)
         {
             string resolvedServiceName = ResolveResourceName(name);
 

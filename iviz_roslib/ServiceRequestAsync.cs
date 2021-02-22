@@ -55,7 +55,7 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        static async Task<Rent<byte>> ReceivePacket(NetworkStream stream, CancellationToken token)
+        static async ValueTask<Rent<byte>> ReceivePacket(NetworkStream stream, CancellationToken token)
         {
             byte[] lengthBuffer = new byte[4];
             if (!await stream.ReadChunkAsync(lengthBuffer, 4, token))
@@ -229,7 +229,7 @@ namespace Iviz.Roslib
                     {
                         Task userTask = callback(serviceMsg);
                         Task timeoutTask = Task.Delay(10000, runningTs.Token);
-                        Task resultTask = await Task.WhenAny(userTask, timeoutTask);
+                        Task resultTask = await (userTask, timeoutTask).WhenAny();
                         if (resultTask == timeoutTask)
                         {
                             runningTs.Token.ThrowIfCanceled(timeoutTask);

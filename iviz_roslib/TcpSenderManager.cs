@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -161,7 +162,7 @@ namespace Iviz.Roslib
                         Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
                     }
                 });
-                await Task.WhenAll(tasks).AwaitNoThrow(this);
+                await tasks.WhenAll().AwaitNoThrow(this);
 
                 publisher.RaiseNumConnectionsChanged();
             });
@@ -170,7 +171,7 @@ namespace Iviz.Roslib
         public void Publish(in TMessage msg)
         {
             using var sharedMessage = new SharedMessage<TMessage>(msg);
-            
+
             if (Latching)
             {
                 latchedMessage?.Dispose();
@@ -179,14 +180,14 @@ namespace Iviz.Roslib
 
             foreach (var pair in connectionsByCallerId)
             {
-                pair.Value.Publish(sharedMessage);
+                pair.Value.Publish(sharedMessage.Share());
             }
         }
 
         public async Task<bool> PublishAndWaitAsync(TMessage msg, CancellationToken token)
         {
             using var sharedMessage = new SharedMessage<TMessage>(msg);
-            
+
             if (Latching)
             {
                 latchedMessage?.Dispose();
@@ -198,7 +199,9 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAndWaitAsync(sharedMessage, token)));
+            await connectionsByCallerId
+                .Select(pair => pair.Value.PublishAndWaitAsync(sharedMessage.Share(), token))
+                .WhenAll();
             return true;
         }
 
@@ -209,9 +212,9 @@ namespace Iviz.Roslib
 
         public async Task StopAsync()
         {
-            await Task.WhenAll(connectionsByCallerId.Values.Select(sender => sender.DisposeAsync())).AwaitNoThrow(this);
+            await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()).WhenAll().AwaitNoThrow(this);
             connectionsByCallerId.Clear();
-            
+
             latchedMessage?.Dispose();
             latchedMessage = null;
         }

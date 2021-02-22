@@ -111,14 +111,14 @@ namespace Iviz.Roslib
             task = Task.Run(StartSession, runningTs.Token);
         }
 
-        async Task<TcpClient?> TryToConnect(Endpoint tryEndpoint)
+        async ValueTask<TcpClient?> TryToConnect(Endpoint testEndpoint)
         {
             TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
+            var (hostname, port) = testEndpoint;
 
             try
             {
-                await client.TryConnectAsync(tryEndpoint.Hostname, tryEndpoint.Port, runningTs.Token,
-                    connectionTimeoutInMs);
+                await client.TryConnectAsync(hostname, port, runningTs.Token, connectionTimeoutInMs);
                 return client;
             }
             catch (Exception e)
@@ -133,13 +133,13 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task<TcpClient?> KeepReconnecting()
+        async ValueTask<TcpClient?> KeepReconnecting()
         {
             for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
             {
                 if (RemoteEndpoint != null)
                 {
-                    TcpClient? client = await TryToConnect(RemoteEndpoint).Caf();
+                    TcpClient? client = await TryToConnect(RemoteEndpoint.Value).Caf();
                     if (client != null)
                     {
                         return client;
@@ -194,7 +194,7 @@ namespace Iviz.Roslib
             return Utils.WriteHeaderAsync(stream!, contents, runningTs.Token);
         }
 
-        async Task<int> ReceivePacket(ResizableRent<byte> readBuffer)
+        async ValueTask<int> ReceivePacket(ResizableRent<byte> readBuffer)
         {
             if (!await stream!.ReadChunkAsync(readBuffer.Array, 4, runningTs.Token))
             {

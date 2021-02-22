@@ -83,7 +83,7 @@ namespace Iviz.Roslib
 #else
             subscriberToken.Dispose();
 #endif
-            await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
+            await subscriber.UnsubscribeAsync(subscriberId!).AsTask().AwaitNoThrow(this);
         }
 
 #if !NETSTANDARD2_0
@@ -142,7 +142,7 @@ namespace Iviz.Roslib
             return Read(token);
         }
 
-        async Task<IMessage> IRosChannelReader.ReadAsync(CancellationToken token)
+        async ValueTask<IMessage> IRosChannelReader.ReadAsync(CancellationToken token)
         {
             return await ReadAsync(token);
         }
@@ -248,7 +248,7 @@ namespace Iviz.Roslib
         /// Waits until a message arrives.
         /// </summary>
         /// <returns>False if the channel has been disposed</returns>
-        public async Task<bool> WaitToReadAsync(int timeoutInMs)
+        public async ValueTask<bool> WaitToReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new(timeoutInMs);
             try
@@ -266,9 +266,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        public Task<bool> WaitToReadAsync(CancellationToken token = default)
+        public async ValueTask<bool> WaitToReadAsync(CancellationToken token = default)
         {
-            return messageQueue.OutputAvailableAsync(token);
+            return await messageQueue.OutputAvailableAsync(token);
         }
 
 
@@ -320,7 +320,7 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async Task<T> ReadAsync(int timeoutInMs)
+        public async ValueTask<T> ReadAsync(int timeoutInMs)
         {
             using CancellationTokenSource ts = new(timeoutInMs);
             try
@@ -340,10 +340,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public Task<T> ReadAsync(CancellationToken token = default)
+        public async ValueTask<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return messageQueue.TakeAsync(token);
+            return await messageQueue.TakeAsync(token);
         }
 
 

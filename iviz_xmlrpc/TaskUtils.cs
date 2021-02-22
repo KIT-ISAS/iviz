@@ -35,7 +35,7 @@ namespace Iviz.XmlRpc
             var timeoutTask = timeout.Task;
             using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
 
-            Task result = await Task.WhenAny(task, timeoutTask).Caf();
+            Task result = await (task, timeoutTask).WhenAny().Caf();
             return result == task;
         }
 
@@ -63,8 +63,8 @@ namespace Iviz.XmlRpc
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
             using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
-            
-            Task result = await Task.WhenAny(task, timeoutTask).Caf();
+
+            Task result = await (task, timeoutTask).WhenAny().Caf();
             if (result != task)
             {
                 throw new TimeoutException(errorMessage);
@@ -107,12 +107,12 @@ namespace Iviz.XmlRpc
         {
             return task.ConfigureAwait(false);
         }
+#endif
 
         public static ConfiguredValueTaskAwaitable<T> Caf<T>(this ValueTask<T> task)
         {
             return task.ConfigureAwait(false);
         }
-#endif
 
         public static void WaitNoThrow(this Task? t, object caller)
         {
@@ -141,6 +141,23 @@ namespace Iviz.XmlRpc
                 return default!;
             }
 
+            try
+            {
+                return t.GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+            }
+
+            return default!;
+        }
+
+        public static T WaitNoThrow<T>(this ValueTask<T> t, object caller)
+        {
             try
             {
                 return t.GetAwaiter().GetResult();
@@ -246,12 +263,88 @@ namespace Iviz.XmlRpc
             return default;
         }
 
+        public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller) where T : class
+        {
+            try
+            {
+                return await Caf(t);
+            }
+            catch (Exception e)
+            {
+                if (!(e is OperationCanceledException))
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+            }
+
+            return default;
+        }
+
         public static void ThrowIfCanceled(this CancellationToken t, Task task)
         {
             if (t.IsCancellationRequested)
             {
                 throw new TaskCanceledException(task);
             }
+        }
+
+
+        public static async Task WhenAll<TA>(this EnumeratorUtils.SelectEnumerable<TA, Task> ts)
+        {
+            List<Exception>? es = null;
+            foreach (var t in ts)
+            {
+                try
+                {
+                    await t.Caf();
+                }
+                catch (Exception e)
+                {
+                    es ??= new List<Exception>();
+                    es.Add(e);
+                }
+            }
+
+            if (es != null)
+            {
+                throw new AggregateException(es);
+            }
+        }
+
+        public static async Task WhenAll(this (Task, Task) ts)
+        {
+            List<Exception>? es = null;
+            var (task1, task2) = ts;
+
+            try
+            {
+                await task1.Caf();
+            }
+            catch (Exception e)
+            {
+                es ??= new List<Exception>();
+                es.Add(e);
+            }
+
+            try
+            {
+                await task2.Caf();
+            }
+            catch (Exception e)
+            {
+                es ??= new List<Exception>();
+                es.Add(e);
+            }
+
+            if (es != null)
+            {
+                throw new AggregateException(es);
+            }
+        }
+
+        public static async ValueTask<Task> WhenAny(this (Task, Task) ts)
+        {
+            return await Task.WhenAny(ts.Item1, ts.Item2).Caf();
         }
     }
 
@@ -262,16 +355,16 @@ namespace Iviz.XmlRpc
         {
             using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
             tokenSource.CancelAfter(timeoutInMs);
-            
+
 #if !NETSTANDARD2_0
             await writer.WriteAsync(text.AsMemory(), tokenSource.Token).Caf();
 #else
             var timeout = new TaskCompletionSource<object>();
             var timeoutTask = timeout.Task;
             using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
-            
+
             Task writeTask = writer.WriteAsync(text);
-            Task resultTask = await Task.WhenAny(writeTask, timeoutTask).Caf();
+            Task resultTask = await (writeTask, timeoutTask).WhenAny().Caf();
             if (resultTask == timeoutTask)
             {
                 token.ThrowIfCanceled(timeoutTask);
@@ -313,7 +406,7 @@ namespace Iviz.XmlRpc
             using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
 
             Task connectionTask = client.ConnectAsync(hostname, port);
-            Task resultTask = await Task.WhenAny(timeoutTask, connectionTask).Caf();
+            Task resultTask = await (timeoutTask, connectionTask).WhenAny().Caf();
             if (resultTask == timeoutTask)
             {
                 token.ThrowIfCanceled(timeoutTask);

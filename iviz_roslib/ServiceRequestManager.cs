@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -93,7 +94,7 @@ namespace Iviz.Roslib
                 await request.StopAsync().Caf();
                 requests.Remove(request);
             });
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this).Caf();
         }
 
         public void Dispose()
@@ -129,7 +130,7 @@ namespace Iviz.Roslib
             }
 
             Task[] tasks = requests.Select(request => request.StopAsync()).ToArray();
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this).Caf();
             requests.Clear();
         }
 

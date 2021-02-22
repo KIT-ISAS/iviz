@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Runtime.Serialization;
 
@@ -7,7 +8,7 @@ namespace Iviz.Roslib
     ///     Simple class containing endpoint data for an IP connection.
     /// </summary>
     [DataContract]
-    public sealed class Endpoint
+    public readonly struct Endpoint : IEquatable<Endpoint>
     {
         [DataMember] public string Hostname { get; }
         [DataMember] public int Port { get; }
@@ -26,8 +27,15 @@ namespace Iviz.Roslib
         
         public bool Equals(Endpoint? other)
         {
-            return other != null && Hostname == other.Hostname && Port == other.Port;
+            return other != null && Hostname == other.Value.Hostname && Port == other.Value.Port;
         }
+
+        public bool Equals(Endpoint other)
+        {
+            var (hostname, port) = other;
+            return Hostname == hostname && Port == port;
+        }
+
 
         public void Deconstruct(out string hostname, out int port) => (hostname, port) = (Hostname, Port);
 
