@@ -222,7 +222,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool Handler(PointCloud2 msg)
+        bool Handler(SharedMessage<PointCloud2> msg)
         {
             if (isProcessing)
             {
@@ -231,30 +231,18 @@ namespace Iviz.Controllers
 
             isProcessing = true;
 
-            var fields = msg.Fields.Release();
-            var data = msg.Data.Release();
+            var sharedMsg = msg.Share();
+
             Task.Run(() =>
             {
-                try
-                {
-                    using (fields)
-                    using (data)
-                    {
-                        ProcessMessage(msg, fields, data);
-                    }
-                }
-                catch (Exception e)
-                {
-                    //Logger.Error($"{this}: Error handling point cloud", e);
-                    Debug.Log(e);
-                }
+                using (sharedMsg) { ProcessMessage(sharedMsg); }
             });
 
             return true;
         }
 
         [ContractAnnotation("=> false, result:null; => true, result:notnull")]
-        static bool TryGetField([NotNull] UniqueRef<PointField> fields, string name, out PointField result)
+        static bool TryGetField([NotNull] IEnumerable<PointField> fields, string name, out PointField result)
         {
             foreach (PointField field in fields)
             {
@@ -271,9 +259,9 @@ namespace Iviz.Controllers
             return false;
         }
 
-        bool FieldsEqual([NotNull] UniqueRef<PointField> fields)
+        bool FieldsEqual([NotNull] IReadOnlyList<PointField> fields)
         {
-            if (fieldNames.Count != fields.Length)
+            if (fieldNames.Count != fields.Count)
             {
                 return false;
             }
@@ -289,93 +277,103 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void ProcessMessage([NotNull] PointCloud2 msg, UniqueRef<PointField> fields, UniqueRef<byte> data)
+        void ProcessMessage([NotNull] SharedMessage<PointCloud2> sharedMsg)
         {
-            if (disposed)
+            try
             {
-                // we're dead
-                return;
-            }
-
-            if (msg.PointStep < 3 * sizeof(float) ||
-                msg.RowStep < msg.PointStep * msg.Width ||
-                data.Length < msg.RowStep * msg.Height)
-            {
-                Logger.Info($"{this}: Invalid point cloud dimensions!");
-                isProcessing = false;
-                return;
-            }
-
-            if (!FieldsEqual(fields))
-            {
-                fieldNames.Clear();
-                foreach (PointField field in fields)
-                {
-                    fieldNames.Add(field.Name);
-                }
-            }
-
-            if (!TryGetField(fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
-                !TryGetField(fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
-                !TryGetField(fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
-            {
-                Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
-                isProcessing = false;
-                return;
-            }
-
-            int xOffset = (int) xField.Offset;
-            int yOffset = (int) yField.Offset;
-            int zOffset = (int) zField.Offset;
-
-            if (!TryGetField(fields, config.IntensityChannel, out PointField iField))
-            {
-                iField = EmptyPointField;
-            }
-
-            int iOffset = (int) iField.Offset;
-            int iSize = FieldSizeFromType(iField.Datatype);
-            if (iSize == -1 || msg.PointStep < iOffset + iSize)
-            {
-                Logger.Info($"{this}: Invalid or unsupported intensity field type!");
-                isProcessing = false;
-                return;
-            }
-
-            bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
-
-            int numPoints = (int) (msg.Width * msg.Height);
-
-            pointBuffer.Clear();
-
-            GeneratePointBuffer(msg, data.Array, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-
-
-            GameThread.PostInListenerQueue(() =>
-            {
+                PointCloud2 msg = sharedMsg.Message;
                 if (disposed)
                 {
                     // we're dead
+                    isProcessing = false;
                     return;
                 }
 
-                node.AttachTo(msg.Header.FrameId);
-                //node.AttachTo(msgHeader.FrameId);
-
-                Size = numPoints;
-                pointCloud.UseColormap = !rgbaHint;
-                pointCloud.SetDirect(pointBuffer);
-
-                //Debug.LogError("listener:"  + pointBuffer.Capacity);
-
-                MeasuredIntensityBounds = pointCloud.IntensityBounds;
-                if (ForceMinMax)
+                if (msg.PointStep < 3 * sizeof(float) ||
+                    msg.RowStep < msg.PointStep * msg.Width ||
+                    msg.Data.Length < msg.RowStep * msg.Height)
                 {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    Logger.Info($"{this}: Invalid point cloud dimensions!");
+                    isProcessing = false;
+                    return;
                 }
 
+                if (!FieldsEqual(msg.Fields))
+                {
+                    fieldNames.Clear();
+                    foreach (PointField field in msg.Fields)
+                    {
+                        fieldNames.Add(field.Name);
+                    }
+                }
+
+                if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
+                {
+                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                    isProcessing = false;
+                    return;
+                }
+
+                int xOffset = (int) xField.Offset;
+                int yOffset = (int) yField.Offset;
+                int zOffset = (int) zField.Offset;
+
+                var iField = TryGetField(msg.Fields, config.IntensityChannel, out PointField outField)
+                    ? outField
+                    : EmptyPointField;
+
+                int iOffset = (int) iField.Offset;
+                int iSize = FieldSizeFromType(iField.Datatype);
+                if (iSize == -1 || msg.PointStep < iOffset + iSize)
+                {
+                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    isProcessing = false;
+                    return;
+                }
+
+                bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
+                var (_, stamp, frameId) = msg.Header;
+                int numPoints = (int) (msg.Width * msg.Height);
+
+                pointBuffer.Clear();
+
+                GeneratePointBuffer(msg, msg.Data.Array, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+
+                GameThread.PostInListenerQueue(() =>
+                {
+                    try
+                    {
+                        if (disposed)
+                        {
+                            // we're dead
+                            return;
+                        }
+
+                        node.AttachTo(frameId, stamp);
+
+                        Size = numPoints;
+                        pointCloud.UseColormap = !rgbaHint;
+                        pointCloud.SetDirect(pointBuffer);
+
+                        MeasuredIntensityBounds = pointCloud.IntensityBounds;
+                        if (ForceMinMax)
+                        {
+                            pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                        }
+                    }
+                    finally
+                    {
+                        isProcessing = false;
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Error handling point cloud", e);
                 isProcessing = false;
-            });
+            }
         }
 
         void GeneratePointBuffer([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int xOffset, int yOffset,

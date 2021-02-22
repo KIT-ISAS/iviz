@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -56,6 +57,8 @@ namespace Iviz.Core
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
             {
+                Debug.Log("Active: " + StringRef.NumActive + " Undisposed: " + (StringRef.NumActive - StringRef.NumDisposed) + " ConvertedPct: " +  (StringRef.NumConverted * 100 / StringRef.NumActive));
+            
                 try
                 {
                     EverySecond?.Invoke();

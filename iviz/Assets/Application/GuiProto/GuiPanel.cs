@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Controllers;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App.Gui
@@ -52,7 +53,7 @@ namespace Iviz.App.Gui
             Parse(panelData);
         }
 
-        public void Parse(PanelData panelData)
+        public void Parse([NotNull] PanelData panelData)
         {
             titleText.text = panelData.Title ?? "";
             contentText.text = panelData.Text ?? "";

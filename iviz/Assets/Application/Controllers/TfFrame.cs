@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Iviz.Controllers
         [SerializeField] string id;
 
         readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly HashSet<FrameNode> listeners = new HashSet<FrameNode>();
+        readonly List<FrameNode> listeners = new List<FrameNode>();
 
         Pose pose;
 
@@ -26,6 +27,7 @@ namespace Iviz.Controllers
         bool trailVisible;
         bool visible;
         bool forceVisible;
+        bool forceInvisible;
 
         AxisFrameResource axis;
         TextMarkerResource labelObjectText;
@@ -102,9 +104,10 @@ namespace Iviz.Controllers
         public string Id
         {
             get => id;
-            set
+            private set
             {
                 id = value ?? throw new ArgumentNullException(nameof(value));
+                
                 if (HasLabelObjectText)
                 {
                     LabelObjectText.Text = id;
@@ -116,6 +119,8 @@ namespace Iviz.Controllers
                 }
             }
         }
+
+        public uint IdHash { get; private set; }
 
         bool ForceVisible
         {
@@ -129,7 +134,17 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ForceInvisible { get; set; }
+        public bool ForceInvisible
+        {
+            get => forceInvisible;
+            set
+            {
+                forceInvisible = value;
+                Visible = Visible;
+                LabelVisible = LabelVisible;
+                ConnectorVisible = ConnectorVisible;
+            }
+        }
 
         public bool Visible
         {
@@ -266,6 +281,13 @@ namespace Iviz.Controllers
             FrameSize = 0.125f;
         }
 
+        public void Setup([NotNull] string newId)
+        {
+            Id = newId;
+            Name = "{" + Id + "}";
+            IdHash = newId.ComputeHash();
+        }
+
         public void AddListener([NotNull] FrameNode frame)
         {
             if (frame == null)
@@ -273,7 +295,10 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            listeners.Add(frame);
+            if (!listeners.Contains(frame))
+            {
+                listeners.Add(frame);
+            }
         }
 
         public void RemoveListener([NotNull] FrameNode frame)
@@ -309,7 +334,7 @@ namespace Iviz.Controllers
 
         void CheckIfDead()
         {
-            if (listeners.RemoveWhere(listener => listener == null) != 0)
+            if (listeners.RemoveAll(listener => listener == null) != 0)
             {
                 Debug.LogWarning($"Frame '{id}' had a listener that was previously destroyed.");
             }

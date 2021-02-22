@@ -56,7 +56,7 @@ namespace Iviz.Controllers
             return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
         }
 
-        static async Task<(string id, bool success, string message)> TryAddModuleAsync([NotNull] string moduleTypeStr,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleAsync([NotNull] string moduleTypeStr,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -138,7 +138,7 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static async Task<(string id, bool success, string message)> TryAddModuleFromTopicAsync([NotNull] string topic,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleFromTopicAsync([NotNull] string topic,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -221,7 +221,7 @@ namespace Iviz.Controllers
             srv.Response.Message = message ?? "";
         }
 
-        static async Task<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id, string[] fields,
+        static async ValueTask<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id, string[] fields,
             string config)
         {
             (bool success, string message) result = default;
@@ -285,7 +285,7 @@ namespace Iviz.Controllers
         }
 
         [ItemNotNull]
-        static async Task<string[]> GetModulesAsync()
+        static async ValueTask<string[]> GetModulesAsync()
         {
             using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
@@ -326,7 +326,7 @@ namespace Iviz.Controllers
             srv.Response.Message = message ?? "";
         }
 
-        static async Task<(bool success, string message)> TrySetFixedFrame(string id)
+        static async ValueTask<(bool success, string message)> TrySetFixedFrame(string id)
         {
             (bool success, string message) result = default;
 
@@ -361,7 +361,7 @@ namespace Iviz.Controllers
             srv.Response.IsValid = success;
         }
 
-        static async Task<(bool[] success, Pose[] poses)> TryGetFramePoseAsync(string[] ids)
+        static async ValueTask<(bool[] success, Pose[] poses)> TryGetFramePoseAsync(string[] ids)
         {
             bool[] success = null;
             Pose[] poses = null;

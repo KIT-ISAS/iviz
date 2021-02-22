@@ -36,7 +36,7 @@ namespace Iviz.Ros
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
 
-        public abstract Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
             where T : IService;
 
         public event Action<ConnectionState> ConnectionStateChanged;
@@ -140,7 +140,7 @@ namespace Iviz.Ros
             }
         }
 
-        protected abstract Task<bool> Connect();
+        protected abstract ValueTask<bool> Connect();
 
         public virtual void Disconnect()
         {

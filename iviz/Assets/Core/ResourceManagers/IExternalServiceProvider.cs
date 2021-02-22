@@ -8,6 +8,6 @@ namespace Iviz.Displays
 {
     public interface IExternalServiceProvider
     {
-        Task<bool> CallServiceAsync<T>([NotNull] string service, [NotNull] T srv, CancellationToken token) where T : IService;
+        ValueTask<bool> CallServiceAsync<T>([NotNull] string service, [NotNull] T srv, CancellationToken token) where T : IService;
      }
 }

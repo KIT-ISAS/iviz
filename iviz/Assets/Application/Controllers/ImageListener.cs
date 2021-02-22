@@ -214,11 +214,12 @@ namespace Iviz.Controllers
                 return false;
             }
 
+            var (_, stamp, frameId) = msg.Header;
             isProcessing = true;
 
             void PostProcess()
             {
-                Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+                Node.AttachTo(frameId, stamp);
                 isProcessing = false;
             }
 

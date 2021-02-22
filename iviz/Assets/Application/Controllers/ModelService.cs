@@ -71,7 +71,7 @@ namespace Iviz.Controllers
         }
 
         [ItemCanBeNull]
-        static async Task<string> GetPathExtras(CancellationToken token)
+        static async ValueTask<string> GetPathExtras(CancellationToken token)
         {
             string homeFolder;
             switch (UnityEngine.Application.platform)

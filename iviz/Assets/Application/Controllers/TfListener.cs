@@ -17,6 +17,7 @@ using Nito.AsyncEx;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
+using String = System.String;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -49,7 +50,7 @@ namespace Iviz.Controllers
         readonly ConcurrentQueue<(UniqueRef<TransformStamped> frame, bool isStatic)> messageList =
             new ConcurrentQueue<(UniqueRef<TransformStamped>, bool)>();
 
-        readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
+        readonly Dictionary<uint, TfFrame> frames = new Dictionary<uint, TfFrame>();
         [NotNull] readonly FrameNode keepAllListener;
         [NotNull] readonly FrameNode staticListener;
         [NotNull] readonly FrameNode fixedFrameListener;
@@ -261,67 +262,73 @@ namespace Iviz.Controllers
             while (messageList.TryDequeue(out var value))
             {
                 bool isStatic = value.isStatic;
-                using (var frame = value.frame)
+                using (var frameArray = value.frame.ToDisposableRef())
                 {
-                    foreach (TransformStamped t in frame)
+                    foreach (TransformStamped frame in frameArray)
                     {
-                        var ((_, _, frameId), childFrameId, transform) = t;
+                            StringRef parentIdRef = frame.Header.FrameId;
+                            StringRef childIdRef = frame.ChildFrameId;
+                            var transform = frame.Transform;
 
-                        if (transform.HasNaN() || childFrameId.Length == 0)
-                        {
-                            continue;
-                        }
-
-                        const int maxPoseMagnitude = 10000;
-                        if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
-                        {
-                            continue; // TODO: Find better way to handle this
-                        }
-
-                        // remove starting '/' from tf v1
-                        string childId = childFrameId[0] != '/'
-                            ? childFrameId
-                            : childFrameId.Substring(1);
-
-                        TfFrame child;
-                        if (isStatic)
-                        {
-                            child = GetOrCreateFrame(childId, staticListener);
-                            if (config.KeepAllFrames)
+                            if (transform.HasNaN() || childIdRef.Length == 0)
                             {
-                                child.AddListener(keepAllListener);
+                                continue;
                             }
-                        }
-                        else if (config.KeepAllFrames)
-                        {
-                            child = GetOrCreateFrame(childId, keepAllListener);
-                        }
-                        else if (!TryGetFrameImpl(childId, out child))
-                        {
-                            continue;
-                        }
 
-                        string parentId = frameId.Length == 0 || frameId[0] != '/'
-                            ? frameId
-                            : frameId.Substring(1);
+                            const int maxPoseMagnitude = 10000;
+                            if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
+                            {
+                                continue; // TODO: Find better way to handle this
+                            }
 
-                        if (parentId.Length == 0)
-                        {
-                            child.SetParent(OriginFrame);
-                            child.SetPose(transform.Ros2Unity());
-                        }
-                        else if (!(child.Parent is null) && parentId == child.Parent.Id)
-                        {
-                            child.SetPose(transform.Ros2Unity());
-                        }
-                        else
-                        {
-                            TfFrame parent = GetOrCreateFrame(parentId);
-                            if (child.SetParent(parent))
+                            /*
+                            // remove starting '/' from tf v1
+                            string childId = childFrameId[0] != '/'
+                                ? childFrameId
+                                : childFrameId.Substring(1);
+                                */
+
+                            TfFrame child;
+                            if (isStatic)
+                            {
+                                child = GetOrCreateFrame(childIdRef, staticListener);
+                                if (config.KeepAllFrames)
+                                {
+                                    child.AddListener(keepAllListener);
+                                }
+                            }
+                            else if (config.KeepAllFrames)
+                            {
+                                child = GetOrCreateFrame(childIdRef, keepAllListener);
+                            }
+                            else if (!TryGetFrameImpl(childIdRef.ComputeHash(), out child))
+                            {
+                                continue;
+                            }
+
+                            /*
+                            string parentId = frameId.Length == 0 || frameId[0] != '/'
+                                ? frameId
+                                : frameId.Substring(1);
+                                */
+
+                            if (parentIdRef.Length == 0)
+                            {
+                                child.SetParent(OriginFrame);
+                                child.SetPose(transform.Ros2Unity());
+                            }
+                            else if (!(child.Parent is null) && parentIdRef.ComputeHash() == child.Parent.IdHash)
                             {
                                 child.SetPose(transform.Ros2Unity());
                             }
-                        }
+                            else
+                            {
+                                TfFrame parent = GetOrCreateFrame(parentIdRef);
+                                if (child.SetParent(parent))
+                                {
+                                    child.SetPose(transform.Ros2Unity());
+                                }
+                            }
                     }
                 }
             }
@@ -349,7 +356,7 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame Add([NotNull] TfFrame t)
         {
-            frames.Add(t.Id, t);
+            frames.Add(t.IdHash, t);
             return t;
         }
 
@@ -361,21 +368,33 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return Instance.TryGetFrameImpl(id, out frame);
+            return Instance.TryGetFrameImpl(id.ComputeHash(), out frame);
         }
 
-
         [NotNull]
-        public static TfFrame GetOrCreateFrame([NotNull] string reqId, [CanBeNull] FrameNode listener = null)
+        public static TfFrame GetOrCreateFrame([NotNull] string frameId, [CanBeNull] FrameNode listener = null)
         {
-            if (reqId == null)
+            if (frameId == null)
             {
-                throw new ArgumentNullException(nameof(reqId));
+                throw new ArgumentNullException(nameof(frameId));
             }
 
-            string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
-
+            //string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
             TfFrame frame = Instance.GetOrCreateFrameImpl(frameId);
+
+            if (!(listener is null))
+            {
+                frame.AddListener(listener);
+            }
+
+            return frame;
+        }
+
+        [NotNull]
+        TfFrame GetOrCreateFrame([NotNull] StringRef frameId, [CanBeNull] FrameNode listener = null)
+        {
+            //string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
+            TfFrame frame = GetOrCreateFrameImpl(frameId);
 
             if (!(listener is null))
             {
@@ -388,17 +407,25 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame GetOrCreateFrameImpl([NotNull] string id)
         {
-            return TryGetFrameImpl(id, out TfFrame frame)
+            return TryGetFrameImpl(id.ComputeHash(), out TfFrame frame)
                 ? frame
                 : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
         }
 
         [NotNull]
+        TfFrame GetOrCreateFrameImpl([NotNull] StringRef id)
+        {
+            return TryGetFrameImpl(id.ComputeHash(), out TfFrame frame)
+                ? frame
+                : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
+        }
+
+        
+        [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
             TfFrame frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
-            frame.Name = "{" + id + "}";
-            frame.Id = id;
+            frame.Setup(id);
             frame.Visible = config.Visible;
             frame.FrameSize = config.FrameSize;
             frame.LabelVisible = config.FrameLabelsVisible;
@@ -412,9 +439,9 @@ namespace Iviz.Controllers
         }
 
         [ContractAnnotation("=> false, t:null; => true, t:notnull")]
-        bool TryGetFrameImpl([NotNull] string id, out TfFrame t)
+        bool TryGetFrameImpl(uint idHash, out TfFrame t)
         {
-            return frames.TryGetValue(id, out t);
+            return frames.TryGetValue(idHash, out t);
         }
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
@@ -436,7 +463,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            frames.Remove(frame.Id);
+            frames.Remove(frame.IdHash);
 
             frame.Stop();
             Object.Destroy(frame.gameObject);

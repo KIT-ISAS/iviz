@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,8 +49,7 @@ namespace Iviz.App
         readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
         readonly StringBuilder description = new StringBuilder(65536);
 
-        readonly ConcurrentDictionary<string, object>
-            ids = new ConcurrentDictionary<string, object>(); // used as concurrent hashset
+        readonly ConcurrentSet<string> ids = new ConcurrentSet<string>();
 
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
@@ -69,7 +69,7 @@ namespace Iviz.App
             dialog.Close.Clicked += Close;
             ProcessLog();
             dialog.FromField.Value = id;
-            dialog.FromField.Hints = ExtraFields.Concat(ids.Keys);
+            dialog.FromField.Hints = ExtraFields.Concat(ids);
             dialog.LogLevel.Options = LogLevelFields;
             dialog.LogLevel.Index = IndexFromLevel(minLogLevel);
             dialog.LogLevel.ValueChanged += (f, _) =>
@@ -88,7 +88,7 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             ProcessLog();
-            dialog.FromField.Hints = ExtraFields.Concat(ids.Keys);
+            dialog.FromField.Hints = ExtraFields.Concat(ids);
             dialog.BottomText.text = UpdateStats();
         }
 
@@ -130,7 +130,7 @@ namespace Iviz.App
         {
             if (log.SourceId != null)
             {
-                ids[log.SourceId] = null;
+                ids.Add(log.SourceId);
             }
 
             if (idCode == FromIdCode.None ||
@@ -306,5 +306,13 @@ namespace Iviz.App
             dialog.Text.SetText(description);
             queueIsDirty = false;
         }
+    }
+
+    public class ConcurrentSet<T> : IEnumerable<T>
+    {
+        readonly ConcurrentDictionary<T, object> backend = new ConcurrentDictionary<T, object>();
+        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Add([NotNull] T s) => backend[s] = null;
     }
 }

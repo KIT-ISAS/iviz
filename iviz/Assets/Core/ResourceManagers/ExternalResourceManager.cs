@@ -23,6 +23,8 @@ namespace Iviz.Displays
 {
     public class ExternalResourceManager
     {
+        const int BlacklistDurationInMs = 5;
+
         const string ModelServiceName = "/iviz/get_model_resource";
         const string TextureServiceName = "/iviz/get_model_texture";
         const string FileServiceName = "/iviz/get_file";
@@ -167,7 +169,7 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        public static string SanitizeForFilename([NotNull] string input)
+        static string SanitizeForFilename([NotNull] string input)
         {
             if (input == null)
             {
@@ -192,7 +194,7 @@ namespace Iviz.Displays
             return resourceFiles.RobotDescriptions.ContainsKey(robotName);
         }
 
-        public async Task<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
+        public async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
             CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
@@ -293,7 +295,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        public async Task<Info<GameObject>> TryGetGameObjectAsync([NotNull] string uriString,
+        public async ValueTask<Info<GameObject>> TryGetGameObjectAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token = default)
         {
             if (uriString is null)
@@ -304,7 +306,7 @@ namespace Iviz.Displays
             float currentTime = Time.time;
             if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
             {
-                if (currentTime < insertionTime + 30)
+                if (currentTime < insertionTime + BlacklistDurationInMs)
                 {
                     return null;
                 }
@@ -349,7 +351,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (loadedModels.TryGetValue(uriString, out Info<GameObject> resource))
@@ -380,10 +382,10 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            using (GetModelResource msg = new GetModelResource {Request = {Uri = uriString}})
+            using (var msg = new GetModelResource {Request = {Uri = uriString}})
             {
                 try
                 {
@@ -429,7 +431,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (loadedScenes.TryGetValue(uriString, out Info<GameObject> resource))
@@ -455,10 +457,10 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            using (GetSdf msg = new GetSdf {Request = {Uri = uriString}})
+            using (var msg = new GetSdf {Request = {Uri = uriString}})
             {
                 if (await provider.CallServiceAsync(SceneServiceName, msg, token) && msg.Response.Success)
                 {
@@ -479,7 +481,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        public async Task<Info<Texture2D>> TryGetTextureAsync([NotNull] string uriString,
+        public async ValueTask<Info<Texture2D>> TryGetTextureAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
@@ -525,10 +527,10 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
+        async ValueTask<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
-            using (GetModelTexture msg = new GetModelTexture {Request = {Uri = uriString}})
+            using (var msg = new GetModelTexture {Request = {Uri = uriString}})
             {
                 if (await provider.CallServiceAsync(TextureServiceName, msg, token) && msg.Response.Success)
                 {
@@ -551,7 +553,7 @@ namespace Iviz.Displays
 
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> LoadLocalModelAsync([NotNull] string uriString, [NotNull] string localPath,
+        async ValueTask<Info<GameObject>> LoadLocalModelAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             GameObject obj;
@@ -565,7 +567,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    using (Model msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length, 32))
+                    using (var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length, 32))
                     {
                         obj = await CreateModelObjectAsync(uriString, msg, provider, token);
                     }
@@ -588,7 +590,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
+        async ValueTask<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
             CancellationToken token)
         {
             Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, true);
@@ -621,7 +623,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> LoadLocalSceneAsync([NotNull] string uriString, [NotNull] string localPath,
+        async ValueTask<Info<GameObject>> LoadLocalSceneAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             GameObject obj;
@@ -636,7 +638,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    using (Scene msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length, 32))
+                    using (var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length, 32))
                     {
                         obj = await CreateSceneNodeAsync(msg, provider, token);
                     }
@@ -659,7 +661,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<GameObject>> ProcessModelResponseAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> ProcessModelResponseAsync([NotNull] string uriString,
             [NotNull] GetModelResourceResponse msg, [NotNull] IExternalServiceProvider provider,
             CancellationToken token)
         {
@@ -700,7 +702,7 @@ namespace Iviz.Displays
         }
 
         [NotNull, ItemCanBeNull]
-        async Task<Info<Texture2D>> ProcessTextureResponseAsync([NotNull] string uriString,
+        async ValueTask<Info<Texture2D>> ProcessTextureResponseAsync([NotNull] string uriString,
             [NotNull] GetModelTextureResponse msg, CancellationToken token)
         {
             try
@@ -735,7 +737,7 @@ namespace Iviz.Displays
         }
 
         [ItemCanBeNull]
-        async Task<Info<GameObject>> ProcessSceneResponseAsync([NotNull] string uriString,
+        async ValueTask<Info<GameObject>> ProcessSceneResponseAsync([NotNull] string uriString,
             [NotNull] GetSdfResponse msg,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -776,7 +778,7 @@ namespace Iviz.Displays
 
         [NotNull]
         [ItemNotNull]
-        async Task<GameObject> CreateModelObjectAsync([NotNull] string uriString, [NotNull] Model msg,
+        async ValueTask<GameObject> CreateModelObjectAsync([NotNull] string uriString, [NotNull] Model msg,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             GameObject model = (await SceneModel.CreateAsync(uriString, msg, provider, token)).gameObject;
@@ -797,7 +799,7 @@ namespace Iviz.Displays
 
         [NotNull]
         [ItemNotNull]
-        async Task<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
+        async ValueTask<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();

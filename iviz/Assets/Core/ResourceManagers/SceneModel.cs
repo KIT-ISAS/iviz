@@ -22,7 +22,7 @@ namespace Iviz.Displays
     {
         [NotNull]
         [ItemNotNull]
-        public static async Task<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
+        public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
             [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
@@ -54,7 +54,7 @@ namespace Iviz.Displays
         }
 
         [ItemNotNull]
-        static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
+        static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
             IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
             switch (msg.OrientationHint.ToString().ToUpperInvariant())
@@ -144,7 +144,7 @@ namespace Iviz.Displays
                     else
                     {
                         Core.Logger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
-                                  $"'{diffuseTexture.Path}' required by {uriString}");
+                                         $"'{diffuseTexture.Path}' required by {uriString}");
                     }
                 }
 
@@ -226,8 +226,8 @@ namespace Iviz.Displays
         }
 
         [ItemCanBeNull]
-        static async Task<Info<Texture2D>> GetTextureResourceAsync(string uriString, string localPath,
-            IExternalServiceProvider provider, CancellationToken token)
+        static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
+            [NotNull] string localPath, IExternalServiceProvider provider, CancellationToken token)
         {
             Uri uri = new Uri(uriString);
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
@@ -236,10 +236,8 @@ namespace Iviz.Displays
             {
                 directoryName = directoryName.Replace('\\', '/'); // windows!
             }
-
-            string texturePath = $"{directoryName}/{localPath}";
-            string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
-
+            
+            string textureUri = $"{uri.Scheme}://{uri.Host}{directoryName}/{localPath}";
             return await Resource.GetTextureResourceAsync(textureUri, provider, token);
         }
 

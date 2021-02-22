@@ -198,16 +198,31 @@ namespace Iviz.Core
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }
 
-        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset, int count)
-        {
-            return new ArraySegment<T>(ts, offset, count);
-        }
 
         [NotNull]
-        public static SharedRef<T> ReleaseAndShare<T>([NotNull] this UniqueRef<T> value)
+        public static SharedRef<T> ReleaseAndShare<T>([NotNull] this UniqueRef<T> value) where T : unmanaged
         {
             return new SharedRef<T>(value);
         }
+
+        [NotNull]
+        public static DisposableRef<T> ToDisposableRef<T>([NotNull] this UniqueRef<T> value) where T : IDisposable
+        {
+            return new DisposableRef<T>(value);
+        }
+        
+        public static uint ComputeHash([NotNull] this StringRef str)
+        {
+            return Crc32Calculator.Instance.Compute(str);
+        }
+        
+        public static uint ComputeHash([NotNull] this string str)
+        {
+            using (StringRef strRef = str)
+            {
+                return Crc32Calculator.Instance.Compute(strRef);
+            }
+        }        
 
         public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
@@ -503,7 +518,7 @@ namespace Iviz.Core
             return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
         }
 
-        public static async Task<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
+        public static async ValueTask<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Open,
                 FileAccess.Read, FileShare.None, 4096, true))
@@ -524,7 +539,7 @@ namespace Iviz.Core
         }
 
         [ItemNotNull]
-        public static async Task<string> ReadAllTextAsync([NotNull] string filePath, CancellationToken token)
+        public static async ValueTask<string> ReadAllTextAsync([NotNull] string filePath, CancellationToken token)
         {
             using (var bytes = await ReadAllBytesAsync(filePath, token))
             {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
 using JetBrains.Annotations;
@@ -32,15 +33,14 @@ namespace Iviz.Ros
 
         readonly ConcurrentQueue<SharedMessage<T>> messageQueue = new ConcurrentQueue<SharedMessage<T>>();
         readonly Action<SharedMessage<T>> delayedHandler;
-        readonly Func<T, bool> directHandler;
-        readonly List<float> timesOfArrival = new List<float>();
+        readonly Func<SharedMessage<T>, bool> directHandler;
         readonly List<SharedMessage<T>> tmpMessageBag = new List<SharedMessage<T>>();
         readonly bool callbackInGameThread;
 
-        int dropped;
+        int droppedMsgs;
         long lastMsgBytes;
-        int msgsInQueue;
         int totalMsgCounter;
+        int recentMsgs;
 
         Listener([NotNull] string topic)
         {
@@ -57,6 +57,14 @@ namespace Iviz.Ros
             GameThread.EverySecond += UpdateStats;
         }
 
+        [NotNull]
+        static Action<SharedMessage<T>> ToSharedHandler(Action<T> handler)
+        {
+            return sharedRef =>
+            {
+                using (sharedRef) { handler(sharedRef.Message); }
+            };
+        }
 
         public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
         {
@@ -65,31 +73,39 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(handler));
             }
 
-            delayedHandler = sharedRef =>
-            {
-                using (sharedRef) handler(sharedRef.Message);
-            };
+            delayedHandler = ToSharedHandler(handler);
             callbackInGameThread = true;
             GameThread.ListenersEveryFrame += CallHandlerDelayed;
-
             Connection.Subscribe(this);
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Func<SharedMessage<T>, bool> handler) : this(topic)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
-
             Connection.Subscribe(this);
             Subscribed = true;
+        }
+
+        [NotNull]
+        static Func<SharedMessage<T>, bool> ToSharedHandler(Func<T, bool> handler)
+        {
+            return sharedRef =>
+            {
+                using (sharedRef) { return handler(sharedRef.Message); }
+            };
+        }
+
+        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic, ToSharedHandler(handler))
+        {
         }
 
         public Listener([NotNull] string topic, [NotNull] Action<SharedMessage<IMessage>> handler) : this(topic)
         {
             delayedHandler = sharedRef =>
             {
-                using (sharedRef) handler(sharedRef.ShareMsg());
+                using (sharedRef) { handler(sharedRef.ShareMsg()); }
             };
 
             callbackInGameThread = true;
@@ -161,7 +177,6 @@ namespace Iviz.Ros
             if (callbackInGameThread)
             {
                 messageQueue.Enqueue(msg);
-                msgsInQueue++;
                 return;
             }
 
@@ -183,11 +198,7 @@ namespace Iviz.Ros
             for (int i = start; i < tmpMessageBag.Count; i++)
             {
                 var msg = tmpMessageBag[i];
-                lock (timesOfArrival)
-                {
-                    timesOfArrival.Add(Time.time);
-                }
-
+                Interlocked.Increment(ref recentMsgs);
                 try
                 {
                     lastMsgBytes += msg.Message.RosMessageLength;
@@ -195,66 +206,59 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Logger.Error($"{this} Error during callback: ", e);
                 }
             }
 
-            dropped += start;
+            droppedMsgs += start;
             totalMsgCounter += messageQueue.Count;
-            msgsInQueue = 0;
+            recentMsgs += messageQueue.Count;
         }
 
         void CallHandlerDirect([NotNull] SharedMessage<T> msg)
         {
-            totalMsgCounter++;
-
-            lock (timesOfArrival)
-            {
-                timesOfArrival.Add(GameThread.GameTime);
-            }
+            Interlocked.Increment(ref totalMsgCounter);
+            Interlocked.Increment(ref recentMsgs);
 
             bool processed;
             try
             {
-                lastMsgBytes += msg.Message.RosMessageLength;
-                processed = directHandler(msg.Message);
+                Interlocked.Add(ref lastMsgBytes, msg.Message.RosMessageLength);
+                processed = directHandler(msg);
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Logger.Error($"{this} Error during callback: ", e);
                 processed = false;
             }
 
             if (!processed)
             {
-                dropped++;
+                Interlocked.Increment(ref droppedMsgs);
             }
         }
 
         void UpdateStats()
         {
-            lock (timesOfArrival)
+            if (recentMsgs == 0)
             {
-                if (timesOfArrival.Count == 0)
-                {
-                    Stats = new RosListenerStats();
-                    return;
-                }
-
-                Stats = new RosListenerStats(
-                    totalMsgCounter,
-                    timesOfArrival.Count,
-                    lastMsgBytes,
-                    msgsInQueue,
-                    dropped
-                );
-
-                ConnectionManager.ReportBandwidthDown(lastMsgBytes);
-
-                lastMsgBytes = 0;
-                dropped = 0;
-                timesOfArrival.Clear();
+                Stats = RosListenerStats.Empty;
+                return;
             }
+
+            Stats = new RosListenerStats(
+                totalMsgCounter,
+                recentMsgs,
+                lastMsgBytes,
+                messageQueue.Count,
+                droppedMsgs
+            );
+
+            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+
+            lastMsgBytes = 0;
+            droppedMsgs = 0;
+            recentMsgs = 0;
         }
 
         [NotNull]

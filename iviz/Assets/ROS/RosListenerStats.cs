@@ -7,6 +7,8 @@ namespace Iviz.Ros
     [DataContract]
     public readonly struct RosListenerStats
     {
+        public static readonly RosListenerStats Empty;
+        
         public RosListenerStats(int totalMessages, int messagesPerSecond, long bytesPerSecond, int messagesInQueue, int dropped)
         {
             TotalMessages = totalMessages;

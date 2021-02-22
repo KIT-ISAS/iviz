@@ -837,7 +837,7 @@ namespace Iviz.Controllers
         }
 
         [ItemCanBeNull]
-        async Task<Info<GameObject>> GetRequestedResource([NotNull] Marker msg)
+        async ValueTask<Info<GameObject>> GetRequestedResource([NotNull] Marker msg)
         {
             if (msg.Type() != MarkerType.MeshResource)
             {

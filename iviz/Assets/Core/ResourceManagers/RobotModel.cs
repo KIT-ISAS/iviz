@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -89,10 +90,8 @@ namespace Iviz.Displays
                     rootMaterials[material.Name] = material;
                 }
 
-                foreach (var link in robot.Links)
-                {
-                    await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token);
-                }
+                await robot.Links.Select(link =>
+                    ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token)).WhenAll();
 
                 foreach (var joint in robot.Joints)
                 {
@@ -125,9 +124,9 @@ namespace Iviz.Displays
                 Metallic = metallic;
                 ApplyAnyValidConfiguration();
 
-                string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors} errors.";
-                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count} " +
-                            $"links and {Joints.Count} joints. {errorStr}");
+                string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors.ToString()} errors.";
+                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
+                            $"links and {Joints.Count.ToString()} joints. {errorStr}");
             }
             catch (OperationCanceledException e)
             {
@@ -157,6 +156,7 @@ namespace Iviz.Displays
         public string BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
 
+        [NotNull]
         public string UnityName
         {
             get => BaseLinkObject.name;

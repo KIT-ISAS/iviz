@@ -14,6 +14,7 @@ using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Nito.AsyncEx;
 using UnityEngine;
 using Logger = Iviz.Msgs.Logger;
 
@@ -88,7 +89,7 @@ namespace Iviz.Ros
             client = null;
         }
 
-        protected override async Task<bool> Connect()
+        protected override async ValueTask<bool> Connect()
         {
             if (MasterUri == null ||
                 MasterUri.Scheme != "http")
@@ -152,14 +153,14 @@ namespace Iviz.Ros
                     }
 
                     Core.Logger.Debug("*** ReAdvertising...");
-                    await Task.WhenAll(publishersByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)));
+                    await publishersByTopic.Values.Select(
+                        topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)).WhenAll();
 
                     token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done ReAdvertising");
                     Core.Logger.Debug("*** Resubscribing...");
-                    await Task.WhenAll(subscribersByTopic.Values.Select(
-                        topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)));
+                    await subscribersByTopic.Values.Select(
+                        topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)).WhenAll();
 
                     token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done Resubscribing");
@@ -170,8 +171,8 @@ namespace Iviz.Ros
                     Core.Logger.Debug("*** Advertising services...");
 
                     token.ThrowIfCancellationRequested();
-                    await Task.WhenAll(servicesByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)));
+                    await servicesByTopic.Values.Select(
+                        topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)).WhenAll();
                     Core.Logger.Debug("*** Done Advertising services!");
 
                     Core.Logger.Internal("Finished resubscribing and readvertising.");
@@ -553,7 +554,7 @@ namespace Iviz.Ros
             servicesByTopic.Add(serviceName, newAdvertisedService);
         }
 
-        public override async Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
         {
             if (service == null)
             {
@@ -607,6 +608,7 @@ namespace Iviz.Ros
 
             if (connectionTs.IsCancellationRequested)
             {
+                msg.Dispose();
                 return;
             }
 
@@ -624,6 +626,7 @@ namespace Iviz.Ros
         {
             if (advertiser.Id == -1)
             {
+                msg.Dispose();
                 return;
             }
 
@@ -796,8 +799,8 @@ namespace Iviz.Ros
             return cachedTopics;
         }
 
-        [NotNull, ItemCanBeNull]
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
+        [ItemCanBeNull]
+        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
             CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
@@ -853,8 +856,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        [NotNull]
-        public async Task<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
+        public async ValueTask<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
@@ -898,8 +900,8 @@ namespace Iviz.Ros
             }
         }
 
-        [NotNull, ItemCanBeNull]
-        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        [ItemCanBeNull]
+        public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
@@ -1076,7 +1078,7 @@ namespace Iviz.Ros
                     }
 
                     builder.Append(receiver.RemoteEndpoint != null
-                        ? receiver.RemoteEndpoint.Hostname
+                        ? receiver.RemoteEndpoint.Value.Hostname
                         : "(Unknown address)");
 
                     if (isAlive)
@@ -1265,19 +1267,30 @@ namespace Iviz.Ros
 
             void Callback(T msg)
             {
-                using (var shared = new SharedMessage<T>(msg))
+                try
                 {
-                    foreach (var listener in listeners)
+                    switch (listeners.Count)
                     {
-                        try
-                        {
-                            listener.EnqueueMessage(shared.Share());
-                        }
-                        catch (Exception e)
-                        {
-                            Core.Logger.Error($"{this}: Error in callback", e);
-                        }
+                        case 0:
+                            msg.Dispose();
+                            return;
+                        case 1:
+                            listeners.First().EnqueueMessage(new SharedMessage<T>(msg));
+                            return;
+                        default:
+                            using (var shared = new SharedMessage<T>(msg))
+                            {
+                                foreach (var listener in listeners)
+                                {
+                                    listener.EnqueueMessage(shared.Share());
+                                }
+                            }
+                            break;
                     }
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error($"{this}: Error in callback", e);
                 }
             }
 

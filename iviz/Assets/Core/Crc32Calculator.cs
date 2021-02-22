@@ -2,7 +2,7 @@
 using Iviz.Msgs;
 using JetBrains.Annotations;
 
-namespace Iviz.Controllers
+namespace Iviz.Core
 {
     public sealed class Crc32Calculator
     {
@@ -52,7 +52,7 @@ namespace Iviz.Controllers
 
             return hash;
         }
-
+        
         public unsafe uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
         {
             T* ptr = &value;
@@ -72,6 +72,22 @@ namespace Iviz.Controllers
             fixed (T* ptr = array.Array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
+            }
+        }
+        
+        public unsafe uint Compute([NotNull] string str, uint startHash = DefaultSeed)
+        {
+            fixed (char* ptr = str)
+            {
+                return CalculateHash(startHash, (byte*) ptr, str.Length * sizeof(char));
+            }
+        }        
+
+        public unsafe uint Compute([NotNull] StringRef array, uint startHash = DefaultSeed)
+        {
+            fixed (byte* ptr = array.Array)
+            {
+                return CalculateHash(startHash, ptr, array.Length);
             }
         }
 
