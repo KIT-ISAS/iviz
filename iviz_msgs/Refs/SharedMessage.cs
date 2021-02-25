@@ -8,7 +8,7 @@ namespace Iviz.Msgs
     /// Similar to <see cref="SharedRef{T}"/> but for messages.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class SharedMessage<T> : IDisposable where T : IMessage
+    public sealed class SharedMessage<T> : IDisposable where T : IMessage, IDisposable
     {
         public T Message { get; }
         readonly CountdownEvent cd;
@@ -36,10 +36,12 @@ namespace Iviz.Msgs
             return new(this);
         }
 
-        public SharedMessage<IMessage> ShareMsg()
+        /*
+        public SharedMessage<TU> ShareMsg<TU>() where TU : IMessage, IDisposable
         {
-            return new (Message, cd);
+            return new ((TU) (IMessage) Message, cd);
         }
+        */
         
         public void Dispose()
         {

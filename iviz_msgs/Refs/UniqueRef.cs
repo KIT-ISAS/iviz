@@ -191,47 +191,4 @@ namespace Iviz.Msgs
 
         int IReadOnlyCollection<T>.Count => Length;
     }
-
-    public sealed class DisposableRef<T> : IDisposable, IReadOnlyList<T> where T : IDisposable
-    {
-        readonly UniqueRef<T> uRef;
-        public DisposableRef(UniqueRef<T> uRef)
-        {
-            this.uRef = uRef;
-        }
-        
-        public T this[int index]
-        {
-            get => uRef[index];
-            set => uRef[index] = value;
-        }
-
-        public int Length => uRef.Length;
-        int IReadOnlyCollection<T>.Count => uRef.Length;
-
-        public void Dispose()
-        {
-            foreach (var child in uRef)
-            {
-                child.Dispose();
-            }
-            
-            uRef.Dispose();
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public RentEnumerator<T> GetEnumerator()
-        {
-            return uRef.GetEnumerator();
-        }
-    }
 }
