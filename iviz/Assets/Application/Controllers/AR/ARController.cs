@@ -392,9 +392,11 @@ namespace Iviz.Controllers
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
+        /*
         void OnDestroy()
         {
             Debug.Log("AR Controller Destroyed!");
         }
+        */
     }
 }

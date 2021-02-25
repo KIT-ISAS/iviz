@@ -120,8 +120,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint IdHash { get; private set; }
-
         bool ForceVisible
         {
             get => forceVisible;
@@ -252,7 +250,7 @@ namespace Iviz.Controllers
             {
                 if (!SetParent(value))
                 {
-                    Logger.Error($"TFFrame: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
+                    Logger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
             }
         }
@@ -285,7 +283,6 @@ namespace Iviz.Controllers
         {
             Id = newId;
             Name = "{" + Id + "}";
-            IdHash = newId.ComputeHash();
         }
 
         public void AddListener([NotNull] FrameNode frame)

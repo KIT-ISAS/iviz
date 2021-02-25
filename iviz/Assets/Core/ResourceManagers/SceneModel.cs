@@ -84,9 +84,9 @@ namespace Iviz.Displays
 
                 meshResource.Name = mesh.Name;
 
-                UniqueRef<Iviz.Msgs.IvizMsgs.Color32> meshColors = mesh.ColorChannels.Length != 0
+                Iviz.Msgs.IvizMsgs.Color32[] meshColors = mesh.ColorChannels.Length != 0
                     ? mesh.ColorChannels[0].Colors
-                    : UniqueRef<Msgs.IvizMsgs.Color32>.Empty;
+                    : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
 
                 var material = msg.Materials[(int) mesh.MaterialIndex];
                 Msgs.IvizMsgs.Texture diffuseTexture =
@@ -94,14 +94,14 @@ namespace Iviz.Displays
                 Msgs.IvizMsgs.Texture bumpTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_NORMALS);
 
-                UniqueRef<Vector3f> meshDiffuseTexCoords =
+                Vector3f[] meshDiffuseTexCoords =
                     diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[diffuseTexture.UvIndex].Coords
-                        : UniqueRef<Vector3f>.Empty;
-                UniqueRef<Vector3f> meshBumpTexCoords =
+                        : Array.Empty<Vector3f>();
+                Vector3f[] meshBumpTexCoords =
                     bumpTexture != null && bumpTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
-                        : UniqueRef<Vector3f>.Empty;
+                        : Array.Empty<Vector3f>();
 
                 using (var vertices = new Rent<Vector3>(mesh.Vertices.Length))
                 using (var normals = new Rent<Vector3>(mesh.Normals.Length))
@@ -245,7 +245,7 @@ namespace Iviz.Displays
         {
             while (transform != endTransform)
             {
-                bounds = UnityUtils.TransformBound(bounds, transform);
+                bounds = bounds.TransformBound(transform);
                 transform = transform.parent;
             }
 
@@ -255,13 +255,6 @@ namespace Iviz.Displays
 
         static Vector3 Assimp2Unity(in Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
-
-        static void MemCopy<TA, TB>([NotNull] UniqueRef<TA> src, [NotNull] TB[] dst, int sizeToCopy)
-            where TA : unmanaged
-            where TB : unmanaged
-        {
-            MemCopy(src.Array, dst, sizeToCopy);
-        }
 
         static void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)
             where TA : unmanaged

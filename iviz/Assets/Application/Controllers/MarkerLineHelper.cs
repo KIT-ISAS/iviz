@@ -13,8 +13,8 @@ namespace Iviz.Controllers
 {
     internal class MarkerLineHelper
     {
-        UniqueRef<Point> points;
-        UniqueRef<ColorRGBA> colors;
+        Point[] points;
+        ColorRGBA[] colors;
         Color32 color32;
 
         readonly LineResource.DirectLineSetter lineStripSingleColor;

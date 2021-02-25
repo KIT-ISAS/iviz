@@ -252,7 +252,7 @@ namespace Iviz.App
                 return;
             }
 
-            using (var messages = new UniqueRef<LogMessage>(messageQueue.Count + 5, true))
+            using (var messages = new UniqueRef<LogMessage>(messageQueue.Count, true))
             {
                 messageQueue.CopyTo(messages.Array, 0);
                 foreach (var message in messages)
@@ -291,7 +291,7 @@ namespace Iviz.App
                         .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
 
-                    if (message.Message.Length < MaxMessageLength)
+                    if (message.SourceId == null || message.Message.Length < MaxMessageLength)
                     {
                         description.Append(message.Message).AppendLine();
                     }

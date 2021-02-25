@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -25,9 +26,14 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MagnitudeSq(this float3 v)
+        public static float MaxAbsCoeff(this float3 p)
         {
-            return v.x * v.x + v.y * v.y + v.z * v.z;
+            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
+        }
+
+        public static float MaxAbsCoeff(this Vector3 p)
+        {
+            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -39,7 +45,9 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cross(this Vector3 lhs, in Vector3 rhs)
         {
-            return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z,
+            return new Vector3(
+                lhs.y * rhs.z - lhs.z * rhs.y, 
+                lhs.z * rhs.x - lhs.x * rhs.z,
                 lhs.x * rhs.y - lhs.y * rhs.x);
         }
 
@@ -56,9 +64,9 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 CwiseProduct(this Vector3 p, Vector3 o)
+        public static float3 Abs(this float3 p)
         {
-            return Vector3.Scale(p, o);
+            return new float3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
         }
 
         public static bool TryParse(string s, out float f)
@@ -91,8 +99,8 @@ namespace Iviz.Core
         {
             return new Pose
             (
-                rotation: p.rotation * o.rotation,
-                position: p.rotation * o.position + p.position
+                p.rotation * o.position + p.position,
+                p.rotation * o.rotation
             );
         }
 
@@ -175,19 +183,6 @@ namespace Iviz.Core
             return false;
         }
 
-        public static bool Any<T>([NotNull] this UniqueRef<T> ts, Predicate<T> predicate)
-        {
-            foreach (var t in ts)
-            {
-                if (predicate(t))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)
         {
             return new ArraySegment<T>(ts);
@@ -197,32 +192,6 @@ namespace Iviz.Core
         {
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }
-
-
-        [NotNull]
-        public static SharedRef<T> ReleaseAndShare<T>([NotNull] this UniqueRef<T> value) where T : unmanaged
-        {
-            return new SharedRef<T>(value);
-        }
-
-        [NotNull]
-        public static DisposableRef<T> ToDisposableRef<T>([NotNull] this UniqueRef<T> value) where T : IDisposable
-        {
-            return new DisposableRef<T>(value);
-        }
-        
-        public static uint ComputeHash([NotNull] this StringRef str)
-        {
-            return Crc32Calculator.Instance.Compute(str);
-        }
-        
-        public static uint ComputeHash([NotNull] this string str)
-        {
-            using (StringRef strRef = str)
-            {
-                return Crc32Calculator.Instance.Compute(strRef);
-            }
-        }        
 
         public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
         {
@@ -306,7 +275,7 @@ namespace Iviz.Core
             -Vector3.right - Vector3.up - Vector3.forward,
         };
 
-        static Bounds TransformBound(Bounds bounds, Pose pose, Vector3 scale)
+        static Bounds TransformBound(this Bounds bounds, Pose pose, Vector3 scale)
         {
             if (pose == Pose.identity)
             {
@@ -353,34 +322,34 @@ namespace Iviz.Core
             return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
-        static Bounds TransformBound(Bounds bounds, [NotNull] Transform transform)
+        static Bounds TransformBound(this Bounds bounds, [NotNull] Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
 
-        static Bounds TransformBoundInverse(Bounds bounds, [NotNull] Transform transform)
+        static Bounds TransformBoundWithInverse(this Bounds bounds, [NotNull] Transform transform)
         {
-            Vector3 scale = transform.localScale;
+            var (x, y, z) = transform.localScale;
             return TransformBound(bounds, transform.AsLocalPose().Inverse(),
-                new Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z));
+                new Vector3(1f / x, 1f / y, 1f / z));
         }
 
-        public static Bounds? TransformBound(Bounds? bounds, Pose pose, Vector3 scale)
+        public static Bounds? TransformBound(this Bounds? bounds, in Pose pose, in Vector3 scale)
         {
             return bounds == null ? (Bounds?) null : TransformBound(bounds.Value, pose, scale);
         }
 
-        public static Bounds? TransformBoundInverse(Bounds? bounds, [NotNull] Transform transform)
+        public static Bounds? TransformBoundWithInverse(this Bounds? bounds, [NotNull] Transform transform)
         {
             if (transform == null)
             {
                 throw new ArgumentNullException(nameof(transform));
             }
 
-            return bounds == null ? (Bounds?) null : TransformBoundInverse(bounds.Value, transform);
+            return bounds == null ? (Bounds?) null : TransformBoundWithInverse(bounds.Value, transform);
         }
 
-        public static Bounds? TransformBound(Bounds? bounds, [NotNull] Transform transform)
+        public static Bounds? TransformBound(this Bounds? bounds, [NotNull] Transform transform)
         {
             if (transform == null)
             {
@@ -391,7 +360,7 @@ namespace Iviz.Core
         }
 
 
-        public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds?> enumOfBounds)
+        public static Bounds? CombineBounds([NotNull] this IEnumerable<Bounds?> enumOfBounds)
         {
             if (enumOfBounds == null)
             {
@@ -423,7 +392,7 @@ namespace Iviz.Core
             return result;
         }
 
-        public static Bounds? CombineBounds([NotNull] IEnumerable<Bounds> enumOfBounds)
+        public static Bounds? CombineBounds([NotNull] this IEnumerable<Bounds> enumOfBounds)
         {
             if (enumOfBounds == null)
             {
@@ -471,7 +440,8 @@ namespace Iviz.Core
             return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
         }
 
-        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, out T t)
+        [ContractAnnotation("=> false, t:null; => true, t:notnull")]
+        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, [CanBeNull] out T t)
         {
             using (var enumerator = enumerable.GetEnumerator())
             {
@@ -484,11 +454,6 @@ namespace Iviz.Core
                 t = default;
                 return false;
             }
-        }
-
-        public static bool LoadImage(this Texture2D texture, [NotNull] UniqueRef<byte> d)
-        {
-            return texture.LoadImage(d.Array, false);
         }
     }
 
@@ -512,10 +477,10 @@ namespace Iviz.Core
         }
 
         [NotNull]
-        public static Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] UniqueRef<byte> bytes,
+        public static Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes,
             CancellationToken token)
         {
-            return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
+            return WriteAllBytesAsync(filePath, bytes, bytes.Length, token);
         }
 
         public static async ValueTask<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
@@ -530,7 +495,8 @@ namespace Iviz.Core
         }
 
         [NotNull]
-        public static async Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text, CancellationToken token)
+        public static async Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text,
+            CancellationToken token)
         {
             using (var bytes = text.AsRent())
             {
@@ -545,7 +511,7 @@ namespace Iviz.Core
             {
                 return BuiltIns.UTF8.GetString(bytes.Array);
             }
-        }        
+        }
     }
 
     public static class MeshRendererUtils
@@ -560,7 +526,7 @@ namespace Iviz.Core
         static readonly int SmoothnessPropId = Shader.PropertyToID("_Smoothness");
         static readonly int MetallicPropId = Shader.PropertyToID("_Metallic");
 
-        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
+        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, in Color color, int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -572,7 +538,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, Color color, int id = 0)
+        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, in Color color, int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -620,5 +586,21 @@ namespace Iviz.Core
             PropBlock.SetVector(BumpMapStPropId, new Vector4(1, 1, 0, 0));
             meshRenderer.SetPropertyBlock(PropBlock, 0);
         }
+
+        public static void Deconstruct(this Vector3 v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.x, v.y, v.z);
+
+        public static void Deconstruct(this float3 v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.x, v.y, v.z);
+
+        public static void Deconstruct(this Vector4 v, out float x, out float y, out float z, out float w) =>
+            (x, y, z, w) = (v.x, v.y, v.z, v.w);
+
+        public static void Deconstruct(this Pose p, out Vector3 position, out Quaternion rotation) =>
+            (position, rotation) = (p.position, p.rotation);
+        
+        public static void Deconstruct(this Msgs.GeometryMsgs.TransformStamped p, 
+            out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
+            (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
     }
 }

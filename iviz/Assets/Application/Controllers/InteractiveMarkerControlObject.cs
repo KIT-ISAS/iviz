@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Hololens;
@@ -87,7 +88,7 @@ namespace Iviz.Controllers
             numWarnings = 0;
 
             description.Clear();
-            description.Append("<color=navy><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
+            description.Append("<color=#000080ff><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")
@@ -303,8 +304,8 @@ namespace Iviz.Controllers
                             markers[markerId] = markerObject;
                         }
 
-                        markerObject.Set(marker);
-                        if (marker.Header.FrameId.Length == 0)
+                        Task _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
+                        if (string.IsNullOrEmpty(marker.Header.FrameId))
                         {
                             markerObject.transform.SetParentLocal(markerNode.transform);
                         }
@@ -441,9 +442,7 @@ namespace Iviz.Controllers
                 .Select(marker => (marker.Bounds, marker.Transform));
 
             Bounds? totalBounds =
-                UnityUtils.CombineBounds(
-                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.Bounds, tuple.Transform))
-                );
+                innerBounds.Select(tuple => tuple.Bounds.TransformBound(tuple.Transform)).CombineBounds();
 
             return totalBounds;
         }
@@ -452,7 +451,7 @@ namespace Iviz.Controllers
         {
             if (Control != null)
             {
-                Control.Bounds = UnityUtils.TransformBoundInverse(bounds, transform);
+                Control.Bounds = bounds.TransformBoundWithInverse(transform);
             }
         }
 

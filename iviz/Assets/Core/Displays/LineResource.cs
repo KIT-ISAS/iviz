@@ -20,9 +20,14 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class LineResource : MarkerResourceWithColormap
     {
-        const int MaxSegmentsForMesh = 30;
-        const float MinLineWidthSq = 1E-09f;
-        const float MaxPositionMagnitudeSq = 1e9f;
+        static int helperForMaxSegmentsForMesh = -1;
+
+        static int MaxSegmentsForMesh => helperForMaxSegmentsForMesh != -1
+            ? helperForMaxSegmentsForMesh
+            : (helperForMaxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue);
+
+        const float MinLineWidth = 1E-03f;
+        const float MaxPositionMagnitude = 1e3f;
 
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
@@ -61,9 +66,9 @@ namespace Iviz.Displays
         bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
 
         public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                                 (t.A - t.B).MagnitudeSq() > MinLineWidthSq &&
-                                                                 t.A.MagnitudeSq() < MaxPositionMagnitudeSq &&
-                                                                 t.B.MagnitudeSq() < MaxPositionMagnitudeSq;
+                                                                 (t.A - t.B).MaxAbsCoeff() > MinLineWidth &&
+                                                                 t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
+                                                                 t.B.MaxAbsCoeff() < MaxPositionMagnitude;
 
         /// <summary>
         /// Sets the lines with the given list.

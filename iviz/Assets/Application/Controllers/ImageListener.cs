@@ -227,11 +227,11 @@ namespace Iviz.Controllers
             {
                 case "png":
                     descriptionOverride = null;
-                    ImageTexture.ProcessPng(msg.Data.Release(), PostProcess);
+                    ImageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
                 case "jpeg":
                     descriptionOverride = null;
-                    ImageTexture.ProcessJpg(msg.Data.Release(), PostProcess);
+                    ImageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
@@ -249,7 +249,7 @@ namespace Iviz.Controllers
 
             int width = (int) msg.Width;
             int height = (int) msg.Height;
-            ImageTexture.Set(width, height, msg.Encoding, msg.Data.Segment);
+            ImageTexture.Set(width, height, msg.Encoding, msg.Data);
         }
 
         public override void StopController()

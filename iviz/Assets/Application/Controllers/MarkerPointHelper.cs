@@ -13,8 +13,8 @@ namespace Iviz.Controllers
 {
     internal class MarkerPointHelper
     {
-        UniqueRef<Point> points;
-        UniqueRef<ColorRGBA> colors;
+        Point[] points;
+        ColorRGBA[] colors;
         Color color;
 
         readonly PointListResource.DirectPointSetter singleColor;
@@ -60,6 +60,7 @@ namespace Iviz.Controllers
             for (int i = 0; i < points.Length; i++)
             {
                 ColorRGBA c = colors[i];
+                
                 float4 rgba = new float4(c.R, c.G, c.B, c.A);
                 if (rgba.HasNaN())
                 {

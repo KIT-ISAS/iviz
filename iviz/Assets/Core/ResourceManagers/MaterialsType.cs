@@ -18,6 +18,8 @@ namespace Iviz.Resources
         public Info<Material> ImagePreview { get; }
         public Info<Material> PointCloud { get; }
         public Info<Material> PointCloudWithColormap { get; }
+        public Info<Material> PointCloudDirect { get; }
+        public Info<Material> PointCloudDirectWithColormap { get; }
         public Info<Material> DepthCloud { get; }
         public Info<Material> GridInterior { get; }
         public Info<Material> GridMap { get; }
@@ -70,12 +72,14 @@ namespace Iviz.Resources
                 : new Info<Material>("Materials/OccupancyGrid Clip");
 
             PointCloud = new Info<Material>(assetHolder.PointCloud);
+            PointCloudDirect = new Info<Material>(assetHolder.PointCloudDirect);
             Line = new Info<Material>(assetHolder.LineMaterial);
             TransparentLine = new Info<Material>(assetHolder.TransparentLine);
             LineSimple = new Info<Material>(assetHolder.LineSimple);
             TransparentLineSimple = new Info<Material>(assetHolder.TransparentLineSimple);
 
             PointCloudWithColormap = new Info<Material>(assetHolder.PointCloudWithColormap);
+            PointCloudDirectWithColormap = new Info<Material>(assetHolder.PointCloudDirectWithColormap);
             LineWithColormap = new Info<Material>(assetHolder.LineWithColormap);
             TransparentLineWithColormap = new Info<Material>(assetHolder.TransparentLineWithColormap);
             LineSimpleWithColormap = new Info<Material>(assetHolder.LineSimpleWithColormap);

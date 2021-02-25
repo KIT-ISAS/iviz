@@ -18,6 +18,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
+        static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        
         [FormerlySerializedAs("texture")] [SerializeField] Texture2D diffuseTexture;
         [SerializeField] Texture2D bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
@@ -122,7 +124,10 @@ namespace Iviz.Displays
             base.Awake();
 
             var sharedMaterial = MainRenderer.sharedMaterial;
-            if (diffuseTexture == null && sharedMaterial != null && sharedMaterial.mainTexture != null)
+            if (diffuseTexture == null 
+                && sharedMaterial != null
+                && sharedMaterial.HasProperty(MainTex)
+                && sharedMaterial.mainTexture != null)
             {
                 diffuseTexture = (Texture2D) sharedMaterial.mainTexture;
             }

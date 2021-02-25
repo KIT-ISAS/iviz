@@ -27,7 +27,9 @@ namespace Iviz.Displays
         [SerializeField] float elementScale = 1.0f;
 
         MaterialPropertyBlock properties;
-        [NotNull] protected MaterialPropertyBlock Properties => properties ?? (properties = new MaterialPropertyBlock());
+
+        [NotNull]
+        protected MaterialPropertyBlock Properties => properties ?? (properties = new MaterialPropertyBlock());
 
         /// <summary>
         /// Whether to use the element color or the element intensity overlaid with a colormap. 
@@ -44,7 +46,7 @@ namespace Iviz.Displays
             {
                 colormap = value;
                 Properties.SetFloat(AtlasRowId,
-                    (ColormapsType.AtlasSize -0.5f - (float) value) / ColormapsType.AtlasSize);
+                    (ColormapsType.AtlasSize - 0.5f - (float) value) / ColormapsType.AtlasSize);
                 UpdateProperties();
             }
         }
@@ -109,7 +111,7 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentException($"Invalid elementScale {elementScale}", nameof(value));
                 }
-                
+
                 elementScale = value;
             }
         }

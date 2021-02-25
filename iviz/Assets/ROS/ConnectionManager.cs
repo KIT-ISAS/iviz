@@ -81,7 +81,7 @@ namespace Iviz.Ros
                 File: Path.GetFileName(msg.File),
                 Function: "",
                 Line: (uint) msg.Line,
-                Topics: UniqueRef<StringRef>.Empty
+                Topics: Array.Empty<string>()
             ));
         }
 

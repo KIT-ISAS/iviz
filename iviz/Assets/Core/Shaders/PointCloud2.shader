@@ -62,8 +62,7 @@ Shader "iviz/PointCloud2"
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
-			//v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
-			v2f vert(appdata In)
+			v2f vert(const appdata In)
 			{
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
@@ -79,19 +78,19 @@ Shader "iviz/PointCloud2"
 
 				inst /= 2;
 #endif
-				float2 extent = abs(float2(UNITY_MATRIX_P._11, UNITY_MATRIX_P._22)) * _Scale;
-				float4 quadVertex = Quad[id] * float4(extent, 1, 1);
-				Point centerPoint = _Points[inst];
-				float4 centerVertex = float4(centerPoint.position, 1);
+				const float2 extent = abs(float2(UNITY_MATRIX_P._11, UNITY_MATRIX_P._22)) * _Scale;
+				const float4 quad_vertex = Quad[id] * float4(extent, 1, 1);
+				const Point center_point = _Points[inst];
+				const float4 center_vertex = float4(center_point.position, 1);
 
-				o.position = UnityObjectToClipPos(centerVertex) + quadVertex;
+				o.position = UnityObjectToClipPos(center_vertex) + quad_vertex;
 #ifdef USE_TEXTURE
-				float centerIntensity = centerPoint.intensity;
-				o.color = tex2Dlod(_AtlasTexture, float4(centerIntensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
+				const float center_intensity = center_point.intensity;
+				o.color = tex2Dlod(_AtlasTexture, float4(center_intensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
 #else
-				int centerIntensity = centerPoint.intensity;
-				int3 rgbi = (centerIntensity >> int3(0, 8, 16)) & 255;
-				float3 rgb = float3(rgbi) / 255; 
+				const int center_intensity = center_point.intensity;
+				const int3 rgbi = (center_intensity >> int3(0, 8, 16)) & 255;
+				const float3 rgb = float3(rgbi) / 255; 
 				o.color = rgb;
 #endif
 				o.color *= _Tint;

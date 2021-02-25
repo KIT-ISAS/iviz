@@ -82,13 +82,6 @@ namespace Iviz.Core
             false;
 #endif
 
-        public const bool IsAndroid =
-#if !UNITY_EDITOR && UNITY_ANDROID
-            true;
-#else
-            false;
-#endif
-
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -153,5 +146,23 @@ namespace Iviz.Core
         }
 
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
+
+        static bool? supportsComputeBuffersHelper;
+        public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
+                                                     (supportsComputeBuffersHelper =
+                                                         !IsHololens &&
+                                                         SystemInfo.supportsComputeShaders &&
+                                                         SystemInfo.maxComputeBufferInputsVertex > 0).Value;
+
+        static bool? supportsR16;
+
+        public static bool SupportsR16 => supportsR16 ??
+                                          (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
+
+        static bool? supportsRGB24;
+
+        public static bool SupportsRGB24 => supportsRGB24 ??
+                                            (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
+                                            .Value;
     }
 }

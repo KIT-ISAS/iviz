@@ -367,7 +367,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
+                Core.Logger.Debug($"{this}: Error while loading parameter '{value}'", e);
                 HelpText = "<b>Error:</b> Failed to retrieve parameter";
                 return;
             }
@@ -380,7 +380,7 @@ namespace Iviz.Controllers
 
             if (!(parameterValue is string robotDescription))
             {
-                Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
+                Core.Logger.Debug($"{this}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";
                 return;
             }
@@ -409,7 +409,7 @@ namespace Iviz.Controllers
             (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                Debug.Log("SimpleRobotController: Failed to load robot!");
+                Core.Logger.Debug($"{this}: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
                 return;
             }
@@ -423,7 +423,7 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrEmpty(description))
             {
-                Debug.Log($"SimpleRobotController: Empty parameter '{description}'");
+                Core.Logger.Debug($"{this}: Empty parameter '{description}'");
                 HelpText = "[Robot Specification is Empty]";
                 return false;
             }
@@ -434,7 +434,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"SimpleRobotController: Error parsing description': {e}");
+                Core.Logger.Debug($"{this}: Error parsing description'", e);
                 HelpText = "[Failed to Parse Specification]";
                 Robot = null;
                 return false;
