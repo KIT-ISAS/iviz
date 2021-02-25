@@ -42,7 +42,7 @@ namespace Iviz.Roslib
         const int MaxConnectionRetries = 3;
 
         readonly SemaphoreSlim signal = new(0);
-        readonly ConcurrentQueue<(SharedMessage<T> msg, TaskCompletionSource? signal)> messageQueue = new();
+        readonly ConcurrentQueue<(T msg, TaskCompletionSource? signal)> messageQueue = new();
         readonly CancellationTokenSource runningTs = new();
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
@@ -353,9 +353,8 @@ namespace Iviz.Roslib
             tcpClient = null;
             TryRelease(managerSignal);
 
-            foreach (var (msg, msgSignal) in messageQueue)
-            {
-                msg.Dispose();
+            foreach (var (_, msgSignal) in messageQueue)
+            { 
                 msgSignal?.TrySetException(new RosQueueException(
                     $"Connection for '{RemoteCallerId}' is shutting down", this));
             }
@@ -393,7 +392,7 @@ namespace Iviz.Roslib
 
             await ProcessHandshake(stream).Caf();
 
-            List<(SharedMessage<T> msg, int msgLength, TaskCompletionSource? signal)> tmpQueue = new();
+            List<(T msg, int msgLength, TaskCompletionSource? signal)> tmpQueue = new();
 
             while (KeepRunning)
             {
@@ -419,9 +418,7 @@ namespace Iviz.Roslib
 
                 for (int i = 0; i < startIndex; i++)
                 {
-                    var (msg, _, msgSignal) = tmpQueue[i];
-                    msg.Dispose();
-                    msgSignal?.TrySetException(CreateOverflowException());
+                    tmpQueue[i].signal?.TrySetException(CreateOverflowException());
                 }
 
                 for (int i = startIndex; i < tmpQueue.Count; i++)
@@ -431,11 +428,7 @@ namespace Iviz.Roslib
                         var (msg, msgLength, msgSignal) = tmpQueue[i];
                         writeBuffer.EnsureCapability(msgLength + 4);
 
-                        uint sendLength;
-                        using (msg)
-                        {
-                            sendLength = Buffer.Serialize(msg.Message, writeBuffer.Array, 4);
-                        }
+                        uint sendLength = Buffer.Serialize(msg, writeBuffer.Array, 4);
 
                         WriteLengthToBuffer(sendLength);
                         await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token).Caf();
@@ -448,9 +441,7 @@ namespace Iviz.Roslib
                     {
                         for (int j = i; j < tmpQueue.Count; j++)
                         {
-                            var (msg, _, msgSignal) = tmpQueue[j];
-                            msg.Dispose();
-                            msgSignal?.TrySetException(CreateQueueException(e));
+                            tmpQueue[j].signal?.TrySetException(CreateQueueException(e));
                         }
 
                         throw;
@@ -459,7 +450,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public void Publish(in SharedMessage<T> message)
+        public void Publish(in T message)
         {
             if (!IsAlive)
             {
@@ -471,7 +462,7 @@ namespace Iviz.Roslib
             signal.Release();
         }
 
-        public async Task PublishAndWaitAsync(SharedMessage<T> message, CancellationToken token)
+        public async Task PublishAndWaitAsync(T message, CancellationToken token)
         {
             if (!IsAlive)
             {
@@ -487,14 +478,14 @@ namespace Iviz.Roslib
             await msgSignal.Task;
         }
 
-        int ReadFromQueue(List<(SharedMessage<T>, int, TaskCompletionSource?)> result)
+        int ReadFromQueue(List<(T, int, TaskCompletionSource?)> result)
         {
             int totalQueueSizeInBytes = 0;
 
             result.Clear();
             while (messageQueue.TryDequeue(out var tuple))
             {
-                int msgLength = tuple.msg.Message.RosMessageLength;
+                int msgLength = tuple.msg.RosMessageLength;
                 result.Add((tuple.msg, msgLength, tuple.signal));
                 totalQueueSizeInBytes += msgLength;
             }
@@ -502,7 +493,7 @@ namespace Iviz.Roslib
             return totalQueueSizeInBytes;
         }
 
-        static void DiscardOldMessages(List<(SharedMessage<T>, int msgLength, TaskCompletionSource?)> queue,
+        static void DiscardOldMessages(List<(T, int msgLength, TaskCompletionSource?)> queue,
             int totalQueueSizeInBytes, int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
         {
             int c = queue.Count - 1;

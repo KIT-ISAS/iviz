@@ -684,8 +684,8 @@ namespace Iviz.Roslib.MarkerHelper
             var erase = new InteractiveMarkerUpdate
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
+                Erases = args 
             };
-            erase.Erases = args.AsRef(erase.Erases);
             return erase;
         }
     }
