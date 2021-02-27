@@ -47,7 +47,7 @@ namespace Iviz.Roslib
         readonly TopicInfo<T> topicInfo;
         readonly bool latching;
         readonly Task? task;
-        readonly TcpListener? listener;
+        readonly TcpListener listener;
         readonly int timeoutInMs;
         readonly byte[] lengthBuffer = new byte[4];
 
@@ -349,7 +349,7 @@ namespace Iviz.Roslib
             catch (ObjectDisposedException) { }
 
             Status = SenderStatus.Dead;
-            listener?.Stop();
+            listener.Stop();
             tcpClient = null;
             TryRelease(managerSignal);
 
