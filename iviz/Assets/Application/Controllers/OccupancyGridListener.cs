@@ -281,21 +281,19 @@ namespace Iviz.Controllers
             numCellsY = (int) msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
-            using (var data = msg.Data.ReleaseAndShare())
+            var data = msg.Data;
+            if (CubesVisible)
             {
-                if (CubesVisible)
-                {
-                    SetCubes(data, origin);
-                }
+                SetCubes(data, origin);
+            }
 
-                if (TextureVisible)
-                {
-                    SetTextures(data, origin);
-                }
+            if (TextureVisible)
+            {
+                SetTextures(data, origin);
             }
         }
 
-        void SetCubes([NotNull] SharedRef<sbyte> data, Pose pose)
+        void SetCubes([NotNull] sbyte[] data, Pose pose)
         {
             if (gridTiles.Length != 16)
             {
@@ -329,15 +327,11 @@ namespace Iviz.Controllers
                         yMax: (v + 1) * numCellsY / 4
                     );
 
-                    var sharedMsgData = data.Share();
                     Task.Run(() =>
                     {
                         try
                         {
-                            using (sharedMsgData)
-                            {
-                                grid.SetOccupancy(sharedMsgData.Array, rect, pose);
-                            }
+                            grid.SetOccupancy(data, rect, pose);
                         }
                         catch (Exception e)
                         {
@@ -351,7 +345,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] SharedRef<sbyte> data, Pose pose)
+        void SetTextures([NotNull] sbyte[] data, Pose pose)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -394,15 +388,11 @@ namespace Iviz.Controllers
                     OccupancyGridResource.Rect rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i];
-                    var sharedMsgData = data.Share();
                     Task.Run(() =>
                     {
                         try
                         {
-                            using (sharedMsgData)
-                            {
-                                texture.Set(sharedMsgData.Array, cellSize, numCellsX, numCellsY, rect, pose);
-                            }
+                            texture.Set(data, cellSize, numCellsX, numCellsY, rect, pose);
                         }
                         catch (Exception e)
                         {

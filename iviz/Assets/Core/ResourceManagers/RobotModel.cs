@@ -10,9 +10,9 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using Iviz.Urdf;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using Iviz.XmlRpc;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
 using Logger = Iviz.Core.Logger;
@@ -130,9 +130,7 @@ namespace Iviz.Displays
             }
             catch (OperationCanceledException e)
             {
-                Logger.Error($"{this}: Robot building canceled");
-                Debug.Log(runningTs.IsCancellationRequested);
-                Debug.Log(e);
+                Logger.Error($"{this}: Robot building canceled.");
                 throw;
             }
             catch (Exception e)
@@ -512,12 +510,12 @@ namespace Iviz.Displays
             WriteJoints(state.Name.Zip(state.Position));
         }
 
-        public void WriteJoints([NotNull] IReadOnlyList<StringRef> names, [NotNull] double[] positions)
+        public void WriteJoints([NotNull] IReadOnlyList<string> names, [NotNull] double[] positions)
         {
             WriteJoints(names.Zip(positions));
         }
 
-        public void WriteJoints([NotNull] IEnumerable<(StringRef name, double position)> jointPositions)
+        public void WriteJoints([NotNull] IEnumerable<(string name, double position)> jointPositions)
         {
             foreach ((string name, double position) in jointPositions)
             {

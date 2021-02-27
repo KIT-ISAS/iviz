@@ -261,6 +261,11 @@ namespace Iviz.App
                 MainCamera.allowHDR = true;
             }
 
+            if (!Settings.SupportsComputeBuffers)
+            {
+                Core.Logger.Info("Platform does not support compute shaders. Point cloud rendering will probably not work.");
+            }
+
             Config = new SettingsConfiguration();
 
             //CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();

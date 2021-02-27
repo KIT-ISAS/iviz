@@ -25,7 +25,6 @@ namespace Iviz.Roslib
 
     internal sealed class TcpReceiverAsync<T> : IRosTcpReceiver where T : IMessage
     {
-        const int BufferSizeIncrease = 1024;
         const int MaxConnectionRetries = 120;
         const int DisposeTimeoutInMs = 2000;
 
@@ -377,7 +376,7 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
 
-                using T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
+                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
                 manager.MessageCallback(message, this);
             }
         }

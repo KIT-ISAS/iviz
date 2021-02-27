@@ -31,10 +31,10 @@ namespace Iviz.Ros
     {
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
 
-        readonly ConcurrentQueue<SharedMessage<T>> messageQueue = new ConcurrentQueue<SharedMessage<T>>();
-        readonly Action<SharedMessage<T>> delayedHandler;
-        readonly Func<SharedMessage<T>, bool> directHandler;
-        readonly List<SharedMessage<T>> tmpMessageBag = new List<SharedMessage<T>>();
+        readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
+        readonly Action<T> delayedHandler;
+        readonly Func<T, bool> directHandler;
+        readonly List<T> tmpMessageBag = new List<T>(32);
         readonly bool callbackInGameThread;
 
         int droppedMsgs;
@@ -57,30 +57,16 @@ namespace Iviz.Ros
             GameThread.EverySecond += UpdateStats;
         }
 
-        [NotNull]
-        static Action<SharedMessage<T>> ToSharedHandler(Action<T> handler)
-        {
-            return sharedRef =>
-            {
-                using (sharedRef) { handler(sharedRef.Message); }
-            };
-        }
-
         public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
         {
-            if (handler == null)
-            {
-                throw new ArgumentNullException(nameof(handler));
-            }
-
-            delayedHandler = ToSharedHandler(handler);
+            delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
             GameThread.ListenersEveryFrame += CallHandlerDelayed;
             Connection.Subscribe(this);
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Func<SharedMessage<T>, bool> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
@@ -88,31 +74,8 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        [NotNull]
-        static Func<SharedMessage<T>, bool> ToSharedHandler(Func<T, bool> handler)
+        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : this(topic, (T t) => handler(t))
         {
-            return sharedRef =>
-            {
-                using (sharedRef) { return handler(sharedRef.Message); }
-            };
-        }
-
-        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic, ToSharedHandler(handler))
-        {
-        }
-
-        public Listener([NotNull] string topic, [NotNull] Action<SharedMessage<IMessage>> handler) : this(topic)
-        {
-            delayedHandler = sharedRef =>
-            {
-                using (sharedRef) { handler(sharedRef.ShareMsg()); }
-            };
-
-            callbackInGameThread = true;
-            GameThread.ListenersEveryFrame += CallHandlerDelayed;
-
-            Connection.Subscribe(this);
-            Subscribed = true;
         }
 
 
@@ -167,7 +130,7 @@ namespace Iviz.Ros
             Unpause();
         }
 
-        internal void EnqueueMessage([NotNull] SharedMessage<T> msg)
+        internal void EnqueueMessage([NotNull] in T msg)
         {
             if (!Subscribed)
             {
@@ -180,16 +143,13 @@ namespace Iviz.Ros
                 return;
             }
 
-            using (msg)
-            {
-                CallHandlerDirect(msg);
-            }
+            CallHandlerDirect(msg);
         }
 
         void CallHandlerDelayed()
         {
             tmpMessageBag.Clear();
-            while (messageQueue.TryDequeue(out SharedMessage<T> t))
+            while (messageQueue.TryDequeue(out T t))
             {
                 tmpMessageBag.Add(t);
             }
@@ -201,7 +161,7 @@ namespace Iviz.Ros
                 Interlocked.Increment(ref recentMsgs);
                 try
                 {
-                    lastMsgBytes += msg.Message.RosMessageLength;
+                    lastMsgBytes += msg.RosMessageLength;
                     delayedHandler(msg);
                 }
                 catch (Exception e)
@@ -215,7 +175,7 @@ namespace Iviz.Ros
             recentMsgs += messageQueue.Count;
         }
 
-        void CallHandlerDirect([NotNull] SharedMessage<T> msg)
+        void CallHandlerDirect([NotNull] in T msg)
         {
             Interlocked.Increment(ref totalMsgCounter);
             Interlocked.Increment(ref recentMsgs);
@@ -223,7 +183,7 @@ namespace Iviz.Ros
             bool processed;
             try
             {
-                Interlocked.Add(ref lastMsgBytes, msg.Message.RosMessageLength);
+                Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
                 processed = directHandler(msg);
             }
             catch (Exception e)

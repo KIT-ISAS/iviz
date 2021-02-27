@@ -208,7 +208,7 @@ namespace Iviz.Controllers
             }
 
             fieldNames.Clear();
-            fieldNames.AddRange(msg.Layers.AsArray());
+            fieldNames.AddRange(msg.Layers);
 
             int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
@@ -229,7 +229,7 @@ namespace Iviz.Controllers
 
             resource.Set(width, height,
                 (float) msg.Info.LengthX, (float) msg.Info.LengthY,
-                msg.Data[layer].Data.Array, length);
+                msg.Data[layer].Data, length);
             MeasuredIntensityBounds = resource.IntensityBounds;
             if (ForceMinMax)
             {

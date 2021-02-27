@@ -23,7 +23,7 @@ namespace Iviz.Roslib
         int maxQueueSizeInBytes;
 
         bool latching;
-        SharedMessage<TMessage>? latchedMessage;
+        readonly Nullable<TMessage> latchedMessage = new ();
 
         bool forceTcpNoDelay;
 
@@ -71,8 +71,7 @@ namespace Iviz.Roslib
             set
             {
                 latching = value;
-                latchedMessage?.Dispose();
-                latchedMessage = null;
+                latchedMessage.Unset();
             }
         }
 
@@ -129,9 +128,9 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (Latching && latchedMessage != null)
+            if (Latching && latchedMessage.HasValue)
             {
-                newSender.Publish(latchedMessage);
+                newSender.Publish(latchedMessage.Value);
             }
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
@@ -170,28 +169,22 @@ namespace Iviz.Roslib
 
         public void Publish(in TMessage msg)
         {
-            using var sharedMessage = new SharedMessage<TMessage>(msg);
-
             if (Latching)
             {
-                latchedMessage?.Dispose();
-                latchedMessage = sharedMessage.Share();
+                latchedMessage.Value = msg;
             }
 
             foreach (var pair in connectionsByCallerId)
             {
-                pair.Value.Publish(sharedMessage.Share());
+                pair.Value.Publish(msg);
             }
         }
 
         public async Task<bool> PublishAndWaitAsync(TMessage msg, CancellationToken token)
         {
-            using var sharedMessage = new SharedMessage<TMessage>(msg);
-
             if (Latching)
             {
-                latchedMessage?.Dispose();
-                latchedMessage = sharedMessage.Share();
+                latchedMessage.Value = msg;
             }
 
             if (connectionsByCallerId.IsEmpty)
@@ -200,7 +193,7 @@ namespace Iviz.Roslib
             }
 
             await connectionsByCallerId
-                .Select(pair => pair.Value.PublishAndWaitAsync(sharedMessage.Share(), token))
+                .Select(pair => pair.Value.PublishAndWaitAsync(msg, token))
                 .WhenAll();
             return true;
         }
@@ -214,9 +207,7 @@ namespace Iviz.Roslib
         {
             await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()).WhenAll().AwaitNoThrow(this);
             connectionsByCallerId.Clear();
-
-            latchedMessage?.Dispose();
-            latchedMessage = null;
+            latchedMessage.Unset();
         }
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()
@@ -234,6 +225,28 @@ namespace Iviz.Roslib
         public override string ToString()
         {
             return $"[TcpSenderManager '{Topic}']";
+        }
+
+        class Nullable<T>
+        {
+            T? element;
+            public bool HasValue { get; private set; }
+
+            public T Value
+            {
+                get => HasValue ? element! : throw new NullReferenceException();
+                set
+                {
+                    element = value ?? throw new ArgumentNullException(nameof(value));
+                    HasValue = true;
+                }
+            }
+
+            public void Unset()
+            {
+                element = default;
+                HasValue = false;
+            }
         }
     }
 }

@@ -296,7 +296,7 @@ namespace Iviz.XmlRpc
             {
                 try
                 {
-                    await t.Caf();
+                    await t;
                 }
                 catch (Exception e)
                 {
@@ -318,7 +318,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                await task1.Caf();
+                await task1;
             }
             catch (Exception e)
             {
@@ -328,7 +328,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                await task2.Caf();
+                await task2;
             }
             catch (Exception e)
             {
@@ -344,7 +344,7 @@ namespace Iviz.XmlRpc
 
         public static async ValueTask<Task> WhenAny(this (Task, Task) ts)
         {
-            return await Task.WhenAny(ts.Item1, ts.Item2).Caf();
+            return await Task.WhenAny(ts.Item1, ts.Item2);
         }
     }
 

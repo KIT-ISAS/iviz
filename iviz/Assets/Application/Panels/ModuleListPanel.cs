@@ -761,7 +761,7 @@ namespace Iviz.App
         {
             //Debug.Log(GC.GetTotalMemory(false) / (1024 * 1024);
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            bottomTime.text = $"Mem {memBytesKb.ToString()}M";
+            bottomTime.text = $"M: {memBytesKb.ToString()}M";
 
             //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
 

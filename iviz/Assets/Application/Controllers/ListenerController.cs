@@ -1,4 +1,5 @@
 ﻿using Iviz.Ros;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -30,10 +31,11 @@ namespace Iviz.Controllers
 
         public virtual void ResetController()
         {
-            Debug.Log($"{this}: Resetting!");
+            //Debug.Log($"{this}: Resetting!");
             Listener?.Reset();
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[{GetType().Name}:'{Listener?.Topic}']";

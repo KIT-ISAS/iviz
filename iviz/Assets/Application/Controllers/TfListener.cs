@@ -14,6 +14,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
+using UnityEngine;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -47,10 +48,10 @@ namespace Iviz.Controllers
         readonly TfConfiguration config = new TfConfiguration();
 
         //readonly AsyncLock mutex = new AsyncLock();
-        readonly ConcurrentQueue<(UniqueRef<TransformStamped> frame, bool isStatic)> messageList =
-            new ConcurrentQueue<(UniqueRef<TransformStamped>, bool)>();
+        readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> messageList =
+            new ConcurrentQueue<(TransformStamped[], bool)>();
 
-        readonly Dictionary<uint, TfFrame> frames = new Dictionary<uint, TfFrame>();
+        readonly Dictionary<string, TfFrame> frames = new Dictionary<string, TfFrame>();
         [NotNull] readonly FrameNode keepAllListener;
         [NotNull] readonly FrameNode staticListener;
         [NotNull] readonly FrameNode fixedFrameListener;
@@ -257,78 +258,74 @@ namespace Iviz.Controllers
             ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, SubscriptionHandlerStatic);
         }
 
+        static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
+        {
+            // TODO: Find better way to handle this
+            const int maxPoseMagnitude = 10000;
+            return Math.Abs(v.X) < maxPoseMagnitude
+                   && Math.Abs(v.Y) < maxPoseMagnitude
+                   && Math.Abs(v.Z) < maxPoseMagnitude;
+        }
+
         void ProcessMessages()
         {
             while (messageList.TryDequeue(out var value))
             {
-                bool isStatic = value.isStatic;
-                using (var frameArray = value.frame.ToDisposableRef())
+                var (frame, isStatic) = value;
+                foreach (var (parentFrameId, childFrameId, transform, _) in frame)
                 {
-                    foreach (TransformStamped frame in frameArray)
+                    if (transform.HasNaN()
+                        || childFrameId.Length == 0
+                        || !IsValid(transform.Translation))
                     {
-                            StringRef parentIdRef = frame.Header.FrameId;
-                            StringRef childIdRef = frame.ChildFrameId;
-                            var transform = frame.Transform;
+                        continue;
+                    }
 
-                            if (transform.HasNaN() || childIdRef.Length == 0)
-                            {
-                                continue;
-                            }
+                    // remove starting '/' from tf v1
+                    string childId = childFrameId[0] != '/'
+                        ? childFrameId
+                        : childFrameId.Substring(1);
 
-                            const int maxPoseMagnitude = 10000;
-                            if (transform.Translation.SquaredNorm > 3 * maxPoseMagnitude * maxPoseMagnitude)
-                            {
-                                continue; // TODO: Find better way to handle this
-                            }
+                    TfFrame child;
+                    if (isStatic)
+                    {
+                        child = GetOrCreateFrame(childId, staticListener);
+                        if (config.KeepAllFrames)
+                        {
+                            child.AddListener(keepAllListener);
+                        }
+                    }
+                    else if (config.KeepAllFrames)
+                    {
+                        child = GetOrCreateFrame(childId, keepAllListener);
+                    }
+                    else if (!TryGetFrameImpl(childId, out child))
+                    {
+                        continue;
+                    }
 
-                            /*
-                            // remove starting '/' from tf v1
-                            string childId = childFrameId[0] != '/'
-                                ? childFrameId
-                                : childFrameId.Substring(1);
-                                */
+                    if (parentFrameId.Length == 0)
+                    {
+                        child.SetParent(OriginFrame);
+                        child.SetPose(transform.Ros2Unity());
+                        continue;
+                    }
 
-                            TfFrame child;
-                            if (isStatic)
-                            {
-                                child = GetOrCreateFrame(childIdRef, staticListener);
-                                if (config.KeepAllFrames)
-                                {
-                                    child.AddListener(keepAllListener);
-                                }
-                            }
-                            else if (config.KeepAllFrames)
-                            {
-                                child = GetOrCreateFrame(childIdRef, keepAllListener);
-                            }
-                            else if (!TryGetFrameImpl(childIdRef.ComputeHash(), out child))
-                            {
-                                continue;
-                            }
+                    string parentId = parentFrameId[0] != '/'
+                        ? parentFrameId
+                        : parentFrameId.Substring(1);
 
-                            /*
-                            string parentId = frameId.Length == 0 || frameId[0] != '/'
-                                ? frameId
-                                : frameId.Substring(1);
-                                */
-
-                            if (parentIdRef.Length == 0)
-                            {
-                                child.SetParent(OriginFrame);
-                                child.SetPose(transform.Ros2Unity());
-                            }
-                            else if (!(child.Parent is null) && parentIdRef.ComputeHash() == child.Parent.IdHash)
-                            {
-                                child.SetPose(transform.Ros2Unity());
-                            }
-                            else
-                            {
-                                TfFrame parent = GetOrCreateFrame(parentIdRef);
-                                if (child.SetParent(parent))
-                                {
-                                    child.SetPose(transform.Ros2Unity());
-                                }
-                            }
+                    if (!(child.Parent is null) && parentId == child.Parent.Id)
+                    {
+                        child.SetPose(transform.Ros2Unity());
+                    }
+                    else
+                    {
+                        TfFrame parent = GetOrCreateFrame(parentId);
+                        if (child.SetParent(parent))
+                        {
+                            child.SetPose(transform.Ros2Unity());
+                        }
                     }
                 }
             }
@@ -356,7 +353,7 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame Add([NotNull] TfFrame t)
         {
-            frames.Add(t.IdHash, t);
+            frames.Add(t.Id, t);
             return t;
         }
 
@@ -368,7 +365,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(id));
             }
 
-            return Instance.TryGetFrameImpl(id.ComputeHash(), out frame);
+            return Instance.TryGetFrameImpl(id, out frame);
         }
 
         [NotNull]
@@ -391,36 +388,13 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        TfFrame GetOrCreateFrame([NotNull] StringRef frameId, [CanBeNull] FrameNode listener = null)
-        {
-            //string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
-            TfFrame frame = GetOrCreateFrameImpl(frameId);
-
-            if (!(listener is null))
-            {
-                frame.AddListener(listener);
-            }
-
-            return frame;
-        }
-
-        [NotNull]
         TfFrame GetOrCreateFrameImpl([NotNull] string id)
         {
-            return TryGetFrameImpl(id.ComputeHash(), out TfFrame frame)
+            return TryGetFrameImpl(id, out TfFrame frame)
                 ? frame
                 : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
         }
 
-        [NotNull]
-        TfFrame GetOrCreateFrameImpl([NotNull] StringRef id)
-        {
-            return TryGetFrameImpl(id.ComputeHash(), out TfFrame frame)
-                ? frame
-                : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
-        }
-
-        
         [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
@@ -439,20 +413,20 @@ namespace Iviz.Controllers
         }
 
         [ContractAnnotation("=> false, t:null; => true, t:notnull")]
-        bool TryGetFrameImpl(uint idHash, out TfFrame t)
+        bool TryGetFrameImpl([NotNull] string id, out TfFrame t)
         {
-            return frames.TryGetValue(idHash, out t);
+            return frames.TryGetValue(id, out t);
         }
 
         bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
         {
-            messageList.Enqueue((msg.Transforms.Release(), false));
+            messageList.Enqueue((msg.Transforms, false));
             return true;
         }
 
         bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
         {
-            messageList.Enqueue((msg.Transforms.Release(), true));
+            messageList.Enqueue((msg.Transforms, true));
             return true;
         }
 
@@ -463,7 +437,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            frames.Remove(frame.IdHash);
+            frames.Remove(frame.Id);
 
             frame.Stop();
             Object.Destroy(frame.gameObject);
@@ -504,9 +478,10 @@ namespace Iviz.Controllers
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
             Transform originFrame = OriginFrame.Transform;
+            var (position, rotation) = unityPose;
             return new Pose(
-                originFrame.InverseTransformPoint(unityPose.position),
-                Quaternion.Inverse(originFrame.rotation) * unityPose.rotation
+                originFrame.InverseTransformPoint(position),
+                Quaternion.Inverse(originFrame.rotation) * rotation
             );
         }
 

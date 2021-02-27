@@ -216,7 +216,7 @@ namespace Iviz.Controllers
 
         static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
         {
-            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields.AsArray(), srv.Request.Config);
+            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
@@ -270,7 +270,6 @@ namespace Iviz.Controllers
                     }
                     finally
                     {
-                        Logger.Debug(Time.time + ": Done!");
                         signal.Release();
                     }
                 });
@@ -356,7 +355,7 @@ namespace Iviz.Controllers
 
         static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
         {
-            (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames.AsArray());
+            (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
             srv.Response.Poses = poses;
             srv.Response.IsValid = success;
         }

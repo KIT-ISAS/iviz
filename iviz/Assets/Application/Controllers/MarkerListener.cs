@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -39,18 +42,14 @@ namespace Iviz.Controllers
 
         /// Temporary buffer to hold incoming marker messages from the network thread
         readonly Dictionary<(string Ns, int Id), Marker> markerBuffer = new Dictionary<(string Ns, int Id), Marker>();
-        
-        /// Temporary buffer 
-        readonly List<Marker> markerList = new List<Marker>();
 
         public MarkerListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            GameThread.EveryFrame += Handle;
         }
 
         public override IModuleData ModuleData { get; }
-        public override TfFrame Frame => TfListener.MapFrame;
+        [NotNull] public override TfFrame Frame => TfListener.MapFrame;
 
         public MarkerConfiguration Config
         {
@@ -135,6 +134,7 @@ namespace Iviz.Controllers
             }
 
             GameThread.EverySecond += CheckDeadMarkers;
+            GameThread.EveryFrame += HandleAsync;
         }
 
         void CheckDeadMarkers()
@@ -156,7 +156,7 @@ namespace Iviz.Controllers
             DestroyAllMarkers();
 
             GameThread.EverySecond -= CheckDeadMarkers;
-            GameThread.EveryFrame -= Handle;
+            GameThread.EveryFrame -= HandleAsync;
         }
 
         public string Topic => config.Topic;
@@ -290,59 +290,72 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void Handle()
+        async void HandleAsync()
         {
+            UniqueRef<Marker> markerList;
             lock (markerBuffer)
             {
-                markerList.AddRange(markerBuffer.Values);
+                if (markerBuffer.Count == 0)
+                {
+                    return;
+                }
+                
+                markerList = new UniqueRef<Marker>(markerBuffer.Count);
+                markerBuffer.Values.CopyTo(markerList.Array, 0);
                 markerBuffer.Clear();
             }
 
-            foreach (Marker msg in markerList)
+            try
             {
-                var id = IdFromMessage(msg);
-                switch (msg.Action)
-                {
-                    case Marker.ADD:
-                        if (msg.Pose.HasNaN())
-                        {
-                            Logger.Debug("MarkerListener: NaN in pose!");
-                            return;
-                        }
-
-                        if (msg.Scale.HasNaN())
-                        {
-                            Logger.Debug("MarkerListener: NaN in scale!");
-                            return;
-                        }
-
-                        if (!markers.TryGetValue(id, out var markerToAdd))
-                        {
-                            markerToAdd = CreateMarkerObject();
-                            //markerToAdd.ModuleData = ModuleData;
-                            markerToAdd.Parent = TfListener.ListenersFrame;
-                            markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
-                            markerToAdd.Tint = Tint;
-                            markerToAdd.Visible = Visible;
-                            markerToAdd.Layer = LayerType.IgnoreRaycast;
-                            markerToAdd.TriangleListFlipWinding = TriangleListFlipWinding;
-                            markers[id] = markerToAdd;
-                        }
-
-                        markerToAdd.Set(msg);
-                        break;
-                    case Marker.DELETE:
-                        if (markers.TryGetValue(id, out var markerToDelete))
-                        {
-                            DeleteMarkerObject(markerToDelete);
-                            markers.Remove(id);
-                        }
-
-                        break;
-                }
+                await markerList.Select(HandleAsync).WhenAll();
             }
-            
-            markerList.Clear();
+            finally
+            {
+                markerList.Dispose();
+            }
+        }
+
+        async Task HandleAsync([NotNull] Marker msg)
+        {
+            var id = IdFromMessage(msg);
+            switch (msg.Action)
+            {
+                case Marker.ADD:
+                    if (msg.Pose.HasNaN())
+                    {
+                        Logger.Debug("MarkerListener: NaN in pose!");
+                        return;
+                    }
+
+                    if (msg.Scale.HasNaN())
+                    {
+                        Logger.Debug("MarkerListener: NaN in scale!");
+                        return;
+                    }
+
+                    if (!markers.TryGetValue(id, out var markerToAdd))
+                    {
+                        markerToAdd = CreateMarkerObject();
+                        markerToAdd.Parent = TfListener.ListenersFrame;
+                        markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
+                        markerToAdd.Tint = Tint;
+                        markerToAdd.Visible = Visible;
+                        markerToAdd.Layer = LayerType.IgnoreRaycast;
+                        markerToAdd.TriangleListFlipWinding = TriangleListFlipWinding;
+                        markers[id] = markerToAdd;
+                    }
+
+                    await markerToAdd.SetAsync(msg);
+                    break;
+                case Marker.DELETE:
+                    if (markers.TryGetValue(id, out var markerToDelete))
+                    {
+                        DeleteMarkerObject(markerToDelete);
+                        markers.Remove(id);
+                    }
+
+                    break;
+            }
         }
 
         public static (string Ns, int Id) IdFromMessage([NotNull] Marker marker)

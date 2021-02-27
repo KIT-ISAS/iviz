@@ -25,6 +25,8 @@ namespace Iviz.Displays
         public Material TransparentBumpLit;
         public Material PointCloud;
         public Material PointCloudWithColormap;
+        public Material PointCloudDirect;
+        public Material PointCloudDirectWithColormap;
 
         public Material LineMaterial;
         public Material TransparentLine;

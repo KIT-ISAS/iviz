@@ -222,7 +222,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool Handler(SharedMessage<PointCloud2> msg)
+        bool Handler(PointCloud2 msg)
         {
             if (isProcessing)
             {
@@ -231,18 +231,13 @@ namespace Iviz.Controllers
 
             isProcessing = true;
 
-            var sharedMsg = msg.Share();
-
-            Task.Run(() =>
-            {
-                using (sharedMsg) { ProcessMessage(sharedMsg); }
-            });
+            Task.Run(() => ProcessMessage(msg));
 
             return true;
         }
 
         [ContractAnnotation("=> false, result:null; => true, result:notnull")]
-        static bool TryGetField([NotNull] IEnumerable<PointField> fields, string name, out PointField result)
+        static bool TryGetField([NotNull] PointField[] fields, string name, out PointField result)
         {
             foreach (PointField field in fields)
             {
@@ -259,9 +254,9 @@ namespace Iviz.Controllers
             return false;
         }
 
-        bool FieldsEqual([NotNull] IReadOnlyList<PointField> fields)
+        bool FieldsEqual([NotNull] PointField[] fields)
         {
-            if (fieldNames.Count != fields.Count)
+            if (fieldNames.Count != fields.Length)
             {
                 return false;
             }
@@ -277,11 +272,10 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void ProcessMessage([NotNull] SharedMessage<PointCloud2> sharedMsg)
+        void ProcessMessage([NotNull] PointCloud2 msg)
         {
             try
             {
-                PointCloud2 msg = sharedMsg.Message;
                 if (disposed)
                 {
                     // we're dead
@@ -339,7 +333,7 @@ namespace Iviz.Controllers
 
                 pointBuffer.Clear();
 
-                GeneratePointBuffer(msg, msg.Data.Array, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+                GeneratePointBuffer(msg, msg.Data, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
                 GameThread.PostInListenerQueue(() =>
                 {
@@ -458,7 +452,7 @@ namespace Iviz.Controllers
 
         void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int iOffset, int iType)
         {
-            const float maxPositionMagnitudeSq = PointListResource.MaxPositionMagnitudeSq;
+            const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 
             int rowStep = (int) msg.RowStep;
             int pointStep = (int) msg.PointStep;
@@ -483,7 +477,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float4 data = *(float4*) dataOff;
-                                    if (data.HasNaN() || data.xyz.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.xyz.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -500,7 +494,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -518,7 +512,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -536,7 +530,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -554,7 +548,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -572,7 +566,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -590,7 +584,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -608,7 +602,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -626,7 +620,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }

@@ -9,7 +9,7 @@ namespace Iviz.Displays
         [SerializeField] GameObject front = null;
         [SerializeField] Billboard billboard = null;
         [SerializeField] float scale = 1;
-        
+
         Pose billboardStartPose;
         ImageTexture texture;
         Vector3 offset;
@@ -88,24 +88,27 @@ namespace Iviz.Displays
                 Texture = new ImageTexture();
             }
 
+            string encoding;
             switch (bpp)
             {
                 case 1:
-                    Texture.Set(width, height, "mono8", data, generateMipmaps);
+                    encoding = "mono8";
                     break;
                 case 2:
-                    Texture.Set(width, height, "mono16", data, generateMipmaps);
+                    encoding = "mono16";
                     break;
                 case 3:
-                    Texture.Set(width, height, "rgb8", data, generateMipmaps);
+                    encoding = "rgb8";
                     break;
                 case 4:
-                    Texture.Set(width, height, "rgba8", data, generateMipmaps);
+                    encoding = "rgba8";
                     break;
                 default:
                     Debug.LogWarning("ImageResource: Set function could not find encoding!");
-                    break;
+                    return;
             }
+
+            Texture.Set(width, height, encoding, data, generateMipmaps);
         }
 
         public override void Suspend()

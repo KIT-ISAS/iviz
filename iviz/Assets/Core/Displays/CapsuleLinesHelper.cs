@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    internal class CapsuleLinesHelper
+    internal static class CapsuleLinesHelper
     {
         static readonly Vector3[] CapsuleLines =
         {
@@ -141,8 +141,7 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(mesh));
             }
 
-            Vector3 dirx, diry, dirz;
-            Vector3 Transform(in Vector3 p) => p.x * dirx + p.y * diry + p.z * dirz;
+            //Vector3 Transform(in Vector3 p) => p.x * dirx + p.y * diry + p.z * dirz;
 
             int length = 10 * lineBuffer.Length;
             using (var points = new Rent<Vector3>(length))
@@ -160,45 +159,53 @@ namespace Iviz.Displays
                 {
                     Vector3 a = line.c0.xyz;
                     Vector3 b = line.c1.xyz;
-                    dirx = b - a;
+                    var dirx = b - a;
                     dirx /= dirx.Magnitude();
 
-                    diry = Vector3.forward.Cross(dirx);
-                    if (Mathf.Approximately(diry.MagnitudeSq(), 0))
+                    //Vector3 diry = Vector3.forward.Cross(dirx);
+                    Vector3 diry = new Vector3(-dirx.y, dirx.x, 0);
+                    if (Mathf.Approximately(diry.MaxAbsCoeff(), 0))
                     {
                         diry = Vector3.up.Cross(dirx);
                     }
 
                     dirx *= scale;
                     diry *= scale / diry.Magnitude();
-                    dirz = dirx.Cross(diry);
+                    
+                    Vector3 dirz = dirx.Cross(diry);
                     dirz *= scale / dirz.Magnitude();
 
-                    points.Array[pOff++] = Transform(CapsuleLines[0]) + a;
-                    points.Array[pOff++] = Transform(CapsuleLines[1]) + a;
-                    points.Array[pOff++] = Transform(CapsuleLines[2]) + a;
-                    points.Array[pOff++] = Transform(CapsuleLines[3]) + a;
-                    points.Array[pOff++] = Transform(CapsuleLines[4]) + a;
+                    Vector3 halfDirX = 0.5f * dirx;
+                    Vector3 halfSumYz = 0.5f * (diry + dirz);
+                    Vector3 halfDiffYz = 0.5f * (diry - dirz);
+                    
+                    points.Array[pOff++] = a - halfDirX;
+                    points.Array[pOff++] = a + halfSumYz;
+                    points.Array[pOff++] = a + halfDiffYz;
+                    points.Array[pOff++] = a - halfSumYz;
+                    points.Array[pOff++] = a - halfDiffYz;                    
 
-                    points.Array[pOff++] = Transform(CapsuleLines[1]) + b;
-                    points.Array[pOff++] = Transform(CapsuleLines[2]) + b;
-                    points.Array[pOff++] = Transform(CapsuleLines[3]) + b;
-                    points.Array[pOff++] = Transform(CapsuleLines[4]) + b;
-                    points.Array[pOff++] = Transform(CapsuleLines[5]) + b;
-
+                    points.Array[pOff++] = b + halfSumYz;
+                    points.Array[pOff++] = b + halfDiffYz;
+                    points.Array[pOff++] = b - halfSumYz;
+                    points.Array[pOff++] = b - halfDiffYz;
+                    points.Array[pOff++] = b + halfDirX;  
+                    
                     Color32 ca = PointWithColor.ColorFromFloatBits(line.c0.w);
                     Color32 cb = PointWithColor.ColorFromFloatBits(line.c1.w);
 
+                    Vector2 uv0 = new Vector2(line.c0.w, 0);
                     for (int i = 0; i < 5; i++)
                     {
                         colors.Array[cOff++] = ca;
-                        uvs.Array[uvOff++] = new Vector2(line.c0.w, 0);
+                        uvs.Array[uvOff++] = uv0;
                     }
 
+                    Vector2 uv1 = new Vector2(line.c1.w, 0);
                     for (int i = 5; i < 10; i++)
                     {
                         colors.Array[cOff++] = cb;
-                        uvs.Array[uvOff++] = new Vector2(line.c1.w, 0);
+                        uvs.Array[uvOff++] = uv1;
                     }
 
                     foreach (int index in CapsuleIndices)

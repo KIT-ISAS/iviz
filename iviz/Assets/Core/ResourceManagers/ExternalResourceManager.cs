@@ -567,10 +567,8 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    using (var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length, 32))
-                    {
-                        obj = await CreateModelObjectAsync(uriString, msg, provider, token);
-                    }
+                    var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length, 32);
+                    obj = await CreateModelObjectAsync(uriString, msg, provider, token);
                 }
             }
             catch (OperationCanceledException)
@@ -638,10 +636,8 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    using (var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length, 32))
-                    {
-                        obj = await CreateSceneNodeAsync(msg, provider, token);
-                    }
+                    var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length, 32);
+                    obj = await CreateSceneNodeAsync(msg, provider, token);
                 }
             }
             catch (OperationCanceledException)

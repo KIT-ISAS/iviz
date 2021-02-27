@@ -77,7 +77,7 @@ namespace Iviz.Controllers
         [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
 
         public Bounds? Bounds =>
-            resource == null ? null : UnityUtils.TransformBound(resource.Bounds, resource.GetTransform());
+            resource == null ? null : resource.Bounds.TransformBound(resource.GetTransform());
 
         uint? previousHash;
 
@@ -191,7 +191,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public async void Set([NotNull] Marker msg)
+        public async Task SetAsync([NotNull] Marker msg)
         {
             if (msg == null)
             {
@@ -209,7 +209,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<color=maroon><b>* Marker: ").Append(id.Ns).Append("/").Append(id.Id)
+            description.Append("<color=#800000ff><b>* ").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
                 .Append("</b></color>").AppendLine();
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
@@ -235,7 +235,7 @@ namespace Iviz.Controllers
 
             try
             {
-                await UpdateResource(msg);
+                await UpdateResourceAsync(msg);
             }
             catch (OperationCanceledException)
             {
@@ -752,7 +752,7 @@ namespace Iviz.Controllers
             }
         }
 
-        async Task UpdateResource([NotNull] Marker msg)
+        async Task UpdateResourceAsync([NotNull] Marker msg)
         {
             Info<GameObject> newResourceInfo = await GetRequestedResource(msg);
             if (newResourceInfo == resourceInfo)
@@ -879,11 +879,11 @@ namespace Iviz.Controllers
                     {
                         StopLoadResourceTask();
                         runningTs = new CancellationTokenSource();
-                        description.Append("-- Mesh is being downloaded --").AppendLine();
+                        description.Append("** Mesh is being downloaded...").AppendLine();
                         
                         var result = await Resource.GetGameObjectResourceAsync(msg.MeshResource,
                             ConnectionManager.ServiceProvider, runningTs.Token);
-                        description.Append("Download finished.").AppendLine();
+                        description.Append(result != null ? "** Download finished." : "** Download failed.").AppendLine();
                         return result;
                     }
                     catch (OperationCanceledException)
@@ -1001,6 +1001,7 @@ namespace Iviz.Controllers
             return false;
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[MarkerObject {name}]";

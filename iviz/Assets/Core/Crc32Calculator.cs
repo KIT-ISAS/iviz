@@ -67,29 +67,13 @@ namespace Iviz.Core
             }
         }
 
-        public unsafe uint Compute<T>([NotNull] UniqueRef<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        public unsafe uint Compute<T>(in Rent<T> array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array.Array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
             }
-        }
-        
-        public unsafe uint Compute([NotNull] string str, uint startHash = DefaultSeed)
-        {
-            fixed (char* ptr = str)
-            {
-                return CalculateHash(startHash, (byte*) ptr, str.Length * sizeof(char));
-            }
         }        
-
-        public unsafe uint Compute([NotNull] StringRef array, uint startHash = DefaultSeed)
-        {
-            fixed (byte* ptr = array.Array)
-            {
-                return CalculateHash(startHash, ptr, array.Length);
-            }
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Update(uint hash, byte val)    

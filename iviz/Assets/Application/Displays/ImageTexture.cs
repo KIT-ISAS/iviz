@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Buffer = System.Buffer;
 using Logger = Iviz.Core.Logger;
@@ -153,17 +154,13 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void ProcessPng(UniqueRef<byte> data, [NotNull] Action onFinished)
+        public void ProcessPng(byte[] data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    BigGustave.Png png;
-                    using (data)
-                    {
-                        png = BigGustave.Png.Open(data.Array);
-                    }
+                    BigGustave.Png png = BigGustave.Png.Open(data);
 
                     byte[] newData;
                     if (png.RowOffset != 0)
@@ -203,17 +200,13 @@ namespace Iviz.Displays
             });
         }
 
-        public void ProcessJpg(UniqueRef<byte> data, [NotNull] Action onFinished)
+        public void ProcessJpg(byte[] data, [NotNull] Action onFinished)
         {
             Task.Run(() =>
             {
                 try
                 {
-                    JpegImage image;                    
-                    using (data)
-                    {
-                        image = new JpegImage(new MemoryStream(data.Array));
-                    }
+                    JpegImage image = new JpegImage(new MemoryStream(data));
 
                     string encoding = null;
 
@@ -224,7 +217,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 4 != 0)
                             {
-                                Logger.Debug("ImageListener: Row padding not implemented");
+                                Logger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -236,7 +229,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 4 != 0)
                             {
-                                Logger.Debug("ImageListener: Row padding not implemented");
+                                Logger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -247,7 +240,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 2 != 0)
                             {
-                                Logger.Debug("ImageListener: Row padding not implemented");
+                                Logger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -259,8 +252,8 @@ namespace Iviz.Displays
 
                     if (encoding == null)
                     {
-                        Logger.Debug("ImageListener: Unsupported encoding '" + image.Colorspace + "' with size " +
-                                     image.BitsPerComponent);
+                        Logger.Debug(
+                            $"{this}: Unsupported encoding '{image.Colorspace}' with size {image.BitsPerComponent}");
                         return;
                     }
 
@@ -272,8 +265,11 @@ namespace Iviz.Displays
                         bitmapBuffer = new byte[reqSize];
                     }
 
-                    Stream outStream = new MemoryStream(bitmapBuffer);
-                    image.WriteBitmap(outStream);
+                    using (var outStream = new MemoryStream(bitmapBuffer))
+                    {
+                        image.WriteBitmap(outStream);
+                    }
+
                     GameThread.PostInListenerQueue(() =>
                     {
                         Set(image.Width, image.Height, encoding, bitmapBuffer.AsSegment(bmpHeaderLength));
@@ -301,18 +297,19 @@ namespace Iviz.Displays
 
             if (bpp == -1)
             {
-                Logger.Debug("ImageListener: Unsupported encoding '" + encoding + "'");
+                Logger.Debug($"ImageListener: Unsupported encoding '{encoding}'");
                 return;
             }
 
             if (data.Count < size * bpp)
             {
                 Logger.Debug(
-                    $"ImageListener: Invalid image! Expected at least {size * bpp} bytes, received {data.Count}");
+                    $"ImageListener: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
+                    $"received {data.Count.ToString()}");
                 return;
             }
 
-            Description = $"<b>{width}x{height} {encoding}</b>";
+            Description = $"<b>{width.ToString()}x{height.ToString()} {encoding}</b>";
 
             switch (encoding)
             {
@@ -350,9 +347,17 @@ namespace Iviz.Displays
         void ApplyTexture(int width, int height, in ArraySegment<byte> data, string type, int length,
             bool generateMipmaps)
         {
+            bool alreadyCopied = false;
             Texture2D texture;
             switch (type)
             {
+                case "rgb8" when !Settings.SupportsRGB24:
+                case "bgr8" when !Settings.SupportsRGB24:
+                case "8SC3" when !Settings.SupportsRGB24:
+                    texture = EnsureSize(width, height, TextureFormat.RGBA32);
+                    CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>(), length);
+                    alreadyCopied = true;
+                    break;
                 case "rgb8":
                 case "bgr8":
                 case "8SC3":
@@ -362,6 +367,12 @@ namespace Iviz.Displays
                 case "bgra8":
                 case "8SC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
+                    break;
+                case "mono16" when !Settings.SupportsR16:
+                case "16UC1" when !Settings.SupportsR16:
+                    texture = EnsureSize(width, height, TextureFormat.R8);
+                    CopyR16ToR8(data, texture.GetRawTextureData<byte>(), length);
+                    alreadyCopied = true;
                     break;
                 case "mono16":
                 case "16UC1":
@@ -375,9 +386,68 @@ namespace Iviz.Displays
                     return;
             }
 
-            NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
+            if (!alreadyCopied)
+            {
+                NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
+            }
+
             texture.Apply(generateMipmaps, false);
         }
+
+        unsafe void CopyR16ToR8(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)
+        {
+            if (src.Array == null)
+            {
+                throw new NullReferenceException($"{this}: Source array in Copy() was null");
+            }
+
+            int numElements = lengthInBytes / 2;
+            if (src.Offset + lengthInBytes > src.Count || numElements > dst.Length)
+            {
+                throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
+            }
+
+            byte* dstPtr = (byte*) dst.GetUnsafePtr();
+            fixed (byte* srcPtr = &src.Array[src.Offset])
+            {
+                byte* srcPtrOff = srcPtr + 1;
+                
+                for (int i = numElements; i >= 0; i--)
+                {
+                    *dstPtr = *srcPtrOff;
+                    dstPtr++;
+                    srcPtrOff += 2;
+                }
+            }
+        }
+        
+        unsafe void CopyRgb24ToRgba32(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)
+        {
+            if (src.Array == null)
+            {
+                throw new NullReferenceException($"{this}: Source array in Copy() was null");
+            }
+
+            int numElements = lengthInBytes / 3;
+            if (src.Offset + lengthInBytes > src.Count || numElements * 4 > dst.Length)
+            {
+                throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
+            }
+
+            byte* dstPtr = (byte*) dst.GetUnsafePtr();
+            fixed (byte* srcPtr0 = &src.Array[src.Offset])
+            {
+                byte* srcPtr = srcPtr0;
+                
+                for (int i = numElements; i >= 0; i--)
+                {
+                    *dstPtr++ = *srcPtr++;
+                    *dstPtr++ = *srcPtr++;
+                    *dstPtr++ = *srcPtr++;
+                    *dstPtr++ = 255;
+                }
+            }
+        }        
 
         [NotNull]
         Texture2D EnsureSize(int width, int height, TextureFormat format)

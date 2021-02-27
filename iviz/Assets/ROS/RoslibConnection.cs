@@ -608,7 +608,6 @@ namespace Iviz.Ros
 
             if (connectionTs.IsCancellationRequested)
             {
-                msg.Dispose();
                 return;
             }
 
@@ -626,7 +625,6 @@ namespace Iviz.Ros
         {
             if (advertiser.Id == -1)
             {
-                msg.Dispose();
                 return;
             }
 
@@ -901,7 +899,8 @@ namespace Iviz.Ros
         }
 
         [ItemCanBeNull]
-        public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000,
+            CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
@@ -1267,30 +1266,16 @@ namespace Iviz.Ros
 
             void Callback(T msg)
             {
-                try
+                foreach (var listener in listeners)
                 {
-                    switch (listeners.Count)
+                    try
                     {
-                        case 0:
-                            msg.Dispose();
-                            return;
-                        case 1:
-                            listeners.First().EnqueueMessage(new SharedMessage<T>(msg));
-                            return;
-                        default:
-                            using (var shared = new SharedMessage<T>(msg))
-                            {
-                                foreach (var listener in listeners)
-                                {
-                                    listener.EnqueueMessage(shared.Share());
-                                }
-                            }
-                            break;
+                        listener.EnqueueMessage(msg);
                     }
-                }
-                catch (Exception e)
-                {
-                    Core.Logger.Error($"{this}: Error in callback", e);
+                    catch (Exception e)
+                    {
+                        Core.Logger.Error($"{this}: Error in callback", e);
+                    }
                 }
             }
 
