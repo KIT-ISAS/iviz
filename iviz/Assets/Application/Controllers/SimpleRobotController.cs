@@ -24,7 +24,7 @@ namespace Iviz.Controllers
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
         [DataMember] public float Metallic { get; set; } = 0.5f;
-        [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public float Smoothness { get; set; } = Settings.IsHololens ? 0.25f : 0.5f;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
         [DataMember] public bool Visible { get; set; } = true;
