@@ -1,5 +1,6 @@
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -59,6 +60,7 @@ namespace Iviz.Controllers
             for (int i = 0; i < points.Length; i++)
             {
                 ColorRGBA c = colors[i];
+                
                 float4 rgba = new float4(c.R, c.G, c.B, c.A);
                 if (rgba.HasNaN())
                 {

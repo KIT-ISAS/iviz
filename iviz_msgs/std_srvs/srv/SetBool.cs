@@ -39,6 +39,12 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (SetBoolResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class SetBoolRequest : IRequest, IDeserializable<SetBoolRequest>
+    public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializable<SetBoolRequest>
     {
         [DataMember (Name = "data")] public bool Data { get; set; } // e.g. for hardware enabling / disabling
     
@@ -85,6 +91,10 @@ namespace Iviz.Msgs.StdSrvs
             b.Serialize(Data);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -104,7 +114,7 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Constructor for empty message. </summary>
         public SetBoolResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -135,6 +145,10 @@ namespace Iviz.Msgs.StdSrvs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

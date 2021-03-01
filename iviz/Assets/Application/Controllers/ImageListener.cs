@@ -6,6 +6,7 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Roslib;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -206,18 +207,19 @@ namespace Iviz.Controllers
             Listener.MaxQueueSize = (int) MaxQueueSize;
         }
 
-        bool HandlerCompressed(CompressedImage msg)
+        bool HandlerCompressed([NotNull] CompressedImage msg)
         {
             if (isProcessing)
             {
                 return false;
             }
 
+            var (_, stamp, frameId) = msg.Header;
             isProcessing = true;
 
             void PostProcess()
             {
-                Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+                Node.AttachTo(frameId, stamp);
                 isProcessing = false;
             }
 
@@ -241,7 +243,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void Handler(Image msg)
+        void Handler([NotNull] Image msg)
         {
             Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 

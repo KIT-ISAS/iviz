@@ -243,7 +243,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                Vector3 cameraPosition = Settings.MainCamera.transform.position;
+                Vector3 cameraPosition = Settings.MainCameraTransform.position;
                 var q1 = Pose.identity.WithPosition(cameraPosition);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-cameraPosition);
@@ -285,7 +285,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                Quaternion cameraRotation = Settings.MainCamera.transform.rotation;
+                Quaternion cameraRotation = Settings.MainCameraTransform.rotation;
                 deltaWorldPosition = cameraRotation * joyVelocityPos.Value;
             }
 
@@ -374,16 +374,6 @@ namespace Iviz.Controllers
             UpdateWorldPose(unityPose, mover);
         }
 
-        /*
-        void SetWorldPose(in Vector3 unityPosition, float angle, RootMover mover)
-        {
-            WorldPosition = unityPosition;
-            WorldAngle = angle;
-            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-            UpdateWorldPose(new Pose(unityPosition, rotation), mover);
-        }
-        */
-
         void SetWorldPosition(in Vector3 unityPosition, RootMover mover)
         {
             WorldPosition = unityPosition;
@@ -402,9 +392,11 @@ namespace Iviz.Controllers
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
+        /*
         void OnDestroy()
         {
             Debug.Log("AR Controller Destroyed!");
         }
+        */
     }
 }

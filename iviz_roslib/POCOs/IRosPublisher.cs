@@ -47,30 +47,42 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(IMessage message);
-        
+
         /// <summary>
         /// Publishes the given message into the topic. 
         /// </summary>
         /// <param name="message">The message to be published.</param>
+        /// <param name="policy">
+        /// The policy for sending.
+        /// If the default <see cref="RosPublishPolicy.DoNotWait"/> is set, the method will fail silently if
+        /// an error happens.
+        /// If <see cref="RosPublishPolicy.WaitUntilSent"/> is set, the task will wait until
+        /// all the connections have sent the message, and throws an exception if at least one connection failed.
+        /// </param>
+        /// <param name="token">An optional cancellation token.</param>
+        /// <returns>False if there are no connections. True if all connections sent the message. Otherwise an exception.</returns>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>          
-        public Task PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);      
-        
-        /// <summary>
-        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
-        /// </summary>
-        /// <param name="id">The id to be unregistered.</param>
-        /// <returns>Whether the id belonged to the publisher.</returns>        
-        public bool Unadvertise(string id);
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
+        /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
+        public ValueTask<bool> PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
         /// </summary>
         /// <param name="id">The id to be unregistered.</param>
+        /// <param name="token">An optional cancellation token.</param>
+        /// <returns>Whether the id belonged to the publisher.</returns>        
+        public bool Unadvertise(string id, CancellationToken token = default);
+
+        /// <summary>
+        /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
+        /// </summary>
+        /// <param name="id">The id to be unregistered.</param>
+        /// <param name="token">An optional cancellation token.</param>
         /// <returns>Whether the id belonged to the publisher.</returns>
-        public Task<bool> UnadvertiseAsync(string id, CancellationToken token = default);
+        public ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default);
 
         /// <summary>
         /// Generates a new advertisement id. Use this string for Unadvertise().
@@ -119,8 +131,31 @@ namespace Iviz.Roslib
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage
     {
+        /// <summary>
+        /// Publishes the given message into the topic. 
+        /// </summary>
+        /// <param name="message">The message to be published.</param>
+        /// <exception cref="ArgumentNullException">The message is null</exception>
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         public void Publish(T message);
-        public Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        
+        /// <summary>
+        /// Publishes the given message into the topic.  
+        /// </summary>
+        /// <param name="message">The message to be published.</param>
+        /// <param name="policy">
+        /// The policy for sending.
+        /// If the default <see cref="RosPublishPolicy.DoNotWait"/> is set, the method will fail silently if
+        /// an error happens.
+        /// If <see cref="RosPublishPolicy.WaitUntilSent"/> is set, the task will wait until
+        /// all the connections have sent the message, and throws an exception if at least one connection failed.
+        /// </param>
+        /// <param name="token">An optional cancellation token.</param>
+        /// <returns>False if there are no connections. True if all connections sent the message. Otherwise an exception.</returns>
+        /// <exception cref="ArgumentNullException">The message is null</exception>
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
+        /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
+        public ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
     }
 
 }

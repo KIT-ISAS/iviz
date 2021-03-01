@@ -35,6 +35,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         {
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -54,7 +58,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+MCAJMG1zIBAAAA";
+                "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
                 
     }
 }

@@ -5,14 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using Iviz.Urdf;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using Iviz.Msgs.TrajectoryMsgs;
-using Iviz.XmlRpc;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
 using Logger = Iviz.Core.Logger;
@@ -90,10 +90,8 @@ namespace Iviz.Displays
                     rootMaterials[material.Name] = material;
                 }
 
-                foreach (var link in robot.Links)
-                {
-                    await ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token);
-                }
+                await robot.Links.Select(link =>
+                    ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token)).WhenAll();
 
                 foreach (var joint in robot.Joints)
                 {
@@ -102,6 +100,7 @@ namespace Iviz.Displays
 
                 if (linkObjects.Count == 0)
                 {
+                    Logger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
                     return;
                 }
 
@@ -125,11 +124,13 @@ namespace Iviz.Displays
                 Metallic = metallic;
                 ApplyAnyValidConfiguration();
 
-                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count} " +
-                            $"links and {Joints.Count} joints.");
+                string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors.ToString()} errors.";
+                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
+                            $"links and {Joints.Count.ToString()} joints. {errorStr}");
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e)
             {
+                Logger.Error($"{this}: Robot building canceled.");
                 throw;
             }
             catch (Exception e)
@@ -153,6 +154,7 @@ namespace Iviz.Displays
         public string BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
 
+        [NotNull]
         public string UnityName
         {
             get => BaseLinkObject.name;
@@ -165,6 +167,7 @@ namespace Iviz.Displays
         public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
 
         public bool IsStarting { get; private set; }
+        public int NumErrors { get; private set; }
 
         public bool OcclusionOnly
         {
@@ -276,7 +279,8 @@ namespace Iviz.Displays
 
                     if (info == null)
                     {
-                        Debug.Log($"{this}: Failed to retrieve '{uri}'");
+                        Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                        NumErrors++;
                         continue;
                     }
 
@@ -501,17 +505,17 @@ namespace Iviz.Displays
             return true;
         }
 
-        public void WriteJoints(JointState state)
+        public void WriteJoints([NotNull] JointState state)
         {
             WriteJoints(state.Name.Zip(state.Position));
         }
 
-        public void WriteJoints(string[] names, double[] positions)
+        public void WriteJoints([NotNull] IReadOnlyList<string> names, [NotNull] double[] positions)
         {
             WriteJoints(names.Zip(positions));
         }
 
-        public void WriteJoints(IEnumerable<(string name, double position)> jointPositions)
+        public void WriteJoints([NotNull] IEnumerable<(string name, double position)> jointPositions)
         {
             foreach ((string name, double position) in jointPositions)
             {

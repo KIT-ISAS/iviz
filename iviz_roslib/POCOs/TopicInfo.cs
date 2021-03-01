@@ -11,6 +11,37 @@ namespace Iviz.Roslib
     {
         readonly IDeserializable<T>? generator;
 
+        /// <summary>
+        ///     Concatenated dependencies file.
+        /// </summary>
+        public string MessageDependencies { get; }
+
+        /// <summary>
+        ///     ROS name of this node.
+        /// </summary>
+        public string CallerId { get; }
+
+        /// <summary>
+        ///     Name of this topic.
+        /// </summary>
+        public string Topic { get; }
+
+        /// <summary>
+        ///     MD5 hash of the compact representation of the message.
+        /// </summary>
+        public string Md5Sum { get; }
+
+        /// <summary>
+        ///     Full ROS message type.
+        /// </summary>
+        public string Type { get; }
+
+        /// <summary>
+        ///     Instance of the message used to generate others of the same type.
+        /// </summary>
+        public IDeserializable<T> Generator =>
+            generator ?? throw new InvalidOperationException("This type does not have a generator!");
+
         TopicInfo(string messageDependencies, string callerId, string topic, string md5Sum, string type,
             IDeserializable<T>? generator)
         {
@@ -45,36 +76,5 @@ namespace Iviz.Roslib
                 throw new InvalidOperationException("Type T needs to be DynamicMessage"))
         {
         }
-
-        /// <summary>
-        ///     Concatenated dependencies file.
-        /// </summary>
-        public string MessageDependencies { get; }
-
-        /// <summary>
-        ///     ROS name of this node.
-        /// </summary>
-        public string CallerId { get; }
-
-        /// <summary>
-        ///     Name of this topic.
-        /// </summary>
-        public string Topic { get; }
-
-        /// <summary>
-        ///     MD5 hash of the compact representation of the message.
-        /// </summary>
-        public string Md5Sum { get; }
-
-        /// <summary>
-        ///     Full ROS message type.
-        /// </summary>
-        public string Type { get; }
-
-        /// <summary>
-        ///     Instance of the message used to generate others of the same type.
-        /// </summary>
-        public IDeserializable<T> Generator =>
-            generator ?? throw new InvalidOperationException("This type does not have a generator!");
     }
 }

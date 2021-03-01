@@ -1,14 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.ModelService
 {
     public static class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
+        {
+            try
+            {
+                await MainImpl(args);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("EE Fatal error: " + Logger.ExceptionToString(e));
+            }
+        }
+
+        static async Task MainImpl(string[] args)
         {
             Console.WriteLine("** Iviz.ModelService: Starting...");
 
@@ -19,8 +34,9 @@ namespace Iviz.ModelService
                 return;
             }
 
-            using RosClient client = new RosClient(masterUri, "/iviz_model_loader");
-
+            Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
+            await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
+                        
             bool enableFileSchema;
             if (args.Length != 0 && args[0] == "--enable-file-schema")
             {
@@ -34,12 +50,12 @@ namespace Iviz.ModelService
             }
 
             string? rosPackagePathExtras = null;
-            string extrasPath = "/Users/akzeac/.iviz/ros_package_path";
-            if (File.Exists(extrasPath))
+            string? extrasPath = await GetPathExtras();
+            if (extrasPath != null && File.Exists(extrasPath))
             {
                 try
                 {
-                    rosPackagePathExtras = File.ReadAllText(extrasPath);
+                    rosPackagePathExtras = await File.ReadAllTextAsync(extrasPath);
                 }
                 catch (IOException e)
                 {
@@ -47,12 +63,7 @@ namespace Iviz.ModelService
                 }
             }
 
-            Console.WriteLine(rosPackagePathExtras);
-
             using var modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema);
-
-
-            //using ModelServer modelServer = new ModelServer();
 
             if (modelServer.NumPackages == 0)
             {
@@ -60,10 +71,12 @@ namespace Iviz.ModelService
                 return;
             }
 
-            client.AdvertiseService<GetModelResource>(ModelServer.ModelServiceName, modelServer.ModelCallback);
-            client.AdvertiseService<GetModelTexture>(ModelServer.TextureServiceName, modelServer.TextureCallback);
-            client.AdvertiseService<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
-            client.AdvertiseService<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
+            await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
+                modelServer.ModelCallback);
+            await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
+                modelServer.TextureCallback);
+            await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
+            await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
                 GetModelResource.RosServiceType);
@@ -75,19 +88,57 @@ namespace Iviz.ModelService
             Console.WriteLine("** Done.");
             Console.WriteLine("** Waiting for requests...");
 
-            WaitForCancel();
+            await WaitForCancel();
 
             Console.WriteLine();
         }
 
-        static void WaitForCancel()
+        static Task WaitForCancel()
         {
-            object o = new object();
-            Console.CancelKeyPress += delegate
+            TaskCompletionSource tc = new TaskCompletionSource();
+            Console.CancelKeyPress += (_, __) => { tc.SetResult(); };
+            return tc.Task;
+        }
+
+        static async Task<string?> GetPathExtras()
+        {
+            string? homeFolder;
+            switch (Environment.OSVersion.Platform)
             {
-                lock (o) Monitor.Pulse(o);
-            };
-            lock (o) Monitor.Wait(o);
+                case PlatformID.Unix:
+                case PlatformID.MacOSX:
+                    homeFolder = Environment.GetEnvironmentVariable("HOME");
+                    break;
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.Win32NT:
+                case PlatformID.WinCE:
+                    homeFolder = Environment.GetEnvironmentVariable("%HOMEDRIVE%%HOMEPATH%");
+                    break;
+                default:
+                    return null;
+            }
+
+            if (homeFolder == null)
+            {
+                return null;
+            }
+
+            string extrasPath = homeFolder + "/.iviz/ros_package_path";
+            if (!File.Exists(extrasPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                return await File.ReadAllTextAsync(extrasPath);
+            }
+            catch (IOException e)
+            {
+                Logger.LogError($"EE ROS package file '{extrasPath}' exists but could not be read: {e.Message}");
+                return null;
+            }
         }
     }
 }

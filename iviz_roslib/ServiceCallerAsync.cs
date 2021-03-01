@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.Rosapi;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -15,7 +13,6 @@ namespace Iviz.Roslib
     internal sealed class ServiceCallerAsync<T> : IServiceCaller where T : IService
     {
         const int DefaultTimeoutInMs = 5000;
-        const int BufferSizeIncrease = 512;
         const byte ErrorByte = 0;
 
         readonly bool requestNoDelay;
@@ -24,11 +21,9 @@ namespace Iviz.Roslib
 
         bool disposed;
 
-        byte[] readBuffer = new byte[16];
-        byte[] writeBuffer = new byte[16];
-
         public bool IsAlive => tcpClient.Connected;
         public string ServiceType => serviceInfo.Service;
+        public Uri? RemoteUri { get; private set; }
 
         public ServiceCallerAsync(ServiceInfo<T> serviceInfo, bool requestNoDelay = true)
         {
@@ -69,109 +64,68 @@ namespace Iviz.Roslib
             return Utils.WriteHeaderAsync(stream, contents, token);
         }
 
-        async Task ProcessHandshake(NetworkStream stream, bool persistent, CancellationToken token)
+        async Task ProcessHandshakeAsync(NetworkStream stream, bool persistent, CancellationToken token)
         {
             await SendHeaderAsync(stream, persistent, token).Caf();
 
-            int receivedLength = await ReceivePacketAsync(stream, token).Caf();
-            if (receivedLength == -1)
+            List<string> responses;
+            using (var readBuffer = await ReceivePacketAsync(stream, token).Caf())
             {
-                throw new IOException("Connection closed during handshake");
+                responses = Utils.ParseHeader(readBuffer);
             }
 
-            List<string> responses = Utils.ParseHeader(readBuffer, receivedLength);
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
-                throw new RosRpcException(index != -1
+                throw new RosHandshakeException(index != -1
                     ? $"Failed handshake: {responses[0].Substring(index + 1)}"
                     : $"Failed handshake: {responses[0]}");
             }
         }
 
-        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token = default)
+        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token)
         {
+            RemoteUri = remoteUri;
             string remoteHostname = remoteUri.Host;
             int remotePort = remoteUri.Port;
-#if NET5_0
-            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort, token).AsTask();
-#else
-            Task task = tcpClient.ConnectAsync(remoteHostname, remotePort);
-#endif
-            if (!await task.WaitFor(DefaultTimeoutInMs, token) || !task.RanToCompletion())
-            {
-                if (task.IsFaulted)
-                {
-                    await task; // rethrow
-                }
 
-                throw new TimeoutException($"{this}: Host {remoteHostname}:{remotePort} timed out");
-            }
-
-            await ProcessHandshake(tcpClient.GetStream(), persistent, token);
+            await tcpClient.TryConnectAsync(remoteHostname, remotePort, token, DefaultTimeoutInMs);
+            await ProcessHandshakeAsync(tcpClient.GetStream(), persistent, token);
         }
 
-        public void Start(Uri remoteUri, bool persistent)
+        static async ValueTask<Rent<byte>> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
         {
-            // just call the async version from sync
-            Task.Run(async () => { await StartAsync(remoteUri, persistent).Caf(); }).WaitNoThrow(this);
-        }
-
-        async Task<int> ReceivePacketAsync(NetworkStream stream, CancellationToken token)
-        {
-            if (!await stream.ReadChunkAsync(readBuffer, 4, token))
+            byte[] lengthBuffer = new byte[4];
+            if (!await stream.ReadChunkAsync(lengthBuffer, 4, token))
             {
-                return -1;
+                throw new IOException("Partner closed connection");
             }
 
-            int length = BitConverter.ToInt32(readBuffer, 0);
+            int length = BitConverter.ToInt32(lengthBuffer, 0);
+
             if (length == 0)
             {
-                return 0;
+                return new Rent<byte>(0);
             }
 
-            if (readBuffer.Length < length)
-            {
-                readBuffer = new byte[length + BufferSizeIncrease];
-            }
-
-            if (!await stream.ReadChunkAsync(readBuffer, length, token))
-            {
-                return -1;
-            }
-
-            return length;
-        }
-
-        public async Task<bool> ExecuteAsync(T service, CancellationToken token)
-        {
-            bool success;
+            var readBuffer = new Rent<byte>(length);
             try
             {
-                success = await ExecuteImplAsync(service, token).Caf();
-            }
-            catch (Exception e)
-            {
-                if (e is OperationCanceledException)
+                if (!await stream.ReadChunkAsync(readBuffer.Array, length, token))
                 {
-                    throw;
+                    throw new IOException("Partner closed connection");
                 }
-
-                throw new RosRpcException("Error during service call", e);
+            }
+            catch (Exception)
+            {
+                readBuffer.Dispose();
+                throw;
             }
 
-            return success;
+            return readBuffer;
         }
 
-        public bool Execute(T service, CancellationToken token)
-        {
-            bool result = false;
-            // just call the async version from sync
-            Task.Run(async () => result = await ExecuteAsync(service, token).Caf(), token).WaitAndRethrow();
-            return result;
-        }
-
-        async Task<bool> ExecuteImplAsync(T service, CancellationToken token)
+        public async Task ExecuteAsync(T service, CancellationToken token)
         {
             if (tcpClient == null)
             {
@@ -187,39 +141,30 @@ namespace Iviz.Roslib
 
             IRequest requestMsg = service.Request;
             int msgLength = requestMsg.RosMessageLength;
-            if (writeBuffer.Length < msgLength)
-            {
-                writeBuffer = new byte[msgLength + BufferSizeIncrease];
-            }
 
-            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer);
+            using var writeBuffer = new Rent<byte>(msgLength);
+
+            uint sendLength = Buffer.Serialize(requestMsg, writeBuffer.Array);
 
             var stream = tcpClient.GetStream();
-            await stream.WriteAsync(BitConverter.GetBytes(sendLength), 0, 4, token).Caf();
-            await stream.WriteAsync(writeBuffer, 0, (int) sendLength, token).Caf();
+            await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token).Caf();
+            await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token).Caf();
 
-            int rcvLengthH = await stream.ReadAsync(readBuffer, 0, 1, token);
-            if (rcvLengthH == 0)
+            var statusBuffer = new byte[1];
+            if (!await stream.ReadChunkAsync(statusBuffer, 1, token))
             {
                 throw new IOException("Partner closed the connection");
             }
 
-            byte statusByte = readBuffer[0];
+            using var readBuffer = await ReceivePacketAsync(stream, token);
 
-            int rcvLength = await ReceivePacketAsync(stream, token);
-            if (rcvLength == -1)
+            if (statusBuffer[0] == ErrorByte)
             {
-                throw new IOException("Partner closed the connection");
+                throw new RosServiceCallFailed(serviceInfo.Service,
+                    BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Length));
             }
 
-            if (statusByte == ErrorByte)
-            {
-                Logger.LogFormat(Utils.GenericExceptionFormat, this, BuiltIns.UTF8.GetString(readBuffer, 0, rcvLength));
-                return false;
-            }
-
-            service.Response = Buffer.Deserialize(service.Response, readBuffer, rcvLength);
-            return true;
+            service.Response = Buffer.Deserialize(service.Response, readBuffer.Array, readBuffer.Length);
         }
     }
 }

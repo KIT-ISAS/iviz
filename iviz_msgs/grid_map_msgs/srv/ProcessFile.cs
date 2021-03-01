@@ -39,6 +39,12 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (ProcessFileResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class ProcessFileRequest : IRequest, IDeserializable<ProcessFileRequest>
+    public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
         [DataMember (Name = "file_path")] public string FilePath { get; set; }
@@ -59,8 +65,8 @@ namespace Iviz.Msgs.GridMapMsgs
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileRequest()
         {
-            FilePath = "";
-            TopicName = "";
+            FilePath = string.Empty;
+            TopicName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -91,6 +97,10 @@ namespace Iviz.Msgs.GridMapMsgs
         {
             b.Serialize(FilePath);
             b.Serialize(TopicName);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -146,6 +156,10 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (GetPlanResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetPlanRequest : IRequest, IDeserializable<GetPlanRequest>
+    public sealed class GetPlanRequest : IRequest<GetPlan, GetPlanResponse>, IDeserializable<GetPlanRequest>
     {
         // Get a plan from the current position to the goal Pose 
         // The start pose for the plan
@@ -98,6 +104,10 @@ namespace Iviz.Msgs.NavMsgs
             Start.RosSerialize(ref b);
             Goal.RosSerialize(ref b);
             b.Serialize(Tolerance);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -155,6 +165,10 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref Buffer b)
         {
             Plan.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

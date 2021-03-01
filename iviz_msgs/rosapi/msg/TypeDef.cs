@@ -18,7 +18,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()
         {
-            Type = "";
+            Type = string.Empty;
             Fieldnames = System.Array.Empty<string>();
             Fieldtypes = System.Array.Empty<string>();
             Fieldarraylen = System.Array.Empty<int>();
@@ -70,6 +70,10 @@ namespace Iviz.Msgs.Rosapi
             b.SerializeArray(Examples, 0);
             b.SerializeArray(Constnames, 0);
             b.SerializeArray(Constvalues, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -148,7 +152,7 @@ namespace Iviz.Msgs.Rosapi
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
+                "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
                 "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 
     }

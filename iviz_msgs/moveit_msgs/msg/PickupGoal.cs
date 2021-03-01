@@ -48,14 +48,14 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PickupGoal()
         {
-            TargetName = "";
-            GroupName = "";
-            EndEffector = "";
+            TargetName = string.Empty;
+            GroupName = string.Empty;
+            EndEffector = string.Empty;
             PossibleGrasps = System.Array.Empty<Grasp>();
-            SupportSurfaceName = "";
+            SupportSurfaceName = string.Empty;
             AttachedObjectTouchLinks = System.Array.Empty<string>();
             PathConstraints = new Constraints();
-            PlannerId = "";
+            PlannerId = string.Empty;
             AllowedTouchObjects = System.Array.Empty<string>();
             PlanningOptions = new PlanningOptions();
         }
@@ -127,6 +127,10 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningOptions.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (TargetName is null) throw new System.NullReferenceException(nameof(TargetName));
@@ -195,7 +199,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+08a3MbN5Lf+StQdtVJTGjasbNbOWW9VY6lJE7Fj7W8eblcLJADkhMNB8xgRhR9df/9" +
+                "H4sIAAAAAAAAE+08a3MbN5Lf+StQdtVJTGjasbNbOWW9VY6lJE7Fj7W8eblcLJADkhMNB8xgRhR9df/9" +
                 "+glgSMpObk/au9pLUhFnBmigG41+A4PBILRNWS9Ma5uFaye1XblBfLlofLfeeefqYuLmczdrfQNvv2ls" +
                 "WL99Z9Y+hHJauckCX4RB6hC69do37SR0zdzOnIIbDKbeV8ZWld9Ap3K9ds1E2858VZWh9HWCA2PYtrWz" +
                 "pSsmfvorjD9pfTdbTqqyvqDxBOKqrMtV+d5pq6IMra1nOOZTXwMwW9ZtMGvbLmGc+CKb8bqydQ2zKYtB" +

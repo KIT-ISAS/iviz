@@ -26,8 +26,6 @@ namespace Iviz.App
             base(constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {
-            //GameObject listenerObject = new GameObject("Magnitude:" + Topic);
-
             panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(Resource.ModuleType.Magnitude);
             listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
@@ -102,6 +100,9 @@ namespace Iviz.App
                 {
                     case nameof(MagnitudeConfiguration.Visible):
                         listener.Visible = config.Visible;
+                        break;
+                    case nameof(MagnitudeConfiguration.AngleVisible):
+                        listener.AngleVisible = config.AngleVisible;
                         break;
                     case nameof(MagnitudeConfiguration.TrailVisible):
                         listener.TrailVisible = config.TrailVisible;

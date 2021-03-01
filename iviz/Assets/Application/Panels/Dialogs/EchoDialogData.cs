@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -19,25 +20,28 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => dialog;
 
         readonly Dictionary<string, Type> topicTypes = new Dictionary<string, Type>();
-        readonly Queue<(string, IMessage)> messageQueue = new Queue<(string, IMessage)>();
+
+        readonly Queue<(string DateTime, IMessage Msg)> messageQueue = new Queue<(string, IMessage)>();
+
         readonly List<TopicEntry> entries = new List<TopicEntry>();
-        readonly StringBuilder messageBuffer = new StringBuilder();
+        readonly StringBuilder messageBuffer = new StringBuilder(65536);
         IListener listener;
         bool queueIsDirty;
 
-        class TopicEntry
+        sealed class TopicEntry : IComparable<TopicEntry>
         {
-            [CanBeNull] public string Topic { get; }
+            public static readonly TopicEntry Empty = new TopicEntry();
+            [NotNull] public string Topic { get; }
             [CanBeNull] public string RosMsgType { get; }
             [NotNull] public Type CsType { get; }
             [NotNull] public string Description { get; }
 
-            public TopicEntry()
+            TopicEntry()
             {
-                Topic = null;
+                Topic = "";
                 RosMsgType = null;
                 CsType = typeof(object);
-                Description = $"<color=grey>(None)</color>";
+                Description = "<color=grey>(None)</color>";
             }
 
             public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
@@ -48,7 +52,14 @@ namespace Iviz.App
 
                 int lastSlash = RosMsgType.LastIndexOf('/');
                 string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType.Substring(lastSlash + 1);
-                Description = $"<color=grey>{shortType}</color> {topic}";
+                Description = $"{topic} <color=grey>[{shortType}]</color>";
+            }
+
+            public int CompareTo(TopicEntry other)
+            {
+                return ReferenceEquals(this, other)
+                    ? 0
+                    : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
             }
         }
 
@@ -57,6 +68,7 @@ namespace Iviz.App
             dialog = DialogPanelManager.GetPanelByType<EchoDialogContents>(DialogPanelType.Echo);
         }
 
+        [ContractAnnotation("=> false, type:null; => true, type:notnull")]
         bool TryGetType([NotNull] string rosMsgType, out Type type)
         {
             if (topicTypes.TryGetValue(rosMsgType, out type))
@@ -69,10 +81,9 @@ namespace Iviz.App
             {
                 return false;
             }
-            
+
             topicTypes.Add(rosMsgType, type);
             return true;
-
         }
 
         void CreateListener(string topicName, string rosMsgType, [NotNull] Type csType)
@@ -97,7 +108,6 @@ namespace Iviz.App
                 Type listenerType = typeof(Listener<>).MakeGenericType(csType);
                 listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
             }
-            
         }
 
         void CreateTopicList()
@@ -105,7 +115,7 @@ namespace Iviz.App
             var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
             entries.Clear();
 
-            entries.Add(new TopicEntry());
+            entries.Add(TopicEntry.Empty);
 
             foreach (var entry in newTopics)
             {
@@ -115,12 +125,13 @@ namespace Iviz.App
                 Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
+
+            entries.Sort();
         }
 
         void Handler(IMessage msg)
         {
-            string time = $"<b>{DateTime.Now.ToString("HH:mm:ss")}</b> ";
-            messageQueue.Enqueue((time, msg));
+            messageQueue.Enqueue((GameThread.NowFormatted, msg));
             if (messageQueue.Count > MaxMessages)
             {
                 messageQueue.Dequeue();
@@ -157,7 +168,7 @@ namespace Iviz.App
         void UpdateOptions()
         {
             CreateTopicList();
-            dialog.Topics.Options = Enumerable.Select(entries, entry => entry.Description);
+            dialog.Topics.Options = entries.Select(entry => entry.Description);
         }
 
         public override void UpdatePanel()
@@ -172,8 +183,9 @@ namespace Iviz.App
             }
             else
             {
-                dialog.Publishers.text = $"{listener.NumPublishers} publishers";
-                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond} mps";
+                dialog.Publishers.text =
+                    $"{listener.NumPublishers.Active.ToString()}/{listener.NumPublishers.Total.ToString()} publishers";
+                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
                 long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
             }
@@ -187,17 +199,15 @@ namespace Iviz.App
             }
 
             messageBuffer.Length = 0;
-
-            (string time, IMessage msg)[] messages = messageQueue.ToArray();
-            foreach ((string time, IMessage msg) in messages)
+            foreach (var (timeFormatted, msg) in messageQueue)
             {
                 string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
                     new ClampJsonConverter(MaxMessageLength));
-                messageBuffer.Append(time);
+                messageBuffer.Append("<b>").Append(timeFormatted).Append("</b> ");
                 messageBuffer.Append(msgAsText).AppendLine();
             }
 
-            dialog.Text.text = messageBuffer.ToString();
+            dialog.Text.SetText(messageBuffer);
             queueIsDirty = false;
         }
     }

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetCartesianPathResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetCartesianPathRequest : IRequest, IDeserializable<GetCartesianPathRequest>
+    public sealed class GetCartesianPathRequest : IRequest<GetCartesianPath, GetCartesianPathResponse>, IDeserializable<GetCartesianPathRequest>
     {
         // Define the frame for the specified waypoints
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -82,8 +88,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetCartesianPathRequest()
         {
             StartState = new RobotState();
-            GroupName = "";
-            LinkName = "";
+            GroupName = string.Empty;
+            LinkName = string.Empty;
             Waypoints = System.Array.Empty<GeometryMsgs.Pose>();
             PathConstraints = new Constraints();
         }
@@ -137,6 +143,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(JumpThreshold);
             b.Serialize(AvoidCollisions);
             PathConstraints.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -220,6 +230,10 @@ namespace Iviz.Msgs.MoveitMsgs
             Solution.RosSerialize(ref b);
             b.Serialize(Fraction);
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

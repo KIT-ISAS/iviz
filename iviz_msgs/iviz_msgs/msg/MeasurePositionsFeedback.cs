@@ -41,6 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Progress);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }

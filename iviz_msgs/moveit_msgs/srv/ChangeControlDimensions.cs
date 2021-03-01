@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ChangeControlDimensionsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class ChangeControlDimensionsRequest : IRequest, IDeserializable<ChangeControlDimensionsRequest>
+    public sealed class ChangeControlDimensionsRequest : IRequest<ChangeControlDimensions, ChangeControlDimensionsResponse>, IDeserializable<ChangeControlDimensionsRequest>
     {
         // For use with moveit_jog_arm Cartesian planner
         //
@@ -109,6 +115,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(ControlZRotation);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -154,6 +164,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

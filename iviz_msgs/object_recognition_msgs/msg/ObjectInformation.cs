@@ -21,7 +21,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// <summary> Constructor for empty message. </summary>
         public ObjectInformation()
         {
-            Name = "";
+            Name = string.Empty;
             GroundTruthMesh = new ShapeMsgs.Mesh();
             GroundTruthPointCloud = new SensorMsgs.PointCloud2();
         }
@@ -59,6 +59,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             GroundTruthPointCloud.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
@@ -89,7 +93,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71XXW/bNhR916+4aB6aFImHJF0XZAiGtHYaY44dNE6BtSgMWqItrjKpklQS9dfvXFK0" +
+                "H4sIAAAAAAAAE71XXW/bNhR916+4aB6aFImHJF0XZAiGtHYaY44dNE6BtSgMWqItrjKpklQS9dfvXFK0" +
                 "3S4DVmCZ4MQSxXvu97n0zs6PXPR+eHN7Php+OJ8OJ2Maji8m9EMA6yt7DH16ObyJoDeXk9tRn14PaPJ6" +
                 "ej4cD/pY7w+uB/g3no7+oIt3kyvsH9CbybvBPo2Gvw+wg87H9O798ANdj27f4vExxRn0lJLKZiU0WSkK" +
                 "Ma8kabGSZBbk8crM/5S5z5y3Si/DmyS0aKqKVtKV3249xb1ylANwLqlxEvtoYSwVytWVaKlubG2cdPsk" +

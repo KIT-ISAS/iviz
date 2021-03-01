@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (ServiceHostResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class ServiceHostRequest : IRequest, IDeserializable<ServiceHostRequest>
+    public sealed class ServiceHostRequest : IRequest<ServiceHost, ServiceHostResponse>, IDeserializable<ServiceHostRequest>
     {
         [DataMember (Name = "service")] public string Service { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceHostRequest()
         {
-            Service = "";
+            Service = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -86,6 +92,10 @@ namespace Iviz.Msgs.Rosapi
             b.Serialize(Service);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Service is null) throw new System.NullReferenceException(nameof(Service));
@@ -109,7 +119,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public ServiceHostResponse()
         {
-            Host = "";
+            Host = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -137,6 +147,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Host);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

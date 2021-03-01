@@ -18,7 +18,7 @@ namespace Iviz.Msgs.NavMsgs
         /// <summary> Constructor for empty message. </summary>
         public Odometry()
         {
-            ChildFrameId = "";
+            ChildFrameId = string.Empty;
             Pose = new GeometryMsgs.PoseWithCovariance();
             Twist = new GeometryMsgs.TwistWithCovariance();
         }
@@ -59,6 +59,10 @@ namespace Iviz.Msgs.NavMsgs
             Twist.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (ChildFrameId is null) throw new System.NullReferenceException(nameof(ChildFrameId));
@@ -88,7 +92,7 @@ namespace Iviz.Msgs.NavMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+1WTW/bRhC981cM4EPsQmKBuPDBQA9FgrY+FEgbo0lbFMaKOyS3IXeV3aUk5tfnzfJD" +
+                "H4sIAAAAAAAAE+1WTW/bRhC981cM4EPsQmKBuPDBQA9FgrY+FEgbo0lbFMaKOyS3IXeV3aUk5tfnzfJD" +
                 "sqw0OaQ61RBgcjmfb97MzgXd1yaQ57XnwDYGUpY4RNOqyORKUrR2wUTjLL5o2nDjChN7MpZKz0xhrQrO" +
                 "ibILWGIRZvkWxWrLIagKMrXrGk0rkebClIb1IMNUOOe1seKs9KplqsyGLa16qllp9nk6fTA6Hx3ErQnx" +
                 "63hIX2vT6IfJSfZzcjr6zkL0xlbHMhW7lqPvH9pQhW9fIeE3JtYv3EZ5o2wxYHAkdS9RH4mlTLLs+6/8" +

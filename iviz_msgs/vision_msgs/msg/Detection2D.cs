@@ -33,7 +33,7 @@ namespace Iviz.Msgs.VisionMsgs
             Results = System.Array.Empty<ObjectHypothesisWithPose>();
             Bbox = new BoundingBox2D();
             SourceImg = new SensorMsgs.Image();
-            TrackingId = "";
+            TrackingId = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -82,6 +82,10 @@ namespace Iviz.Msgs.VisionMsgs
             b.Serialize(TrackingId);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Results is null) throw new System.NullReferenceException(nameof(Results));
@@ -122,7 +126,7 @@ namespace Iviz.Msgs.VisionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71ZW3PcthV+56/AjB4kJbu0G3c0GXcybW01jR7aurXbJPV4NFgSuwsbBBiA1C796/ud" +
+                "H4sIAAAAAAAAE71ZW3PcthV+56/AjB4kJbu0G3c0GXcybW01jR7aurXbJPV4NFgSuwsbBBiA1C796/ud" +
                 "c0ByV1o7eail0WiXIHBwrt+56Exdm7X1JimtvrlWtelM1dngVTSpd11ZnBVn6s3WJoXfZBvrdFRdkN2V" +
                 "0ynZta00HVmoVd8p6yvX16DXhmSZkvXrEBvZAmJKaefCzvoNiBxTyJcq7Me71JqKXqkqhlZhyTZ6Y0DX" +
                 "+g4sMClwsjLKBZw3NW5S3RaPOm5M3l4WxQ9G13jc8keBYy/pUtXGsNIr68CkScU/Vu8h+A9DG0Ah2fSj" +

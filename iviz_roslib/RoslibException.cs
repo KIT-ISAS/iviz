@@ -19,21 +19,21 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     /// <summary>
     /// Thrown when the provided message type is not correct.
     /// </summary>
-    public class InvalidMessageTypeException : RoslibException
+    public class RosInvalidMessageTypeException : RoslibException
     {
-        public InvalidMessageTypeException(string message) : base(message)
+        public RosInvalidMessageTypeException(string message) : base(message)
         {
         }
 
-        public InvalidMessageTypeException()
+        public RosInvalidMessageTypeException()
         {
         }
 
-        public InvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
+        public RosInvalidMessageTypeException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -41,35 +41,35 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
-    public class ConnectionException : RoslibException
+    public class RosConnectionException : RoslibException
     {
-        public ConnectionException(string message, Exception innerException) : base(message, innerException)
+        public RosConnectionException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public ConnectionException()
+        public RosConnectionException()
         {
         }
 
-        public ConnectionException(string message) : base(message)
+        public RosConnectionException(string message) : base(message)
         {
         }
     }
-    
+
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
-    public class UriBindingException : ConnectionException
+    public class RosUriBindingException : RosConnectionException
     {
-        public UriBindingException(string message, Exception innerException) : base(message, innerException)
+        public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public UriBindingException()
+        public RosUriBindingException()
         {
         }
 
-        public UriBindingException(string message) : base(message)
+        public RosUriBindingException(string message) : base(message)
         {
         }
     }
@@ -77,17 +77,17 @@ namespace Iviz.Roslib
     /// <summary>
     /// Thrown when the uri provided for the caller (this node) is not reachable.
     /// </summary>
-    public class UnreachableUriException : RoslibException
+    public class RosUnreachableUriException : RoslibException
     {
-        public UnreachableUriException(string message) : base(message)
+        public RosUnreachableUriException(string message) : base(message)
         {
         }
 
-        public UnreachableUriException(string message, Exception innerException) : base(message, innerException)
+        public RosUnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        public UnreachableUriException()
+        public RosUnreachableUriException()
         {
         }
     }
@@ -109,7 +109,7 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     public class RosHandshakeException : RosRpcException
     {
         public RosHandshakeException(string message) : base(message)
@@ -123,44 +123,41 @@ namespace Iviz.Roslib
         public RosHandshakeException(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }    
-    
+    }
+
     public class RosServiceNotFoundException : RoslibException
     {
         public string ServiceName { get; }
         public string ErrorMessage { get; }
-        
-        public RosServiceNotFoundException(string service, string message) 
+
+        public RosServiceNotFoundException(string service, string message)
             : base($"Failed to call service {service}: {message}")
         {
             ServiceName = service;
             ErrorMessage = message;
         }
-        
-        public RosServiceNotFoundException(string service, string message, Exception innerException) 
+
+        public RosServiceNotFoundException(string service, string message, Exception innerException)
             : base($"Failed to call service {service}: {message}", innerException)
         {
             ServiceName = service;
             ErrorMessage = message;
         }
-        
-    }  
-    
+    }
+
     public class RosServiceCallFailed : RoslibException
     {
-        public RosServiceCallFailed(string message) : base(message)
-        {
-        }
+        public string ServiceName { get; }
+        public string ServerMessage { get; }
 
-        public RosServiceCallFailed()
+        public RosServiceCallFailed(string service, string message) : base(
+            $"Service call to '{service}' failed: {message}")
         {
+            ServiceName = service;
+            ServerMessage = message;
         }
+    }
 
-        public RosServiceCallFailed(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }      
-    
     public class RosInvalidPackageSizeException : RoslibException
     {
         public RosInvalidPackageSizeException(string message) : base(message)
@@ -174,21 +171,45 @@ namespace Iviz.Roslib
         public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
         {
         }
-    }    
-    
-    public class RosQueueOverflowException : RoslibException
+    }
+
+    public class RosQueueOverflowException : RosQueueException
     {
-        public RosQueueOverflowException(string message) : base(message)
+        public RosQueueOverflowException(string message, IRosTcpSender sender) : base(message, sender)
         {
         }
-
-        public RosQueueOverflowException()
+    }
+    
+    public class RosQueueException : RoslibException
+    {
+        public IRosTcpSender Sender { get; }
+        
+        public RosQueueException(string message, IRosTcpSender sender) : base(message)
         {
+            Sender = sender;
         }
 
-        public RosQueueOverflowException(string message, Exception innerException) : base(message, innerException)
+        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message, innerException)
         {
+            Sender = sender;
         }
     }    
     
+    /// <summary>
+    /// Thrown when an error happened during the connection.
+    /// </summary>
+    public class RosServiceRequestTimeout : RoslibException
+    {
+        public RosServiceRequestTimeout(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public RosServiceRequestTimeout()
+        {
+        }
+
+        public RosServiceRequestTimeout(string message) : base(message)
+        {
+        }
+    }    
 }

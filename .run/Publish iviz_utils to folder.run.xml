@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Publish iviz_utils to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
+    <riderPublish target_folder="$PROJECT_DIR$/iviz_utils/Publish" target_framework="netstandard2.0" uuid_high="8633256516940745104" uuid_low="-7072369315305698281" />
+    <method v="2" />
+  </configuration>
+</component>

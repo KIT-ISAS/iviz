@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/TransformStamped")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct TransformStamped : IMessage, System.IEquatable<TransformStamped>, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessage, System.IEquatable<TransformStamped>, IDeserializable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -15,9 +15,9 @@ namespace Iviz.Msgs.GeometryMsgs
         // This message is mostly used by the 
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; }
-        [DataMember (Name = "child_frame_id")] public string ChildFrameId { get; } // the frame id of the child frame
-        [DataMember (Name = "transform")] public Transform Transform { get; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "child_frame_id")] public string? ChildFrameId; // the frame id of the child frame
+        [DataMember (Name = "transform")] public Transform Transform;
     
         /// <summary> Explicit constructor. </summary>
         public TransformStamped(in StdMsgs.Header Header, string ChildFrameId, in Transform Transform)
@@ -62,6 +62,10 @@ namespace Iviz.Msgs.GeometryMsgs
             Transform.RosSerialize(ref b);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -71,7 +75,7 @@ namespace Iviz.Msgs.GeometryMsgs
             get {
                 int size = 60;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(ChildFrameId);
+                size += BuiltIns.UTF8.GetByteCount(ChildFrameId ?? string.Empty);
                 return size;
             }
         }
@@ -86,7 +90,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71VTU/cMBC951eMugeggqwEVQ8IOKG2HCpRgXpFQzJJLBI72BOW9Nf32dnN8iW1h5ZV" +
+                "H4sIAAAAAAAAE71VTU/cMBC951eMugeggqwEVQ8IOKG2HCpRgXpFQzJJLBI72BOW9Nf32dnN8iW1h5ZV" +
                 "pLUdz5uP92ayoOvGBJLH3ksIEohJPdtQOd9R5V1HhXO+NJZVsOdOqBEuxedpc2PKbEHqSBt5fbNoTFve" +
                 "bC/iavLWwRXXQnHpgrYjDUFKuh0TDG6dMDVeqtMPjWp/vFyuzJ3JvQu58/VSqw9nWp0s+Yx6Lu4AlEeb" +
                 "KwGgBipdMXRildU4S8gDPjxe2ZhSOsyz7FvKYZ1KFtQbW78IlxYpmikTbF01JRkvTafZ9VypuWZZdvqP" +

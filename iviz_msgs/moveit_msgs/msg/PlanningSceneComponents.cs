@@ -65,6 +65,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Components);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -84,7 +88,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA41TwY6bMBS88xVP2ksrVZWS7a564eAQmmZLcIQtbXtCxpjEXbCR7Wy6f99HNqaq1Ep7" +
+                "H4sIAAAAAAAAE41TwY6bMBS88xVP2ksrVZWS7a564eAQmmZLcIQtbXtCxpjEXbCR7Wy6f99HNqaq1Ep7" +
                 "QID9Zt7M8/gG+FF7GJT34qCgVZ02ykM4KpB2GK1RJky/IsAgnhScxsvevhfGaHNgUhkV0R+TG2RT8Cz6" +
                 "E3JIYaBBhFctCA8CGh06rfoWggU/Kqm7FzgftTzCKBx2sd3/uZFaODWVaBOUUz4kuPRaYsSgPsBgW9X/" +
                 "9e2sDckJ62+XwLK8zGuWc74tNyxdTOgHi3tR7bW5s40N4IMIKkIruqK8ZpzwPF1OOBKCkEd0ZZufSqLw" +

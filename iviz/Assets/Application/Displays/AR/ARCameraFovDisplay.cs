@@ -87,7 +87,7 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            ResourcePool.DisposeDisplay(resource);
+            resource.DisposeDisplay();
             ARController.ARModeChanged -= OnARModeChanged;
         }
     }

@@ -39,17 +39,23 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetModelResourceResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
         [Preserve] public const string RosServiceType = "iviz_msgs/GetModelResource";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "02c42b3fdf08f126e5fad7a629a839e0";
+        [Preserve] public const string RosMd5Sum = "a67de8e71bc8e03882d5d86e64000b51";
     }
 
     [DataContract]
-    public sealed class GetModelResourceRequest : IRequest, IDeserializable<GetModelResourceRequest>
+    public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializable<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.dae
@@ -57,7 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetModelResourceRequest()
         {
-            Uri = "";
+            Uri = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -87,6 +93,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Uri);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
@@ -113,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetModelResourceResponse()
         {
             Model = new Model();
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -147,6 +157,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             Model.RosSerialize(ref b);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

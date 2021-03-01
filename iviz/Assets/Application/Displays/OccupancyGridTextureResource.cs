@@ -1,6 +1,7 @@
 using System;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -103,6 +104,11 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(values));
             }
 
+            if (values.Length < numCellsX * numCellsY)
+            {
+                throw new ArgumentException("Values argument is too small", nameof(values));
+            }
+
             IsProcessing = true;
 
             var bounds = inBounds ?? new OccupancyGridResource.Rect(0, numCellsX, 0, numCellsY);
@@ -137,7 +143,7 @@ namespace Iviz.Displays
             {
                 GameThread.PostImmediate(() =>
                 {
-                    Visible = false;
+                    MeshRenderer.enabled = false;
                     IsProcessing = false;
                 });
 
@@ -148,7 +154,7 @@ namespace Iviz.Displays
 
             GameThread.PostImmediate(() =>
             {
-                Visible = true;
+                MeshRenderer.enabled = true;
 
                 Transform mTransform = transform;
                 //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
@@ -217,6 +223,12 @@ namespace Iviz.Displays
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            MeshRenderer.enabled = true;
         }
 
         static unsafe void CreateMipmaps([NotNull] sbyte[] array, int width, int height)

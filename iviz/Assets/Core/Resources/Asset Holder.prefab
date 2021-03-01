@@ -63,8 +63,13 @@ MonoBehaviour:
   TransparentLit: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
   TransparentTexturedLit: {fileID: 2100000, guid: 05f42792aba3d440e9fe1a51161b5d26,
     type: 2}
+  BumpLit: {fileID: 2100000, guid: 0bce27334cfee4a669387e1b34632fe4, type: 2}
+  TransparentBumpLit: {fileID: 2100000, guid: 0c593f5d1e1c247d6b030d4c98ebb0f8, type: 2}
   PointCloud: {fileID: 2100000, guid: b03b21172f7085346ae7aa04334ae0f6, type: 2}
   PointCloudWithColormap: {fileID: 2100000, guid: 5f2ef28c70bc04853b522597ec8b1738,
+    type: 2}
+  PointCloudDirect: {fileID: 2100000, guid: 846c3d316c83945ad89835cbddfd6fab, type: 2}
+  PointCloudDirectWithColormap: {fileID: 2100000, guid: 389990182da58485e8db499e17442d12,
     type: 2}
   LineMaterial: {fileID: 2100000, guid: 024589e00cb654296b6616fdaccde49e, type: 2}
   TransparentLine: {fileID: 2100000, guid: e66c468d082b44738a158a584125ccec, type: 2}
@@ -88,3 +93,17 @@ MonoBehaviour:
     type: 2}
   MeshListOcclusionOnlyWithScaleY: {fileID: 2100000, guid: ebd2b232c7da04af6994225a29382d4f,
     type: 2}
+  Lines: {fileID: 2800000, guid: 9c3c6a738a5afdf4b97007615ed15ae1, type: 3}
+  Pink: {fileID: 2800000, guid: e91257000652d3c43b75ac3490f6d051, type: 3}
+  Copper: {fileID: 2800000, guid: dc24028e6d757554aabbfece4bcab26a, type: 3}
+  Bone: {fileID: 2800000, guid: c06a867b98916e544af4889afabe4dc8, type: 3}
+  Gray: {fileID: 2800000, guid: d4aa4b5a7ee77674f9d40dd932e5901b, type: 3}
+  Winter: {fileID: 2800000, guid: 8a02ba8863739bf4a9189fe53f7aa9ac, type: 3}
+  Autumn: {fileID: 2800000, guid: 11a6e19786891d14c9c4c1c279c241cd, type: 3}
+  Summer: {fileID: 2800000, guid: d37144161ad5ddc4796b8d0fa123baed, type: 3}
+  Spring: {fileID: 2800000, guid: c431e1bc67da3bd4bb30b928003d30d2, type: 3}
+  Cool: {fileID: 2800000, guid: 1fe171322d985a84ca5c78a67c86cf5e, type: 3}
+  Hot: {fileID: 2800000, guid: efcb203d21d464c478ffefe0ce958a82, type: 3}
+  Hsv: {fileID: 2800000, guid: d8511129aeb7d3249a33bb12dd1bfcff, type: 3}
+  Jet: {fileID: 2800000, guid: 4ba8564429f3e9d4da1b60c920922c5a, type: 3}
+  Parula: {fileID: 2800000, guid: 03287f84e4fb1064da31e0856bd4a518, type: 3}

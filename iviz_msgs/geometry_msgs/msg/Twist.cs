@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Twist")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
+    public struct Twist : IMessage, System.IEquatable<Twist>, IDeserializable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
-        [DataMember (Name = "linear")] public Vector3 Linear { get; }
-        [DataMember (Name = "angular")] public Vector3 Angular { get; }
+        [DataMember (Name = "linear")] public Vector3 Linear;
+        [DataMember (Name = "angular")] public Vector3 Angular;
     
         /// <summary> Explicit constructor. </summary>
         public Twist(in Vector3 Linear, in Vector3 Angular)
@@ -51,6 +51,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -70,7 +74,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA61RQUrEQBC8zysKvCiECCoeBM+yB0FQvEpv0skOO5kJPb3uxtfbkyyRvRsY6GSqqqsq" +
+                "H4sIAAAAAAAAE61RQUrEQBC8zysKvCiECCoeBM+yB0FQvEpv0skOO5kJPb3uxtfbkyyRvRsY6GSqqqsq" +
                 "V/jY+Qw+jcI5c8Y3h9R4neAjOmFGHqlhbCXtOdpHTfCaEXxkElBs7fSHYPNIorl2n9xoknucIX/vZ5xz" +
                 "z//8uNf3lyf0nAZWmb6G3Ofb81Z3teQTLvk4mnOyiOXuMmANg24Uhk0xTBiYosLCrkwjtl6M6lOsTZWF" +
                 "uyRcWR1okzUXk5rGQHuT5Ji5sGkcTYygQjEHKlzMDeKa676ucNxZqzPKx96AptBzZPENxPe+XZi2aFjJ" +
@@ -79,6 +83,6 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         /// Custom iviz code
         public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);
-        public static implicit operator Twist((Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
+        public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);
     }
 }

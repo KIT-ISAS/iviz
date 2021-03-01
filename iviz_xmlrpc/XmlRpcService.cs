@@ -1,6 +1,7 @@
 ﻿//#define DEBUG__
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -171,24 +172,27 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static string CreateRequest(string method, IEnumerable<Arg> args)
+        static string CreateRequest(string method, Arg[] args)
         {
-            StringBuilder buffer = new StringBuilder(200);
-            buffer.AppendLine("<?xml version=\"1.0\"?>");
-            buffer.AppendLine("<methodCall>");
-            buffer.Append("<methodName>").Append(method).AppendLine("</methodName>");
-            buffer.AppendLine("<params>");
+            string[] entries = new string[4 + args.Length * 3];
+            entries[0] = "<?xml version=\"1.0\"?>\n" +
+                           "<methodCall>\n" +
+                           "<methodName>";
+            entries[1] = method;
+            entries[2] = "</methodName>\n" +
+                           "<params>\n";
+            int o = 3;
             foreach (Arg arg in args)
             {
-                buffer.AppendLine("<param>");
-                buffer.AppendLine(arg);
-                buffer.AppendLine("</param>");
+                entries[o++] = "<param>";
+                entries[o++] = arg;
+                entries[o++] = "</param>\n";
             }
 
-            buffer.AppendLine("</params>");
-            buffer.AppendLine("</methodCall>");
+            entries[o] = "</params>\n" +
+                         "</methodCall>\n";
 
-            return buffer.ToString();
+            return string.Concat(entries);
         }
 
         static object ProcessResponse(string inData)
@@ -246,8 +250,8 @@ namespace Iviz.XmlRpc
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
-        public static async Task<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
-            IEnumerable<Arg> args, int timeoutInMs = 2000, CancellationToken token = default)
+        public static async ValueTask<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, Arg[] args,
+            int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (remoteUri is null)
             {
@@ -281,7 +285,7 @@ namespace Iviz.XmlRpc
             {
                 throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
-
+            
             return ProcessResponse(inData);
         }
 
@@ -296,8 +300,8 @@ namespace Iviz.XmlRpc
         /// <param name="token">Optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, IEnumerable<Arg> args,
-            int timeoutInMs = 2000)
+        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, Arg[] args,
+            int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (remoteUri is null)
             {
@@ -320,7 +324,7 @@ namespace Iviz.XmlRpc
             using HttpRequest request = new HttpRequest(callerUri, remoteUri);
             try
             {
-                request.Start(timeoutInMs);
+                request.Start(timeoutInMs, token);
                 inData = request.Request(outData, timeoutInMs);
             }
             catch (OperationCanceledException)
@@ -377,13 +381,13 @@ namespace Iviz.XmlRpc
 
                 Arg response = (Arg) method(args);
 
-                string outData = "<?xml version=\"1.0\"?>\n" + 
-                                 "<methodResponse>\n" + 
-                                 "<params>\n" + 
+                string outData = "<?xml version=\"1.0\"?>\n" +
+                                 "<methodResponse>\n" +
+                                 "<params>\n" +
                                  "<param>\n" +
-                                 $"{response.ToString()}\n" + 
-                                 "</param>\n" + 
-                                 "</params>\n" + 
+                                 $"{response.ToString()}\n" +
+                                 "</param>\n" +
+                                 "</params>\n" +
                                  "</methodResponse>\n" +
                                  "\n";
 
@@ -397,11 +401,11 @@ namespace Iviz.XmlRpc
             }
             catch (ParseException e)
             {
-                string buffer = "<?xml version=\"1.0\"?>\n" + 
-                                "<methodResponse>\n" + 
+                string buffer = "<?xml version=\"1.0\"?>\n" +
+                                "<methodResponse>\n" +
                                 "<fault>\n" +
-                                $"{new Arg(e.Message).ToString()}\n" + 
-                                "</fault>\n" + 
+                                $"{new Arg(e.Message).ToString()}\n" +
+                                "</fault>\n" +
                                 "</methodResponse>\n";
 
                 await httpContext.RespondAsync(buffer, token: token).Caf();

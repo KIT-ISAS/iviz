@@ -14,7 +14,7 @@ namespace Iviz.Msgs.StdMsgs
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayDimension()
         {
-            Label = "";
+            Label = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -50,6 +50,10 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(Stride);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Label is null) throw new System.NullReferenceException(nameof(Label));
@@ -74,7 +78,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
+                "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
                 "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";
                 
     }

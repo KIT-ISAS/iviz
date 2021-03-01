@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -35,14 +34,13 @@ namespace Iviz.Ros
         readonly ConcurrentQueue<T> messageQueue = new ConcurrentQueue<T>();
         readonly Action<T> delayedHandler;
         readonly Func<T, bool> directHandler;
-        readonly List<float> timesOfArrival = new List<float>();
-        readonly List<T> tmpMessageBag = new List<T>();
+        readonly List<T> tmpMessageBag = new List<T>(32);
         readonly bool callbackInGameThread;
 
-        int dropped;
+        int droppedMsgs;
         long lastMsgBytes;
-        int msgsInQueue;
         int totalMsgCounter;
+        int recentMsgs;
 
         Listener([NotNull] string topic)
         {
@@ -59,13 +57,11 @@ namespace Iviz.Ros
             GameThread.EverySecond += UpdateStats;
         }
 
-
         public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
         {
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
             GameThread.ListenersEveryFrame += CallHandlerDelayed;
-
             Connection.Subscribe(this);
             Subscribed = true;
         }
@@ -74,15 +70,14 @@ namespace Iviz.Ros
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
-
             Connection.Subscribe(this);
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : 
-            this(topic, (T t) => handler(t))
+        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : this(topic, (T t) => handler(t))
         {
         }
+
 
         public string Topic { get; }
         public string Type { get; }
@@ -102,8 +97,8 @@ namespace Iviz.Ros
             Logger.Info($"Unsubscribing from {Topic}.");
             if (Subscribed)
             {
-                Connection.Unsubscribe(this);
                 Subscribed = false;
+                Connection.Unsubscribe(this);
             }
         }
 
@@ -137,20 +132,18 @@ namespace Iviz.Ros
 
         internal void EnqueueMessage([NotNull] in T msg)
         {
-            if (msg == null)
+            if (!Subscribed)
             {
-                throw new ArgumentNullException(nameof(msg));
+                return;
             }
 
             if (callbackInGameThread)
             {
                 messageQueue.Enqueue(msg);
-                msgsInQueue++;
+                return;
             }
-            else
-            {
-                CallHandlerDirect(msg);
-            }
+
+            CallHandlerDirect(msg);
         }
 
         void CallHandlerDelayed()
@@ -164,80 +157,68 @@ namespace Iviz.Ros
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
             for (int i = start; i < tmpMessageBag.Count; i++)
             {
-                T msg = tmpMessageBag[i];
-                lastMsgBytes += msg.RosMessageLength;
-                
-                lock (timesOfArrival)
-                {
-                    timesOfArrival.Add(Time.time);
-                }
-
+                var msg = tmpMessageBag[i];
+                Interlocked.Increment(ref recentMsgs);
                 try
                 {
+                    lastMsgBytes += msg.RosMessageLength;
                     delayedHandler(msg);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Logger.Error($"{this} Error during callback: ", e);
                 }
             }
 
-            dropped += start;
+            droppedMsgs += start;
             totalMsgCounter += messageQueue.Count;
-            msgsInQueue = 0;
+            recentMsgs += messageQueue.Count;
         }
 
         void CallHandlerDirect([NotNull] in T msg)
         {
-            lastMsgBytes += msg.RosMessageLength;
-            totalMsgCounter++;
-
-            lock (timesOfArrival)
-            {
-                timesOfArrival.Add(GameThread.GameTime);
-            }
+            Interlocked.Increment(ref totalMsgCounter);
+            Interlocked.Increment(ref recentMsgs);
 
             bool processed;
             try
             {
+                Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
                 processed = directHandler(msg);
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Logger.Error($"{this} Error during callback: ", e);
                 processed = false;
             }
 
             if (!processed)
             {
-                dropped++;
+                Interlocked.Increment(ref droppedMsgs);
             }
         }
 
         void UpdateStats()
         {
-            lock (timesOfArrival)
+            if (recentMsgs == 0)
             {
-                if (timesOfArrival.Count == 0)
-                {
-                    Stats = new RosListenerStats();
-                    return;
-                }
-
-                Stats = new RosListenerStats(
-                    totalMsgCounter,
-                    timesOfArrival.Count,
-                    lastMsgBytes,
-                    msgsInQueue,
-                    dropped
-                );
-
-                ConnectionManager.ReportBandwidthDown(lastMsgBytes);
-
-                lastMsgBytes = 0;
-                dropped = 0;
-                timesOfArrival.Clear();
+                Stats = RosListenerStats.Empty;
+                return;
             }
+
+            Stats = new RosListenerStats(
+                totalMsgCounter,
+                recentMsgs,
+                lastMsgBytes,
+                messageQueue.Count,
+                droppedMsgs
+            );
+
+            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+
+            lastMsgBytes = 0;
+            droppedMsgs = 0;
+            recentMsgs = 0;
         }
 
         [NotNull]

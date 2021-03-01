@@ -7,7 +7,7 @@ namespace Iviz.Msgs
     {
         public static Quaternion Multiply(in Quaternion a, in Quaternion b)
         {
-            return new Quaternion(
+            return new(
                 a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
                 a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
                 a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
@@ -15,13 +15,12 @@ namespace Iviz.Msgs
             );
         }
 
-        public static Vector3 Multiply(in Quaternion q, in Vector3 v)
+        public static Vector3 Multiply(in Vector3 qv, double w, in Vector3 v)
         {
-            Vector3 qv = new Vector3(q.X, q.Y, q.Z);
-            return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);
+            return v + 2 * qv.Cross(qv.Cross(v) + w * v);
         }
 
-        public static Quaternion AngleAxis(double angleInRad, Vector3 axis)
+        public static Quaternion AngleAxis(double angleInRad, in Vector3 axis)
         {
             return (System.Math.Sin(angleInRad / 2) * axis, System.Math.Cos(angleInRad / 2));
         }
@@ -32,106 +31,97 @@ namespace Iviz.Msgs
             return norm == 0 ? q : new Quaternion(q.X / norm, q.Y / norm, q.Z / norm, q.W / norm);
         }
 
-        public static Pose WithPosition(this Pose pose, in Point position) => new Pose(position, pose.Orientation);
+        public static Pose WithPosition(this Pose pose, in Point position) => new(position, pose.Orientation);
 
         public static Pose WithOrientation(this Pose pose, in Quaternion orientation) =>
-            new Pose(pose.Position, orientation);
+            new(pose.Position, orientation);
 
         public static Transform WithTranslation(this Transform t, in Vector3 translation) =>
-            new Transform(translation, t.Rotation);
+            new(translation, t.Rotation);
 
         public static Transform WithRotation(this Transform t, in Quaternion rotation) =>
-            new Transform(t.Translation, rotation);
+            new(t.Translation, rotation);
 
         public static Transform Translate(this Transform t, in Vector3 translation) =>
-            new Transform(t.Translation + translation, t.Rotation);
+            new(t.Translation + translation, t.Rotation);
 
         public static Transform Rotate(this Transform t, in Quaternion rotation) =>
-            new Transform(rotation * t.Translation, rotation * t.Rotation);
-        
+            new(rotation * t.Translation, rotation * t.Rotation);
+
         public static void Deconstruct(this Transform t, out Vector3 Translation, out Quaternion Rotation)
         {
             Translation = t.Translation;
             Rotation = t.Rotation;
-        } 
-        
+        }
+
         public static void Deconstruct(this Pose t, out Point Position, out Quaternion Orientation)
         {
             Position = t.Position;
             Orientation = t.Orientation;
-        }         
+        }
 
-        public static ColorRGBA WithRed(this ColorRGBA c, float red) => new ColorRGBA(red, c.G, c.B, c.A);
-        public static ColorRGBA WithGreen(this ColorRGBA c, float green) => new ColorRGBA(c.R, green, c.B, c.A);
-        public static ColorRGBA WithBlue(this ColorRGBA c, float blue) => new ColorRGBA(c.R, c.G, blue, c.A);
-        public static ColorRGBA WithAlpha(this ColorRGBA c, float alpha) => new ColorRGBA(c.R, c.G, c.B, alpha);
-        public static void Deconstruct(this ColorRGBA v, out float R, out float G, out float B, out float A)
-        {
-            R = v.R;
-            G = v.G;
-            B = v.B;
-            A = v.A;
-        } 
-        
-        public static Point WithX(this Point p, double x) => new Point(x, p.Y, p.Z);
-        public static Point WithY(this Point p, double y) => new Point(p.X, y, p.Z);
-        public static Point WithZ(this Point p, double z) => new Point(p.X, p.Y, z);
-        public static void Deconstruct(this Point v, out double X, out double Y, out double Z)
-        {
-            X = v.X;
-            Y = v.Y;
-            Z = v.Z;
-        } 
-        
-        public static Vector3 WithX(this Vector3 p, double x) => new Vector3(x, p.Y, p.Z);
-        public static Vector3 WithY(this Vector3 p, double y) => new Vector3(p.X, y, p.Z);
-        public static Vector3 WithZ(this Vector3 p, double z) => new Vector3(p.X, p.Y, z);
-        public static void Deconstruct(this Vector3 v, out double X, out double Y, out double Z)
-        {
-            X = v.X;
-            Y = v.Y;
-            Z = v.Z;
-        } 
+        public static ColorRGBA WithRed(this ColorRGBA c, float red) => new(red, c.G, c.B, c.A);
+        public static ColorRGBA WithGreen(this ColorRGBA c, float green) => new(c.R, green, c.B, c.A);
+        public static ColorRGBA WithBlue(this ColorRGBA c, float blue) => new(c.R, c.G, blue, c.A);
+        public static ColorRGBA WithAlpha(this ColorRGBA c, float alpha) => new(c.R, c.G, c.B, alpha);
 
-        public static Quaternion WithX(this Quaternion p, double x) => new Quaternion(x, p.Y, p.Z, p.W);
-        public static Quaternion WithY(this Quaternion p, double y) => new Quaternion(p.X, y, p.Z, p.W);
-        public static Quaternion WithZ(this Quaternion p, double z) => new Quaternion(p.X, p.Y, z, p.W);
-        public static Quaternion WithW(this Quaternion p, double w) => new Quaternion(p.X, p.Y, p.Z, w);
-        public static void Deconstruct(this Quaternion q, out double X, out double Y, out double Z, out double W)
-        {
-            X = q.X;
-            Y = q.Y;
-            Z = q.Z;
-            W = q.W;
-        }             
-        
-        public static Twist WithLinear(this Twist p, Vector3 v) => new Twist(v, p.Angular);
-        public static Twist WithAngular(this Twist p, Vector3 v) => new Twist(p.Linear, v);
+        public static void Deconstruct(this ColorRGBA v, out float R, out float G, out float B, out float A) =>
+            (R, G, B, A) = (v.R, v.G, v.B, v.A);
+
+        public static Point WithX(this Point p, double x) => new(x, p.Y, p.Z);
+        public static Point WithY(this Point p, double y) => new(p.X, y, p.Z);
+        public static Point WithZ(this Point p, double z) => new(p.X, p.Y, z);
+
+        public static void Deconstruct(this Point v, out double X, out double Y, out double Z) =>
+            (X, Y, Z) = (v.X, v.Y, v.Z);
+
+        public static Vector3 WithX(this Vector3 p, double x) => new(x, p.Y, p.Z);
+        public static Vector3 WithY(this Vector3 p, double y) => new(p.X, y, p.Z);
+        public static Vector3 WithZ(this Vector3 p, double z) => new(p.X, p.Y, z);
+
+        public static void Deconstruct(this Vector3 v, out double X, out double Y, out double Z) =>
+            (X, Y, Z) = (v.X, v.Y, v.Z);
+
+        public static Quaternion WithX(this Quaternion p, double x) => new(x, p.Y, p.Z, p.W);
+        public static Quaternion WithY(this Quaternion p, double y) => new(p.X, y, p.Z, p.W);
+        public static Quaternion WithZ(this Quaternion p, double z) => new(p.X, p.Y, z, p.W);
+        public static Quaternion WithW(this Quaternion p, double w) => new(p.X, p.Y, p.Z, w);
+
+        public static void Deconstruct(this Quaternion q, out double X, out double Y, out double Z, out double W) =>
+            (X, Y, Z, W) = (q.X, q.Y, q.Z, q.W);
+
+        public static Twist WithLinear(this Twist p, Vector3 v) => new(v, p.Angular);
+        public static Twist WithAngular(this Twist p, Vector3 v) => new(p.Linear, v);
+
         public static void Deconstruct(this Twist t, out Vector3 Linear, out Vector3 Angular)
         {
             Linear = t.Linear;
             Angular = t.Angular;
-        }        
-        
-        public static Header WithNextSeq(this Header h) => new Header(h.Seq + 1, time.Now(), h.FrameId);
-        public static void Deconstruct(this Header h, out uint Seq, out time Stamp, out string FrameId)
-        {
-            Seq = h.Seq;
-            Stamp = h.Stamp;
-            FrameId = h.FrameId;
         }
 
-        public static TransformStamped WithTransform(this TransformStamped ts, in Transform t) => new TransformStamped(ts.Header, ts.ChildFrameId, t);
-        public static TransformStamped WithNextTransform(this TransformStamped ts, in Transform t) => new TransformStamped(ts.Header.WithNextSeq(), ts.ChildFrameId, t);
-        public static TransformStamped WithHeader(this TransformStamped ts, in Header h) => new TransformStamped(h, ts.ChildFrameId, ts.Transform);
-        public static TransformStamped WithChildFrameId(this TransformStamped ts, string s) => new TransformStamped(ts.Header, s, ts.Transform);
+        public static Header WithNextSeq(this Header h) => new(h.Seq + 1, time.Now(), h.FrameId ?? "");
 
-        public static void Deconstruct(this TransformStamped t, out StdMsgs.Header Header, out string ChildFrameId, out Transform Transform)
+        public static void Deconstruct(this Header h, out uint Seq, out time Stamp, out string FrameId) =>
+            (Seq, Stamp, FrameId) = (h.Seq, h.Stamp, h.FrameId ?? "");
+
+        public static TransformStamped WithTransform(this TransformStamped ts, in Transform t) =>
+            new(ts.Header, ts.ChildFrameId ?? "", t);
+
+        public static TransformStamped WithNextTransform(this TransformStamped ts, in Transform t) =>
+            new(ts.Header.WithNextSeq(), ts.ChildFrameId ?? "", t);
+
+        public static TransformStamped WithHeader(this TransformStamped ts, in Header h) =>
+            new(h, ts.ChildFrameId ?? "", ts.Transform);
+
+        public static TransformStamped WithChildFrameId(this TransformStamped ts, string? s) =>
+            new(ts.Header, s ?? "", ts.Transform);
+
+        public static void Deconstruct(this TransformStamped t, out StdMsgs.Header Header, out string ChildFrameId,
+            out Transform Transform)
         {
             Header = t.Header;
-            ChildFrameId = t.ChildFrameId;
+            ChildFrameId = t.ChildFrameId ?? "";
             Transform = t.Transform;
         }
-        
     }
 }

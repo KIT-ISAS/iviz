@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
@@ -229,6 +230,7 @@ namespace Iviz.Controllers
             }
 
             isProcessing = true;
+
             Task.Run(() => ProcessMessage(msg));
 
             return true;
@@ -272,112 +274,120 @@ namespace Iviz.Controllers
 
         void ProcessMessage([NotNull] PointCloud2 msg)
         {
-            if (disposed)
-            {
-                // we're dead
-                return;
-            }
-
-            if (msg.PointStep < 3 * sizeof(float) ||
-                msg.RowStep < msg.PointStep * msg.Width ||
-                msg.Data.Length < msg.RowStep * msg.Height)
-            {
-                Logger.Info($"{this}: Invalid point cloud dimensions!");
-                isProcessing = false;
-                return;
-            }
-
-            if (!FieldsEqual(msg.Fields))
-            {
-                fieldNames.Clear();
-                foreach (PointField field in msg.Fields)
-                {
-                    fieldNames.Add(field.Name);
-                }
-            }
-
-            if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
-                !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
-                !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
-            {
-                Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
-                isProcessing = false;
-                return;
-            }
-
-            int xOffset = (int) xField.Offset;
-            int yOffset = (int) yField.Offset;
-            int zOffset = (int) zField.Offset;
-
-            if (!TryGetField(msg.Fields, config.IntensityChannel, out PointField iField))
-            {
-                iField = EmptyPointField;
-            }
-
-            int iOffset = (int) iField.Offset;
-            int iSize = FieldSizeFromType(iField.Datatype);
-            if (iSize == -1 || msg.PointStep < iOffset + iSize)
-            {
-                Logger.Info($"{this}: Invalid or unsupported intensity field type!");
-                isProcessing = false;
-                return;
-            }
-
-            bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
-
-            int numPoints = (int) (msg.Width * msg.Height);
-
-            pointBuffer.Clear();
-
-            GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-
-            Header msgHeader = msg.Header;
-
-            GameThread.PostInListenerQueue(() =>
+            try
             {
                 if (disposed)
                 {
                     // we're dead
+                    isProcessing = false;
                     return;
                 }
 
-                node.AttachTo(msgHeader.FrameId, msgHeader.Stamp);
-                //node.AttachTo(msgHeader.FrameId);
-
-                Size = numPoints;
-                pointCloud.UseColormap = !rgbaHint;
-                pointCloud.SetDirect(pointBuffer);
-
-                //Debug.LogError("listener:"  + pointBuffer.Capacity);
-
-                MeasuredIntensityBounds = pointCloud.IntensityBounds;
-                if (ForceMinMax)
+                if (msg.PointStep < 3 * sizeof(float) ||
+                    msg.RowStep < msg.PointStep * msg.Width ||
+                    msg.Data.Length < msg.RowStep * msg.Height)
                 {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    Logger.Info($"{this}: Invalid point cloud dimensions!");
+                    isProcessing = false;
+                    return;
                 }
 
+                if (!FieldsEqual(msg.Fields))
+                {
+                    fieldNames.Clear();
+                    foreach (PointField field in msg.Fields)
+                    {
+                        fieldNames.Add(field.Name);
+                    }
+                }
+
+                if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
+                {
+                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                    isProcessing = false;
+                    return;
+                }
+
+                int xOffset = (int) xField.Offset;
+                int yOffset = (int) yField.Offset;
+                int zOffset = (int) zField.Offset;
+
+                var iField = TryGetField(msg.Fields, config.IntensityChannel, out PointField outField)
+                    ? outField
+                    : EmptyPointField;
+
+                int iOffset = (int) iField.Offset;
+                int iSize = FieldSizeFromType(iField.Datatype);
+                if (iSize == -1 || msg.PointStep < iOffset + iSize)
+                {
+                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    isProcessing = false;
+                    return;
+                }
+
+                bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
+                var (_, stamp, frameId) = msg.Header;
+                int numPoints = (int) (msg.Width * msg.Height);
+
+                pointBuffer.Clear();
+
+                GeneratePointBuffer(msg, msg.Data, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+
+                GameThread.PostInListenerQueue(() =>
+                {
+                    try
+                    {
+                        if (disposed)
+                        {
+                            // we're dead
+                            return;
+                        }
+
+                        node.AttachTo(frameId, stamp);
+
+                        Size = numPoints;
+                        pointCloud.UseColormap = !rgbaHint;
+                        pointCloud.SetDirect(pointBuffer);
+
+                        MeasuredIntensityBounds = pointCloud.IntensityBounds;
+                        if (ForceMinMax)
+                        {
+                            pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                        }
+                    }
+                    finally
+                    {
+                        isProcessing = false;
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Error handling point cloud", e);
                 isProcessing = false;
-            });
+            }
         }
 
-        void GeneratePointBuffer([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset,
-            int iType,
-            bool rgbaHint)
+        void GeneratePointBuffer([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int xOffset, int yOffset,
+            int zOffset, int iOffset,
+            int iType, bool rgbaHint)
         {
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             if (xyzAligned)
             {
-                GeneratePointBufferXYZ(msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
+                GeneratePointBufferXYZ(msg, dataSrc, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
             }
             else
             {
-                GeneratePointBufferSlow(msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
+                GeneratePointBufferSlow(msg, dataSrc, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
             }
         }
 
-        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, int xOffset, int yOffset, int zOffset, int iOffset,
-            int iType,
-            bool rgbaHint)
+        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc,
+            int xOffset, int yOffset, int zOffset, int iOffset,
+            int iType, bool rgbaHint)
         {
             int heightOffset = 0;
             int rowStep = (int) msg.RowStep;
@@ -428,21 +438,21 @@ namespace Iviz.Controllers
                 for (int u = (int) msg.Width; u > 0; u--, rowOffset += pointStep)
                 {
                     Vector3 xyz = new Vector3(
-                        BitConverter.ToSingle(msg.Data, rowOffset + xOffset),
-                        BitConverter.ToSingle(msg.Data, rowOffset + yOffset),
-                        BitConverter.ToSingle(msg.Data, rowOffset + zOffset)
+                        BitConverter.ToSingle(dataSrc, rowOffset + xOffset),
+                        BitConverter.ToSingle(dataSrc, rowOffset + yOffset),
+                        BitConverter.ToSingle(dataSrc, rowOffset + zOffset)
                     );
                     pointBuffer.Add(new float4(
                         new float3(-xyz.y, xyz.z, xyz.x),
-                        intensityFn(msg.Data, rowOffset + iOffset)
+                        intensityFn(dataSrc, rowOffset + iOffset)
                     ));
                 }
             }
         }
 
-        void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, int iOffset, int iType)
+        void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int iOffset, int iType)
         {
-            const float maxPositionMagnitudeSq = PointListResource.MaxPositionMagnitudeSq;
+            const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 
             int rowStep = (int) msg.RowStep;
             int pointStep = (int) msg.PointStep;
@@ -454,7 +464,7 @@ namespace Iviz.Controllers
             unsafe
             {
                 var pointBufferPtr = (float4*) pointBuffer.GetUnsafePtr();
-                fixed (byte* dataPtr = msg.Data)
+                fixed (byte* dataPtr = dataSrc)
                 {
                     var pointBufferOff = pointBufferPtr;
                     var dataRowOff = dataPtr;
@@ -467,7 +477,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float4 data = *(float4*) dataOff;
-                                    if (data.HasNaN() || data.xyz.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.xyz.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -484,7 +494,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -502,7 +512,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -520,7 +530,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -538,7 +548,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -556,7 +566,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -574,7 +584,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -592,7 +602,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }
@@ -610,7 +620,7 @@ namespace Iviz.Controllers
                                 for (int u = width; u > 0; u--, dataOff += pointStep)
                                 {
                                     float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MagnitudeSq() > maxPositionMagnitudeSq)
+                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                     {
                                         continue;
                                     }

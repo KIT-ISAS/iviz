@@ -7,11 +7,11 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Transform")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
+    public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
-        [DataMember (Name = "translation")] public Vector3 Translation { get; }
-        [DataMember (Name = "rotation")] public Quaternion Rotation { get; }
+        [DataMember (Name = "translation")] public Vector3 Translation;
+        [DataMember (Name = "rotation")] public Quaternion Rotation;
     
         /// <summary> Explicit constructor. </summary>
         public Transform(in Vector3 Translation, in Quaternion Rotation)
@@ -51,6 +51,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -70,7 +74,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
+                "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
                 "7+0CHtY+glAnFCloBF0TqGCIFUsLK9KeKID2DAWzlD6gElSCLUXwwRARxA4Lyp17pEJZzkZ+g+o5uLuN" +
                 "ESQYBGEdz9zVHz/u5v76EmrillSGpzbW8WRnxi2+rYjwuv32xT/Y6FLBZjk0A7SEQUF5Zhqx9GJU2yE3" +
                 "VRKykCgDr1Cy5RFYTaPFZ5OkECmxsetMDD9nko6NckR5nWfQry3f7ZQPtQ2aQk2BxBcgvvbl3MZERtgt" +
@@ -84,8 +88,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Transform operator *(in Transform t, in Transform q) =>
                 new Transform(t.Translation + t.Rotation * q.Translation, t.Rotation * q.Rotation);
         public static Vector3 operator *(in Transform t, in Vector3 q) => t.Rotation * q + t.Translation;
+        public static Point operator *(in Transform t, in Point q) => t.Rotation * q + t.Translation;
+        public static Vector3 operator *(in Transform t, in (double X, double Y, double Z) q) => t * (Vector3) q;
         public static Quaternion operator *(in Transform t, in Quaternion q) => t.Rotation * q;
         public static Transform RotateAround(in Quaternion q, in Point p) => new Transform(p - q * p, q);
-        public static implicit operator Transform((Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
+        public static implicit operator Transform(in (Vector3 translation, Quaternion rotation) p) => new Transform(p.translation, p.rotation);
     }
 }

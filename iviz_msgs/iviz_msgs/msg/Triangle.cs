@@ -7,11 +7,11 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = "iviz_msgs/Triangle")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
+    public struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {
-        [DataMember (Name = "a")] public uint A { get; }
-        [DataMember (Name = "b")] public uint B { get; }
-        [DataMember (Name = "c")] public uint C { get; }
+        [DataMember (Name = "a")] public uint A;
+        [DataMember (Name = "b")] public uint B;
+        [DataMember (Name = "c")] public uint C;
     
         /// <summary> Explicit constructor. </summary>
         public Triangle(uint A, uint B, uint C)
@@ -52,6 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -71,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
+                "H4sIAAAAAAAAEyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
                 
     }
 }

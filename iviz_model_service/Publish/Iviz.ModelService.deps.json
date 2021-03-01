@@ -1,11 +1,11 @@
 {
   "runtimeTarget": {
-    "name": ".NETCoreApp,Version=v3.1",
+    "name": ".NETCoreApp,Version=v5.0",
     "signature": ""
   },
   "compilationOptions": {},
   "targets": {
-    ".NETCoreApp,Version=v3.1": {
+    ".NETCoreApp,Version=v5.0": {
       "Iviz.ModelService/1.0.0": {
         "dependencies": {
           "AssimpNet": "4.1.0",
@@ -211,15 +211,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "System.Buffers/4.3.0": {
-        "dependencies": {
-          "System.Diagnostics.Debug": "4.3.0",
-          "System.Diagnostics.Tracing": "4.3.0",
-          "System.Resources.ResourceManager": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Threading": "4.3.0"
-        }
-      },
+      "System.Buffers/4.5.1": {},
       "System.Collections/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -318,7 +310,7 @@
       "System.IO.Compression/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
-          "System.Buffers": "4.3.0",
+          "System.Buffers": "4.5.1",
           "System.Collections": "4.3.0",
           "System.Diagnostics.Debug": "4.3.0",
           "System.IO": "4.3.0",
@@ -336,7 +328,7 @@
       },
       "System.IO.Compression.ZipFile/4.3.0": {
         "dependencies": {
-          "System.Buffers": "4.3.0",
+          "System.Buffers": "4.5.1",
           "System.IO": "4.3.0",
           "System.IO.Compression": "4.3.0",
           "System.IO.FileSystem": "4.3.0",
@@ -772,20 +764,35 @@
         "dependencies": {
           "AssimpNet": "4.1.0",
           "Iviz.Msgs": "1.0.0",
-          "Iviz.Urdf": "1.0.0"
+          "Iviz.Urdf": "1.0.0",
+          "Iviz.XmlRpc": "1.0.0"
         },
         "runtime": {
           "Iviz.ModelService.Lib.dll": {}
         }
       },
       "Iviz.Msgs/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3",
+          "System.Buffers": "4.5.1"
+        },
         "runtime": {
           "Iviz.Msgs.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0",
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.Lib.dll": {}
         }
       },
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
           "Nito.AsyncEx.Coordination": "5.1.0",
@@ -1009,12 +1016,12 @@
       "path": "system.appcontext/4.3.0",
       "hashPath": "system.appcontext.4.3.0.nupkg.sha512"
     },
-    "System.Buffers/4.3.0": {
+    "System.Buffers/4.5.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ratu44uTIHgeBeI0dE8DWvmXVBSo4u7ozRZZHOMmK/JPpYyo0dAfgSiHlpiObMQ5lEtEyIXA40sKRYg5J6A8uQ==",
-      "path": "system.buffers/4.3.0",
-      "hashPath": "system.buffers.4.3.0.nupkg.sha512"
+      "sha512": "sha512-Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg==",
+      "path": "system.buffers/4.5.1",
+      "hashPath": "system.buffers.4.5.1.nupkg.sha512"
     },
     "System.Collections/4.3.0": {
       "type": "package",
@@ -1386,6 +1393,11 @@
       "sha512": ""
     },
     "Iviz.Msgs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

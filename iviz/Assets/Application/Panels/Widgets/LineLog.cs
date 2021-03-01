@@ -12,6 +12,8 @@ namespace Iviz.App
         [SerializeField] Text text = null;
         [SerializeField] GameObject content = null;
 
+        static readonly char[] Separators = {'\n'};
+
         readonly List<string> lines = new List<string>();
         const int MaxLines = 100;
 
@@ -36,19 +38,12 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(str));
             }
 
-            string[] subLines = str.Split('\n');
+            string[] subLines = str.Split(Separators);
             lines.AddRange(subLines);
         }
 
         public void Flush()
         {
-            /*
-            if (Settings.IsHololens)
-            {
-                return;
-            }
-            */
-
             if (!Active)
             {
                 return;
@@ -60,13 +55,7 @@ namespace Iviz.App
                 lines.RemoveRange(0, overflow);
             }
 
-            StringBuilder str = new StringBuilder();
-            foreach (string x in lines)
-            {
-                str.AppendLine(x);
-            }
-
-            text.text = str.ToString();
+            text.text = string.Join("\n", lines);
             float y = text.preferredHeight;
 
             RectTransform ctransform = (RectTransform)content.transform;

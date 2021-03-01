@@ -7,12 +7,12 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = "iviz_msgs/Color32")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
+    public struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
     {
-        [DataMember (Name = "r")] public byte R { get; }
-        [DataMember (Name = "g")] public byte G { get; }
-        [DataMember (Name = "b")] public byte B { get; }
-        [DataMember (Name = "a")] public byte A { get; }
+        [DataMember (Name = "r")] public byte R;
+        [DataMember (Name = "g")] public byte G;
+        [DataMember (Name = "b")] public byte B;
+        [DataMember (Name = "a")] public byte A;
     
         /// <summary> Explicit constructor. </summary>
         public Color32(byte R, byte G, byte B, byte A)
@@ -54,6 +54,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -73,7 +77,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
+                "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 
     }
 }

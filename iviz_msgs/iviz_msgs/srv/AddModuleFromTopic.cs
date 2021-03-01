@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (AddModuleFromTopicResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class AddModuleFromTopicRequest : IRequest, IDeserializable<AddModuleFromTopicRequest>
+    public sealed class AddModuleFromTopicRequest : IRequest<AddModuleFromTopic, AddModuleFromTopicResponse>, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
         [DataMember (Name = "topic")] public string Topic { get; set; } // Name of the topic
@@ -58,8 +64,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddModuleFromTopicRequest()
         {
-            Topic = "";
-            Id = "";
+            Topic = string.Empty;
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -92,6 +98,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
@@ -119,8 +129,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddModuleFromTopicResponse()
         {
-            Message = "";
-            Id = "";
+            Message = string.Empty;
+            Id = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -154,6 +164,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.Serialize(Message);
             b.Serialize(Id);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

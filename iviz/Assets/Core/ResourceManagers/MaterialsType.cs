@@ -13,9 +13,13 @@ namespace Iviz.Resources
         public Info<Material> TexturedLit { get; }
         public Info<Material> TransparentLit { get; }
         public Info<Material> TransparentTexturedLit { get; }
+        public Info<Material> BumpLit { get; }
+        public Info<Material> TransparentBumpLit { get; }
         public Info<Material> ImagePreview { get; }
         public Info<Material> PointCloud { get; }
         public Info<Material> PointCloudWithColormap { get; }
+        public Info<Material> PointCloudDirect { get; }
+        public Info<Material> PointCloudDirectWithColormap { get; }
         public Info<Material> DepthCloud { get; }
         public Info<Material> GridInterior { get; }
         public Info<Material> GridMap { get; }
@@ -57,19 +61,25 @@ namespace Iviz.Resources
             TransparentTexturedLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Holo Transparent Textured Lit")
                 : new Info<Material>(assetHolder.TransparentTexturedLit);
+            BumpLit = new Info<Material>(assetHolder.BumpLit);
+            TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");
-            OccupancyGridTexture = new Info<Material>("Materials/OccupancyGrid");
+            OccupancyGridTexture = (Settings.IsMobile || Settings.IsHololens)
+                ? new Info<Material>("Materials/OccupancyGrid") 
+                : new Info<Material>("Materials/OccupancyGrid Clip");
 
             PointCloud = new Info<Material>(assetHolder.PointCloud);
+            PointCloudDirect = new Info<Material>(assetHolder.PointCloudDirect);
             Line = new Info<Material>(assetHolder.LineMaterial);
             TransparentLine = new Info<Material>(assetHolder.TransparentLine);
             LineSimple = new Info<Material>(assetHolder.LineSimple);
             TransparentLineSimple = new Info<Material>(assetHolder.TransparentLineSimple);
 
             PointCloudWithColormap = new Info<Material>(assetHolder.PointCloudWithColormap);
+            PointCloudDirectWithColormap = new Info<Material>(assetHolder.PointCloudDirectWithColormap);
             LineWithColormap = new Info<Material>(assetHolder.LineWithColormap);
             TransparentLineWithColormap = new Info<Material>(assetHolder.TransparentLineWithColormap);
             LineSimpleWithColormap = new Info<Material>(assetHolder.LineSimpleWithColormap);

@@ -39,17 +39,23 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetSdfResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
         [Preserve] public const string RosServiceType = "iviz_msgs/GetSdf";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "920692c7a5a3dd3789f2d8f444a0bf8f";
+        [Preserve] public const string RosMd5Sum = "4268e0641c7ff6b587e46790f433e3ba";
     }
 
     [DataContract]
-    public sealed class GetSdfRequest : IRequest, IDeserializable<GetSdfRequest>
+    public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializable<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.world
@@ -57,7 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetSdfRequest()
         {
-            Uri = "";
+            Uri = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -87,6 +93,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Uri);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
@@ -113,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetSdfResponse()
         {
             Scene = new Scene();
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -147,6 +157,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             Scene.RosSerialize(ref b);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

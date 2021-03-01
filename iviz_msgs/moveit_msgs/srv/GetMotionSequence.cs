@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetMotionSequenceResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetMotionSequenceRequest : IRequest, IDeserializable<GetMotionSequenceRequest>
+    public sealed class GetMotionSequenceRequest : IRequest<GetMotionSequence, GetMotionSequenceResponse>, IDeserializable<GetMotionSequenceRequest>
     {
         // Planning request with a list of motion commands
         [DataMember (Name = "request")] public MotionSequenceRequest Request { get; set; }
@@ -85,6 +91,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Request.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -140,6 +150,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Response.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

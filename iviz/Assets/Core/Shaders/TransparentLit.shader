@@ -2,9 +2,6 @@
 {
 	Properties
 	{
-		_Color("Diffuse Color", Color) = (1,1,1,1)
-		_Smoothness("Smoothness", Range(0,1)) = 0.5
-		_Metallic("Metalness", Range(0,1)) = 0.5
 	}
 		SubShader
 	{
@@ -15,7 +12,7 @@
 		#pragma surface surf Standard addshadow fullforwardshadows alpha:fade
 
 		struct Input {
-			float dummy;
+			float4 color : COLOR;
 		};
 
 		UNITY_INSTANCING_BUFFER_START(Props)
@@ -27,7 +24,7 @@
 
 
 		void surf(Input IN, inout SurfaceOutputStandard o) {
-			fixed4 color = UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
+			const fixed4 color = UNITY_ACCESS_INSTANCED_PROP(Props, _Color) * IN.color;
 			o.Albedo = color.rgb;
 			o.Alpha = color.a;
 			o.Metallic = UNITY_ACCESS_INSTANCED_PROP(Props, _Metallic);

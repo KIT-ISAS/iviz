@@ -20,7 +20,7 @@ namespace Iviz.Sdf
         public Color Diffuse { get; } = Color.White;
         public Color Specular { get; } = DefaultSpecular;
         public Attenuation Attenuation { get; } = Attenuation.Default;
-        public Vector3f Direction { get; } = Vector3f.Down;
+        public Vector3d Direction { get; } = Vector3d.Down;
         public Spot Spot { get; } = Spot.Default;
         public Pose Pose { get; } = Pose.Identity;
         
@@ -60,7 +60,7 @@ namespace Iviz.Sdf
                         Attenuation = new Attenuation(child);
                         break;
                     case "direction":
-                        Direction = new Vector3f(child);
+                        Direction = new Vector3d(child);
                         break;
                     case "spot":
                         Spot = new Spot(child);

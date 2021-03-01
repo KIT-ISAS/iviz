@@ -179,12 +179,12 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (!FollowCamera || Settings.MainCamera == null)
+            if (!FollowCamera)
             {
                 return;
             }
 
-            Vector3 cameraPos = Settings.MainCamera.transform.position;
+            Vector3 cameraPos = Settings.MainCameraTransform.position;
             switch (Orientation)
             {
                 case GridOrientation.XY:

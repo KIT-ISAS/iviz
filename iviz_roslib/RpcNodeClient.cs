@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -28,46 +26,46 @@ namespace Iviz.Roslib.XmlRpc
         public RequestTopicResponse RequestTopic(string topic)
         {
             Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[]? response = MethodCall("requestTopic", args);
+            object[] response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
         }
 
-        public async Task<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
+        public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
         {
             Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[]? response = await MethodCallAsync("requestTopic", args, token).Caf();
+            object[] response = await MethodCallAsync("requestTopic", args, token).Caf();
             return new RequestTopicResponse(response);
         }
 
         public GetMasterUriResponse GetMasterUri()
         {
             Arg[] args = {CallerId};
-            object[]? response = MethodCall("getMasterUri", args);
+            object[] response = MethodCall("getMasterUri", args);
             return new GetMasterUriResponse(response);
         }
 
-        public async Task<GetMasterUriResponse> GetMasterUriAsync()
+        public async ValueTask<GetMasterUriResponse> GetMasterUriAsync(CancellationToken token = default)
         {
             Arg[] args = {CallerId};
-            object[]? response = await MethodCallAsync("getMasterUri", args).Caf();
+            object[] response = await MethodCallAsync("getMasterUri", args, token).Caf();
             return new GetMasterUriResponse(response);
         }
 
         public GetPidResponse GetPid()
         {
             Arg[] args = {CallerId};
-            object[]? response = MethodCall("getPid", args);
+            object[] response = MethodCall("getPid", args);
             return new GetPidResponse(response);
         }
 
-        public async Task<GetPidResponse> GetPidAsync(CancellationToken token = default)
+        public async ValueTask<GetPidResponse> GetPidAsync(CancellationToken token = default)
         {
             Arg[] args = {CallerId};
-            object[]? response = await MethodCallAsync("getPid", args, token).Caf();
+            object[] response = await MethodCallAsync("getPid", args, token).Caf();
             return new GetPidResponse(response);
         }
 
-        object[]? MethodCall(string function, IEnumerable<Arg> args)
+        object[] MethodCall(string function, Arg[] args)
         {
             object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -75,20 +73,20 @@ namespace Iviz.Roslib.XmlRpc
                 return result;
             }
 
-            Logger.LogFormat("Rpc Response: Expected type object[], got {0}", tmp?.GetType().Name);
-            return null;
+            throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
+                                      $"Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]?> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
+        async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
         {
             object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs, token).Caf();
             if (tmp is object[] result)
             {
                 return result;
             }
-
-            Logger.LogFormat("Rpc Response: Expected type object[], got {0}", tmp?.GetType().Name);
-            return null;
+            
+            throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
+                                      $"Expected type object[], got {tmp.GetType().Name}");
         }
 
 

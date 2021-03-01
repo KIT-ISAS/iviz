@@ -32,8 +32,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public ContactInformation()
         {
-            ContactBody1 = "";
-            ContactBody2 = "";
+            ContactBody1 = string.Empty;
+            ContactBody2 = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -84,6 +84,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(BodyType2);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (ContactBody1 is null) throw new System.NullReferenceException(nameof(ContactBody1));
@@ -111,7 +115,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71VTW/UMBC951eM1AMtahcoiEOlHoDlY/naql3BceWNJ4lFYgfbaRt+PW/s7LYFJDgA" +
+                "H4sIAAAAAAAAE71VTW/UMBC951eM1AMtahcoiEOlHoDlY/naql3BceWNJ4lFYgfbaRt+PW/s7LYFJDgA" +
                 "q0ib2POe5+PNeI8uorJaeU3nywtqWGn2VDoblbGBjK2c71Q0zlKxR2rjhkixYaq86hjbdNWYssGSCWKQ" +
                 "gGUkfIWeS1MZ1sWbTJq5C1iduWASpasS2RbVO2NjUbPrOPpx3YU6PDiTNexkhKA/ikctQN5z6J3VxtYU" +
                 "3W+ZPnEZnX9MNuOFas59bMSLu7iqdSo+fUJattOREuzkbGV8iLRxesSnSqEiDRMBbFeSitINraYNk6LW" +

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (GetMapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.NavMsgs
     }
 
     [DataContract]
-    public sealed class GetMapRequest : IRequest, IDeserializable<GetMapRequest>
+    public sealed class GetMapRequest : IRequest<GetMap, GetMapResponse>, IDeserializable<GetMapRequest>
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
@@ -76,6 +82,10 @@ namespace Iviz.Msgs.NavMsgs
         public static readonly GetMapRequest Singleton = new GetMapRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -125,6 +135,10 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref Buffer b)
         {
             Map.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

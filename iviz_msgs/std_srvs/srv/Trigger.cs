@@ -39,6 +39,12 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (TriggerResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.StdSrvs
     }
 
     [DataContract]
-    public sealed class TriggerRequest : IRequest, IDeserializable<TriggerRequest>
+    public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializable<TriggerRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -78,6 +84,10 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -97,7 +107,7 @@ namespace Iviz.Msgs.StdSrvs
         /// <summary> Constructor for empty message. </summary>
         public TriggerResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -128,6 +138,10 @@ namespace Iviz.Msgs.StdSrvs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

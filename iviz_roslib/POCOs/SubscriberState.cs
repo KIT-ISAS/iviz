@@ -6,48 +6,20 @@ namespace Iviz.Roslib
 {
     public sealed class SubscriberReceiverState
     {
-        public bool IsAlive { get; }
-        public bool IsConnected { get; }
-        public bool RequestNoDelay { get; }
-        public Endpoint? EndPoint { get; }
+        public bool IsAlive { get; internal set; }
+        public bool IsConnected { get; internal set;}
+        public bool RequestNoDelay { get; internal set;}
+        public Endpoint? EndPoint { get; internal set;}
         public Uri RemoteUri { get; }
-        public Endpoint? RemoteEndpoint { get; }
-        public long NumReceived { get; }
-        public long BytesReceived { get; }
-        public string? ErrorDescription { get; }
-
-        internal SubscriberReceiverState(bool isAlive, bool isConnected,
-            bool requestNoDelay,
-            Endpoint? endPoint,
-            Uri remoteUri, Endpoint? remoteEndpoint,
-            long numReceived, long bytesReceived,
-            string? errorDescription)
-        {
-            IsAlive = isAlive;
-            IsConnected = isConnected;
-            RequestNoDelay = requestNoDelay;
-            EndPoint = endPoint; 
-            RemoteUri = remoteUri;
-            RemoteEndpoint = remoteEndpoint;
-            NumReceived = numReceived;
-            BytesReceived = bytesReceived;
-            ErrorDescription = errorDescription;
-        }
+        public Endpoint? RemoteEndpoint { get; internal set;}
+        public long NumReceived { get; internal set;}
+        public long BytesReceived { get; internal set;}
+        public string? ErrorDescription { get; internal set;}
 
         internal SubscriberReceiverState(Uri remoteUri)
         {
-            IsAlive = false;
-            IsConnected = false;
-            RequestNoDelay = false;
-            EndPoint = null; 
             RemoteUri = remoteUri;
-            RemoteEndpoint = null;
-            NumReceived = 0;
-            BytesReceived = 0;
-            ErrorDescription = null;            
         }
-        
-
     }
 
     public sealed class SubscriberTopicState
@@ -57,7 +29,7 @@ namespace Iviz.Roslib
         public ReadOnlyCollection<string> TopicIds { get; }
         public ReadOnlyCollection<SubscriberReceiverState> Receivers { get; }
 
-        public SubscriberTopicState(string topic, string type, IList<string> topicIds, IList<SubscriberReceiverState> receivers)
+        internal SubscriberTopicState(string topic, string type, IList<string> topicIds, IList<SubscriberReceiverState> receivers)
         {
             Topic = topic;
             Type = type;

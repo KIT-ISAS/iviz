@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionPlanResponse()
         {
             TrajectoryStart = new RobotState();
-            GroupName = "";
+            GroupName = string.Empty;
             Trajectory = new RobotTrajectory();
             ErrorCode = new MoveItErrorCodes();
         }
@@ -67,6 +67,10 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (TrajectoryStart is null) throw new System.NullReferenceException(nameof(TrajectoryStart));
@@ -99,7 +103,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+1bb2/bRtJ/z0+xuACP7ausNHGaa33wC8WWE7W25FpKrmkQEBS5knimuCqXsqwenu/+" +
+                "H4sIAAAAAAAAE+1bb2/bRtJ/z0+xuACP7ausNHGaa33wC8WWE7W25FpKrmkQEBS5knimuCqXsqwenu/+" +
                 "/GZml6RkucnhOftwwLlFTHJnZ+f/zsyun6nRTKtCLwptdV5GZWpyZSYqUtZkS34rDd4WWZTnaT5Vi8KM" +
                 "Mz0Pgmc8MzYFZi5MntAgxkypLNDo4Jqeh/SoyiL6u45LU6xDjBWlnzwtzHKhllYnamKKeo39pV1GWbZW" +
                 "JYBsNNcqsirN+bXQvy21LQ8CWxYEyzjCHECEtdMgu1q0pdIJFljmiRA1qkYaQDT7yhNQplhz3+oYfNmD" +

@@ -83,7 +83,14 @@ namespace Iviz.App
 
         void UpdateSelected()
         {
-            selectedDialogData?.UpdatePanel();
+            try
+            {
+                selectedDialogData?.UpdatePanel();
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error($"{this}: Exception during UpdatePanel", e);
+            }
         }
 
         [NotNull]
@@ -119,7 +126,15 @@ namespace Iviz.App
         void ShowPanel(DialogData newSelected)
         {
             selectedDialogData = newSelected;
-            selectedDialogData.SetupPanel();
+            try
+            {
+                selectedDialogData.SetupPanel();
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error($"{this}: Exception during SetupPanel", e);
+            }
+
             selectedDialogData.Panel.Active = true;
             Active = true;
         }
@@ -157,6 +172,12 @@ namespace Iviz.App
             {
                 SelectPanelFor(selected);
             }
+        }
+
+        [NotNull]
+        public override string ToString()
+        {
+            return "[DialogPanelPanager]";
         }
     }
 }

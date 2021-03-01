@@ -17,22 +17,22 @@ namespace Iviz.App
     {
         const float InteriorColorFactor = 0.25f;
         
-        [NotNull] readonly GridController controller;
+        [NotNull] public GridController GridController { get; }
         [NotNull] readonly GridPanelContents panel;
 
         public override Resource.ModuleType ModuleType => Resource.ModuleType.Grid;
         public override DataPanelContents Panel => panel;
-        public override IConfiguration Configuration => controller.Config;
-        public override IController Controller => controller;
+        public override IConfiguration Configuration => GridController.Config;
+        public override IController Controller => GridController;
 
         public GridModuleData([NotNull] ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(Resource.ModuleType.Grid);
 
-            controller = new GridController(this);
+            GridController = new GridController(this);
             if (constructor.Configuration != null)
             {
-                controller.Config = (GridConfiguration)constructor.Configuration;
+                GridController.Config = (GridConfiguration)constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -41,62 +41,33 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-
-            controller.StopController();
+            GridController.StopController();
         }
 
 
 
         public override void SetupPanel()
         {
-            //panel.LineWidth.Value = controller.GridLineWidth;
-            //panel.NumberOfCells.Value = controller.NumberOfGridCells;
-            //panel.CellSize.Value = controller.GridCellSize;
-            //panel.Orientation.Index = (int)controller.Orientation;
-            panel.ColorPicker.Value = controller.InteriorColor;
-            panel.ShowInterior.Value = controller.InteriorVisible;
-            panel.HideButton.State = controller.Visible;
-            panel.Offset.Value = controller.Offset;
-            panel.FollowCamera.Value = controller.FollowCamera;
-            panel.HideInARMode.Value = controller.HideInARMode;
-            panel.PublishLongTapPosition.Value = controller.PublishLongTapPosition;
-            panel.Sender.Set(controller.SenderPoint);
-            panel.LastTapPosition.Label = controller.LastTapPositionString;
-            panel.TapTopic.Value = controller.TapTopic;
-            panel.TapTopic.Interactable = controller.PublishLongTapPosition;
+            panel.ColorPicker.Value = GridController.InteriorColor;
+            panel.ShowInterior.Value = GridController.InteriorVisible;
+            panel.HideButton.State = GridController.Visible;
+            panel.Offset.Value = GridController.Offset;
+            panel.FollowCamera.Value = GridController.FollowCamera;
+            panel.HideInARMode.Value = GridController.HideInARMode;
+            panel.PublishLongTapPosition.Value = GridController.PublishLongTapPosition;
+            panel.Sender.Set(GridController.SenderPoint);
+            panel.LastTapPosition.Label = GridController.LastTapPositionString;
+            panel.TapTopic.Value = GridController.TapTopic;
+            panel.TapTopic.Interactable = GridController.PublishLongTapPosition;
             panel.TapTopic.Hints = GetTopicHints();
 
-            /*
-            panel.LineWidth.ValueChanged += f =>
-            {
-                controller.GridLineWidth = f;
-            };
-            */
-            /*
-            panel.NumberOfCells.ValueChanged += f =>
-            {
-                controller.NumberOfGridCells = (int)f;
-            };
-            */
-            /*
-            panel.CellSize.ValueChanged += f =>
-            {
-                controller.GridCellSize = f;
-            };
-            */
-            /*
-            panel.Orientation.ValueChanged += (i, _) =>
-            {
-                controller.Orientation = (GridOrientation)i;
-            };
-            */
             panel.ColorPicker.ValueChanged += f =>
             {
                 UpdateColor();
             };
             panel.ShowInterior.ValueChanged += f =>
             {
-                controller.InteriorVisible = f;
+                GridController.InteriorVisible = f;
                 UpdateColor();
             };
             panel.CloseButton.Clicked += () =>
@@ -106,46 +77,46 @@ namespace Iviz.App
             };
             panel.Offset.ValueChanged += f =>
             {
-                controller.Offset = f;
+                GridController.Offset = f;
             };
             panel.HideButton.Clicked += () =>
             {
-                controller.Visible = !controller.Visible;
-                panel.HideButton.State = controller.Visible;
+                GridController.Visible = !GridController.Visible;
+                panel.HideButton.State = GridController.Visible;
                 UpdateModuleButton();
             };
             panel.FollowCamera.ValueChanged += f =>
             {
-                controller.FollowCamera = f;
+                GridController.FollowCamera = f;
             };
             panel.HideInARMode.ValueChanged += f =>
             {
-                controller.HideInARMode = f;
+                GridController.HideInARMode = f;
             };
             panel.PublishLongTapPosition.ValueChanged += f =>
             {
-                controller.PublishLongTapPosition = f;
-                panel.Sender.Set(controller.SenderPoint);
+                GridController.PublishLongTapPosition = f;
+                panel.Sender.Set(GridController.SenderPoint);
                 panel.TapTopic.Interactable = f;
             };
             panel.TapTopic.EndEdit += f =>
             {
-                controller.TapTopic = f;
-                panel.Sender.Set(controller.SenderPoint);
+                GridController.TapTopic = f;
+                panel.Sender.Set(GridController.SenderPoint);
             };
         }
 
         void UpdateColor()
         {
             Color f = panel.ColorPicker.Value;
-            if (controller.InteriorVisible)
+            if (GridController.InteriorVisible)
             {
-                controller.GridColor = f * InteriorColorFactor;
-                controller.InteriorColor = f;
+                GridController.GridColor = f * InteriorColorFactor;
+                GridController.InteriorColor = f;
             }
             else
             {
-                controller.GridColor = f;
+                GridController.GridColor = f;
             }
         }
 
@@ -156,11 +127,12 @@ namespace Iviz.App
 
         static readonly string[] OwnPublishedTopicName = {"clicked_point"};
         
+        [NotNull]
         IEnumerable<string> GetTopicHints()
         {
             string ownResolvedTopic =
-                (controller.SenderPoint != null &&
-                 controller.SenderPoint.TryGetResolvedTopicName(out string topicName))
+                (GridController.SenderPoint != null &&
+                 GridController.SenderPoint.TryGetResolvedTopicName(out string topicName))
                     ? topicName
                     : OwnPublishedTopicName[0];
             return ConnectionManager.Connection.GetSystemTopicTypes()
@@ -178,13 +150,13 @@ namespace Iviz.App
                 switch (field) 
                 {
                     case nameof(GridConfiguration.Visible):
-                        controller.Visible = config.Visible;
+                        GridController.Visible = config.Visible;
                         break;
                     case nameof(GridConfiguration.GridColor):
-                        controller.GridColor = config.GridColor;
+                        GridController.GridColor = config.GridColor;
                         break;
                     case nameof(GridConfiguration.InteriorColor):
-                        controller.InteriorColor = config.InteriorColor;
+                        GridController.InteriorColor = config.InteriorColor;
                         break;
                     /*
                     case nameof(GridConfiguration.GridLineWidth):
@@ -198,16 +170,16 @@ namespace Iviz.App
                         break;
                         */
                     case nameof(GridConfiguration.InteriorVisible):
-                        controller.InteriorVisible = config.InteriorVisible;
+                        GridController.InteriorVisible = config.InteriorVisible;
                         break;
                     case nameof(GridConfiguration.FollowCamera):
-                        controller.FollowCamera = config.FollowCamera;
+                        GridController.FollowCamera = config.FollowCamera;
                         break;
                     case nameof(GridConfiguration.HideInARMode):
-                        controller.HideInARMode = config.HideInARMode;
+                        GridController.HideInARMode = config.HideInARMode;
                         break;
                     case nameof(GridConfiguration.Offset):
-                        controller.Offset = config.Offset;
+                        GridController.Offset = config.Offset;
                         break;
                     default:
                         Core.Logger.Error($"{this}: Unknown field '{field}'");
@@ -220,17 +192,17 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            config.Grids.Add(controller.Config);
+            config.Grids.Add(GridController.Config);
         }
 
         public override void OnARModeChanged(bool value)
         {
-            if (!controller.HideInARMode)
+            if (!GridController.HideInARMode)
             {
                 return;
             }
 
-            controller.Visible = !value;
+            GridController.Visible = !value;
             UpdateModuleButton();
         }
     }

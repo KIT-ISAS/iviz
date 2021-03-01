@@ -39,7 +39,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public Arg(IEnumerable<Uri> f) : this(ThrowIfNull(f).Select(x => new Arg(x)))
+        public Arg(IEnumerable<Uri> f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
         {
         }
 
@@ -72,7 +72,6 @@ namespace Iviz.XmlRpc
 
         Arg((string A, string B) f) : this(new Arg[] {ThrowIfNull(f.A), ThrowIfNull(f.B)})
         {
-            
         }
 
         public Arg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new Arg(x)).ToArray())
@@ -83,27 +82,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public Arg(IEnumerable<Arg> f)
-        {
-            if (f == null)
-            {
-                throw new ArgumentNullException(nameof(f));
-            }
-
-            
-            StringBuilder builder = new StringBuilder(100);
-            builder.Append("<value><array><data>");
-            foreach (Arg arg in f)
-            {
-                builder.Append(arg);
-            }
-
-            builder.Append("</data></array></value>");
-
-            content = builder.ToString();
-        }
-        
-        public Arg(Arg[] f)
+        Arg(Arg[] f)
         {
             if (f == null)
             {
@@ -116,6 +95,7 @@ namespace Iviz.XmlRpc
             {
                 fs[i + 1] = f[i].content;
             }
+
             fs[f.Length + 1] = "</data></array></value>";
 
             content = string.Concat(fs);

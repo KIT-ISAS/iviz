@@ -7,44 +7,73 @@ namespace Iviz.Resources
 {
     public sealed class TexturedMaterialsType
     {
-        readonly Dictionary<Texture, Material> materialsByTexture = new Dictionary<Texture, Material>();
-        readonly Dictionary<Texture, Material> materialsByTextureAlpha = new Dictionary<Texture, Material>();
+        readonly Dictionary<(Texture Diffuse, Texture Bump, bool alpha), Material> materialsByTexture =
+            new Dictionary<(Texture, Texture, bool), Material>();
 
-        public Material Get([NotNull] Texture texture)
+        static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
+        static readonly int MainTex = Shader.PropertyToID("_MainTex");
+
+        public Material Get([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
-            if (texture is null)
+            if (diffuse is null)
             {
-                throw new ArgumentNullException(nameof(texture));
+                throw new ArgumentNullException(nameof(diffuse));
             }
 
-            if (materialsByTexture.TryGetValue(texture, out Material material))
+            var key = (diffuse, bump, false);
+            if (materialsByTexture.TryGetValue(key, out Material existingMaterial))
             {
-                return material;
+                return existingMaterial;
             }
 
-            material = Resource.Materials.TexturedLit.Instantiate();
-            material.mainTexture = texture;
-            material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count}";
-            materialsByTexture[texture] = material;
+            Material material;
+            if (bump != null)
+            {
+                material = Resource.Materials.BumpLit.Instantiate();
+                material.SetTexture(MainTex, diffuse);
+                material.SetTexture(BumpMap, bump);
+                material.name = $"{Resource.Materials.BumpLit.Name} - {materialsByTexture.Count}";
+            }
+            else
+            {
+                material = Resource.Materials.TexturedLit.Instantiate();
+                material.SetTexture(MainTex, diffuse);
+                material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count}";
+            }
+
+            materialsByTexture[key] = material;
             return material;
         }
 
-        public Material GetAlpha([NotNull] Texture texture)
+        public Material GetAlpha([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
-            if (texture is null)
+            if (diffuse is null)
             {
-                throw new ArgumentNullException(nameof(texture));
+                throw new ArgumentNullException(nameof(diffuse));
             }
 
-            if (materialsByTextureAlpha.TryGetValue(texture, out Material material))
+            var key = (diffuse, bump, true);
+            if (materialsByTexture.TryGetValue(key, out Material existingMaterial))
             {
-                return material;
+                return existingMaterial;
             }
 
-            material = Resource.Materials.TransparentTexturedLit.Instantiate();
-            material.mainTexture = texture;
-            material.name = Resource.Materials.TransparentTexturedLit.Name + " - " + materialsByTextureAlpha.Count;
-            materialsByTextureAlpha[texture] = material;
+            Material material;
+            if (bump != null)
+            {
+                material = Resource.Materials.TransparentBumpLit.Instantiate();
+                material.SetTexture(MainTex, diffuse);
+                material.SetTexture(BumpMap, bump);
+                material.name = Resource.Materials.TransparentBumpLit.Name + " - " + materialsByTexture.Count;
+            }
+            else
+            {
+                material = Resource.Materials.TransparentTexturedLit.Instantiate();
+                material.SetTexture(MainTex, diffuse);
+                material.name = Resource.Materials.TransparentTexturedLit.Name + " - " + materialsByTexture.Count;
+            }
+
+            materialsByTexture[key] = material;
             return material;
         }
     }

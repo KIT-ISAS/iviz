@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (SetPlannerParamsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class SetPlannerParamsRequest : IRequest, IDeserializable<SetPlannerParamsRequest>
+    public sealed class SetPlannerParamsRequest : IRequest<SetPlannerParams, SetPlannerParamsResponse>, IDeserializable<SetPlannerParamsRequest>
     {
         // Name of planning config
         [DataMember (Name = "planner_config")] public string PlannerConfig { get; set; }
@@ -63,8 +69,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public SetPlannerParamsRequest()
         {
-            PlannerConfig = "";
-            Group = "";
+            PlannerConfig = string.Empty;
+            Group = string.Empty;
             Params = new PlannerParams();
         }
         
@@ -102,6 +108,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Group);
             Params.RosSerialize(ref b);
             b.Serialize(Replace);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -151,6 +161,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

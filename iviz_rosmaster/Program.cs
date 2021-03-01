@@ -32,14 +32,20 @@ namespace Iviz.RosMaster
             
             Logger.Log = Console.WriteLine;
             Logger.LogError = Console.Error.WriteLine;
-            //Logger.LogDebug = Console.Error.WriteLine;
-            
-            masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
-            using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);    
-            Console.WriteLine($"** Iviz.RosMaster: Starting at uri {rosMasterServer.MasterUri} ...");
-            rosMasterServer.AddKey("/rosdistro", "noetic");
-            rosMasterServer.AddKey("/rosversion", "1.15.8");
-            await rosMasterServer.StartAsync();
+
+            try
+            {
+                masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
+                using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);
+                Console.WriteLine($"** Iviz.RosMaster: Starting at uri {rosMasterServer.MasterUri} ...");
+                rosMasterServer.AddKey("/rosdistro", "noetic");
+                rosMasterServer.AddKey("/rosversion", "1.15.8");
+                await rosMasterServer.StartAsync();
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"EE Fatal error: {Logger.ExceptionToString(e)}");
+            }
         }
     }
 }

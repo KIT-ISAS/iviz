@@ -55,25 +55,12 @@ namespace Iviz.Core
             Z = z;
         }
 
-        public static implicit operator Vector3(in SerializableVector3 i)
-        {
-            return new Vector3(i.X, i.Y, i.Z);
-        }
-
-        public static implicit operator SerializableVector3(in Vector3 v)
-        {
-            return new SerializableVector3(
-                x: v.x,
-                y: v.y,
-                z: v.z
-            );
-        }
+        public static implicit operator Vector3(in SerializableVector3 i) => new Vector3(i.X, i.Y, i.Z);
+        public static implicit operator SerializableVector3(in Vector3 v) => new SerializableVector3(v.x, v.y, v.z);
     }
 
     public static class RosUtils
     {
-        const string BaseFrameId = "map";
-
         public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
         public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
 
@@ -104,6 +91,9 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion RosRpy2Unity(this Vector3 v) => Quaternion.Euler(v.Ros2Unity() * -Mathf.Rad2Deg);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Quaternion RosRpy2Unity(this Msgs.GeometryMsgs.Vector3 v) => v.ToUnity().RosRpy2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
@@ -198,10 +188,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Msgs.GeometryMsgs.Point ToRosPoint(this Vector3 p)
-        {
-            return new Msgs.GeometryMsgs.Point(p.x, p.y, p.z);
-        }
+        static Msgs.GeometryMsgs.Point ToRosPoint(this Vector3 p) => (p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Point Unity2RosPoint(this Vector3 p)
@@ -222,10 +209,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Msgs.GeometryMsgs.Quaternion ToRos(this Quaternion p)
-        {
-            return new Msgs.GeometryMsgs.Quaternion(p.x, p.y, p.z, p.w);
-        }
+        static Msgs.GeometryMsgs.Quaternion ToRos(this Quaternion p) => (p.x, p.y, p.z, p.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
@@ -258,10 +242,8 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p)
-        {
-            return new Msgs.GeometryMsgs.Transform(p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
-        }
+        public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p) =>
+            (p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)

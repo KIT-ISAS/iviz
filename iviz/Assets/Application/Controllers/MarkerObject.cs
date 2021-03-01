@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -59,22 +60,7 @@ namespace Iviz.Controllers
 
         readonly StringBuilder description = new StringBuilder(250);
 
-        class TaskInfo
-        {
-            [NotNull] readonly Task task;
-            [NotNull] public CancellationTokenSource TokenSource { get; }
-            [NotNull] public string Uri { get; }
-            [CanBeNull] public Info<GameObject> ResourceInfo { get; set; }
-
-            public TaskInfo([NotNull] Task task, [NotNull] CancellationTokenSource tokenSource, [NotNull] string uri)
-            {
-                this.task = task;
-                TokenSource = tokenSource;
-                Uri = uri;
-            }
-        }
-
-        [CanBeNull] TaskInfo taskInfo;
+        [CanBeNull] CancellationTokenSource runningTs;
 
         (string Ns, int Id) id;
 
@@ -91,7 +77,7 @@ namespace Iviz.Controllers
         [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
 
         public Bounds? Bounds =>
-            resource == null ? null : UnityUtils.TransformBound(resource.Bounds, resource.GetTransform());
+            resource == null ? null : resource.Bounds.TransformBound(resource.GetTransform());
 
         uint? previousHash;
 
@@ -205,7 +191,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Set([NotNull] Marker msg)
+        public async Task SetAsync([NotNull] Marker msg)
         {
             if (msg == null)
             {
@@ -223,7 +209,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<color=maroon><b>* Marker: ").Append(id.Ns).Append("/").Append(id.Id)
+            description.Append("<color=#800000ff><b>* ").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
                 .Append("</b></color>").AppendLine();
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
@@ -234,7 +220,7 @@ namespace Iviz.Controllers
 
             description.Append("</b>").AppendLine();
 
-            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : DateTime.Now + msg.Lifetime.ToTimeSpan();
+            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : GameThread.Now + msg.Lifetime.ToTimeSpan();
 
             if (msg.Lifetime == default)
             {
@@ -243,19 +229,28 @@ namespace Iviz.Controllers
             }
             else
             {
-                ExpirationTime = DateTime.Now + msg.Lifetime.ToTimeSpan();
+                ExpirationTime = GameThread.Now + msg.Lifetime.ToTimeSpan();
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
-            UpdateResource(msg);
+            try
+            {
+                await UpdateResourceAsync(msg);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
 
             if (resource == null)
             {
-                if (msg.Type() == MarkerType.MeshResource)
+                if (msg.Type() != MarkerType.MeshResource)
                 {
-                    description.Append(ErrorStr).Append("Mesh resource not found").AppendLine();
-                    numErrors++;
+                    return;
                 }
+
+                description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
+                numErrors++;
 
                 return;
             }
@@ -416,7 +411,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                     .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numErrors++;
                 return;
             }
@@ -424,7 +419,7 @@ namespace Iviz.Controllers
             if (Mathf.Approximately(msg.Color.A, 0))
             {
                 description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numWarnings++;
                 return;
             }
@@ -432,7 +427,7 @@ namespace Iviz.Controllers
             if (msg.Color.HasNaN())
             {
                 description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numWarnings++;
                 return;
             }
@@ -441,7 +436,7 @@ namespace Iviz.Controllers
             {
                 description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
                     .Append(" needs to be a multiple of 3").AppendLine();
-                meshTriangles.Set(Array.Empty<Vector3>());
+                meshTriangles.Clear();
                 numErrors++;
                 return;
             }
@@ -460,27 +455,32 @@ namespace Iviz.Controllers
             }
 
             meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
-            var points = new Vector3[msg.Points.Length];
-            for (int i = 0; i < points.Length; i++)
-            {
-                points[i] = msg.Points[i].Ros2Unity();
-            }
 
-            meshTriangles.FlipWinding = TriangleListFlipWinding;
-
-            if (msg.Colors.Length != 0)
+            using (var points = new Rent<Vector3>(msg.Points.Length))
             {
-                var colors = new Color[msg.Colors.Length];
-                for (int i = 0; i < colors.Length; i++)
+                for (int i = 0; i < points.Length; i++)
                 {
-                    colors[i] = msg.Colors[i].ToUnityColor();
+                    points.Array[i] = msg.Points[i].Ros2Unity();
                 }
 
-                meshTriangles.Set(points, colors);
-            }
-            else
-            {
-                meshTriangles.Set(points);
+                meshTriangles.FlipWinding = TriangleListFlipWinding;
+
+                if (msg.Colors.Length != 0)
+                {
+                    using (var colors = new Rent<Color>(msg.Colors.Length))
+                    {
+                        for (int i = 0; i < colors.Length; i++)
+                        {
+                            colors.Array[i] = msg.Colors[i].ToUnityColor();
+                        }
+
+                        meshTriangles.Set(points, colors);
+                    }
+                }
+                else
+                {
+                    meshTriangles.Set(points);
+                }
             }
         }
 
@@ -520,7 +520,6 @@ namespace Iviz.Controllers
 
             if (HasSameHash(msg))
             {
-                //Debug.Log("Same message!");
                 return;
             }
 
@@ -753,9 +752,9 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateResource([NotNull] Marker msg)
+        async Task UpdateResourceAsync([NotNull] Marker msg)
         {
-            var newResourceInfo = GetRequestedResource(msg);
+            Info<GameObject> newResourceInfo = await GetRequestedResource(msg);
             if (newResourceInfo == resourceInfo)
             {
                 return;
@@ -782,7 +781,6 @@ namespace Iviz.Controllers
                         .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
                         .AppendLine();
                     numWarnings++;
-                    //Logger.Warn($"MarkerObject: Unknown mesh resource '{msg.MeshResource}'");
                 }
 
                 return;
@@ -811,17 +809,6 @@ namespace Iviz.Controllers
 
         void UpdateTransform([NotNull] Marker msg)
         {
-            /*
-            if (msg.FrameLocked)
-            {
-                AttachTo(msg.Header.FrameId);
-                description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
-            }
-            else
-            {
-                AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-            }
-            */
             AttachTo(msg.Header.FrameId);
             description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
 
@@ -849,8 +836,8 @@ namespace Iviz.Controllers
             transform.SetLocalPose(currentPose = newPose);
         }
 
-        [CanBeNull]
-        Info<GameObject> GetRequestedResource([NotNull] Marker msg)
+        [ItemCanBeNull]
+        async ValueTask<Info<GameObject>> GetRequestedResource([NotNull] Marker msg)
         {
             if (msg.Type() != MarkerType.MeshResource)
             {
@@ -888,65 +875,37 @@ namespace Iviz.Controllers
                         return newResourceInfo;
                     }
 
-                    if (taskInfo == null || taskInfo.Uri != msg.MeshResource)
+                    try
                     {
                         StopLoadResourceTask();
-                        CancellationTokenSource tokenSource = new CancellationTokenSource();
-                        taskInfo = new TaskInfo(LoadResourceAsync(msg.MeshResource, tokenSource), tokenSource,
-                            msg.MeshResource);
+                        runningTs = new CancellationTokenSource();
+                        description.Append("** Mesh is being downloaded...").AppendLine();
+                        
+                        var result = await Resource.GetGameObjectResourceAsync(msg.MeshResource,
+                            ConnectionManager.ServiceProvider, runningTs.Token);
+                        description.Append(result != null ? "** Download finished." : "** Download failed.").AppendLine();
+                        return result;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error($"{this}: LoadResourceAsync failed for '{msg.MeshResource}'", e);
+                        return null;
                     }
 
-                    return taskInfo.ResourceInfo;
                 default:
                     return null;
             }
         }
 
+
         void StopLoadResourceTask()
         {
-            taskInfo?.TokenSource.Cancel();
-            taskInfo = null;
-        }
-
-        async Task LoadResourceAsync(string uriString, CancellationTokenSource tokenSource)
-        {
-            Info<GameObject> newResourceInfo;
-            try
-            {
-                var task = Resource.GetGameObjectResourceAsync(uriString,
-                    ConnectionManager.ServiceProvider,
-                    tokenSource.Token);
-                newResourceInfo = task.RanToCompletion() ? task.Result : await task;
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"{this}: LoadResourceAsync failed for '{uriString}'", e);
-                return;
-            }
-
-            if (tokenSource.IsCancellationRequested || newResourceInfo == null)
-            {
-                return;
-            }
-
-            GameObject resourceGameObject = ResourcePool.GetOrCreate(newResourceInfo, transform);
-            var newResource = resourceGameObject.GetComponent<IDisplay>();
-            if (newResource != null)
-            {
-                newResource.Layer = LayerType.IgnoreRaycast;
-            }
-
-            if (taskInfo != null)
-            {
-                taskInfo.ResourceInfo = resourceInfo;
-            }
-
-            resourceInfo = newResourceInfo;
-            resource = newResource;
+            runningTs?.Cancel();
+            runningTs = null;
         }
 
         [NotNull]
@@ -1042,6 +1001,7 @@ namespace Iviz.Controllers
             return false;
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[MarkerObject {name}]";

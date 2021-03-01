@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestNestedServiceResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestNestedServiceRequest : IRequest, IDeserializable<TestNestedServiceRequest>
+    public sealed class TestNestedServiceRequest : IRequest<TestNestedService, TestNestedServiceResponse>, IDeserializable<TestNestedServiceRequest>
     {
         //request definition
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
@@ -84,6 +90,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosSerialize(ref Buffer b)
         {
             Pose.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -133,6 +143,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosSerialize(ref Buffer b)
         {
             Data.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

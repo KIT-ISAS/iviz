@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -17,7 +18,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion
     {
-        const float MaxPositionMagnitudeSq = 1e9f;
+        const float MaxPositionMagnitude = 1e3f;
 
         static readonly int BoundaryCenterID = Shader.PropertyToID("_BoundaryCenter");
         static readonly int PointsID = Shader.PropertyToID("_Points");
@@ -214,7 +215,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
-                if (t.HasNaN() || t.Position.MagnitudeSq() > MaxPositionMagnitudeSq)
+                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                 {
                     continue;
                 }

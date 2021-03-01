@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (UpdateModuleResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class UpdateModuleRequest : IRequest, IDeserializable<UpdateModuleRequest>
+    public sealed class UpdateModuleRequest : IRequest<UpdateModule, UpdateModuleResponse>, IDeserializable<UpdateModuleRequest>
     {
         // Updates a module
         [DataMember (Name = "id")] public string Id { get; set; } // Id of the module
@@ -59,9 +65,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public UpdateModuleRequest()
         {
-            Id = "";
+            Id = string.Empty;
             Fields = System.Array.Empty<string>();
-            Config = "";
+            Config = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -95,6 +101,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
             b.SerializeArray(Fields, 0);
             b.Serialize(Config);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -133,7 +143,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public UpdateModuleResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -164,6 +174,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

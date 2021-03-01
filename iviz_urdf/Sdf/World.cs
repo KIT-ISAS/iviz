@@ -7,12 +7,12 @@ namespace Iviz.Sdf
 {
     public sealed class World
     {
-        static readonly Vector3f DefaultGravity = new Vector3f(0, 0, -9.8);
+        static readonly Vector3d DefaultGravity = new Vector3d(0, 0, -9.8);
         
         public string? Name { get; }
         public Wind? Wind { get; }
         public ReadOnlyCollection<Include> Includes { get; }
-        public Vector3f Gravity { get; } = DefaultGravity;
+        public Vector3d Gravity { get; } = DefaultGravity;
         public ReadOnlyCollection<Light> Lights { get; }
         public ReadOnlyCollection<Frame> Frames { get; }
         public ReadOnlyCollection<Model> Models { get; }
@@ -41,7 +41,7 @@ namespace Iviz.Sdf
                         Wind = new Wind(child);
                         break;
                     case "gravity":
-                        Gravity = new Vector3f(child);
+                        Gravity = new Vector3d(child);
                         break;
                     case "include":
                         includes.Add(new Include(child));

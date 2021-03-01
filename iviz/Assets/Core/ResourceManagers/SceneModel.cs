@@ -5,20 +5,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using Buffer = System.Buffer;
 using Color32 = UnityEngine.Color32;
 using Object = UnityEngine.Object;
+using Texture = UnityEngine.Texture;
 
 namespace Iviz.Displays
 {
     public static class SceneModel
     {
         [NotNull]
-        public static async Task<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
+        [ItemNotNull]
+        public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
             [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             if (uriString is null)
@@ -32,7 +36,6 @@ namespace Iviz.Displays
             }
 
             token.ThrowIfCancellationRequested();
-
             GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
 
             try
@@ -41,15 +44,20 @@ namespace Iviz.Displays
             }
             catch (Exception)
             {
-                Object.Destroy(root);
+                if (root != null)
+                {
+                    Object.Destroy(root);
+                }
+
                 throw;
             }
         }
 
-        static async Task<AggregatedMeshMarkerResource> CreateImpl(string uriString, Model msg,
-            IExternalServiceProvider provider, CancellationToken token, GameObject root)
+        [ItemNotNull]
+        static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
+            IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
-            switch (msg.OrientationHint.ToUpperInvariant())
+            switch (msg.OrientationHint.ToString().ToUpperInvariant())
             {
                 case "Z_UP":
                     root.transform.localRotation = Quaternion.Euler(0, -90, 0);
@@ -66,71 +74,98 @@ namespace Iviz.Displays
             foreach (var mesh in msg.Meshes)
             {
                 token.ThrowIfCancellationRequested();
-
                 GameObject obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
                 obj.AddComponent<BoxCollider>();
                 obj.transform.SetParent(root.transform, false);
 
-                MeshTrianglesResource r = obj.AddComponent<MeshTrianglesResource>();
+                MeshTrianglesResource meshResource = obj.AddComponent<MeshTrianglesResource>();
 
-                r.Name = mesh.Name;
+                meshResource.Name = mesh.Name;
 
-                Vector3[] vertices = new Vector3[mesh.Vertices.Length];
-                for (int i = 0; i < vertices.Length; i++)
+                Iviz.Msgs.IvizMsgs.Color32[] meshColors = mesh.ColorChannels.Length != 0
+                    ? mesh.ColorChannels[0].Colors
+                    : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
+
+                var material = msg.Materials[(int) mesh.MaterialIndex];
+                Msgs.IvizMsgs.Texture diffuseTexture =
+                    material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_DIFFUSE);
+                Msgs.IvizMsgs.Texture bumpTexture =
+                    material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_NORMALS);
+
+                Vector3f[] meshDiffuseTexCoords =
+                    diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
+                        ? mesh.TexCoords[diffuseTexture.UvIndex].Coords
+                        : Array.Empty<Vector3f>();
+                Vector3f[] meshBumpTexCoords =
+                    bumpTexture != null && bumpTexture.UvIndex < mesh.TexCoords.Length
+                        ? mesh.TexCoords[bumpTexture.UvIndex].Coords
+                        : Array.Empty<Vector3f>();
+
+                using (var vertices = new Rent<Vector3>(mesh.Vertices.Length))
+                using (var normals = new Rent<Vector3>(mesh.Normals.Length))
+                using (var colors = new Rent<Color32>(meshColors.Length))
+                using (var diffuseTexCoords = new Rent<Vector3>(meshDiffuseTexCoords.Length))
+                using (var bumpTexCoords = new Rent<Vector3>(meshBumpTexCoords.Length))
+                using (var tangents = new Rent<Vector4>(mesh.Tangents.Length))
+                using (var triangles = new Rent<int>(mesh.Faces.Length * 3))
                 {
-                    vertices[i] = Assimp2Unity(mesh.Vertices[i]);
-                }
-
-                Vector3[] normals = new Vector3[mesh.Normals.Length];
-                MemCopy(mesh.Normals, normals, normals.Length * 3 * sizeof(float));
-
-                Color32[] colors = new Color32[mesh.Colors.Length];
-                MemCopy(mesh.Colors, colors, colors.Length * sizeof(int));
-
-                Vector2[] texCoords = new Vector2[mesh.TexCoords.Length];
-                MemCopy(mesh.TexCoords, texCoords, texCoords.Length * 2 * sizeof(float));
-
-                int[] triangles = new int[mesh.Faces.Length * 3];
-                MemCopy(mesh.Faces, triangles, triangles.Length * sizeof(int));
-
-                var material = msg.Materials[mesh.MaterialIndex];
-                r.Color = new Color32(material.Diffuse.R, material.Diffuse.G, material.Diffuse.B,
-                    material.Diffuse.A);
-                r.EmissiveColor = new Color32(material.Emissive.R, material.Emissive.G, material.Emissive.B,
-                    material.Emissive.A);
-
-                if (material.DiffuseTexture.Path.Length != 0)
-                {
-                    Uri uri = new Uri(uriString);
-                    string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
-                    string directoryName = Path.GetDirectoryName(uriPath);
-                    if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
+                    for (int i = 0; i < vertices.Length; i++)
                     {
-                        directoryName = directoryName.Replace('\\', '/'); // windows!
+                        vertices.Array[i] = Assimp2Unity(mesh.Vertices[i]);
                     }
 
-                    string texturePath = $"{directoryName}/{material.DiffuseTexture.Path}";
-                    string textureUri = $"{uri.Scheme}://{uri.Host}{texturePath}";
-                    
-                    var task = Resource.GetTextureResourceAsync(textureUri, provider, token);
-                    var textureInfo = task.RanToCompletion() ? task.Result : await task;
+                    MemCopy(mesh.Normals, normals.Array, normals.Length * 3 * sizeof(float));
+                    MemCopy(meshColors, colors.Array, colors.Length * sizeof(int));
+                    MemCopy(meshDiffuseTexCoords, diffuseTexCoords.Array, diffuseTexCoords.Length * 3 * sizeof(float));
+                    MemCopy(meshBumpTexCoords, bumpTexCoords.Array, bumpTexCoords.Length * 3 * sizeof(float));
+                    MemCopy(mesh.Faces, triangles.Array, triangles.Length * sizeof(int));
+
+                    for (int i = 0; i < mesh.Tangents.Length; i++)
+                    {
+                        var tangent = mesh.Tangents[i];
+                        tangents.Array[i] = new Vector4(tangent.X, tangent.Y, tangent.Z, -1);
+                    }
+
+                    meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
+                }
+
+                meshResource.Color = material.Diffuse.ToColor32();
+                meshResource.EmissiveColor = material.Emissive.ToColor32();
+
+                if (diffuseTexture != null && diffuseTexture.Path.Length != 0)
+                {
+                    var textureInfo = await GetTextureResourceAsync(uriString, diffuseTexture.Path, provider, token);
                     if (textureInfo != null)
                     {
-                        r.Texture = textureInfo.Object;
+                        meshResource.DiffuseTexture = textureInfo.Object;
                     }
                     else
                     {
-                        Debug.Log($"SceneModel: Failed to retrieve texture {textureUri}");
+                        Core.Logger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
+                                         $"'{diffuseTexture.Path}' required by {uriString}");
                     }
                 }
 
-                r.Set(vertices, normals, texCoords, triangles, colors);
-                r.Mesh.name = mesh.Name;
+                if (bumpTexture != null && bumpTexture.Path.Length != 0)
+                {
+                    var textureInfo = await GetTextureResourceAsync(uriString, bumpTexture.Path, provider, token);
+                    if (textureInfo != null)
+                    {
+                        meshResource.BumpTexture = textureInfo.Object;
+                    }
+                    else
+                    {
+                        Core.Logger.Warn($"SceneModel: Failed to retrieve normal texture " +
+                                         $"'{bumpTexture.Path}' required by {uriString}");
+                    }
+                }
 
-                children.Add(r);
-                templateMeshes.Add(r);
+                meshResource.Mesh.name = mesh.Name;
+
+                children.Add(meshResource);
+                templateMeshes.Add(meshResource);
             }
 
             List<GameObject> nodes = new List<GameObject>();
@@ -138,6 +173,7 @@ namespace Iviz.Displays
 
             foreach (var node in msg.Nodes)
             {
+                token.ThrowIfCancellationRequested();
                 GameObject nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
 
@@ -189,11 +225,27 @@ namespace Iviz.Displays
             return amm;
         }
 
+        [ItemCanBeNull]
+        static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
+            [NotNull] string localPath, IExternalServiceProvider provider, CancellationToken token)
+        {
+            Uri uri = new Uri(uriString);
+            string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
+            string directoryName = Path.GetDirectoryName(uriPath);
+            if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
+            {
+                directoryName = directoryName.Replace('\\', '/'); // windows!
+            }
+            
+            string textureUri = $"{uri.Scheme}://{uri.Host}{directoryName}/{localPath}";
+            return await Resource.GetTextureResourceAsync(textureUri, provider, token);
+        }
+
         static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)
         {
             while (transform != endTransform)
             {
-                bounds = UnityUtils.TransformBound(bounds, transform);
+                bounds = bounds.TransformBound(transform);
                 transform = transform.parent;
             }
 

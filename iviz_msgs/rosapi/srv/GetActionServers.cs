@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (GetActionServersResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class GetActionServersRequest : IRequest, IDeserializable<GetActionServersRequest>
+    public sealed class GetActionServersRequest : IRequest<GetActionServers, GetActionServersResponse>, IDeserializable<GetActionServersRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -75,6 +81,10 @@ namespace Iviz.Msgs.Rosapi
         public static readonly GetActionServersRequest Singleton = new GetActionServersRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -124,6 +134,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(ActionServers, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

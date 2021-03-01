@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -29,6 +30,11 @@ namespace Iviz.Core
 
         public static float GameTime { get; private set; }
 
+        public static DateTime Now { get; private set; } = DateTime.Now;
+
+        [CanBeNull] static string nowFormatted;
+        [NotNull] public static string NowFormatted => nowFormatted ?? (nowFormatted = Now.ToString("HH:mm:ss"));
+
         void Awake()
         {
             Instance = this;
@@ -37,19 +43,51 @@ namespace Iviz.Core
 
         void Update()
         {
-            EveryFrame?.Invoke();
+            try
+            {
+                EveryFrame?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Error during EveryFrame", e);
+            }
 
+            Now = DateTime.Now;
+            nowFormatted = null;
             GameTime = Time.time;
             if (GameTime - lastRunTime > 1)
             {
-                EverySecond?.Invoke();
-                LateEverySecond?.Invoke();
+                try
+                {
+                    EverySecond?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Error during EverySecond", e);
+                }
+
+                try
+                {
+                    LateEverySecond?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Error during LateEverySecond", e);
+                }
+
                 lastRunTime = GameTime;
             }
 
             while (actionsQueue.TryDequeue(out Action action))
             {
-                action();
+                try
+                {
+                    action();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Error during action call", e);
+                }
             }
 
             counter++;
@@ -58,18 +96,46 @@ namespace Iviz.Core
                 return;
             }
 
-            ListenersEveryFrame?.Invoke();
+            try
+            {
+                ListenersEveryFrame?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Error during ListenersEveryFrame", e);
+            }
+
             while (listenerQueue.TryDequeue(out Action action))
             {
-                action();
+                try
+                {
+                    action();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Error during listener action call", e);
+                }
             }
 
             counter = 0;
         }
 
+        [NotNull]
+        public override string ToString()
+        {
+            return "[GameThread]";
+        }
+
         void LateUpdate()
         {
-            LateEveryFrame?.Invoke();
+            try
+            {
+                LateEveryFrame?.Invoke();
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Error during LateEveryFrame", e);
+            }
         }
 
         void OnDestroy()

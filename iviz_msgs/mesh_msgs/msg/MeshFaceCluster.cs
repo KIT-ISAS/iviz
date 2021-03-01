@@ -16,7 +16,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFaceCluster()
         {
             FaceIndices = System.Array.Empty<uint>();
-            Label = "";
+            Label = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -49,6 +49,10 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(Label);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (FaceIndices is null) throw new System.NullReferenceException(nameof(FaceIndices));
@@ -75,7 +79,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
+                "H4sIAAAAAAAAE1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
                 "TErN4eICAKZztFU3AAAA";
                 
     }

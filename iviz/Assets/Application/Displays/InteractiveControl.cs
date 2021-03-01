@@ -279,7 +279,7 @@ namespace Iviz.Displays
                 float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
                 float absoluteScaleY = transform.lossyScale.y; 
                 menuObject.transform.localScale = 0.5f * Vector3.one;
-                menuObject.GetComponent<Billboard>().offset =
+                menuObject.GetComponent<Billboard>().Offset =
                     new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale) * absoluteScaleY;
 
                 frame.Bounds = newBounds;
@@ -375,7 +375,7 @@ namespace Iviz.Displays
 
         void RotateToCamera()
         {
-            var cameraForward = Settings.MainCamera.transform.forward;
+            var cameraForward = Settings.MainCameraTransform.forward;
             var mTransform = transform;
             if (HandlesPointToCamera)
             {

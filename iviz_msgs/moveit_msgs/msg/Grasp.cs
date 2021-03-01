@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public Grasp()
         {
-            Id = "";
+            Id = string.Empty;
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory();
             GraspPosture = new TrajectoryMsgs.JointTrajectory();
             GraspPose = new GeometryMsgs.PoseStamped();
@@ -113,6 +113,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(AllowedTouchObjects, 0);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
@@ -165,7 +169,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71YS2/bRhC+81cs7EPsQFaKtOghbQ4B0qYp0DZFjPYQBMKKHEqbkLvM7lKy+uv7zSyX" +
+                "H4sIAAAAAAAAE71YS2/bRhC+81cs7EPsQFaKtOghbQ4B0qYp0DZFjPYQBMKKHEqbkLvM7lKy+uv7zSyX" +
                 "pGSnadA6hgHxMe+d+WaG5+p6a4JqKQS9IVU6G7WxQWlVUSi96aJxVrkaDzZeh07FrY5q7/qmUmtSfaCq" +
                 "OFd7E7eg6LSPpuwb7RXZ6orqmsrovIpuYNYQtX6HhwtlbNn0lbEbtXV7UECK7jrvdLlVBu830C0XFMul" +
                 "OraychSUdTGbC7kH8BtbO99qsVivXR9h0llS3Dlj45m6gI0uGKH47Vf4QoM9l0vw/wnXaEdebciSx3UA" +

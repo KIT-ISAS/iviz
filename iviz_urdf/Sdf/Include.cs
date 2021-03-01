@@ -26,7 +26,7 @@ namespace Iviz.Sdf
                     case "static":
                         Static = BoolElement.ValueOf(child);
                         break;
-                    case "Pose":
+                    case "pose":
                         Pose = new Pose(child);
                         break;
                 }

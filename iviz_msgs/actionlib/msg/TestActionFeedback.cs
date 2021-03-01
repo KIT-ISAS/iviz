@@ -51,6 +51,10 @@ namespace Iviz.Msgs.Actionlib
             Feedback.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
@@ -79,7 +83,7 @@ namespace Iviz.Msgs.Actionlib
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71W23LbNhB951dgxg+xO7XSJr2kntGDaiuOOk7isdW+ekBiRaIFQRUXyfr7ngUpinKs" +
+                "H4sIAAAAAAAAE71W23LbNhB951dgxg+xO7XSJr2kntGDaiuOOk7isdW+ekBiRaIFQRUXyfr7ngUpinKs" +
                 "Rg9JNLJ1A84enD272HckFTlRpZdMFkE31uj8ofalf3ndSHMfZIhe+PSSzcmHt0Qql8U/YtG9ycZf+JG9" +
                 "v7++QEjV0njXkjsR4GKVdErUFKSSQYpFA+66rMidG1qRYZ71kpRIv4bNkvwIG+eV9gLPkiw5acxGRI9F" +
                 "oRFFU9fR6kIGEkHXtLcfO7UVUiylC7qIRjqsb5zSlpcvnKyJ0fH09G8kW5CYXV1gjfVUxKBBaAOEwpH0" +

@@ -1,5 +1,4 @@
-﻿using System;
-using Iviz.Msgs;
+﻿using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
@@ -14,7 +13,7 @@ namespace Iviz.Roslib
         public string CallerId { get; }
 
         /// <summary>
-        /// Name of this topic.
+        /// Name of this service.
         /// </summary>
         public string Service { get; }
 

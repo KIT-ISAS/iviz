@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
@@ -14,14 +15,14 @@ namespace Iviz.Core
         [CanBeNull, DataMember] public string SourceId { get; }
         [DataMember] public DateTime Stamp { get; }
         [DataMember] public LogLevel Level { get; }
-        [NotNull] [DataMember] public string Message { get; }
-        [NotNull] [DataMember] public string File { get; }
+        [NotNull, DataMember] public string Message { get; }
+        [NotNull, DataMember] public string File { get; }
         [DataMember] public int Line { get; }
 
         public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
         {
             SourceId = null;
-            Stamp = DateTime.Now;
+            Stamp = GameThread.Now;
             Level = level;
             Message = message;
             File = file;
@@ -33,9 +34,9 @@ namespace Iviz.Core
             SourceId = msg.Name;
             Stamp = msg.Header.Stamp.ToDateTime();
             Level = (LogLevel) msg.Level;
-            Message = msg.Msg;
-            File = msg.File;
-            Line = (int) msg.Line;
+            Message = msg.Msg ?? "";
+            File = "";
+            Line = 0;
         }
     }
 
@@ -44,6 +45,8 @@ namespace Iviz.Core
         const string NullMessage = "[null message]";
         const string NullException = "[null exception]";
 
+        static readonly ConcurrentBag<StringBuilder> BuilderPool = new ConcurrentBag<StringBuilder>();
+
         public delegate void ExternalLogDelegate(in LogMessage msg);
 
         public static event Action<string> LogInternal;
@@ -51,18 +54,18 @@ namespace Iviz.Core
 
         public static void Info([CanBeNull] object t)
         {
-            External(t?.ToString(), LogLevel.Info);
+            ExternalImpl(t?.ToString(), LogLevel.Info);
         }
 
         public static void Error([CanBeNull] object t)
         {
-            External(t?.ToString(), LogLevel.Error);
+            ExternalImpl(t?.ToString(), LogLevel.Error);
         }
 
         public static void Error([CanBeNull] object t, Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            ExternalImpl(t?.ToString(), e, file, line);
+            ExternalImpl(t, LogLevel.Error, e, file, line);
         }
 
         public static void Error(Exception e)
@@ -71,32 +74,52 @@ namespace Iviz.Core
 
         public static void Warn([CanBeNull] object t)
         {
-            External(t?.ToString(), LogLevel.Warn);
+            ExternalImpl(t?.ToString(), LogLevel.Warn);
         }
 
         public static void Debug([CanBeNull] object t)
         {
-            External(t?.ToString(), LogLevel.Debug);
+            ExternalImpl(t?.ToString(), LogLevel.Debug);
+        }
+
+        public static void Debug([CanBeNull] object t, Exception e, [CallerFilePath] string file = "",
+            [CallerLineNumber] int line = 0)
+        {
+            ExternalImpl(t, LogLevel.Debug, e, file, line);
         }
 
         public static void Internal([CanBeNull] string msg)
         {
-            var msgTxt = $"<b>[{DateTime.Now:HH:mm:ss}]</b> {msg ?? NullMessage}";
+            var msgTxt = $"<b>[{GameThread.NowFormatted}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }
 
         public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
         {
-            var str = new StringBuilder();
+            StringBuilder str = BuilderPool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
+            try
+            {
+                InternalImpl(msg, e, str);
+            }
+            finally
+            {
+                BuilderPool.Add(str);
+            }
+        }
+
+
+        static void InternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, [NotNull] StringBuilder str)
+        {
+            str.Length = 0;
             str.Append("<b>[")
-                .AppendFormat("{0:HH:mm:ss}", DateTime.Now)
+                .Append(GameThread.NowFormatted)
                 .Append("]</b> ")
                 .Append(msg ?? NullMessage);
 
             if (e == null)
             {
-                str.AppendLine().Append($"<color=red>→ ").Append(NullException).Append("</color>");
+                str.AppendLine().Append("<color=red>").Append(NullException).Append("</color>");
             }
             else
             {
@@ -107,7 +130,7 @@ namespace Iviz.Core
                     {
                         str.AppendLine()
                             .Append("<color=red>")
-                            .Append(childException.GetType())
+                            .Append(childException.GetType().Name)
                             .Append("</color> ")
                             .Append(childException.Message);
                     }
@@ -122,7 +145,7 @@ namespace Iviz.Core
         }
 
 
-        static void External([CanBeNull] string msg, LogLevel level,
+        static void ExternalImpl([CanBeNull] string msg, LogLevel level,
             [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
@@ -142,17 +165,23 @@ namespace Iviz.Core
             }
         }
 
-        /*
-        public static void External([CanBeNull] string msg, [CanBeNull] Exception e, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
+        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string file, int line)
         {
-            ExternalImpl(msg, e, file, line);
+            StringBuilder str = BuilderPool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
+            try
+            {
+                ExternalImpl(msg, level, e, file, line, str);
+            }
+            finally
+            {
+                BuilderPool.Add(str);
+            }
         }
-        */
 
-        static void ExternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, string file, int line)
+        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string file, int line,
+            [NotNull] StringBuilder str)
         {
-            var str = new StringBuilder();
+            str.Length = 0;
             str.Append(msg ?? NullMessage);
 
             if (e == null)
@@ -167,7 +196,8 @@ namespace Iviz.Core
                     if (!(childException is AggregateException))
                     {
                         str.AppendLine();
-                        str.Append("[").Append(childException.GetType()).Append("] ").Append(childException.Message);
+                        str.Append("[").Append(childException.GetType().Name).Append("] ")
+                            .Append(childException.Message);
                     }
 
                     childException = childException.InnerException;
@@ -175,7 +205,7 @@ namespace Iviz.Core
             }
 
             string message = str.ToString();
-            LogExternal?.Invoke(new LogMessage(LogLevel.Error, message, file, line));
+            LogExternal?.Invoke(new LogMessage(level, message, file, line));
             UnityEngine.Debug.LogWarning(message);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -34,13 +35,13 @@ namespace Iviz.Displays
         bool colliderEnabled;
         bool visible = true;
         int layer;
-        
+
         [NotNull]
         public string Name
         {
             get => gameObject.name;
             set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }        
+        }
 
         public int Size
         {
@@ -234,8 +235,8 @@ namespace Iviz.Displays
             lines.DisposeDisplay();
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, [NotNull] float[] ranges,
-            [NotNull] float[] intensities)
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, 
+            [NotNull] float[] ranges, [NotNull] float[] intensities)
         {
             if (ranges == null)
             {
@@ -297,17 +298,14 @@ namespace Iviz.Displays
 
             Size = pointBuffer.Count;
 
-            GameThread.PostImmediate(() =>
+            if (!UseLines)
             {
-                if (!UseLines)
-                {
-                    SetPoints();
-                }
-                else
-                {
-                    SetLines();
-                }
-            });
+                SetPoints();
+            }
+            else
+            {
+                SetLines();
+            }
         }
 
         void SetPoints()
@@ -323,14 +321,13 @@ namespace Iviz.Displays
         void SetLines()
         {
             int numPoints = pointBuffer.Count;
-            float maxLineDistanceSq = maxLineDistance * maxLineDistance;
             lineBuffer.Clear();
 
             for (int i = 0; i < numPoints - 1; i++)
             {
                 PointWithColor pA = pointBuffer[i];
                 PointWithColor pB = pointBuffer[i + 1];
-                if ((pB.Position - pA.Position).MagnitudeSq() < maxLineDistanceSq)
+                if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
                 }
@@ -340,7 +337,7 @@ namespace Iviz.Displays
             {
                 PointWithColor pA = pointBuffer[numPoints - 1];
                 PointWithColor pB = pointBuffer[0];
-                if ((pB.Position - pA.Position).MagnitudeSq() < maxLineDistanceSq)
+                if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
                 }

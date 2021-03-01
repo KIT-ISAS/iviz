@@ -1,14 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
-using Iviz.Msgs.StdMsgs;
-using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.Actionlib
 {
@@ -40,7 +36,7 @@ namespace Iviz.Roslib.Actionlib
         where TAFeedback : class, IActionFeedback, IDeserializable<TAFeedback>, new()
         where TAResult : class, IActionResult, IDeserializable<TAResult>, new()
     {
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
 
         string? actionName;
         string? callerId;
@@ -283,7 +279,7 @@ namespace Iviz.Roslib.Actionlib
                 Stamp = now
             };
 
-            TAGoal actionGoal = new TAGoal
+            TAGoal actionGoal = new()
             {
                 GoalId = goalId
             };
@@ -335,8 +331,27 @@ namespace Iviz.Roslib.Actionlib
 
         public void WaitForServer(int timeoutInMs)
         {
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeoutInMs);
-            WaitForServer(tokenSource.Token);
+            if (goalPublisher == null)
+            {
+                throw new InvalidOperationException("Start has not been called!");
+            }
+
+            try
+            {
+                using CancellationTokenSource linkedSource =
+                    CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
+                linkedSource.CancelAfter(timeoutInMs);
+                goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
+            }
+            catch (OperationCanceledException e)
+            {
+                if (e.CancellationToken == runningTs.Token)
+                {
+                    throw new ObjectDisposedException("Client was disposed.");
+                }
+
+                throw new TimeoutException("Wait for server timed out");
+            }
         }
 
         public void WaitForServer(CancellationToken token = default)
@@ -346,23 +361,22 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            CancellationTokenSource linkedSource =
+            using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
-        public Task WaitForServerAsync(CancellationToken token = default)
+        public async Task WaitForServerAsync(CancellationToken token = default)
         {
             if (goalPublisher == null)
             {
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            CancellationTokenSource linkedSource =
+            using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            return goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
+            await goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
         }
-
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAll(CancellationToken token = default)
         {
@@ -371,10 +385,20 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
+            return token == default
+                ? ReadAllImpl(channelReader.ReadAll(runningTs.Token))
+                : ReadAllWithToken(token);
+        }
+
+        IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllWithToken(CancellationToken token)
+        {
             using CancellationTokenSource linkedSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-
-            return ReadAllImpl(channelReader.ReadAll(linkedSource.Token));
+            var source = channelReader!.ReadAll(linkedSource.Token);
+            foreach (var msg in ReadAllImpl(source))
+            {
+                yield return msg;
+            }
         }
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> TryReadAll()
@@ -478,27 +502,27 @@ namespace Iviz.Roslib.Actionlib
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
             (
+                this IAction<TActionGoal, TActionFeedback, TActionResult>? _,
                 RosClient client,
-                string actionName,
-                IAction<TActionGoal, TActionFeedback, TActionResult>? _
+                string actionName
             )
             where TActionGoal : class, IActionGoal, new()
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
             where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
-            return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>(client, actionName);
+            return new(client, actionName);
         }
 
         public static RosActionClient<TActionGoal, TActionFeedback, TActionResult>
             Create<TActionGoal, TActionFeedback, TActionResult>
             (
-                IAction<TActionGoal, TActionFeedback, TActionResult>? _
+                this IAction<TActionGoal, TActionFeedback, TActionResult>? _
             )
             where TActionGoal : class, IActionGoal, new()
             where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
             where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
-            return new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
+            return new();
         }
     }
 }

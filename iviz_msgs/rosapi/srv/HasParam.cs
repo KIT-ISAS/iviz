@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (HasParamResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class HasParamRequest : IRequest, IDeserializable<HasParamRequest>
+    public sealed class HasParamRequest : IRequest<HasParam, HasParamResponse>, IDeserializable<HasParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamRequest()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -84,6 +90,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -136,6 +146,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Exists);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

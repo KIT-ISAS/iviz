@@ -96,7 +96,9 @@ namespace Iviz.MsgsGen
 
             List<string> lines = new List<string>();
             lines.Add("[DataContract]");
-            lines.Add($"public sealed class {name} : I{strType}, IDeserializable<{name}>");
+            lines.Add(isRequest
+                ? $"public sealed class {name} : IRequest<{service}, {service}Response>, IDeserializable<{name}>"
+                : $"public sealed class {name} : IResponse, IDeserializable<{name}>");
             lines.Add("{");
 
             IEnumerable<string> entries = elements.SelectMany(element => element.ToCsString());
@@ -236,6 +238,12 @@ namespace Iviz.MsgsGen
                 "{",
                 "    get => Response;",
                 $"    set => Response = ({Name}Response)value;",
+                "}",
+                "",
+                "public void Dispose()",
+                "{",
+                "    Request.Dispose();",
+                "    Response.Dispose();",
                 "}",
                 "",
                 "string IService.RosType => RosServiceType;",

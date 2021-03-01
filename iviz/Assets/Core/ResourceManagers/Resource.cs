@@ -143,12 +143,13 @@ namespace Iviz.Resources
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
-        public static Task<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
+        [NotNull]
+        public static async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
             CancellationToken token = default)
         {
             return Internal.TryGetRobot(robotName, out string robotDescription)
-                ? Task.FromResult((true, robotDescription))
-                : External.TryGetRobotAsync(robotName, token);
+                ? (true, robotDescription)
+                : await External.TryGetRobotAsync(robotName, token);
         }
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
@@ -158,21 +159,21 @@ namespace Iviz.Resources
         }
 
         [NotNull, ItemCanBeNull]
-        public static Task<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
+        public static async ValueTask<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             return Internal.TryGet(uriString, out GameObjectInfo info)
-                ? Task.FromResult(info)
-                : External.TryGetGameObjectAsync(uriString, provider, token);
+                ? info
+                : await External.TryGetGameObjectAsync(uriString, provider, token);
         }
 
         [NotNull, ItemCanBeNull]
-        internal static Task<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
+        internal static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             return Internal.TryGet(uriString, out Info<Texture2D> info)
-                ? Task.FromResult(info)
-                : External.TryGetTextureAsync(uriString, provider, token);
+                ? info
+                : await External.TryGetTextureAsync(uriString, provider, token);
         }
     }
 }

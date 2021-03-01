@@ -7,12 +7,12 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Point")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
+    public struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
     {
         // This contains the position of a point in free space
-        [DataMember (Name = "x")] public double X { get; }
-        [DataMember (Name = "y")] public double Y { get; }
-        [DataMember (Name = "z")] public double Z { get; }
+        [DataMember (Name = "x")] public double X;
+        [DataMember (Name = "y")] public double Y;
+        [DataMember (Name = "z")] public double Z;
     
         /// <summary> Explicit constructor. </summary>
         public Point(double X, double Y, double Z)
@@ -53,6 +53,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -72,7 +76,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
+                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         /// Custom iviz code
@@ -88,6 +92,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public static Point operator *(in Point v, double f) => new Point(f * v.X, f * v.Y, f * v.Z);
         public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);
         public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);
-        public static implicit operator Point((double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);
+        public static implicit operator Point(in (double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);
     }
 }

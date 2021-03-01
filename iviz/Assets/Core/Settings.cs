@@ -23,7 +23,7 @@ namespace Iviz.Core
     }
 
     [DataContract]
-    public class SettingsConfiguration : JsonToString
+    public sealed class SettingsConfiguration : JsonToString
     {
         [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
         [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
@@ -82,13 +82,6 @@ namespace Iviz.Core
             false;
 #endif
 
-        public const bool IsAndroid =
-#if !UNITY_EDITOR && UNITY_ANDROID
-            true;
-#else
-            false;
-#endif
-
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -131,6 +124,12 @@ namespace Iviz.Core
             resourcesFilePath ?? (resourcesFilePath = $"{PersistentDataPath}/resources.json");
 
         [CanBeNull] static Camera mainCamera;
+        [CanBeNull] static Transform mainCameraTransform;
+
+        [NotNull]
+        public static Transform MainCameraTransform => mainCameraTransform != null
+            ? mainCameraTransform
+            : (mainCameraTransform = MainCamera.transform);
 
         [NotNull]
         public static Camera MainCamera
@@ -139,9 +138,31 @@ namespace Iviz.Core
                 ? mainCamera
                 : mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
                     .GetComponent<Camera>();
-            set => mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
+            set
+            {
+                mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
+                mainCameraTransform = value.transform;
+            }
         }
 
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
+
+        static bool? supportsComputeBuffersHelper;
+        public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
+                                                     (supportsComputeBuffersHelper =
+                                                         !IsHololens &&
+                                                         SystemInfo.supportsComputeShaders &&
+                                                         SystemInfo.maxComputeBufferInputsVertex > 0).Value;
+
+        static bool? supportsR16;
+
+        public static bool SupportsR16 => supportsR16 ??
+                                          (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
+
+        static bool? supportsRGB24;
+
+        public static bool SupportsRGB24 => supportsRGB24 ??
+                                            (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
+                                            .Value;
     }
 }

@@ -50,10 +50,10 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PositionIKRequest()
         {
-            GroupName = "";
+            GroupName = string.Empty;
             RobotState = new MoveitMsgs.RobotState();
             Constraints = new Constraints();
-            IkLinkName = "";
+            IkLinkName = string.Empty;
             PoseStamped = new GeometryMsgs.PoseStamped();
             IkLinkNames = System.Array.Empty<string>();
             PoseStampedVector = System.Array.Empty<GeometryMsgs.PoseStamped>();
@@ -117,6 +117,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Attempts);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
@@ -172,7 +176,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+08bXMTR5rf9Su64IOtjRAE2K09p/hgsNk4GzCLnSwJRalampY08Wha6Z6xrFzdf7/n" +
+                "H4sIAAAAAAAAE+08bXMTR5rf9Su64IOtjRAE2K09p/hgsNk4GzCLnSwJRalampY08Wha6Z6xrFzdf7/n" +
                 "pZ/unpEcSN3ZtVd7QGFrpt+e99fWQ3Ws3llfNqWt1dnflTO/tsY3amW81wszGDxUl0ujar0yys5VA78v" +
                 "nG3XarMsZ0u1KatKTY1qvSlUY9XMrtZtY2AlmGjGi7F64MrFsplot3owUtapB/Cbf6AeKW9wmPJrMyvn" +
                 "5UzTCeYwYtVWTbmuzCPayMPyld3Acmc1vF2Fcc6u6DAX709e75xCt43FgTNdVVtVmMa4VVmbcOaqrK8U" +

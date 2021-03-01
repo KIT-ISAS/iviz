@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (TopicsAndRawTypesResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class TopicsAndRawTypesRequest : IRequest, IDeserializable<TopicsAndRawTypesRequest>
+    public sealed class TopicsAndRawTypesRequest : IRequest<TopicsAndRawTypes, TopicsAndRawTypesResponse>, IDeserializable<TopicsAndRawTypesRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -75,6 +81,10 @@ namespace Iviz.Msgs.Rosapi
         public static readonly TopicsAndRawTypesRequest Singleton = new TopicsAndRawTypesRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -134,6 +144,10 @@ namespace Iviz.Msgs.Rosapi
             b.SerializeArray(Topics, 0);
             b.SerializeArray(Types, 0);
             b.SerializeArray(TypedefsFullText, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

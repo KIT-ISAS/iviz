@@ -21,7 +21,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PositionConstraint()
         {
-            LinkName = "";
+            LinkName = string.Empty;
             ConstraintRegion = new BoundingVolume();
         }
         
@@ -64,6 +64,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Weight);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
@@ -92,7 +96,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71X224bNxB9368g4AdL7UZN46AoXPghiZ1YQJO4thvkgkCgdke7RFbkhuTKVr6+Z8i9" +
+                "H4sIAAAAAAAAE71X224bNxB9368g4AdL7UZN46AoXPghiZ1YQJO4thvkgkCgdke7RFbkhuTKVr6+Z8i9" +
                 "ybGbPtRODEirnTkzc+ZG7onLUjmxJudkQSIz2kulnfAliZxWSiuvjBZmJaSojYtPkHLeQs7PkuSUZE5W" +
                 "lOEjSfYASMKapfGiUvoLkIA/aAhLK7IwYBL8onQRpBZarqlTNquVIy8mSgc3AsrKQmAqVsaG37y0BURq" +
                 "w4hmJHdFQloSdSW1ZnAoJAWZNXm7Xaxd4X55R5k39qCFWASIRTTZObAxVbOmuz0XyXPT6Bz476LkILSw" +

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetStateValidityResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class GetStateValidityRequest : IRequest, IDeserializable<GetStateValidityRequest>
+    public sealed class GetStateValidityRequest : IRequest<GetStateValidity, GetStateValidityResponse>, IDeserializable<GetStateValidityRequest>
     {
         [DataMember (Name = "robot_state")] public RobotState RobotState { get; set; }
         [DataMember (Name = "group_name")] public string GroupName { get; set; }
@@ -59,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetStateValidityRequest()
         {
             RobotState = new RobotState();
-            GroupName = "";
+            GroupName = string.Empty;
             Constraints = new Constraints();
         }
         
@@ -94,6 +100,10 @@ namespace Iviz.Msgs.MoveitMsgs
             RobotState.RosSerialize(ref b);
             b.Serialize(GroupName);
             Constraints.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -179,6 +189,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(Contacts, 0);
             b.SerializeArray(CostSources, 0);
             b.SerializeArray(ConstraintResult, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

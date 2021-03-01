@@ -28,7 +28,7 @@ namespace Iviz.Msgs.VisionMsgs
         /// <summary> Constructor for empty message. </summary>
         public ObjectHypothesisWithPose()
         {
-            Id = "";
+            Id = string.Empty;
             Pose = new GeometryMsgs.PoseWithCovariance();
         }
         
@@ -65,6 +65,10 @@ namespace Iviz.Msgs.VisionMsgs
             Pose.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
@@ -91,7 +95,7 @@ namespace Iviz.Msgs.VisionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71VS2/UMBC+51eMtBeQsgEE2kMRh0IltAcQ0IpXVaFJPNm4JHZqO9ukv56x4yTbh+CC" +
+                "H4sIAAAAAAAAE71VS2/UMBC+51eMtBeQsgEE2kMRh0IltAcQ0IpXVaFJPNm4JHZqO9ukv56x4yTbh+CC" +
                 "uoddx5n5Zr5vHruCYwU6v6TCQTW02lVkpQVXoYNCK4dSWWi1lU5qBVKV2jToz1mSrOCsIuiUvOoItieg" +
                 "S/ajCa2o0doMzjTsyAEKESCwPgQBzHXnGAjYk8NuT1KwXVEBWpDOQtU1qNaGUGBe0wgJChtKoZbWkSJj" +
                 "wVa6qwW0ZDwuYICrtf7dtRwLEBpyDOAQ/FeOljI4JYK9tJzCr8bu7LOv4bzlzDJ+BgaCRhsCwa6yzhLr" +

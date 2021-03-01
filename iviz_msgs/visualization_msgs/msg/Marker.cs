@@ -49,11 +49,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public Marker()
         {
-            Ns = "";
+            Ns = string.Empty;
             Points = System.Array.Empty<GeometryMsgs.Point>();
             Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
-            Text = "";
-            MeshResource = "";
+            Text = string.Empty;
+            MeshResource = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -125,6 +125,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(MeshUseEmbeddedMaterials);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Ns is null) throw new System.NullReferenceException(nameof(Ns));
@@ -158,7 +162,7 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71X227bOBB9rr5igKBosnDkXLrdbgA/pLGbGMhtbbfdoigMWqJtNrKoklRc9+t7hpTk" +
+                "H4sIAAAAAAAAE71X227bOBB9rr5igKBosnDkXLrdbgA/pLGbGMhtbbfdoigMWqJtNrKoklRc9+t7hpTk" +
                 "uEnafdg2MWKK4sycuZ1htmgoJc2dK47a7eVyGRttY21m7aW6UW1zq762u8oWmViNVoW07QthbqQhkac/" +
                 "FhqVThslslrCPj08fnqw90pYleB7OBfQRlNtaKGNJJVjuRBO6ZzwKa3KZ+TmytJCWitmkpbKzYlVR1Gp" +
                 "cveSjgeDq3edverp5M2rXme/ehhen/UGvc5B/e79ef+y2xt0DqsNPPbGw9Ggf915fnfrvD8cdf68ozHs" +

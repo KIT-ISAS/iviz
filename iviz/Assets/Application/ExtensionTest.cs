@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.MoveitTest;
+//using Iviz.Msgs.MoveitTest;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Msgs.TrajectoryMsgs;
@@ -15,14 +16,13 @@ using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Msgs.Logger;
 using Pose = UnityEngine.Pose;
 
 namespace Iviz.App
 {
     public class ExtensionTest : MonoBehaviour
     {
-        static RoslibConnection Connection => ConnectionManager.Connection;
-
         RobotModel robot;
         RobotModel planRobot;
 
@@ -34,6 +34,7 @@ namespace Iviz.App
         bool hasNewTrajectory;
         [CanBeNull] JointTrajectory newTrajectory;
 
+        /*
         void Awake()
         {
             // wait until the GUI finishes initializing
@@ -60,21 +61,23 @@ namespace Iviz.App
             // make TF frames invisible
             TfListener.Instance.FramesVisible = false;
         }
+        */
 
+        RosClient connectionClient;
+        
         // this gets called when we're connected to the master
-        async void OnConnectionStateChanged(ConnectionState state)
+        async void Start()
         {
-            if (state != ConnectionState.Connected)
-            {
-                return;
-            }
-
+            Uri masterUri = new Uri("http://141.3.59.5:11311");
+            Uri myUri = RosClient.TryGetCallerUriFor(masterUri, 7635) ?? RosClient.TryGetCallerUri(7635);
+            connectionClient = await RosClient.CreateAsync(masterUri, "/iviz_test", myUri); 
+            
             Debug.Log($"{this}: Connected!");
-            while (true)
+            while (gameObject != null)
             {
                 // keep checking whether the moveit_test node is on
                 const string trajectoryService = "/moveit_test/calculate_trajectory";
-                var systemState = await Connection.GetSystemStateAsync();
+                var systemState = await connectionClient.GetSystemStateAsync();
                 bool hasService = systemState.Services.Any(service => service.Topic == trajectoryService);
                 if (hasService)
                 {
@@ -93,7 +96,7 @@ namespace Iviz.App
             // start listening to the joints topic
             // thes joints apply only for 'robot'. 
             jointsListener = new RosChannelReader<JointState>();
-            await jointsListener.StartAsync(Connection.Client, "/joint_states");
+            await jointsListener.StartAsync(connectionClient, "/joint_states").Caf();
             
             // tell Update() we're finished
             initialized = true;
@@ -132,13 +135,20 @@ namespace Iviz.App
         // we use hasNewTrajectory to tell Update() we have a trajectory 
         async void SetTargetPose(Msgs.GeometryMsgs.Pose rosPose)
         {
+            /*
             SetManipulatorPose srv = new SetManipulatorPose
             {
                 Request = {TargetPose = rosPose}
             };
             
             Debug.Log($"{this}: Setting target pose.");
-            await Connection.Client.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true).AwaitNoThrow(this);
+
+
+            Logger.LogDebug = Debug.Log;
+            Logger.Log = Debug.Log;
+            Logger.LogError = Debug.LogWarning;
+            //await Task.Run(async () => await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true, 3000).Caf());
+            await connectionClient.CallServiceAsync("/moveit_test/calculate_trajectory", srv, true, 3000);
             
             if (srv.Response.Success)
             {
@@ -153,6 +163,7 @@ namespace Iviz.App
             
             // tell Update() that we have a response
             hasNewTrajectory = true;
+            */
         }
 
         void Update()
@@ -178,7 +189,7 @@ namespace Iviz.App
                     // a trajectory is a sequence of joint values with timestamps
                     // but for visualization we're only interested in the final value
                     JointTrajectoryPoint lastJoints = newTrajectory.Points.Last();
-                    planRobot.WriteJoints(newTrajectory.JointNames, lastJoints.Positions);
+                    //planRobot.WriteJoints(newTrajectory.JointNames, lastJoints.Positions);
                 }
 
                 hasNewTrajectory = false;

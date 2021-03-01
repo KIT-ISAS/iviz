@@ -8,6 +8,8 @@ namespace Iviz.Resources
 {
     public sealed class FontInfo
     {
+        static readonly StringBuilder CachedStr = new StringBuilder(50);
+
         readonly Font font;
         readonly int dotWidth;
         readonly int arrowWidth;
@@ -21,48 +23,60 @@ namespace Iviz.Resources
         }
 
         [NotNull]
-        public string Split([NotNull] string s, int maxWidth, int maxLines = 2)
+        public string Split([NotNull] string str, int maxWidth, int maxLines = 2)
         {
-            if (s == null)
+            if (str == null)
             {
-                throw new ArgumentNullException(nameof(s));
+                throw new ArgumentNullException(nameof(str));
             }
 
             int usableWidth = maxWidth - dotWidth;
-            StringBuilder str = new StringBuilder();
+            
+            int totalWidth = 0;
+            foreach (var c in str)
+            {
+                totalWidth += CharWidth(c);
+            }
+
+            if (totalWidth <= usableWidth)
+            {
+                return str;
+            }
+
+            CachedStr.Length = 0;
             int usedWidth = 0;
             int numLines = 0;
-            for (int i = 0; i < s.Length; i++)
+            for (int i = 0; i < str.Length; i++)
             {
-                int charWidth = CharWidth(s[i]);
+                int charWidth = CharWidth(str[i]);
                 if (usedWidth + charWidth > usableWidth)
                 {
-                    if (i >= s.Length - 2)
+                    if (i >= str.Length - 2)
                     {
-                        str.Append(s[i]);
+                        CachedStr.Append(str[i]);
                         continue;
                     }
 
                     if (numLines != maxLines - 1)
                     {
-                        str.Append("...\n→ ").Append(s[i]);
+                        CachedStr.Append("...\n→ ").Append(str[i]);
                         usedWidth = arrowWidth;
                         numLines = 1;
                     }
                     else
                     {
-                        str.Append("...");
-                        return str.ToString();
+                        CachedStr.Append("...");
+                        return CachedStr.ToString();
                     }
                 }
                 else
                 {
-                    str.Append(s[i]);
+                    CachedStr.Append(str[i]);
                     usedWidth += charWidth;
                 }
             }
 
-            return str.ToString();
+            return CachedStr.ToString();
         }
 
         int CharWidth(char c)

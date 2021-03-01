@@ -11,14 +11,16 @@ namespace Iviz.Roslib
     /// <summary>
     /// Manager for a subscription to a ROS topic.
     /// </summary>
-    public class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
+    public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        readonly Dictionary<string, Action<T>> callbacksById = new Dictionary<string, Action<T>>();
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        static readonly Action<T, IRosTcpReceiver>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver>>();
+
+        readonly Dictionary<string, Action<T, IRosTcpReceiver>> callbacksById = new();
+        readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
         readonly TcpReceiverManager<T> manager;
 
-        Action<T>[] callbacks = Array.Empty<Action<T>>(); // cache to iterate through callbacks quickly
+        Action<T, IRosTcpReceiver>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
         int totalSubscribers;
         bool disposed;
 
@@ -39,7 +41,7 @@ namespace Iviz.Roslib
             return manager.GetTotalActiveConnections(timeoutInMs);
         }
 
-        public Task<int> GetTotalActivePublishersAsync(CancellationToken token = default)
+        public ValueTask<int> GetTotalActivePublishersAsync(CancellationToken token = default)
         {
             return manager.GetTotalActiveConnectionsAsync(token);
         }
@@ -72,13 +74,13 @@ namespace Iviz.Roslib
                 {TimeoutInMs = timeoutInMs};
         }
 
-        internal void MessageCallback(in T msg)
+        internal void MessageCallback(in T msg, IRosTcpReceiver receiver)
         {
-            foreach (Action<T> callback in callbacks)
+            foreach (var callback in callbacks)
             {
                 try
                 {
-                    callback(msg);
+                    callback(msg, receiver);
                 }
                 catch (Exception e)
                 {
@@ -143,9 +145,10 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = Array.Empty<Action<T>>();
+            callbacks = EmptyCallback;
             NumPublishersChanged = null;
             manager.Stop();
+            runningTs.Dispose();
         }
 
         public async Task DisposeAsync()
@@ -158,9 +161,10 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = Array.Empty<Action<T>>();
+            callbacks = EmptyCallback;
             NumPublishersChanged = null;
             await manager.StopAsync();
+            runningTs.Dispose();
         }
 
         public bool MessageTypeMatches(Type type)
@@ -178,7 +182,7 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            callbacksById.Add(id, t => callback(t));
+            callbacksById.Add(id, (t, _) => callback(t));
             callbacks = callbacksById.Values.ToArray();
             return id;
         }
@@ -200,10 +204,25 @@ namespace Iviz.Roslib
             AssertIsAlive();
 
             string id = GenerateId();
-            callbacksById.Add(id, callback);
+            callbacksById.Add(id, (t, _) => callback(t));
             callbacks = callbacksById.Values.ToArray();
             return id;
         }
+        
+        public string Subscribe(Action<T, IRosTcpReceiver> callback)
+        {
+            if (callback is null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            AssertIsAlive();
+
+            string id = GenerateId();
+            callbacksById.Add(id, callback);
+            callbacks = callbacksById.Values.ToArray();
+            return id;
+        }        
 
         public bool ContainsId(string id)
         {
@@ -239,7 +258,7 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        public async Task<bool> UnsubscribeAsync(string id, CancellationToken token = default)
+        public async ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default)
         {
             if (id is null)
             {
@@ -258,10 +277,10 @@ namespace Iviz.Roslib
             }
             else
             {
-                callbacks = Array.Empty<Action<T>>();
+                callbacks = EmptyCallback;
                 Task disposeTask = DisposeAsync().AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
-                await Task.WhenAll(disposeTask, unsubscribeTask).Caf();
+                await (disposeTask, unsubscribeTask).WhenAll().Caf();
             }
 
             return removed;

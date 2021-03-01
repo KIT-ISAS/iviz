@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -20,9 +23,11 @@ namespace Iviz.App
             Me,
             OnlyId
         }
-        
-        const int MaxMessageLength = 250;
-        const int MaxMessages = 50;
+
+        const int MaxMessageLength = 300;
+
+        // TMP does not have a limit of 65000 but it's a nice threshold anyway
+        const int MaxMessages = 65000 / 4 / MaxMessageLength;
 
         const string AllString = "[All]";
         const string NoneString = "[None]";
@@ -42,8 +47,10 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => dialog;
 
         readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
-        readonly StringBuilder description = new StringBuilder();
-        readonly HashSet<string> ids = new HashSet<string>();
+        readonly StringBuilder description = new StringBuilder(65536);
+
+        readonly ConcurrentSet<string> ids = new ConcurrentSet<string>();
+
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
 
@@ -82,10 +89,45 @@ namespace Iviz.App
         {
             ProcessLog();
             dialog.FromField.Hints = ExtraFields.Concat(ids);
+            dialog.BottomText.text = UpdateStats();
         }
 
+        [NotNull]
+        string UpdateStats()
+        {
+            var listener = ConnectionManager.LogListener;
+            if (listener == null)
+            {
+                return "Error: No Log Listener";
+            }
+
+            (int numActivePublishers, int numPublishers) = listener.NumPublishers;
+
+            description.Length = 0;
+            description.Append(listener.Topic).Append(" ");
+            if (numPublishers == -1)
+            {
+                description.Append("Off");
+            }
+            else if (!listener.Subscribed)
+            {
+                description.Append("PAUSED");
+            }
+            else
+            {
+                description.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
+            }
+
+            string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
+            description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
+                .Append(kbPerSecond).Append(" kB/s");
+
+            return description.ToString();
+        }
+
+
         void HandleMessage(in LogMessage log)
-        {  
+        {
             if (log.SourceId != null)
             {
                 ids.Add(log.SourceId);
@@ -97,24 +139,28 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             if (log.SourceId != null && log.Level < minLogLevel)
             {
                 return;
             }
 
-            messageQueue.Enqueue(log);
-            if (messageQueue.Count > MaxMessages)
+            if (messageQueue.Count >= MaxMessages)
             {
                 messageQueue.TryDequeue(out _);
             }
 
+            messageQueue.Enqueue(log);
+
             queueIsDirty = true;
         }
 
-        void HandleMessage(Log log)
+        void HandleMessage(in Log log)
         {
-            if (log.Name == ConnectionManager.MyId)
+            if (log.Level < (byte) minLogLevel
+                || idCode == FromIdCode.None
+                || idCode == FromIdCode.Me
+                || log.Name == ConnectionManager.MyId)
             {
                 return;
             }
@@ -206,51 +252,67 @@ namespace Iviz.App
                 return;
             }
 
-            LogMessage[] messages = messageQueue.ToArray();
-            
-            foreach (var message in messages)
+            using (var messages = new UniqueRef<LogMessage>(messageQueue.Count, true))
             {
-                var messageLevel = message.Level;
-                if (messageLevel < minLogLevel)
+                messageQueue.CopyTo(messages.Array, 0);
+                foreach (var message in messages)
                 {
-                    continue;
-                }
+                    var messageLevel = message.Level;
+                    if (messageLevel < minLogLevel)
+                    {
+                        continue;
+                    }
 
-                if (idCode == FromIdCode.Me && message.SourceId != null ||
-                    idCode == FromIdCode.OnlyId && message.SourceId != id)
-                {
-                    continue;
-                }
-                
-                if (message.Stamp == default)
-                {
-                    description.Append("<b>[] ");
-                }
-                else
-                {
-                    description.AppendFormat("<b>[{0:HH:mm:ss}] ", message.Stamp);
-                }
+                    if (idCode == FromIdCode.Me && message.SourceId != null ||
+                        idCode == FromIdCode.OnlyId && message.SourceId != id)
+                    {
+                        continue;
+                    }
 
-                string levelColor = ColorFromLevel(messageLevel);
+                    if (message.Stamp == default)
+                    {
+                        description.Append("<b>[] ");
+                    }
+                    else
+                    {
+                        string dateAsStr = message.SourceId == null
+                            ? GameThread.NowFormatted
+                            : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
+                                ? "HH:mm:ss"
+                                : "yy-MM-dd HH:mm:ss");
 
-                description
-                    .Append("<color=").Append(levelColor).Append(">")
-                    .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
+                        description.Append("<b>[").Append(dateAsStr).Append("] ");
+                    }
+
+                    string levelColor = ColorFromLevel(messageLevel);
+
+                    description
+                        .Append("<color=").Append(levelColor).Append(">")
+                        .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
 
-                if (message.Message.Length < MaxMessageLength)
-                {
-                    description.Append(message.Message).AppendLine();
-                }
-                else
-                {
-                    description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
-                        .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                    if (message.SourceId == null || message.Message.Length < MaxMessageLength)
+                    {
+                        description.Append(message.Message).AppendLine();
+                    }
+                    else
+                    {
+                        description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
+                            .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                    }
                 }
             }
 
-            dialog.Text.text = description.ToString();
+            dialog.Text.SetText(description);
             queueIsDirty = false;
         }
+    }
+
+    public class ConcurrentSet<T> : IEnumerable<T>
+    {
+        readonly ConcurrentDictionary<T, object> backend = new ConcurrentDictionary<T, object>();
+        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Add([NotNull] T s) => backend[s] = null;
     }
 }

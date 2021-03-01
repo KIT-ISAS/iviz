@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ExecuteKnownTrajectoryResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class ExecuteKnownTrajectoryRequest : IRequest, IDeserializable<ExecuteKnownTrajectoryRequest>
+    public sealed class ExecuteKnownTrajectoryRequest : IRequest<ExecuteKnownTrajectory, ExecuteKnownTrajectoryResponse>, IDeserializable<ExecuteKnownTrajectoryRequest>
     {
         // This service is deprecated and will go away at some point. For new development use the ExecuteTrajectory action.
         // Effective since: Indigo 0.7.4, Jade and Kinetic 0.8.3
@@ -92,6 +98,10 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             Trajectory.RosSerialize(ref b);
             b.Serialize(WaitForExecution);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -147,6 +157,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             ErrorCode.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

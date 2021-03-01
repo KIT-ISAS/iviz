@@ -22,17 +22,8 @@
           }
         }
       },
-      "Iviz.Msgs/1.0.0": {
-        "dependencies": {
-          "Newtonsoft.Json": "12.0.3"
-        },
-        "runtime": {
-          "Iviz.Msgs.dll": {}
-        }
-      },
       "Iviz.MsgsGen.Lib/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0",
           "Newtonsoft.Json": "12.0.3"
         },
         "runtime": {
@@ -53,11 +44,6 @@
       "sha512": "sha512-6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg==",
       "path": "newtonsoft.json/12.0.3",
       "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
-    },
-    "Iviz.Msgs/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     },
     "Iviz.MsgsGen.Lib/1.0.0": {
       "type": "project",

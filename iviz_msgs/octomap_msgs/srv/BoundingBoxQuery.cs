@@ -39,6 +39,12 @@ namespace Iviz.Msgs.OctomapMsgs
             set => Response = (BoundingBoxQueryResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.OctomapMsgs
     }
 
     [DataContract]
-    public sealed class BoundingBoxQueryRequest : IRequest, IDeserializable<BoundingBoxQueryRequest>
+    public sealed class BoundingBoxQueryRequest : IRequest<BoundingBoxQuery, BoundingBoxQueryResponse>, IDeserializable<BoundingBoxQueryRequest>
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
         // minimum corner point of axis-aligned bounding box in global frame
@@ -92,6 +98,10 @@ namespace Iviz.Msgs.OctomapMsgs
             Max.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -129,6 +139,10 @@ namespace Iviz.Msgs.OctomapMsgs
         public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

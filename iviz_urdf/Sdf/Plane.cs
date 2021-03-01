@@ -4,8 +4,8 @@ namespace Iviz.Sdf
 {
     public sealed class Plane
     {
-        public Vector3f Normal { get; } = Vector3f.Up;
-        public Vector2f Size { get; } = Vector2f.One;
+        public Vector3d Normal { get; } = Vector3d.Up;
+        public Vector2d Size { get; } = Vector2d.One;
 
         internal Plane(XmlNode node)
         {
@@ -14,10 +14,10 @@ namespace Iviz.Sdf
                 switch (child.Name)
                 {
                     case "normal": 
-                        Normal = new Vector3f(child);
+                        Normal = new Vector3d(child);
                         break;
                     case "size":
-                        Size = new Vector2f(child);
+                        Size = new Vector2d(child);
                         break;
                 }
             }     

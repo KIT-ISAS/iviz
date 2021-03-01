@@ -6,7 +6,7 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.Displays
 {
-    public class ARAnchorResource : MonoBehaviour
+    public sealed class ARAnchorResource : MonoBehaviour
     {
         public event Action<Pose> Moved;
         public Pose Pose => transform.AsPose();

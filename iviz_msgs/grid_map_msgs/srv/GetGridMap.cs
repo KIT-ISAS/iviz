@@ -39,6 +39,12 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (GetGridMapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.GridMapMsgs
     }
 
     [DataContract]
-    public sealed class GetGridMapRequest : IRequest, IDeserializable<GetGridMapRequest>
+    public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
         [DataMember (Name = "frame_id")] public string FrameId { get; set; }
@@ -67,7 +73,7 @@ namespace Iviz.Msgs.GridMapMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapRequest()
         {
-            FrameId = "";
+            FrameId = string.Empty;
             Layers = System.Array.Empty<string>();
         }
         
@@ -111,6 +117,10 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Serialize(LengthX);
             b.Serialize(LengthY);
             b.SerializeArray(Layers, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -175,6 +185,10 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref Buffer b)
         {
             Map.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

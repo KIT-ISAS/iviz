@@ -47,6 +47,10 @@ namespace Iviz.Msgs.MoveitMsgs
             MultiDofJointTrajectory.RosSerialize(ref b);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (JointTrajectory is null) throw new System.NullReferenceException(nameof(JointTrajectory));
@@ -75,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA8VXTY/bNhC961cQ2EPswusFkiKHBXookKbdAkFTZNFLsDBoaSQxoUiFpNbr/vq+IfVh" +
+                "H4sIAAAAAAAAE8VXTY/bNhC961cQ2EPswusFkiKHBXookKbdAkFTZNFLsDBoaSQxoUiFpNbr/vq+IfVh" +
                 "aXfRAGlcw4Alcr7ezJshHZz8RHmw7rhrfOWvfrfKhNtxUXzi910YF7KwUHjX6aDe/PF2qdjw+q6w5e6R" +
                 "ieyn//iTvfvw67VYRraIKPuNZEFO1PEn88EpU3286xEa2ZDPFirv+RUiLf/67xW3D0UKOAWYXYgPQZpC" +
                 "ukI0FGQhgxSlReCqqsldaronDSXZtFSIuBuOLfktFG9r5QW+FRlyUuuj6DyEghW5bZrOqFwGEkEB66k+" +

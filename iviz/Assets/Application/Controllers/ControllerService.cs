@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -55,7 +56,7 @@ namespace Iviz.Controllers
             return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
         }
 
-        static async Task<(string id, bool success, string message)> TryAddModuleAsync([NotNull] string moduleTypeStr,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleAsync([NotNull] string moduleTypeStr,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -103,30 +104,30 @@ namespace Iviz.Controllers
                 return result;
             }
 
-
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                try
+                GameThread.Post(() =>
                 {
-                    Logger.Info($"Creating module of type {moduleType}");
-                    var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
-                        requestedId: requestedId.Length != 0 ? requestedId : null);
-                    result.id = newModuleData.Configuration.Id;
-                    result.success = true;
-                    Logger.Info("Done!");
-                }
-                catch (Exception e)
-                {
-                    result.message = $"EE An exception was raised: {e.Message}";
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+                    try
+                    {
+                        Logger.Info($"Creating module of type {moduleType}");
+                        var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
+                            requestedId: requestedId.Length != 0 ? requestedId : null);
+                        result.id = newModuleData.Configuration.Id;
+                        result.success = true;
+                        Logger.Info("Done!");
+                    }
+                    catch (Exception e)
+                    {
+                        result.message = $"EE An exception was raised: {e.Message}";
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+                return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+            }
         }
 
         static async Task AddModuleFromTopicAsync([NotNull] AddModuleFromTopic srv)
@@ -137,7 +138,7 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static async Task<(string id, bool success, string message)> TryAddModuleFromTopicAsync([NotNull] string topic,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleFromTopicAsync([NotNull] string topic,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -188,29 +189,29 @@ namespace Iviz.Controllers
                 result.message = $"EE Type '{type}' is unsupported";
             }
 
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                try
+                GameThread.Post(() =>
                 {
-                    //Logger.Debug(Time.time + ": Adding topic " + topic);
-                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
-                        requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
-                    result.success = true;
-                    //Logger.Debug(Time.time + ": Done!");
-                }
-                catch (Exception e)
-                {
-                    result.message = $"EE An exception was raised: {e.Message}";
-                    Logger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
+                    try
+                    {
+                        result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
+                            requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
+                        result.success = true;
+                    }
+                    catch (Exception e)
+                    {
+                        result.message = $"EE An exception was raised: {e.Message}";
+                        Logger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
 
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+                return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+            }
         }
 
         static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
@@ -220,7 +221,7 @@ namespace Iviz.Controllers
             srv.Response.Message = message ?? "";
         }
 
-        static async Task<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id, string[] fields,
+        static async ValueTask<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id, string[] fields,
             string config)
         {
             (bool success, string message) result = default;
@@ -236,82 +237,85 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                Logger.Debug(Time.time + ": Updating module!");
-
-                try
+                GameThread.Post(() =>
                 {
-                    ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
-                    if (module == null)
+                    Logger.Debug(Time.time + ": Updating module!");
+
+                    try
+                    {
+                        ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
+                        if (module == null)
+                        {
+                            result.success = false;
+                            result.message = "EE There is no module with that id";
+                            return;
+                        }
+
+                        module.UpdateConfiguration(config, fields);
+                        result.success = true;
+                    }
+                    catch (JsonException e)
                     {
                         result.success = false;
-                        result.message = "EE There is no module with that id";
-                        return;
+                        result.message = $"EE Error parsing JSON config: {e.Message}";
+                        Logger.Error("Error:", e);
                     }
-
-                    module.UpdateConfiguration(config, fields);
-                    result.success = true;
-                }
-                catch (JsonException e)
-                {
-                    result.success = false;
-                    result.message = $"EE Error parsing JSON config: {e.Message}";
-                    Logger.Error("Error:", e);
-                }
-                catch (Exception e)
-                {
-                    result.success = false;
-                    result.message = $"EE An exception was raised: {e.Message}";
-                    Logger.Error("Error:", e);
-                }
-                finally
-                {
-                    Logger.Debug(Time.time + ": Done!");
-                    signal.Release();
-                }
-            });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
+                    catch (Exception e)
+                    {
+                        result.success = false;
+                        result.message = $"EE An exception was raised: {e.Message}";
+                        Logger.Error("Error:", e);
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+                return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
+            }
         }
 
         static async Task GetModulesAsync([NotNull] GetModules srv)
         {
             string[] result = await GetModulesAsync();
-            srv.Response.Configs = result;
+            srv.Response.Configs = result.AsRef(srv.Response.Configs);
         }
 
         [ItemNotNull]
-        static async Task<string[]> GetModulesAsync()
+        static async ValueTask<string[]> GetModulesAsync()
         {
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-            string[] result = Array.Empty<string>();
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                try
+                string[] result = Array.Empty<string>();
+                GameThread.Post(() =>
                 {
-                    IConfiguration[] configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
-                    result = configurations.Select(JsonConvert.SerializeObject).ToArray();
-                }
-                catch (JsonException e)
+                    try
+                    {
+                        IConfiguration[] configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
+                        result = configurations.Select(JsonConvert.SerializeObject).ToArray();
+                    }
+                    catch (JsonException e)
+                    {
+                        Logger.Error("ControllerService: Unexpected JSON exception in GetModules", e);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error("ControllerService: Unexpected exception in GetModules", e);
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected JSON exception in GetModules", e);
+                    Logger.Error("Timeout in GetModules");
                 }
-                catch (Exception e)
-                {
-                    Logger.Error("ControllerService: Unexpected exception in GetModules", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
-            {
-                Logger.Error("Timeout in GetModules");
-            }
 
-            return result;
+                return result;
+            }
         }
 
         static async Task SetFixedFrameAsync([NotNull] SetFixedFrame srv)
@@ -321,32 +325,34 @@ namespace Iviz.Controllers
             srv.Response.Message = message ?? "";
         }
 
-        static async Task<(bool success, string message)> TrySetFixedFrame(string id)
+        static async ValueTask<(bool success, string message)> TrySetFixedFrame(string id)
         {
             (bool success, string message) result = default;
 
-            SemaphoreSlim signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                try
+                GameThread.Post(() =>
                 {
-                    TfListener.FixedFrameId = id;
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
+                    try
+                    {
+                        TfListener.FixedFrameId = id;
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
 
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
-            {
-                Logger.Error("ControllerService: Unexpected timeout in TrySetFixedFrame");
-                return result;
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    Logger.Error("ControllerService: Unexpected timeout in TrySetFixedFrame");
+                    return result;
+                }
             }
 
             return (true, "");
         }
-        
+
         static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
         {
             (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
@@ -354,48 +360,50 @@ namespace Iviz.Controllers
             srv.Response.IsValid = success;
         }
 
-        static async Task<(bool[] success, Pose[] poses)> TryGetFramePoseAsync(string[] ids)
+        static async ValueTask<(bool[] success, Pose[] poses)> TryGetFramePoseAsync(string[] ids)
         {
-            SemaphoreSlim signal = new SemaphoreSlim(0);
             bool[] success = null;
             Pose[] poses = null;
 
-            GameThread.Post(() =>
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
-                try
+                GameThread.Post(() =>
                 {
-                    List<bool> successList = new List<bool>();
-                    List<Pose> posesList = new List<Pose>();
-                    foreach (string id in ids)
+                    try
                     {
-                        if (!TfListener.TryGetFrame(id, out var frame))
+                        List<bool> successList = new List<bool>();
+                        List<Pose> posesList = new List<Pose>();
+                        foreach (string id in ids)
                         {
-                            successList.Add(false);
-                            posesList.Add(Pose.Identity);
+                            if (!TfListener.TryGetFrame(id, out var frame))
+                            {
+                                successList.Add(false);
+                                posesList.Add(Pose.Identity);
+                            }
+                            else
+                            {
+                                successList.Add(true);
+                                posesList.Add(frame.WorldPose.Unity2RosPose());
+                            }
                         }
-                        else
-                        {
-                            successList.Add(true);
-                            posesList.Add(frame.WorldPose.Unity2RosPose());
-                        }
+
+                        success = successList.ToArray();
+                        poses = posesList.ToArray();
                     }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
 
-                    success = successList.ToArray();
-                    poses = posesList.ToArray();
-                }
-                finally
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    signal.Release();
+                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    return (new bool[ids.Length], new Pose[ids.Length]);
                 }
-            });
-
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
-            {
-                Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
-                return (new bool[ids.Length], new Pose[ids.Length]);
             }
 
             return (success, poses);
-        }        
+        }
     }
 }

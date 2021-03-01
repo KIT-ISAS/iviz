@@ -19,7 +19,7 @@ namespace Iviz.Controllers
             new Dictionary<string, InteractiveMarkerControlObject>();
 
         readonly HashSet<string> controlsToDelete = new HashSet<string>();
-        readonly StringBuilder description = new StringBuilder();
+        readonly StringBuilder description = new StringBuilder(250);
         int numWarnings;
         int numErrors;
 
@@ -161,7 +161,9 @@ namespace Iviz.Controllers
             int numUnnamed = 0;
             foreach (InteractiveMarkerControl controlMsg in msg.Controls)
             {
-                string controlId = controlMsg.Name.Length != 0 ? controlMsg.Name : $"[Unnamed-{(numUnnamed++)}]";
+                string controlId = controlMsg.Name.Length != 0
+                    ? controlMsg.Name
+                    : $"[Unnamed-{(numUnnamed++)}]";
 
                 if (controls.TryGetValue(controlId, out var existingControl))
                 {
@@ -194,15 +196,11 @@ namespace Iviz.Controllers
                 controls.Remove(controlId);
             }
 
-
             // update the dimensions of the controls
-            IEnumerable<(Bounds? bounds, Transform transform)> innerBounds =
-                controls.Values.Select(control => (control.Bounds, control.transform));
-
             Bounds? totalBounds =
-                UnityUtils.CombineBounds(
-                    innerBounds.Select(tuple => UnityUtils.TransformBound(tuple.bounds, tuple.transform))
-                );
+                controls.Values
+                    .Select(control => control.Bounds.TransformBound(control.transform))
+                    .CombineBounds();
 
             foreach (var control in controls.Values)
             {
@@ -302,7 +300,7 @@ namespace Iviz.Controllers
             controls.Clear();
             controlsToDelete.Clear();
 
-            ResourcePool.DisposeDisplay(text);
+            text.DisposeDisplay();
 
             Destroy(controlNode.gameObject);
         }

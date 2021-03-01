@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetFileResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFileRequest : IRequest, IDeserializable<GetFileRequest>
+    public sealed class GetFileRequest : IRequest<GetFile, GetFileResponse>, IDeserializable<GetFileRequest>
     {
         // Retrieves a file
         [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.dae
@@ -57,7 +63,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// <summary> Constructor for empty message. </summary>
         public GetFileRequest()
         {
-            Uri = "";
+            Uri = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -87,6 +93,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Uri);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
@@ -113,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse()
         {
             Bytes = System.Array.Empty<byte>();
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -147,6 +157,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.SerializeStructArray(Bytes, 0);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

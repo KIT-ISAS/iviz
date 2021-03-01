@@ -13,7 +13,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClient()
         {
-            IpAddress = "";
+            IpAddress = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -46,6 +46,10 @@ namespace Iviz.Msgs.RosbridgeMsgs
             b.Serialize(ConnectionTime);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (IpAddress is null) throw new System.NullReferenceException(nameof(IpAddress));
@@ -70,7 +74,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAysuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
+                "H4sIAAAAAAAAEysuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
                 
     }
 }

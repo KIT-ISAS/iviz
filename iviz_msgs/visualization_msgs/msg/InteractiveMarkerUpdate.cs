@@ -35,7 +35,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerUpdate()
         {
-            ServerId = "";
+            ServerId = string.Empty;
             Markers = System.Array.Empty<InteractiveMarker>();
             Poses = System.Array.Empty<InteractiveMarkerPose>();
             Erases = System.Array.Empty<string>();
@@ -89,6 +89,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.SerializeArray(Markers, 0);
             b.SerializeArray(Poses, 0);
             b.SerializeArray(Erases, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -145,7 +149,7 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA91aW3PbNhZ+rn4FJp5O7K0s39Jsq10/KJacaOrb2nLaTqejgUhIQk0RDEhaVn59v3MA" +
+                "H4sIAAAAAAAAE91aW3PbNhZ+rn4FJp5O7K0s39Jsq10/KJacaOrb2nLaTqejgUhIQk0RDEhaVn59v3MA" +
                 "UKRlJ52dTTqz2c6aAnEOzv0GbolhrNJCT1c6nYm8sPjTEedlXoiJEmWqP5RK6FQUcyUKk+lIpHKh8kxG" +
                 "qrWFVVng/3QucmXvlRVLY+9yYdJOy6Hy62Mdt7D9RgFbGimRlouJsh0sjYA3SjRIEEudJKLMlUNYGBGr" +
                 "QkWF0FOhCzGXuVjoPFexkKkos1gWqtMqdVq8foVTPoyBk84YrTIl5iaJc6Y5K21mgNNMHVrQnsuZ6ggx" +

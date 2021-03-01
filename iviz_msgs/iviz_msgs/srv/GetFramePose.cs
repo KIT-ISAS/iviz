@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetFramePoseResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetFramePoseRequest : IRequest, IDeserializable<GetFramePoseRequest>
+    public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializable<GetFramePoseRequest>
     {
         // Gets the absolute pose of a TF frame w.r.t. the map frame
         [DataMember (Name = "frames")] public string[] Frames { get; set; } // Frame ids
@@ -85,6 +91,10 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Frames, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -151,6 +161,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.SerializeStructArray(IsValid, 0);
             b.SerializeStructArray(Poses, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

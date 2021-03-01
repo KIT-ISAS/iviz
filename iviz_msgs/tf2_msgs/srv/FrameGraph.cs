@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Tf2Msgs
             set => Response = (FrameGraphResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.Tf2Msgs
     }
 
     [DataContract]
-    public sealed class FrameGraphRequest : IRequest, IDeserializable<FrameGraphRequest>
+    public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -78,6 +84,10 @@ namespace Iviz.Msgs.Tf2Msgs
         {
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -96,7 +106,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()
         {
-            FrameYaml = "";
+            FrameYaml = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -124,6 +134,10 @@ namespace Iviz.Msgs.Tf2Msgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(FrameYaml);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

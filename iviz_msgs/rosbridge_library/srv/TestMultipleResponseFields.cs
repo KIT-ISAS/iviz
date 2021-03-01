@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestMultipleResponseFieldsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestMultipleResponseFieldsRequest : IRequest, IDeserializable<TestMultipleResponseFieldsRequest>
+    public sealed class TestMultipleResponseFieldsRequest : IRequest<TestMultipleResponseFields, TestMultipleResponseFieldsResponse>, IDeserializable<TestMultipleResponseFieldsRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -78,6 +84,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
         }
@@ -99,7 +109,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// <summary> Constructor for empty message. </summary>
         public TestMultipleResponseFieldsResponse()
         {
-            @string = "";
+            @string = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -136,6 +146,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
             b.Serialize(@float);
             b.Serialize(@string);
             b.Serialize(@bool);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

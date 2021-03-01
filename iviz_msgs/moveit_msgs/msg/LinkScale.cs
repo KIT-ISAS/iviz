@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public LinkScale()
         {
-            LinkName = "";
+            LinkName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -48,6 +48,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Scale);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
@@ -72,7 +76,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYk5IMGSfIXEgoKcShAD" +
+                "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYk5IMGSfIXEgoKcShAD" +
                 "riEtJz+xxMwErAioGgCWgqioUwAAAA==";
                 
     }

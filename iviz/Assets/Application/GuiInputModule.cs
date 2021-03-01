@@ -204,7 +204,7 @@ namespace Iviz.App
                 MainCamera.backgroundColor = valueNoAlpha;
 
                 float maxRGB = Mathf.Max(Mathf.Max(value.r, value.g), value.b);
-                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
+                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB ;
                 RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
             }
         }
@@ -261,12 +261,17 @@ namespace Iviz.App
                 MainCamera.allowHDR = true;
             }
 
+            if (!Settings.SupportsComputeBuffers)
+            {
+                Core.Logger.Info("Platform does not support compute shaders. Point cloud rendering will probably not work.");
+            }
+
             Config = new SettingsConfiguration();
 
-            CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
-            //canvas.referenceResolution = Settings.IsMobile ? new Vector2(800, 600) : new Vector2(800, 800);
-            //canvas.referenceResolution = new Vector2(800, 800);
-
+            //CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
+            //canvas.scaleFactor = 2;
+            //canvas.referenceResolution = new Vector2(800, 600);
+            
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
             mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();

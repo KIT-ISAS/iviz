@@ -24,40 +24,25 @@ namespace Iviz.XmlRpc
             client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
         }
 
-        public void Start(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
+        public void Start(int timeoutInMs, CancellationToken token)
         {
-            Task.Run(() => StartAsync(timeoutInMs, token), token).WaitAndRethrow();
+            Task.Run(() => StartAsync(timeoutInMs, token).Caf(), token).WaitAndRethrow();
         }
 
-        public async Task StartAsync(int timeoutInMs = DefaultTimeoutInMs, CancellationToken token = default)
+        public Task StartAsync(int timeoutInMs, CancellationToken token)
         {
-            string hostname = uri.Host;
-            int port = uri.Port;
-
-#if NET5_0
-            Task task = client.ConnectAsync(hostname, port, token).AsTask();
-#else
-            Task task = client.ConnectAsync(hostname, port);
-#endif
-            if (!await task.WaitFor(timeoutInMs, token) || !task.RanToCompletion())
-            {
-                token.ThrowIfCanceled();
-                if (task.IsFaulted)
-                {
-                    ExceptionDispatchInfo.Capture(task.Exception!.InnerException!).Throw();
-                }
-
-                throw new TimeoutException($"HttpRequest: Host {hostname}:{port} timed out");
-            }
+            return client.TryConnectAsync(uri.Host, uri.Port, token, timeoutInMs);
         }
 
         string CreateRequest(string msgIn)
         {
-            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" + 
+            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" +
                    "User-Agent: iviz XML-RPC\r\n" +
-                   $"Host: {callerUri.Host}\r\n" + 
+                   $"Host: {callerUri.Host}\r\n" +
                    $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
-                   "Content-Type: text/xml; charset=utf-8\r\n" + $"\r\n{msgIn}\r\n";
+                   "Content-Type: text/xml; charset=utf-8\r\n" +
+                   $"\r\n{msgIn}" +
+                   "\r\n";
         }
 
         static string ProcessResponse(string response)
@@ -87,7 +72,7 @@ namespace Iviz.XmlRpc
             return response.Substring(index);
         }
 
-        internal string Request(string msgIn, int timeoutInMs = DefaultTimeoutInMs)
+        internal string Request(string msgIn, int timeoutInMs)
         {
             string response;
             using (Stream stream = client.GetStream())
@@ -106,24 +91,20 @@ namespace Iviz.XmlRpc
             return ProcessResponse(response);
         }
 
-        internal async Task<string> RequestAsync(string msgIn, int timeoutInMs = DefaultTimeoutInMs,
-            CancellationToken token = default)
+        internal async ValueTask<string> RequestAsync(string msgIn, int timeoutInMs, CancellationToken token)
         {
             string response;
             using (Stream stream = client.GetStream())
             {
                 StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
-                Task writeTask = writer.WriteAsync(CreateRequest(msgIn));
-                if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
+                try
+                {
+                    await writer.WriteChunkAsync(CreateRequest(msgIn), token, timeoutInMs);
+                }
+                catch (Exception)
                 {
                     writer.Close();
-                    token.ThrowIfCanceled();
-                    if (writeTask.IsFaulted)
-                    {
-                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
-                    }
-
-                    throw new TimeoutException("HttpRequest: Request writing timed out!", writeTask.Exception);
+                    throw;
                 }
 
                 await writer.FlushAsync().Caf();
@@ -133,13 +114,13 @@ namespace Iviz.XmlRpc
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
                     reader.Close();
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     if (readTask.IsFaulted)
                     {
-                        ExceptionDispatchInfo.Capture(writeTask.Exception!.InnerException!).Throw();
+                        ExceptionDispatchInfo.Capture(readTask.Exception!.InnerException!).Throw();
                     }
 
-                    throw new TimeoutException("HttpRequest: Request response timed out!", writeTask.Exception);
+                    throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
                 }
 
                 response = readTask.Result;

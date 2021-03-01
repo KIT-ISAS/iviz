@@ -118,6 +118,7 @@ namespace Iviz.RosMaster
         public async Task StartAsync()
         {
             Logger.Log($"** {this}: Starting at {MasterUri}");
+            AddKey("/run_id", Guid.NewGuid().ToString());
             Task startTask = listener.StartAsync(StartContext, true);
             await ManageRosoutAggAsync().AwaitNoThrow(this);
             await startTask.AwaitNoThrow(this);
@@ -154,6 +155,7 @@ namespace Iviz.RosMaster
                 while (!runningTs.IsCancellationRequested)
                 {
                     Log log = await reader.ReadAsync(runningTs.Token);
+                    //Console.WriteLine(log.Msg);
                     await writer.WriteAsync(log);
                 }
             }
@@ -258,7 +260,7 @@ namespace Iviz.RosMaster
             }
         }
 
-        async void NotifySubscriber(Uri remoteUri, IEnumerable<Arg> methodArgs, CancellationToken token)
+        async void NotifySubscriber(Uri remoteUri, Arg[] methodArgs, CancellationToken token)
         {
             try
             {
@@ -483,10 +485,10 @@ namespace Iviz.RosMaster
             using var myLock = rosLock.Lock();
 
             var publishers = publishersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                    pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
                 .ToArray();
             var subscribers = subscribersByTopic.Select(
-                pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
+                    pair => new Arg[] {pair.Key, new Arg(pair.Value.Select(tuple => tuple.Key))})
                 .ToArray();
             var providers = serviceProviders.Select(
                 pair => new Arg[] {pair.Key, new Arg(new[] {pair.Value.Id})}).ToArray();
@@ -503,6 +505,8 @@ namespace Iviz.RosMaster
             {
                 return ErrorResponse("Failed to parse arguments");
             }
+
+            Console.WriteLine("**** Delete " + key);
 
             parameters.Remove(key);
             return DefaultOkResponse;
@@ -529,14 +533,17 @@ namespace Iviz.RosMaster
                 key = "/" + key;
             }
 
-            if (args[2] is object[] argObj && 
-                argObj.Length != 0 && 
-                argObj[0] is List<(string, object)>)
+            if (args[2] is object[] argObj &&
+                argObj.Length != 0 &&
+                argObj[0] is List<(string, object)> argEntries)
             {
-                foreach ((string name, object value) in argObj.SelectMany(obj => (List<(string, object)>) obj))
+                try
                 {
-                    Arg arg = Arg.Create(value);
-                    parameters[$"{key}/{name}"] = arg;
+                    AddDictionary(argEntries, key);
+                }
+                catch (ParseException e)
+                {
+                    return ErrorResponse(e.Message);
                 }
             }
             else
@@ -544,13 +551,38 @@ namespace Iviz.RosMaster
                 Arg arg = Arg.Create(args[2]);
                 if (!arg.IsValid)
                 {
-                    return ErrorResponse("Failed to parse arguments");
+                    return ErrorResponse($"Parameter [{key}] could not be parsed'");
                 }
 
+                Console.WriteLine("++ Param " + key + " --> " + args[2].GetType());
                 parameters[key] = arg;
             }
 
             return DefaultOkResponse;
+        }
+
+        void AddDictionary(List<(string, object)> entries, string root)
+        {
+            foreach ((string name, object value) in entries)
+            {
+                string key = $"{root}/{name}";
+
+                if (value is List<(string, object)> subEntries)
+                {
+                    AddDictionary(subEntries, key);
+                }
+                else
+                {
+                    Arg arg = Arg.Create(value);
+                    if (!arg.IsValid)
+                    {
+                        throw new ParseException($"Parameter [{key}] could not be parsed'");
+                    }
+
+                    Console.WriteLine("++ Param " + key + " --> " + value.GetType());
+                    parameters[key] = arg;
+                }
+            }
         }
 
         Arg[] GetParam(object[] args)
@@ -587,8 +619,8 @@ namespace Iviz.RosMaster
             var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
             if (candidates.Length == 0)
             {
-                //Console.WriteLine("key " + key + " is missing");
-                return ErrorResponse($"Parameter '{key}' is not set");
+                Console.WriteLine("**** " + key + " is missing");
+                return ErrorResponse($"Parameter [{key}] is not set");
             }
 
             arg = new Arg(candidates.Select(pair => (pair.Key, pair.Value)).ToList());
@@ -612,12 +644,13 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            if (!parameters.ContainsKey(key))
+            bool success = parameters.ContainsKey(key);
+            if (!success)
             {
-                Console.WriteLine("key " + key + " is missing");
+                Console.WriteLine("**** " + key + " is missing");
             }
 
-            return OkResponse(parameters.ContainsKey(key));
+            return OkResponse(success);
         }
 
         static Arg[] SubscribeParam(object[] _)
@@ -688,7 +721,6 @@ namespace Iviz.RosMaster
                     return ErrorResponse("methodname or params missing");
                 }
 
-                Console.WriteLine("-- " + methodName);
                 if (!methods.TryGetValue(methodName, out var method))
                 {
                     return ErrorResponse("Method not found");

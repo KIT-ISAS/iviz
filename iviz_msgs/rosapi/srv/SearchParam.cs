@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (SearchParamResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class SearchParamRequest : IRequest, IDeserializable<SearchParamRequest>
+    public sealed class SearchParamRequest : IRequest<SearchParam, SearchParamResponse>, IDeserializable<SearchParamRequest>
     {
         [DataMember (Name = "name")] public string Name { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamRequest()
         {
-            Name = "";
+            Name = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -86,6 +92,10 @@ namespace Iviz.Msgs.Rosapi
             b.Serialize(Name);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
@@ -109,7 +119,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public SearchParamResponse()
         {
-            GlobalName = "";
+            GlobalName = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -137,6 +147,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(GlobalName);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -7,12 +7,12 @@ namespace Iviz.Msgs.StdMsgs
 {
     [Preserve, DataContract (Name = "std_msgs/ColorRGBA")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
+    public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
     {
-        [DataMember (Name = "r")] public float R { get; }
-        [DataMember (Name = "g")] public float G { get; }
-        [DataMember (Name = "b")] public float B { get; }
-        [DataMember (Name = "a")] public float A { get; }
+        [DataMember (Name = "r")] public float R;
+        [DataMember (Name = "g")] public float G;
+        [DataMember (Name = "b")] public float B;
+        [DataMember (Name = "a")] public float A;
     
         /// <summary> Explicit constructor. </summary>
         public ColorRGBA(float R, float G, float B, float A)
@@ -54,6 +54,10 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -73,7 +77,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
+                "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         /// Custom iviz code
         public static readonly ColorRGBA White = (1, 1, 1, 1);
@@ -86,6 +90,9 @@ namespace Iviz.Msgs.StdMsgs
         public static readonly ColorRGBA Magenta = (1, 0, 1, 1);
         public static readonly ColorRGBA Grey = (0.5f, 0.5f, 0.5f, 1);
         public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new ColorRGBA(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);
-        public static implicit operator ColorRGBA((float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);
+        public static implicit operator ColorRGBA(in (float R, float G, float B, float A) p) => new ColorRGBA(p.R, p.G, p.B, p.A);
+        public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new ColorRGBA(q.p.R, q.p.G, q.p.B, q.A);
+        public static implicit operator ColorRGBA(in (float R, float G, float B) p) => new ColorRGBA(p.R, p.G, p.B, 1);
+        public (float R, float G, float B) RGB { readonly get => (R, G, B); set => (R, G, B) = value; }
     }
 }

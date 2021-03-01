@@ -1,17 +1,13 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
-using Nito.AsyncEx.Synchronous;
-
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -26,16 +22,23 @@ namespace Iviz.Roslib
     /// <typeparam name="T"></typeparam>
     public sealed class RosChannelReader<T> : IEnumerable<T>, IRosChannelReader
 #if !NETSTANDARD2_0
-            , IAsyncEnumerable<T>
+        , IAsyncEnumerable<T>
 #endif
         where T : IMessage, IDeserializable<T>, new()
     {
-        readonly AsyncProducerConsumerQueue<T> messageQueue = new AsyncProducerConsumerQueue<T>();
+        readonly ConcurrentQueue<T> backQueue = new();
+        readonly AsyncCollection<T> messageQueue;
         CancellationTokenRegistration subscriberToken;
         bool disposed;
         string? subscriberId;
         IRosSubscriber<T>? subscriber;
 
+        /// <summary>
+        /// Tentative number of elements. This number may become outdated right after calling this property.
+        /// Use this only as an estimate for the number of elements.
+        /// </summary>
+        public int Count => backQueue.Count;
+        
         public IRosSubscriber<T> Subscriber =>
             subscriber ?? throw new InvalidOperationException("Channel has not been started!");
 
@@ -45,6 +48,7 @@ namespace Iviz.Roslib
 
         public RosChannelReader()
         {
+            messageQueue = new AsyncCollection<T>(backQueue);
         }
 
         /// <summary>
@@ -54,6 +58,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to.</param>
         public RosChannelReader(IRosClient client, string topic)
         {
+            messageQueue = new AsyncCollection<T>(backQueue);
             Start(client, topic);
         }
 
@@ -78,7 +83,7 @@ namespace Iviz.Roslib
 #else
             subscriberToken.Dispose();
 #endif
-            await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
+            await subscriber.UnsubscribeAsync(subscriberId!).AsTask().AwaitNoThrow(this);
         }
 
 #if !NETSTANDARD2_0
@@ -137,7 +142,7 @@ namespace Iviz.Roslib
             return Read(token);
         }
 
-        async Task<IMessage> IRosChannelReader.ReadAsync(CancellationToken token)
+        async ValueTask<IMessage> IRosChannelReader.ReadAsync(CancellationToken token)
         {
             return await ReadAsync(token);
         }
@@ -209,7 +214,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Enqueue(t);
+            messageQueue.Add(t);
         }
 
         /// <summary>
@@ -218,8 +223,15 @@ namespace Iviz.Roslib
         /// <returns>False if the channel has been disposed</returns>
         public bool WaitToRead(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return WaitToRead(ts.Token);
+            using CancellationTokenSource ts = new(timeoutInMs);
+            try
+            {
+                return WaitToRead(ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait to read timed out");
+            }
         }
 
         /// <summary>
@@ -236,10 +248,17 @@ namespace Iviz.Roslib
         /// Waits until a message arrives.
         /// </summary>
         /// <returns>False if the channel has been disposed</returns>
-        public async Task<bool> WaitToReadAsync(int timeoutInMs)
+        public async ValueTask<bool> WaitToReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return await WaitToReadAsync(ts.Token);
+            using CancellationTokenSource ts = new(timeoutInMs);
+            try
+            {
+                return await WaitToReadAsync(ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait to read timed out");
+            }
         }
 
         /// <summary>
@@ -247,9 +266,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        public Task<bool> WaitToReadAsync(CancellationToken token = default)
+        public async ValueTask<bool> WaitToReadAsync(CancellationToken token = default)
         {
-            return messageQueue.OutputAvailableAsync(token);
+            return await messageQueue.OutputAvailableAsync(token);
         }
 
 
@@ -262,8 +281,15 @@ namespace Iviz.Roslib
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
         public T Read(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return Read(ts.Token);
+            using CancellationTokenSource ts = new(timeoutInMs);
+            try
+            {
+                return Read(ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait for read timed out");
+            }
         }
 
         void ThrowIfNotStarted()
@@ -284,7 +310,7 @@ namespace Iviz.Roslib
         public T Read(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return messageQueue.Dequeue(token);
+            return messageQueue.Take(token);
         }
 
         /// <summary>
@@ -294,10 +320,17 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived</returns>
         /// <exception cref="OperationCanceledException">Thrown if the waiting times out</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async Task<T> ReadAsync(int timeoutInMs)
+        public async ValueTask<T> ReadAsync(int timeoutInMs)
         {
-            using CancellationTokenSource ts = new CancellationTokenSource(timeoutInMs);
-            return await ReadAsync(ts.Token);
+            using CancellationTokenSource ts = new(timeoutInMs);
+            try
+            {
+                return await ReadAsync(ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Wait for read timed out");
+            }
         }
 
         /// <summary>
@@ -307,10 +340,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public Task<T> ReadAsync(CancellationToken token = default)
+        public async ValueTask<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return messageQueue.DequeueAsync(token);
+            return await messageQueue.TakeAsync(token);
         }
 
 
@@ -323,16 +356,16 @@ namespace Iviz.Roslib
         public bool TryRead(out T t)
         {
             ThrowIfNotStarted();
-            Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
-            if (!task.RanToCompletion())
+
+            if (backQueue.Count == 0)
             {
                 t = default!;
                 return false;
             }
-            
+
             try
             {
-                t = messageQueue.Dequeue(new CancellationToken(true));
+                t = messageQueue.Take(new CancellationToken(true));
                 return true;
             }
             catch (OperationCanceledException)
@@ -366,20 +399,17 @@ namespace Iviz.Roslib
 
         public IEnumerable<T> TryReadAll()
         {
-            IEnumerable<T> enumerable = messageQueue.GetConsumingEnumerable(new CancellationToken(true));
-            using IEnumerator<T> enumerator = enumerable.GetEnumerator();
             while (true)
             {
-                Task task = messageQueue.OutputAvailableAsync(new CancellationToken(true));
-                if (!task.RanToCompletion())
+                if (backQueue.Count == 0)
                 {
                     yield break;
                 }
 
-                bool canMoveNext;
+                T element;
                 try
                 {
-                    canMoveNext = enumerator.MoveNext();
+                    element = messageQueue.Take(new CancellationToken(true));
                 }
                 catch (OperationCanceledException)
                 {
@@ -387,19 +417,14 @@ namespace Iviz.Roslib
                     yield break;
                 }
 
-                if (!canMoveNext)
-                {
-                    yield break;
-                }
-
-                yield return enumerator.Current!;
+                yield return element!;
             }
         }
-        
+
         IEnumerable<IMessage> IRosChannelReader.TryReadAll()
         {
             return TryReadAll().Cast<IMessage>();
-        }        
+        }
 
 #if !NETSTANDARD2_0
         /// <summary>
@@ -412,21 +437,23 @@ namespace Iviz.Roslib
         public async IAsyncEnumerable<T> ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token = default)
         {
+            ThrowIfNotStarted();
             while (true)
             {
-                yield return await ReadAsync(token);
+                yield return await messageQueue.TakeAsync(token);
             }
         }
 
         async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
             [EnumeratorCancellation] CancellationToken token)
         {
+            ThrowIfNotStarted();
             while (true)
             {
-                yield return await ReadAsync(token);
+                yield return await messageQueue.TakeAsync(token);
             }
         }
-        
+
         public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken token = default)
         {
             return ReadAllAsync(token).GetAsyncEnumerator(token);

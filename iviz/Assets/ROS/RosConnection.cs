@@ -23,7 +23,6 @@ namespace Iviz.Ros
             Array.Empty<BriefTopicInfo>().AsReadOnly();
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0);
-        readonly SemaphoreSlim signalNoAwait = new SemaphoreSlim(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
         readonly CancellationTokenSource connectionTs = new CancellationTokenSource();
@@ -37,7 +36,7 @@ namespace Iviz.Ros
         public bool KeepReconnecting { get; set; }
         protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
 
-        public abstract Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
             where T : IService;
 
         public event Action<ConnectionState> ConnectionStateChanged;
@@ -92,7 +91,7 @@ namespace Iviz.Ros
             {
                 while (!connectionTs.IsCancellationRequested)
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = GameThread.Now;
                     if (KeepReconnecting
                         && ConnectionState != ConnectionState.Connected
                         && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
@@ -141,7 +140,7 @@ namespace Iviz.Ros
             }
         }
 
-        protected abstract Task<bool> Connect();
+        protected abstract ValueTask<bool> Connect();
 
         public virtual void Disconnect()
         {

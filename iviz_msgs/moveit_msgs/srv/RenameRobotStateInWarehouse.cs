@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (RenameRobotStateInWarehouseResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class RenameRobotStateInWarehouseRequest : IRequest, IDeserializable<RenameRobotStateInWarehouseRequest>
+    public sealed class RenameRobotStateInWarehouseRequest : IRequest<RenameRobotStateInWarehouse, RenameRobotStateInWarehouseResponse>, IDeserializable<RenameRobotStateInWarehouseRequest>
     {
         [DataMember (Name = "old_name")] public string OldName { get; set; }
         [DataMember (Name = "new_name")] public string NewName { get; set; }
@@ -58,9 +64,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public RenameRobotStateInWarehouseRequest()
         {
-            OldName = "";
-            NewName = "";
-            Robot = "";
+            OldName = string.Empty;
+            NewName = string.Empty;
+            Robot = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -94,6 +100,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(OldName);
             b.Serialize(NewName);
             b.Serialize(Robot);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -142,6 +152,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public static readonly RenameRobotStateInWarehouseResponse Singleton = new RenameRobotStateInWarehouseResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

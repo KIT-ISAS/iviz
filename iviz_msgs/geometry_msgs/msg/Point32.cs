@@ -7,7 +7,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Point32")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
+    public struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -16,9 +16,9 @@ namespace Iviz.Msgs.GeometryMsgs
         //
         // This message is designed to take up less space when sending
         // lots of points at once, as in the case of a PointCloud.  
-        [DataMember (Name = "x")] public float X { get; }
-        [DataMember (Name = "y")] public float Y { get; }
-        [DataMember (Name = "z")] public float Z { get; }
+        [DataMember (Name = "x")] public float X;
+        [DataMember (Name = "y")] public float Y;
+        [DataMember (Name = "z")] public float Z;
     
         /// <summary> Explicit constructor. </summary>
         public Point32(float X, float Y, float Z)
@@ -59,6 +59,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -78,7 +82,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
+                "H4sIAAAAAAAAEz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
                 "OCtsJRRRNpYMmRH8x9nAGXMlgpYw0cuVbcX5hJFN21apNLE65PU4HPDh6wpvybZRpAgT7Er47EzXlSpd" +
                 "qDYZ5TGRc6tRiI2or5xPR8B5/HVzD6YcQ3flHScsVTaxBjaqUqiGkRPbrUP/kRuphoUaJJLyku9mLHwT" +
                 "9oLk43ui5ipDXYPz4ugkj2DNjyIYJE/0hqDtEu1IU/BE/UDd83uSPTbtYU4SPAJ+ntXtWf0Of3eAjDBw" +

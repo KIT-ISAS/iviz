@@ -13,9 +13,6 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MouseOverHighlighter : MonoBehaviour,
         IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
-#if UNITY_WSA
-        , IMixedRealityFocusHandler
-#endif
     {
         MeshMarkerResource resource;
 
@@ -55,18 +52,6 @@ namespace Iviz.Displays
 
             resource.EmissiveColor = Color.black;
         }
-
-#if UNITY_WSA
-        public void OnFocusEnter(FocusEventData eventData)
-        {
-            resource.EmissiveColor = GetHighlightColor(Color.black);
-        }
-
-        public void OnFocusExit(FocusEventData eventData)
-        {
-            resource.EmissiveColor = Color.black;
-        }
-#endif
 
         public void OnPointerDown(PointerEventData eventData)
         {

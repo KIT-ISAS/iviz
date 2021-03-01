@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestEmptyResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestEmptyRequest : IRequest, IDeserializable<TestEmptyRequest>
+    public sealed class TestEmptyRequest : IRequest<TestEmpty, TestEmptyResponse>, IDeserializable<TestEmptyRequest>
     {
     
         /// <summary> Constructor for empty message. </summary>
@@ -75,6 +81,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         
@@ -115,6 +125,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

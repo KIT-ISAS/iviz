@@ -10,30 +10,36 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "name")] public string Name { get; set; }
         [DataMember (Name = "vertices")] public Vector3f[] Vertices { get; set; }
         [DataMember (Name = "normals")] public Vector3f[] Normals { get; set; }
-        [DataMember (Name = "texCoords")] public Vector2f[] TexCoords { get; set; }
-        [DataMember (Name = "colors")] public Color32[] Colors { get; set; }
+        [DataMember (Name = "tangents")] public Vector3f[] Tangents { get; set; }
+        [DataMember (Name = "bi_tangents")] public Vector3f[] BiTangents { get; set; }
+        [DataMember (Name = "tex_coords")] public TexCoords[] TexCoords { get; set; }
+        [DataMember (Name = "color_channels")] public ColorChannel[] ColorChannels { get; set; }
         [DataMember (Name = "faces")] public Triangle[] Faces { get; set; }
-        [DataMember (Name = "materialIndex")] public uint MaterialIndex { get; set; }
+        [DataMember (Name = "material_index")] public uint MaterialIndex { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Mesh()
         {
-            Name = "";
+            Name = string.Empty;
             Vertices = System.Array.Empty<Vector3f>();
             Normals = System.Array.Empty<Vector3f>();
-            TexCoords = System.Array.Empty<Vector2f>();
-            Colors = System.Array.Empty<Color32>();
+            Tangents = System.Array.Empty<Vector3f>();
+            BiTangents = System.Array.Empty<Vector3f>();
+            TexCoords = System.Array.Empty<TexCoords>();
+            ColorChannels = System.Array.Empty<ColorChannel>();
             Faces = System.Array.Empty<Triangle>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Mesh(string Name, Vector3f[] Vertices, Vector3f[] Normals, Vector2f[] TexCoords, Color32[] Colors, Triangle[] Faces, uint MaterialIndex)
+        public Mesh(string Name, Vector3f[] Vertices, Vector3f[] Normals, Vector3f[] Tangents, Vector3f[] BiTangents, TexCoords[] TexCoords, ColorChannel[] ColorChannels, Triangle[] Faces, uint MaterialIndex)
         {
             this.Name = Name;
             this.Vertices = Vertices;
             this.Normals = Normals;
+            this.Tangents = Tangents;
+            this.BiTangents = BiTangents;
             this.TexCoords = TexCoords;
-            this.Colors = Colors;
+            this.ColorChannels = ColorChannels;
             this.Faces = Faces;
             this.MaterialIndex = MaterialIndex;
         }
@@ -44,8 +50,18 @@ namespace Iviz.Msgs.IvizMsgs
             Name = b.DeserializeString();
             Vertices = b.DeserializeStructArray<Vector3f>();
             Normals = b.DeserializeStructArray<Vector3f>();
-            TexCoords = b.DeserializeStructArray<Vector2f>();
-            Colors = b.DeserializeStructArray<Color32>();
+            Tangents = b.DeserializeStructArray<Vector3f>();
+            BiTangents = b.DeserializeStructArray<Vector3f>();
+            TexCoords = b.DeserializeArray<TexCoords>();
+            for (int i = 0; i < TexCoords.Length; i++)
+            {
+                TexCoords[i] = new TexCoords(ref b);
+            }
+            ColorChannels = b.DeserializeArray<ColorChannel>();
+            for (int i = 0; i < ColorChannels.Length; i++)
+            {
+                ColorChannels[i] = new ColorChannel(ref b);
+            }
             Faces = b.DeserializeStructArray<Triangle>();
             MaterialIndex = b.Deserialize<uint>();
         }
@@ -65,10 +81,16 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.SerializeStructArray(Vertices, 0);
             b.SerializeStructArray(Normals, 0);
-            b.SerializeStructArray(TexCoords, 0);
-            b.SerializeStructArray(Colors, 0);
+            b.SerializeStructArray(Tangents, 0);
+            b.SerializeStructArray(BiTangents, 0);
+            b.SerializeArray(TexCoords, 0);
+            b.SerializeArray(ColorChannels, 0);
             b.SerializeStructArray(Faces, 0);
             b.Serialize(MaterialIndex);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -76,20 +98,40 @@ namespace Iviz.Msgs.IvizMsgs
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
             if (Vertices is null) throw new System.NullReferenceException(nameof(Vertices));
             if (Normals is null) throw new System.NullReferenceException(nameof(Normals));
+            if (Tangents is null) throw new System.NullReferenceException(nameof(Tangents));
+            if (BiTangents is null) throw new System.NullReferenceException(nameof(BiTangents));
             if (TexCoords is null) throw new System.NullReferenceException(nameof(TexCoords));
-            if (Colors is null) throw new System.NullReferenceException(nameof(Colors));
+            for (int i = 0; i < TexCoords.Length; i++)
+            {
+                if (TexCoords[i] is null) throw new System.NullReferenceException($"{nameof(TexCoords)}[{i}]");
+                TexCoords[i].RosValidate();
+            }
+            if (ColorChannels is null) throw new System.NullReferenceException(nameof(ColorChannels));
+            for (int i = 0; i < ColorChannels.Length; i++)
+            {
+                if (ColorChannels[i] is null) throw new System.NullReferenceException($"{nameof(ColorChannels)}[{i}]");
+                ColorChannels[i].RosValidate();
+            }
             if (Faces is null) throw new System.NullReferenceException(nameof(Faces));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 28;
+                int size = 36;
                 size += BuiltIns.UTF8.GetByteCount(Name);
                 size += 12 * Vertices.Length;
                 size += 12 * Normals.Length;
-                size += 8 * TexCoords.Length;
-                size += 4 * Colors.Length;
+                size += 12 * Tangents.Length;
+                size += 12 * BiTangents.Length;
+                foreach (var i in TexCoords)
+                {
+                    size += i.RosMessageLength;
+                }
+                foreach (var i in ColorChannels)
+                {
+                    size += i.RosMessageLength;
+                }
                 size += 12 * Faces.Length;
                 return size;
             }
@@ -101,14 +143,14 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Mesh";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b76923f54d0c429ac4071dd83be15982";
+        [Preserve] public const string RosMd5Sum = "a5cea1d5d993b3cd934f9a3c7f16378c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA72SvwrCMBDG93uKvIGQLiI4dRAHJ8VFRK7pNQTyB5JYap/eRJLi4Khm+T5+d+Q+uAvR" +
-                "KyuZRUNwJhGdb4bLlY3koxIU3pl13qCuiGcUaWqd832A1unUxhMT2QU4eYVWakpkwPzTXdnYcGYwUirp" +
-                "ve1pAth++cHhuNswNar5ZoIMq5ofBu0wz58W91jc/K8c/HOOn08v23ntYM18UVm0K4q/D1Kvol4DVtNV" +
-                "IwCeGDGFE5QCAAA=";
+                "H4sIAAAAAAAAE71SOw7CMAzdc4rcAKldEBJTByYmEAtCkZu6JVLqSEmoSk9PCknU7kAWPz/H8ufZeauo" +
+                "4wQ9sgtKb2zZXm98QOuVRLfkyNge9IryQB2SX3G1Epk+41gZYxs3/8VRyLfDKqONre5AhDpE5OwK+fFD" +
+                "klUhX2OItDD38FDky4L34DGEtFDU4MjY/suPHU+HHVeDmkTvOrdJM7FWG5gbGDN6ZjT9vo+8xOWW4yZ/" +
+                "Xnwp1Ue3skiS/at8WbxPYMtttF20dbTwBxHiUaZjhATqBCRjL5ZmGPZNAwAA";
                 
     }
 }

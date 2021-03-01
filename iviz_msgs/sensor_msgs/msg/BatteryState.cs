@@ -59,8 +59,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             CellVoltage = System.Array.Empty<float>();
             CellTemperature = System.Array.Empty<float>();
-            Location = "";
-            SerialNumber = "";
+            Location = string.Empty;
+            SerialNumber = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -135,6 +135,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(SerialNumber);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (CellVoltage is null) throw new System.NullReferenceException(nameof(CellVoltage));
@@ -166,7 +170,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA61WbW/iOBD+nl8xEh+WnlS6L3e3q0r7AQEFdDRBJW2vOp0ikwyJVcfmbIeWf3/jvEBo" +
+                "H4sIAAAAAAAAE61WbW/iOBD+nl8xEh+WnlS6L3e3q0r7AQEFdDRBJW2vOp0ikwyJVcfmbIeWf3/jvEBo" +
                 "C909XVSpJH7mmRnP+Bl7HRgoaSyT1gDTCHGmDEqwCnJm4wxshoCyyA1wWb4ILotneEQtUXgdSHDFJSZu" +
                 "lctYFAlelIiLtXpCHZlivRbbXgbMgFrBBrXhSsKX3leyDYlOSYSEr1aoUcYI3MBKaTB2KxA0MkPBlW7j" +
                 "dpRky4QA4kYdM4MglYWcP1Mc7rXnEWDu/EPln/iYLcyexCu4tN9gHtyPbqLF7Xw+e4gWYT+8XUS3/h9+" +

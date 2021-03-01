@@ -42,6 +42,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Measurements, 0);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Measurements is null) throw new System.NullReferenceException(nameof(Measurements));

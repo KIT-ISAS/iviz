@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [Preserve, DataContract (Name = "rosgraph_msgs/Log")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Log : IMessage, System.IEquatable<Log>, IDeserializable<Log>
+    public struct Log : IMessage, System.IEquatable<Log>, IDeserializable<Log>
     {
         //#
         //# Severity level constants
@@ -20,14 +20,14 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         //# Fields
         //#
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; }
-        [DataMember (Name = "level")] public byte Level { get; }
-        [DataMember (Name = "name")] public string Name { get; } // name of the node
-        [DataMember (Name = "msg")] public string Msg { get; } // message 
-        [DataMember (Name = "file")] public string File { get; } // file the message came from
-        [DataMember (Name = "function")] public string Function { get; } // function the message came from
-        [DataMember (Name = "line")] public uint Line { get; } // line the message came from
-        [DataMember (Name = "topics")] public string[] Topics { get; } // topic names that the node publishes
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "level")] public byte Level;
+        [DataMember (Name = "name")] public string? Name; // name of the node
+        [DataMember (Name = "msg")] public string? Msg; // message 
+        [DataMember (Name = "file")] public string? File; // file the message came from
+        [DataMember (Name = "function")] public string? Function; // function the message came from
+        [DataMember (Name = "line")] public uint Line; // line the message came from
+        [DataMember (Name = "topics")] public string[]? Topics; // topic names that the node publishes
     
         /// <summary> Explicit constructor. </summary>
         public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
@@ -87,11 +87,18 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.SerializeArray(Topics ?? System.Array.Empty<string>(), 0);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
-            for (int i = 0; i < Topics.Length; i++)
+            if (Topics != null)
             {
-                if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                for (int i = 0; i < Topics.Length; i++)
+                {
+                    if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                }
             }
         }
     
@@ -100,14 +107,17 @@ namespace Iviz.Msgs.RosgraphMsgs
             get {
                 int size = 25;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Msg);
-                size += BuiltIns.UTF8.GetByteCount(File);
-                size += BuiltIns.UTF8.GetByteCount(Function);
-                size += 4 * Topics.Length;
-                foreach (string s in Topics)
+                size += BuiltIns.UTF8.GetByteCount(Name ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(Msg ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(File ?? string.Empty);
+                size += BuiltIns.UTF8.GetByteCount(Function ?? string.Empty);
+                if (Topics != null)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(s);
+                    size += 4 * Topics.Length;
+                    foreach (string s in Topics)
+                    {
+                        size += BuiltIns.UTF8.GetByteCount(s);
+                    }
                 }
                 return size;
             }
@@ -123,7 +133,7 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
+                "H4sIAAAAAAAAE61TXWvbMBR996+44Ie2g7S0G6ME/JCRpits7Ugz9jBGkK1rWyBLniQn87/fkdxkGYyx" +
                 "hwWDZN9zzv06yfMsz+mZd+xUGEnjoqmyxgdhgkcsK8fAtLx79/m+uKZccjk0E2yKPDyunooborxhw07o" +
                 "09iXxfqxeIPYXjijzG+8u/X6aV3cUs7OWXcaWS02iw/F9VvKaxGEvqpQmaqOynmqeKVYy1TfexaSHbXp" +
                 "mBQmoA8u5jSiY8qnw9YUWiZjJR/CnW8Q7dh70TAdvtZKR1I6IuMQr6JK7Wx3BA6mCsqaCD5c/0wYlAmv" +

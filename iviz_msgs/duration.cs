@@ -53,7 +53,7 @@ namespace Iviz.Msgs
             return this == other;
         }
 
-        public static implicit operator duration(in TimeSpan t) => new duration(t);
+        public static implicit operator duration(in TimeSpan t) => new(t);
         public static implicit operator TimeSpan(in duration t) => t.ToTimeSpan();
 
         public int CompareTo(duration other)

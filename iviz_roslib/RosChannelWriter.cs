@@ -89,10 +89,10 @@ namespace Iviz.Roslib
             Publisher.Publish(msg);
         }
 
-        public Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public async Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
-            return Publisher.PublishAsync(msg, policy, token);
+            await Publisher.PublishAsync(msg, policy, token);
         }
 
         void IRosChannelWriter.Write(IMessage msg)
@@ -206,7 +206,7 @@ namespace Iviz.Roslib
                 return; // not started
             }
 
-            await Publisher.UnadvertiseAsync(publisherId!).AwaitNoThrow(this);
+            await Publisher.UnadvertiseAsync(publisherId!).AsTask().AwaitNoThrow(this);
         }
 
 #if !NETSTANDARD2_0

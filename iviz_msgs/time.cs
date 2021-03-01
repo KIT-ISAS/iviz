@@ -17,23 +17,23 @@ namespace Iviz.Msgs
             Nsecs = nsecs;
         }
 
-        static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         public time(in DateTime time)
         {
             TimeSpan diff = time - UnixEpoch;
-            Secs = (uint)diff.TotalSeconds;
-            Nsecs = (uint)(diff.Ticks % 10000000) * 100;
+            Secs = (uint) diff.TotalSeconds;
+            Nsecs = (uint) (diff.Ticks % 10000000) * 100;
         }
 
         public static time Now()
         {
-            return new time(DateTime.UtcNow);
+            return new(DateTime.UtcNow);
         }
-        
+
         public DateTime ToDateTime()
         {
-            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100).ToLocalTime();
+            return ToLocalTime(UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100));
         }
 
         public TimeSpan ToTimeSpan()
@@ -65,18 +65,18 @@ namespace Iviz.Msgs
         {
             return this == other;
         }
-        
+
         public int CompareTo(time other)
         {
             int secsComparison = Secs.CompareTo(other.Secs);
             return secsComparison != 0 ? secsComparison : Nsecs.CompareTo(other.Nsecs);
-        }        
+        }
 
         public static bool operator >(time left, time right)
         {
             return left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
         }
-        
+
         public static bool operator <(time left, time right)
         {
             return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
@@ -84,13 +84,28 @@ namespace Iviz.Msgs
 
         public time WithSecs(uint secs)
         {
-            return new time(secs, Nsecs);
+            return new(secs, Nsecs);
         }
 
         public override string ToString()
         {
             return $"{{\"secs\":{Secs},\"nsecs\":{Nsecs}}}";
         }
-    }
 
+        static long? cachedTicksDiff;
+
+        static DateTime ToLocalTime(DateTime utc)
+        {
+            if (cachedTicksDiff == null)
+            {
+                DateTime utcNow = DateTime.UtcNow;
+                DateTime now = utcNow.ToLocalTime();
+                cachedTicksDiff = now.Ticks - utcNow.Ticks;
+            }
+
+            return utc.Kind == DateTimeKind.Local
+                ? utc
+                : utc.AddTicks(cachedTicksDiff.Value);
+        }
+    }
 }

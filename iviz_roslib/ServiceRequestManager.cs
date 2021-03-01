@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
-using Nito.AsyncEx.Synchronous;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
     internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
     {
         readonly Func<T, Task> callback;
-        readonly HashSet<ServiceRequestAsync<T>> requests = new HashSet<ServiceRequestAsync<T>>();
-
+        readonly HashSet<ServiceRequestAsync<T>> requests = new();
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
         readonly Task task;
@@ -97,7 +94,7 @@ namespace Iviz.Roslib
                 await request.StopAsync().Caf();
                 requests.Remove(request);
             });
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this).Caf();
         }
 
         public void Dispose()
@@ -120,7 +117,8 @@ namespace Iviz.Roslib
             disposed = true;
             keepGoing = false;
 
-            using (TcpClient client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
+            // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
+            using (TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
             {
                 await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
             }
@@ -132,7 +130,7 @@ namespace Iviz.Roslib
             }
 
             Task[] tasks = requests.Select(request => request.StopAsync()).ToArray();
-            await Task.WhenAll(tasks).AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this).Caf();
             requests.Clear();
         }
 

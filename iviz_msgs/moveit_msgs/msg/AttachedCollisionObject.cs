@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public AttachedCollisionObject()
         {
-            LinkName = "";
+            LinkName = string.Empty;
             Object = new CollisionObject();
             TouchLinks = System.Array.Empty<string>();
             DetachPosture = new TrajectoryMsgs.JointTrajectory();
@@ -72,6 +72,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Weight);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
@@ -112,7 +116,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA71ZbVMbORL+Pr9CtXwwbBwnG7Jbe1zxgQR2QyoJbOCuklCUS56RbYXxyBlpAO/V/fd7" +
+                "H4sIAAAAAAAAE71ZbVMbORL+Pr9CtXwwbBwnG7Jbe1zxgQR2QyoJbOCuklCUS56RbYXxyBlpAO/V/fd7" +
                 "uluaGRtyua06QqhgSa1+70cteUudz4166crSeuuqk8lnkwd1Y8tSTYzSIeh8bgpMhLnSampvMfjsbBVU" +
                 "cCrMrVelra4yH2pbzfjzuNILk2Vb57SYuypoW3mQglseGl0qP9dL45WuCrV0Hp+mrub1DS2yLYjoK8ES" +
                 "jQjcOp4SPxAriKnNwl0bZlk55Xj7yBa05E0YKg1zZNZnW/fxU7YqbK4DZierzozWESKgyDYdJUxhLbsR" +

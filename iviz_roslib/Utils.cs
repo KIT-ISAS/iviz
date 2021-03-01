@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,20 +16,11 @@ using Newtonsoft.Json;
 
 namespace Iviz.Roslib
 {
-    /// <summary>
-    /// Simple class that overrides the ToString() method to produce a JSON representation. 
-    /// </summary>
-    public abstract class JsonToString
-    {
-        public override string ToString()
-        {
-            return Utils.ToJsonString(this);
-        }
-    }
-
     public static class Utils
     {
         public const string GenericExceptionFormat = "{0}: {1}";
+
+        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool HasPrefix(this string check, string prefix)
         {
@@ -118,7 +109,7 @@ namespace Iviz.Roslib
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
         {
-            return new ReadOnlyCollection<T>(t);
+            return new(t);
         }
 
         public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u)
@@ -156,12 +147,16 @@ namespace Iviz.Roslib
             return false;
         }
 
-        internal static List<string> ParseHeader(byte[] readBuffer, int totalLength = -1)
+        internal static List<string> ParseHeader(in Rent<byte> readBuffer)
+        {
+            return ParseHeader(readBuffer.Array, readBuffer.Length);
+        }
+
+        internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
         {
             int numRead = 0;
-            int toRead = totalLength != -1 ? totalLength : readBuffer.Length;
 
-            List<string> contents = new List<string>();
+            List<string> contents = new();
             while (numRead < toRead)
             {
                 int length = BitConverter.ToInt32(readBuffer, numRead);
@@ -175,16 +170,30 @@ namespace Iviz.Roslib
             return contents;
         }
 
-        internal static async Task<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
-            CancellationToken token = default)
+        internal static async ValueTask<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
+            CancellationToken token)
         {
             int numRead = 0;
+#if !NETSTANDARD2_0
             while (numRead < toRead)
             {
-#if !NETSTANDARD2_0
-                int readNow = await stream.ReadAsync(new Memory<byte>(buffer, numRead, toRead - numRead), token);
+                int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token).Caf();
 #else
-                int readNow = await stream.ReadAsync(buffer, numRead, toRead - numRead, token).Caf();
+            var tokenTaskSource = new TaskCompletionSource<object>();
+            var tokenTask = tokenTaskSource.Task;
+            using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
+
+            while (numRead < toRead)
+            {
+                Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
+                Task resultTask = await (readTask, tokenTask).WhenAny().Caf();
+                if (resultTask == tokenTask)
+                {
+                    token.ThrowIfCanceled(tokenTask);
+                    throw new TimeoutException("Reading operation timed out");
+                }
+
+                int readNow = await readTask.Caf();
 #endif
                 if (readNow == 0)
                 {
@@ -197,28 +206,47 @@ namespace Iviz.Roslib
             return true;
         }
 
-        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents,
-            CancellationToken token = default)
+        internal static async Task WriteChunkAsync(this NetworkStream stream, byte[] buffer, int count,
+            CancellationToken token)
+        {
+#if !NETSTANDARD2_0
+            await stream.WriteAsync(buffer.AsMemory(0, count), token).Caf();
+#else
+            var tokenTaskSource = new TaskCompletionSource<object>();
+            var tokenTask = tokenTaskSource.Task;
+            using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
+
+            Task writeTask = stream.WriteAsync(buffer, 0, count, token);
+            Task resultTask = await (writeTask, tokenTask).WhenAny().Caf();
+            if (resultTask == tokenTask)
+            {
+                token.ThrowIfCanceled(tokenTask);
+                throw new TimeoutException("Writing operation timed out");
+            }
+
+            await writeTask.Caf();
+#endif
+        }
+
+        internal static async Task WriteHeaderAsync(NetworkStream stream, string[] contents, CancellationToken token)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
 
-            byte[] array = new byte[totalLength + 4];
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream(array)))
+            using var array = new Rent<byte>(totalLength + 4);
+            using var writer = new BinaryWriter(new MemoryStream(array.Array));
+
+            writer.Write(totalLength);
+            foreach (string t in contents)
             {
-                writer.Write(totalLength);
-                foreach (string t in contents)
-                {
-                    writer.Write(t.Length);
-                    writer.Write(BuiltIns.UTF8.GetBytes(t));
-                }
+                writer.Write(t.Length);
+                writer.Write(BuiltIns.UTF8.GetBytes(t));
             }
 
-            await stream.WriteAsync(array, 0, array.Length, token).Caf();
+            await stream.WriteChunkAsync(array.Array, array.Length, token).Caf();
         }
 
-
         /// <summary>
-        /// A string hash that does not change every run unlike GetHashCode
+        ///     A string hash that does not change every run unlike GetHashCode
         /// </summary>
         /// <param name="str">String to calculate the hash from</param>
         /// <returns>A hash integer</returns>
@@ -233,20 +261,16 @@ namespace Iviz.Roslib
                 {
                     hash1 = ((hash1 << 5) + hash1) ^ str[i];
                     if (i == str.Length - 1)
+                    {
                         break;
+                    }
+
                     hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
                 }
 
-                return hash1 + (hash2 * 1566083941);
+                return hash1 + hash2 * 1566083941;
             }
         }
-
-        public static bool IsAlive(this IRosPublisher t)
-        {
-            return !t.CancellationToken.IsCancellationRequested;
-        }
-
-        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {
@@ -271,6 +295,57 @@ namespace Iviz.Roslib
         {
             UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+        }
+    }
+
+    /// <summary>
+    ///     Simple class that overrides the ToString() method to produce a JSON representation.
+    /// </summary>
+    public abstract class JsonToString
+    {
+        public override string ToString()
+        {
+            return Utils.ToJsonString(this);
+        }
+    }
+
+    internal sealed class ResizableRent<T> : IDisposable where T : unmanaged
+    {
+        bool disposed;
+        Rent<T> buffer;
+
+        public T[] Array => buffer.Array;
+
+        public ResizableRent(int size)
+        {
+            buffer = new Rent<T>(size);
+        }
+
+        public void EnsureCapability(int size)
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("Dispose() has already been called on this object.");
+            }
+
+            if (buffer.Array.Length >= size)
+            {
+                return;
+            }
+
+            buffer.Dispose();
+            buffer = new Rent<T>(size);
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            buffer.Dispose();
         }
     }
 }

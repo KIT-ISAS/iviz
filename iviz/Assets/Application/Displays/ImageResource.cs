@@ -9,9 +9,10 @@ namespace Iviz.Displays
         [SerializeField] GameObject front = null;
         [SerializeField] Billboard billboard = null;
         [SerializeField] float scale = 1;
-        
+
         Pose billboardStartPose;
         ImageTexture texture;
+        Vector3 offset;
 
         public ImageTexture Texture
         {
@@ -42,15 +43,19 @@ namespace Iviz.Displays
                 billboard.enabled = value;
                 if (!value)
                 {
-                    billboard.transform.SetLocalPose(billboardStartPose);
+                    billboard.transform.SetLocalPose(new Pose(Offset, billboardStartPose.rotation));
                 }
             }
         }
 
         public Vector3 Offset
         {
-            get => billboard.transform.localPosition;
-            set => billboard.transform.localPosition = value;
+            get => offset;
+            set
+            {
+                offset = value;
+                billboard.transform.localPosition = value;
+            }
         }
 
         public float Scale
@@ -78,23 +83,32 @@ namespace Iviz.Displays
 
         public void Set(int width, int height, int bpp, in ArraySegment<byte> data, bool generateMipmaps = false)
         {
-            if (Texture == null) Texture = new ImageTexture();
+            if (Texture == null)
+            {
+                Texture = new ImageTexture();
+            }
 
+            string encoding;
             switch (bpp)
             {
                 case 1:
-                    Texture.Set(width, height, "mono8", data, generateMipmaps);
+                    encoding = "mono8";
+                    break;
+                case 2:
+                    encoding = "mono16";
                     break;
                 case 3:
-                    Texture.Set(width, height, "rgb8", data, generateMipmaps);
+                    encoding = "rgb8";
                     break;
                 case 4:
-                    Texture.Set(width, height, "rgba8", data, generateMipmaps);
+                    encoding = "rgba8";
                     break;
                 default:
                     Debug.LogWarning("ImageResource: Set function could not find encoding!");
-                    break;
+                    return;
             }
+
+            Texture.Set(width, height, encoding, data, generateMipmaps);
         }
 
         public override void Suspend()

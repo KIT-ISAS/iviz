@@ -8,7 +8,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Roslib;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.MarkerHelper
@@ -18,11 +17,11 @@ namespace Iviz.Roslib.MarkerHelper
         , IAsyncDisposable
 #endif
     {
-        static readonly Marker InvalidMarker = new Marker();
+        static readonly Marker InvalidMarker = new();
 
         readonly string ns;
-        readonly List<Marker> markers = new List<Marker>();
-        readonly RosChannelWriter<MarkerArray> publisher = new RosChannelWriter<MarkerArray> {LatchingEnabled = true};
+        readonly List<Marker> markers = new();
+        readonly RosChannelWriter<MarkerArray> publisher = new() {LatchingEnabled = true};
         bool disposed;
 
         public ReadOnlyCollection<Marker> Markers { get; }
@@ -119,7 +118,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateArrow(string ns = "", int id = 0, Pose? pose = null, ColorRGBA? color = null,
             Vector3? scale = null, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -144,7 +143,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateArrow(string ns = "", int id = 0, Point a = default, Point b = default,
             float width = 1, ColorRGBA? color = null, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -170,7 +169,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateCube(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
             ColorRGBA? color = null, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -195,7 +194,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateSphere(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
             ColorRGBA? color = null, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -226,7 +225,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateCylinder(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
             ColorRGBA? color = null, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -253,7 +252,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateTextViewFacing(string ns = "", int id = 0, string text = "",
             Point? position = null, ColorRGBA? color = null, double scale = 1, string frameId = "")
         {
-            return new Marker
+            return new()
             {
                 Header = (0, frameId),
                 Ns = ns,
@@ -472,7 +471,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             Marker[] toSend = markers.Where(marker => marker != InvalidMarker).ToArray();
-            MarkerArray array = new MarkerArray(toSend);
+            MarkerArray array = new(toSend);
 
             for (int id = 0; id < markers.Count; id++)
             {
@@ -493,7 +492,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             Marker[] toSend = markers.Where(marker => marker != InvalidMarker).ToArray();
-            MarkerArray array = new MarkerArray(toSend);
+            MarkerArray array = new(toSend);
 
             for (int id = 0; id < markers.Count; id++)
             {
@@ -503,7 +502,7 @@ namespace Iviz.Roslib.MarkerHelper
                 }
             }
 
-            using CancellationTokenSource tokenSource = new CancellationTokenSource(1000);
+            using CancellationTokenSource tokenSource = new(1000);
             await publisher.WriteAsync(array, RosPublishPolicy.WaitUntilSent, tokenSource.Token).AwaitNoThrow(this);
         }
     }
@@ -564,7 +563,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static InteractiveMarker Create(string name, Pose? pose = null, string description = "", float scale = 1,
             string frameId = "", params InteractiveMarkerControl[] controls)
         {
-            return new InteractiveMarker
+            return new()
             {
                 Header = frameId,
                 Name = name,
@@ -578,7 +577,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static InteractiveMarkerControl CreateControl(string name = "", Quaternion? orientation = null,
             RosInteractionMode mode = RosInteractionMode.None, params Marker[] markers)
         {
-            return new InteractiveMarkerControl
+            return new()
             {
                 Name = name,
                 Orientation = orientation ?? Quaternion.Identity,
@@ -605,17 +604,17 @@ namespace Iviz.Roslib.MarkerHelper
                 }
             }
 
-            public static implicit operator MenuEntry((string title, uint id) p) => new MenuEntry(p.title, p.id);
+            public static implicit operator MenuEntry((string title, uint id) p) => new(p.title, p.id);
 
             public static implicit operator MenuEntry((string title, uint id, uint parentId) p) =>
-                new MenuEntry(p.title, p.id, p.parentId);
+                new(p.title, p.id, p.parentId);
         }
 
 
         public static InteractiveMarker CreateMenu(string name = "", Pose? pose = null,
             float scale = 1, string frameId = "", Marker? controlMarker = null, params MenuEntry[] entries)
         {
-            return new InteractiveMarker
+            return new()
             {
                 Header = frameId,
                 Name = name,
@@ -634,7 +633,7 @@ namespace Iviz.Roslib.MarkerHelper
 
         public static InteractiveMarkerUpdate CreateMarkerUpdate(params InteractiveMarker[] args)
         {
-            return new InteractiveMarkerUpdate
+            return new()
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
                 Markers = args
@@ -655,15 +654,15 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             public static implicit operator PoseUpdate((string name, Pose pose) p) =>
-                new PoseUpdate(p.name, p.pose);
+                new(p.name, p.pose);
 
             public static implicit operator PoseUpdate((string name, Pose pose, string parent) p) =>
-                new PoseUpdate(p.name, p.pose, p.parent);
+                new(p.name, p.pose, p.parent);
         }
 
         public static InteractiveMarkerUpdate CreatePoseUpdate(params PoseUpdate[] args)
         {
-            return new InteractiveMarkerUpdate
+            return new()
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
                 Poses = args.Select(tuple => new InteractiveMarkerPose
@@ -674,7 +673,7 @@ namespace Iviz.Roslib.MarkerHelper
 
         public static InteractiveMarkerInit CreateInit(params InteractiveMarker[] markers)
         {
-            return new InteractiveMarkerInit
+            return new()
             {
                 Markers = markers
             };
@@ -682,11 +681,12 @@ namespace Iviz.Roslib.MarkerHelper
 
         public static InteractiveMarkerUpdate CreateMarkerErase(params string[] args)
         {
-            return new InteractiveMarkerUpdate
+            var erase = new InteractiveMarkerUpdate
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
-                Erases = args
+                Erases = args 
             };
+            return erase;
         }
     }
 }

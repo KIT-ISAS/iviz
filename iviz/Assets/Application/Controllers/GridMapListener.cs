@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     [DataContract]
     public class GridMapConfiguration : JsonToString, IConfiguration
     {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.GridMap;
         [DataMember] public bool Visible { get; set; } = true;
 
@@ -25,10 +25,10 @@ namespace Iviz.Controllers
 
         [DataMember] public string IntensityChannel { get; set; } = "";
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
-        [DataMember] public bool ForceMinMax { get; set; } = false;
-        [DataMember] public float MinIntensity { get; set; } = 0;
+        [DataMember] public bool ForceMinMax { get; set; }
+        [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
-        [DataMember] public bool FlipMinMax { get; set; } = false;
+        [DataMember] public bool FlipMinMax { get; set; }
         [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
@@ -159,7 +159,7 @@ namespace Iviz.Controllers
 
         public GridMapListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            ModuleData = moduleData ?? throw new System.ArgumentNullException(nameof(moduleData));
          
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             
@@ -217,7 +217,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var length = msg.Data[layer].Data.Length;
+            int length = msg.Data[layer].Data.Length;
             if (length != width * height)
             {
                 Logger.Error($"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
@@ -228,7 +228,8 @@ namespace Iviz.Controllers
             link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,
-                (float) msg.Info.LengthX, (float) msg.Info.LengthY, msg.Data[layer].Data);
+                (float) msg.Info.LengthX, (float) msg.Info.LengthY,
+                msg.Data[layer].Data, length);
             MeasuredIntensityBounds = resource.IntensityBounds;
             if (ForceMinMax)
             {
@@ -243,9 +244,9 @@ namespace Iviz.Controllers
             resource.DisposeDisplay();
 
             link.Stop();
-            UnityEngine.Object.Destroy(link.gameObject);
+            Object.Destroy(link.gameObject);
             node.Stop();
-            UnityEngine.Object.Destroy(node.gameObject);
+            Object.Destroy(node.gameObject);
         }
     }
 }

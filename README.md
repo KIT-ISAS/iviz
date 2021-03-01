@@ -11,9 +11,6 @@ Unity application for ROS data visualization on mobile devices.
 ## [iviz_roslib](iviz_roslib)
 ROS client library in C#.
 
-## [iviz_bridge](iviz_bridge)
-Partial implementation of the [rosbridge protocol](https://github.com/RobotWebTools/rosbridge_suite/blob/groovy-devel/ROSBRIDGE_PROTOCOL.md) in C#. Does not support services (yet).
-
 ## [iviz_model_service](iviz_model_service)
 Service to upload 3D models from a PC to a mobile device using iviz.
 

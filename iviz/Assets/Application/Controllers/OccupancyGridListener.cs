@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -102,6 +103,11 @@ namespace Iviz.Controllers
                 foreach (var grid in gridTiles)
                 {
                     grid.Visible = value;
+                }
+
+                foreach (var texture in textureTiles)
+                {
+                    texture.Visible = value;
                 }
             }
         }
@@ -275,18 +281,19 @@ namespace Iviz.Controllers
             numCellsY = (int) msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
+            var data = msg.Data;
             if (CubesVisible)
             {
-                SetCubes(msg, origin);
+                SetCubes(data, origin);
             }
 
             if (TextureVisible)
             {
-                SetTextures(msg, origin);
+                SetTextures(data, origin);
             }
         }
 
-        void SetCubes([NotNull] OccupancyGrid msg, Pose pose)
+        void SetCubes([NotNull] sbyte[] data, Pose pose)
         {
             if (gridTiles.Length != 16)
             {
@@ -319,11 +326,12 @@ namespace Iviz.Controllers
                         yMin: v * numCellsY / 4,
                         yMax: (v + 1) * numCellsY / 4
                     );
+
                     Task.Run(() =>
                     {
                         try
                         {
-                            grid.SetOccupancy(msg.Data, rect, pose);
+                            grid.SetOccupancy(data, rect, pose);
                         }
                         catch (Exception e)
                         {
@@ -333,10 +341,11 @@ namespace Iviz.Controllers
                 }
             }
 
+
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] OccupancyGrid msg, Pose pose)
+        void SetTextures([NotNull] sbyte[] data, Pose pose)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -350,6 +359,7 @@ namespace Iviz.Controllers
                     {
                         textureTiles.Add(
                             ResourcePool.GetOrCreateDisplay<OccupancyGridTextureResource>(textureNode.transform));
+                        textureTiles[j].Visible = Visible;
                         textureTiles[j].Colormap = Colormap;
                         textureTiles[j].FlipMinMax = FlipMinMax;
                     }
@@ -358,7 +368,7 @@ namespace Iviz.Controllers
                 {
                     for (int j = tileTotalSize; j < textureTiles.Count; j++)
                     {
-                        ResourcePool.DisposeDisplay(textureTiles[j]);
+                        textureTiles[j].DisposeDisplay();
                         textureTiles[j] = null;
                     }
 
@@ -382,11 +392,11 @@ namespace Iviz.Controllers
                     {
                         try
                         {
-                            texture.Set(msg.Data, cellSize, numCellsX, numCellsY, rect, pose);
+                            texture.Set(data, cellSize, numCellsX, numCellsY, rect, pose);
                         }
                         catch (Exception e)
                         {
-                            Debug.LogWarning(e);
+                            Logger.Error($"{this}: Error processing occupancy grid", e);
                         }
                     });
                 }

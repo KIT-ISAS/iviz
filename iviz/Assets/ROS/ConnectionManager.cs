@@ -17,13 +17,14 @@ namespace Iviz.Ros
         Connected
     }
 
-    public class ConnectionManager : MonoBehaviour
+    public sealed class ConnectionManager : MonoBehaviour
     {
         static ConnectionManager instance;
         static RoslibConnection connection;
 
         Listener<Log> logListener;
-        public static event Action<Log> LogMessageArrived;
+        public delegate void LogDelegate(in Log log);
+        public static event LogDelegate LogMessageArrived;
 
 
         long frameBandwidthDown;
@@ -48,7 +49,13 @@ namespace Iviz.Ros
             logSender = new Sender<Log>("/rosout");
             Logger.LogExternal += LogMessage;
 
-            logListener = new Listener<Log>("/rosout_agg", msg => LogMessageArrived?.Invoke(msg));
+            logListener = new Listener<Log>("/rosout_agg", Handler);
+        }
+
+        static bool Handler(Log msg)
+        {
+            LogMessageArrived?.Invoke(msg);
+            return true;
         }
 
         void OnDestroy()

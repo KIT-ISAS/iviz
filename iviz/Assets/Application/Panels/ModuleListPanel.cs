@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Security;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
@@ -73,8 +74,6 @@ namespace Iviz.App
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
 
-        const bool EnableFileSchema = false; // NYI
-        
         int frameCounter;
         bool allGuiVisible = true;
 
@@ -92,8 +91,8 @@ namespace Iviz.App
         SettingsDialogData settingsData;
         EchoDialogData echoData;
 
+        public Controllers.ModelService ModelService { get; private set; }
         Controllers.ControllerService controllerService;
-        Controllers.ModelService modelService;
         ModuleListButtons buttons;
 
         [SerializeField] GameObject menuObject = null;
@@ -125,6 +124,7 @@ namespace Iviz.App
                     return;
                 }
 
+                HideGuiButton.State = value;                     
                 parentCanvas.gameObject.SetActive(value);
             }
         }
@@ -330,7 +330,7 @@ namespace Iviz.App
             UpdateFpsStats();
 
             controllerService = new ControllerService();
-            modelService = new Controllers.ModelService(EnableFileSchema);
+            ModelService = new Controllers.ModelService();
 
             menuDialog = menuObject.GetComponent<IMenuDialogContents>();
             menuObject.SetActive(false);
@@ -398,11 +398,6 @@ namespace Iviz.App
             connectionData.MyUri = new Uri(myUri);
             connectionData.MyId = myId;
             ConnectionManager.Connection.KeepReconnecting = true;
-        }
-
-        public void RestartModelService()
-        {
-            modelService.Restart(EnableFileSchema);
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -563,8 +558,19 @@ namespace Iviz.App
             {
             }
         }
+
+        public void UpdateSettings()
+        {
+            UpdateSimpleConfigurationSettings();
+            foreach (var gridModuleData in moduleDatas.OfType<GridModuleData>())
+            {
+                gridModuleData.GridController.OnSettingsChanged();
+            }
+        }
+
+        public int NumMastersInCache => connectionData.LastMasterUris.Count;   
         
-        public async void ClearMastersFromSimpleConfiguration(CancellationToken token = default)
+        public async Task ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -588,6 +594,8 @@ namespace Iviz.App
             {
             }
         }
+
+        public static int NumSavedFiles => LoadConfigDialogData.SavedFiles.Count();  
 
         public static void ClearSavedFiles()
         {
@@ -751,10 +759,11 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            //long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            //bottomTime.text = $"{memBytesKb:N0} MB";
+            //Debug.Log(GC.GetTotalMemory(false) / (1024 * 1024);
+            long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
+            bottomTime.text = $"M: {memBytesKb.ToString()}M";
 
-            bottomTime.text = DateTime.Now.ToString("HH:mm:ss");
+            //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
 
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
@@ -762,7 +771,7 @@ namespace Iviz.App
             var (downB, upB) = ConnectionManager.CollectBandwidthReport();
             long downKb = downB / 1000;
             long upKb = upB / 1000;
-            bottomBandwidth.text = $"↓{downKb:N0}kB/s ↑{upKb:N0}kB/s";
+            bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
 
             var state = SystemInfo.batteryStatus;
             switch (SystemInfo.batteryLevel)
@@ -779,8 +788,8 @@ namespace Iviz.App
                 default:
                     int level = (int) (SystemInfo.batteryLevel * 100);
                     bottomBattery.text = state == BatteryStatus.Charging
-                        ? $"<color=#005500>{level}%</color>"
-                        : $"{level}%";
+                        ? $"<color=#005500>{level.ToString()}%</color>"
+                        : $"{level.ToString()}%";
                     break;
             }
         }
@@ -798,7 +807,7 @@ namespace Iviz.App
             }
         }
 
-        public void ShowMenu([NotNull] MenuEntryList menuEntries, Action<uint> callback, Vector3 unityPositionHint)
+        public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback, Vector3 unityPositionHint)
         {
             if (menuEntries == null)
             {
@@ -808,7 +817,7 @@ namespace Iviz.App
             menuDialog.Set(menuEntries, unityPositionHint, callback);
         }
 
-        class ModuleListButtons
+        sealed class ModuleListButtons
         {
             [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
             readonly GameObject contentObject;

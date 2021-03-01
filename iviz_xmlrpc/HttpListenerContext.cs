@@ -52,7 +52,7 @@ namespace Iviz.XmlRpc
                 Task<string?> readTask = stream.ReadLineAsync();
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
@@ -85,14 +85,15 @@ namespace Iviz.XmlRpc
                 throw new ParseException("Content-Length not found in HTTP header");
             }
 
-            char[] buffer = new char[length];
+            using var buffer = new Rent<char>(length);
+            
             int numRead = 0;
-            while (BuiltIns.UTF8.GetByteCount(buffer, 0, numRead) < length)
+            while (BuiltIns.UTF8.GetByteCount(buffer.Array, 0, numRead) < length)
             {
-                Task<int> readTask = stream.ReadAsync(buffer, numRead, length - numRead);
+                Task<int> readTask = stream.ReadAsync(buffer.Array, numRead, length - numRead);
                 if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
                 {
-                    token.ThrowIfCanceled();
+                    token.ThrowIfCancellationRequested();
                     throw new TimeoutException("Read line timed out!", readTask.Exception);
                 }
 
@@ -100,7 +101,7 @@ namespace Iviz.XmlRpc
             }
 
 
-            return new string(buffer, 0, numRead);
+            return new string(buffer.Array, 0, numRead);
         }
 
         static bool CheckHeaderLine(string line, string key, out string? value)
@@ -160,12 +161,7 @@ namespace Iviz.XmlRpc
                          msgOut;
 
             using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
-            Task writeTask = writer.WriteAsync(str);
-            if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
-            {
-                token.ThrowIfCanceled();
-                throw new TimeoutException("Write response timed out!", writeTask.Exception);
-            }
+            await writer.WriteChunkAsync(str, token, timeoutInMs);
         }
 
         /// <summary>
@@ -188,12 +184,7 @@ namespace Iviz.XmlRpc
                 "\r\n";
 
             using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
-            Task writeTask = writer.WriteAsync(errorMsg);
-            if (!await writeTask.WaitFor(timeoutInMs, token) || !writeTask.RanToCompletion())
-            {
-                token.ThrowIfCanceled();
-                throw new TimeoutException("Write response timed out!", writeTask.Exception);
-            }
+            await writer.WriteChunkAsync(errorMsg, token, timeoutInMs);
         }
     }
 }

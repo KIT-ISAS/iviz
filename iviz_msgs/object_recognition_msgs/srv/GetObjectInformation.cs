@@ -39,6 +39,12 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             set => Response = (GetObjectInformationResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     }
 
     [DataContract]
-    public sealed class GetObjectInformationRequest : IRequest, IDeserializable<GetObjectInformationRequest>
+    public sealed class GetObjectInformationRequest : IRequest<GetObjectInformation, GetObjectInformationResponse>, IDeserializable<GetObjectInformationRequest>
     {
         // Retrieve extra data from the DB for a given object
         // The type of the object to retrieve info from
@@ -86,6 +92,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Type.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -141,6 +151,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Information.RosSerialize(ref b);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

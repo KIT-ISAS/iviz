@@ -32,9 +32,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public PlanningScene()
         {
-            Name = "";
+            Name = string.Empty;
             RobotState = new RobotState();
-            RobotModelName = "";
+            RobotModelName = string.Empty;
             FixedFrameTransforms = System.Array.Empty<GeometryMsgs.TransformStamped>();
             AllowedCollisionMatrix = new AllowedCollisionMatrix();
             LinkPadding = System.Array.Empty<LinkPadding>();
@@ -113,6 +113,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(IsDiff);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
@@ -183,7 +187,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+1b628ct7X/Pn8FEX2Q1GxWieUWrVoXkC05dhA/arnNwzAW3BnuLqPZ4Yac1Wpzcf/3" +
+                "H4sIAAAAAAAAE+1b628ct7X/Pn8FEX2Q1GxWieUWrVoXkC05dhA/arnNwzAW3BnuLqPZ4Yac1Wpzcf/3" +
                 "nt85JGf2oTgtrnRRoE5g7wwPyfN+kXOgGj03yk3UotZNY5upCqVpTBFajweMFsWBmizrWnk3dq0KrW5N" +
                 "8Q6/r/BTXo/kNYG+n5m8aDuLw2ruKlPTsw2ygaIfE+fTPrIGA43inrqqbGtdo2s18fSK4VW1XNS21C0m" +
                 "tRN1tLLtTHkTFqZsVet4x0wKzzsupsbNTevXo3mYhpP3XjeBlpoT9vOFqT58VBN7a6oRQ4/aNBwIByZb" +

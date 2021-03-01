@@ -81,12 +81,12 @@ namespace Iviz.Controllers
                 Tint = value.Tint;
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
-                
+
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
         }
 
-        public string HelpText { get; private set; } = "<b>No Robot Loaded</b>";
+        public string HelpText { get; private set; } = "<b>No Robot Selected</b>";
 
         public string SourceParameter => config.SourceParameter;
 
@@ -186,7 +186,7 @@ namespace Iviz.Controllers
                 Robot.Tint = value;
             }
         }
-        
+
         public float Metallic
         {
             get => config.Metallic;
@@ -200,8 +200,8 @@ namespace Iviz.Controllers
 
                 Robot.Metallic = value;
             }
-        }        
-        
+        }
+
         public float Smoothness
         {
             get => config.Smoothness;
@@ -215,7 +215,7 @@ namespace Iviz.Controllers
 
                 Robot.Smoothness = value;
             }
-        }   
+        }
 
         public IModuleData ModuleData { get; }
 
@@ -261,7 +261,29 @@ namespace Iviz.Controllers
 
         public TfFrame Frame => node.Parent;
 
-        [NotNull] public string Name => Robot == null ? "[Empty]" : Robot.Name ?? "[No Name]";
+        [NotNull]
+        public string Name
+        {
+            get
+            {
+                if (Robot == null)
+                {
+                    return "[No Robot Selected]";
+                }
+
+                if (!string.IsNullOrEmpty(Robot.Name))
+                {
+                    return Robot.Name;
+                }
+
+                if (Robot.LinkObjects.Count == 0)
+                {
+                    return "[Empty Robot]";
+                }
+
+                return Robot.Name == null ? "[No Name]" : "[Empty Name]";
+            }
+        }
 
         public event Action Stopped;
 
@@ -271,7 +293,7 @@ namespace Iviz.Controllers
             {
                 throw new InvalidOperationException("There is no robot to set joints to!");
             }
-            
+
             return Robot.TryWriteJoint(joint, value);
         }
 
@@ -316,9 +338,9 @@ namespace Iviz.Controllers
             else
             {
                 TryLoadFromSourceParameter(null);
-            }            
+            }
         }
-        
+
         public async void TryLoadFromSourceParameter([CanBeNull] string value)
         {
             config.SourceParameter = "";
@@ -345,7 +367,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.LogError($"SimpleRobotController: Error while loading parameter '{value}': {e}");
+                Core.Logger.Debug($"{this}: Error while loading parameter '{value}'", e);
                 HelpText = "<b>Error:</b> Failed to retrieve parameter";
                 return;
             }
@@ -358,7 +380,7 @@ namespace Iviz.Controllers
 
             if (!(parameterValue is string robotDescription))
             {
-                Debug.Log($"SimpleRobotController: Parameter '{value}' was not string!");
+                Core.Logger.Debug($"{this}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";
                 return;
             }
@@ -387,7 +409,7 @@ namespace Iviz.Controllers
             (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                Debug.Log("SimpleRobotController: Failed to load robot!");
+                Core.Logger.Debug($"{this}: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
                 return;
             }
@@ -401,7 +423,7 @@ namespace Iviz.Controllers
         {
             if (string.IsNullOrEmpty(description))
             {
-                Debug.Log($"SimpleRobotController: Empty parameter '{description}'");
+                Core.Logger.Debug($"{this}: Empty parameter '{description}'");
                 HelpText = "[Robot Specification is Empty]";
                 return false;
             }
@@ -412,7 +434,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"SimpleRobotController: Error parsing description': {e}");
+                Core.Logger.Debug($"{this}: Error parsing description'", e);
                 HelpText = "[Failed to Parse Specification]";
                 Robot = null;
                 return false;
@@ -430,7 +452,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             switch (robotLoadingTask.Status)
             {
                 case TaskStatus.Faulted:
@@ -439,11 +461,32 @@ namespace Iviz.Controllers
                     robotLoadingTask = null;
                     return;
                 case TaskStatus.Canceled:
+                    HelpText = "[Robot Task canceled.]";
                     robotLoadingTask = null;
                     return;
                 case TaskStatus.RanToCompletion:
                     node.name = "SimpleRobotNode:" + Name;
-                    HelpText = string.IsNullOrEmpty(Robot?.Name) ? "<b>[No Name]</b>" : $"<b>- {Name} -</b>";
+                    if (Robot == null)
+                    {
+                        HelpText = "[Invalid Robot]";
+                    }
+                    else if (!string.IsNullOrEmpty(Robot.Name))
+                    {
+                        HelpText = $"<b>- {Name} -</b>";
+                    }
+                    else if (Robot.LinkObjects.Count == 0)
+                    {
+                        HelpText = "[Robot is Empty]";
+                    }
+                    else if (Robot.Name == null)
+                    {
+                        HelpText = "[No Name]";
+                    }
+                    else
+                    {
+                        HelpText = "[Empty Name]";
+                    }
+
                     AttachedToTf = AttachedToTf;
                     Visible = Visible;
                     RenderAsOcclusionOnly = RenderAsOcclusionOnly;
@@ -467,7 +510,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             foreach (var entry in robot.LinkParents)
             {
                 if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))

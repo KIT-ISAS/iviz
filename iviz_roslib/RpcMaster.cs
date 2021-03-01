@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Design.Serialization;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -52,7 +50,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetUriResponse(response);
         }
 
-        public async Task<GetUriResponse> GetUriAsync(CancellationToken token = default)
+        public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getUri", args, token).Caf();
@@ -71,7 +69,7 @@ namespace Iviz.Roslib.XmlRpc
             return new LookupNodeResponse(response);
         }
 
-        public async Task<LookupNodeResponse> LookupNodeAsync(string nodeId, CancellationToken token = default)
+        public async ValueTask<LookupNodeResponse> LookupNodeAsync(string nodeId, CancellationToken token = default)
         {
             if (nodeId == null)
             {
@@ -90,7 +88,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPublishedTopicsResponse(response);
         }
 
-        public async Task<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "",
+        public async ValueTask<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "",
             CancellationToken token = default)
         {
             Arg[] args = {CallerId, subgraph};
@@ -105,7 +103,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetPublishedTopicsResponse(response);
         }
 
-        public async Task<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
+        public async ValueTask<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getTopicTypes", args, token).Caf();
@@ -129,7 +127,7 @@ namespace Iviz.Roslib.XmlRpc
             return new RegisterSubscriberResponse(response);
         }
 
-        public async Task<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType,
+        public async ValueTask<RegisterSubscriberResponse> RegisterSubscriberAsync(string topic, string topicType,
             CancellationToken token = default)
         {
             if (topic == null)
@@ -159,7 +157,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterSubscriberResponse(response);
         }
 
-        public async Task<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic,
+        public async ValueTask<UnregisterSubscriberResponse> UnregisterSubscriberAsync(string topic,
             CancellationToken token = default)
         {
             if (topic == null)
@@ -189,7 +187,7 @@ namespace Iviz.Roslib.XmlRpc
             return new RegisterPublisherResponse(response);
         }
 
-        public async Task<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType,
+        public async ValueTask<RegisterPublisherResponse> RegisterPublisherAsync(string topic, string topicType,
             CancellationToken token)
         {
             if (topic == null)
@@ -219,7 +217,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterPublisherResponse(response);
         }
 
-        public async Task<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic, CancellationToken token = default)
+        public async ValueTask<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic, CancellationToken token = default)
         {
             if (topic == null)
             {
@@ -238,7 +236,7 @@ namespace Iviz.Roslib.XmlRpc
             return new GetSystemStateResponse(response);
         }
 
-        public async Task<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
+        public async ValueTask<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
             object[] response = await MethodCallAsync("getSystemState", args, token).Caf();
@@ -257,7 +255,7 @@ namespace Iviz.Roslib.XmlRpc
             return new LookupServiceResponse(response);
         }
 
-        public async Task<LookupServiceResponse> LookupServiceAsync(string service, CancellationToken token = default)
+        public async ValueTask<LookupServiceResponse> LookupServiceAsync(string service, CancellationToken token = default)
         {
             if (service == null)
             {
@@ -286,7 +284,7 @@ namespace Iviz.Roslib.XmlRpc
             return new DefaultResponse(response);
         }
 
-        public async Task<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri,
+        public async ValueTask<DefaultResponse> RegisterServiceAsync(string service, Uri rosRpcUri,
             CancellationToken token = default)
         {
             if (service == null)
@@ -321,7 +319,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterServiceResponse(response);
         }
 
-        public async Task<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri, CancellationToken token = default)
+        public async ValueTask<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri, CancellationToken token = default)
         {
             if (service == null)
             {
@@ -338,7 +336,7 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterServiceResponse(response);
         }
 
-        object[] MethodCall(string function, IEnumerable<Arg> args)
+        object[] MethodCall(string function, Arg[] args)
         {
             object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
             if (tmp is object[] result)
@@ -349,7 +347,7 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async Task<object[]> MethodCallAsync(string function, IEnumerable<Arg> args, CancellationToken token = default)
+        async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
         {
             object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
                 .Caf();
@@ -447,7 +445,7 @@ namespace Iviz.Roslib.XmlRpc
                 return Empty;
             }
 
-            List<TopicTuple> result = new List<TopicTuple>();
+            List<TopicTuple> result = new();
             foreach (var objTuple in objTuples)
             {
                 if (!(objTuple is object[] tuple) ||
@@ -592,7 +590,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<(string, string)> topics = new List<(string, string)>();
+            List<(string, string)> topics = new();
             foreach (var objTopic in objTopics)
             {
                 if (!(objTopic is object[] topic) ||
@@ -643,7 +641,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
 
-            List<Uri> publishers = new List<Uri>();
+            List<Uri> publishers = new();
             foreach (var objUriStr in objUriStrings)
             {
                 if (!(objUriStr is string uriStr) ||
@@ -726,7 +724,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            List<string> subscribers = new List<string>();
+            List<string> subscribers = new();
             foreach (var objSubscriberStr in objSubscriberStrs)
             {
                 if (!(objSubscriberStr is string subscriberStr))

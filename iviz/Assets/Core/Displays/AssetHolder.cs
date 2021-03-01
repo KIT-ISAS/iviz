@@ -21,8 +21,12 @@ namespace Iviz.Displays
         public Material TexturedLit;
         public Material TransparentLit;
         public Material TransparentTexturedLit;
+        public Material BumpLit;
+        public Material TransparentBumpLit;
         public Material PointCloud;
         public Material PointCloudWithColormap;
+        public Material PointCloudDirect;
+        public Material PointCloudDirectWithColormap;
 
         public Material LineMaterial;
         public Material TransparentLine;
@@ -40,5 +44,20 @@ namespace Iviz.Displays
         public Material MeshListWithColormapScaleY;
         public Material MeshListOcclusionOnly;
         public Material MeshListOcclusionOnlyWithScaleY;
+        
+        public Texture2D Lines;
+        public Texture2D Pink;
+        public Texture2D Copper;
+        public Texture2D Bone;
+        public Texture2D Gray;
+        public Texture2D Winter;
+        public Texture2D Autumn;
+        public Texture2D Summer;
+        public Texture2D Spring;
+        public Texture2D Cool;
+        public Texture2D Hot;
+        public Texture2D Hsv;
+        public Texture2D Jet;
+        public Texture2D Parula;
     }
 }

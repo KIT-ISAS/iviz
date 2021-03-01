@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
+using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -12,7 +14,7 @@ namespace Iviz.Displays
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
         const int MaxVerticesShort = 65000;
-        
+
         public bool FlipWinding { get; set; }
 
         [CanBeNull] Mesh mesh;
@@ -78,215 +80,125 @@ namespace Iviz.Displays
             return tmpMesh;
         }
 
-        static void SetVertices([NotNull] IEnumerable<Vector3> points, [NotNull] Mesh mesh)
+        public void Clear()
         {
-            switch (points)
-            {
-                case List<Vector3> pointsV:
-                    mesh.SetVertices(pointsV);
-                    break;
-                case Vector3[] pointsA:
-                    mesh.vertices = pointsA;
-                    break;
-                default:
-                    mesh.vertices = points.ToArray();
-                    break;
-            }
+            EnsureOwnMesh(0).Clear();
         }
 
-        static void SetNormals([NotNull] IEnumerable<Vector3> points, [NotNull] Mesh mesh)
+        public void Set(in Rent<Vector3> points, in Rent<Color> colors = default)
         {
-            switch (points)
-            {
-                case List<Vector3> pointsV:
-                    mesh.SetNormals(pointsV);
-                    break;
-                case Vector3[] pointsA:
-                    mesh.normals = pointsA;
-                    break;
-                default:
-                    mesh.normals = points.ToArray();
-                    break;
-            }
-        }
-
-        static void SetTexCoords([NotNull] IEnumerable<Vector2> uvs, [NotNull] Mesh mesh)
-        {
-            switch (uvs)
-            {
-                case List<Vector2> uvsV:
-                    mesh.SetUVs(0, uvsV);
-                    break;
-                case Vector2[] uvsA:
-                    mesh.uv = uvsA;
-                    break;
-                default:
-                    mesh.uv = uvs.ToArray();
-                    break;
-            }
-        }
-
-        static void SetColors([NotNull] IEnumerable<Color> colors, [NotNull] Mesh mesh)
-        {
-            switch (colors)
-            {
-                case List<Color> colorsV:
-                    mesh.SetColors(colorsV);
-                    break;
-                case Color[] colorsA:
-                    mesh.colors = colorsA;
-                    break;
-                default:
-                    mesh.colors = colors.ToArray();
-                    break;
-            }
-        }
-
-        static void SetColors([NotNull] IEnumerable<Color32> colors, [NotNull] Mesh mesh)
-        {
-            switch (colors)
-            {
-                case List<Color32> colorsV:
-                    mesh.SetColors(colorsV);
-                    break;
-                case Color32[] colorsA:
-                    mesh.colors32 = colorsA;
-                    break;
-                default:
-                    mesh.colors32 = colors.ToArray();
-                    break;
-            }
-        }
-
-        static void SetTriangles([NotNull] IEnumerable<int> indices, [NotNull] Mesh mesh, int subMesh)
-        {
-            switch (indices)
-            {
-                case List<int> indicesV:
-                    mesh.SetTriangles(indicesV, subMesh);
-                    break;
-                case int[] indicesA:
-                    mesh.SetTriangles(indicesA, subMesh);
-                    break;
-                default:
-                    mesh.SetTriangles(indices.ToArray(), subMesh);
-                    break;
-            }
-        }
-
-
-        public void Set([NotNull] Vector3[] points, [CanBeNull] Color[] colors = null)
-        {
-            if (points is null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
-
             if (points.Length % 3 != 0)
             {
                 throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (colors != null && colors.Length != 0 && colors.Length != points.Length)
+            if (colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            int[] triangles = Enumerable.Range(0, points.Length).ToArray();
-
             Mesh ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
-            SetVertices(points, ownMesh);
-            if (colors != null && colors.Length != 0)
+            ownMesh.SetVertices(points);
+            if (colors.Length != 0)
             {
-                SetColors(colors, ownMesh);
+                ownMesh.SetColors(colors);
             }
 
-            if (FlipWinding)
+            using (var triangles = new Rent<int>(points.Length))
             {
-                unsafe
+                if (FlipWinding)
                 {
-                    fixed (int* tPtr = triangles)
+                    for (int i = 0; i < triangles.Length; i += 3)
                     {
-                        int* endPtr = tPtr + triangles.Length;
-                        for (int* ptr = tPtr; ptr != endPtr; ptr += 3)
-                        {
-                            int t = ptr[1];
-                            ptr[1] = ptr[2];
-                            ptr[2] = t;
-                        }
+                        triangles.Array[i] = i;
+                        triangles.Array[i + 1] = i + 2;
+                        triangles.Array[i + 2] = i + 1;
                     }
                 }
+                else
+                {
+                    for (int i = 0; i < triangles.Length; i++)
+                    {
+                        triangles.Array[i] = i;
+                    }
+                }
+
+                ownMesh.SetTriangles(triangles);
             }
 
-            SetTriangles(triangles, ownMesh, 0);
             ownMesh.RecalculateNormals();
 
             LocalBounds = ownMesh.bounds;
         }
 
         public void Set(
-            [NotNull] Vector3[] points,
-            [CanBeNull] Vector3[] normals,
-            [CanBeNull] Vector2[] texCoords,
-            [NotNull] int[] triangles,
-            [CanBeNull] Color32[] colors = null)
+            in Rent<Vector3> points,
+            in Rent<Vector3> normals,
+            in Rent<Vector4> tangents,
+            in Rent<Vector3> diffuseTexCoords,
+            in Rent<Vector3> bumpTexCoords,
+            in Rent<int> triangles,
+            in Rent<Color32> colors = default)
         {
-            if (points is null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
-
-            if (triangles is null)
-            {
-                throw new ArgumentNullException(nameof(triangles));
-            }
-
             if (triangles.Length % 3 != 0)
             {
                 throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
             }
 
-            if (normals != null && normals.Length != 0 && normals.Length != points.Length)
+            if (normals.Length != 0 && normals.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent normals size!", nameof(normals));
             }
 
-            if (colors != null && colors.Length != 0 && colors.Length != points.Length)
+            if (colors.Length != 0 && colors.Length != points.Length)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
             Mesh ownMesh = EnsureOwnMesh(points.Length);
-            bool hasNormals = normals != null && normals.Length != 0;
-
 
             ownMesh.Clear();
-            SetVertices(points, ownMesh);
-            if (hasNormals)
+            ownMesh.SetVertices(points);
+            if (normals.Length != 0)
             {
-                SetNormals(normals, ownMesh);
+                ownMesh.SetNormals(normals);
             }
 
-            if (texCoords != null && texCoords.Length != 0)
+            if (diffuseTexCoords.Length != 0)
             {
-                SetTexCoords(texCoords, ownMesh);
+                ownMesh.SetUVs(0, diffuseTexCoords);
             }
 
-            if (colors != null && colors.Length != 0)
+            if (bumpTexCoords.Length != 0)
             {
-                SetColors(colors, ownMesh);
+                ownMesh.SetUVs(1, bumpTexCoords);
             }
 
-            SetTriangles(triangles, ownMesh, 0);
+            if (colors.Length != 0)
+            {
+                ownMesh.SetColors(colors);
+            }
 
-            if (!hasNormals)
+            ownMesh.SetTriangles(triangles);
+
+            
+            if (normals.Length == 0)
             {
                 ownMesh.RecalculateNormals();
             }
-
-            ownMesh.Optimize();
+            
+            
+            if (tangents.Length != 0)
+            {
+                ownMesh.SetTangents(tangents);
+            }
+            else
+            {
+                ownMesh.RecalculateTangents();
+            }
+            
             LocalBounds = ownMesh.bounds;
         }
 

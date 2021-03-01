@@ -23,7 +23,7 @@ namespace Iviz.Bridge
                 rosBridge = new RosBridge(client, 8080);
                 WaitForCancel();
             }
-            catch (ConnectionException)
+            catch (RosConnectionException)
             {
                 Console.Error.WriteLine("EE Fatal error: Failed to connect to the ROS master");
             }

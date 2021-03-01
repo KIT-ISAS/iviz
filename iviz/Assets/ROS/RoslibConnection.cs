@@ -14,6 +14,7 @@ using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Nito.AsyncEx;
 using UnityEngine;
 using Logger = Iviz.Msgs.Logger;
 
@@ -41,7 +42,7 @@ namespace Iviz.Ros
         public bool Connected => client != null;
 
         [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
-        
+
         [CanBeNull]
         public Uri MasterUri
         {
@@ -88,7 +89,7 @@ namespace Iviz.Ros
             client = null;
         }
 
-        protected override async Task<bool> Connect()
+        protected override async ValueTask<bool> Connect()
         {
             if (MasterUri == null ||
                 MasterUri.Scheme != "http")
@@ -121,7 +122,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 750;
 
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -145,15 +146,21 @@ namespace Iviz.Ros
                     Core.Logger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
+                    (bool success, object hosts) = await client.Parameters.GetParameterAsync("/iviz/hosts", token);
+                    if (success)
+                    {
+                        ParseHostsParam(hosts);
+                    }
+
                     Core.Logger.Debug("*** ReAdvertising...");
-                    await Task.WhenAll(publishersByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)));
+                    await publishersByTopic.Values.Select(
+                        topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)).WhenAll();
 
                     token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done ReAdvertising");
                     Core.Logger.Debug("*** Resubscribing...");
-                    await Task.WhenAll(subscribersByTopic.Values.Select(
-                        topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)));
+                    await subscribersByTopic.Values.Select(
+                        topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)).WhenAll();
 
                     token.ThrowIfCancellationRequested();
                     Core.Logger.Debug("*** Done Resubscribing");
@@ -164,8 +171,8 @@ namespace Iviz.Ros
                     Core.Logger.Debug("*** Advertising services...");
 
                     token.ThrowIfCancellationRequested();
-                    await Task.WhenAll(servicesByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)));
+                    await servicesByTopic.Values.Select(
+                        topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)).WhenAll();
                     Core.Logger.Debug("*** Done Advertising services!");
 
                     Core.Logger.Internal("Finished resubscribing and readvertising.");
@@ -184,10 +191,10 @@ namespace Iviz.Ros
             {
                 switch (e)
                 {
-                    case UnreachableUriException _:
+                    case RosUnreachableUriException _:
                         Core.Logger.Internal($"<b>Error:</b> Own uri validation failed. Reason: {e.Message}");
                         break;
-                    case UriBindingException _:
+                    case RosUriBindingException _:
                         Core.Logger.Internal(
                             $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
                         break;
@@ -215,6 +222,50 @@ namespace Iviz.Ros
 
             await DisconnectImpl();
             return false;
+        }
+
+        static void ParseHostsParam([CanBeNull] object hostsObj)
+        {
+            try
+            {
+                if (hostsObj == null)
+                {
+                    return;
+                }
+
+                if (!(hostsObj is object[] array))
+                {
+                    Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
+                    return;
+                }
+
+                Dictionary<string, string> hosts = new Dictionary<string, string>();
+                foreach (object entry in array)
+                {
+                    if (!(entry is object[] pair) ||
+                        pair.Length != 2 ||
+                        !(pair[0] is string hostname) ||
+                        !(pair[1] is string address))
+                    {
+                        Core.Logger.Error(
+                            "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
+                        return;
+                    }
+
+                    hosts[hostname] = address;
+                }
+
+                ConnectionUtils.GlobalResolver.Clear();
+                foreach (var pair in hosts)
+                {
+                    Core.Logger.Info($"Adding custom host {pair.Key} -> {pair.Value}");
+                    ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Unexpected exception in ParseHostParams", e);
+            }
         }
 
         static async void LogConnectionCheck(CancellationToken token)
@@ -250,7 +301,7 @@ namespace Iviz.Ros
         {
             const int maxTimeMasterUnseenInMs = 10000;
             RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
-            DateTime lastMasterAccess = DateTime.Now;
+            DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
             Uri lastRosOutUri = null;
             var instance = ConnectionManager.Connection;
@@ -259,7 +310,7 @@ namespace Iviz.Ros
             {
                 while (!token.IsCancellationRequested)
                 {
-                    DateTime now = DateTime.Now;
+                    DateTime now = GameThread.Now;
                     try
                     {
                         LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);
@@ -503,7 +554,7 @@ namespace Iviz.Ros
             servicesByTopic.Add(serviceName, newAdvertisedService);
         }
 
-        public override async Task<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
         {
             if (service == null)
             {
@@ -515,43 +566,32 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(srv));
             }
 
-            bool hasClient = false;
-            Exception exception = null;
+            if (client == null || connectionTs.IsCancellationRequested)
+            {
+                return false;
+            }
 
-            using (var signal = new SemaphoreSlim(0))
+            token.ThrowIfCancellationRequested();
+
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
-                AddTask(async () =>
+                tokenSource.CancelAfter(3000);
+                try
                 {
-                    try
-                    {
-                        if (client == null)
-                        {
-                            return;
-                        }
-
-                        hasClient = true;
-                        await client.CallServiceAsync(service, srv, true, tokenSource.Token);
-                    }
-                    catch (Exception e)
-                    {
-                        exception = e;
-                    }
-                    finally
-                    {
-                        signal.Release();
-                    }
-                });
-                await signal.WaitAsync(tokenSource.Token);
+                    await client.CallServiceAsync(service, srv, true, tokenSource.Token).Caf();
+                    return true;
+                }
+                catch (OperationCanceledException) when (token.IsCancellationRequested ||
+                                                         connectionTs.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw new TimeoutException($"Service call to '{service}' timed out");
+                }
             }
-
-            if (exception != null)
-            {
-                throw exception;
-            }
-
-            return hasClient;
         }
 
         internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage
@@ -742,7 +782,9 @@ namespace Iviz.Ros
             {
                 try
                 {
-                    cachedTopics = client == null ? EmptyTopics : await client.GetSystemPublishedTopicsAsync(token);
+                    cachedTopics = client == null
+                        ? EmptyTopics
+                        : await client.GetSystemPublishedTopicsAsync(token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -755,8 +797,8 @@ namespace Iviz.Ros
             return cachedTopics;
         }
 
-        [NotNull, ItemCanBeNull]
-        public async Task<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
+        [ItemCanBeNull]
+        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
             CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
@@ -812,8 +854,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        [NotNull]
-        public async Task<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
+        public async ValueTask<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
@@ -857,8 +898,9 @@ namespace Iviz.Ros
             }
         }
 
-        [NotNull]
-        public async Task<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        [ItemCanBeNull]
+        public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000,
+            CancellationToken token = default)
         {
             using (CancellationTokenSource tokenSource =
                 CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
@@ -924,7 +966,8 @@ namespace Iviz.Ros
             var publisherStats = mClient.GetPublisherStatistics();
             foreach (var stat in subscriberStats.Topics)
             {
-                builder.Append("<color=navy><b>** Subscribed to ").Append(stat.Topic).Append("</b></color>")
+                builder.Append("<color=#000080ff><b>** Subscribed to ")
+                    .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
@@ -977,17 +1020,17 @@ namespace Iviz.Ros
                     }
                     else if (!isAlive)
                     {
-                        builder.Append(" <color=red>(dead)</color>");
+                        builder.Append(" <color=#ff0000ff>(dead)</color>");
                     }
                     else
                     {
-                        builder.Append(" <color=navy>(Trying to connect...)</color>");
+                        builder.Append(" <color=#000080ff>(Trying to connect...)</color>");
                     }
 
                     if (receiver.ErrorDescription != null)
                     {
                         builder.AppendLine();
-                        builder.Append("<color=brown>\"").Append(receiver.ErrorDescription).Append("\"</color>");
+                        builder.Append("<color=#a52a2aff>\"").Append(receiver.ErrorDescription).Append("\"</color>");
                     }
 
                     builder.AppendLine();
@@ -998,7 +1041,7 @@ namespace Iviz.Ros
 
             foreach (var stat in publisherStats.Topics)
             {
-                builder.Append("<color=maroon><b>** Publishing to ").Append(stat.Topic).Append("</b></color>")
+                builder.Append("<color=#800000ff><b>** Publishing to ").Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b><i>").Append(stat.Type).Append("</i>").AppendLine();
 
@@ -1034,7 +1077,7 @@ namespace Iviz.Ros
                     }
 
                     builder.Append(receiver.RemoteEndpoint != null
-                        ? receiver.RemoteEndpoint.Hostname
+                        ? receiver.RemoteEndpoint.Value.Hostname
                         : "(Unknown address)");
 
                     if (isAlive)
@@ -1044,7 +1087,7 @@ namespace Iviz.Ros
                     }
                     else
                     {
-                        builder.Append(" <color=red>(dead)</color>");
+                        builder.Append(" <color=#ff0000ff>(dead)</color>");
                     }
 
                     builder.AppendLine();
@@ -1066,7 +1109,7 @@ namespace Iviz.Ros
             void Invalidate();
         }
 
-        class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
+        sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
         {
             readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
             [NotNull] readonly string topic;
@@ -1161,7 +1204,7 @@ namespace Iviz.Ros
             void Invalidate();
         }
 
-        class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+        sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
         {
             readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
             [NotNull] readonly string topic;
@@ -1225,7 +1268,14 @@ namespace Iviz.Ros
             {
                 foreach (var listener in listeners)
                 {
-                    listener.EnqueueMessage(msg);
+                    try
+                    {
+                        listener.EnqueueMessage(msg);
+                    }
+                    catch (Exception e)
+                    {
+                        Core.Logger.Error($"{this}: Error in callback", e);
+                    }
                 }
             }
 
@@ -1241,7 +1291,7 @@ namespace Iviz.Ros
             Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
         }
 
-        class AdvertisedService<T> : IAdvertisedService where T : IService, new()
+        sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
         {
             [NotNull] Func<T, Task> callback;
             [NotNull] readonly string service;

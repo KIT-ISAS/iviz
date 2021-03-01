@@ -7,11 +7,11 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = "iviz_msgs/Vector3f")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Vector3f : IMessage, System.IEquatable<Vector3f>, IDeserializable<Vector3f>
+    public struct Vector3f : IMessage, System.IEquatable<Vector3f>, IDeserializable<Vector3f>
     {
-        [DataMember (Name = "x")] public float X { get; }
-        [DataMember (Name = "y")] public float Y { get; }
-        [DataMember (Name = "z")] public float Z { get; }
+        [DataMember (Name = "x")] public float X;
+        [DataMember (Name = "y")] public float Y;
+        [DataMember (Name = "z")] public float Z;
     
         /// <summary> Explicit constructor. </summary>
         public Vector3f(float X, float Y, float Z)
@@ -52,6 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -71,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
+                "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
                 
         /// Custom iviz code
         public static readonly Vector3f Zero = new Vector3f(0, 0, 0);

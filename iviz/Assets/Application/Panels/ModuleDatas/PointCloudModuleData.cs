@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -56,7 +57,15 @@ namespace Iviz.App
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.IntensityChannel.Options = listener.FieldNames;
-            panel.IntensityChannel.Value = listener.IntensityChannel;
+            try
+            {
+                panel.IntensityChannel.Value = listener.IntensityChannel;
+            }
+            catch (InvalidOperationException)
+            {
+                panel.IntensityChannel.Index = 0;
+            }
+
             panel.HideButton.State = listener.Visible;
 
             panel.ForceMinMax.Value = listener.ForceMinMax;

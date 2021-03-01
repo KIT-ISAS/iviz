@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs
 {
@@ -6,7 +7,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS services.
     /// All classes representing ROS services derive from this.
     /// </summary>
-    public interface IService
+    public interface IService : IDisposable
     {
         /// <summary>
         /// Create an empty service message.
@@ -38,6 +39,10 @@ namespace Iviz.Msgs
     {
     }
 
+    public interface IRequest<TT, TU> : IRequest where TT : IService, new() where TU : IResponse
+    {
+    }
+    
     /// <summary>
     /// Interface for all ROS service responses.
     /// All classes representing ROS responses derive from this.
@@ -69,9 +74,13 @@ namespace Iviz.Msgs
             {
             }
 
+            public void Dispose()
+            {
+            }
+
             EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer _)
             {
-                return new EmptyRequest();
+                return new();
             }
         }
 
@@ -95,10 +104,14 @@ namespace Iviz.Msgs
             public void RosValidate()
             {
             }
+            
+            public void Dispose()
+            {
+            }
 
             EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer _)
             {
-                return new EmptyResponse();
+                return new();
             }
         }
     }

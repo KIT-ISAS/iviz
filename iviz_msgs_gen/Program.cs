@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Iviz.MsgsGen
 {
@@ -14,9 +14,9 @@ namespace Iviz.MsgsGen
             {
                 DoMain(args);
             }
-            catch (MessageGenException e)
+            catch (Exception e)
             {
-                Console.Error.WriteLine($"EE [{e.GetType().Name}] {e.Message}");
+                Console.Error.WriteLine("EE Fatal error: " + ExceptionToString(e));
             }
         }
 
@@ -91,7 +91,7 @@ namespace Iviz.MsgsGen
         static void PrintHelpMessage()
         {
             Console.WriteLine("** Welcome to Iviz.MsgsGen, an utility to generate C# code from ROS messages.");
-            Console.WriteLine("Usage:");
+            Console.WriteLine("** Usage:");
             Console.WriteLine("    dotnet Iviz.MsgsGen.dll -h");
             Console.WriteLine("        Shows this text");
             Console.WriteLine("    dotnet Iviz.MsgsGen.dll -o OutputFolder -p Package -i Files... ");
@@ -324,5 +324,32 @@ namespace Iviz.MsgsGen
 
             Console.WriteLine("** Done!");
         }
+        
+        // copied from Iviz.Msgs to avoid depending on that project 
+        static string ExceptionToString(Exception? e)
+        {
+            if (e == null)
+            {
+                return "[null exception]";
+            }
+
+            var str = new StringBuilder(100);
+            Exception? subException = e;
+
+            bool firstException = true;
+            while (subException != null)
+            {
+                if (!(subException is AggregateException))
+                {
+                    str.Append(firstException ? "\n[" : "\n   [");
+                    str.Append(subException.GetType().Name).Append("] ").Append(subException.Message);
+                    firstException = false;
+                }
+
+                subException = subException.InnerException;
+            }
+
+            return str.ToString();
+        }         
     }
 }

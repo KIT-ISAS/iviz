@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestArrayRequestResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class TestArrayRequestRequest : IRequest, IDeserializable<TestArrayRequestRequest>
+    public sealed class TestArrayRequestRequest : IRequest<TestArrayRequest, TestArrayRequestResponse>, IDeserializable<TestArrayRequestRequest>
     {
         [DataMember (Name = "int")] public int[] @int { get; set; }
     
@@ -84,6 +90,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeStructArray(@int, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -128,6 +138,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public static readonly TestArrayRequestResponse Singleton = new TestArrayRequestResponse();
     
         public void RosSerialize(ref Buffer b)
+        {
+        }
+        
+        public void Dispose()
         {
         }
         

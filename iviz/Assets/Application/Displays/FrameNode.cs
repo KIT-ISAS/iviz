@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         TfFrame parent;
 
         Transform mTransform;
-        public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
 
         IFrameNodeOwner owner;
         
@@ -32,6 +32,7 @@ namespace Iviz.Controllers
             set => SetParent(value, true);
         }
 
+        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -62,27 +63,17 @@ namespace Iviz.Controllers
             }
         }
 
-        public void AttachTo([NotNull] string parentId)
+        public void AttachTo([CanBeNull] string parentId, in Msgs.time _ = default)
         {
             if (parentId == null)
             {
-                throw new ArgumentNullException(nameof(parentId));
+                return;
             }
 
             if (Parent == null || parentId != Parent.Id)
             {
                 Parent = string.IsNullOrEmpty(parentId) ? TfListener.MapFrame : TfListener.GetOrCreateFrame(parentId);
             }
-        }
-
-        public void AttachTo([NotNull] string parentId, in Msgs.time _)
-        {
-            if (parentId == null)
-            {
-                throw new ArgumentNullException(nameof(parentId));
-            }
-
-            AttachTo(parentId);
         }
 
         public virtual void Stop()

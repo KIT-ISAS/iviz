@@ -18,7 +18,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// <summary> Constructor for empty message. </summary>
         public Constraints()
         {
-            Name = "";
+            Name = string.Empty;
             JointConstraints = System.Array.Empty<JointConstraint>();
             PositionConstraints = System.Array.Empty<PositionConstraint>();
             OrientationConstraints = System.Array.Empty<OrientationConstraint>();
@@ -78,6 +78,10 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(PositionConstraints, 0);
             b.SerializeArray(OrientationConstraints, 0);
             b.SerializeArray(VisibilityConstraints, 0);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -144,7 +148,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA+VZW2/byBV+568YIA+xu4zWGwdFkYUfsrGz8aJx3DgNckEgjMSRNA3J4c6QkpVf3++c" +
+                "H4sIAAAAAAAAE+VZW2/byBV+568YIA+xu4zWGwdFkYUfsrGz8aJx3DgNckEgjMSRNA3J4c6QkpVf3++c" +
                 "mSGHkty0aGMU2N0AsqiZc/nO/fCBeLvSTlTKOblUYm7qVuraCSlK7VphFqIyrTa1aEpZ17pe0hHXWhxq" +
                 "3SR7IJ6VZfpIVB2uzZRwstVuoVUhFsaC3NLIUrSGfqLjulAWv61lqYssw20iXctKZdlvBoSe9yQ/fRb/" +
                 "oCfThEuWXRunSa7RuSY8HB99bbWCVnunzfB8fOGddnqmS91uR+fX/ePx8bP/8X/Zq5tfnwL2tdLttHJL" +

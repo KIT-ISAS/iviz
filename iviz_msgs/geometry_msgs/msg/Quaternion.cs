@@ -7,13 +7,13 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = "geometry_msgs/Quaternion")]
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
+    public struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
-        [DataMember (Name = "x")] public double X { get; }
-        [DataMember (Name = "y")] public double Y { get; }
-        [DataMember (Name = "z")] public double Z { get; }
-        [DataMember (Name = "w")] public double W { get; }
+        [DataMember (Name = "x")] public double X;
+        [DataMember (Name = "y")] public double Y;
+        [DataMember (Name = "z")] public double Z;
+        [DataMember (Name = "w")] public double W;
     
         /// <summary> Explicit constructor. </summary>
         public Quaternion(double X, double Y, double Z, double W)
@@ -55,6 +55,10 @@ namespace Iviz.Msgs.GeometryMsgs
             b.Serialize(this);
         }
         
+        public readonly void Dispose()
+        {
+        }
+        
         public readonly void RosValidate()
         {
         }
@@ -74,18 +78,20 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAAz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
+                "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
         /// Custom iviz code
         public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
         public static readonly Quaternion Identity = (0, 0, 0, 1);
         public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;
-        public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);
+        public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q.XYZ, q.W, v);
+        public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;
         public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;
         public readonly Quaternion Normalized => Extensions.Normalize(this);
-        public static implicit operator Quaternion((double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
-        public static implicit operator Quaternion((Vector3 XYZ, double W) p) => new Quaternion(p.XYZ.X, p.XYZ.Y, p.XYZ.Z, p.W);
-        public static Quaternion AngleAxis(double angleInRad, Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
+        public Vector3 XYZ { readonly get => (X, Y, Z); set => (X, Y, Z) = value; }
+        public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
+        public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
+        public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
     }
 }

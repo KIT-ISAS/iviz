@@ -39,6 +39,12 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (TopicTypeResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.Rosapi
     }
 
     [DataContract]
-    public sealed class TopicTypeRequest : IRequest, IDeserializable<TopicTypeRequest>
+    public sealed class TopicTypeRequest : IRequest<TopicType, TopicTypeResponse>, IDeserializable<TopicTypeRequest>
     {
         [DataMember (Name = "topic")] public string Topic { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeRequest()
         {
-            Topic = "";
+            Topic = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -86,6 +92,10 @@ namespace Iviz.Msgs.Rosapi
             b.Serialize(Topic);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
@@ -109,7 +119,7 @@ namespace Iviz.Msgs.Rosapi
         /// <summary> Constructor for empty message. </summary>
         public TopicTypeResponse()
         {
-            Type = "";
+            Type = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -137,6 +147,10 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Type);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

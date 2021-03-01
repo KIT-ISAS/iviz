@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
@@ -176,12 +178,11 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<LaserScan>(config.Topic, Handler);
-            Listener.MaxQueueSize = (int)MaxQueueSize;
+            Listener = new Listener<LaserScan>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
             node.name = "[" + config.Topic + "]";
         }
 
-        void Handler(LaserScan msg)
+        void Handler([NotNull] LaserScan msg)
         {
             node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
@@ -212,8 +213,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            resource.Suspend();
-            ResourcePool.DisposeDisplay(resource);
+            resource.DisposeDisplay();
 
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);

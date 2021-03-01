@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    public class RosServerManager
+    public sealed class RosServerManager
     {
         public const int DefaultPort = RosMasterServer.DefaultPort;
         const int DisposeTimeoutInMs = 2000;

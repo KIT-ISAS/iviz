@@ -11,12 +11,12 @@ namespace Iviz.Roslib
     ///     Manager for a ROS publisher.
     /// </summary>
     /// <typeparam name="T">Topic type</typeparam>
-    public class RosPublisher<T> : IRosPublisher<T> where T : IMessage
+    public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     {
         readonly RosClient client;
-        readonly List<string> ids = new List<string>();
+        readonly List<string> ids = new();
         readonly TcpSenderManager<T> manager;
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
         bool disposed;
         int totalPublishers;
 
@@ -89,7 +89,7 @@ namespace Iviz.Roslib
 
             if (!MessageTypeMatches(message.GetType()))
             {
-                throw new InvalidMessageTypeException("Type does not match publisher.");
+                throw new RosInvalidMessageTypeException("Type does not match publisher.");
             }
 
             message.RosValidate();
@@ -97,7 +97,7 @@ namespace Iviz.Roslib
             manager.Publish((T) message);
         }
 
-        Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        ValueTask<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -106,7 +106,7 @@ namespace Iviz.Roslib
 
             if (!MessageTypeMatches(message.GetType()))
             {
-                throw new InvalidMessageTypeException("Type does not match publisher.");
+                throw new RosInvalidMessageTypeException("Type does not match publisher.");
             }
 
             return PublishAsync((T) message, policy, token);
@@ -118,7 +118,7 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
-        /// <exception cref="InvalidMessageTypeException">The message type does not match.</exception>
+        /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
         public void Publish(T message)
         {
             if (message == null)
@@ -131,7 +131,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public Task PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public async ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -148,18 +148,18 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return Task.CompletedTask;
+                    return true;
                 case RosPublishPolicy.WaitUntilSent:
-                    return manager.PublishAndWaitAsync(message, linkedToken.Token);
+                    return await manager.PublishAndWaitAsync(message, linkedToken.Token);
                 default:
-                    return Task.CompletedTask;
+                    return false;
             }
         }
 
         Endpoint? IRosPublisher.RequestTopicRpc(string remoteCallerId)
         {
             Endpoint? localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
-            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Port);
+            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Value.Port);
         }
 
         void IDisposable.Dispose()
@@ -179,8 +179,24 @@ namespace Iviz.Roslib
             ids.Clear();
             await manager.StopAsync().AwaitNoThrow(this);
             NumSubscribersChanged = null;
+            runningTs.Dispose();
         }
 
+        void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            runningTs.Cancel();
+            ids.Clear();
+            manager.Stop();
+            NumSubscribersChanged = null;
+            runningTs.Dispose();
+        }        
+        
         public string Advertise()
         {
             AssertIsAlive();
@@ -190,7 +206,7 @@ namespace Iviz.Roslib
             return id;
         }
 
-        public bool Unadvertise(string id)
+        public bool Unadvertise(string id, CancellationToken token = default)
         {
             if (!IsAlive)
             {
@@ -201,14 +217,13 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Dispose();
-                client.RemovePublisher(this);
+                Task.Run(() => RemovePublisherAsync(token), token).WaitAndRethrow();
             }
 
             return removed;
         }
 
-        public async Task<bool> UnadvertiseAsync(string id, CancellationToken token = default)
+        public async ValueTask<bool> UnadvertiseAsync(string id, CancellationToken token = default)
         {
             if (!IsAlive)
             {
@@ -219,12 +234,17 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                Task disposeTask = DisposeAsync().AwaitNoThrow(this);
-                Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-                await Task.WhenAll(disposeTask, unadvertiseTask).Caf();
+                await RemovePublisherAsync(token).Caf();
             }
 
             return removed;
+        }
+
+        async Task RemovePublisherAsync(CancellationToken token)
+        {
+            Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+            Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
+            await (disposeTask, unadvertiseTask).WhenAll().Caf();            
         }
 
         public bool ContainsId(string id)
@@ -265,20 +285,6 @@ namespace Iviz.Roslib
             string newId = totalPublishers == 0 ? Topic : $"{Topic}-{totalPublishers}";
             totalPublishers++;
             return newId;
-        }
-
-        void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            runningTs.Cancel();
-            ids.Clear();
-            manager.Stop();
-            NumSubscribersChanged = null;
         }
 
         bool RemoveId(string topicId)

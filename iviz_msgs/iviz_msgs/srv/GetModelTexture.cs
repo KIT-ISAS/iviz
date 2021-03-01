@@ -39,6 +39,12 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetModelTextureResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.IvizMsgs
     }
 
     [DataContract]
-    public sealed class GetModelTextureRequest : IRequest, IDeserializable<GetModelTextureRequest>
+    public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializable<GetModelTextureRequest>
     {
         [DataMember (Name = "uri")] public string Uri { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetModelTextureRequest()
         {
-            Uri = "";
+            Uri = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -86,6 +92,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Uri);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
@@ -112,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetModelTextureResponse()
         {
             Image = new SensorMsgs.CompressedImage();
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -146,6 +156,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             Image.RosSerialize(ref b);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

@@ -39,6 +39,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (AddTwoIntsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     }
 
     [DataContract]
-    public sealed class AddTwoIntsRequest : IRequest, IDeserializable<AddTwoIntsRequest>
+    public sealed class AddTwoIntsRequest : IRequest<AddTwoInts, AddTwoIntsResponse>, IDeserializable<AddTwoIntsRequest>
     {
         [DataMember (Name = "a")] public long A { get; set; }
         [DataMember (Name = "b")] public long B { get; set; }
@@ -87,6 +93,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             b.Serialize(A);
             b.Serialize(B);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -134,6 +144,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Sum);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

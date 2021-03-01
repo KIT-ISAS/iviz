@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Iviz.Msgs;
+using System.Globalization;
+using System.Text;
 
 namespace Iviz.MsgsGen
 {
     public sealed class VariableElement : IElement
     {
+        public const bool UseShared = false;
+
         const string CachedHeaderMd5 = "2176decaecbce78abc3b96ef049fabed";
 
         public const int NotAnArray = -1;
@@ -135,21 +138,75 @@ namespace Iviz.MsgsGen
             string result;
             switch (ArraySize)
             {
+                case NotAnArray when CsClassName == "string":
+                    if (UseShared)
+                    {
+                        result = isInStruct
+                            ? $"public StringRef? {CsFieldName};"
+                            : $"public StringRef {CsFieldName} {{ get; set; }}";
+                    }
+                    else
+                    {
+                        result = isInStruct
+                            ? $"public string? {CsFieldName};"
+                            : $"public string {CsFieldName} {{ get; set; }}";
+                    }
+                    break;
                 case NotAnArray:
                     result = isInStruct
-                        ? $"public {CsClassName} {CsFieldName} {{ get; }}"
+                        ? $"public {CsClassName} {CsFieldName};"
                         : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
                     break;
+                case DynamicSizeArray when UseShared && CsClassName == "string":
+                    if (UseShared)
+                    {
+                        result = isInStruct
+                            ? $"public UniqueRef<StringRef>? {CsFieldName};"
+                            : $"public UniqueRef<StringRef> {CsFieldName} {{ get; set; }}";
+                    }
+                    else
+                    {
+                        result = isInStruct
+                            ? $"public {CsClassName}[]? {CsFieldName};"
+                            : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                    }
+
+                    break;
                 case DynamicSizeArray:
-                    result = isInStruct
-                        ? $"public {CsClassName}[] {CsFieldName} {{ get; }}"
-                        : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                    if (UseShared && CsClassName == "string")
+                    {
+                        result = isInStruct
+                            ? $"public UniqueRef<StringRef>? {CsFieldName};"
+                            : $"public UniqueRef<StringRef> {CsFieldName} {{ get; set; }}";
+                    }
+                    else if (UseShared)
+                    {
+                        result = isInStruct
+                            ? $"public UniqueRef<{CsClassName}>? {CsFieldName};"
+                            : $"public UniqueRef<{CsClassName}> {CsFieldName} {{ get; set; }}";
+                    }
+                    else
+                    {
+                        result = isInStruct
+                            ? $"public {CsClassName}[]? {CsFieldName};"
+                            : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                    }
+
                     break;
                 default:
                 {
-                    result = isInStruct
-                        ? $"fixed {CsClassName} {CsFieldName}[{ArraySize}];"
-                        : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
+                    if (UseShared)
+                    {
+                        result = isInStruct
+                            ? $"public UniqueRef<{CsClassName}>? {CsFieldName} {{ get; set; }}"
+                            : $"public UniqueRef<{CsClassName}> {CsFieldName} {{ get; set; }}";
+                    }
+                    else
+                    {
+                        result = isInStruct
+                            ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
+                            : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
+                    }
                     break;
                 }
             }
@@ -158,6 +215,7 @@ namespace Iviz.MsgsGen
                 ? $"{attrStr} {result}"
                 : $"{attrStr} {result} //{Comment}";
 
+            /*
             if (ArraySize <= 0 || !isInStruct)
             {
                 return new[] {csString};
@@ -174,6 +232,9 @@ namespace Iviz.MsgsGen
             }
 
             return list;
+            */
+
+            return new[] {csString};
         }
 
         public string ToRosString()
@@ -208,6 +269,7 @@ namespace Iviz.MsgsGen
                 RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
 
             // is it in the assembly?
+            
             Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
             if (guessType == null)
             {
@@ -217,6 +279,67 @@ namespace Iviz.MsgsGen
 
             string md5Sum = BuiltIns.GetMd5Sum(guessType);
             return $"{md5Sum} {RosFieldName}";
+        }
+    }
+
+    // this class copies functions from Iviz.Msgs to avoid depending on that project 
+    internal static class BuiltIns
+    {
+        public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
+        {
+            string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
+            return System.Type.GetType(guessName);
+        }
+        
+        public static string GetMd5Sum(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            return GetClassStringConstant(type, "RosMd5Sum");
+        }
+        
+        static string GetClassStringConstant(Type type, string name)
+        {
+            string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
+            if (constant == null)
+            {
+                throw new ArgumentException($"Failed to resolve constant '{name}' in class {type.FullName}",
+                    nameof(name));
+            }
+
+            return constant;
+        }
+        
+        public static string RosNameToCs(string name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            StringBuilder str = new();
+            str.Append(char.ToUpper(name[0], CultureInfo.InvariantCulture));
+            for (int i = 1; i < name.Length; i++)
+            {
+                switch (name[i])
+                {
+                    case '_' when i != name.Length - 1:
+                        str.Append(char.ToUpper(name[i + 1], CultureInfo.InvariantCulture));
+                        i++;
+                        break;
+                    case '/':
+                        str.Append('.');
+                        break;
+                    default:
+                        str.Append(name[i]);
+                        break;
+                }
+            }
+
+            return str.ToString();
         }
     }
 }

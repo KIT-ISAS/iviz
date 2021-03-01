@@ -39,6 +39,12 @@ namespace Iviz.Msgs.DiagnosticMsgs
             set => Response = (AddDiagnosticsResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,7 +55,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
     }
 
     [DataContract]
-    public sealed class AddDiagnosticsRequest : IRequest, IDeserializable<AddDiagnosticsRequest>
+    public sealed class AddDiagnosticsRequest : IRequest<AddDiagnostics, AddDiagnosticsResponse>, IDeserializable<AddDiagnosticsRequest>
     {
         // This service is used as part of the process for loading analyzers at runtime,
         // and should be used by a loader script or program, not as a standalone service.
@@ -71,7 +77,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsRequest()
         {
-            LoadNamespace = "";
+            LoadNamespace = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -99,6 +105,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(LoadNamespace);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -130,7 +140,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsResponse()
         {
-            Message = "";
+            Message = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -161,6 +171,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

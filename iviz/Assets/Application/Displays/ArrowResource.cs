@@ -57,7 +57,7 @@ namespace Iviz.Displays
 
         public void Reset()
         {
-            transform.localScale = Vector3.one;
+            transform.localScale = Vector3.zero;
             transform.SetLocalPose(Pose.identity);
         }
 

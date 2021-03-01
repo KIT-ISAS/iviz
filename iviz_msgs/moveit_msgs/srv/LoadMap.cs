@@ -39,6 +39,12 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (LoadMapResponse)value;
         }
         
+        public void Dispose()
+        {
+            Request.Dispose();
+            Response.Dispose();
+        }
+        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -49,14 +55,14 @@ namespace Iviz.Msgs.MoveitMsgs
     }
 
     [DataContract]
-    public sealed class LoadMapRequest : IRequest, IDeserializable<LoadMapRequest>
+    public sealed class LoadMapRequest : IRequest<LoadMap, LoadMapResponse>, IDeserializable<LoadMapRequest>
     {
         [DataMember (Name = "filename")] public string Filename { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public LoadMapRequest()
         {
-            Filename = "";
+            Filename = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -84,6 +90,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Filename);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()
@@ -136,6 +146,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
+        }
+        
+        public void Dispose()
+        {
         }
         
         public void RosValidate()

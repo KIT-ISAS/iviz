@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
+using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
@@ -15,15 +16,14 @@ namespace Iviz.Roslib
         const int DefaultTimeoutInMs = 5000;
 
         readonly ConcurrentDictionary<string, TcpSenderAsync<TMessage>> connectionsByCallerId =
-            new ConcurrentDictionary<string, TcpSenderAsync<TMessage>>();
+            new();
 
         readonly RosPublisher<TMessage> publisher;
         readonly TopicInfo<TMessage> topicInfo;
         int maxQueueSizeInBytes;
 
         bool latching;
-        bool hasLatchedMessage;
-        TMessage latchedMessage = default!;
+        readonly Nullable<TMessage> latchedMessage = new ();
 
         bool forceTcpNoDelay;
 
@@ -71,10 +71,7 @@ namespace Iviz.Roslib
             set
             {
                 latching = value;
-                if (!value)
-                {
-                    hasLatchedMessage = false;
-                }
+                latchedMessage.Unset();
             }
         }
 
@@ -102,12 +99,13 @@ namespace Iviz.Roslib
             Task cleanupTask = TryToCleanup();
 
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
-            TcpSenderAsync<TMessage> newSender = new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching);
+            TcpSenderAsync<TMessage> newSender; //= new(remoteCallerId, topicInfo, Latching);
 
-            Endpoint endPoint;
-            using (SemaphoreSlim managerSignal = new SemaphoreSlim(0))
+            using (SemaphoreSlim managerSignal = new(0))
             {
-                endPoint = newSender.Start(TimeoutInMs, managerSignal);
+                newSender =
+                    new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching, TimeoutInMs, managerSignal);
+                //endPoint = newSender.Start(TimeoutInMs, managerSignal);
 
                 connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
                 {
@@ -130,9 +128,9 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (Latching && hasLatchedMessage)
+            if (Latching && latchedMessage.HasValue)
             {
-                newSender.Publish(latchedMessage);
+                newSender.Publish(latchedMessage.Value);
             }
 
             newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
@@ -141,7 +139,8 @@ namespace Iviz.Roslib
             cleanupTask.WaitNoThrow(this);
 
             // return null if this connection got killed, which gets translated later as an error response
-            return !newSender.IsAlive ? null : endPoint;
+            //return !newSender.IsAlive ? null : endPoint;
+            return !newSender.IsAlive ? null : newSender.Endpoint;
         }
 
         Task TryToCleanup()
@@ -162,7 +161,7 @@ namespace Iviz.Roslib
                         Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
                     }
                 });
-                await Task.WhenAll(tasks).AwaitNoThrow(this);
+                await tasks.WhenAll().AwaitNoThrow(this);
 
                 publisher.RaiseNumConnectionsChanged();
             });
@@ -172,8 +171,7 @@ namespace Iviz.Roslib
         {
             if (Latching)
             {
-                hasLatchedMessage = true;
-                latchedMessage = msg;
+                latchedMessage.Value = msg;
             }
 
             foreach (var pair in connectionsByCallerId)
@@ -181,17 +179,24 @@ namespace Iviz.Roslib
                 pair.Value.Publish(msg);
             }
         }
-        
-        public async Task PublishAndWaitAsync(TMessage msg, CancellationToken token)
+
+        public async Task<bool> PublishAndWaitAsync(TMessage msg, CancellationToken token)
         {
             if (Latching)
             {
-                hasLatchedMessage = true;
-                latchedMessage = msg;
+                latchedMessage.Value = msg;
             }
-            
-            await Task.WhenAll(connectionsByCallerId.Select(pair => pair.Value.PublishAndWaitAsync(msg, token))).AwaitNoThrow(this);
-        }        
+
+            if (connectionsByCallerId.IsEmpty)
+            {
+                return false;
+            }
+
+            await connectionsByCallerId
+                .Select(pair => pair.Value.PublishAndWaitAsync(msg, token))
+                .WhenAll();
+            return true;
+        }
 
         public void Stop()
         {
@@ -200,20 +205,48 @@ namespace Iviz.Roslib
 
         public async Task StopAsync()
         {
-            await Task.WhenAll(connectionsByCallerId.Values.Select(sender => sender.DisposeAsync())).AwaitNoThrow(this);
+            await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()).WhenAll().AwaitNoThrow(this);
             connectionsByCallerId.Clear();
+            latchedMessage.Unset();
         }
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()
         {
-            return new ReadOnlyCollection<PublisherSenderState>(
+            return new(
                 connectionsByCallerId.Values.Select(sender => sender.State).ToArray()
             );
+        }
+
+        public ReadOnlyCollection<IRosTcpSender> GetConnections()
+        {
+            return connectionsByCallerId.Values.Cast<IRosTcpSender>().ToArray().AsReadOnly();
         }
 
         public override string ToString()
         {
             return $"[TcpSenderManager '{Topic}']";
+        }
+
+        class Nullable<T>
+        {
+            T? element;
+            public bool HasValue { get; private set; }
+
+            public T Value
+            {
+                get => HasValue ? element! : throw new NullReferenceException();
+                set
+                {
+                    element = value ?? throw new ArgumentNullException(nameof(value));
+                    HasValue = true;
+                }
+            }
+
+            public void Unset()
+            {
+                element = default;
+                HasValue = false;
+            }
         }
     }
 }

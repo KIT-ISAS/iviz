@@ -22,6 +22,8 @@ UWP/
 project.json
 project.lock.json
 
+ios/
+
 #Foler for generated UWP App to export to hololens
 App/
 

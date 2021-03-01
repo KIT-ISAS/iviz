@@ -43,7 +43,7 @@ namespace Iviz.Msgs
                     JValue.CreateString(shortString).WriteTo(writer);
                     break;
                 case Array array when array.Length < maxArrayLength:
-                    JArray shortArray = new JArray();
+                    JArray shortArray = new();
                     foreach (object? element in array)
                     {
                         shortArray.Add(element == null ? JValue.CreateNull() : JToken.FromObject(element, serializer));
@@ -53,7 +53,7 @@ namespace Iviz.Msgs
                     break;
                 case Array array:
                     JValue.CreateComment($"<i>(Showing first {maxArrayLength} of {array.Length})</i>").WriteTo(writer);
-                    JArray longArray = new JArray();
+                    JArray longArray = new();
                     for (int i = 0; i < maxArrayLength; i++)
                     {
                         var element = array.GetValue(i);

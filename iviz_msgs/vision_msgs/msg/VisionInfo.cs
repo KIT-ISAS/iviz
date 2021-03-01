@@ -47,8 +47,8 @@ namespace Iviz.Msgs.VisionMsgs
         /// <summary> Constructor for empty message. </summary>
         public VisionInfo()
         {
-            Method = "";
-            DatabaseLocation = "";
+            Method = string.Empty;
+            DatabaseLocation = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
@@ -87,6 +87,10 @@ namespace Iviz.Msgs.VisionMsgs
             b.Serialize(DatabaseVersion);
         }
         
+        public void Dispose()
+        {
+        }
+        
         public void RosValidate()
         {
             if (Method is null) throw new System.NullReferenceException(nameof(Method));
@@ -114,7 +118,7 @@ namespace Iviz.Msgs.VisionMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAA61WTW/rNhC861cQ8CFJ4bhAewvQS78f8NI+NOlDbwElrSQWFKnyw4776zu7pOQkzaGH" +
+                "H4sIAAAAAAAAE61WTW/rNhC861cQ8CFJ4bhAewvQS78f8NI+NOlDbwElrSQWFKnyw4776zu7pOQkzaGH" +
                 "BkYSi9zh7uzsUDv1Kfij6SmqmZK+NW7wYdbJeKd063NSWh1NzNqqxSxkjaNDs2t26nEyHBKjHklFCkcg" +
                 "aBXNbKwOaslh8ZFU8lhz0YenOY7xy+/0TEF/wBl71QLbuJhI94BTyg+qJeNGlQz1HDjp0J90oL0ySQVa" +
                 "AgEqRfVeinGhzgymE6TOz0tOFDhx3rQlXpJ+GR+TPkcEIA/tkrr2ASdZrB3JnitYWbtR/gjIZGYkpF2v" +
