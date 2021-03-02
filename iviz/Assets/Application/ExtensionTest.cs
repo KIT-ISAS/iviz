@@ -116,7 +116,7 @@ namespace Iviz.App
             };
             scene.IsDiff = true; // important! we mark the object as a change, not as the whole scene
 
-            await scenePublisher.WriteAsync(scene);
+            scenePublisher.Write(scene);
 
 
             // tell Update() we're finished
