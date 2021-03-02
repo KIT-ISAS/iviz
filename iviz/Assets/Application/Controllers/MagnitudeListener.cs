@@ -42,6 +42,8 @@ namespace Iviz.Controllers
         MeshMarkerResource sphere;
         ArrowResource arrow;
         AngleAxisResource angleAxis;
+        
+        Vector3 dirForDataSource;
 
         readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
 
@@ -175,7 +177,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Scale = value;
-                frameNode.transform.localScale = value * Vector3.one;
+                frameNode.Transform.localScale = value * Vector3.one;
                 trail.ElementScale = 0.02f * value;
             }
         }
@@ -203,7 +205,7 @@ namespace Iviz.Controllers
             frameNode = FrameNode.Instantiate("DisplayNode");
 
             trail = ResourcePool.GetOrCreateDisplay<TrailResource>();
-            trail.DataSource = () => frameNode.transform.position;
+            trail.DataSource = () => frameNode.Transform.position;
 
             Config = new MagnitudeConfiguration();
         }
@@ -216,91 +218,94 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    Listener = new Listener<PoseStamped>(config.Topic, Handler);
+                    Listener = new Listener<PoseStamped>(config.Topic, Handler) {MaxQueueSize = 1};
                     goto case Msgs.GeometryMsgs.Pose.RosMessageType;
 
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
+                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler) {MaxQueueSize = 1};
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.Transform);
                     break;
 
                 case PointStamped.RosMessageType:
-                    Listener = new Listener<PointStamped>(config.Topic, Handler);
+                    Listener = new Listener<PointStamped>(config.Topic, Handler) {MaxQueueSize = 1};
                     goto case Point.RosMessageType;
 
                 case Point.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Point>(config.Topic, Handler);
+                        Listener = new Listener<Point>(config.Topic, Handler) {MaxQueueSize = 1};
                     }
 
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.transform);
+                        frameNode.Transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     break;
 
                 case WrenchStamped.RosMessageType:
-                    Listener = new Listener<WrenchStamped>(config.Topic, Handler);
+                    Listener = new Listener<WrenchStamped>(config.Topic, Handler) {MaxQueueSize = 1};
                     goto case Wrench.RosMessageType;
 
                 case Wrench.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Wrench>(config.Topic, Handler);
+                        Listener = new Listener<Wrench>(config.Topic, Handler) {MaxQueueSize = 1};
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
-                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.Transform);
+                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.Transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.transform);
+                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.Transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.transform);
+                        frameNode.Transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
+                    trail.DataSource = TrailDataSource;
                     break;
 
                 case TwistStamped.RosMessageType:
-                    Listener = new Listener<TwistStamped>(config.Topic, Handler);
+                    Listener = new Listener<TwistStamped>(config.Topic, Handler) {MaxQueueSize = 1};
                     goto case Twist.RosMessageType;
 
                 case Twist.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Twist>(config.Topic, Handler);
+                        Listener = new Listener<Twist>(config.Topic, Handler) {MaxQueueSize = 1};
                     }
 
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
-                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.transform);
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.Transform);
+                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(frameNode.Transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.transform);
+                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(frameNode.Transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.transform);
+                        frameNode.Transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
+                    trail.DataSource = TrailDataSource;
                     break;
 
                 case Odometry.RosMessageType:
-                    Listener = new Listener<Odometry>(config.Topic, Handler);
-                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.transform);
+                    Listener = new Listener<Odometry>(config.Topic, Handler) {MaxQueueSize = 1};
+                    axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(frameNode.Transform);
                     childNode = FrameNode.Instantiate("ChildNode");
-                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(childNode.transform);
+                    arrow = ResourcePool.GetOrCreateDisplay<ArrowResource>(childNode.Transform);
                     arrow.Color = Color;
                     arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(childNode.transform);
+                    angleAxis = ResourcePool.GetOrCreateDisplay<AngleAxisResource>(childNode.Transform);
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.transform);
+                        frameNode.Transform);
                     sphere.transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
+                    trail.DataSource = TrailDataSource;
                     break;
             }
         }
@@ -318,7 +323,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            frameNode.transform.SetLocalPose(msg.Ros2Unity());
+            frameNode.Transform.SetLocalPose(msg.Ros2Unity());
         }
 
         void Handler([NotNull] PointStamped msg)
@@ -334,7 +339,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            frameNode.transform.localPosition = msg.Ros2Unity();
+            frameNode.Transform.localPosition = msg.Ros2Unity();
         }
 
         void Handler([NotNull] WrenchStamped msg)
@@ -343,7 +348,9 @@ namespace Iviz.Controllers
             Handler(msg.Wrench);
         }
 
-        void Handler(Wrench msg)
+        Vector3 TrailDataSource() => frameNode.Transform.TransformPoint(dirForDataSource * VectorScale);
+
+        void Handler([NotNull] Wrench msg)
         {
             if (msg.Force.HasNaN() || msg.Torque.HasNaN())
             {
@@ -353,7 +360,7 @@ namespace Iviz.Controllers
             Vector3 dir = msg.Force.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
             angleAxis.Set(msg.Torque.Ros2Unity());
-            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
+            dirForDataSource = dir;
         }
 
         void Handler([NotNull] TwistStamped msg)
@@ -373,7 +380,7 @@ namespace Iviz.Controllers
             Vector3 dir = linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
             angleAxis.Set(angular.RosRpy2Unity());
-            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
+            dirForDataSource = dir;
         }
 
         void Handler([NotNull] Odometry msg)
@@ -386,17 +393,18 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Twist.Twist.Angular.HasNaN() || msg.Twist.Twist.Linear.HasNaN())
+            var (linear, angular) = msg.Twist.Twist;
+            if (angular.HasNaN() || linear.HasNaN())
             {
                 return;
             }
 
-            frameNode.transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
+            frameNode.Transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
-            Vector3 dir = msg.Twist.Twist.Linear.Ros2Unity();
+            Vector3 dir = linear.Ros2Unity();
             arrow.Set(Vector3.zero, dir * VectorScale);
-            angleAxis.Set(msg.Twist.Twist.Angular.RosRpy2Unity());
-            trail.DataSource = () => frameNode.transform.TransformPoint(dir * VectorScale);
+            angleAxis.Set(angular.RosRpy2Unity());
+            dirForDataSource = dir;
         }
 
         public override void ResetController()

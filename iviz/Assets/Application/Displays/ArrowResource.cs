@@ -6,12 +6,15 @@ namespace Iviz.Displays
     public sealed class ArrowResource : MeshMarkerResource
     {
         const float MaxArrowWidth = 5.0f;
-        
+
         static readonly Quaternion PointToX = Quaternion.AngleAxis(90, Vector3.up);
+
+        Transform mTransform;
 
         protected override void Awake()
         {
             base.Awake();
+            mTransform = transform;
             Reset();
         }
 
@@ -21,7 +24,6 @@ namespace Iviz.Displays
             float scaleX = diff.Magnitude();
             float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX * 0.15f, MaxArrowWidth);
 
-            Transform mTransform = transform;
             mTransform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
             mTransform.localPosition = a;
 
@@ -29,7 +31,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             Vector3 x = diff / scaleX;
 
             Vector3 notX = Vector3.forward;
@@ -51,14 +53,14 @@ namespace Iviz.Displays
 
         public void Set(in Vector3 scale)
         {
-            transform.localScale = new Vector3(scale.z, scale.y, scale.x);
-            transform.SetLocalPose(Pose.identity.WithRotation( PointToX));
+            mTransform.localScale = new Vector3(scale.z, scale.y, scale.x);
+            mTransform.SetLocalPose(Pose.identity.WithRotation(PointToX));
         }
 
         public void Reset()
         {
-            transform.localScale = Vector3.zero;
-            transform.SetLocalPose(Pose.identity);
+            mTransform.localScale = Vector3.zero;
+            mTransform.SetLocalPose(Pose.identity);
         }
 
         public override void Suspend()
