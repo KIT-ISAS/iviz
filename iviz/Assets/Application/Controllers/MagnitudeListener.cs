@@ -24,11 +24,12 @@ namespace Iviz.Controllers
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool TrailVisible { get; set; } = false;
-        [DataMember] public bool AngleVisible { get; set; } = false;
+        [DataMember] public bool AngleVisible { get; set; } = true;
         [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
+        [DataMember] public float ScaleMultiplierPow10 { get; set; } = 0;
         [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }
@@ -177,10 +178,24 @@ namespace Iviz.Controllers
             set
             {
                 config.Scale = value;
-                frameNode.Transform.localScale = value * Vector3.one;
-                trail.ElementScale = 0.02f * value;
+                frameNode.Transform.localScale = value * scaleMultiplier * Vector3.one;
+                trail.ElementScale = 0.02f * value * scaleMultiplier;
             }
         }
+
+        float scaleMultiplier = 1;
+        public float ScaleMultiplierPow10
+        {
+            get => config.ScaleMultiplierPow10;
+            set
+            {
+                config.ScaleMultiplierPow10 = value;
+                scaleMultiplier = Mathf.Pow(10, value);
+                Scale = Scale;
+                VectorScale = VectorScale;
+            }
+        }
+
 
         public float TrailTime
         {
@@ -348,7 +363,7 @@ namespace Iviz.Controllers
             Handler(msg.Wrench);
         }
 
-        Vector3 TrailDataSource() => frameNode.Transform.TransformPoint(dirForDataSource * VectorScale);
+        Vector3 TrailDataSource() => frameNode.Transform.TransformPoint(dirForDataSource * (VectorScale * scaleMultiplier));
 
         void Handler([NotNull] Wrench msg)
         {
@@ -358,7 +373,7 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = msg.Force.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * VectorScale);
+            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
             angleAxis.Set(msg.Torque.Ros2Unity());
             dirForDataSource = dir;
         }
@@ -378,7 +393,7 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * VectorScale);
+            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
             angleAxis.Set(angular.RosRpy2Unity());
             dirForDataSource = dir;
         }
@@ -402,7 +417,7 @@ namespace Iviz.Controllers
             frameNode.Transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
             Vector3 dir = linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * VectorScale);
+            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
             angleAxis.Set(angular.RosRpy2Unity());
             dirForDataSource = dir;
         }
