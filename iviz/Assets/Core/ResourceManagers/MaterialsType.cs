@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Iviz.Resources
 {
-    public class MaterialsType
+    public sealed class MaterialsType
     {
         public Info<Material> FontMaterial { get; }
         public Info<Material> FontMaterialZWrite { get; }
@@ -39,8 +39,10 @@ namespace Iviz.Resources
         public Info<Material> MeshList { get; }
         public Info<Material> MeshListWithColormap { get; }
         public Info<Material> MeshListWithColormapScaleY { get; }
+        public Info<Material> MeshListWithColormapScaleAll { get; }
         public Info<Material> MeshListOcclusionOnly { get; }
         public Info<Material> MeshListOcclusionOnlyWithScaleY { get; }
+        public Info<Material> MeshListOcclusionOnlyWithScaleAll { get; }
 
         public MaterialsType()
         {
@@ -88,9 +90,12 @@ namespace Iviz.Resources
             MeshList = new Info<Material>(assetHolder.MeshListMaterial);
             MeshListWithColormap = new Info<Material>(assetHolder.MeshListWithColormap);
             MeshListWithColormapScaleY = new Info<Material>(assetHolder.MeshListWithColormapScaleY);
-            MeshListWithColormapScaleY.Object.enableInstancing = true;
+            MeshListWithColormapScaleY.Object.enableInstancing = true; // TODO: is this needed?
+            MeshListWithColormapScaleAll = new Info<Material>(assetHolder.MeshListWithColormapScaleAll);
+            MeshListWithColormapScaleAll.Object.enableInstancing = true;
             MeshListOcclusionOnly = new Info<Material>(assetHolder.MeshListOcclusionOnly);
             MeshListOcclusionOnlyWithScaleY = new Info<Material>(assetHolder.MeshListOcclusionOnlyWithScaleY);
+            MeshListOcclusionOnlyWithScaleAll = new Info<Material>(assetHolder.MeshListOcclusionOnlyWithScaleAll);
 
             LitOcclusionOnly = new Info<Material>(assetHolder.LitOcclusionOnly);
         }

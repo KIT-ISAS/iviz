@@ -45,7 +45,7 @@ namespace Iviz.App
             set => emptyText.text = value;
         }
 
-        public class ItemEntry
+        public sealed class ItemEntry
         {
             readonly GameObject buttonObject;
             readonly Text text;

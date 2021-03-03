@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class MenuEntryList
+    public sealed class MenuEntryList
     {
         readonly Entry root;
 
@@ -77,7 +77,7 @@ namespace Iviz.App
             }
         }
 
-        public MenuEntryList([NotNull] IReadOnlyList<MenuEntry> menu, [NotNull] StringBuilder description, out int numErrors)
+        public MenuEntryList([NotNull] MenuEntry[] menu, [NotNull] StringBuilder description, out int numErrors)
         {
             if (menu == null)
             {

@@ -8,7 +8,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Resources
 {
-    public class InternalResourceManager
+    public sealed class InternalResourceManager
     {
         readonly Dictionary<string, Info<GameObject>> gameObjects = new Dictionary<string, Info<GameObject>>
         {

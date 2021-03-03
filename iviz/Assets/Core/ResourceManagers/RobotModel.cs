@@ -128,7 +128,7 @@ namespace Iviz.Displays
                 Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
                             $"links and {Joints.Count.ToString()} joints. {errorStr}");
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 Logger.Error($"{this}: Robot building canceled.");
                 throw;

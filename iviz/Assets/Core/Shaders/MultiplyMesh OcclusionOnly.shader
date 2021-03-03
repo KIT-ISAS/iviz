@@ -4,6 +4,7 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
 	Properties
 	{
 		[Toggle(USE_TEXTURE_SCALE)] _UseTextureScale("Use Texture ScaleY", Float) = 1
+		[Toggle(USE_TEXTURE_SCALE_ALL)] _UseTextureScaleAll("Use Texture Scale All", Float) = 0
 	}    
     
     SubShader
@@ -19,13 +20,13 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
         CGPROGRAM
         #pragma surface surf Standard vertex:vert
         #pragma instancing_options procedural:setup 
-		#pragma multi_compile _ USE_TEXTURE_SCALE
+		#pragma multi_compile _ USE_TEXTURE_SCALE USE_TEXTURE_SCALE_ALL
         #pragma multi_compile_instancing
         #pragma target 4.5
 
         struct PointWithColor {
             float3 pos;
-#if USE_TEXTURE_SCALE
+#if USE_TEXTURE_SCALE || USE_TEXTURE_SCALE_ALL
 		    float intensity;
 #else
 			int dummy; // unused
@@ -77,6 +78,10 @@ Shader "iviz/MultiplyMeshOcclusionOnly"
 			float intensity = _Points[instanceID].intensity;
 			v.vertex.y *= intensity;
     #endif
+	#if USE_TEXTURE_SCALE_ALL
+			float intensity = _Points[instanceID].intensity;
+			v.vertex.xyz *= intensity;
+    #endif        	
 
             v.vertex.xyz += _Points[instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);

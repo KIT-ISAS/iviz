@@ -306,13 +306,13 @@ namespace Iviz.App
             dialog.Text.SetText(description);
             queueIsDirty = false;
         }
-    }
-
-    public class ConcurrentSet<T> : IEnumerable<T>
-    {
-        readonly ConcurrentDictionary<T, object> backend = new ConcurrentDictionary<T, object>();
-        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public void Add([NotNull] T s) => backend[s] = null;
+        
+        sealed class ConcurrentSet<T> : IEnumerable<T>
+        {
+            readonly ConcurrentDictionary<T, object> backend = new ConcurrentDictionary<T, object>();
+            public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public void Add([NotNull] T s) => backend[s] = null;
+        }
     }
 }

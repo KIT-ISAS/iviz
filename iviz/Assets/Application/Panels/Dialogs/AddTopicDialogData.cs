@@ -16,7 +16,7 @@ namespace Iviz.App
         readonly AddTopicDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        public class TopicWithResource
+        public readonly struct TopicWithResource
         {
             public string Topic { get; }
             public string Type { get; }
