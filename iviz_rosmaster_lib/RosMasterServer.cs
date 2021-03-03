@@ -264,7 +264,9 @@ namespace Iviz.RosMaster
         {
             try
             {
-                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token: token);
+                await XmlRpcService
+                    .MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token: token)
+                    .Caf();
             }
             catch (Exception e)
             {
