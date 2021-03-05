@@ -21,7 +21,7 @@ namespace Iviz.XmlRpc
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.uri = uri ?? throw new ArgumentNullException(nameof(uri));
-            client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
+            client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true, NoDelay = true}};
         }
 
         public void Start(int timeoutInMs, CancellationToken token)
