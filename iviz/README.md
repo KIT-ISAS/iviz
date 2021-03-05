@@ -5,6 +5,9 @@ You can use it to display 3D information about topics, navigate your virtual env
 
 iviz has been designed primarily for use in **mobile devices** (iOS/Android smartphones and tablets), but can also be used in a normal PC if you don't mind the big buttons.
 
+If you want a technical overview or want to cite this app, you can read the [publication here](
+https://doi.org/10.1016/j.simpa.2021.100057) (open access!).
+
 ![image](../wiki_files/iviz_front_2.png)
 
 ## 1. Installation
