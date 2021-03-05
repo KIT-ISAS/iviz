@@ -145,7 +145,7 @@ namespace Iviz.Displays
             }
         }
 
-        public void Cancel()
+        public void CancelTasks()
         {
             runningTs.Cancel();
         }
@@ -443,7 +443,7 @@ namespace Iviz.Displays
 
         public void Dispose()
         {
-            Cancel();
+            CancelTasks();
 
             ResetLinkParents();
 

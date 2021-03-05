@@ -6,6 +6,7 @@ using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Newtonsoft.Json;
@@ -112,7 +113,7 @@ namespace Iviz.Hololens
             }
 
             Logger.LogInternal += AddToQueue;
-            ConnectionManager.LogMessageArrived += message =>
+            ConnectionManager.LogMessageArrived += (in Log message) =>
             {
                 string messageTime = message.Header.Stamp == default
                     ? ""
@@ -189,8 +190,8 @@ namespace Iviz.Hololens
             const string myUri = "http://141.3.59.11:7613";
             const string myId = "/iviz_win_hololens";
 #else
-            //const string myUri = "http://141.3.59.45:7613";
-            const string myUri = "http://192.168.20.5:7613";
+            const string myUri = "http://141.3.59.45:7613";
+            //const string myUri = "http://192.168.20.5:7613";
             const string myId = "/iviz_hololens";
 #endif
             const string masterUri = "http://141.3.59.5:11311";
@@ -229,12 +230,12 @@ namespace Iviz.Hololens
         {
             void MenuListClick(string robotName)
             {
-                var config = new SimpleRobotConfiguration
+                var robotConfig = new SimpleRobotConfiguration
                 {
                     SavedRobotName = robotName,
                     AttachedToTf = true
                 };
-                ModuleListPanel.Instance.CreateModule(Resource.ModuleType.Robot, configuration: config);
+                ModuleListPanel.Instance.CreateModule(Resource.ModuleType.Robot, configuration: robotConfig);
             }
 
             hololensHandMenu.SetPalm(Resource.GetRobotNames().Select(

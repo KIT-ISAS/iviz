@@ -57,7 +57,7 @@ namespace Iviz.Controllers
             {
                 if (robot != null)
                 {
-                    robot.Cancel();
+                    robot.CancelTasks();
                     robot.Dispose();
                     robotLoadingTask = null;
                 }

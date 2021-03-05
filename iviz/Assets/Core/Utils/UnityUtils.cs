@@ -135,6 +135,17 @@ namespace Iviz.Core
             );
         }
 
+        public static bool IsApproxIdentity(this Pose p)
+        {
+            return Mathf.Approximately(p.position.x, 0)
+                   && Mathf.Approximately(p.position.y, 0)
+                   && Mathf.Approximately(p.position.z, 0)
+                   && Mathf.Approximately(p.rotation.x, 0)
+                   && Mathf.Approximately(p.rotation.y, 0)
+                   && Mathf.Approximately(p.rotation.z, 0)
+                   && Mathf.Approximately(p.rotation.w, 1);
+        }
+
         public static Pose Lerp(this Pose p, in Pose o, float t)
         {
             return new Pose(

@@ -254,8 +254,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<TFMessage>(DefaultTopic, SubscriptionHandlerNonStatic);
-            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, SubscriptionHandlerStatic);
+            Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic);
+            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
         }
 
         static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
@@ -418,13 +418,13 @@ namespace Iviz.Controllers
             return frames.TryGetValue(id, out t);
         }
 
-        bool SubscriptionHandlerNonStatic([NotNull] TFMessage msg)
+        bool HandlerNonStatic([NotNull] TFMessage msg)
         {
             messageList.Enqueue((msg.Transforms, false));
             return true;
         }
 
-        bool SubscriptionHandlerStatic([NotNull] TFMessage msg)
+        bool HandlerStatic([NotNull] TFMessage msg)
         {
             messageList.Enqueue((msg.Transforms, true));
             return true;
@@ -446,7 +446,13 @@ namespace Iviz.Controllers
         void LateUpdate()
         {
             ProcessMessages();
-            OriginFrame.Transform.SetLocalPose(FixedFrame.WorldPose.Inverse());
+
+            Pose worldPose = FixedFrame.WorldPose;
+            if (!worldPose.IsApproxIdentity())
+            {
+                Debug.Log(FixedFrame.WorldPose);
+                OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
+            }
         }
 
         public override void StopController()
