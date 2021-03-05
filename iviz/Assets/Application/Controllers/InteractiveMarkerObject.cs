@@ -105,7 +105,7 @@ namespace Iviz.Controllers
             controlNode = new GameObject("[ControlNode]");
             controlNode.transform.parent = transform;
 
-            text = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(controlNode.transform);
+            text = ResourcePool.RentDisplay<TextMarkerResource>(controlNode.transform);
             text.BillboardEnabled = true;
             text.BillboardOffset = Vector3.up * 0.1f;
             text.ElementSize = 0.1f;
@@ -300,7 +300,7 @@ namespace Iviz.Controllers
             controls.Clear();
             controlsToDelete.Clear();
 
-            text.DisposeDisplay();
+            text.ReturnToPool();
 
             Destroy(controlNode.gameObject);
         }

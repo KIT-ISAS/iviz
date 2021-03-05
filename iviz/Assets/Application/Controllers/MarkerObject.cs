@@ -762,7 +762,7 @@ namespace Iviz.Controllers
 
             if (resource != null && resourceInfo != null)
             {
-                resource.DisposeResource(resourceInfo);
+                resource.ReturnToPool(resourceInfo);
                 resource = null;
             }
 
@@ -786,7 +786,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            GameObject resourceGameObject = ResourcePool.GetOrCreate(resourceInfo, transform);
+            GameObject resourceGameObject = ResourcePool.Rent(resourceInfo, transform);
 
             resource = resourceGameObject.GetComponent<IDisplay>();
             if (resource != null)
@@ -974,7 +974,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            resource.DisposeResource(resourceInfo);
+            resource.ReturnToPool(resourceInfo);
             resource = null;
             resourceInfo = null;
             previousHash = null;

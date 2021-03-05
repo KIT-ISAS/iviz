@@ -127,7 +127,7 @@ namespace Iviz.Controllers
 
             GameObject controlObject = Settings.IsHololens
                 ? HololensManager.ResourcePool.GetOrCreate(transform)
-                : ResourcePool.GetOrCreate(Resource.Displays.InteractiveControl, transform);
+                : ResourcePool.Rent(Resource.Displays.InteractiveControl, transform);
 
             Control = controlObject.GetComponent<IControlMarker>()
                       ?? throw new InvalidOperationException("Control marker has no control component!");
@@ -174,7 +174,7 @@ namespace Iviz.Controllers
             }
 
             Control.Suspend();
-            ResourcePool.Dispose(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
+            ResourcePool.Return(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
             Control = null;
         }
 
@@ -348,7 +348,7 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    ResourcePool.Dispose(Resource.Displays.InteractiveControl, controlObject);
+                    ResourcePool.Return(Resource.Displays.InteractiveControl, controlObject);
                 }
 
                 Control = null;

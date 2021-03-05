@@ -83,7 +83,7 @@ namespace Iviz.Ros
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
         public (int Active, int Total) NumPublishers => Connection.GetNumPublishers(Topic);
-        public int MaxQueueSize { get; set; } = 50;
+        public int MaxQueueSize { get; set; } = 1;
         public bool Subscribed { get; private set; }
 
         public void Stop()

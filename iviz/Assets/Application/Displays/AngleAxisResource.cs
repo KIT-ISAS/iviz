@@ -32,7 +32,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+            resource = ResourcePool.RentDisplay<LineResource>(transform);
             resource.ElementScale = 0.01f;
             Color = Color.yellow;
             Layer = LayerType.IgnoreRaycast;

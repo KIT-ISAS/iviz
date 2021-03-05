@@ -24,7 +24,6 @@ namespace Iviz.Controllers
         [DataMember] public float FrameSize { get; set; } = 0.125f;
         [DataMember] public bool LinesVisible { get; set; } = true;
         [DataMember] public SerializableColor LineColor { get; set; } = Color.yellow;
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public sealed class PathListener : ListenerController
@@ -48,7 +47,6 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 LineWidth = value.LineWidth;
                 FramesVisible = value.FramesVisible;
-                MaxQueueSize = value.MaxQueueSize;
                 FrameSize = value.FrameSize;
                 LineColor = value.LineColor;
                 LinesVisible = value.LinesVisible;
@@ -126,19 +124,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int) value;
-                }
-            }
-        }
-
         readonly List<Pose> savedPoses = new List<Pose>();
         readonly List<LineWithColor> lines = new List<LineWithColor>();
 
@@ -147,7 +132,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             node = FrameNode.Instantiate("PathNode");
-            resource = ResourcePool.GetOrCreate<LineResource>(Resource.Displays.Line, node.Transform);
+            resource = ResourcePool.Rent<LineResource>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;
             Config = new PathConfiguration();
@@ -175,7 +160,6 @@ namespace Iviz.Controllers
                     break;
             }
 
-            Listener.MaxQueueSize = (int) MaxQueueSize;
             node.name = $"[{config.Topic}]";
         }
 
@@ -198,7 +182,7 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.PoseStamped ps in msg.Poses)
             {
-                string header = ps.Header.FrameId;
+                string header = ps.Header.FrameId ?? "";
                 Msgs.time stamp = ps.Header.Stamp;
 
                 if (topHeader == header && topStamp == stamp)
@@ -213,7 +197,7 @@ namespace Iviz.Controllers
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
-                else if (TfListener.TryGetFrame(ps.Header.FrameId, out TfFrame frame))
+                else if (TfListener.TryGetFrame(header, out TfFrame frame))
                 {
                     Pose newPose = frame.WorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
@@ -256,7 +240,7 @@ namespace Iviz.Controllers
         void Handler([NotNull] Msgs.GeometryMsgs.Polygon msg)
         {
             savedPoses.Clear();
-            foreach (Msgs.GeometryMsgs.Point32 p in msg.Points)
+            foreach (var p in msg.Points)
             {
                 if (p.HasNaN())
                 {
@@ -308,7 +292,7 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-            resource.DisposeDisplay();
+            resource.ReturnToPool();
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
         }

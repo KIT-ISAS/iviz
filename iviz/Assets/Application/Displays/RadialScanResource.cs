@@ -174,8 +174,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(transform);
-            lines = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+            pointCloud = ResourcePool.RentDisplay<PointListResource>(transform);
+            lines = ResourcePool.RentDisplay<LineResource>(transform);
 
             pointCloud.UseColormap = true;
             lines.UseColormap = true;
@@ -231,8 +231,8 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            pointCloud.DisposeDisplay();
-            lines.DisposeDisplay();
+            pointCloud.ReturnToPool();
+            lines.ReturnToPool();
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, 

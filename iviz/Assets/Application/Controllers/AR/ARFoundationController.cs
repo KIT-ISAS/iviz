@@ -280,14 +280,14 @@ namespace Iviz.Controllers
 
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
-            resource = ResourcePool.GetOrCreate<ARMarkerResource>(Resource.Displays.ARMarkerResource);
+            resource = ResourcePool.Rent<ARMarkerResource>(Resource.Displays.ARMarkerResource);
             resource.Parent = node.transform;
 
             Config = new ARConfiguration();
 
             if (setupModeFrame == null)
             {
-                setupModeFrame = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(arCamera.transform);
+                setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(arCamera.transform);
                 setupModeFrame.Layer = LayerType.ARSetupMode;
             }
 

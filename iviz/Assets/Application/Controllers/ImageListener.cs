@@ -29,7 +29,6 @@ namespace Iviz.Controllers
         [DataMember] public float BillboardSize { get; set; } = 1.0f;
         [DataMember] public bool BillboardFollowCamera { get; set; } = false;
         [DataMember] public SerializableVector3 BillboardOffset { get; set; }
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public sealed class ImageListener : ListenerController
@@ -73,7 +72,6 @@ namespace Iviz.Controllers
                 BillboardSize = value.BillboardSize;
                 BillboardFollowsCamera = value.BillboardFollowCamera;
                 BillboardOffset = value.BillboardOffset;
-                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -167,25 +165,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int) value;
-                }
-            }
-        }
-
         public ImageListener([NotNull] IModuleData moduleData)
         {
             ImageTexture = new ImageTexture();
             Node = FrameNode.Instantiate("[ImageNode]");
             this.moduleData = (ImageModuleData) (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
-            marker = ResourcePool.GetOrCreateDisplay<ImageResource>();
+            marker = ResourcePool.RentDisplay<ImageResource>();
             marker.Texture = ImageTexture;
             marker.Parent = Node.transform;
 
@@ -203,8 +188,6 @@ namespace Iviz.Controllers
                     Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed);
                     break;
             }
-
-            Listener.MaxQueueSize = (int) MaxQueueSize;
         }
 
         bool HandlerCompressed([NotNull] CompressedImage msg)
@@ -256,7 +239,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
             marker.Texture = null;
-            marker.DisposeDisplay();
+            marker.ReturnToPool();
             marker = null;
 
             ImageTexture.Stop();

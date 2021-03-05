@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using Iviz.Msgs;
+using Iviz.Core;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public sealed class OctreeHelper
     {
-        const string BinaryFileHeader = "# Octomap OcTree binary file";
-        const string FileHeader = "# Octomap OcTree file";
         const int TreeMaxVal = short.MaxValue + 1;
         const int TreeMaxDepth = 16;
 
@@ -18,7 +16,12 @@ namespace Iviz.Displays
         readonly float[] sizeLookupTable;
         readonly float resolution;
 
-        OctreeHelper(float resolution)
+        public float Resolution => resolution;
+
+        static float Probability(float logOdds) => 1 - 1 / (1 - Mathf.Exp(logOdds));
+        static float LogOdds(float probability) => Mathf.Log(1 / (1 - probability) - 1);
+
+        public OctreeHelper(float resolution)
         {
             this.resolution = resolution;
 
@@ -31,202 +34,200 @@ namespace Iviz.Displays
             }
         }
 
-        Vector3 KeyToCoord(in OcTreeKey key, int depth)
+        float3 KeyToCoord(in OcTreeKey key, int depth)
         {
             float il = invLookupTable[depth];
             float sl = sizeLookupTable[depth];
-            
+
             float x = (Mathf.Floor((key.a - TreeMaxVal) * il) + 0.5f) * sl;
             float y = (Mathf.Floor((key.b - TreeMaxVal) * il) + 0.5f) * sl;
             float z = (Mathf.Floor((key.c - TreeMaxVal) * il) + 0.5f) * sl;
-            return new Vector3(x, y, z);
+            return new float3(x, y, z);
         }
 
-        public IEnumerable<OctreeLeaf> GetLeaves(byte[] src, int startOffset = 0, int maxDepth = 16)
+        float4 KeyToPosition(in OcTreeKey key, int depth)
+        {
+            return new float4(KeyToCoord(key, depth).Ros2Unity(), sizeLookupTable[depth]);
+        }
+
+        public void GetLeaves(sbyte[] src, uint offset, uint valueStride, ref NativeList<float4> pointBuffer,
+            int maxDepth = 16)
         {
             if (src == null)
             {
                 throw new ArgumentNullException(nameof(src));
             }
 
-            if (startOffset < 0)
-            {
-                throw new IndexOutOfRangeException(nameof(startOffset));
-            }
-
             if (maxDepth > TreeMaxDepth)
             {
-                throw new IndexOutOfRangeException(nameof(maxDepth));
+                throw new ArgumentOutOfRangeException(nameof(maxDepth));
             }
 
-            var stack = new Stack<NodeIterator>(16);
-            Reader reader = new Reader(src, startOffset);
+            var stack = new Stack<NodeIterator>(TreeMaxDepth);
+            var reader = new Reader(src, offset);
 
-            float startValue = reader.ReadFloat();
-            NodeIterator startIt = NodeIterator.Start(reader.ReadByte());
+            reader.Skip(valueStride);
+            var startIt = NodeIterator.Start(reader.ReadByte());
             if (maxDepth == 0)
             {
-                yield return new OctreeLeaf(default, startValue, resolution * (1 << TreeMaxDepth));
-                yield break;
+                pointBuffer.Add(default);
+                return;
             }
 
             stack.Push(startIt);
 
             while (stack.Count != 0)
             {
-                NodeIterator prevIt = stack.Pop();
+                var prevIt = stack.Pop();
+                if (prevIt.depth >= TreeMaxDepth)
+                {
+                    throw new MalformedOctreeException();
+                }
+
                 if (!prevIt.CanMoveNext())
                 {
                     continue;
                 }
 
-                NodeIterator nextIt = prevIt.MoveNext();
-                stack.Push(nextIt);
+                prevIt.MoveNext(out var currentIt);
+                stack.Push(currentIt);
 
-                if (!nextIt.HasChild)
+                if (!currentIt.HasChild)
                 {
                     continue;
                 }
 
-                float value = reader.ReadFloat();
-                byte bitset = reader.ReadByte();
+                reader.Skip(valueStride);
+                sbyte bitset = reader.ReadByte();
 
-                NodeIterator childIt = nextIt.CreateChild(bitset);
+                currentIt.CreateChild(bitset, out var childIt);
                 if (!childIt.IsLeaf)
                 {
                     stack.Push(childIt);
                 }
 
-                if (childIt.IsLeaf && childIt.depth <= maxDepth || childIt.depth == maxDepth)
+                if ((childIt.IsLeaf && childIt.depth <= maxDepth || childIt.depth == maxDepth))
                 {
-                    yield return
-                        new OctreeLeaf(KeyToCoord(childIt.key, childIt.depth), value, sizeLookupTable[childIt.depth]);
+                    pointBuffer.Add(KeyToPosition(childIt.key, childIt.depth));
                 }
             }
         }
 
-        public static IEnumerable<OctreeLeaf> ReadFromFile(string filename)
+        public void GetLeavesBinary(sbyte[] src, uint offset, uint valueStride, ref NativeList<float4> pointBuffer,
+            int maxDepth = 16)
         {
-            if (filename == null)
+            if (src == null)
             {
-                throw new ArgumentNullException(nameof(filename));
+                throw new ArgumentNullException(nameof(src));
             }
 
-            byte[] chars = File.ReadAllBytes(filename);
-            if (chars.Length < FileHeader.Length + 1)
+            if (maxDepth > TreeMaxDepth)
             {
-                throw new InvalidOperationException();
+                throw new ArgumentOutOfRangeException(nameof(maxDepth));
             }
 
-            byte magicEnd = chars[FileHeader.Length];
-            if (magicEnd != '\n')
+            var stack = new Stack<BinNodeIterator>(TreeMaxDepth);
+            var reader = new Reader(src, offset);
+
+            reader.Skip(valueStride);
+            var startIt = BinNodeIterator.Start(reader.ReadUshort());
+            if (maxDepth == 0)
             {
-                throw new InvalidOperationException();
+                pointBuffer.Add(default);
+                return;
             }
 
-            string magic = BuiltIns.UTF8.GetString(chars, 0, FileHeader.Length);
-            if (magic != FileHeader)
-            {
-                throw new InvalidOperationException();
-            }
+            stack.Push(startIt);
 
-            int dataStart = -1;
-            for (int i = FileHeader.Length; i < chars.Length; i++)
+            while (stack.Count != 0)
             {
-                if (chars[i] == '\n'
-                    && chars[i + 1] == 'd'
-                    && chars[i + 2] == 'a'
-                    && chars[i + 3] == 't'
-                    && chars[i + 4] == 'a'
-                    && chars[i + 5] == '\n')
+                var prevIt = stack.Pop();
+                if (prevIt.depth >= TreeMaxDepth)
                 {
-                    dataStart = i + 6;
-                    break;
+                    throw new MalformedOctreeException();
                 }
-            }
 
-            if (dataStart == -1)
-            {
-                throw new InvalidOperationException();
-            }
-
-            string header = BuiltIns.UTF8.GetString(chars, FileHeader.Length + 1, dataStart - 6 - FileHeader.Length);
-            string[] lines = header.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
-
-            string id = null;
-            float resolution = -1;
-            foreach (string line in lines)
-            {
-                if (line[0] == '#')
+                if (!prevIt.CanMoveNext())
                 {
                     continue;
                 }
 
-                string[] words = line.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-                if (words.Length != 2)
-                {
-                    continue;
-                }
+                prevIt.MoveNext(out var currentIt);
+                stack.Push(currentIt);
 
-                switch (words[0])
+                switch (currentIt.ChildBits)
                 {
-                    case "id":
-                        id = words[0];
+                    case BinNodeIterator.FreeNode:
+                    case BinNodeIterator.OccupiedNode:
+                        if (currentIt.depth < maxDepth)
+                        {
+                            pointBuffer.Add(KeyToPosition(currentIt.ChildKey, currentIt.depth + 1));
+                        }
+
                         break;
-                    case "res":
-                        resolution = float.TryParse(words[1], NumberStyles.Any, BuiltIns.Culture,
-                            out float tmpResolution)
-                            ? tmpResolution
-                            : -1;
+                    case BinNodeIterator.HasChildren:
+                        reader.Skip(valueStride);
+                        ushort bitset = reader.ReadUshort();
+                        currentIt.CreateChild(bitset, out var childIt);
+
+                        if (childIt.depth == maxDepth)
+                        {
+                            pointBuffer.Add(KeyToPosition(childIt.key, childIt.depth));
+                        }
+
+                        stack.Push(childIt);
                         break;
                 }
             }
-
-            if (id == null || resolution < 0)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return new OctreeHelper(resolution).GetLeaves(chars, dataStart);
         }
 
         struct Reader
         {
-            readonly byte[] buffer;
-            int offset;
+            readonly sbyte[] buffer;
+            uint offset;
 
-            public Reader(byte[] buffer, int startOffset = 0)
+            public Reader(sbyte[] buffer, uint offset)
             {
                 this.buffer = buffer;
-                offset = startOffset;
+                this.offset = offset;
             }
+
+            public void Skip(uint value) => offset += value;
 
             public float ReadFloat()
             {
-                int tmp = (buffer[offset + 3] << 24)
-                          + (buffer[offset + 2] << 16)
-                          + (buffer[offset + 1] << 8)
-                          + buffer[offset];
-                offset += 4;
+                byte b0 = (byte) buffer[offset++];
+                byte b1 = (byte) buffer[offset++];
+                byte b2 = (byte) buffer[offset++];
+                byte b3 = (byte) buffer[offset++];
+
+                int tmp = (b3 << 24) + (b2 << 16) + (b1 << 8) + b0;
                 return Int32ToSingleBits(tmp);
             }
 
             static unsafe float Int32ToSingleBits(int bits) => *(float*) &bits;
 
-            public byte ReadByte()
+            public sbyte ReadByte()
             {
                 return buffer[offset++];
+            }
+
+            public ushort ReadUshort()
+            {
+                byte b0 = (byte) buffer[offset++];
+                byte b1 = (byte) buffer[offset++];
+                return (ushort) ((b0 << 0) + (b1 << 8));
             }
         }
 
         readonly struct NodeIterator
         {
             public readonly OcTreeKey key;
-            public readonly byte depth;
-            readonly sbyte position;
-            readonly byte bitset;
+            public readonly int depth;
+            readonly int position;
+            readonly sbyte bitset;
 
-            NodeIterator(byte depth, sbyte position, in OcTreeKey key, byte bitset)
+            NodeIterator(int depth, int position, in OcTreeKey key, sbyte bitset)
             {
                 this.depth = depth;
                 this.position = position;
@@ -234,7 +235,7 @@ namespace Iviz.Displays
                 this.bitset = bitset;
             }
 
-            public static NodeIterator Start(byte bitset)
+            public static NodeIterator Start(sbyte bitset)
             {
                 return new NodeIterator(0, -1, new OcTreeKey(TreeMaxVal), bitset);
             }
@@ -244,21 +245,67 @@ namespace Iviz.Displays
                 return position < 7;
             }
 
-            public NodeIterator MoveNext()
+            public void MoveNext(out NodeIterator nextIt)
             {
-                return new NodeIterator(depth, (sbyte) (position + 1), key, bitset);
+                nextIt = new NodeIterator(depth, position + 1, key, bitset);
             }
 
             public bool HasChild => (bitset & (1 << position)) != 0;
             public bool IsLeaf => bitset == 0;
 
-            public NodeIterator CreateChild(byte childBitset)
+            public void CreateChild(sbyte childBitset, out NodeIterator childIt)
             {
-                return new NodeIterator((byte) (depth + 1), -1,
+                childIt = new NodeIterator(depth + 1, -1,
                     key.ComputeChildKey(position, TreeMaxVal >> (depth + 1)),
                     childBitset);
             }
         }
+
+        readonly struct BinNodeIterator
+        {
+            //public const int UnknownNode = 0;
+            public const int FreeNode = 1; // 10 flipped
+            public const int OccupiedNode = 2; // 01 flipped
+            public const int HasChildren = 3;
+
+            public readonly OcTreeKey key;
+            public readonly int depth;
+            readonly int position;
+            readonly ushort bitset;
+
+            BinNodeIterator(int depth, int position, in OcTreeKey key, ushort bitset)
+            {
+                this.depth = depth;
+                this.position = position;
+                this.key = key;
+                this.bitset = bitset;
+            }
+
+            public static BinNodeIterator Start(ushort bitset)
+            {
+                return new BinNodeIterator(0, -2, new OcTreeKey(TreeMaxVal), bitset);
+            }
+
+            public bool CanMoveNext()
+            {
+                return position < 14;
+            }
+
+            public void MoveNext(out BinNodeIterator nextIt)
+            {
+                nextIt = new BinNodeIterator(depth, position + 2, key, bitset);
+            }
+
+            public int ChildBits => (bitset & (3 << position)) >> position;
+
+            public OcTreeKey ChildKey => key.ComputeChildKey(position / 2, TreeMaxVal >> (depth + 1));
+
+            public void CreateChild(ushort childBitset, out BinNodeIterator childIt)
+            {
+                childIt = new BinNodeIterator(depth + 1, -2, ChildKey, childBitset);
+            }
+        }
+
 
         readonly struct OcTreeKey
         {
@@ -301,31 +348,16 @@ namespace Iviz.Displays
                 return new OcTreeKey(na, nb, nc);
             }
 
-            public override string ToString()
-            {
-                return $"[{a.ToString()} {b.ToString()} {c.ToString()}]";
-            }
+            public override string ToString() => $"[{a.ToString()} {b.ToString()} {c.ToString()}]";
         }
     }
 
-    public readonly struct OctreeLeaf
+    public class MalformedOctreeException : Exception
     {
-        public readonly Vector3 Position;
-        public readonly float LogOdds;
-        public readonly float Size;
-
-        public double Occupancy => Probability(LogOdds);
-
-        static double Probability(double logodds)
+        public MalformedOctreeException()
+            : base("Depth reached a value greater than 16. " +
+                   "Either the tree is malformed, or there is an error in the implementation.")
         {
-            return 1.0 - 1.0 / (1.0 + Math.Exp(logodds));
-        }
-
-        public OctreeLeaf(in Vector3 position, float logOdds, float size)
-        {
-            Position = position;
-            LogOdds = logOdds;
-            Size = size;
         }
     }
 }

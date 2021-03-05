@@ -36,6 +36,11 @@ namespace Iviz.Core
             return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
         }
 
+        public static float MaxAbsCoeff(this Quaternion p)
+        {
+            return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Magnitude(this Vector3 v)
         {
@@ -238,21 +243,21 @@ namespace Iviz.Core
             mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
         }
 
-        public static void DisposeDisplay<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
+        public static void ReturnToPool<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {
             if (resource != null)
             {
                 resource.Suspend();
-                ResourcePool.DisposeDisplay(resource);
+                ResourcePool.ReturnDisplay(resource);
             }
         }
 
-        public static void DisposeResource([CanBeNull] this IDisplay resource, [NotNull] Info<GameObject> info)
+        public static void ReturnToPool([CanBeNull] this IDisplay resource, [NotNull] Info<GameObject> info)
         {
             if (resource != null)
             {
                 resource.Suspend();
-                ResourcePool.Dispose(info, ((MonoBehaviour) resource).gameObject);
+                ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
             }
         }
 
@@ -429,15 +434,15 @@ namespace Iviz.Core
 
         [CanBeNull]
         public static T SafeNull<T>(this T o) where T : UnityEngine.Object => o != null ? o : null;
-
         public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
+        public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
         public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
         public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
 
         public static bool IsUsable(this Pose pose)
         {
             const int maxPoseMagnitude = 10000;
-            return (pose.position.sqrMagnitude < 3 * maxPoseMagnitude * maxPoseMagnitude);
+            return pose.position.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
         [ContractAnnotation("=> false, t:null; => true, t:notnull")]

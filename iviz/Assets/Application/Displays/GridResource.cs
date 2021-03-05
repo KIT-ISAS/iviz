@@ -292,9 +292,9 @@ namespace Iviz.Displays
             {
                 while (horizontals.Count != size)
                 {
-                    horizontals[horizontals.Count - 1].DisposeResource(Resource.Displays.Square);
+                    horizontals[horizontals.Count - 1].ReturnToPool(Resource.Displays.Square);
                     horizontals.RemoveAt(horizontals.Count - 1);
-                    verticals[verticals.Count - 1].DisposeResource(Resource.Displays.Square);
+                    verticals[verticals.Count - 1].ReturnToPool(Resource.Displays.Square);
                     verticals.RemoveAt(verticals.Count - 1);
                 }
             }
@@ -302,12 +302,12 @@ namespace Iviz.Displays
             {
                 for (int i = horizontals.Count; i < size; i++)
                 {
-                    var hResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    var hResource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Square, transform);
                     hResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
                     hResource.Layer = LayerType.IgnoreRaycast;
                     horizontals.Add(hResource);
 
-                    var vResource = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Square, transform);
+                    var vResource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Square, transform);
                     vResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
                     vResource.Layer = LayerType.IgnoreRaycast;
                     verticals.Add(vResource);
@@ -334,12 +334,12 @@ namespace Iviz.Displays
         {
             foreach (var plane in horizontals)
             {
-                plane.DisposeResource(Resource.Displays.Square);
+                plane.ReturnToPool(Resource.Displays.Square);
             }
 
             foreach (var plane in verticals)
             {
-                plane.DisposeResource(Resource.Displays.Square);
+                plane.ReturnToPool(Resource.Displays.Square);
             }
         }
     }

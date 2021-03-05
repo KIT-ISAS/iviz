@@ -27,7 +27,6 @@ namespace Iviz.Controllers
         [DataMember] public float MinIntensity { get; set; } = 0;
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; } = false;
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public sealed class LaserScanListener : ListenerController
@@ -59,7 +58,6 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
-                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -154,31 +152,18 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int)value;
-                }
-            }
-        }
-
         public LaserScanListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
 
             node = FrameNode.Instantiate("[LaserScanNode]");
-            resource = ResourcePool.GetOrCreateDisplay<RadialScanResource>(node.transform);
+            resource = ResourcePool.RentDisplay<RadialScanResource>(node.transform);
             Config = new LaserScanConfiguration();
         }
 
         public override void StartListening()
         {
-            Listener = new Listener<LaserScan>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<LaserScan>(config.Topic, Handler);
             node.name = "[" + config.Topic + "]";
         }
 
@@ -213,7 +198,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            resource.DisposeDisplay();
+            resource.ReturnToPool();
 
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);

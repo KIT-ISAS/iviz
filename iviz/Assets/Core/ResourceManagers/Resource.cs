@@ -9,6 +9,7 @@ using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Msgs.NavMsgs;
+using Iviz.Msgs.OctomapMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
@@ -66,7 +67,8 @@ namespace Iviz.Resources
             Joystick,
             Path,
             GridMap,
-            Robot
+            Robot,
+            Octomap
         }
 
 
@@ -108,7 +110,9 @@ namespace Iviz.Resources
                     {PoseArray.RosMessageType, ModuleType.Path},
                     {PolygonStamped.RosMessageType, ModuleType.Path},
                     {Polygon.RosMessageType, ModuleType.Path},
-                    {GridMap.RosMessageType, ModuleType.GridMap}
+                    {GridMap.RosMessageType, ModuleType.GridMap},
+                    {Octomap.RosMessageType, ModuleType.Octomap},
+                    {OctomapWithPose.RosMessageType, ModuleType.Octomap},
                 }
             );
 

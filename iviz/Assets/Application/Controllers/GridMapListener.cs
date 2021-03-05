@@ -29,7 +29,6 @@ namespace Iviz.Controllers
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public sealed class GridMapListener : ListenerController
@@ -61,7 +60,6 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
-                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -140,19 +138,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int) value;
-                }
-            }
-        }
-
         readonly List<string> fieldNames = new List<string>();
 
         public ReadOnlyCollection<string> FieldNames { get; }
@@ -166,14 +151,14 @@ namespace Iviz.Controllers
             node = FrameNode.Instantiate("[GridMapNode]");
             link = FrameNode.Instantiate("[GridMapLink]");
             link.transform.parent = node.Transform;
-            resource = ResourcePool.GetOrCreate<GridMapResource>(Resource.Displays.GridMap, link.transform);
+            resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.transform);
 
             Config = new GridMapConfiguration();
         }
 
         public override void StartListening()
         {
-            Listener = new Listener<GridMap>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<GridMap>(config.Topic, Handler);
         }
 
         static bool IsInvalidSize(double x)
@@ -241,7 +226,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
 
-            resource.DisposeDisplay();
+            resource.ReturnToPool();
 
             link.Stop();
             Object.Destroy(link.gameObject);

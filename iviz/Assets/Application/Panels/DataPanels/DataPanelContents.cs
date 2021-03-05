@@ -22,7 +22,7 @@ namespace Iviz.App
             {
                 FindWidgets();
             }
-            cachedWidgets.ForEach(w => w.ClearSubscribers());
+            cachedWidgets.ForEach(widget => widget.ClearSubscribers());
         }
 
         void FindWidgets()
@@ -46,7 +46,6 @@ namespace Iviz.App
                 case Resource.ModuleType.PointCloud: return o.AddComponent<PointCloudPanelContents>();
                 case Resource.ModuleType.Grid: return o.AddComponent<GridPanelContents>();
                 case Resource.ModuleType.Image: return o.AddComponent<ImagePanelContents>();
-                //case Resource.Module.LegacyRobot: return o.AddComponent<RobotPanelContents>();
                 case Resource.ModuleType.Robot: return o.AddComponent<SimpleRobotPanelContents>();
                 case Resource.ModuleType.Marker: return o.AddComponent<MarkerPanelContents>();
                 case Resource.ModuleType.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
@@ -59,6 +58,7 @@ namespace Iviz.App
                 case Resource.ModuleType.Joystick: return o.AddComponent<JoystickPanelContents>();
                 case Resource.ModuleType.Path: return o.AddComponent<PathPanelContents>();
                 case Resource.ModuleType.GridMap: return o.AddComponent<GridMapPanelContents>();
+                case Resource.ModuleType.Octomap: return o.AddComponent<OctomapPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

@@ -15,7 +15,9 @@ namespace Iviz.Displays
         [SerializeField] int timeWindowInMs = 5000;
         [SerializeField] Color color = UnityEngine.Color.red;
 
-        readonly Queue<(Vector3 A, Vector3 B)> measurements = new Queue<(Vector3 A, Vector3 B)>(5 * MeasurementsPerSecond);
+        readonly Queue<(Vector3 A, Vector3 B)> measurements =
+            new Queue<(Vector3, Vector3)>(5 * MeasurementsPerSecond);
+
         Vector3? lastMeasurement;
         float lastTick;
         int maxMeasurements = 160;
@@ -68,7 +70,7 @@ namespace Iviz.Displays
         void Awake()
         {
             transform.SetPose(Pose.identity);
-            resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+            resource = ResourcePool.RentDisplay<LineResource>(transform);
             resource.Name = "[Line for Trail]";
             resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
@@ -88,7 +90,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            var tick = Time.time;
+            float tick = Time.time;
             if (tick - lastTick < 0.1f)
             {
                 return;
@@ -117,12 +119,12 @@ namespace Iviz.Displays
         bool? LineSetter(ref NativeList<float4x2> lineBuffer)
         {
             int i = 1;
-            Color32 colorA = new Color32(Color.r, Color.g, Color.b, 0);
+            Color32 colorA = Color.WithAlpha(0);
             float scale = 255f / measurements.Count;
 
             foreach ((Vector3 a, Vector3 b) in measurements)
             {
-                Color32 colorB = new Color32(Color.r, Color.g, Color.b, (byte) (i * scale));
+                Color32 colorB = colorA.WithAlpha((byte) (i * scale));
                 LineWithColor line = new LineWithColor(a, colorA, b, colorB);
                 if (LineResource.IsElementValid(line))
                 {

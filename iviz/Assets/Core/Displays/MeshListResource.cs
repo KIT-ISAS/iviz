@@ -262,8 +262,7 @@ namespace Iviz.Displays
 
             UpdateBuffer();
         }
-
-
+        
         public void Reset()
         {
             pointBuffer.Clear();
