@@ -120,8 +120,8 @@ namespace Iviz.RosMaster
             Logger.Log($"** {this}: Starting at {MasterUri}");
             AddKey("/run_id", Guid.NewGuid().ToString());
             Task startTask = listener.StartAsync(StartContext, true);
-            await ManageRosoutAggAsync().AwaitNoThrow(this);
-            await startTask.AwaitNoThrow(this);
+            Task rosoutTask = ManageRosoutAggAsync().AwaitNoThrow(this);
+            await (startTask, rosoutTask).WhenAll();
             Logger.Log($"** {this}: Leaving thread.");
         }
 
@@ -143,7 +143,7 @@ namespace Iviz.RosMaster
         async Task ManageRosoutAggAsync()
         {
             Uri ownUri = new Uri($"http://{MasterUri.Host}:0");
-            RosClient client = new RosClient(MasterUri, "/rosout", ownUri);
+            RosClient client = await RosClient.CreateAsync(MasterUri, "/rosout", ownUri);
             RosChannelReader<Log> reader = new RosChannelReader<Log>();
             RosChannelWriter<Log> writer = new RosChannelWriter<Log>();
 
@@ -508,7 +508,7 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            Console.WriteLine("**** Delete " + key);
+            //Console.WriteLine("**** Delete " + key);
 
             parameters.Remove(key);
             return DefaultOkResponse;
@@ -621,7 +621,7 @@ namespace Iviz.RosMaster
             var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
             if (candidates.Length == 0)
             {
-                Console.WriteLine("**** " + key + " is missing");
+                //Console.WriteLine("**** " + key + " is missing");
                 return ErrorResponse($"Parameter [{key}] is not set");
             }
 
@@ -649,7 +649,7 @@ namespace Iviz.RosMaster
             bool success = parameters.ContainsKey(key);
             if (!success)
             {
-                Console.WriteLine("**** " + key + " is missing");
+                //Console.WriteLine("****© " + key + " is missing");
             }
 
             return OkResponse(success);
