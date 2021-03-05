@@ -962,8 +962,8 @@ namespace Iviz.Ros
             }
 
             var subscriberStats = mClient.GetSubscriberStatistics();
-
             var publisherStats = mClient.GetPublisherStatistics();
+            
             foreach (var stat in subscriberStats.Topics)
             {
                 builder.Append("<color=#000080ff><b>** Subscribed to ")

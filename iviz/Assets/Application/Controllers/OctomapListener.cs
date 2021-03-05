@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.OctomapMsgs;
+using Iviz.Octree;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -22,18 +23,17 @@ namespace Iviz.Controllers
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public SerializableColor Tint { get; set; } = new Color(0.5f, 0.5f, 1);
         [DataMember] public int MaxDepth { get; set; } = 16;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
     }
 
     public sealed class OctomapListener : ListenerController
     {
-        static readonly Vector2 WhiteBounds = new Vector2(-10, 1); 
+        static readonly Vector2 WhiteBounds = new Vector2(-10, 1);
 
         readonly MeshListResource resource;
         readonly FrameNode node;
-        Listener<Octomap> listener;
         OctreeHelper helper;
         Octomap lastMsg;
         readonly PointListResource.DirectPointSetter setterFunction;
@@ -141,13 +141,10 @@ namespace Iviz.Controllers
 
             if (lastMsg.Binary)
             {
-                switch (lastMsg.Id)
+                if (lastMsg.Id != "OcTree")
                 {
-                    case "OcTree":
-                        break;
-                    default:
-                        Logger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");
-                        return;
+                    Logger.Debug($"{this}: Unknown or unimplemented binary octomap id '{lastMsg.Id}'");
+                    return;
                 }
 
                 var enumerator = helper.EnumerateLeavesBinary(lastMsg.Data, 0, MaxDepth);
@@ -165,6 +162,9 @@ namespace Iviz.Controllers
                     case "OcTree":
                         valueStride = 4;
                         break;
+                    case "ColorOcTree":
+                        valueStride = 7;
+                        break;
                     default:
                         Logger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");
                         return;
@@ -177,7 +177,7 @@ namespace Iviz.Controllers
                     buffer.Add(leaf);
                 }
             }
-            
+
             Logger.Debug($"{this}: Construction of octomap finished with {buffer.Length.ToString()} values");
         }
 
