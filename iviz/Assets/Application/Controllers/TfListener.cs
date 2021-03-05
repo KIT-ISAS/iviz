@@ -450,7 +450,6 @@ namespace Iviz.Controllers
             Pose worldPose = FixedFrame.WorldPose;
             if (!worldPose.IsApproxIdentity())
             {
-                Debug.Log(FixedFrame.WorldPose);
                 OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
             }
         }
