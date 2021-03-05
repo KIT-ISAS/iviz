@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Core;
 using Iviz.Displays;
@@ -22,7 +23,7 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public int MaxDepth { get; set; } = 15;
+        [DataMember] public int MaxDepth { get; set; } = 16;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
     }
 
@@ -140,18 +141,21 @@ namespace Iviz.Controllers
 
             if (lastMsg.Binary)
             {
-                uint valueStride;
                 switch (lastMsg.Id)
                 {
                     case "OcTree":
-                        valueStride = 0;
                         break;
                     default:
                         Logger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");
                         return;
                 }
 
-                helper.GetLeavesBinary(lastMsg.Data, 0, valueStride, ref buffer, MaxDepth);
+                var enumerator = helper.EnumerateLeavesBinary(lastMsg.Data, 0, MaxDepth);
+                buffer.Capacity = Math.Max(buffer.Capacity, enumerator.NumberOfNodes / 2);
+                foreach (var leaf in enumerator)
+                {
+                    buffer.Add(leaf);
+                }
             }
             else
             {
@@ -166,7 +170,12 @@ namespace Iviz.Controllers
                         return;
                 }
 
-                helper.GetLeaves(lastMsg.Data, 0, valueStride, ref buffer, MaxDepth);
+                var enumerator = helper.EnumerateLeaves(lastMsg.Data, 0, valueStride, MaxDepth);
+                buffer.Capacity = Math.Max(buffer.Capacity, enumerator.NumberOfNodes / 2);
+                foreach (var leaf in enumerator)
+                {
+                    buffer.Add(leaf);
+                }
             }
             
             Logger.Debug($"{this}: Construction of octomap finished with {buffer.Length.ToString()} values");

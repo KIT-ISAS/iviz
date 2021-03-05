@@ -26,7 +26,7 @@ namespace Iviz.Displays
         [SerializeField] Color color = Color.white;
         [SerializeField] Color tint = Color.white;
         [SerializeField] bool occlusionOnly;
-        [SerializeField] float smoothness = 0.5f;
+        [SerializeField] float smoothness = Settings.IsHololens ? 0.25f : 0.5f;
         [SerializeField] float metallic = 0.5f;
         
         MeshRenderer mainRenderer;
