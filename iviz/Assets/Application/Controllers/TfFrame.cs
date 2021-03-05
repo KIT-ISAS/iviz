@@ -42,7 +42,7 @@ namespace Iviz.Controllers
             {
                 if (trail == null)
                 {
-                    trail = ResourcePool.GetOrCreateDisplay<TrailResource>(TfListener.UnityFrame.Transform);
+                    trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrame.Transform);
                     trail.TimeWindowInMs = TrailTimeWindowInMs;
                     trail.Color = Color.yellow;
                     trail.Name = $"[Trail:{id}]";
@@ -59,7 +59,7 @@ namespace Iviz.Controllers
             {
                 if (labelObjectText == null)
                 {
-                    labelObjectText = ResourcePool.GetOrCreateDisplay<TextMarkerResource>(Transform);
+                    labelObjectText = ResourcePool.RentDisplay<TextMarkerResource>(Transform);
                     labelObjectText.Name = "[Label]";
                     labelObjectText.Text = Id;
                     labelObjectText.transform.localScale = 0.5f * LabelSize * FrameSize * Vector3.one;
@@ -79,7 +79,7 @@ namespace Iviz.Controllers
             {
                 if (parentConnector == null)
                 {
-                    parentConnector = ResourcePool.GetOrCreateDisplay<LineConnector>(Transform);
+                    parentConnector = ResourcePool.RentDisplay<LineConnector>(Transform);
                     parentConnector.A = Transform;
 
                     parentConnector.B = Transform.parent.SafeNull() ?? TfListener.RootFrame.Transform;
@@ -271,7 +271,7 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            axis = ResourcePool.GetOrCreateDisplay<AxisFrameResource>(Transform);
+            axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
 
             axis.ColliderEnabled = true;
             axis.Layer = LayerType.IgnoreRaycast;
@@ -411,9 +411,9 @@ namespace Iviz.Controllers
         public override void Stop()
         {
             base.Stop();
-            axis.DisposeDisplay();
-            trail.DisposeDisplay();
-            labelObjectText.DisposeDisplay();
+            axis.ReturnToPool();
+            trail.ReturnToPool();
+            labelObjectText.ReturnToPool();
 
             trail = null;
             axis = null;

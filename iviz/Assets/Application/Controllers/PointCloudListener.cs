@@ -33,7 +33,6 @@ namespace Iviz.Controllers
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.PointCloud;
         [DataMember] public bool Visible { get; set; } = true;
@@ -58,7 +57,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             node = FrameNode.Instantiate("[PointCloudNode]");
-            pointCloud = ResourcePool.GetOrCreateDisplay<PointListResource>(node.transform);
+            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
             Config = new PointCloudConfiguration();
         }
 
@@ -84,7 +83,6 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
-                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -180,24 +178,11 @@ namespace Iviz.Controllers
 
         public bool IsIntensityUsed => pointCloud != null && pointCloud.UseColormap;
 
-        uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int) value;
-                }
-            }
-        }
-
         public ReadOnlyCollection<string> FieldNames { get; }
 
         public override void StartListening()
         {
-            Listener = new Listener<PointCloud2>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<PointCloud2>(config.Topic, Handler);
             node.name = $"[{config.Topic}]";
         }
 
@@ -645,7 +630,7 @@ namespace Iviz.Controllers
 
             if (pointCloud != null)
             {
-                pointCloud.DisposeDisplay();
+                pointCloud.ReturnToPool();
             }
 
             node.Stop();

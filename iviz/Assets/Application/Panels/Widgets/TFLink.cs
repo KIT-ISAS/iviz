@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
-    public class TFLink : MonoBehaviour, IPointerClickHandler
+    public sealed class TFLink : MonoBehaviour, IPointerClickHandler
     {
         TMP_Text text;
 

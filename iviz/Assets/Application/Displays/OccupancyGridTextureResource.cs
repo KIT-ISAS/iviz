@@ -228,6 +228,7 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
+            previousHash = null;
             MeshRenderer.enabled = true;
         }
 

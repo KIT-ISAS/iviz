@@ -53,7 +53,7 @@ namespace Iviz.Displays
         {
             if (Display != null)
             {
-                ResourcePool.TryDisposeDisplay(Display);
+                ResourcePool.TryReturnDisplay(Display);
             }
         }
     }

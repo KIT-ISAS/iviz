@@ -35,7 +35,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = FrameNode.Instantiate("DepthCloud");
-            resource = ResourcePool.GetOrCreateDisplay<DepthCloudResource>(node.transform);
+            resource = ResourcePool.RentDisplay<DepthCloudResource>(node.transform);
             Config = new DepthCloudConfiguration();
         }
 
@@ -133,7 +133,7 @@ namespace Iviz.Controllers
         public void StopController()
         {
             node.Stop();
-            resource.DisposeDisplay();
+            resource.ReturnToPool();
             Object.Destroy(node.gameObject);
         }
 

@@ -832,7 +832,7 @@ namespace Iviz.App
             public void CreateButtonObject([NotNull] ModuleData moduleData)
             {
                 GameObject buttonObject =
-                    ResourcePool.GetOrCreate(Resource.Widgets.DisplayButton, contentObject.transform, false);
+                    ResourcePool.Rent(Resource.Widgets.DisplayButton, contentObject.transform, false);
 
                 int size = buttons.Count;
                 float y = 2 * YOffset + size * (buttonHeight + YOffset);
@@ -856,7 +856,7 @@ namespace Iviz.App
                 buttons.RemoveAt(index);
 
                 displayButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                ResourcePool.Dispose(Resource.Widgets.DisplayButton, displayButton);
+                ResourcePool.Return(Resource.Widgets.DisplayButton, displayButton);
 
                 int i;
                 for (i = index; i < buttons.Count; i++)

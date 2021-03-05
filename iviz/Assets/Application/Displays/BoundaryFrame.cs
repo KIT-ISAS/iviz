@@ -136,7 +136,7 @@ namespace Iviz.Controllers
             foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
             {
                 meshRenderer.GetComponent<MeshMarkerResource>().Suspend();
-                ResourcePool.Dispose(Resource.Displays.Cube, meshRenderer.gameObject);
+                ResourcePool.Return(Resource.Displays.Cube, meshRenderer.gameObject);
             }
 
             Destroy(holder);
@@ -194,7 +194,7 @@ namespace Iviz.Controllers
         GameObject CreateFrameLink([NotNull] GameObject frameLinkHolder)
         {
             var frameLink =
-                ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
+                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
             frameLink.Name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;

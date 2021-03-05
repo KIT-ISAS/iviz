@@ -14,9 +14,11 @@ namespace Iviz.App
         public ToggleWidget ShowAxis { get; private set; }
         public ToggleWidget ShowTrail { get; private set; }
         public ToggleWidget ShowVector { get; private set; }
+        public ToggleWidget ShowAngle { get; private set; }
         public SliderWidget VectorScale { get; private set; }
         public SliderWidget TrailTime { get; private set; }
         public ColorPickerWidget Color { get; private set; }
+        public SliderWidget ScaleMultiplier { get; private set; }
 
         void Awake()
         {
@@ -26,13 +28,15 @@ namespace Iviz.App
             Frame = p.AddFrame();
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
-            Scale = p.AddSlider("Axis Scale").SetMinValue(0.1f).SetMaxValue(10.0f);
             ShowAxis = p.AddToggle("Show Frame");
+            ShowAngle = p.AddToggle("Show Angle");
             ShowTrail = p.AddToggle("Enable Trail");
             TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f).SetNumberOfSteps(45);
             Color = p.AddColorPicker("Color");
             ShowVector = p.AddToggle("Enable Vector");
-            VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.01f).SetMaxValue(10.0f).SetNumberOfSteps(999);
+            Scale = p.AddSlider("Scale").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
+            VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
+            ScaleMultiplier = p.AddSlider("Scale by Power of 10").SetMinValue(-4).SetMaxValue(4).SetIntegerOnly(true);
             p.UpdateSize();
             gameObject.SetActive(false);
         }

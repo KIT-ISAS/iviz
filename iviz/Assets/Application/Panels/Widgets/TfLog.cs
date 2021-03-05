@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class TfLog : MonoBehaviour, IWidget
+    public sealed class TfLog : MonoBehaviour, IWidget
     {
         static TfLog Instance;
 

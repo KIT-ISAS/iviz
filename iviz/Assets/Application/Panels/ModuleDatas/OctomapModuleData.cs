@@ -1,0 +1,108 @@
+﻿using System.Collections.Generic;
+using Iviz.Controllers;
+using Iviz.Core;
+using Iviz.Resources;
+using JetBrains.Annotations;
+using Newtonsoft.Json;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
+
+namespace Iviz.App
+{
+    /// <summary>
+    /// <see cref="OctomapPanelContents"/> 
+    /// </summary>
+
+    public sealed class OctomapModuleData : ListenerModuleData
+    {
+        [NotNull] readonly OctomapListener listener;
+        [NotNull] readonly OctomapPanelContents panel;
+
+        protected override ListenerController Listener => listener;
+
+        public override DataPanelContents Panel => panel;
+        public override Resource.ModuleType ModuleType => Resource.ModuleType.Octomap;
+        public override IConfiguration Configuration => listener.Config;
+
+
+        public OctomapModuleData([NotNull] ModuleDataConstructor constructor) :
+        base(constructor.GetConfiguration<OctomapConfiguration>()?.Topic ?? constructor.Topic, 
+            constructor.Type)
+        {
+            panel = DataPanelManager.GetPanelByResourceType<OctomapPanelContents>(Resource.ModuleType.Octomap);
+            listener = new OctomapListener(this);
+            if (constructor.Configuration == null)
+            {
+                listener.Config.Topic = Topic;
+            }
+            else
+            {
+                listener.Config = (OctomapConfiguration)constructor.Configuration;
+            }
+            listener.StartListening();
+            UpdateModuleButton();
+        }
+
+        public override void SetupPanel()
+        {
+            panel.Listener.Listener = listener.Listener;
+            panel.Frame.Owner = listener;
+
+            panel.HideButton.State = listener.Visible;
+            panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
+            panel.Tint.Value = listener.Tint;
+            panel.MaxDepth.Value = listener.MaxDepth;
+
+            panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(1);
+            panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
+            panel.MaxDepth.ValueChanged += f => listener.MaxDepth = (int) f;
+
+            panel.CloseButton.Clicked += () =>
+            {
+                DataPanelManager.HideSelectedPanel();
+                ModuleListPanel.RemoveModule(this);
+            };
+            panel.HideButton.Clicked += () =>
+            {
+                listener.Visible = !listener.Visible;
+                panel.HideButton.State = listener.Visible;
+                UpdateModuleButton();
+            };
+        }
+
+        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        {
+            var config = JsonConvert.DeserializeObject<OctomapConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(OctomapConfiguration.Visible):
+                        listener.Visible = config.Visible;
+                        break;
+                    case nameof(OctomapConfiguration.RenderAsOcclusionOnly):
+                        listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        break;
+                    case nameof(OctomapConfiguration.Tint):
+                        listener.Tint = config.Tint;
+                        break;
+                    case nameof(OctomapConfiguration.MaxDepth):
+                        listener.MaxDepth = config.MaxDepth;
+                        break;
+
+                    default:
+                        Logger.Error($"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+
+            ResetPanel();
+        }             
+
+        public override void AddToState(StateConfiguration config)
+        {
+            config.Octomaps.Add(listener.Config);
+        }
+    }
+}

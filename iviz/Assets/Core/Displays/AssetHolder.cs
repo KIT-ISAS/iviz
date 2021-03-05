@@ -42,8 +42,10 @@ namespace Iviz.Displays
         public Material MeshListMaterial;
         public Material MeshListWithColormap;
         public Material MeshListWithColormapScaleY;
+        public Material MeshListWithColormapScaleAll;
         public Material MeshListOcclusionOnly;
         public Material MeshListOcclusionOnlyWithScaleY;
+        public Material MeshListOcclusionOnlyWithScaleAll;
         
         public Texture2D Lines;
         public Texture2D Pink;

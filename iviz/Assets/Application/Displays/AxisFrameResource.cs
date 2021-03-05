@@ -84,7 +84,7 @@ namespace Iviz.Displays
 
             for (int i = 0; i < 3; i++)
             {
-                axisObjects[i] = ResourcePool.GetOrCreate<MeshMarkerResource>(Resource.Displays.Cube, transform);
+                axisObjects[i] = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
                 axisObjects[i].gameObject.name = Names[i];
                 axisObjects[i].ColliderEnabled = false;
                 axisObjects[i].Layer = Layer;
@@ -112,9 +112,9 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
-            axisObjects[0].DisposeResource(Resource.Displays.Cube);
-            axisObjects[1].DisposeResource(Resource.Displays.Cube);
-            axisObjects[2].DisposeResource(Resource.Displays.Cube);
+            axisObjects[0].ReturnToPool(Resource.Displays.Cube);
+            axisObjects[1].ReturnToPool(Resource.Displays.Cube);
+            axisObjects[2].ReturnToPool(Resource.Displays.Cube);
         }
 
         public override void Suspend()

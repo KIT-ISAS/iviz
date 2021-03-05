@@ -128,7 +128,7 @@ namespace Iviz.Displays
                 Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
                             $"links and {Joints.Count.ToString()} joints. {errorStr}");
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 Logger.Error($"{this}: Robot building canceled.");
                 throw;
@@ -284,7 +284,7 @@ namespace Iviz.Displays
                         continue;
                     }
 
-                    resourceObject = ResourcePool.GetOrCreate(info);
+                    resourceObject = ResourcePool.Rent(info);
                     objectResources.Add((resourceObject, info));
                     resourceObject.transform.SetParent(visualObject.transform, false);
                     visualObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
@@ -292,7 +292,7 @@ namespace Iviz.Displays
                 }
                 else if (geometry.Cylinder != null)
                 {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Cylinder);
+                    resourceObject = ResourcePool.Rent(Resource.Displays.Cylinder);
                     objectResources.Add((resourceObject, Resource.Displays.Cylinder));
                     resourceObject.transform.SetParent(visualObject.transform, false);
                     visualObject.transform.localScale = new Vector3(
@@ -302,14 +302,14 @@ namespace Iviz.Displays
                 }
                 else if (geometry.Box != null)
                 {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Cube);
+                    resourceObject = ResourcePool.Rent(Resource.Displays.Cube);
                     objectResources.Add((resourceObject, Resource.Displays.Cube));
                     resourceObject.transform.SetParent(visualObject.transform, false);
                     visualObject.transform.localScale = geometry.Box.Size.ToVector3().Abs();
                 }
                 else if (geometry.Sphere != null)
                 {
-                    resourceObject = ResourcePool.GetOrCreate(Resource.Displays.Sphere);
+                    resourceObject = ResourcePool.Rent(Resource.Displays.Sphere);
                     objectResources.Add((resourceObject, Resource.Displays.Sphere));
                     resourceObject.transform.SetParent(visualObject.transform, false);
                     visualObject.transform.localScale = geometry.Sphere.Radius * Vector3.one;
@@ -451,7 +451,7 @@ namespace Iviz.Displays
             {
                 var display = gameObject.GetComponent<IDisplay>();
                 display?.Suspend();
-                ResourcePool.Dispose(info, gameObject);
+                ResourcePool.Return(info, gameObject);
             }
 
             Object.Destroy(BaseLinkObject);

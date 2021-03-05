@@ -24,7 +24,7 @@ namespace Iviz.Displays
             mesh = new Mesh();
             plane = GetComponent<ARPlane>();
 
-            lines = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+            lines = ResourcePool.RentDisplay<LineResource>(transform);
             lines.Visible = false;
             lines.ElementScale = 0.005f;
             lines.Layer = gameObject.layer;
@@ -136,7 +136,7 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            lines.DisposeDisplay();
+            lines.ReturnToPool();
             lines = null;
             ARController.ARModeChanged -= OnARModeChanged;
         }

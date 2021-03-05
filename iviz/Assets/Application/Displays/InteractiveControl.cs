@@ -356,7 +356,7 @@ namespace Iviz.Displays
                 draggable.PointerDown += RaisePointerDown;
             }
 
-            frame = ResourcePool.GetOrCreateDisplay<BoundaryFrame>(transform);
+            frame = ResourcePool.RentDisplay<BoundaryFrame>(transform);
             frame.FrameAxisLength = 0.125f;
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
             frame.Layer = LayerType.IgnoreRaycast;

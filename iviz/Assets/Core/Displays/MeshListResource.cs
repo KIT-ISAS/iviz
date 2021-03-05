@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -28,13 +27,16 @@ namespace Iviz.Displays
         [SerializeField] Vector3 elementScale3;
         [SerializeField] Vector3 preTranslation;
         [SerializeField] Mesh mesh;
-        
+
         readonly uint[] argsBuffer = {0, 0, 0, 0, 0};
         [CanBeNull] ComputeBuffer argsComputeBuffer;
         [CanBeNull] Info<GameObject> meshResource;
+
         NativeList<float4> pointBuffer;
+        
         [CanBeNull] ComputeBuffer pointComputeBuffer;
         bool useIntensityForScaleY;
+        bool useIntensityForAllScales;
 
         [NotNull]
         Mesh Mesh
@@ -46,7 +48,7 @@ namespace Iviz.Displays
                 {
                     throw new ArgumentNullException(nameof(value), "Cannot set a null mesh!");
                 }
-                
+
                 mesh = value;
 
                 argsBuffer[0] = mesh.GetIndexCount(0);
@@ -90,7 +92,27 @@ namespace Iviz.Displays
             get => useIntensityForScaleY;
             set
             {
+                if (value)
+                {
+                    useIntensityForAllScales = false;
+                }
+
                 useIntensityForScaleY = value;
+                UpdateScale();
+            }
+        }
+
+        public bool UseIntensityForAllScales
+        {
+            get => useIntensityForAllScales;
+            set
+            {
+                if (value)
+                {
+                    useIntensityForScaleY = false;
+                }
+
+                useIntensityForAllScales = value;
                 UpdateScale();
             }
         }
@@ -156,30 +178,45 @@ namespace Iviz.Displays
             Bounds worldBounds = BoxCollider.bounds;
             Properties.SetVector(BoundaryCenterID, worldBounds.center);
 
-            Material material;
-            if (OcclusionOnly && UseIntensityForScaleY)
-            {
-                material = Resource.Materials.MeshListOcclusionOnlyWithScaleY.Object;
-            }
-            else if (OcclusionOnly)
-            {
-                material = Resource.Materials.MeshListOcclusionOnly.Object;
-            }
-            else if (UseIntensityForScaleY)
-            {
-                material = Resource.Materials.MeshListWithColormapScaleY.Object;
-            }
-            else if (UseColormap)
-            {
-                material = Resource.Materials.MeshListWithColormap.Object;
-            }
-            else
-            {
-                material = Resource.Materials.MeshList.Object;
-            }
+            Material material = FindMaterial();
 
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
                 0, Properties, CastShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
+        }
+
+        Material FindMaterial()
+        {
+            if (OcclusionOnly && UseIntensityForScaleY)
+            {
+                return Resource.Materials.MeshListOcclusionOnlyWithScaleY.Object;
+            }
+
+            if (OcclusionOnly && UseIntensityForAllScales)
+            {
+                return Resource.Materials.MeshListOcclusionOnlyWithScaleAll.Object;
+            }
+
+            if (OcclusionOnly)
+            {
+                return Resource.Materials.MeshListOcclusionOnly.Object;
+            }
+
+            if (UseIntensityForScaleY)
+            {
+                return Resource.Materials.MeshListWithColormapScaleY.Object;
+            }
+
+            if (UseIntensityForAllScales)
+            {
+                return Resource.Materials.MeshListWithColormapScaleAll.Object;
+            }
+
+            if (UseColormap)
+            {
+                return Resource.Materials.MeshListWithColormap.Object;
+            }
+
+            return Resource.Materials.MeshList.Object;
         }
 
         void OnDestroy()
@@ -211,7 +248,7 @@ namespace Iviz.Displays
         public void Set([NotNull] List<PointWithColor> points)
         {
             pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, points.Count);
-            
+
             pointBuffer.Clear();
             foreach (PointWithColor t in points)
             {
@@ -225,7 +262,6 @@ namespace Iviz.Displays
 
             UpdateBuffer();
         }
-
         
         public void Reset()
         {
@@ -243,7 +279,7 @@ namespace Iviz.Displays
             pointBuffer.AddRange(points);
             UpdateBuffer();
         }
-        
+
         public void SetDirect([NotNull] PointListResource.DirectPointSetter callback, int reserve = 0)
         {
             if (callback == null)
@@ -259,8 +295,8 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             callback(ref pointBuffer);
             UpdateBuffer();
-        }        
-        
+        }
+
         void UpdateScale()
         {
             var realScale = new Vector4(
@@ -290,10 +326,10 @@ namespace Iviz.Displays
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds pointBounds, out Vector2 span);
-            
+
             bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
             int instanceCount = isSinglePassStereo ? 2 * Size : Size;
-            
+
             argsBuffer[1] = (uint) instanceCount;
             argsComputeBuffer?.SetData(argsBuffer);
 

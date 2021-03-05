@@ -25,11 +25,12 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
+            GameThread.EverySecond -= CheckForDead;
             Instance = null;
         }
 
         [NotNull]
-        public static GameObject GetOrCreate([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null,
+        public static GameObject Rent([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null,
             bool enable = true)
         {
             if (resource == null)
@@ -48,7 +49,7 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        public static T GetOrCreate<T>([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null, bool enable = true)
+        public static T Rent<T>([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null, bool enable = true)
             where T : MonoBehaviour
         {
             if (resource == null)
@@ -56,10 +57,21 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            return GetOrCreate(resource, parent, enable).GetComponent<T>();
+            return Rent(resource, parent, enable).GetComponent<T>();
+        }
+        
+        [NotNull]
+        public static T RentDisplay<T>([CanBeNull] Transform parent = null) where T : MonoBehaviour, IDisplay
+        {
+            if (!Resource.Displays.TryGetResource(typeof(T), out var info))
+            {
+                throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
+            }
+
+            return Rent<T>(info, parent);
         }
 
-        public static void Dispose([NotNull] Info<GameObject> resource, [NotNull] GameObject instance)
+        public static void Return([NotNull] Info<GameObject> resource, [NotNull] GameObject instance)
         {
             if (resource == null)
             {
@@ -81,18 +93,7 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull]
-        public static T GetOrCreateDisplay<T>([CanBeNull] Transform parent = null) where T : MonoBehaviour, IDisplay
-        {
-            if (!Resource.Displays.TryGetResource(typeof(T), out var info))
-            {
-                throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
-            }
-
-            return GetOrCreate<T>(info, parent);
-        }
-
-        public static void DisposeDisplay<T>([NotNull] T resource) where T : MonoBehaviour, IDisplay
+        public static void ReturnDisplay<T>([NotNull] T resource) where T : MonoBehaviour, IDisplay
         {
             if (resource == null)
             {
@@ -104,10 +105,10 @@ namespace Iviz.Displays
                 throw new ResourceNotFoundException("Cannot find unique display type for resource");
             }
 
-            Dispose(info, resource.gameObject);
+            Return(info, resource.gameObject);
         }
 
-        public static bool TryDisposeDisplay([CanBeNull] IDisplay resource)
+        public static bool TryReturnDisplay([CanBeNull] IDisplay resource)
         {
             if (resource == null)
             {
@@ -126,7 +127,7 @@ namespace Iviz.Displays
                 return false;
             }
 
-            Dispose(info, behaviour.gameObject);
+            Return(info, behaviour.gameObject);
             return true;
         }
 
@@ -153,7 +154,7 @@ namespace Iviz.Displays
 
         GameObject Get([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent, bool enable)
         {
-            if (!pool.TryGetValue(resource.Id, out var instances) || !instances.Any())
+            if (!pool.TryGetValue(resource.Id, out var instances) || instances.Count == 0)
             {
                 return Instantiate(resource.Object, parent);
             }
@@ -169,7 +170,7 @@ namespace Iviz.Displays
             return obj;
         }
 
-        void Add(Info<GameObject> resource, GameObject obj)
+        void Add([NotNull] Info<GameObject> resource, [NotNull] GameObject obj)
         {
             if (obj == null)
             {
@@ -204,7 +205,7 @@ namespace Iviz.Displays
             destroyedObjects.Add(obj.GetInstanceID());
         }
 
-        class ObjectWithDeadline
+        readonly struct ObjectWithDeadline
         {
             public ObjectWithDeadline([NotNull] GameObject o)
             {

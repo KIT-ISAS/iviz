@@ -30,7 +30,6 @@ namespace Iviz.Controllers
         [DataMember] public float ScaleZ { get; set; } = 0.5f;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public uint MaxQueueSize { get; set; } = 1;
     }
 
     public sealed class OccupancyGridListener : ListenerController
@@ -90,7 +89,6 @@ namespace Iviz.Controllers
                 Tint = value.Tint;
                 CubesVisible = value.CubesVisible;
                 TextureVisible = value.TextureVisible;
-                MaxQueueSize = value.MaxQueueSize;
             }
         }
 
@@ -160,19 +158,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public uint MaxQueueSize
-        {
-            get => config.MaxQueueSize;
-            set
-            {
-                config.MaxQueueSize = value;
-                if (Listener != null)
-                {
-                    Listener.MaxQueueSize = (int) value;
-                }
-            }
-        }
-
         public bool RenderAsOcclusionOnly
         {
             get => config.RenderAsOcclusionOnly;
@@ -236,7 +221,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<OccupancyGrid>(config.Topic, Handler) {MaxQueueSize = (int) MaxQueueSize};
+            Listener = new Listener<OccupancyGrid>(config.Topic, Handler);
         }
 
         void Handler(OccupancyGrid msg)
@@ -300,7 +285,7 @@ namespace Iviz.Controllers
                 gridTiles = new OccupancyGridResource[16];
                 for (int j = 0; j < gridTiles.Length; j++)
                 {
-                    gridTiles[j] = ResourcePool.GetOrCreate<OccupancyGridResource>(
+                    gridTiles[j] = ResourcePool.Rent<OccupancyGridResource>(
                         Resource.Displays.OccupancyGridResource,
                         cubeNode.transform);
                     gridTiles[j].transform.SetLocalPose(Pose.identity);
@@ -358,7 +343,7 @@ namespace Iviz.Controllers
                     for (int j = textureTiles.Count; j < tileTotalSize; j++)
                     {
                         textureTiles.Add(
-                            ResourcePool.GetOrCreateDisplay<OccupancyGridTextureResource>(textureNode.transform));
+                            ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.transform));
                         textureTiles[j].Visible = Visible;
                         textureTiles[j].Colormap = Colormap;
                         textureTiles[j].FlipMinMax = FlipMinMax;
@@ -368,7 +353,7 @@ namespace Iviz.Controllers
                 {
                     for (int j = tileTotalSize; j < textureTiles.Count; j++)
                     {
-                        textureTiles[j].DisposeDisplay();
+                        textureTiles[j].ReturnToPool();
                         textureTiles[j] = null;
                     }
 
@@ -409,12 +394,12 @@ namespace Iviz.Controllers
             base.StopController();
             foreach (var grid in gridTiles)
             {
-                grid.DisposeDisplay();
+                grid.ReturnToPool();
             }
 
             foreach (var texture in textureTiles)
             {
-                texture.DisposeDisplay();
+                texture.ReturnToPool();
             }
 
             cubeNode.Stop();

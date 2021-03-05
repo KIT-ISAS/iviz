@@ -45,7 +45,7 @@ namespace Iviz.App
             set => emptyText.text = value;
         }
 
-        public class ItemEntry
+        public sealed class ItemEntry
         {
             readonly GameObject buttonObject;
             readonly Text text;
@@ -77,7 +77,7 @@ namespace Iviz.App
 
                 this.buttonHeight = buttonHeight;
                 this.yOffset = yOffset;
-                buttonObject = ResourcePool.GetOrCreate(Resource.Widgets.TopicsButton, parent.transform, false);
+                buttonObject = ResourcePool.Rent(Resource.Widgets.TopicsButton, parent.transform, false);
 
                 RectTransform mTransform = ButtonTransform;
                 Vector2 sizeDelta = mTransform.sizeDelta;
@@ -142,7 +142,7 @@ namespace Iviz.App
                     mTransform.sizeDelta = new Vector2(sizeDelta.x, BaseButtonHeight);
                 }
 
-                ResourcePool.Dispose(Resource.Widgets.TopicsButton, buttonObject);
+                ResourcePool.Return(Resource.Widgets.TopicsButton, buttonObject);
             }
         }
 

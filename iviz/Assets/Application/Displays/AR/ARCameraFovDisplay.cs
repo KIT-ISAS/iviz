@@ -18,7 +18,7 @@ namespace Iviz.Displays
         {
             if (resource == null)
             {
-                resource = ResourcePool.GetOrCreateDisplay<LineResource>(transform);
+                resource = ResourcePool.RentDisplay<LineResource>(transform);
             }
 
             transform.SetParentLocal(TfListener.OriginFrame.Transform);
@@ -87,7 +87,7 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            resource.DisposeDisplay();
+            resource.ReturnToPool();
             ARController.ARModeChanged -= OnARModeChanged;
         }
     }

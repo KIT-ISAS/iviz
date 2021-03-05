@@ -7,6 +7,7 @@ Shader "iviz/MultiplyMesh"
         _Metallic ("Metallic", Range(0,1)) = 0.0
 		[Toggle(USE_TEXTURE)] _UseTexture("Use Texture", Float) = 1
 		[Toggle(USE_TEXTURE_SCALE)] _UseTextureScale("Use Texture ScaleY", Float) = 1
+		[Toggle(USE_TEXTURE_SCALE_ALL)] _UseTextureScaleAll("Use Texture Scale All", Float) = 0
 		_MainTex("Atlas Texture", 2D) = "defaulttexture" {}    	
     }
     SubShader
@@ -16,13 +17,13 @@ Shader "iviz/MultiplyMesh"
         CGPROGRAM
         #pragma surface surf Standard addshadow fullforwardshadows vertex:vert
         #pragma instancing_options procedural:setup 
-		#pragma multi_compile _ USE_TEXTURE USE_TEXTURE_SCALE
+		#pragma multi_compile _ USE_TEXTURE USE_TEXTURE_SCALE USE_TEXTURE_SCALE_ALL
         #pragma multi_compile_instancing
         #pragma target 4.5
 
         struct PointWithColor {
             float3 pos;
-#if USE_TEXTURE || USE_TEXTURE_SCALE
+#if USE_TEXTURE || USE_TEXTURE_SCALE || USE_TEXTURE_SCALE_ALL
 		    float intensity;
 #else
 			int intensity;
@@ -76,19 +77,22 @@ Shader "iviz/MultiplyMesh"
 	#endif
 
 
-    #if USE_TEXTURE || USE_TEXTURE_SCALE
+    #if USE_TEXTURE || USE_TEXTURE_SCALE || USE_TEXTURE_SCALE_ALL
 			float intensity = _Points[instanceID].intensity;
     #endif
 
 	#if USE_TEXTURE_SCALE
 			v.vertex.y *= intensity;
     #endif
+	#if USE_TEXTURE_SCALE_ALL
+			v.vertex.xyz *= intensity;
+    #endif
 
             v.vertex.xyz += _Points[instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
             v.vertex -= _BoundaryCenter;
 
-	#if USE_TEXTURE || USE_TEXTURE_SCALE
+	#if USE_TEXTURE || USE_TEXTURE_SCALE || USE_TEXTURE_SCALE_ALL
 			o.color = tex2Dlod(_MainTex, float4(intensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));
     #else
             int color = _Points[instanceID].intensity;

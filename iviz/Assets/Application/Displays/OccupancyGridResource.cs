@@ -98,7 +98,7 @@ namespace Iviz.Displays
         void Awake()
         {
             pointBuffer = new NativeList<float4>(Allocator.Persistent);
-            resource = ResourcePool.GetOrCreateDisplay<MeshListResource>(transform);
+            resource = ResourcePool.RentDisplay<MeshListResource>(transform);
 
             NumCellsX = 10;
             NumCellsY = 10;
