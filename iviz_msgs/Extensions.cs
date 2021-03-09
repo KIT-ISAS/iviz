@@ -1,4 +1,5 @@
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Msgs
@@ -123,5 +124,14 @@ namespace Iviz.Msgs
             ChildFrameId = t.ChildFrameId ?? "";
             Transform = t.Transform;
         }
+
+        public static string ToString(in Point p) =>
+            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+        
+        public static string ToString(in Vector3 p) =>
+            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+        
+        public static string ToString(in Vector3f p) =>
+            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
     }
 }

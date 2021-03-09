@@ -19,7 +19,7 @@ namespace Iviz.Msgs
         /// </summary>
         readonly byte* end;
 
-        Buffer(byte* ptr, byte* end)
+        public Buffer(byte* ptr, byte* end)
         {
             this.ptr = ptr;
             this.end = end;

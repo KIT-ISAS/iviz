@@ -78,6 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
                 
         /// Custom iviz code
+        public override string ToString() => Extensions.ToString(this);
         public static readonly Vector3f Zero = new Vector3f(0, 0, 0);
         public static readonly Vector3f One = new Vector3f(1, 1, 1);
         public static readonly Vector3f UnitX = new Vector3f(1, 0, 0);

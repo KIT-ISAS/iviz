@@ -78,8 +78,9 @@ namespace Iviz.Msgs.GeometryMsgs
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
-                
+
         /// Custom iviz code
+        public override string ToString() => Extensions.ToString(this);
         public static readonly Point Zero = new Point(0, 0, 0);
         public static readonly Point One = new Point(1, 1, 1);
         public static readonly Point UnitX = new Point(1, 0, 0);

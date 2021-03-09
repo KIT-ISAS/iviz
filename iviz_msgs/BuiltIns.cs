@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Newtonsoft.Json;
 
 #if !NETSTANDARD2_0
 #endif
@@ -221,6 +222,21 @@ namespace Iviz.Msgs
             var bytes = new Rent<byte>(UTF8.GetByteCount(text));
             UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
             return bytes;
+        }
+        
+        public static string ToJsonString(this ISerializable o, bool indented = true)
+        {
+            return ToJsonString((object) o, indented);
+        }
+
+        public static string ToJsonString(this IService o, bool indented = true)
+        {
+            return ToJsonString((object) o, indented);
+        }
+
+        public static string ToJsonString(object o, bool indented = true)
+        {
+            return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
         }
     }
 }

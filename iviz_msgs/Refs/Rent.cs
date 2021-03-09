@@ -50,11 +50,11 @@ namespace Iviz.Msgs
 
         public override string ToString()
         {
-            return $"[Rent Type={typeof(T).Name} Count={Length} RealSize={(Array != null ? Array.Length : 0)}]";
+            return $"[Rent Type={typeof(T).Name} Length={Length} RealSize={(Array != null ? Array.Length : 0)}]";
         }
 
         public RentEnumerator<T> GetEnumerator() => new(Array, Length);
-        
+
         public T this[int index]
         {
             get
@@ -75,6 +75,79 @@ namespace Iviz.Msgs
 
                 Array[index] = value;
             }
-        }        
+        }
+    }
+
+    public readonly struct RentAndClear<T> : IDisposable
+    {
+        static readonly ArrayPool<T?> Pool = ArrayPool<T?>.Shared;
+
+        public readonly int Length;
+        public readonly T?[] Array;
+
+#if !NETSTANDARD2_0
+        public Span<T> Span => new(Array, 0, Length);
+#endif
+
+        public RentAndClear(int count)
+        {
+            switch (count)
+            {
+                case < 0:
+                    throw new ArgumentException("Count cannot be negative", nameof(count));
+                case 0:
+                    Array = System.Array.Empty<T>();
+                    Length = 0;
+                    break;
+                default:
+                    Array = Pool.Rent(count);
+                    Length = count;
+                    break;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (Length <= 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < Length; i++)
+            {
+                Array[i] = default;
+            }
+
+            Pool.Return(Array);
+        }
+
+        public override string ToString()
+        {
+            return $"[RentAndClear Type={typeof(T).Name} Length={Length} RealSize={(Array != null ? Array.Length : 0)}]";
+        }
+
+        public RentEnumerator<T?> GetEnumerator() => new(Array, Length);
+
+        public T? this[int index]
+        {
+            get
+            {
+                if ((uint) index >= Length)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                return Array[index];
+            }
+            set
+            {
+                if ((uint) index >= Length)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                Array[index] = value;
+            }
+        }
     }
 }
