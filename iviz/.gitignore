@@ -4,6 +4,8 @@
 #https://github.com/Microsoft/GalaxyExplorer/blob/master/.gitignore
 #https://gist.github.com/Ikalou/197c414d62f45a1193fd
 
+.DS_Store
+
 # =============== #
 # Unity generated #
 # =============== #

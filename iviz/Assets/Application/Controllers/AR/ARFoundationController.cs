@@ -2,12 +2,17 @@ using System;
 using System.Collections.Generic;
 using Iviz.Roslib;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using BitMiracle.LibJpeg.Classic;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
@@ -458,7 +463,7 @@ namespace Iviz.Controllers
             {
                 arLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
             }
-            
+
             if (lightEstimation.mainLightColor.HasValue)
             {
                 arLight.color = lightEstimation.mainLightColor.Value;
@@ -469,8 +474,7 @@ namespace Iviz.Controllers
                 var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
                 RenderSettings.ambientMode = AmbientMode.Skybox;
                 RenderSettings.ambientProbe = sphericalHarmonics.Value;
-            }            
-
+            }
         }
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
@@ -502,6 +506,48 @@ namespace Iviz.Controllers
             SetWorldPose(registeredPose, RootMover.ImageMarker);
 
             //markerFound = true;
+        }
+
+        void CaptureImage(Opencv.Context context)
+        {
+            var cameraManager = arCamera.GetComponent<ARCameraManager>();
+            if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
+            {
+                return;
+            }
+
+            var conversionParams = new XRCpuImage.ConversionParams
+            {
+                inputRect = new RectInt(0, 0, image.width, image.height),
+                outputDimensions = new Vector2Int(image.width, image.height),
+                outputFormat = TextureFormat.RGB24,
+                transformation = XRCpuImage.Transformation.None
+            };
+
+            void Callback(
+                XRCpuImage.AsyncConversionStatus status,
+                XRCpuImage.ConversionParams parameters,
+                NativeArray<byte> array)
+            {
+                if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    Debug.LogErrorFormat("Request failed with status {0}", status);
+                    return;
+                }
+
+                try
+                {
+                    context.SetImageData(array);
+                }
+                catch (ObjectDisposedException)
+                {
+                }
+            }
+
+            using (image)
+            {
+                image.ConvertAsync(conversionParams, Callback);
+            }
         }
 
         public override void StopController()
