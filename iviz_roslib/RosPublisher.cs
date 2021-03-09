@@ -276,7 +276,7 @@ namespace Iviz.Roslib
         {
             if (!IsAlive)
             {
-                throw new ObjectDisposedException("This is not a valid publisher");
+                throw new ObjectDisposedException("this", "This is not a valid publisher");
             }
         }
 

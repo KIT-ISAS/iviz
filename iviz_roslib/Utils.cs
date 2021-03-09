@@ -92,21 +92,6 @@ namespace Iviz.Roslib
             }
         }
 
-        public static string ToJsonString(this ISerializable o, bool indented = true)
-        {
-            return ToJsonString((object) o, indented);
-        }
-
-        public static string ToJsonString(this IService o, bool indented = true)
-        {
-            return ToJsonString((object) o, indented);
-        }
-
-        public static string ToJsonString(object o, bool indented = true)
-        {
-            return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
-        }
-
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
         {
             return new(t);
@@ -305,7 +290,7 @@ namespace Iviz.Roslib
     {
         public override string ToString()
         {
-            return Utils.ToJsonString(this);
+            return BuiltIns.ToJsonString(this);
         }
     }
 
@@ -325,7 +310,7 @@ namespace Iviz.Roslib
         {
             if (disposed)
             {
-                throw new ObjectDisposedException("Dispose() has already been called on this object.");
+                throw new ObjectDisposedException("this", "Dispose() has already been called on this object.");
             }
 
             if (buffer.Array.Length >= size)

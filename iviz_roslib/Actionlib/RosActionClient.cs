@@ -347,7 +347,7 @@ namespace Iviz.Roslib.Actionlib
             {
                 if (e.CancellationToken == runningTs.Token)
                 {
-                    throw new ObjectDisposedException("Client was disposed.");
+                    throw new ObjectDisposedException("this", "Client was disposed.");
                 }
 
                 throw new TimeoutException("Wait for server timed out");

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Nito.AsyncEx;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -19,7 +20,7 @@ namespace Iviz.Roslib
     public sealed class MergedChannelReader : IEnumerable<IMessage>
 #if !NETSTANDARD2_0
         , IAsyncEnumerable<IMessage>
-#endif    
+#endif
     {
         readonly IRosChannelReader[] sources;
 
@@ -73,7 +74,8 @@ namespace Iviz.Roslib
 
                 if (!readyTask.Result)
                 {
-                    throw new ObjectDisposedException($"Channel {readyTaskId} has been disposed!");
+                    throw new ObjectDisposedException($"{nameof(sources)}[{readyTaskId}]",
+                        $"Channel {readyTaskId} has been disposed!");
                 }
 
                 yield return sources[readyTaskId].Read(token);
@@ -85,7 +87,7 @@ namespace Iviz.Roslib
         {
             return sources.SelectMany(source => source.TryReadAll());
         }
-        
+
         public IEnumerator<IMessage> GetEnumerator()
         {
             return ReadAll().GetEnumerator();
@@ -94,7 +96,7 @@ namespace Iviz.Roslib
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }        
+        }
 
 #if !NETSTANDARD2_0
         public async IAsyncEnumerable<IMessage> ReadAllAsync([EnumeratorCancellation] CancellationToken token = default)
@@ -117,7 +119,7 @@ namespace Iviz.Roslib
 
                     if (!await readyTask)
                     {
-                        throw new ObjectDisposedException($"Channel {i} has been disposed!");
+                        throw new ObjectDisposedException($"{nameof(sources)}[{i}]", $"Channel {i} has been disposed!");
                     }
 
                     yield return await sources[i].ReadAsync(token);
@@ -131,6 +133,5 @@ namespace Iviz.Roslib
             return ReadAllAsync(token).GetAsyncEnumerator(token);
         }
 #endif
-
     }
 }
