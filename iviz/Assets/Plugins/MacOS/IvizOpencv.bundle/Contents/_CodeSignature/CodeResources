@@ -5,7 +5,24 @@
 	<key>files</key>
 	<dict/>
 	<key>files2</key>
-	<dict/>
+	<dict>
+		<key>Frameworks/opencv2.framework</key>
+		<dict>
+			<key>cdhash</key>
+			<data>
+			hrZTtNICLO8DYuTv9Cm8iCSt/qY=
+			</data>
+			<key>requirement</key>
+			<string>identifier "org.opencv.opencv2" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: Antonio Zea (GG577MS799)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		</dict>
+		<key>Headers/OpenCv.hpp</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			c6ABMLqLsZj5JSOMQEdOChTbkwKgR1jXyLpgy/AwTWE=
+			</data>
+		</dict>
+	</dict>
 	<key>rules</key>
 	<dict>
 		<key>^Resources/</key>
