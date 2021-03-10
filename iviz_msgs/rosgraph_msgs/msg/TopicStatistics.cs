@@ -146,5 +146,6 @@ namespace Iviz.Msgs.RosgraphMsgs
                 "a2lV6jC30p3r9l3MJbZcj8ZiOsOPh1YlBV9vbdAN+iDQmwnBFFo3IbqUYdCC8Hl+vfKRUKtwV+o13/fa" +
                 "KHK1XzP4/jHTAgAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

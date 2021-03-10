@@ -155,5 +155,6 @@ namespace Iviz.Msgs.Rosapi
                 "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
                 "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

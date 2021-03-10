@@ -60,5 +60,6 @@ namespace Iviz.Msgs.TurtleActionlib
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

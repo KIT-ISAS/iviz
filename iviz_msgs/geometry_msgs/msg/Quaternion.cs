@@ -81,6 +81,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
         public static readonly Quaternion Identity = (0, 0, 0, 1);

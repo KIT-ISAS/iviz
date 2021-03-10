@@ -240,5 +240,6 @@ namespace Iviz.Msgs.MoveitMsgs
                 "tNllRpQ1mxfVMS4bqtS9LzmtDJE1Pun0z43T5LKtfwxqU8xFvy7+j0Vd7LfJt/5Rcou3+4ounWf6H5nQ" +
                 "yKN4fQAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

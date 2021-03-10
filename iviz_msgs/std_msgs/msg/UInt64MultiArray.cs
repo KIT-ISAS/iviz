@@ -92,5 +92,6 @@ namespace Iviz.Msgs.StdMsgs
                 "h0HnaxMuerY2XZTl40lazhidhPYO11KQ3JrjmHZYQO+q1OPYLfvwX1ec/Mf5b2crCUQwGA1/jEq9guJb" +
                 "9YqObzv3NF+NGuHya47m3Ua6CFOCa4AqXLjusg2sJQuB9eovNf4AefzhwNQFAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

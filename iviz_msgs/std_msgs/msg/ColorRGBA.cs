@@ -79,6 +79,7 @@ namespace Iviz.Msgs.StdMsgs
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public static readonly ColorRGBA White = (1, 1, 1, 1);
         public static readonly ColorRGBA Black = (0, 0, 0, 1);

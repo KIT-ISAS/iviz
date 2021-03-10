@@ -102,5 +102,6 @@ namespace Iviz.Msgs.TurtleActionlib
                 "yKg/KrT80V3a8QKtGPR2x1nYj6zsRuzAfBW0xzjpnCyoSY1bU6ZWKtsXQ2Tghi06z3rNApCqQiwK9DmF" +
                 "VcN98ngI+Uqp88F6TQ9dBl8eTeQI+x+by3R90QsAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

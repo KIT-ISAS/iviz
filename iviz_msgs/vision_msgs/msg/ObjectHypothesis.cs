@@ -86,5 +86,6 @@ namespace Iviz.Msgs.VisionMsgs
                 "gEJYnoaMa7wy4yTmFj5H6+3ubZ0P7qz2PxyEUTMjuFRiXVnJknpIuKWesjbUSJRyhi97W50ETq1jKXod" +
                 "1y5c711wuJZS4+W87J44LfG3f8kvqmuUKLw4XwCZUs94v989fNRVF5XK0yOsdW/VLy8kXqm+AQAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

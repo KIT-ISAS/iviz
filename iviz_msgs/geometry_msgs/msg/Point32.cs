@@ -88,5 +88,6 @@ namespace Iviz.Msgs.GeometryMsgs
                 "9oLk43ui5ipDXYPz4ugkj2DNjyIYJE/0hqDtEu1IU/BE/UDd83uSPTbtYU4SPAJ+ntXtWf0Of3eAjDBw" +
                 "AQAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

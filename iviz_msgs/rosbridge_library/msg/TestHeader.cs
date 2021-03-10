@@ -76,5 +76,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
                 "3pYBDYRwbvWsCdLTukFiVilOWU+N2xq66xIZdl97jyGCa5sIdjarUTGARC/qYzBvnb5N46gphFe/0Y83" +
                 "pQIAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

@@ -66,5 +66,6 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTZSKCjKTy9KLS7m4uICAK5iVncTAAAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

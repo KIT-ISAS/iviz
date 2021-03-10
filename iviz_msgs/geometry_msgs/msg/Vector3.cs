@@ -87,8 +87,8 @@ namespace Iviz.Msgs.GeometryMsgs
                 "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
                 "0nqk3+YP1MrAiH8BAAA=";
                 
-        /// Custom iviz code
         public override string ToString() => Extensions.ToString(this);
+        /// Custom iviz code
         public static readonly Vector3 Zero = new Vector3(0, 0, 0);
         public static readonly Vector3 One = new Vector3(1, 1, 1);
         public static readonly Vector3 UnitX = new Vector3(1, 0, 0);

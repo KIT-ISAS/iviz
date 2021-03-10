@@ -111,5 +111,6 @@ namespace Iviz.Msgs.NavMsgs
                 "bwpEix9rwdE8QB4sN2rqzWtx3f1adb/+exr4a+ruKooDPofg+e77mndOV9S9H6+o/bVMkv8B3mBxBc0R" +
                 "AAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

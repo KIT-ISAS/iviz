@@ -1141,6 +1141,8 @@ namespace Iviz.MsgsGen
                 lines.Add($"            {entry}");
             }
 
+            lines.Add("    public override string ToString() => Extensions.ToString(this);");
+            
             if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
             {
                 lines.Add("    /// Custom iviz code");

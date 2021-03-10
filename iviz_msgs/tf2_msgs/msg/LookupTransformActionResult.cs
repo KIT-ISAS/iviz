@@ -112,5 +112,6 @@ namespace Iviz.Msgs.Tf2Msgs
                 "Py/O2uU39fLhoN+P+ZLZG/3Tbu7Wm/Hfo2H3bHDSHfUG/XZ3r97t9b92T3pHl93h8cVp3B+1BG9rglHv" +
                 "NB5cLNffNevDbv/882B42u68j+qt0J/qKulfLsNLFP0PNqf4d8sSAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

@@ -100,6 +100,7 @@ namespace Iviz.Msgs.StdMsgs
                 "aqbV5hc5L+iMuXzjb8R7xn+w+YfbetpG21lq3deptwGacJRy4WDS07xAfGLKColPgjK75rpFuu6lzdhE" +
                 "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
         public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);

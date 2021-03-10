@@ -116,5 +116,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
                 "lWD6cXfvU0eZx3MdNDpcY9+77urTf4JouWzex5gkYHaMPRCxh2oJsp9roNgZ5ruiexwFV2evw+QNgW5h" +
                 "E09fVoJTtwB0/vc0k77Ns+w/bTBuPageAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

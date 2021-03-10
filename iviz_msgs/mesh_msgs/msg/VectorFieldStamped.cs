@@ -88,5 +88,6 @@ namespace Iviz.Msgs.MeshMsgs
                 "Z1K39Yr2nbjZKvdj2R5l3xhFwbRGz0g46hcw0yG4FaXmEv1s7ax5doYSgST4VADnNd00NPmR9jkgHMJh" +
                 "zXnayqKrjGPyfpV33IHimX7IDR25xeS6mLBg6+oPtf4JFgGUXiAGAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

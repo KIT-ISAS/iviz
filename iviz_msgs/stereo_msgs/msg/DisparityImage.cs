@@ -149,5 +149,6 @@ namespace Iviz.Msgs.StereoMsgs
                 "BzbKiNSWUaNgKkNmHKYYpLx/ppfggQrOvNyewUwOOTdxD2Ps/PuWpy+/wvP5wdKNNIGG26ZyDvuJPhRR" +
                 "XLBRfjVhNM/mCX+HcMP4NnmqAzNJY1GsnDMYwct8I7yt/AModVbPlxAAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

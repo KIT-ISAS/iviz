@@ -81,6 +81,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "hHO4Ctrd4ehDWDwvy3THJiJJZ8JNjU2HKR1wLIFsELSkVIS2vPqibSh+U4VDMT5LXBb6luzfWy05U8/W" +
                 "XVamtnauC4n08QGndZrW6cf9ArHUTVJfAgAA";
                 
+        public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public static readonly Twist Zero = (Vector3.Zero, Vector3.Zero);
         public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new Twist(p.linear, p.angular);

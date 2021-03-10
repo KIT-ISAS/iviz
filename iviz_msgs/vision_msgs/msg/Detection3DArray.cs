@@ -133,5 +133,6 @@ namespace Iviz.Msgs.VisionMsgs
                 "ga47ckhea0llxmMGi1ut6LaJJ7yRZ77hwhnZR+n8yRWSomkjBgX9lwYtWuRn0w1EMsIKAXUb/RoOt2mf" +
                 "Cm1JTIq8Agj5P39MY1pmz9xKsWbFfwC4gZTlxBoAAA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

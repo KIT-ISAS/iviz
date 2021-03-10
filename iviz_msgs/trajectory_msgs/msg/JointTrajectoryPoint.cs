@@ -103,5 +103,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
                 "7raUb3ZLDy6DV+AKyv20rNzBA1pvxDqR29S3d67j0H6Uh2/EqtNLCKkI22Z9bH7FZux3zgz+nTXjn2tC" +
                 "O3wsstzhlKp0JzV2I7wBGsNsNFIBAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

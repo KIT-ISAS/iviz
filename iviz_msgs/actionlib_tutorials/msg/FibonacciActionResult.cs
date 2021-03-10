@@ -103,5 +103,6 @@ namespace Iviz.Msgs.ActionlibTutorials
                 "yy0lMuqPCi1/dJd2vEArBr3tYRaWRFkq1b/sRuxo5leMk87JnJrUuBUpvdRqVwyRgRu26DzrNQtAqgqx" +
                 "KNDnNFYNd8njIeSrp84HJEdDruePhvIkiRPmX393Q2nyEYHLfDjmCwAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

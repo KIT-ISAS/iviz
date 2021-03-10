@@ -145,5 +145,6 @@ namespace Iviz.Msgs.VisualizationMsgs
                 "B+lu9zbVKT4odKgyu+ajju371eP99dd9wkq1Ji//i1Pa+mlbhul5d5HSnr7fmSnudNLdDLs2Gv0F7VRe" +
                 "/DMGAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

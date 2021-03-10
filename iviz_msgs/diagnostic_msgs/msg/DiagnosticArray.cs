@@ -101,5 +101,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
                 "sNfsYg+Tw3QmjCeGi7KZupXxM7eD4KJaxfXlRbV5+UIl+/H+l0KmTKcCn2VErus43bh4Wi7Qg6TslDI+" +
                 "iKGVlvUegflLZCPv4Bccl8+EDuUrQ6mfaRVQPzIGAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

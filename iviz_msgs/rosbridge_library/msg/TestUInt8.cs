@@ -72,5 +72,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEyvNzCuxiI5VSEksSeQCANR1vBgNAAAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

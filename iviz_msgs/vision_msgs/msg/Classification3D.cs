@@ -128,5 +128,6 @@ namespace Iviz.Msgs.VisionMsgs
                 "PN+k51TkFp0PSqTgCyYbXZbvyo4sMlkVAmYj5vJelXNaN9o4O/IGJOz5vyrKqD6p59xI2bPqX7yWssYN" +
                 "DQAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

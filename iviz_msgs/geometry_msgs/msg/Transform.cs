@@ -81,6 +81,7 @@ namespace Iviz.Msgs.GeometryMsgs
                 "l4FWp9D7phk9jz+zCk1kn/ZxDssKBt5AnxYyIFCiYhJa0eQLV03yyxlskvGtxGGgt+yNb71HrMmyi0pY" +
                 "WutVw6gX5/A2oWFC7/9S9XzHfmo7AIs3OMZ30Hl6e5kvaAr514X2qHfuA/8+ZJE+AwAA";
                 
+        public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public static readonly Transform Identity = (Vector3.Zero, Quaternion.Identity);
         public static implicit operator Pose(in Transform p) => new Pose(p.Translation, p.Rotation);

@@ -103,5 +103,6 @@ namespace Iviz.Msgs.SensorMsgs
                 "iFCgPpgWzoX53YFb6R7tgaLZkyuDxEgFBPVMD50tZ8i+QEtzhAl+QDzF+BdYf8TVnFataOY0+5QbKaBO" +
                 "whh2thbXp0MBMc5qtzr7FDEeqnKhSshq8VVrPEyPooh8ZVoFY5GneZu4DLLpJlXVX2W/CORpBgAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

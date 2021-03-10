@@ -119,5 +119,6 @@ namespace Iviz.Msgs.Tf2Msgs
                 "gnH/PB5eLdffteuj3uDyZDg6D0/eR/6Rq08+S9qbibv5PsNv+xb2f46/4WXud3qLG8SI/gOlCDY0vBYA" +
                 "AA==";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

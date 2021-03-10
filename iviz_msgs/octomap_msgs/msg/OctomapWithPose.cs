@@ -97,5 +97,6 @@ namespace Iviz.Msgs.OctomapMsgs
                 "qc9dW/p1RR8lBTfUZJT50q1nvdSVmZLyrOaDkbTwHRe1ArIPIwkmkrN3Sz9Oqodl4hc/riUm3KRNW0jA" +
                 "ZDa1EW+izfMTmhRq+vmXr3XkKPUN7UeuJKAHAAA=";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

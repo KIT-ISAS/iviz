@@ -101,5 +101,6 @@ namespace Iviz.Msgs.GridMapMsgs
                 "XAYhZXdyMAuZrU+1W7N+eMHRqJIP7M4fn+38NM5Pv55H/r50Ow9zozBBB/U8FF/ebvd1x/elW6knHO2e" +
                 "7pX6DcJaO68kBgAA";
                 
+        public override string ToString() => Extensions.ToString(this);
     }
 }

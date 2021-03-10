@@ -1,6 +1,7 @@
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
+using Newtonsoft.Json;
 
 namespace Iviz.Msgs
 {
@@ -133,5 +134,7 @@ namespace Iviz.Msgs
         
         public static string ToString(in Vector3f p) =>
             $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+        
+        public static string ToString(in ISerializable t) => JsonConvert.SerializeObject(t);
     }
 }
