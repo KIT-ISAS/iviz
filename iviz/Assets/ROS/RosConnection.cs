@@ -68,7 +68,6 @@ namespace Iviz.Ros
         protected void AddTask(Func<Task> a)
         {
             toDos.Enqueue(a);
-            //Debug.Log("+1: " + toDos.Count);
             Signal();
         }
 

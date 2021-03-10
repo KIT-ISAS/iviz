@@ -809,7 +809,7 @@ namespace Iviz.Controllers
 
         void UpdateTransform([NotNull] Marker msg)
         {
-            AttachTo(msg.Header.FrameId);
+            AttachTo(msg.Header);
             description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
 
             if (msg.Pose.HasNaN())

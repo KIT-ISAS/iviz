@@ -91,7 +91,7 @@ namespace Iviz.Core
             }
 
             counter++;
-            if (counter != NetworkFrameSkip)
+            if (counter < NetworkFrameSkip)
             {
                 return;
             }
@@ -105,8 +105,14 @@ namespace Iviz.Core
                 Logger.Error($"{this}: Error during ListenersEveryFrame", e);
             }
 
-            while (listenerQueue.TryDequeue(out Action action))
+            int queueSize = listenerQueue.Count;
+            for (int i = 0; i < queueSize; i++)
             {
+                if (!listenerQueue.TryDequeue(out Action action))
+                {
+                    break;
+                }
+
                 try
                 {
                     action();

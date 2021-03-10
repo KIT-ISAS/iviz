@@ -230,7 +230,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                await t.Caf();
+                await t;
             }
             catch (Exception e)
             {
@@ -250,7 +250,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                return await t.Caf();
+                return await t;
             }
             catch (Exception e)
             {
@@ -267,7 +267,7 @@ namespace Iviz.XmlRpc
         {
             try
             {
-                return await Caf(t);
+                return await t;
             }
             catch (Exception e)
             {

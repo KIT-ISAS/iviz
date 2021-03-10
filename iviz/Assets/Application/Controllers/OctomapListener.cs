@@ -126,7 +126,7 @@ namespace Iviz.Controllers
 
         void Handler(Octomap msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header);
             lastMsg = msg;
             resource.SetDirect(setterFunction);
             resource.IntensityBounds = WhiteBounds;
@@ -160,10 +160,10 @@ namespace Iviz.Controllers
                 switch (lastMsg.Id)
                 {
                     case "OcTree":
-                        valueStride = 4;
+                        valueStride = 4; // float value
                         break;
                     case "ColorOcTree":
-                        valueStride = 7;
+                        valueStride = 7; // float value + rgb
                         break;
                     default:
                         Logger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");

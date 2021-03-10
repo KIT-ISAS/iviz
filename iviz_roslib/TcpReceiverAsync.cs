@@ -68,6 +68,8 @@ namespace Iviz.Roslib
         public Uri RemoteUri { get; }
         public string Topic => topicInfo.Topic;
         public bool IsAlive => task != null && !task.IsCompleted;
+        
+        public bool IsPaused { get; set; }
 
         public SubscriberReceiverState State => new(RemoteUri)
         {
@@ -214,6 +216,27 @@ namespace Iviz.Roslib
 
             readBuffer.EnsureCapability(length);
             if (!await stream!.ReadChunkAsync(readBuffer.Array, length, runningTs.Token).Caf())
+            {
+                return -1;
+            }
+
+            return length;
+        }
+        
+        async ValueTask<int> ReceiveAndIgnore(byte[] bufferForSize)
+        {
+            if (!await stream!.ReadChunkAsync(bufferForSize, 4, runningTs.Token))
+            {
+                return -1;
+            }
+
+            int length = BitConverter.ToInt32(bufferForSize, 0);
+            if (length == 0)
+            {
+                return 0;
+            }
+
+            if (!await stream!.ReadAndIgnoreAsync(length, runningTs.Token).Caf())
             {
                 return -1;
             }
@@ -376,6 +399,11 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
 
+                if (IsPaused)
+                {
+                    continue;
+                }
+
                 T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
                 manager.MessageCallback(message, this);
             }
@@ -386,18 +414,33 @@ namespace Iviz.Roslib
             using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
             {
-                int rcvLength = await ReceivePacket(readBuffer);
-                if (rcvLength == -1)
+                if (IsPaused)
                 {
-                    Logger.LogDebugFormat("{0}: Partner closed connection", this);
-                    return;
+                    int rcvLength = await ReceiveAndIgnore(readBuffer.Array); 
+                    if (rcvLength == -1)
+                    {
+                        Logger.LogDebugFormat("{0}: Partner closed connection", this);
+                        return;
+                    }
+
+                    numReceived++;
+                    bytesReceived += rcvLength + 4;
                 }
+                else
+                {
+                    int rcvLength = await ReceivePacket(readBuffer);
+                    if (rcvLength == -1)
+                    {
+                        Logger.LogDebugFormat("{0}: Partner closed connection", this);
+                        return;
+                    }
 
-                numReceived++;
-                bytesReceived += rcvLength + 4;
+                    numReceived++;
+                    bytesReceived += rcvLength + 4;
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
-                manager.MessageCallback(message, this);
+                    T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
+                    manager.MessageCallback(message, this);
+                }
             }
         }
 

@@ -209,7 +209,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            node.AttachTo(msg.Info.Header.FrameId, msg.Info.Header.Stamp);
+            node.AttachTo(msg.Info.Header);
             link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,

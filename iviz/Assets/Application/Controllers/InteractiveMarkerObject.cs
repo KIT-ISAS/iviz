@@ -150,7 +150,7 @@ namespace Iviz.Controllers
 
             LocalPose = msg.Pose.Ros2Unity();
 
-            AttachTo(msg.Header.FrameId);
+            AttachTo(msg.Header);
 
             controlsToDelete.Clear();
             foreach (string controlId in controls.Keys)

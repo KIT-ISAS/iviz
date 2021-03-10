@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace Iviz.Octree
 {
-    public struct LeafEnumerator
+    public struct LeafEnumerator : IEnumerable<float4>, IEnumerator<float4>
     {
         const float MinProbabilityForOccupied = 0.5f;
         static readonly float MinLogOdds = OctreeHelper.LogOdds(MinProbabilityForOccupied);
@@ -80,5 +81,14 @@ namespace Iviz.Octree
         public int NumberOfNodes => (int) (reader.Size / (4 + strideAfterValue));
         public float4 Current => current;
         public LeafEnumerator GetEnumerator() => this;
+        
+        public void Reset() => throw new System.NotSupportedException();
+        object IEnumerator.Current => Current;
+        IEnumerator<float4> IEnumerable<float4>.GetEnumerator() => this;
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        
+        public void Dispose()
+        {
+        }
     }
 }

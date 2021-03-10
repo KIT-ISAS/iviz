@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using Iviz.Msgs;
 using Iviz.Roslib;
 
 namespace Iviz.Ros
@@ -19,7 +20,7 @@ namespace Iviz.Ros
         
         public override string ToString()
         {
-            return Utils.ToJsonString(this);
+            return BuiltIns.ToJsonString(this);
         }        
     }
 }

@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource runningTs = new();
         bool disposed;
         int totalPublishers;
-
+        
         internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;

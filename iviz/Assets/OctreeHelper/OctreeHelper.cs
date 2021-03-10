@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -44,12 +45,40 @@ namespace Iviz.Octree
         internal float4 KeyToPosition(in OcTreeKey key, int depth) =>
             new float4(KeyToCoord(key, depth), sizeLookupTable[depth]);
 
+        /// <summary>
+        /// Creates an iterator that returns the childless nodes before maxDepth
+        /// and the nodes at exactly maxDepth (whether they have children or not). 
+        /// Usable only on non-binary-encoded octomaps.
+        /// </summary>
+        /// <param name="src">Array that contains the octomap</param>
+        /// <param name="offset">Offset at which to start reading the array</param>
+        /// <param name="valueStride">
+        /// Number of bytes to read between nodes.
+        /// For "OcTree" it's 4 (a float), for "ColorOcTree" it's 7 (a float + 3 bytes).
+        /// </param>
+        /// <param name="maxDepth">Maximal depth</param>
+        /// <returns>
+        /// An <see cref="IEnumerable"/> of type <see cref="float4"/> that traverses the octomap and returns the leaves.
+        /// Each node is represented by four values: cube center (x, y, z) in ROS coords and cube size.
+        /// </returns>
         public LeafEnumerator EnumerateLeaves(sbyte[] src, uint offset, uint valueStride, int maxDepth = 16)
         {
             return new LeafEnumerator(this, src, offset, valueStride, maxDepth);
         }
 
 
+        /// <summary>
+        /// Creates an iterator that returns the childless fully-occupied nodes before maxDepth
+        /// and the nodes at exactly maxDepth (whether they have children or not).
+        /// Usable only on binary-encoded octomaps.
+        /// </summary>
+        /// <param name="src">Array that contains the octomap</param>
+        /// <param name="offset">Offset at which to start reading the array</param>
+        /// <param name="maxDepth">Maximal depth</param>
+        /// <returns>
+        /// An <see cref="IEnumerable"/> of type <see cref="float4"/> that traverses the octomap and returns the leaves.
+        /// Each node is represented by four values: cube center (x, y, z) in ROS coords and cube size.
+        /// </returns>
         public BinaryLeafEnumerator EnumerateLeavesBinary(sbyte[] src, uint offset, int maxDepth = 16)
         {
             return new BinaryLeafEnumerator(this, src, offset, maxDepth);

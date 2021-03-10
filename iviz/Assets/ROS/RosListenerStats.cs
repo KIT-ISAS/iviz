@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using Iviz.Msgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 
@@ -7,7 +8,7 @@ namespace Iviz.Ros
     [DataContract]
     public readonly struct RosListenerStats
     {
-        public static readonly RosListenerStats Empty;
+        public static readonly RosListenerStats Empty = default;
         
         public RosListenerStats(int totalMessages, int messagesPerSecond, long bytesPerSecond, int messagesInQueue, int dropped)
         {
@@ -27,7 +28,7 @@ namespace Iviz.Ros
         [NotNull]
         public override string ToString()
         {
-            return Utils.ToJsonString(this);
+            return BuiltIns.ToJsonString(this);
         }        
     }
 }

@@ -42,6 +42,8 @@ namespace Iviz.Roslib
         /// </summary>
         public int NumActivePublishers { get; }
 
+        public bool IsPaused { get; set; }
+        
         /// <summary>
         /// Returns a structure that represents the internal state of the subscriber. 
         /// </summary>           

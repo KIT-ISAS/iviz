@@ -327,7 +327,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] PoseStamped msg)
         {
-            frameNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header);
             Handler(msg.Pose);
         }
 
@@ -343,7 +343,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] PointStamped msg)
         {
-            frameNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header);
             Handler(msg.Point);
         }
 
@@ -359,7 +359,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] WrenchStamped msg)
         {
-            frameNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header);
             Handler(msg.Wrench);
         }
 
@@ -380,7 +380,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] TwistStamped msg)
         {
-            frameNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header);
             Handler(msg.Twist);
         }
 
@@ -400,7 +400,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Odometry msg)
         {
-            frameNode.AttachTo(msg.Header.FrameId);
+            frameNode.AttachTo(msg.Header);
             childNode.AttachTo(msg.ChildFrameId);
 
             if (msg.Pose.Pose.HasNaN())

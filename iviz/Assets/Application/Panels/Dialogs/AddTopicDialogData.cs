@@ -64,20 +64,9 @@ namespace Iviz.App
 
                 bool resourceFound =
                     Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.ModuleType resource);
-                if (!resourceFound)
-                {
-                    continue;
-                }
-
-                yield return new TopicWithResource(topic, msgType, resource);
+                yield return new TopicWithResource(topic, msgType,
+                    resourceFound ? resource : Resource.ModuleType.Invalid);
             }
-            
-        }
-
-        void GetTopics()
-        {
-            topics.Clear();
-            topics.AddRange(GetTopicCandidates());
         }
 
         public override void SetupPanel()
@@ -88,15 +77,14 @@ namespace Iviz.App
 
             UpdatePanel();
 
-            panel.ShowAll.ValueChanged += _ =>
-            {
-                UpdatePanel();
-            };
+            panel.ShowAll.ValueChanged += _ => { UpdatePanel(); };
         }
 
         public override void UpdatePanel()
         {
-            GetTopics();
+            topics.Clear();
+
+            topics.AddRange(GetTopicCandidates());
 
             topics.Sort((x, y) => string.CompareOrdinal(x.Topic, y.Topic));
             if (SortByType)
@@ -104,10 +92,10 @@ namespace Iviz.App
                 topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
             }
 
-            panel.Items =  topics.Select(x => x.ToString());
-
             if (panel.ShowAll.Value)
             {
+                panel.Items = topics.Select(topic => topic.ToString());
+
                 foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
                 {
                     if (topic.ResourceType == Resource.ModuleType.Invalid)
@@ -115,6 +103,12 @@ namespace Iviz.App
                         item.Interactable = false;
                     }
                 }
+            }
+            else
+            {
+                panel.Items = topics
+                    .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
+                    .Select(topic => topic.ToString());
             }
 
             panel.EmptyText = ConnectionManager.IsConnected ? "No Topics Available" : "(Not Connected)";

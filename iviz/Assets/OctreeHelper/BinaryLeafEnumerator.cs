@@ -1,9 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace Iviz.Octree
 {
-    public struct BinaryLeafEnumerator
+    public struct BinaryLeafEnumerator : IEnumerable<float4>, IEnumerator<float4>
     {
         readonly OctreeHelper parent;
         readonly Stack<BinNodeIterator> stack;
@@ -76,5 +77,14 @@ namespace Iviz.Octree
         public int NumberOfNodes => reader.Size / 2;
         public float4 Current => current;
         public BinaryLeafEnumerator GetEnumerator() => this;
+        
+        public void Reset() => throw new System.NotSupportedException();
+        object IEnumerator.Current => Current;
+        IEnumerator<float4> IEnumerable<float4>.GetEnumerator() => this;
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        
+        public void Dispose()
+        {
+        }
     }
 }

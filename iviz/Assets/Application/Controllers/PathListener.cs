@@ -166,7 +166,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Msgs.NavMsgs.Path msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header);
 
             string topHeader = msg.Header.FrameId;
             Msgs.time topStamp = msg.Header.Stamp;
@@ -215,7 +215,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Msgs.GeometryMsgs.PoseArray msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header);
 
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Pose ps in msg.Poses)
@@ -233,7 +233,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Msgs.GeometryMsgs.PolygonStamped msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header);
             Handler(msg.Polygon);
         }
 

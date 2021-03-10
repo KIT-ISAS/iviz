@@ -5,9 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
@@ -49,6 +47,16 @@ namespace Iviz.Controllers
 
         bool disposed;
         bool isProcessing;
+
+        bool IsProcessing
+        {
+            get => isProcessing;
+            set
+            {
+                isProcessing = value;
+                Listener.SetPause(value);
+            }
+        }
 
         NativeList<float4> pointBuffer = new NativeList<float4>(Allocator.Persistent);
 
@@ -209,12 +217,12 @@ namespace Iviz.Controllers
 
         bool Handler(PointCloud2 msg)
         {
-            if (isProcessing)
+            if (IsProcessing)
             {
                 return false;
             }
 
-            isProcessing = true;
+            IsProcessing = true;
 
             Task.Run(() => ProcessMessage(msg));
 
@@ -264,7 +272,7 @@ namespace Iviz.Controllers
                 if (disposed)
                 {
                     // we're dead
-                    isProcessing = false;
+                    IsProcessing = false;
                     return;
                 }
 
@@ -273,7 +281,7 @@ namespace Iviz.Controllers
                     msg.Data.Length < msg.RowStep * msg.Height)
                 {
                     Logger.Info($"{this}: Invalid point cloud dimensions!");
-                    isProcessing = false;
+                    IsProcessing = false;
                     return;
                 }
 
@@ -291,7 +299,7 @@ namespace Iviz.Controllers
                     !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
-                    isProcessing = false;
+                    IsProcessing = false;
                     return;
                 }
 
@@ -308,12 +316,12 @@ namespace Iviz.Controllers
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
                     Logger.Info($"{this}: Invalid or unsupported intensity field type!");
-                    isProcessing = false;
+                    IsProcessing = false;
                     return;
                 }
 
                 bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
-                var (_, stamp, frameId) = msg.Header;
+                var header = msg.Header;
                 int numPoints = (int) (msg.Width * msg.Height);
 
                 pointBuffer.Clear();
@@ -330,7 +338,7 @@ namespace Iviz.Controllers
                             return;
                         }
 
-                        node.AttachTo(frameId, stamp);
+                        node.AttachTo(header);
 
                         Size = numPoints;
                         pointCloud.UseColormap = !rgbaHint;
@@ -344,14 +352,14 @@ namespace Iviz.Controllers
                     }
                     finally
                     {
-                        isProcessing = false;
+                        IsProcessing = false;
                     }
                 });
             }
             catch (Exception e)
             {
                 Logger.Error($"{this}: Error handling point cloud", e);
-                isProcessing = false;
+                IsProcessing = false;
             }
         }
 

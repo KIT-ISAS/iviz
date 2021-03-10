@@ -230,7 +230,8 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Constructs and connects a ROS client.
+        /// Constructs and connects a ROS client in a sync way.
+        /// You should use <see cref="CreateAsync"/> in async contexts.
         /// </summary>
         /// <param name="masterUri">
         /// URI to the master node. Example: new Uri("http://localhost:11311").
@@ -298,7 +299,7 @@ namespace Iviz.Roslib
         }
 
         /// <summary>
-        /// Constructs and connects a ROS client. Connection parts are done async.
+        /// Constructs and connects a ROS client in async.
         /// </summary>
         /// <param name="masterUri">
         /// URI to the master node. Example: new Uri("http://localhost:11311").

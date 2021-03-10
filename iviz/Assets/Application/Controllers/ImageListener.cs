@@ -50,6 +50,16 @@ namespace Iviz.Controllers
 
         public bool IsMono => ImageTexture.IsMono;
         bool isProcessing;
+        
+        bool IsProcessing
+        {
+            get => isProcessing;
+            set
+            {
+                isProcessing = value;
+                Listener.SetPause(value);
+            }
+        }        
 
         readonly ImageModuleData moduleData;
         public override IModuleData ModuleData => moduleData;
@@ -192,18 +202,17 @@ namespace Iviz.Controllers
 
         bool HandlerCompressed([NotNull] CompressedImage msg)
         {
-            if (isProcessing)
+            if (IsProcessing)
             {
                 return false;
             }
 
-            var (_, stamp, frameId) = msg.Header;
-            isProcessing = true;
+            IsProcessing = true;
 
             void PostProcess()
             {
-                Node.AttachTo(frameId, stamp);
-                isProcessing = false;
+                Node.AttachTo(msg.Header);
+                IsProcessing = false;
             }
 
             switch (msg.Format)
@@ -228,7 +237,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Image msg)
         {
-            Node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            Node.AttachTo(msg.Header);
 
             int width = (int) msg.Width;
             int height = (int) msg.Height;

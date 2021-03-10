@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using Iviz.Core;
@@ -14,14 +15,14 @@ namespace Iviz.App
     public sealed class EchoDialogData : DialogData
     {
         const int MaxMessageLength = 1000;
-        const int MaxMessages = 100;
+        const int MaxMessages = 50;
 
         [NotNull] readonly EchoDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
 
         readonly Dictionary<string, Type> topicTypes = new Dictionary<string, Type>();
 
-        readonly Queue<(string DateTime, IMessage Msg)> messageQueue = new Queue<(string, IMessage)>();
+        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue = new ConcurrentQueue<(string, IMessage)>();
 
         readonly List<TopicEntry> entries = new List<TopicEntry>();
         readonly StringBuilder messageBuffer = new StringBuilder(65536);
@@ -104,7 +105,7 @@ namespace Iviz.App
             }
             else
             {
-                Action<IMessage> handler = Handler;
+                Func<IMessage, bool> handler = Handler;
                 Type listenerType = typeof(Listener<>).MakeGenericType(csType);
                 listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
             }
@@ -129,15 +130,16 @@ namespace Iviz.App
             entries.Sort();
         }
 
-        void Handler(IMessage msg)
+        bool Handler(IMessage msg)
         {
             messageQueue.Enqueue((GameThread.NowFormatted, msg));
             if (messageQueue.Count > MaxMessages)
             {
-                messageQueue.Dequeue();
+                messageQueue.TryDequeue(out _);
             }
 
             queueIsDirty = true;
+            return true;
         }
 
 
@@ -156,7 +158,11 @@ namespace Iviz.App
                 var entry = entries[i];
                 CreateListener(entry.Topic, entry.RosMsgType, entry.CsType);
 
-                messageQueue.Clear();
+                while (!messageQueue.IsEmpty)
+                {
+                    messageQueue.TryDequeue(out var __);
+                }
+
                 queueIsDirty = false;
                 messageBuffer.Length = 0;
                 dialog.Text.text = "";
@@ -207,6 +213,11 @@ namespace Iviz.App
                 messageBuffer.Append(msgAsText).AppendLine();
             }
 
+            if (messageBuffer.Length > MaxMessages * MaxMessageLength)
+            {
+                messageBuffer.Remove(0, MaxMessages * MaxMessageLength - messageBuffer.Length);
+            }
+            
             dialog.Text.SetText(messageBuffer);
             queueIsDirty = false;
         }

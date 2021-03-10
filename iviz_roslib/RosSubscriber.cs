@@ -24,6 +24,12 @@ namespace Iviz.Roslib
         int totalSubscribers;
         bool disposed;
 
+        public bool IsPaused
+        {
+            get => manager.IsPaused;
+            set => manager.IsPaused = value;
+        }
+        
         public CancellationToken CancellationToken => runningTs.Token;
 
         /// <summary>

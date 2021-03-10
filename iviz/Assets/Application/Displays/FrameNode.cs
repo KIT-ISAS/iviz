@@ -63,7 +63,17 @@ namespace Iviz.Controllers
             }
         }
 
-        public void AttachTo([CanBeNull] string parentId, in Msgs.time _ = default)
+        public void AttachTo(in Msgs.StdMsgs.Header header)
+        {
+            AttachTo(header.FrameId, header.Stamp);
+        }
+
+        public void AttachTo(string parentId)
+        {
+            AttachTo(parentId, default);
+        }
+
+        void AttachTo([CanBeNull] string parentId, in Msgs.time _)
         {
             if (parentId == null)
             {

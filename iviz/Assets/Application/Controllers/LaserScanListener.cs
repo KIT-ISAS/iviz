@@ -169,7 +169,7 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] LaserScan msg)
         {
-            node.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
+            node.AttachTo(msg.Header);
 
             if (float.IsNaN(msg.AngleMin) || float.IsNaN(msg.AngleMax) ||
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||

@@ -22,9 +22,10 @@ namespace Iviz.Ros
         int MaxQueueSize { set; }
         bool Subscribed { get; }
         void Stop();
-        void Pause();
-        void Unpause();
+        void Suspend();
+        void Unsuspend();
         void Reset();
+        void SetPause(bool value);
     }
 
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
@@ -102,7 +103,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void Pause()
+        public void Suspend()
         {
             if (!Subscribed)
             {
@@ -113,7 +114,7 @@ namespace Iviz.Ros
             Subscribed = false;
         }
 
-        public void Unpause()
+        public void Unsuspend()
         {
             if (Subscribed)
             {
@@ -123,11 +124,16 @@ namespace Iviz.Ros
             Connection.Subscribe(this);
             Subscribed = true;
         }
+        
+        public void SetPause(bool value)
+        {
+            Connection.SetPause(this, value);
+        }        
 
         public void Reset()
         {
-            Pause();
-            Unpause();
+            Suspend();
+            Unsuspend();
         }
 
         internal void EnqueueMessage([NotNull] in T msg)

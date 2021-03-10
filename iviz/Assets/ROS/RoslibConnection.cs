@@ -682,6 +682,25 @@ namespace Iviz.Ros
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
         }
 
+        internal void SetPause([NotNull] IListener listener, bool value)
+        {
+            if (listener == null)
+            {
+                throw new ArgumentNullException(nameof(listener));
+            }
+
+            AddTask(() =>
+            {
+                if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic) &&
+                    subscribedTopic.Subscriber != null)
+                {
+                    subscribedTopic.Subscriber.IsPaused = value;
+                }
+
+                return Task.CompletedTask;
+            });
+        }
+
         internal void Unadvertise([NotNull] ISender advertiser)
         {
             if (advertiser == null)
@@ -963,7 +982,7 @@ namespace Iviz.Ros
 
             var subscriberStats = mClient.GetSubscriberStatistics();
             var publisherStats = mClient.GetPublisherStatistics();
-            
+
             foreach (var stat in subscriberStats.Topics)
             {
                 builder.Append("<color=#000080ff><b>** Subscribed to ")

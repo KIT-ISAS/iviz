@@ -98,11 +98,11 @@ namespace Iviz.App
 
             if (listener.Subscribed)
             {
-                listener.Pause();
+                listener.Suspend();
             }
             else
             {
-                listener.Unpause();
+                listener.Unsuspend();
             }
 
             panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;

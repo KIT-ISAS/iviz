@@ -27,6 +27,21 @@ namespace Iviz.Roslib
         readonly RosSubscriber<T> subscriber;
         readonly TopicInfo<T> topicInfo;
 
+        bool isPaused;
+
+        public bool IsPaused
+        {
+            get => isPaused;
+            set
+            {
+                isPaused = value;
+                foreach (var receiver in connectionsByUri.Values)
+                {
+                    receiver.IsPaused = value;
+                }
+            }
+        }
+
         public TcpReceiverManager(RosSubscriber<T> subscriber, RosClient client, TopicInfo<T> topicInfo,
             bool requestNoDelay)
         {
@@ -156,7 +171,7 @@ namespace Iviz.Roslib
         void CreateConnection(Endpoint? remoteEndpoint, Uri remoteUri)
         {
             TcpReceiverAsync<T> connection =
-                new(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay);
+                new(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay) {IsPaused = IsPaused};
 
             connectionsByUri[remoteUri] = connection;
             connection.Start(TimeoutInMs);

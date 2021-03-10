@@ -159,26 +159,32 @@ namespace Iviz.Roslib
             CancellationToken token)
         {
             int numRead = 0;
-#if !NETSTANDARD2_0
             while (numRead < toRead)
             {
+#if !NETSTANDARD2_0
                 int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token).Caf();
 #else
-            var tokenTaskSource = new TaskCompletionSource<object>();
-            var tokenTask = tokenTaskSource.Task;
-            using var registration = token.Register(() => tokenTaskSource.TrySetCanceled());
-
-            while (numRead < toRead)
-            {
-                Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
-                Task resultTask = await (readTask, tokenTask).WhenAny().Caf();
-                if (resultTask == tokenTask)
+                int readNow;
+                if (stream.DataAvailable)
                 {
-                    token.ThrowIfCanceled(tokenTask);
-                    throw new TimeoutException("Reading operation timed out");
+                    token.ThrowIfCancellationRequested();
+                    readNow = stream.Read(buffer, numRead, toRead - numRead);
+                }
+                else
+                {
+                    Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
+                    var tokenTaskSource = new TaskCompletionSource<object?>();
+                    Action whenComplete = () => tokenTaskSource.TrySetResult(null);
+
+                    using var registration = token.Register(whenComplete);
+                    readTask.GetAwaiter().OnCompleted(whenComplete);
+                    
+                    await tokenTaskSource.Task;
+
+                    token.ThrowIfCancellationRequested();
+                    readNow = await readTask.Caf();
                 }
 
-                int readNow = await readTask.Caf();
 #endif
                 if (readNow == 0)
                 {
@@ -189,6 +195,33 @@ namespace Iviz.Roslib
             }
 
             return true;
+        }
+
+        internal static async ValueTask<bool> ReadAndIgnoreAsync(this NetworkStream stream, int toRead,
+            CancellationToken token)
+        {
+            const int bufferSize = 4096;
+            if (toRead <= bufferSize)
+            {
+                using var buffer = new Rent<byte>(toRead);
+                return await ReadChunkAsync(stream, buffer.Array, toRead, token);
+            }
+            else
+            {
+                int remaining = toRead;
+                using var buffer = new Rent<byte>(toRead);
+                while (remaining > bufferSize)
+                {
+                    if (!await ReadChunkAsync(stream, buffer.Array, bufferSize, token))
+                    {
+                        return false;
+                    }
+
+                    remaining -= bufferSize;
+                }
+
+                return await ReadChunkAsync(stream, buffer.Array, remaining, token);
+            }
         }
 
         internal static async Task WriteChunkAsync(this NetworkStream stream, byte[] buffer, int count,

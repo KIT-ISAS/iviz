@@ -192,7 +192,7 @@ namespace Iviz.Controllers
         public void Reset()
         {
             DestroyAllMarkers();
-            FullListener?.Unpause();
+            FullListener?.Unsuspend();
         }
 
         public override void StartListening()
@@ -265,7 +265,7 @@ namespace Iviz.Controllers
         void HandlerUpdateFull([NotNull] InteractiveMarkerInit msg)
         {
             msg.Markers.ForEach(CreateInteractiveMarker);
-            FullListener.Pause();
+            FullListener.Suspend();
         }
 
         void CreateInteractiveMarker([NotNull] InteractiveMarker msg)

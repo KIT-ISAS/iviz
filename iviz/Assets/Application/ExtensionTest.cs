@@ -8,7 +8,6 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.MoveitMsgs;
-using Iviz.Msgs.MoveitTest;
 using Iviz.Msgs.ObjectRecognitionMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.ShapeMsgs;
@@ -24,6 +23,10 @@ using Logger = Iviz.Msgs.Logger;
 using Pose = UnityEngine.Pose;
 using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
 using Time = UnityEngine.Time;
+
+#if false
+using Iviz.Msgs.MoveitTest;
+
 
 namespace Iviz.App
 {
@@ -259,3 +262,4 @@ namespace Iviz.App
         }
     }
 }
+#endif

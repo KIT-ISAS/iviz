@@ -7,10 +7,13 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Nito.AsyncEx;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
@@ -49,6 +52,18 @@ namespace Iviz.Controllers
         public override IModuleData ModuleData { get; }
 
         public override TfFrame Frame => cubeNode.Parent;
+
+        bool isProcessing;
+
+        bool IsProcessing
+        {
+            get => isProcessing;
+            set
+            {
+                isProcessing = value;
+                Listener.SetPause(value);
+            }
+        }
 
         [NotNull]
         public string Description
@@ -226,8 +241,7 @@ namespace Iviz.Controllers
 
         void Handler(OccupancyGrid msg)
         {
-            if (gridTiles.Any(grid => grid.IsProcessing)
-                || textureTiles.Any(texture => texture.IsProcessing))
+            if (IsProcessing)
             {
                 return;
             }
@@ -245,14 +259,14 @@ namespace Iviz.Controllers
                 return;
             }
 
+            cubeNode.AttachTo(msg.Header);
+            textureNode.AttachTo(msg.Header);
+
             if (msg.Info.Origin.HasNaN())
             {
                 Logger.Debug($"{this}: NaN in origin!");
                 return;
             }
-
-            cubeNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
-            textureNode.AttachTo(msg.Header.FrameId, msg.Header.Stamp);
 
             Pose origin = msg.Info.Origin.Ros2Unity();
             if (!origin.IsUsable())
@@ -266,19 +280,35 @@ namespace Iviz.Controllers
             numCellsY = (int) msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
-            var data = msg.Data;
-            if (CubesVisible)
-            {
-                SetCubes(data, origin);
-            }
+            List<Task> tasks = new List<Task>();
 
-            if (TextureVisible)
+            try
             {
-                SetTextures(data, origin);
+                IsProcessing = true;
+                if (CubesVisible)
+                {
+                    SetCubes(msg.Data, origin, tasks);
+                }
+
+                if (TextureVisible)
+                {
+                    SetTextures(msg.Data, origin, tasks);
+                }
+            }
+            finally
+            {
+                // next frame
+                AwaitAndReset(tasks);
             }
         }
 
-        void SetCubes([NotNull] sbyte[] data, Pose pose)
+        async void AwaitAndReset(IEnumerable<Task> tasks)
+        {
+            await tasks.WhenAll().AwaitNoThrow(this);
+            IsProcessing = false;
+        }
+
+        void SetCubes([NotNull] sbyte[] data, Pose pose, List<Task> tasks)
         {
             if (gridTiles.Length != 16)
             {
@@ -312,7 +342,7 @@ namespace Iviz.Controllers
                         yMax: (v + 1) * numCellsY / 4
                     );
 
-                    Task.Run(() =>
+                    tasks.Add(Task.Run(() =>
                     {
                         try
                         {
@@ -322,7 +352,7 @@ namespace Iviz.Controllers
                         {
                             Debug.LogWarning(e);
                         }
-                    });
+                    }));
                 }
             }
 
@@ -330,7 +360,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] sbyte[] data, Pose pose)
+        void SetTextures([NotNull] sbyte[] data, Pose pose, List<Task> tasks)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -373,7 +403,7 @@ namespace Iviz.Controllers
                     OccupancyGridResource.Rect rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i];
-                    Task.Run(() =>
+                    tasks.Add(Task.Run(() =>
                     {
                         try
                         {
@@ -383,7 +413,7 @@ namespace Iviz.Controllers
                         {
                             Logger.Error($"{this}: Error processing occupancy grid", e);
                         }
-                    });
+                    }));
                 }
             }
         }
