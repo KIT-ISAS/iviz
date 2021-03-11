@@ -102,15 +102,15 @@ namespace Iviz.Msgs.ShapeMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
-                "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +
-                "Uu04GTkWqBylKymCL+AqpV+WJK1U7gbuHpeTz/H76fcsX+STL9G8X/2aP0zzxeRrd/D4kE+uE6rjuSKx" +
-                "Y4OgtywaaopefJ50TqXco7JSK/vedVtr4b5d/30ZeXQxexSKyx8HjNy+A4qiYiTWCeUiBOt9GdeB/r1x" +
-                "PsScU/NGHFnhhzb+lhr3pabeWqawSkEQnvW4ZobM1zWqnau6igptDNpGe8qU0soS+/4Iejaw3SwnVyNr" +
-                "1bNma02oxyUF/rEqreoj8NgLvScpGiJIC63FMtQpHezkW+zbiFK2XAJl88z8BmXv5rpZ3E7nf56onrFm" +
-                "N2Sfkwfs5W2gElYHat5MEtdG8gFtUq194+yzBnGQNgMencGtjsS6vJtZPv85e4YLzh2Ny6EnSkLcRsSH" +
-                "nmiXd5Xrmce3ABf8Fi6DHkX3OqG7qBOMkc5HKpShZxfGJyx+rHnPA2FS3RXFN0bupfMJT97kK6WQpmhr" +
-                "YbLwZGQz7JBnyvGahsT73jZpIAufItTk5CVGfv1KnTRPyzV6qf85D2DY8R/CXFx5cwQAAA==";
+                "H4sIAAAAAAAACnVTUWvbMBB+N+w/HOShLTOh28oYAz90jbcERjvSDpKMEVRLiQWOZCS5JP++d5JsaynD" +
+                "YHy+u++7++5uAjOxk0rAsz7mYNtaGJFDdWqk4sLgl0ZfNoHbpgFbs1ZYYEYA90kcnIaavQhwtZAGMTrF" +
+                "pdoTGAZWQjmE45hBDrjO8ZlmWSeV+wLfHlbFh/j9+GteLsviYzTv1j8X97NyWXzqfzzcl8VNhnU81Uh2" +
+                "agXoHZGGmmIU/c/6IC4PQlmplf03dNdo5j7f/PmbRPQ5B8EUlZ8mJGFfQbCqJkmsY8pFEayPJbmO+PbG" +
+                "xZhzgc0bdiKG79p4LzbuS829tcphnQNDeTZpzSQyuRuh9q7uK6q0McK22quMkFZy5I9OFH06artdFdeJ" +
+                "tR60JmuDUqclBf1jVVo1J3wR2wGpcIggLXRW8FCndLCXL7Fvw7jsqARE85r5DerrCLjb5e1s8fsR60k5" +
+                "+yF7TBqwp7dBlbA6gFuI0iK8kfQDN6nRvnGK2QA7SjsFGp0ROx0V63G383LxY/4El4QdjauxJwRB3RLF" +
+                "x55wl/e1GzSPtwCXdAtXgQ+zB57QXeQJRsLzP5ZsMmoXxsfssNVvOe9oIKRU78L81siDdB7w7CafEUKa" +
+                "qmuYmYaTke24Q15Tytc4JNr3rsXJkrLwPoraH+mZmMNKnTWPy5Vc6pvgURgMfJe9ApRvhQh0BAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

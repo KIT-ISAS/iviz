@@ -127,14 +127,18 @@ namespace Iviz.Msgs
         }
 
         public static string ToString(in Point p) =>
-            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+            $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
         
         public static string ToString(in Vector3 p) =>
-            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+            $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
         
         public static string ToString(in Vector3f p) =>
-            $"[{p.X.ToString(BuiltIns.Culture)}, {p.Y.ToString(BuiltIns.Culture)}, {p.Z.ToString(BuiltIns.Culture)}]";
+            $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
         
+        public static string ToString(in Quaternion p) =>
+            $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, " +
+            $"\"z\": {p.Z.ToString(BuiltIns.Culture)}, \"w\": {p.W.ToString(BuiltIns.Culture)}}}";
+
         public static string ToString(in ISerializable t) => JsonConvert.SerializeObject(t);
     }
 }

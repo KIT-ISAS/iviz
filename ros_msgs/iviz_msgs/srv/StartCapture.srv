@@ -1,0 +1,5 @@
+int32 resolution_x
+int32 resolution_y
+---
+bool success
+string message

@@ -11,7 +11,11 @@ namespace Iviz.Msgs
     /// This class is meant only for short-lived rents. If you want to pass the reference around,
     /// then you should probably use <see cref="UniqueRef{T}"/> or <see cref="SharedRef{T}"/>.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">
+    /// The array type. Must be unmanaged. This is to prevent references from remaining in the array
+    /// after releasing it into the array pool, which keeps them from being garbage collected.
+    /// For a more generic version that clears the array after disposing, use <see cref="RentAndClear{T}"/>.
+    /// </typeparam>
     public readonly struct Rent<T> : IDisposable where T : unmanaged
     {
         static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
@@ -56,79 +60,6 @@ namespace Iviz.Msgs
         public RentEnumerator<T> GetEnumerator() => new(Array, Length);
 
         public T this[int index]
-        {
-            get
-            {
-                if ((uint) index >= Length)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                return Array[index];
-            }
-            set
-            {
-                if ((uint) index >= Length)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                Array[index] = value;
-            }
-        }
-    }
-
-    public readonly struct RentAndClear<T> : IDisposable
-    {
-        static readonly ArrayPool<T?> Pool = ArrayPool<T?>.Shared;
-
-        public readonly int Length;
-        public readonly T?[] Array;
-
-#if !NETSTANDARD2_0
-        public Span<T> Span => new(Array, 0, Length);
-#endif
-
-        public RentAndClear(int count)
-        {
-            switch (count)
-            {
-                case < 0:
-                    throw new ArgumentException("Count cannot be negative", nameof(count));
-                case 0:
-                    Array = System.Array.Empty<T>();
-                    Length = 0;
-                    break;
-                default:
-                    Array = Pool.Rent(count);
-                    Length = count;
-                    break;
-            }
-        }
-
-        public void Dispose()
-        {
-            if (Length <= 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i < Length; i++)
-            {
-                Array[i] = default;
-            }
-
-            Pool.Return(Array);
-        }
-
-        public override string ToString()
-        {
-            return $"[RentAndClear Type={typeof(T).Name} Length={Length} RealSize={(Array != null ? Array.Length : 0)}]";
-        }
-
-        public RentEnumerator<T?> GetEnumerator() => new(Array, Length);
-
-        public T? this[int index]
         {
             get
             {

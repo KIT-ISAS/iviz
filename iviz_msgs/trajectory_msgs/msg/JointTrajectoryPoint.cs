@@ -98,10 +98,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
-                "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +
-                "7raUb3ZLDy6DV+AKyv20rNzBA1pvxDqR29S3d67j0H6Uh2/EqtNLCKkI22Z9bH7FZux3zgz+nTXjn2tC" +
-                "O3wsstzhlKp0JzV2I7wBGsNsNFIBAAA=";
+                "H4sIAAAAAAAAClWPsY7CQAxE+5X4B0u0iOp0/RXXUF+HImQ2s7BoE6O1g46/xwlSEpqV5o29M97SL8cr" +
+                "WeUbokl90l1yb6R3xJwylJDtiupYs2Xp9bijB4pEVxgFx4iCypPZNGFL8jmNlKRaQ/6Sf7XOMqEzCP+I" +
+                "g6Hd++5PKXN2Sw8ug1fgCsr9tKzcwQNab8Q6kdvUt3eu49BhlH9zxL7TSwipCNv317FZiq3Ycs4Kfpy1" +
+                "4u9rQju8LbLc4ZSqdCc1dmMTXu0FwIBTAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

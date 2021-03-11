@@ -76,8 +76,8 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
-                "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
+                "H4sIAAAAAAAACj3HwQmAMAwF0HvAHT64gjiJC4SS0IAkxeSgTq+n3t5bcXRLtPBi80R1wYi0snCEgv+Z" +
+                "F8yhlwhycBPSM7j2DffUM/XSQh9Q4wl6VgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

@@ -1,0 +1,10 @@
+bool compress
+---
+bool success
+string message
+int32 width
+int32 height
+int32 bpp
+float64[] intrinsics
+geometry_msgs/Pose pose
+byte[] data
