@@ -12,50 +12,13 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
-    public interface IRosClient : IDisposable
-#if !NETSTANDARD2_0
-        , IAsyncDisposable
-#endif
-    {
-        string CallerId { get; }
-        string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
-
-        ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic, CancellationToken token = default)
-            where T : IMessage;
-
-        string Advertise(string topic, Type msgType, out IRosPublisher publisher);
-
-        ValueTask<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType,
-            CancellationToken token = default);
-
-        string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay = true) where T : IMessage, IDeserializable<T>, new();
-
-        ValueTask<(string id, IRosSubscriber<T> subscriber)>
-            SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
-                CancellationToken token = default)
-            where T : IMessage, IDeserializable<T>, new();
-
-        bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
-            where T : IService, new();
-
-        ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
-            CancellationToken token = default) where T : IService, new();
-
-        void CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
-            where T : IService;
-
-        Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
-            CancellationToken token = default)
-            where T : IService;
-    }
-
     /// <summary>
     /// Class that manages a client connection to a ROS master. 
     /// </summary>
@@ -117,7 +80,7 @@ namespace Iviz.Roslib
             }
         }
 
-        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(2);
+        TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(3);
 
         /// <summary>
         /// Timeout in milliseconds for XML-RPC communications with another node.
@@ -136,7 +99,7 @@ namespace Iviz.Roslib
             }
         }
 
-        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(2);
+        TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
 
         /// <summary>
         /// Timeout in milliseconds for TCP-ROS communications (topics, services).
@@ -225,8 +188,8 @@ namespace Iviz.Roslib
             CallerId = callerId;
             CallerUri = callerUri;
 
-            RosMasterApi = new RosMasterApi(masterUri, CallerId, CallerUri);
-            Parameters = new ParameterClient(masterUri, CallerId, CallerUri);
+            RosMasterApi = new RosMasterApi(masterUri, CallerId, CallerUri, 3);
+            Parameters = new ParameterClient(RosMasterApi);
         }
 
         /// <summary>
@@ -285,8 +248,8 @@ namespace Iviz.Roslib
                 CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort}{absolutePath}");
 
                 // caller uri has changed;
-                RosMasterApi = new RosMasterApi(MasterUri, CallerId, CallerUri);
-                Parameters = new ParameterClient(MasterUri, CallerId, CallerUri);
+                RosMasterApi = new RosMasterApi(MasterUri, CallerId, CallerUri, 3);
+                Parameters = new ParameterClient(RosMasterApi);
             }
 
 
@@ -294,7 +257,16 @@ namespace Iviz.Roslib
 
             if (ensureCleanSlate)
             {
-                EnsureCleanSlate();
+                try
+                {
+                    EnsureCleanSlate();
+                }
+                catch (Exception)
+                {
+                    Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", this);
+                    listener.Dispose();
+                    throw;
+                }
             }
         }
 
@@ -352,14 +324,23 @@ namespace Iviz.Roslib
 
                 // caller uri has changed;
                 client.RosMasterApi = new RosMasterApi(client.MasterUri, client.CallerId, client.CallerUri);
-                client.Parameters = new ParameterClient(client.MasterUri, client.CallerId, client.CallerUri);
+                client.Parameters = new ParameterClient(client.RosMasterApi);
             }
 
             Logger.LogFormat("** {0}: Initialized.", client);
 
             if (ensureCleanSlate)
             {
-                await client.EnsureCleanSlateAsync(token);
+                try
+                {
+                    await client.EnsureCleanSlateAsync(token);
+                }
+                catch (Exception)
+                {
+                    Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", client);
+                    await client.listener.DisposeAsync();
+                    throw;
+                }
             }
 
             return client;
@@ -427,8 +408,8 @@ namespace Iviz.Roslib
                 return new Uri($"http://{envHostname}:{usingPort}/");
             }
 
-            return Utils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
-                   Utils.GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
+            return BaseUtils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
+                   BaseUtils.GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
                    new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
         }
 
@@ -471,7 +452,7 @@ namespace Iviz.Roslib
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
 
             bool CanAccessMaster(UnicastIPAddressInformation info) =>
-                Utils.IsInSameSubnet(info.Address, masterAddress, info.IPv4Mask);
+                BaseUtils.IsInSameSubnet(info.Address, masterAddress, info.IPv4Mask);
 
             IPAddress? myAddress = candidates
                 .Select(info => (info, success: CanAccessMaster(info)))
@@ -733,7 +714,7 @@ namespace Iviz.Roslib
                     $"Error registering publisher for topic {topic}: {masterResponse.StatusMessage}");
             }
 
-            await subscription.PublisherUpdateRcpAsync(masterResponse.Publishers, token).Caf();
+            subscription.PublisherUpdateRcp(masterResponse.Publishers, token);
             return (id, subscription);
         }
 
@@ -1290,7 +1271,6 @@ namespace Iviz.Roslib
             return response.Topics
                 .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
                 .ToArray().AsReadOnly();
-
         }
 
         /// <summary>
@@ -1328,7 +1308,6 @@ namespace Iviz.Roslib
             return response.Topics
                 .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
                 .ToArray().AsReadOnly();
-
         }
 
 
@@ -1351,7 +1330,6 @@ namespace Iviz.Roslib
             }
 
             return new SystemState(response.Publishers, response.Subscribers, response.Services);
-
         }
 
         /// <summary>
@@ -1368,7 +1346,6 @@ namespace Iviz.Roslib
             }
 
             return new SystemState(response.Publishers, response.Subscribers, response.Services);
-
         }
 
         /// <summary>
@@ -1445,7 +1422,7 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task CloseAsync(CancellationToken token = default)
         {
-            const int timeoutInMs = 3000;
+            const int timeoutInMs = 4000;
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
             tokenSource.CancelAfter(timeoutInMs);
             var innerToken = tokenSource.Token;
@@ -1463,7 +1440,7 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, publishers.Select(async publisher =>
             {
-                await publisher.DisposeAsync().AwaitNoThrow(this).Caf();
+                await publisher.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this).Caf();
             }));
 
@@ -1472,7 +1449,7 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
-                await subscriber.DisposeAsync().AwaitNoThrow(this).Caf();
+                await subscriber.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
                 await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this).Caf();
             }));
 
@@ -1489,8 +1466,9 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
-                await senderManager.DisposeAsync().AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
+                await senderManager.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
+                await RosMasterApi
+                    .UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
                     .AwaitNoThrow(this).Caf();
             }));
 
@@ -1500,6 +1478,8 @@ namespace Iviz.Roslib
             {
                 Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
             }
+
+            RosMasterApi.Dispose();
         }
 
         public SubscriberState GetSubscriberStatistics()
@@ -1572,11 +1552,11 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">The operation timed out.</exception>
-        public void CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
+        public T CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
             where T : IService
         {
             using CancellationTokenSource timeoutTs = new(timeoutInMs);
-            CallService(serviceName, service, persistent, timeoutTs.Token);
+            return CallService(serviceName, service, persistent, timeoutTs.Token);
         }
 
         public TU CallService<TT, TU>(string serviceName, IRequest<TT, TU> request,
@@ -1599,11 +1579,12 @@ namespace Iviz.Roslib
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">Thrown if the operation timed out.</exception>
         /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-        public void CallService<T>(string serviceName, T service, bool persistent = false,
+        public T CallService<T>(string serviceName, T service, bool persistent = false,
             CancellationToken token = default)
             where T : IService
         {
-            Task.Run(() => CallServiceAsync(serviceName, service, persistent, token), token).WaitAndRethrow();
+            return Task.Run(() => CallServiceAsync(serviceName, service, persistent, token).AsTask(), token)
+                .WaitAndRethrow();
         }
 
         /// <summary>
@@ -1616,13 +1597,13 @@ namespace Iviz.Roslib
         /// <typeparam name="T">Service type.</typeparam>
         /// <exception cref="TaskCanceledException">Thrown if the timeout expired.</exception>
         /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent,
+        public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent,
             int timeoutInMs) where T : IService
         {
             using CancellationTokenSource timeoutTs = new(timeoutInMs);
             try
             {
-                await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token).Caf();
+                return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token).Caf();
             }
             catch (OperationCanceledException)
             {
@@ -1654,7 +1635,7 @@ namespace Iviz.Roslib
         /// <returns>Whether the call succeeded.</returns>
         /// <exception cref="TaskCanceledException">Thrown if the token expired.</exception>
         /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
-        public async Task CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
+        public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
             CancellationToken token = default)
             where T : IService
         {
@@ -1681,13 +1662,14 @@ namespace Iviz.Roslib
                     try
                     {
                         await existingReceiver.ExecuteAsync(service, token).Caf();
-                        return;
+                        return service;
                     }
                     catch (Exception e)
                     {
                         existingReceiver.Dispose();
                         subscribedServicesByName.TryRemove(resolvedServiceName, out _);
                         ThrowExceptionHelper(e, resolvedServiceName, existingReceiver.RemoteUri);
+                        throw; // unreachable
                     }
                 }
             }
@@ -1708,26 +1690,27 @@ namespace Iviz.Roslib
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
                     await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
                     await serviceCaller.ExecuteAsync(service, token).Caf();
+                    return service;
                 }
                 catch (Exception e)
                 {
                     serviceCaller.Dispose();
                     subscribedServicesByName.TryRemove(resolvedServiceName, out _);
                     ThrowExceptionHelper(e, resolvedServiceName, serviceUri);
+                    throw; // unreachable
                 }
             }
-            else
+
+            try
             {
-                try
-                {
-                    using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
-                    await serviceCaller.ExecuteAsync(service, token).Caf();
-                }
-                catch (Exception e) when (!(e is OperationCanceledException || e is RosServiceCallFailed))
-                {
-                    throw new RoslibException($"Service call '{resolvedServiceName}' to {serviceUri} failed", e);
-                }
+                using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
+                await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
+                await serviceCaller.ExecuteAsync(service, token).Caf();
+                return service;
+            }
+            catch (Exception e) when (!(e is OperationCanceledException || e is RosServiceCallFailed))
+            {
+                throw new RoslibException($"Service call '{resolvedServiceName}' to {serviceUri} failed", e);
             }
         }
 
@@ -1848,7 +1831,7 @@ namespace Iviz.Roslib
 
             advertisedServicesByName.TryRemove(resolvedServiceName, out _);
 
-            await advertisedService.DisposeAsync();
+            await advertisedService.DisposeAsync(token);
             await RosMasterApi.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
             return true;
         }

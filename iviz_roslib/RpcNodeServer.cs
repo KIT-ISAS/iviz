@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
@@ -64,7 +65,7 @@ namespace Iviz.Roslib.XmlRpc
 
             runningTs.Cancel();
             listener.Dispose();
-            task?.WaitForWithTimeout(2000).WaitNoThrow(this);
+            task?.AwaitForWithTimeout(2000).WaitNoThrow(this);
             runningTs.Dispose();
         }
 
@@ -79,7 +80,7 @@ namespace Iviz.Roslib.XmlRpc
 
             runningTs.Cancel();
             listener.Dispose();
-            await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
+            await task.AwaitForWithTimeout(2000).AwaitNoThrow(this);
             runningTs.Dispose();
         }
 
@@ -108,8 +109,7 @@ namespace Iviz.Roslib.XmlRpc
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            using CancellationTokenSource linkedTs =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             try
             {
                 await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();
@@ -119,13 +119,13 @@ namespace Iviz.Roslib.XmlRpc
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat(Utils.GenericExceptionFormat, this, e);
+                Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
             }
         }
 
         static Arg[] OkResponse(Arg arg)
         {
-            return new Arg[] {StatusCode.Success, "ok", arg};
+            return new[] {StatusCode.Success, "ok", arg};
         }
         
         static Arg[] ErrorResponse(string msg)
@@ -154,9 +154,9 @@ namespace Iviz.Roslib.XmlRpc
                 info.DestinationId,
                 info.Direction switch
                 {
-                    BusInfo.DirectionType.In => 1,
-                    BusInfo.DirectionType.Out => 0,
-                    _ => -1
+                    BusInfo.DirectionType.In => "i",
+                    BusInfo.DirectionType.Out => "o",
+                    _ => ""
                 },
                 info.Transport,
                 info.Topic,

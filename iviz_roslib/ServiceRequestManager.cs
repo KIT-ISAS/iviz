@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
@@ -18,15 +19,15 @@ namespace Iviz.Roslib
         readonly ServiceInfo<T> serviceInfo;
         readonly Task task;
 
-        bool keepGoing;
+        readonly CancellationTokenSource tokenSource = new();
+        bool KeepRunning => !tokenSource.IsCancellationRequested;
+        
         bool disposed;
 
         public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
         {
             this.serviceInfo = serviceInfo;
             this.callback = callback;
-
-            keepGoing = true;
 
             listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
             listener.Start();
@@ -49,10 +50,10 @@ namespace Iviz.Roslib
         {
             try
             {
-                while (keepGoing)
+                while (KeepRunning)
                 {
                     TcpClient client = await listener.AcceptTcpClientAsync().Caf();
-                    if (!keepGoing)
+                    if (!KeepRunning)
                     {
                         break;
                     }
@@ -68,46 +69,36 @@ namespace Iviz.Roslib
                     var sender = new ServiceRequestAsync<T>(serviceInfo, client, new Endpoint(endPoint), callback);
                     requests.Add(sender);
 
-                    await CleanupAsync();
+                    await CleanupAsync(tokenSource.Token);
                 }
-            }
-            catch (ObjectDisposedException)
-            {
-                return;
             }
             catch (Exception e)
             {
-                Logger.LogFormat("{0}: Stopped thread {1}", this, e);
+                if (!(e is ObjectDisposedException || e is OperationCanceledException))
+                {
+                    Logger.LogFormat("{0}: Stopped thread {1}", this, e);
+                }
+
                 return;
             }
 
             Logger.LogDebugFormat("{0}: Leaving thread (normally)", this); // also expected
         }
 
-        async Task CleanupAsync()
+        async Task CleanupAsync(CancellationToken token)
         {
             ServiceRequestAsync<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
             var tasks = toRemove.Select(async request =>
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
                     this, request.Hostname);
-                await request.StopAsync().Caf();
+                await request.StopAsync(token).Caf();
                 requests.Remove(request);
             });
             await tasks.WhenAll().AwaitNoThrow(this).Caf();
         }
 
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            Task.Run(DisposeAsync).WaitNoThrow(this);
-        }
-
-        public async Task DisposeAsync()
+        public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -115,7 +106,8 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            keepGoing = false;
+
+            tokenSource.Cancel();
 
             // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
             using (TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
@@ -124,14 +116,17 @@ namespace Iviz.Roslib
             }
 
             listener.Stop();
-            if (!await task.WaitFor(2000).Caf())
+            if (!await task.AwaitFor(2000, token).Caf())
             {
                 Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
 
-            Task[] tasks = requests.Select(request => request.StopAsync()).ToArray();
+
+            Task[] tasks = requests.Select(request => request.StopAsync(token)).ToArray();
             await tasks.WhenAll().AwaitNoThrow(this).Caf();
             requests.Clear();
+            
+            tokenSource.Dispose();
         }
 
         public override string ToString()

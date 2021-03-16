@@ -41,5 +41,5 @@ namespace Iviz.Roslib.Actionlib
         /// The goal received a cancel request after it started executing and has not yet completed execution
         /// </summary>
         Done = 7
-    };
+    }
 }

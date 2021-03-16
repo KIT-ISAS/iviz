@@ -338,8 +338,7 @@ namespace Iviz.Roslib.Actionlib
 
             try
             {
-                using CancellationTokenSource linkedSource =
-                    CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
+                using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
                 linkedSource.CancelAfter(timeoutInMs);
                 goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
             }
@@ -361,8 +360,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
@@ -373,8 +371,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             await goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
         }
 
@@ -392,8 +389,7 @@ namespace Iviz.Roslib.Actionlib
 
         IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllWithToken(CancellationToken token)
         {
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             var source = channelReader!.ReadAll(linkedSource.Token);
             foreach (var msg in ReadAllImpl(source))
             {
@@ -462,8 +458,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
             {

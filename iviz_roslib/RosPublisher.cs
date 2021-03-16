@@ -167,7 +167,7 @@ namespace Iviz.Roslib
             Dispose();
         }
 
-        public async Task DisposeAsync()
+        public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -177,7 +177,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
-            await manager.StopAsync().AwaitNoThrow(this);
+            await manager.StopAsync(token).AwaitNoThrow(this);
             NumSubscribersChanged = null;
             runningTs.Dispose();
         }
@@ -242,7 +242,7 @@ namespace Iviz.Roslib
 
         async Task RemovePublisherAsync(CancellationToken token)
         {
-            Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
             Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
             await (disposeTask, unadvertiseTask).WhenAll().Caf();            
         }

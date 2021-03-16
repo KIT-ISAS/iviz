@@ -626,7 +626,7 @@ namespace Iviz.Roslib.MarkerHelper
                         CreateControl(mode: RosInteractionMode.Menu,
                             markers: controlMarker ?? RosMarker.CreateSphere())
                     },
-                MenuEntries = entries.Select(entry => new Iviz.Msgs.VisualizationMsgs.MenuEntry
+                MenuEntries = entries.Select(entry => new Msgs.VisualizationMsgs.MenuEntry
                     {Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title}).ToArray()
             };
         }

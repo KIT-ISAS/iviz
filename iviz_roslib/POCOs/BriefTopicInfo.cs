@@ -1,4 +1,6 @@
-﻿namespace Iviz.Roslib
+﻿using Iviz.Roslib.Utils;
+
+namespace Iviz.Roslib
 {
     /// <summary>
     /// Topic name and message type.

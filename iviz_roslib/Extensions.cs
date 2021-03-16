@@ -76,7 +76,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Wait for subscriber timed out");
+                throw new TimeoutException("Wait for subscriber timed out");
             }
         }
 
@@ -98,8 +98,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(publisher));
             }
 
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
 
             while (publisher.GetState().Senders.Count == 0)
             {
@@ -138,8 +137,7 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
-            using CancellationTokenSource linkedSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
 
             while (subscriber.GetState().Receivers.Count == 0)
             {

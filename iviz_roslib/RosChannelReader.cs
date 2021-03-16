@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
+
 #if !NETSTANDARD2_0
 using System.Runtime.CompilerServices;
 
@@ -230,7 +231,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Wait to read timed out");
+                throw new TimeoutException("Wait to read timed out");
             }
         }
 
@@ -257,7 +258,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Wait to read timed out");
+                throw new TimeoutException("Wait to read timed out");
             }
         }
 
@@ -288,7 +289,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Wait for read timed out");
+                throw new TimeoutException("Wait for read timed out");
             }
         }
 
@@ -329,7 +330,7 @@ namespace Iviz.Roslib
             }
             catch (OperationCanceledException)
             {
-                throw new TimeoutException($"Wait for read timed out");
+                throw new TimeoutException("Wait for read timed out");
             }
         }
 

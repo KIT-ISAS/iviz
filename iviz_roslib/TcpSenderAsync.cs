@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -93,7 +94,7 @@ namespace Iviz.Roslib
             listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
             listener.Start();
             Endpoint = new Endpoint((IPEndPoint) listener.LocalEndpoint);
-            task = Task.Run(async () => await StartSession(managerSignal).Caf());
+            task = Task.Run(async () => await StartSession(managerSignal));
         }
 
         public string RemoteCallerId { get; }
@@ -118,7 +119,7 @@ namespace Iviz.Roslib
                 BytesDropped = bytesDropped
             };
 
-        public async Task DisposeAsync()
+        public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -131,7 +132,7 @@ namespace Iviz.Roslib
 
             if (task != null)
             {
-                await task.WaitForWithTimeout(5000, "Sender task dispose timed out.").AwaitNoThrow(this);
+                await task.AwaitForWithTimeout(5000, "Sender task dispose timed out.", token).AwaitNoThrow(this);
             }
 
             runningTs.Dispose();
@@ -139,7 +140,7 @@ namespace Iviz.Roslib
 
         async ValueTask<Rent<byte>> ReceivePacket(NetworkStream stream)
         {
-            if (!await stream.ReadChunkAsync(lengthBuffer, 4, runningTs.Token).Caf())
+            if (!await stream.ReadChunkAsync(lengthBuffer, 4, runningTs.Token))
             {
                 throw new IOException("Connection closed during handshake.");
             }
@@ -154,7 +155,7 @@ namespace Iviz.Roslib
             var readBuffer = new Rent<byte>(length);
             try
             {
-                if (!await stream.ReadChunkAsync(readBuffer.Array, length, runningTs.Token).Caf())
+                if (!await stream.ReadChunkAsync(readBuffer.Array, length, runningTs.Token))
                 {
                     throw new IOException("Connection closed during handshake.");
                 }
@@ -195,7 +196,7 @@ namespace Iviz.Roslib
                 TcpHeader = contents.AsReadOnly();
             }
 
-            await Utils.WriteHeaderAsync(stream, contents, runningTs.Token).Caf();
+            await stream.WriteHeaderAsync(contents, runningTs.Token);
         }
 
         string? ProcessRemoteHeader(List<string> fields)
@@ -250,10 +251,6 @@ namespace Iviz.Roslib
                     return
                         $"error=Expected md5 '{topicInfo.Md5Sum}' but partner provided '{receivedMd5Sum}', closing connection";
                 }
-                else
-                {
-                    // OK
-                }
             }
 
             if (TcpNoDelay || values.TryGetValue("tcp_nodelay", out string? receivedNoDelay) && receivedNoDelay == "1")
@@ -267,14 +264,14 @@ namespace Iviz.Roslib
         async Task ProcessHandshake(NetworkStream stream)
         {
             List<string> fields;
-            using (Rent<byte> readBuffer = await ReceivePacket(stream).Caf())
+            using (Rent<byte> readBuffer = await ReceivePacket(stream))
             {
-                fields = Utils.ParseHeader(readBuffer);
+                fields = BaseUtils.ParseHeader(readBuffer);
             }
 
             string? errorMessage = ProcessRemoteHeader(fields);
 
-            await SendHeader(stream, errorMessage).Caf();
+            await SendHeader(stream, errorMessage);
 
             if (errorMessage != null)
             {
@@ -302,9 +299,9 @@ namespace Iviz.Roslib
 
                     TcpClient newTcpClient;
                     IPEndPoint? newRemoteEndPoint;
-                    if (!await connectionTask.WaitFor(timeoutInMs, runningTs.Token).Caf()
+                    if (!await connectionTask.AwaitFor(timeoutInMs, runningTs.Token)
                         || !connectionTask.RanToCompletion()
-                        || (newTcpClient = await connectionTask.Caf()) == null
+                        || (newTcpClient = await connectionTask) == null
                         || (newRemoteEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
                     {
                         Logger.LogFormat("{0}: Connection timed out (round {1}/{2}): {3}",
@@ -320,7 +317,7 @@ namespace Iviz.Roslib
                         Status = SenderStatus.Active;
                         RemoteEndpoint = new Endpoint(newRemoteEndPoint);
                         Logger.LogDebugFormat("{0}: Started!", this);
-                        await ProcessLoop(stream).Caf();
+                        await ProcessLoop(stream);
                     }
                 }
                 catch (Exception e)
@@ -333,10 +330,10 @@ namespace Iviz.Roslib
                         case IOException _:
                         case TimeoutException _:
                         case SocketException _:
-                            Logger.LogDebugFormat(Utils.GenericExceptionFormat, this, e);
+                            Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                             break;
                         default:
-                            Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
+                            Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
                             break;
                     }
                 }
@@ -390,7 +387,7 @@ namespace Iviz.Roslib
                 array[2] = (byte) (i >> 0x10);
             }
 
-            await ProcessHandshake(stream).Caf();
+            await ProcessHandshake(stream);
 
             List<(T msg, int msgLength, TaskCompletionSource? signal)> tmpQueue = new();
 
@@ -431,7 +428,7 @@ namespace Iviz.Roslib
                         uint sendLength = Buffer.Serialize(msg, writeBuffer.Array, 4);
 
                         WriteLengthToBuffer(sendLength);
-                        await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token);
 
                         numSent++;
                         bytesSent += (int) sendLength + 4;

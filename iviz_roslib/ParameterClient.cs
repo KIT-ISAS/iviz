@@ -14,16 +14,15 @@ namespace Iviz.Roslib.XmlRpc
     /// </summary>
     public sealed class ParameterClient
     {
-        public Uri MasterUri { get; }
-        public Uri CallerUri { get; }
-        public string CallerId { get; }
-        public int TimeoutInMs { get; set; } = 2000;
+        readonly RosMasterApi backend;
 
-        public ParameterClient(Uri masterUri, string callerId, Uri callerUri)
+        public Uri MasterUri => backend.MasterUri;
+        public Uri CallerUri => backend.CallerUri;
+        public string CallerId => backend.CallerId;
+
+        public ParameterClient(RosMasterApi backend)
         {
-            MasterUri = masterUri ?? throw new ArgumentNullException(nameof(masterUri));
-            CallerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
-            CallerId = callerId ?? throw new ArgumentNullException(nameof(callerId));
+            this.backend = backend;
         }
 
         public override string ToString()
@@ -297,230 +296,216 @@ namespace Iviz.Roslib.XmlRpc
 
         object[] MethodCall(string function, Arg[] args)
         {
-            object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
-            if (tmp is object[] result)
-            {
-                return result;
-            }
-
-            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            return backend.MethodCall(function, args);
         }
 
-        async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
+        ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token = default)
         {
-            object tmp = await XmlRpcService
-                .MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
-                .Caf();
-            if (tmp is object[] result)
-            {
-                return result;
-            }
-
-            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            return backend.MethodCallAsync(function, args, token);
         }
-    }
 
-    internal sealed class GetParamResponse : BaseResponse
-    {
-        public object? ParameterValue { get; }
-
-        internal GetParamResponse(object[]? a)
+        internal sealed class GetParamResponse : BaseResponse
         {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+            public object? ParameterValue { get; }
+
+            internal GetParamResponse(object[]? a)
             {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            ParameterValue = a[2];
-        }
-    }
-
-    internal sealed class SearchParamResponse : BaseResponse
-    {
-        public string? FoundKey { get; }
-
-        internal SearchParamResponse(object[]? a)
-        {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            if (!(a[2] is string foundKeyStr))
-            {
-                MarkError();
-                return;
-            }
-
-            FoundKey = foundKeyStr;
-        }
-    }
-
-    internal sealed class SubscribeParamResponse : BaseResponse
-    {
-        public object? ParameterValue { get; }
-
-        internal SubscribeParamResponse(object[]? a)
-        {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            if (!(a[2] is string parameterValue))
-            {
-                MarkError();
-                return;
-            }
-
-            ParameterValue = parameterValue;
-        }
-    }
-
-    internal sealed class UnsubscribeParamResponse : BaseResponse
-    {
-        public int NumUnsubscribed { get; }
-
-        internal UnsubscribeParamResponse(object[]? a)
-        {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            if (!(a[2] is int numUnsubscribed))
-            {
-                MarkError();
-                return;
-            }
-
-            NumUnsubscribed = numUnsubscribed;
-        }
-    }
-
-    internal sealed class HasParamResponse : BaseResponse
-    {
-        public bool HasParam { get; }
-
-        internal HasParamResponse(object[]? a)
-        {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            if (!(a[2] is bool hasParam))
-            {
-                MarkError();
-                return;
-            }
-
-            HasParam = hasParam;
-        }
-    }
-
-    internal sealed class GetParamNamesResponse : BaseResponse
-    {
-        public ReadOnlyCollection<string>? ParameterNameList { get; }
-
-        internal GetParamNamesResponse(object[]? a)
-        {
-            if (a is null ||
-                a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            Code = code;
-            StatusMessage = statusMessage;
-
-            if (Code == StatusCode.Error)
-            {
-                return;
-            }
-
-            if (!(a[2] is object[] objNameList))
-            {
-                MarkError();
-                return;
-            }
-
-            List<string> nameList = new();
-            foreach (var objName in objNameList)
-            {
-                if (!(objName is string name))
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
                 {
                     MarkError();
                     return;
                 }
 
-                nameList.Add(name);
-            }
+                Code = code;
+                StatusMessage = statusMessage;
 
-            ParameterNameList = nameList.AsReadOnly();
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                ParameterValue = a[2];
+            }
+        }
+
+        internal sealed class SearchParamResponse : BaseResponse
+        {
+            public string? FoundKey { get; }
+
+            internal SearchParamResponse(object[]? a)
+            {
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
+                {
+                    MarkError();
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                if (!(a[2] is string foundKeyStr))
+                {
+                    MarkError();
+                    return;
+                }
+
+                FoundKey = foundKeyStr;
+            }
+        }
+
+        internal sealed class SubscribeParamResponse : BaseResponse
+        {
+            public object? ParameterValue { get; }
+
+            internal SubscribeParamResponse(object[]? a)
+            {
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
+                {
+                    MarkError();
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                if (!(a[2] is string parameterValue))
+                {
+                    MarkError();
+                    return;
+                }
+
+                ParameterValue = parameterValue;
+            }
+        }
+
+        internal sealed class UnsubscribeParamResponse : BaseResponse
+        {
+            public int NumUnsubscribed { get; }
+
+            internal UnsubscribeParamResponse(object[]? a)
+            {
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
+                {
+                    MarkError();
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                if (!(a[2] is int numUnsubscribed))
+                {
+                    MarkError();
+                    return;
+                }
+
+                NumUnsubscribed = numUnsubscribed;
+            }
+        }
+
+        internal sealed class HasParamResponse : BaseResponse
+        {
+            public bool HasParam { get; }
+
+            internal HasParamResponse(object[]? a)
+            {
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
+                {
+                    MarkError();
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                if (!(a[2] is bool hasParam))
+                {
+                    MarkError();
+                    return;
+                }
+
+                HasParam = hasParam;
+            }
+        }
+
+        internal sealed class GetParamNamesResponse : BaseResponse
+        {
+            public ReadOnlyCollection<string>? ParameterNameList { get; }
+
+            internal GetParamNamesResponse(object[]? a)
+            {
+                if (a is null ||
+                    a.Length != 3 ||
+                    !(a[0] is int code) ||
+                    !(a[1] is string statusMessage))
+                {
+                    MarkError();
+                    return;
+                }
+
+                Code = code;
+                StatusMessage = statusMessage;
+
+                if (Code == StatusCode.Error)
+                {
+                    return;
+                }
+
+                if (!(a[2] is object[] objNameList))
+                {
+                    MarkError();
+                    return;
+                }
+
+                List<string> nameList = new();
+                foreach (var objName in objNameList)
+                {
+                    if (!(objName is string name))
+                    {
+                        MarkError();
+                        return;
+                    }
+
+                    nameList.Add(name);
+                }
+
+                ParameterNameList = nameList.AsReadOnly();
+            }
         }
     }
 }

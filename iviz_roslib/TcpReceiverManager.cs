@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
@@ -81,7 +82,7 @@ namespace Iviz.Roslib
 
                 using (await mutex.LockAsync(token))
                 {
-                    numConnectionsChanged = await CleanupAsync();
+                    numConnectionsChanged = await CleanupAsync(token);
                 }
 
                 if (numConnectionsChanged)
@@ -193,12 +194,12 @@ namespace Iviz.Roslib
                     .Select(pair => pair.Value)
                     .ToArray();
 
-                var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync());
+                var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
                 await deleteTasks.WhenAll().AwaitNoThrow(this).Caf();
 
                 var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
                 bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this).Caf();
-                numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync();
+                numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync(token);
             }
 
             if (numConnectionsChanged)
@@ -212,7 +213,7 @@ namespace Iviz.Roslib
             return connectionsByUri.Values.Any(receiver => !receiver.IsAlive);
         }
 
-        async ValueTask<bool> CleanupAsync()
+        async ValueTask<bool> CleanupAsync(CancellationToken token)
         {
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             if (toDelete.Length == 0)
@@ -224,7 +225,7 @@ namespace Iviz.Roslib
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
-                return receiver.DisposeAsync();
+                return receiver.DisposeAsync(token);
             });
 
             await tasks.WhenAll().AwaitNoThrow(this).Caf();
@@ -234,17 +235,20 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
-            Task.Run(StopAsync).WaitNoThrow(this);
+            Task.Run(() => StopAsync(default)).WaitNoThrow(this);
         }
 
-        public async Task StopAsync()
+        public async Task StopAsync(CancellationToken token)
         {
-            using (await mutex.LockAsync())
+            TcpReceiverAsync<T>[] receivers;
+            using (await mutex.LockAsync(token))
             {
-                await connectionsByUri.Values.Select(receiver => receiver.DisposeAsync()).WhenAll();
+                receivers = connectionsByUri.Values.ToArray();
                 connectionsByUri.Clear();
-                subscriber.RaiseNumPublishersChanged();
             }
+            
+            await receivers.Select(receiver => receiver.DisposeAsync(token)).WhenAll();
+            subscriber.RaiseNumPublishersChanged();
         }
 
         public ReadOnlyCollection<SubscriberReceiverState> GetStates()

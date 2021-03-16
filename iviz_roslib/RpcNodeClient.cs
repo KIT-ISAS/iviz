@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
@@ -67,7 +66,7 @@ namespace Iviz.Roslib.XmlRpc
 
         object[] MethodCall(string function, Arg[] args)
         {
-            object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args, TimeoutInMs);
+            object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
             if (tmp is object[] result)
             {
                 return result;
@@ -79,14 +78,31 @@ namespace Iviz.Roslib.XmlRpc
 
         async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
         {
-            object tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, TimeoutInMs, token).Caf();
-            if (tmp is object[] result)
+            using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            ts.CancelAfter(TimeoutInMs);
+
+            object tmp;
+            try
             {
-                return result;
+                tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, ts.Token).Caf();
+            }
+            catch (OperationCanceledException)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"Call to '{function}' timed out");
+                }
+
+                throw;
+            }
+
+            if (!(tmp is object[] result))
+            {
+                throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
+                                          $"Expected type object[], got {tmp.GetType().Name}");
             }
             
-            throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                      $"Expected type object[], got {tmp.GetType().Name}");
+            return result;
         }
 
 

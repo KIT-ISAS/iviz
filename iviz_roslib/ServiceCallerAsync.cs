@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -61,7 +62,7 @@ namespace Iviz.Roslib
                 persistent ? "persistent=1" : "persistent=0",
             };
 
-            return Utils.WriteHeaderAsync(stream, contents, token);
+            return stream.WriteHeaderAsync(contents, token);
         }
 
         async Task ProcessHandshakeAsync(NetworkStream stream, bool persistent, CancellationToken token)
@@ -71,7 +72,7 @@ namespace Iviz.Roslib
             List<string> responses;
             using (var readBuffer = await ReceivePacketAsync(stream, token).Caf())
             {
-                responses = Utils.ParseHeader(readBuffer);
+                responses = BaseUtils.ParseHeader(readBuffer);
             }
 
             if (responses.Count != 0 && responses[0].HasPrefix("error"))

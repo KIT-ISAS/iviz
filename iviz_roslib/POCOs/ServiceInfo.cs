@@ -1,4 +1,5 @@
 ﻿using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
 {

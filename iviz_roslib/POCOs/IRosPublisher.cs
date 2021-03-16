@@ -126,7 +126,7 @@ namespace Iviz.Roslib
         /// Async version of Dispose(), for NET Core 2.0 where IAsyncDisposable is not available.
         /// </summary>
         /// <returns>The awaitable dispose task.</returns>
-        Task DisposeAsync();
+        Task DisposeAsync(CancellationToken token);
     }
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage

@@ -157,7 +157,7 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        public async Task DisposeAsync()
+        public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -169,7 +169,7 @@ namespace Iviz.Roslib
             callbacksById.Clear();
             callbacks = EmptyCallback;
             NumPublishersChanged = null;
-            await manager.StopAsync();
+            await manager.StopAsync(token);
             runningTs.Dispose();
         }
 
@@ -284,7 +284,7 @@ namespace Iviz.Roslib
             else
             {
                 callbacks = EmptyCallback;
-                Task disposeTask = DisposeAsync().AwaitNoThrow(this);
+                Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
                 await (disposeTask, unsubscribeTask).WhenAll().Caf();
             }
@@ -292,20 +292,21 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        internal async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            if (token.IsCancellationRequested || runningTs.IsCancellationRequested)
+            if (runningTs.IsCancellationRequested)
             {
                 return;
             }
 
-            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            token.ThrowIfCancellationRequested();
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             await manager.PublisherUpdateRpcAsync(publisherUris, tokenSource.Token).AwaitNoThrow(this);
         }
 
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            Task.Run( () => PublisherUpdateRcpAsync(publisherUris, token), token).WaitNoThrow(this);
+            Task.Run( () => PublisherUpdateRcpAsync(publisherUris, token), token).AwaitNoThrow(this);
         }
 
         public override string ToString()

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
@@ -21,21 +22,53 @@ namespace Iviz.Roslib.XmlRpc
     /// <summary>
     /// Implements communication to the ROS master API.
     /// </summary>
-    public sealed class RosMasterApi
+    public sealed class RosMasterApi : IDisposable
     {
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
         public string CallerId { get; }
-        public int TimeoutInMs { get; set; } = 2000;
+        public int TimeoutInMs { get; set; } = 3000;
 
         readonly Arg[] callerIdArgCache;
 
-        public RosMasterApi(Uri masterUri, string callerId, Uri callerUri)
+        readonly List<XmlRpcConnection> rpcConnections = new List<XmlRpcConnection>();
+
+        public long BytesReceived => rpcConnections.Sum(connection => connection.BytesReceived);
+        public long BytesSent => rpcConnections.Sum(connection => connection.BytesSent);
+        public int RequestsInQueue => rpcConnections.Sum(connection => connection.QueueSize);
+        public int TotalRequests => rpcConnections.Sum(connection => connection.TotalRequests);
+        public int AvgTimeInQueueInMs => rpcConnections[0].AvgTimeInQueueInMs;
+
+        //readonly XmlRpcConnection rpcConnection;
+
+        public RosMasterApi(Uri masterUri, string callerId, Uri callerUri, int numParallelConnections = 1)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
             callerIdArgCache = new Arg[] {CallerId};
+            //rpcConnection[0] = new XmlRpcConnection(masterUri);
+            //rpcConnection[1] = new XmlRpcConnection(masterUri);
+
+            if (numParallelConnections <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(numParallelConnections));
+            }
+
+            for (int i = 0; i < numParallelConnections; i++)
+            {
+                rpcConnections.Add(new XmlRpcConnection("Rpc#" + i, masterUri));
+            }
+        }
+
+        public void Dispose()
+        {
+            //rpcConnection[0].Dispose();
+            //rpcConnection[1].Dispose();
+            foreach (var connection in rpcConnections)
+            {
+                connection.Dispose();
+            }
         }
 
         public override string ToString()
@@ -53,7 +86,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getUri", args, token).Caf();
+            object[] response = await MethodCallAsync("getUri", args, token);
             return new GetUriResponse(response);
         }
 
@@ -77,7 +110,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, nodeId};
-            object[] response = await MethodCallAsync("lookupNode", args, token).Caf();
+            object[] response = await MethodCallAsync("lookupNode", args, token);
             return new LookupNodeResponse(response);
         }
 
@@ -92,7 +125,7 @@ namespace Iviz.Roslib.XmlRpc
             CancellationToken token = default)
         {
             Arg[] args = {CallerId, subgraph};
-            object[] response = await MethodCallAsync("getPublishedTopics", args, token).Caf();
+            object[] response = await MethodCallAsync("getPublishedTopics", args, token);
             return new GetPublishedTopicsResponse(response);
         }
 
@@ -106,7 +139,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getTopicTypes", args, token).Caf();
+            object[] response = await MethodCallAsync("getTopicTypes", args, token);
             return new GetPublishedTopicsResponse(response);
         }
 
@@ -141,7 +174,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerSubscriber", args, token).Caf();
+            object[] response = await MethodCallAsync("registerSubscriber", args, token);
             return new RegisterSubscriberResponse(response);
         }
 
@@ -166,7 +199,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterSubscriber", args, token).Caf();
+            object[] response = await MethodCallAsync("unregisterSubscriber", args, token);
             return new UnregisterSubscriberResponse(response);
         }
 
@@ -201,7 +234,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerPublisher", args, token).Caf();
+            object[] response = await MethodCallAsync("registerPublisher", args, token);
             return new RegisterPublisherResponse(response);
         }
 
@@ -217,7 +250,8 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterPublisherResponse(response);
         }
 
-        public async ValueTask<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic, CancellationToken token = default)
+        public async ValueTask<UnregisterPublisherResponse> UnregisterPublisherAsync(string topic,
+            CancellationToken token = default)
         {
             if (topic == null)
             {
@@ -225,7 +259,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterPublisher", args, token).Caf();
+            object[] response = await MethodCallAsync("unregisterPublisher", args, token);
             return new UnregisterPublisherResponse(response);
         }
 
@@ -239,7 +273,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
             Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getSystemState", args, token).Caf();
+            object[] response = await MethodCallAsync("getSystemState", args, token);
             return new GetSystemStateResponse(response);
         }
 
@@ -255,7 +289,8 @@ namespace Iviz.Roslib.XmlRpc
             return new LookupServiceResponse(response);
         }
 
-        public async ValueTask<LookupServiceResponse> LookupServiceAsync(string service, CancellationToken token = default)
+        public async ValueTask<LookupServiceResponse> LookupServiceAsync(string service,
+            CancellationToken token = default)
         {
             if (service == null)
             {
@@ -263,7 +298,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service};
-            object[] response = await MethodCallAsync("lookupService", args, token).Caf();
+            object[] response = await MethodCallAsync("lookupService", args, token);
             return new LookupServiceResponse(response);
         }
 
@@ -298,7 +333,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
-            object[] response = await MethodCallAsync("registerService", args, token).Caf();
+            object[] response = await MethodCallAsync("registerService", args, token);
             return new DefaultResponse(response);
         }
 
@@ -319,7 +354,8 @@ namespace Iviz.Roslib.XmlRpc
             return new UnregisterServiceResponse(response);
         }
 
-        public async ValueTask<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri, CancellationToken token = default)
+        public async ValueTask<UnregisterServiceResponse> UnregisterServiceAsync(string service, Uri rosRpcUri,
+            CancellationToken token = default)
         {
             if (service == null)
             {
@@ -332,13 +368,15 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             Arg[] args = {CallerId, service, rosRpcUri};
-            object[] response = await MethodCallAsync("unregisterService", args, token).Caf();
+            object[] response = await MethodCallAsync("unregisterService", args, token);
             return new UnregisterServiceResponse(response);
         }
 
-        object[] MethodCall(string function, Arg[] args)
+        internal object[] MethodCall(string function, Arg[] args)
         {
-            object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, TimeoutInMs);
+            using CancellationTokenSource ts = new(TimeoutInMs);
+
+            object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
             if (tmp is object[] result)
             {
                 return result;
@@ -347,16 +385,35 @@ namespace Iviz.Roslib.XmlRpc
             throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
         }
 
-        async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
+        internal async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
         {
-            object tmp = await XmlRpcService.MethodCallAsync(MasterUri, CallerUri, function, args, TimeoutInMs, token)
-                .Caf();
-            if (tmp is object[] result)
+            using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            ts.CancelAfter(TimeoutInMs);
+
+            object tmp;
+            try
             {
-                return result;
+                XmlRpcConnection freeConnection = rpcConnections.Min()!;
+                //XmlRpcConnection freeConnection = rpcConnection;
+                //using XmlRpcConnection freeConnection = new XmlRpcConnection("Rpc#0", MasterUri);
+                tmp = await freeConnection.MethodCallAsync(CallerUri, function, args, ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"Call to '{function}' timed out");
+                }
+
+                throw;
             }
 
-            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            if (!(tmp is object[] result))
+            {
+                throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            }
+
+            return result;
         }
     }
 

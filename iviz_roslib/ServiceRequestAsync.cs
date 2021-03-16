@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -47,11 +48,11 @@ namespace Iviz.Roslib
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Hostname;
 
-        public async Task StopAsync()
+        public async Task StopAsync(CancellationToken token)
         {
             tcpClient.Close();
             runningTs.Cancel();
-            await task.WaitForWithTimeout(2000).AwaitNoThrow(this);
+            await task.AwaitForWithTimeout(2000, token: token).AwaitNoThrow(this);
             runningTs.Dispose();
         }
 
@@ -169,11 +170,13 @@ namespace Iviz.Roslib
             {
                 contents = new[]
                 {
-                    $"callerid={serviceInfo.CallerId}"
+                    $"callerid={serviceInfo.CallerId}",
+                    $"type={serviceInfo.Type}",
+                    $"md5sum={serviceInfo.Md5Sum}",
                 };
             }
 
-            await Utils.WriteHeaderAsync(stream, contents, runningTs.Token).Caf();
+            await stream.WriteHeaderAsync(contents, runningTs.Token).Caf();
         }
 
         async Task ProcessHandshake(NetworkStream stream)
@@ -181,7 +184,7 @@ namespace Iviz.Roslib
             List<string> fields;
             using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
             {
-                fields = Utils.ParseHeader(readBuffer);
+                fields = BaseUtils.ParseHeader(readBuffer);
             }
 
             string? errorMessage = ProcessRemoteHeader(fields);
@@ -197,14 +200,27 @@ namespace Iviz.Roslib
         async Task Run()
         {
             NetworkStream stream = tcpClient.GetStream();
-            
+
             try
             {
                 await ProcessHandshake(stream).Caf();
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
+                switch (e)
+                {
+                    case OperationCanceledException:
+                    case ObjectDisposedException:
+                        break;
+                    case IOException:
+                    case SocketException:
+                        Logger.LogDebugFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
+                        break;
+                    default:
+                        Logger.LogErrorFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
+                        break;
+                }
+
                 runningTs.Cancel();
                 return;
             }
@@ -218,7 +234,8 @@ namespace Iviz.Roslib
                     using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
                     {
                         serviceMsg = (TService) serviceInfo.Generator.Create();
-                        serviceMsg.Request = Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Length);
+                        serviceMsg.Request =
+                            Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Length);
                     }
 
                     byte resultStatus;
@@ -250,7 +267,8 @@ namespace Iviz.Roslib
                     if (errorInResponse)
                     {
                         resultStatus = ErrorByte;
-                        errorMessage = "Callback function returned null, an invalid value, or an exception happened.";
+                        errorMessage =
+                            "Callback function failed: it returned null, an invalid value, or an exception happened.";
                     }
                     else
                     {
@@ -281,11 +299,13 @@ namespace Iviz.Roslib
                 }
                 catch (Exception e)
                 {
-                    Logger.LogFormat(Utils.GenericExceptionFormat, this, e);
                     if (e is IOException || e is SocketException)
                     {
+                        Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                         break;
                     }
+
+                    Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
                 }
             }
 

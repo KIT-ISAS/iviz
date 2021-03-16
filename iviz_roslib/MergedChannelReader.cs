@@ -5,11 +5,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Nito.AsyncEx;
-
 #if !NETSTANDARD2_0
+using Nito.AsyncEx;
 using System.Runtime.CompilerServices;
-
 #endif
 
 namespace Iviz.Roslib

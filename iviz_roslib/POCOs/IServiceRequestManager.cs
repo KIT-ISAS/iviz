@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Iviz.Roslib
@@ -8,7 +9,6 @@ namespace Iviz.Roslib
         string Service { get; }
         string ServiceType { get; }
         Uri Uri { get; }
-        void Dispose();
-        Task DisposeAsync();
+        Task DisposeAsync(CancellationToken token);
     }
 }

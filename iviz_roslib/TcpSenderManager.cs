@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
 
@@ -58,7 +59,7 @@ namespace Iviz.Roslib
         {
             get
             {
-                TryToCleanup().WaitNoThrow(this);
+                TryToCleanup(default).WaitNoThrow(this);
                 return connectionsByCallerId.Count;
             }
         }
@@ -96,7 +97,7 @@ namespace Iviz.Roslib
         public Endpoint? CreateConnectionRpc(string remoteCallerId)
         {
             // while we're here
-            Task cleanupTask = TryToCleanup();
+            Task cleanupTask = TryToCleanup(default);
 
             Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
             TcpSenderAsync<TMessage> newSender; //= new(remoteCallerId, topicInfo, Latching);
@@ -143,7 +144,7 @@ namespace Iviz.Roslib
             return !newSender.IsAlive ? null : newSender.Endpoint;
         }
 
-        Task TryToCleanup()
+        Task TryToCleanup(CancellationToken token)
         {
             var toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
             if (toDelete.Length == 0)
@@ -155,7 +156,7 @@ namespace Iviz.Roslib
             {
                 var tasks = toDelete.Select(async sender =>
                 {
-                    await sender.DisposeAsync().AwaitNoThrow(this);
+                    await sender.DisposeAsync(token).AwaitNoThrow(this);
                     if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
                     {
                         Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
@@ -164,7 +165,7 @@ namespace Iviz.Roslib
                 await tasks.WhenAll().AwaitNoThrow(this);
 
                 publisher.RaiseNumConnectionsChanged();
-            });
+            }, token);
         }
 
         public void Publish(in TMessage msg)
@@ -200,12 +201,12 @@ namespace Iviz.Roslib
 
         public void Stop()
         {
-            Task.Run(StopAsync).WaitNoThrow(this);
+            Task.Run(() => StopAsync(default)).WaitNoThrow(this);
         }
 
-        public async Task StopAsync()
+        public async Task StopAsync(CancellationToken token)
         {
-            await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync()).WhenAll().AwaitNoThrow(this);
+            await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
             connectionsByCallerId.Clear();
             latchedMessage.Unset();
         }
