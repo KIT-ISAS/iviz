@@ -130,6 +130,9 @@ namespace Iviz.MsgsGen
                 lines.Add($"    {entry}");
             }
 
+            lines.Add("");
+            lines.Add("    public override string ToString() => Extensions.ToString(this);");
+
             lines.Add("}");
 
             return lines;
@@ -252,7 +255,9 @@ namespace Iviz.MsgsGen
                 $"[Preserve] public const string RosServiceType = \"{RosPackage}/{Name}\";",
                 "",
                 "/// <summary> MD5 hash of a compact representation of the service. </summary>",
-                $"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};"
+                $"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
+                "",
+                "public override string ToString() => Extensions.ToString(this);",
             };
         }
 
