@@ -3,7 +3,16 @@
     <PropertyGroup>
         <AssemblyName>BigGustave</AssemblyName>
         <RootNamespace>BigGustave</RootNamespace>
-        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+        <LangVersion>9</LangVersion>        
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
 </Project>

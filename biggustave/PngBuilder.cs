@@ -1,4 +1,6 @@
-﻿namespace BigGustave
+﻿using System;
+
+namespace BigGustave
 {
     using System.IO;
     using System.IO.Compression;
@@ -12,33 +14,24 @@
     /// </remarks>
     public class PngBuilder
     {
-        private static readonly byte[] FakeDeflateHeader = { 120, 156 };
+        static readonly byte[] FakeDeflateHeader = {120, 156};
 
-        private readonly byte[] rawData;
-        private readonly bool hasAlphaChannel;
-        private readonly int width;
-        private readonly int height;
-        private readonly int bytesPerPixel;
+        readonly byte[] rawData;
+        readonly int width;
+        readonly int height;
+        readonly int bytesPerPixel;
+        readonly bool hasAlphaChannel;
+        readonly bool flipRb;
 
-        /// <summary>
-        /// Create a builder for a PNG with the given width and size.
-        /// </summary>
-        public static PngBuilder Create(int width, int height, bool hasAlphaChannel)
-        {
-            var bpp = hasAlphaChannel ? 4 : 3;
-
-            var length = (height * width * bpp) + height;
-
-            return new PngBuilder(new byte[length], hasAlphaChannel, width, height, bpp);
-        }
-
-        private PngBuilder(byte[] rawData, bool hasAlphaChannel, int width, int height, int bytesPerPixel)
+        public PngBuilder(byte[] rawData, bool hasAlphaChannel, int width, int height, int bytesPerPixel,
+            bool flipRb = false)
         {
             this.rawData = rawData;
             this.hasAlphaChannel = hasAlphaChannel;
             this.width = width;
             this.height = height;
             this.bytesPerPixel = bytesPerPixel;
+            this.flipRb = flipRb;
         }
 
         /// <summary>
@@ -94,14 +87,21 @@
                 colorType |= ColorType.AlphaChannelUsed;
             }
 
-            stream.WriteByte((byte)colorType);
-            stream.WriteByte((byte)CompressionMethod.DeflateWithSlidingWindow);
-            stream.WriteByte((byte)FilterMethod.AdaptiveFiltering);
-            stream.WriteByte((byte)InterlaceMethod.None);
+            stream.WriteByte((byte) colorType);
+            stream.WriteByte((byte) CompressionMethod.DeflateWithSlidingWindow);
+            stream.WriteByte((byte) FilterMethod.AdaptiveFiltering);
+            stream.WriteByte((byte) InterlaceMethod.None);
 
             stream.WriteCrc();
 
-            var imageData = Compress(rawData);
+            byte[] imageData = bytesPerPixel switch
+            {
+                4 when flipRb => CompressFlipRb4(rawData, height, width * 4),
+                4 => Compress(rawData, height, width * 4),
+                3 when flipRb => CompressFlipRb3(rawData, height, width * 3),
+                3 => Compress(rawData, height, width * 3),
+                _ => throw new ArgumentOutOfRangeException()
+            };
             stream.WriteChunkLength(imageData.Length);
             stream.WriteChunkHeader(Encoding.ASCII.GetBytes("IDAT"));
             stream.Write(imageData, 0, imageData.Length);
@@ -111,8 +111,8 @@
             stream.WriteChunkHeader(Encoding.ASCII.GetBytes("IEND"));
             stream.WriteCrc();
         }
-        
-        private static byte[] Compress(byte[] data)
+
+        static byte[] Compress(byte[] data)
         {
             using (var compressStream = new MemoryStream())
             using (var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest))
@@ -122,6 +122,76 @@
                 compressor.Close();
                 return compressStream.ToArray();
             }
+        }
+
+        static byte[] Compress(byte[] data, int height, int stride)
+        {
+            using var compressStream = new MemoryStream();
+            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
+
+            compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
+            for (int v = 0, offset = 0; v < height; v++, offset += stride)
+            {
+                compressor.WriteByte(0);
+                compressor.Write(data, offset, stride);
+            }
+
+            compressor.Close();
+            return compressStream.ToArray();
+        }
+
+        static unsafe byte[] CompressFlipRb4(byte[] data, int height, int stride)
+        {
+            using var compressStream = new MemoryStream();
+            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
+
+            fixed (byte* srcPtr = data)
+            {
+                byte* srcPtrOff = srcPtr;
+                compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
+                for (int v = 0; v < height; v++)
+                {
+                    compressor.WriteByte(0);
+                    for (int u = 0; u < stride; u += 4, srcPtrOff += 4)
+                    {
+                        byte tmp = srcPtrOff[0];
+                        srcPtrOff[0] = srcPtrOff[2];
+                        srcPtrOff[2] = tmp;
+                    }
+
+                    compressor.Write(data, v * stride, stride);
+                }
+            }
+
+            compressor.Close();
+            return compressStream.ToArray();
+        }
+        
+        static unsafe byte[] CompressFlipRb3(byte[] data, int height, int stride)
+        {
+            using var compressStream = new MemoryStream();
+            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
+
+            fixed (byte* srcPtr = data)
+            {
+                byte* srcPtrOff = srcPtr;
+                compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
+                for (int v = 0; v < height; v++)
+                {
+                    compressor.WriteByte(0);
+                    for (int u = 0; u < stride; u += 3, srcPtrOff += 3)
+                    {
+                        byte tmp = srcPtrOff[0];
+                        srcPtrOff[0] = srcPtrOff[2];
+                        srcPtrOff[2] = tmp;
+                    }
+
+                    compressor.Write(data, v * stride, stride);
+                }
+            }
+
+            compressor.Close();
+            return compressStream.ToArray();
         }
     }
 }
