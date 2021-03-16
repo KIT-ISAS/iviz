@@ -34,7 +34,7 @@ namespace iviz_test
             {
                 if (feedback != null)
                 {
-                    Console.WriteLine($"Feedback: {feedback.ToJsonString()}");
+                    Console.WriteLine($"Feedback: {feedback}");
 
                     n++;
                     if (n == 5 && withCancel)
@@ -44,7 +44,7 @@ namespace iviz_test
                     }
                 } else if (result != null)
                 {
-                    Console.WriteLine($"Result: {result.ToJsonString()}");
+                    Console.WriteLine($"Result: {result}");
                 }
             }
 
