@@ -125,7 +125,7 @@ namespace Iviz.Roslib.XmlRpc
 
         static Arg[] OkResponse(Arg arg)
         {
-            return new[] {StatusCode.Success, "ok", arg};
+            return new Arg[] {StatusCode.Success, "ok", arg};
         }
         
         static Arg[] ErrorResponse(string msg)
