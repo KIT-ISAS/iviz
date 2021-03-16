@@ -127,8 +127,7 @@ namespace Iviz.RosMaster
 
         async Task StartContext(HttpListenerContext context, CancellationToken token)
         {
-            using CancellationTokenSource linkedTs =
-                CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
+            using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
             try
             {

@@ -69,6 +69,7 @@
       },
       "System.Buffers/4.5.1": {},
       "System.Collections.Immutable/1.4.0": {},
+      "System.Threading.Tasks.Extensions/4.4.0": {},
       "Iviz.Msgs/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "12.0.3",
@@ -78,9 +79,17 @@
           "Iviz.Msgs.dll": {}
         }
       },
-      "Iviz.MsgsGen.Lib/1.0.0": {
+      "Iviz.MsgsGen.Dynamic.Lib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.Dynamic.Lib.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
           "Newtonsoft.Json": "12.0.3"
         },
         "runtime": {
@@ -90,11 +99,13 @@
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Dynamic.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
           "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0"
+          "Nito.AsyncEx.Tasks": "5.1.0",
+          "System.Threading.Tasks.Extensions": "4.4.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
@@ -112,7 +123,9 @@
       },
       "Iviz.XmlRpc/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0"
+          "Iviz.Msgs": "1.0.0",
+          "Nito.AsyncEx.Coordination": "5.1.0",
+          "System.Threading.Tasks.Extensions": "4.4.0"
         },
         "runtime": {
           "Iviz.XmlRpc.dll": {}
@@ -175,7 +188,19 @@
       "path": "system.collections.immutable/1.4.0",
       "hashPath": "system.collections.immutable.1.4.0.nupkg.sha512"
     },
+    "System.Threading.Tasks.Extensions/4.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SPKfFGbpQsK5Srz2Kq3URgvC90yoOyBE8H1quDA2+MAJ2HAzFmV3biOgPv2Ck3mPAvdKngo3QHi2BNwUQDRVvA==",
+      "path": "system.threading.tasks.extensions/4.4.0",
+      "hashPath": "system.threading.tasks.extensions.4.4.0.nupkg.sha512"
+    },
     "Iviz.Msgs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Dynamic.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
