@@ -11,6 +11,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;

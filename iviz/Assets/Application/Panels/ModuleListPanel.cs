@@ -125,7 +125,7 @@ namespace Iviz.App
                     return;
                 }
 
-                HideGuiButton.State = value;                     
+                HideGuiButton.State = value;
                 parentCanvas.gameObject.SetActive(value);
             }
         }
@@ -199,6 +199,9 @@ namespace Iviz.App
             GameThread.EveryFrame -= UpdateFpsCounter;
         }
 
+        static string MasterUriToString(Uri uri) =>
+            uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
+
         void Start()
         {
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
@@ -248,11 +251,8 @@ namespace Iviz.App
             showSettings.onClick.AddListener(settingsData.Show);
             showEcho.onClick.AddListener(echoData.Show);
 
-            string MasterUriToString(Uri uri) =>
-                uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
-
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
-            masterUriButton.Clicked += () => { connectionData.Show(); };
+            masterUriButton.Clicked += () => connectionData.Show();
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
@@ -398,7 +398,7 @@ namespace Iviz.App
             connectionData.MasterUri = new Uri(masterUri);
             connectionData.MyUri = new Uri(myUri);
             connectionData.MyId = myId;
-            ConnectionManager.Connection.KeepReconnecting = true;
+            //ConnectionManager.Connection.KeepReconnecting = true;
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -424,7 +424,7 @@ namespace Iviz.App
                 await FileUtils.WriteAllTextAsync($"{Settings.SavedFolder}/{file}", text, default);
                 Logger.Internal("Done.");
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 Logger.Internal("Error saving state configuration", e);
                 return;
@@ -481,18 +481,23 @@ namespace Iviz.App
 
         void LoadSimpleConfiguration()
         {
-            string path = Settings.SimpleConfigurationPath;
-            if (!File.Exists(path))
-            {
-                return;
-            }
-
             try
             {
+                string path = Settings.SimpleConfigurationPath;
+                if (!File.Exists(path))
+                {
+                    return;
+                }
+
                 Debug.Log("Using settings from " + path);
 
-                string text = File.ReadAllText(path); // sync
+                string text = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
+                if (config == null)
+                {
+                    return; // empty text
+                }
+
                 connectionData.MasterUri = config.MasterUri;
                 connectionData.MyUri = config.MyUri;
                 connectionData.MyId = config.MyId;
@@ -509,7 +514,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                //Debug.Log(e);
+                Debug.Log(e);
             }
         }
 
@@ -537,7 +542,7 @@ namespace Iviz.App
                 //Debug.Log(e);
             }
         }
-        
+
         public static async void UpdateSimpleConfigurationSettings(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
@@ -550,7 +555,7 @@ namespace Iviz.App
             {
                 string inText = await FileUtils.ReadAllTextAsync(path, token);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
-                config.Settings = Settings.SettingsManager.Config; 
+                config.Settings = Settings.SettingsManager.Config;
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
@@ -569,8 +574,8 @@ namespace Iviz.App
             }
         }
 
-        public int NumMastersInCache => connectionData.LastMasterUris.Count;   
-        
+        public int NumMastersInCache => connectionData.LastMasterUris.Count;
+
         public async Task ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
@@ -585,8 +590,8 @@ namespace Iviz.App
             {
                 string inText = await FileUtils.ReadAllTextAsync(path, token);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
-                config.LastMasterUris = new List<Uri>(); 
-                
+                config.LastMasterUris = new List<Uri>();
+
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
@@ -596,7 +601,7 @@ namespace Iviz.App
             }
         }
 
-        public static int NumSavedFiles => LoadConfigDialogData.SavedFiles.Count();  
+        public static int NumSavedFiles => LoadConfigDialogData.SavedFiles.Count();
 
         public static void ClearSavedFiles()
         {
@@ -611,7 +616,6 @@ namespace Iviz.App
                     Logger.Error($"Error deleting file '{file}'", e);
                 }
             }
-            
         }
 
         public void ResetAllModules()
@@ -662,7 +666,7 @@ namespace Iviz.App
             {
                 InteractableButton.Visible = true;
             }
-            
+
             return moduleData;
         }
 
@@ -808,7 +812,8 @@ namespace Iviz.App
             }
         }
 
-        public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback, Vector3 unityPositionHint)
+        public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback,
+            Vector3 unityPositionHint)
         {
             if (menuEntries == null)
             {

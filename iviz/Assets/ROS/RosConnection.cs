@@ -7,9 +7,9 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
@@ -69,13 +69,6 @@ namespace Iviz.Ros
         {
             toDos.Enqueue(a);
             Signal();
-        }
-
-        protected void ClearTaskQueue()
-        {
-            while (toDos.TryDequeue(out _))
-            {
-            }
         }
 
         protected void Signal()
@@ -144,6 +137,7 @@ namespace Iviz.Ros
         public virtual void Disconnect()
         {
             SetConnectionState(ConnectionState.Disconnected);
+            GC.Collect();
         }
 
         [NotNull]

@@ -83,7 +83,7 @@ namespace Iviz.Ros
             }
 
             server.Dispose();
-            serverTask.WaitForWithTimeout(DisposeTimeoutInMs).WaitNoThrow("RosServerManager");
+            serverTask.AwaitForWithTimeout(DisposeTimeoutInMs).WaitNoThrow("RosServerManager");
             server = null;
         }
     }

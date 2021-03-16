@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Assimp.Configs;
 using Iviz.Core;
 using Iviz.Msgs;
 using JetBrains.Annotations;
@@ -238,6 +236,10 @@ namespace Iviz.Opencv
             ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
+        
+        
+        
+        
 
         ~Context()
         {
@@ -352,6 +354,19 @@ namespace Iviz.Opencv
         {
             Id = id;
             Pose = pose;
+        }
+    }
+
+    static class OpencvUtils
+    {
+        static Vector3 OpencvToUnity(this Vector3 p)
+        {
+            return new Vector3(p.x, -p.y, p.z);
+        }
+
+        static Quaternion OpencvToUnity(this Quaternion q)
+        {
+            return new Quaternion(q.x, -q.y, q.z, -q.w);
         }
     }
 }

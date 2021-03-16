@@ -81,7 +81,7 @@ namespace Iviz.Displays
             billboardStartPose = billboard.transform.AsLocalPose();
         }
 
-        public void Set(int width, int height, int bpp, in ArraySegment<byte> data, bool generateMipmaps = false)
+        public void Set(int width, int height, int bpp, byte[] data, bool generateMipmaps = false)
         {
             if (Texture == null)
             {
@@ -108,7 +108,7 @@ namespace Iviz.Displays
                     return;
             }
 
-            Texture.Set(width, height, encoding, data, generateMipmaps);
+            Texture.Set(width, height, encoding, data.AsSegment(), generateMipmaps);
         }
 
         public override void Suspend()

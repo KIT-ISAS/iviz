@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,23 +9,51 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.Roscpp;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using UnityEngine;
+using Buffer = System.Buffer;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using Time = UnityEngine.Time;
 
 namespace Iviz.Controllers
 {
     public sealed class ControllerService
     {
+        public ControllerService()
+        {
+            RoslibConnection connection = ConnectionManager.Connection;
+
+            connection.AdvertiseService<GetLoggers>("get_loggers", ServiceFunctions.GetLoggers);
+            connection.AdvertiseService<SetLoggerLevel>("set_logger_level", ServiceFunctions.SetLoggerLevel);
+
+            connection.AdvertiseService<AddModule>("add_module", ServiceFunctions.AddModuleAsync);
+            connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic",
+                ServiceFunctions.AddModuleFromTopicAsync);
+            connection.AdvertiseService<UpdateModule>("update_module", ServiceFunctions.UpdateModuleAsync);
+            connection.AdvertiseService<GetModules>("get_modules", ServiceFunctions.GetModulesAsync);
+            connection.AdvertiseService<SetFixedFrame>("set_fixed_frame", ServiceFunctions.SetFixedFrameAsync);
+            connection.AdvertiseService<GetFramePose>("get_frame_poses", ServiceFunctions.GetFramePoseAsync);
+            connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions",
+                ServiceFunctions.GetCaptureResolutions);
+            connection.AdvertiseService<StartCapture>("start_capture", ServiceFunctions.StartCaptureAsync);
+            connection.AdvertiseService<StopCapture>("stop_capture", ServiceFunctions.StopCaptureAsync);
+            connection.AdvertiseService<CaptureScreenshot>("capture_screenshot",
+                ServiceFunctions.CaptureScreenshotAsync);
+        }
+    }
+
+    static class ServiceFunctions
+    {
         const int DefaultTimeoutInMs = 4500;
 
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
-        [NotNull] static IReadOnlyList<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        [NotNull] static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly (Resource.ModuleType module, string name)[] ModuleNames =
             typeof(Resource.ModuleType).GetEnumValues()
@@ -33,17 +62,35 @@ namespace Iviz.Controllers
                 .ToArray();
 
 
-        public ControllerService()
+        static readonly string[] LogLevelNames = {"debug", "info", "warn", "error", "fatal"};
+
+        internal static void GetLoggers(GetLoggers srv)
         {
-            Connection.AdvertiseService<AddModule>("add_module", AddModuleAsync);
-            Connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleFromTopicAsync);
-            Connection.AdvertiseService<UpdateModule>("update_module", UpdateModuleAsync);
-            Connection.AdvertiseService<GetModules>("get_modules", GetModulesAsync);
-            Connection.AdvertiseService<SetFixedFrame>("set_fixed_frame", SetFixedFrameAsync);
-            Connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
+            srv.Response.Loggers = new[]
+            {
+                new Msgs.Roscpp.Logger("ros.iviz",
+                    LogLevelNames[ConsoleDialogData.IndexFromLevel(ConnectionManager.MinLogLevel)])
+            };
         }
 
-        static async Task AddModuleAsync([NotNull] AddModule srv)
+        internal static void SetLoggerLevel(SetLoggerLevel srv)
+        {
+            if (srv.Request.Logger != "ros.iviz")
+            {
+                return;
+            }
+
+            for (int i = 0; i < LogLevelNames.Length; i++)
+            {
+                if (LogLevelNames[i] == srv.Request.Level)
+                {
+                    ConnectionManager.MinLogLevel = ConsoleDialogData.LevelFromIndex(i);
+                    break;
+                }
+            }
+        }
+
+        internal static async Task AddModuleAsync([NotNull] AddModule srv)
         {
             var (id, success, message) = await TryAddModuleAsync(srv.Request.ModuleType, srv.Request.Id);
             srv.Response.Success = success;
@@ -56,7 +103,8 @@ namespace Iviz.Controllers
             return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
         }
 
-        static async ValueTask<(string id, bool success, string message)> TryAddModuleAsync([NotNull] string moduleTypeStr,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleAsync(
+            [NotNull] string moduleTypeStr,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -130,7 +178,7 @@ namespace Iviz.Controllers
             }
         }
 
-        static async Task AddModuleFromTopicAsync([NotNull] AddModuleFromTopic srv)
+        internal static async Task AddModuleFromTopicAsync([NotNull] AddModuleFromTopic srv)
         {
             var (id, success, message) = await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id);
             srv.Response.Success = success;
@@ -138,7 +186,8 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static async ValueTask<(string id, bool success, string message)> TryAddModuleFromTopicAsync([NotNull] string topic,
+        static async ValueTask<(string id, bool success, string message)> TryAddModuleFromTopicAsync(
+            [NotNull] string topic,
             [NotNull] string requestedId)
         {
             (string id, bool success, string message) result = default;
@@ -214,14 +263,15 @@ namespace Iviz.Controllers
             }
         }
 
-        static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
+        internal static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
         {
             var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
 
-        static async ValueTask<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id, string[] fields,
+        static async ValueTask<(bool success, string message)> TryUpdateModuleAsync([NotNull] string id,
+            string[] fields,
             string config)
         {
             (bool success, string message) result = default;
@@ -241,8 +291,6 @@ namespace Iviz.Controllers
             {
                 GameThread.Post(() =>
                 {
-                    Logger.Debug(Time.time + ": Updating module!");
-
                     try
                     {
                         ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
@@ -277,10 +325,9 @@ namespace Iviz.Controllers
             }
         }
 
-        static async Task GetModulesAsync([NotNull] GetModules srv)
+        internal static async Task GetModulesAsync([NotNull] GetModules srv)
         {
-            string[] result = await GetModulesAsync();
-            srv.Response.Configs = result.AsRef(srv.Response.Configs);
+            srv.Response.Configs = await GetModulesAsync();
         }
 
         [ItemNotNull]
@@ -318,7 +365,7 @@ namespace Iviz.Controllers
             }
         }
 
-        static async Task SetFixedFrameAsync([NotNull] SetFixedFrame srv)
+        internal static async Task SetFixedFrameAsync([NotNull] SetFixedFrame srv)
         {
             (bool success, string message) = await TrySetFixedFrame(srv.Request.Id);
             srv.Response.Success = success;
@@ -353,7 +400,7 @@ namespace Iviz.Controllers
             return (true, "");
         }
 
-        static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
+        internal static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
         {
             (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
             srv.Response.Poses = poses;
@@ -404,6 +451,208 @@ namespace Iviz.Controllers
             }
 
             return (success, poses);
+        }
+
+        internal static void GetCaptureResolutions([NotNull] GetCaptureResolutions srv)
+        {
+            if (Settings.ScreenshotManager == null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "No screenshot manager has been set for this platform";
+                return;
+            }
+
+            srv.Response.Resolutions = Settings.ScreenshotManager.GetResolutions()
+                .Select(resolution => new Vector2i(resolution.width, resolution.height))
+                .ToArray();
+        }
+
+        internal static async Task StartCaptureAsync([NotNull] StartCapture srv)
+        {
+            if (Settings.ScreenshotManager == null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "No screenshot manager has been set for this platform";
+                return;
+            }
+
+            string errorMessage = null;
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(async () =>
+                {
+                    try
+                    {
+                        await Settings.ScreenshotManager.StartAsync(
+                            srv.Request.ResolutionX, srv.Request.ResolutionY, false);
+                    }
+                    catch (Exception e)
+                    {
+                        errorMessage = e.Message;
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    srv.Response.Success = false;
+                    srv.Response.Message = "Request timed out";
+                    return;
+                }
+            }
+
+            if (errorMessage != null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = errorMessage;
+                return;
+            }
+
+            srv.Response.Success = true;
+        }
+
+        internal static async Task StopCaptureAsync([NotNull] StopCapture srv)
+        {
+            if (Settings.ScreenshotManager == null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "No screenshot manager has been set for this platform";
+                return;
+            }
+
+            string errorMessage = null;
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(async () =>
+                {
+                    try
+                    {
+                        await Settings.ScreenshotManager.StopAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        errorMessage = e.Message;
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    srv.Response.Success = false;
+                    srv.Response.Message = "Request timed out";
+                    return;
+                }
+            }
+
+            if (errorMessage != null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = errorMessage;
+                return;
+            }
+
+            srv.Response.Success = true;
+        }
+
+        static uint screenshotSeq;
+
+        internal static async Task CaptureScreenshotAsync([NotNull] CaptureScreenshot srv)
+        {
+            if (Settings.ScreenshotManager == null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "No screenshot manager has been set for this platform";
+                return;
+            }
+
+            string errorMessage = null;
+            Screenshot ss = null;
+            Pose? pose = null;
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(async () =>
+                {
+                    try
+                    {
+                        ss = await Settings.ScreenshotManager.TakeScreenshotColorAsync();
+                        pose = TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose();
+                    }
+                    catch (Exception e)
+                    {
+                        errorMessage = e.Message;
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    srv.Response.Success = false;
+                    srv.Response.Message = "Request timed out";
+                    return;
+                }
+            }
+
+            if (errorMessage != null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = errorMessage;
+                return;
+            }
+
+            if (ss == null)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "Captured failed for unknown reason";
+                return;
+            }
+
+            srv.Response.Success = true;
+            srv.Response.Width = ss.Width;
+            srv.Response.Height = ss.Height;
+            srv.Response.Bpp = ss.Bpp;
+            srv.Response.Header = new Header(screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId ?? "");
+            srv.Response.Intrinsics = new double[] {ss.Fx, 0, ss.Cx, 0, ss.Fy, ss.Cy, 0, 0, 1};
+            srv.Response.Pose = pose ?? Pose.Identity;
+
+            using (ss.Bytes)
+            {
+                srv.Response.Data = await CompressAsync(ss);
+            }
+        }
+
+        static Task<byte[]> CompressAsync([NotNull] Screenshot ss)
+        {
+            return Task.Run(() =>
+            {
+                int bpp;
+                bool flipRb;
+
+                switch (ss.Format)
+                {
+                    case "bgra":
+                        bpp = 4;
+                        flipRb = true;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unknown screenshot format");
+                }
+
+                var builder = new BigGustave.PngBuilder(
+                    ss.Bytes.Array, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
+                return builder.Save();
+            });
         }
     }
 }

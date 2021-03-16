@@ -194,7 +194,7 @@ namespace Iviz.App
             return "#000000";
         }
 
-        static int IndexFromLevel(LogLevel level)
+        public static int IndexFromLevel(LogLevel level)
         {
             switch (level)
             {
@@ -207,7 +207,7 @@ namespace Iviz.App
             }
         }
 
-        static LogLevel LevelFromIndex(int index)
+        public static LogLevel LevelFromIndex(int index)
         {
             switch (index)
             {

@@ -80,68 +80,69 @@ namespace Iviz.Displays
             CancellationToken token = default)
         {
             IsStarting = true;
-            CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
-
-            try
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token))
             {
-                var rootMaterials = new Dictionary<string, Material>();
-                foreach (var material in robot.Materials)
+                try
                 {
-                    rootMaterials[material.Name] = material;
+                    var rootMaterials = new Dictionary<string, Material>();
+                    foreach (var material in robot.Materials)
+                    {
+                        rootMaterials[material.Name] = material;
+                    }
+
+                    await robot.Links.Select(link =>
+                            ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token))
+                        .WhenAll();
+
+                    foreach (var joint in robot.Joints)
+                    {
+                        ProcessJoint(joint);
+                    }
+
+                    if (linkObjects.Count == 0)
+                    {
+                        Logger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
+                        return;
+                    }
+
+                    var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
+                    keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
+
+                    BaseLink = keysWithoutParent.FirstOrDefault();
+                    if (BaseLink != null)
+                    {
+                        linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+                    }
+
+                    LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
+                    LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
+                    Joints = new ReadOnlyDictionary<string, Joint>(joints);
+
+                    Tint = tint;
+                    OcclusionOnly = occlusionOnly;
+                    Visible = visible;
+                    Smoothness = smoothness;
+                    Metallic = metallic;
+                    ApplyAnyValidConfiguration();
+
+                    string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors.ToString()} errors.";
+                    Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
+                                $"links and {Joints.Count.ToString()} joints. {errorStr}");
                 }
-
-                await robot.Links.Select(link =>
-                    ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token)).WhenAll();
-
-                foreach (var joint in robot.Joints)
+                catch (OperationCanceledException)
                 {
-                    ProcessJoint(joint);
+                    Logger.Error($"{this}: Robot building canceled.");
+                    throw;
                 }
-
-                if (linkObjects.Count == 0)
+                catch (Exception e)
                 {
-                    Logger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
-                    return;
+                    Logger.Error($"{this}: Failed to construct '{Name}'", e);
+                    throw;
                 }
-
-                var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
-                keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
-
-                BaseLink = keysWithoutParent.FirstOrDefault();
-                if (BaseLink != null)
+                finally
                 {
-                    linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+                    IsStarting = false;
                 }
-
-                LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
-                LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
-                Joints = new ReadOnlyDictionary<string, Joint>(joints);
-
-                Tint = tint;
-                OcclusionOnly = occlusionOnly;
-                Visible = visible;
-                Smoothness = smoothness;
-                Metallic = metallic;
-                ApplyAnyValidConfiguration();
-
-                string errorStr = NumErrors == 0 ? "" : $"There were {NumErrors.ToString()} errors.";
-                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
-                            $"links and {Joints.Count.ToString()} joints. {errorStr}");
-            }
-            catch (OperationCanceledException)
-            {
-                Logger.Error($"{this}: Robot building canceled.");
-                throw;
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"{this}: Failed to construct '{Name}'", e);
-                throw;
-            }
-            finally
-            {
-                IsStarting = false;
-                tokenSource.Dispose();
             }
         }
 

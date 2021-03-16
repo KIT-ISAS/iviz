@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Iviz.Core;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -25,7 +26,7 @@ namespace Iviz.App
         {
             files.Clear();
             files.AddRange(Directory.GetFiles(Settings.SavedFolder).
-                Where(x => Roslib.Utils.HasSuffix(x, Suffix)).
+                Where(x => x.HasSuffix(Suffix)).
                 Select(GetFileName));
             panel.Items = files;
             panel.ItemClicked += OnItemClicked;

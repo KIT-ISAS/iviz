@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -67,10 +68,19 @@ namespace Iviz.Hololens
 
         void Initialize()
         {
+            //ThreadPool.GetMinThreads(out var wt, out var ct);
+            //Debug.Log("Current settings: wt: " + wt + " ct: " + ct);
+            ThreadPool.SetMinThreads(25, 20);
+            //Debug.Log("New settings: wt: " + 25 + " ct: " + 20);
+            //ThreadPool.GetMaxThreads(out wt, out ct);
+            //Debug.Log("Max settings: wt: " + wt + " ct: " + ct);
+            
             try
             {
                 Logger.Debug("Hololens Manager: Initializing!");
                 Settings.SettingsManager = this;
+                Settings.ScreenshotManager = new HololensScreenshotManager();
+
 
                 ModuleListPanel.InitFinished -= Initialize;
 

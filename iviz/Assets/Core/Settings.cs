@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -146,8 +149,10 @@ namespace Iviz.Core
         }
 
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
+        [CanBeNull] public static IScreenshotManager ScreenshotManager { get; set; }
 
         static bool? supportsComputeBuffersHelper;
+
         public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
                                                      (supportsComputeBuffersHelper =
                                                          !IsHololens &&
@@ -164,5 +169,58 @@ namespace Iviz.Core
         public static bool SupportsRGB24 => supportsRGB24 ??
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
                                             .Value;
+    }
+
+    public class Screenshot : IDisposable
+    {
+        public string Format { get; }
+        public time Timestamp { get; }
+        public int Width { get; }
+        public int Height { get; }
+        public int Bpp { get; }
+
+        public float Fx { get; }
+        public float Cx { get; }
+        public float Fy { get; }
+        public float Cy { get; }
+        public Pose CameraPose { get; }
+
+        public UniqueRef<byte> Bytes { get; }
+
+        public Screenshot(string format, int width, int height, int bpp, float fx, float cx, float fy, float cy,
+            in Pose cameraPose, UniqueRef<byte> bytes)
+        {
+            Format = format;
+            Timestamp = time.Now();
+            Width = width;
+            Height = height;
+            Bpp = bpp;
+            Fx = fx;
+            Cx = cx;
+            Fy = fy;
+            Cy = cy;
+            CameraPose = cameraPose;
+            Bytes = bytes;
+        }
+
+        public void Dispose()
+        {
+            Bytes.Dispose();
+        }
+
+        public override string ToString()
+        {
+            return $"[Screenshot width={Width} height={Height} At={CameraPose}]";
+        }
+    }
+
+    public interface IScreenshotManager
+    {
+        bool Started { get; }
+        IEnumerable<(int width, int height)> GetResolutions();
+        Task StartAsync(int width, int height, bool withHolograms);
+        Task StopAsync();
+        Task<Screenshot> TakeScreenshotColorAsync();
+        Task<Screenshot> TakeScreenshotGrey();
     }
 }

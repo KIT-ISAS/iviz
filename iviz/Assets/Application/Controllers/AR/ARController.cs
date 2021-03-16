@@ -4,6 +4,7 @@ using Iviz.App;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;

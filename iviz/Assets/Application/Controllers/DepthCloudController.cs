@@ -4,6 +4,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Object = UnityEngine.Object;

@@ -9,6 +9,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers

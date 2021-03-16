@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using Iviz.Roslib;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 

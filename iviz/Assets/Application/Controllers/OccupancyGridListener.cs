@@ -11,6 +11,7 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
@@ -77,7 +78,7 @@ namespace Iviz.Controllers
                 }
                 else if (CubesVisible)
                 {
-                    numValid = gridTiles.Sum(grid => grid.NumValidValues);
+                    numValid = Enumerable.Sum(gridTiles, grid => grid.NumValidValues);
                 }
                 else
                 {

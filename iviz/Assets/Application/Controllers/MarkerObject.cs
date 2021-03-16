@@ -10,6 +10,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -209,7 +210,8 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<color=#800000ff><b>* ").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
+            description.Append("<color=#800000ff><b>* ").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/")
+                .Append(id.Id)
                 .Append("</b></color>").AppendLine();
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
@@ -353,36 +355,48 @@ namespace Iviz.Controllers
                 return;
             }
 
-            bool hasAlpha = msg.Colors.Any(color => color.A < 1);
-            byte[] data;
-            int bpp, j = 0;
-            if (hasAlpha)
+            bool hasAlpha = false;
+            foreach (var color in msg.Colors)
             {
-                bpp = 3;
-                data = new byte[count * 3];
-                foreach (ColorRGBA color in msg.Colors)
+                if (color.A < 1)
                 {
-                    Color32 color32 = new Color(color.R, color.G, color.B);
-                    data[j++] = color32.r;
-                    data[j++] = color32.g;
-                    data[j++] = color32.b;
+                    hasAlpha = true;
+                    break;
+                }
+            }
+
+            int j = 0;
+            if (!hasAlpha)
+            {
+                using (var data = new Rent<byte>(count * 3))
+                {
+                    foreach (ColorRGBA color in msg.Colors)
+                    {
+                        Color32 color32 = new Color(color.R, color.G, color.B);
+                        data.Array[j++] = color32.r;
+                        data.Array[j++] = color32.g;
+                        data.Array[j++] = color32.b;
+                    }
+
+                    image.Set(width, height, 3, data.Array, true);
                 }
             }
             else
             {
-                bpp = 4;
-                data = new byte[count * 4];
-                foreach (ColorRGBA color in msg.Colors)
+                using (var data = new Rent<byte>(count * 4))
                 {
-                    Color32 color32 = new Color(color.R, color.G, color.B);
-                    data[j++] = color32.r;
-                    data[j++] = color32.g;
-                    data[j++] = color32.b;
-                    data[j++] = color32.a;
+                    foreach (ColorRGBA color in msg.Colors)
+                    {
+                        Color32 color32 = new Color(color.R, color.G, color.B);
+                        data.Array[j++] = color32.r;
+                        data.Array[j++] = color32.g;
+                        data.Array[j++] = color32.b;
+                        data.Array[j++] = color32.a;
+                    }
+
+                    image.Set(width, height, 4, data.Array, true);
                 }
             }
-
-            image.Set(width, height, bpp, data.AsSegment(), true);
 
             Vector3 imageScale = new Msgs.GeometryMsgs.Vector3(msg.Scale.X, msg.Scale.Y, 1).Ros2Unity().Abs();
             if (imageScale != currentScale)
@@ -880,10 +894,11 @@ namespace Iviz.Controllers
                         StopLoadResourceTask();
                         runningTs = new CancellationTokenSource();
                         description.Append("** Mesh is being downloaded...").AppendLine();
-                        
+
                         var result = await Resource.GetGameObjectResourceAsync(msg.MeshResource,
                             ConnectionManager.ServiceProvider, runningTs.Token);
-                        description.Append(result != null ? "** Download finished." : "** Download failed.").AppendLine();
+                        description.Append(result != null ? "** Download finished." : "** Download failed.")
+                            .AppendLine();
                         return result;
                     }
                     catch (OperationCanceledException)

@@ -8,6 +8,7 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;

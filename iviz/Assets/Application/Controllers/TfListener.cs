@@ -12,6 +12,7 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
@@ -487,6 +488,16 @@ namespace Iviz.Controllers
             return new Pose(
                 originFrame.InverseTransformPoint(position),
                 Quaternion.Inverse(originFrame.rotation) * rotation
+            );
+        }
+
+        public static Pose RelativePoseToFixedFrame(in Pose unityPose)
+        {
+            Transform fixedFrame = Instance.FixedFrame.Transform;
+            var (position, rotation) = unityPose;
+            return new Pose(
+                fixedFrame.InverseTransformPoint(position),
+                Quaternion.Inverse(fixedFrame.rotation) * rotation
             );
         }
 

@@ -206,7 +206,7 @@ namespace Iviz.Core
         public static Quaternion Ros2Unity(this Msgs.GeometryMsgs.Quaternion p)
         {
             Quaternion q = p.ToUnity().Ros2Unity();
-            return q.MaxAbsCoeff() != 0 ? q : Quaternion.identity;
+            return (q.x == 0 && q.y == 0 && q.z == 0 && q.w == 0) ? Quaternion.identity : q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

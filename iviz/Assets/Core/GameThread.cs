@@ -198,7 +198,7 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance == null)
+            if (Instance is null)
             {
                 return;
             }
@@ -213,7 +213,7 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance == null)
+            if (Instance is null)
             {
                 return;
             }
@@ -240,7 +240,7 @@ namespace Iviz.Core
                 return;
             }
 
-            if (Instance == null)
+            if (Instance is null)
             {
                 return;
             }

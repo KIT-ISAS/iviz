@@ -508,12 +508,12 @@ namespace Iviz.Controllers
             //markerFound = true;
         }
 
-        void CaptureImage(Opencv.Context context)
+        public Task<Screenshot> CaptureImage()
         {
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {
-                return;
+                return Task.FromResult<Screenshot>(null);
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -521,33 +521,35 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.RGB24,
-                transformation = XRCpuImage.Transformation.None
+                transformation = XRCpuImage.Transformation.MirrorY
             };
 
-            void Callback(
-                XRCpuImage.AsyncConversionStatus status,
-                XRCpuImage.ConversionParams parameters,
-                NativeArray<byte> array)
-            {
-                if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                {
-                    Debug.LogErrorFormat("Request failed with status {0}", status);
-                    return;
-                }
-
-                try
-                {
-                    context.SetImageData(array);
-                }
-                catch (ObjectDisposedException)
-                {
-                }
-            }
-
+            TaskCompletionSource<Screenshot> task = new TaskCompletionSource<Screenshot>();
+            
             using (image)
             {
-                image.ConvertAsync(conversionParams, Callback);
+                try
+                {
+                    image.ConvertAsync(conversionParams, (status, _, array) =>
+                    {
+                        if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                        {
+                            Debug.LogErrorFormat("Request failed with status {0}", status);
+                            task.TrySetResult(null);
+                        }
+                        else
+                        {
+                            task.TrySetResult(null);
+                        }
+                    });
+                }
+                catch (Exception e)
+                {
+                    task.TrySetException(e);
+                }
             }
+
+            return task.Task;
         }
 
         public override void StopController()

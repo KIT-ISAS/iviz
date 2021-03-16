@@ -6,6 +6,7 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 

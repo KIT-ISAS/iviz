@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Iviz.Core;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -21,7 +22,7 @@ namespace Iviz.App
         }
 
         public static IEnumerable<string> SavedFiles => Directory.GetFiles(Settings.SavedFolder)
-            .Where(x => Roslib.Utils.HasSuffix(x, Suffix));
+            .Where(x => x.HasSuffix(Suffix));
 
         public override void SetupPanel()
         {

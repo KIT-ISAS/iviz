@@ -31,6 +31,8 @@ namespace Iviz.Ros
         long frameBandwidthUp;
         uint logSeq;
 
+        public static LogLevel MinLogLevel { get; set; } = LogLevel.Info;
+
         Sender<Log> logSender;
 
         [NotNull] public static IExternalServiceProvider ServiceProvider => Connection;
@@ -72,6 +74,11 @@ namespace Iviz.Ros
 
         void LogMessage(in LogMessage msg)
         {
+            if (msg.Level < MinLogLevel)
+            {
+                return;
+            }
+            
             logSender.Publish(new Log
             (
                 Header: (logSeq++, ""),

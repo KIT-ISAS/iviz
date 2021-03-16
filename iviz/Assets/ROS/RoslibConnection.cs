@@ -16,12 +16,18 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
+using Iviz.Roslib.Utils;
+using UnityEditor;
 using Logger = Iviz.Msgs.Logger;
+using Random = System.Random;
 
 namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection
     {
+        static readonly Action<string> LogInternalIfHololens =
+            Settings.IsHololens ? (Action<string>) Core.Logger.Internal : Core.Logger.Debug;
+
         static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
         readonly ConcurrentDictionary<int, IRosPublisher> publishers = new ConcurrentDictionary<int, IRosPublisher>();
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
@@ -119,10 +125,10 @@ namespace Iviz.Ros
 
             try
             {
-                const int rpcTimeoutInMs = 750;
+                const int rpcTimeoutInMs = 3000;
 
 #if LOG_ENABLED
-                //Logger.LogDebug = Core.Logger.Debug;
+                Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -139,50 +145,53 @@ namespace Iviz.Ros
                 await client.CheckOwnUriAsync(token);
 
                 client.RosMasterApi.TimeoutInMs = rpcTimeoutInMs;
-                client.Parameters.TimeoutInMs = rpcTimeoutInMs;
 
                 AddTask(async () =>
                 {
                     Core.Logger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    (bool success, object hosts) = await client.Parameters.GetParameterAsync("/iviz/hosts", token);
+                    (bool success, object hosts) =
+                        await client.Parameters.GetParameterAsync("/iviz/hosts", token).Caf();
                     if (success)
                     {
                         ParseHostsParam(hosts);
                     }
 
-                    Core.Logger.Debug("*** ReAdvertising...");
-                    await publishersByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token)).WhenAll();
-
+                    LogInternalIfHololens("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
-                    Core.Logger.Debug("*** Done ReAdvertising");
-                    Core.Logger.Debug("*** Resubscribing...");
-                    await subscribersByTopic.Values.Select(
-                        topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token)).WhenAll();
+                    await servicesByTopic.Values
+                        .Select(topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token))
+                        .WhenAll().Caf();
+                    LogInternalIfHololens("+++ Done advertising services");
 
+                    LogInternalIfHololens("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
-                    Core.Logger.Debug("*** Done Resubscribing");
-                    Core.Logger.Debug("*** Requesting topics...");
-                    cachedTopics = await newClient.GetSystemPublishedTopicsAsync(token);
-                    Core.Logger.Debug("*** Done Requesting topics");
+                    await publishersByTopic.Values
+                        .Select(topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token))
+                        .WhenAll().Caf();
+                    LogInternalIfHololens("+++ Done readvertising");
 
-                    Core.Logger.Debug("*** Advertising services...");
-
+                    LogInternalIfHololens("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
-                    await servicesByTopic.Values.Select(
-                        topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token)).WhenAll();
-                    Core.Logger.Debug("*** Done Advertising services!");
+                    await subscribersByTopic.Values
+                        .Select(topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token))
+                        .WhenAll().Caf();
+                    LogInternalIfHololens("+++ Done resubscribing");
 
-                    Core.Logger.Internal("Finished resubscribing and readvertising.");
+                    LogInternalIfHololens("--- Requesting topics...");
+                    token.ThrowIfCancellationRequested();
+                    cachedTopics = await client.GetSystemPublishedTopicsAsync(token).Caf();
+                    LogInternalIfHololens("+++ Done requesting topics");
+
+                    Core.Logger.Internal("Finished resubscribing and readvertising!");
+
+                    watchdogTask = WatchdogAsync(client.RosMasterApi, token);
                 });
 
                 Core.Logger.Debug("*** Connected!");
 
                 Core.Logger.Internal("<b>Connected!</b>");
-                watchdogTask = Task.Run(() => WatchdogAsync(newClient.MasterUri, newClient.CallerId,
-                    newClient.CallerUri, token), token);
                 LogConnectionCheck(token);
 
                 return true;
@@ -294,17 +303,15 @@ namespace Iviz.Ros
         }
 
         static async Task WatchdogAsync(
-            [NotNull] Uri masterUri,
-            [NotNull] string callerId,
-            [NotNull] Uri callerUri,
+            [NotNull] RosMasterApi masterApi,
             CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
-            RosMasterApi masterApi = new RosMasterApi(masterUri, callerId, callerUri);
             DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
             Uri lastRosOutUri = null;
             var instance = ConnectionManager.Connection;
+
             instance.SetConnectionWarningState(false);
             try
             {
@@ -313,7 +320,7 @@ namespace Iviz.Ros
                     DateTime now = GameThread.Now;
                     try
                     {
-                        LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);
+                        LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token).Caf();
 
                         TimeSpan timeSinceLastAccess = now - lastMasterAccess;
                         lastMasterAccess = now;
@@ -350,7 +357,6 @@ namespace Iviz.Ros
                     }
                     catch (Exception)
                     {
-                        //TimeSpan diff = now - lastMasterAccess;
                         if (!warningSet)
                         {
                             Core.Logger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
@@ -360,7 +366,7 @@ namespace Iviz.Ros
                         }
                     }
 
-                    await Task.Delay(5000, token);
+                    await Task.Delay(5000, token).Caf();
                 }
             }
             catch (OperationCanceledException)
@@ -370,8 +376,15 @@ namespace Iviz.Ros
             instance.SetConnectionWarningState(false);
         }
 
+        static readonly Random Random = new Random();
+
+        static Task DelayByPlatform(CancellationToken token) => Settings.IsHololens
+            ? Task.Delay(Random.Next(0, 1000), token)
+            : Task.CompletedTask;
+        
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic, CancellationToken token)
         {
+            await DelayByPlatform(token);
             await topic.AdvertiseAsync(client, token);
             topic.Id = publishers.Count;
             publishers[topic.Id] = topic.Publisher;
@@ -379,11 +392,15 @@ namespace Iviz.Ros
 
         async Task ReSubscribe([NotNull] ISubscribedTopic topic, CancellationToken token)
         {
+            await DelayByPlatform(token);
+            //Logger.LogDebug("Resubscribing " + topic.Subscriber?.Topic);
             await topic.SubscribeAsync(client, token: token);
+            //Logger.LogDebug("Finished resubscribing " + topic.Subscriber?.Topic);
         }
 
         async Task ReAdvertiseService([NotNull] IAdvertisedService service, CancellationToken token)
         {
+            await DelayByPlatform(token);
             await service.AdvertiseAsync(client, token);
         }
 
@@ -573,8 +590,7 @@ namespace Iviz.Ros
 
             token.ThrowIfCancellationRequested();
 
-            using (CancellationTokenSource tokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
                 tokenSource.CancelAfter(3000);
                 try
@@ -799,6 +815,11 @@ namespace Iviz.Ros
             CancellationToken token = connectionTs.Token;
             Task.Run(async () =>
             {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 try
                 {
                     cachedTopics = client == null
@@ -820,8 +841,12 @@ namespace Iviz.Ros
         public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
             CancellationToken token = default)
         {
-            using (CancellationTokenSource tokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
                 tokenSource.CancelAfter(timeoutInMs);
 
@@ -850,6 +875,11 @@ namespace Iviz.Ros
             CancellationToken internalToken = connectionTs.Token;
             Task.Run(async () =>
             {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 try
                 {
                     if (client?.Parameters is null)
@@ -858,9 +888,10 @@ namespace Iviz.Ros
                         return;
                     }
 
-                    CancellationTokenSource tokenSource =
-                        CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
-                    cachedParameters = await client.Parameters.GetParameterNamesAsync(tokenSource.Token);
+                    using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken))
+                    {
+                        cachedParameters = await client.Parameters.GetParameterNamesAsync(tokenSource.Token);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -881,8 +912,12 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            using (CancellationTokenSource tokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            if (token.IsCancellationRequested)
+            {
+                return (null, "Cancellation requested");
+            }
+
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
                 tokenSource.CancelAfter(timeoutInMs);
 
@@ -921,8 +956,12 @@ namespace Iviz.Ros
         public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000,
             CancellationToken token = default)
         {
-            using (CancellationTokenSource tokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+
+            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
                 tokenSource.CancelAfter(timeoutInMs);
 
@@ -980,6 +1019,18 @@ namespace Iviz.Ros
                 return;
             }
 
+            var masterApi = mClient.RosMasterApi;
+            builder.Append("<b>** ROS Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
+                .Append(" requests | Ping ")
+                .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
+                .AppendLine();
+
+            long masterReceivedKb = masterApi.BytesReceived / 1000;
+            long masterSentKb = masterApi.BytesSent / 1000;
+            builder.Append("<b>Received ").Append(masterReceivedKb.ToString("N0")).Append(" kB | ");
+            builder.Append("Sent ").Append(masterSentKb.ToString("N0")).Append(" kB</b>").AppendLine();
+            builder.AppendLine();
+
             var subscriberStats = mClient.GetSubscriberStatistics();
             var publisherStats = mClient.GetPublisherStatistics();
 
@@ -999,8 +1050,8 @@ namespace Iviz.Ros
                 }
 
                 long totalKbytes = totalBytes / 1000;
-                builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs ↓")
-                    .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
+                builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
+                    .Append(totalKbytes.ToString("N0")).Append(" kB</b> total").AppendLine();
 
                 if (stat.Receivers.Count == 0)
                 {
@@ -1035,7 +1086,7 @@ namespace Iviz.Ros
                     if (isAlive && isConnected)
                     {
                         long kbytes = receiver.BytesReceived / 1000;
-                        builder.Append(" ↓").Append(kbytes.ToString("N0")).Append("kB");
+                        builder.Append(" | ").Append(kbytes.ToString("N0")).Append("kB");
                     }
                     else if (!isAlive)
                     {
@@ -1073,8 +1124,8 @@ namespace Iviz.Ros
                 }
 
                 long totalKbytes = totalBytes / 1000;
-                builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs ↑")
-                    .Append(totalKbytes.ToString("N0")).Append("kB</b> total").AppendLine();
+                builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
+                    .Append(totalKbytes.ToString("N0")).Append(" kB</b> total").AppendLine();
 
                 if (stat.Senders.Count == 0)
                 {
@@ -1102,7 +1153,7 @@ namespace Iviz.Ros
                     if (isAlive)
                     {
                         long kbytes = receiver.BytesSent / 1000;
-                        builder.Append(" ↑").Append(kbytes.ToString("N0")).Append("kB");
+                        builder.Append(" | ").Append(kbytes.ToString("N0")).Append("kB");
                     }
                     else
                     {
@@ -1168,6 +1219,7 @@ namespace Iviz.Ros
 
             public async Task AdvertiseAsync(RosClient client, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
                 string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
                 IRosPublisher publisher;
                 if (client != null)
@@ -1189,6 +1241,7 @@ namespace Iviz.Ros
                     throw new ArgumentNullException(nameof(client));
                 }
 
+                token.ThrowIfCancellationRequested();
                 var fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
                 if (Publisher != null)
                 {
@@ -1247,6 +1300,7 @@ namespace Iviz.Ros
 
             public async Task SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
                 var fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
                 IRosSubscriber subscriber;
                 if (listener != null)
@@ -1268,6 +1322,7 @@ namespace Iviz.Ros
 
             public async Task UnsubscribeAsync(RosClient client, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
                 var fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
 
                 if (Subscriber != null)
@@ -1328,6 +1383,7 @@ namespace Iviz.Ros
 
             public async Task AdvertiseAsync(RosClient client, CancellationToken token)
             {
+                token.ThrowIfCancellationRequested();
                 var fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
                 if (client != null)
                 {
