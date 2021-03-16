@@ -711,13 +711,7 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "System.Threading.Tasks.Extensions/4.3.0": {
-        "dependencies": {
-          "System.Collections": "4.3.0",
-          "System.Runtime": "4.3.0",
-          "System.Threading.Tasks": "4.3.0"
-        }
-      },
+      "System.Threading.Tasks.Extensions/4.4.0": {},
       "System.Threading.Timer/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -741,7 +735,7 @@
           "System.Text.Encoding.Extensions": "4.3.0",
           "System.Text.RegularExpressions": "4.3.0",
           "System.Threading.Tasks": "4.3.0",
-          "System.Threading.Tasks.Extensions": "4.3.0"
+          "System.Threading.Tasks.Extensions": "4.4.0"
         }
       },
       "System.Xml.XDocument/4.3.0": {
@@ -780,9 +774,17 @@
           "Iviz.Msgs.dll": {}
         }
       },
-      "Iviz.MsgsGen.Lib/1.0.0": {
+      "Iviz.MsgsGen.Dynamic.Lib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Lib": "1.0.0"
+        },
+        "runtime": {
+          "Iviz.MsgsGen.Dynamic.Lib.dll": {}
+        }
+      },
+      "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
           "Newtonsoft.Json": "12.0.3"
         },
         "runtime": {
@@ -792,11 +794,13 @@
       "Iviz.Roslib/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
+          "Iviz.MsgsGen.Dynamic.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Newtonsoft.Json": "12.0.3",
           "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0"
+          "Nito.AsyncEx.Tasks": "5.1.0",
+          "System.Threading.Tasks.Extensions": "4.4.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
@@ -813,7 +817,9 @@
       },
       "Iviz.XmlRpc/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0"
+          "Iviz.Msgs": "1.0.0",
+          "Nito.AsyncEx.Coordination": "5.1.0",
+          "System.Threading.Tasks.Extensions": "4.4.0"
         },
         "runtime": {
           "Iviz.XmlRpc.dll": {}
@@ -837,7 +843,7 @@
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
+      "sha512": "sha512-bLpT1f/SFlO1CzqXG12KnJzpZs6lv24uX2Rzi4Fmm0noJpNlnWRVryuO3yK18Ca04t/YHcO1e1Z0WDfjseqNzw==",
       "path": "microsoft.netcore.platforms/1.1.0",
       "hashPath": "microsoft.netcore.platforms.1.1.0.nupkg.sha512"
     },
@@ -1152,7 +1158,7 @@
     "System.Net.Http/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-sYg+FtILtRQuYWSIAuNOELwVuVsxVyJGWQyOnlAzhV4xvhyFnON1bAzYYC+jjRW8JREM45R0R5Dgi8MTC5sEwA==",
+      "sha512": "sha512-Z1UfSF6dlpCdZdxh6LeoGlYH+q6ptG/iiIWgUUeKhE3DbQACmZkU7Sz2nOX0qdHjz72MOdYRbkSJ5Qwl6sZgvg==",
       "path": "system.net.http/4.3.0",
       "hashPath": "system.net.http.4.3.0.nupkg.sha512"
     },
@@ -1359,12 +1365,12 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "System.Threading.Tasks.Extensions/4.3.0": {
+    "System.Threading.Tasks.Extensions/4.4.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-npvJkVKl5rKXrtl1Kkm6OhOUaYGEiF9wFbppFRWSMoApKzt2PiPHT2Bb8a5sAWxprvdOAtvaARS9QYMznEUtug==",
-      "path": "system.threading.tasks.extensions/4.3.0",
-      "hashPath": "system.threading.tasks.extensions.4.3.0.nupkg.sha512"
+      "sha512": "sha512-SPKfFGbpQsK5Srz2Kq3URgvC90yoOyBE8H1quDA2+MAJ2HAzFmV3biOgPv2Ck3mPAvdKngo3QHi2BNwUQDRVvA==",
+      "path": "system.threading.tasks.extensions/4.4.0",
+      "hashPath": "system.threading.tasks.extensions.4.4.0.nupkg.sha512"
     },
     "System.Threading.Timer/4.3.0": {
       "type": "package",
@@ -1393,6 +1399,11 @@
       "sha512": ""
     },
     "Iviz.Msgs/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsGen.Dynamic.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
