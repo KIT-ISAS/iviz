@@ -1,5 +1,5 @@
 ---
 bool success
 string message
-int32[] resolutions_xy
+Vector2i[] resolutions
 

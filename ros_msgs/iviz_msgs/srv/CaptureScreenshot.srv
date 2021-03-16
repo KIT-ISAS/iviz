@@ -2,6 +2,7 @@ bool compress
 ---
 bool success
 string message
+Header header
 int32 width
 int32 height
 int32 bpp
