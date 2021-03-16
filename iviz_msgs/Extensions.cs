@@ -140,5 +140,7 @@ namespace Iviz.Msgs
             $"\"z\": {p.Z.ToString(BuiltIns.Culture)}, \"w\": {p.W.ToString(BuiltIns.Culture)}}}";
 
         public static string ToString(in ISerializable t) => JsonConvert.SerializeObject(t);
+
+        public static string ToString(IService t) => JsonConvert.SerializeObject(t);
     }
 }

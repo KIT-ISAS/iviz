@@ -18,7 +18,7 @@ namespace Iviz.Msgs
         /// </summary>
         public static Action<object> LogDebug { get; set; } = None;
 
-        public static void LogDebugFormat(string format, object? arg1)
+        public static void LogDebugFormat<TT>(string format, TT? arg1)
         {
             if (LogDebug != None)
             {
@@ -34,7 +34,7 @@ namespace Iviz.Msgs
             }
         }        
         
-        public static void LogDebugFormat(string format, object? arg1, object? arg2)
+        public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (LogDebug != None)
             {
@@ -42,7 +42,7 @@ namespace Iviz.Msgs
             }
         }
 
-        public static void LogDebugFormat(string format, object? arg1, Exception? arg2)
+        public static void LogDebugFormat<TT>(string format, TT? arg1, Exception? arg2)
         {
             if (LogDebug != None)
             {
@@ -50,7 +50,7 @@ namespace Iviz.Msgs
             }
         }
 
-        public static void LogDebugFormat(string format, object? arg1, object? arg2, object? arg3)
+        public static void LogDebugFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (LogDebug != None)
             {
@@ -58,7 +58,7 @@ namespace Iviz.Msgs
             }
         }
         
-        public static void LogDebugFormat(string format, object? arg1, object? arg2, Exception? arg3)
+        public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogDebug != None)
             {
@@ -79,7 +79,7 @@ namespace Iviz.Msgs
         /// </summary>
         public static Action<object> Log { get; set; } = None;
 
-        public static void LogFormat(string format, object? arg1)
+        public static void LogFormat<TT>(string format, TT? arg1)
         {
             if (Log != None)
             {
@@ -95,7 +95,7 @@ namespace Iviz.Msgs
             }
         }
 
-        public static void LogFormat(string format, object? arg1, object? arg2)
+        public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (Log != None)
             {
@@ -103,7 +103,7 @@ namespace Iviz.Msgs
             }
         }
         
-        public static void LogFormat(string format, object? arg1, Exception? arg2)
+        public static void LogFormat<TT>(string format, TT? arg1, Exception? arg2)
         {
             if (Log != None)
             {
@@ -111,7 +111,7 @@ namespace Iviz.Msgs
             }
         }        
 
-        public static void LogFormat(string format, object? arg1, object? arg2, object? arg3)
+        public static void LogFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (Log != None)
             {
@@ -119,7 +119,7 @@ namespace Iviz.Msgs
             }
         }
         
-        public static void LogFormat(string format, object? arg1, object? arg2, Exception? arg3)
+        public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (Log != None)
             {
@@ -140,7 +140,7 @@ namespace Iviz.Msgs
         /// </summary>
         public static Action<object> LogError { get; set; } = None;
 
-        public static void LogErrorFormat(string format, object? arg1)
+        public static void LogErrorFormat<TT>(string format, TT? arg1)
         {
             if (LogError != None)
             {
@@ -156,7 +156,7 @@ namespace Iviz.Msgs
             }
         }
 
-        public static void LogErrorFormat(string format, object? arg1, object? arg2)
+        public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (LogError != None)
             {
@@ -164,7 +164,7 @@ namespace Iviz.Msgs
             }
         }
         
-        public static void LogErrorFormat(string format, object? arg1, Exception? arg2)
+        public static void LogErrorFormat<TT>(string format, TT? arg1, Exception? arg2)
         {
             if (LogError != None)
             {
@@ -172,7 +172,7 @@ namespace Iviz.Msgs
             }
         }        
 
-        public static void LogErrorFormat(string format, object? arg1, object? arg2, object? arg3)
+        public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (LogError != None)
             {
@@ -180,7 +180,7 @@ namespace Iviz.Msgs
             }
         }
         
-        public static void LogErrorFormat(string format, object? arg1, object? arg2, Exception? arg3)
+        public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogError != None)
             {

@@ -52,6 +52,8 @@ namespace Iviz.Msgs.NavMsgs
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         [Preserve] public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
+        
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -97,6 +99,8 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -155,5 +159,7 @@ namespace Iviz.Msgs.NavMsgs
                 return size;
             }
         }
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 }

@@ -52,6 +52,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         [Preserve] public const string RosMd5Sum = "93aa3d73b866f04880927745f4aab303";
+        
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -110,6 +112,8 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -154,5 +158,7 @@ namespace Iviz.Msgs.OctomapMsgs
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 }

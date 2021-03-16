@@ -51,7 +51,9 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/CaptureScreenshot";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "4bff2d0367d9773d843a6d061102db78";
+        [Preserve] public const string RosMd5Sum = "41b6a7b3e6d595bdc6e085d2d94b94e6";
+        
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -103,6 +105,8 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -110,6 +114,7 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "success")] public bool Success { get; set; }
         [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "width")] public int Width { get; set; }
         [DataMember (Name = "height")] public int Height { get; set; }
         [DataMember (Name = "bpp")] public int Bpp { get; set; }
@@ -126,10 +131,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public CaptureScreenshotResponse(bool Success, string Message, int Width, int Height, int Bpp, double[] Intrinsics, in GeometryMsgs.Pose Pose, byte[] Data)
+        public CaptureScreenshotResponse(bool Success, string Message, in StdMsgs.Header Header, int Width, int Height, int Bpp, double[] Intrinsics, in GeometryMsgs.Pose Pose, byte[] Data)
         {
             this.Success = Success;
             this.Message = Message;
+            this.Header = Header;
             this.Width = Width;
             this.Height = Height;
             this.Bpp = Bpp;
@@ -143,6 +149,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
+            Header = new StdMsgs.Header(ref b);
             Width = b.Deserialize<int>();
             Height = b.Deserialize<int>();
             Bpp = b.Deserialize<int>();
@@ -165,6 +172,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
+            Header.RosSerialize(ref b);
             b.Serialize(Width);
             b.Serialize(Height);
             b.Serialize(Bpp);
@@ -189,10 +197,13 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 81;
                 size += BuiltIns.UTF8.GetByteCount(Message);
+                size += Header.RosMessageLength;
                 size += 8 * Intrinsics.Length;
                 size += 1 * Data.Length;
                 return size;
             }
         }
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 }

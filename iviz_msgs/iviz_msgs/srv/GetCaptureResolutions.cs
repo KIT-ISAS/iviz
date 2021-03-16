@@ -51,7 +51,9 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/GetCaptureResolutions";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "c1a4ef517e74fbd385d235c2bacbd3b7";
+        [Preserve] public const string RosMd5Sum = "e375c70c9e7caf58991e78dd0f791c3a";
+        
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -96,6 +98,8 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -103,21 +107,21 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "success")] public bool Success { get; set; }
         [DataMember (Name = "message")] public string Message { get; set; }
-        [DataMember (Name = "resolutions_xy")] public int[] ResolutionsXy { get; set; }
+        [DataMember (Name = "resolutions")] public Vector2i[] Resolutions { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public GetCaptureResolutionsResponse()
         {
             Message = string.Empty;
-            ResolutionsXy = System.Array.Empty<int>();
+            Resolutions = System.Array.Empty<Vector2i>();
         }
         
         /// <summary> Explicit constructor. </summary>
-        public GetCaptureResolutionsResponse(bool Success, string Message, int[] ResolutionsXy)
+        public GetCaptureResolutionsResponse(bool Success, string Message, Vector2i[] Resolutions)
         {
             this.Success = Success;
             this.Message = Message;
-            this.ResolutionsXy = ResolutionsXy;
+            this.Resolutions = Resolutions;
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -125,7 +129,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
-            ResolutionsXy = b.DeserializeStructArray<int>();
+            Resolutions = b.DeserializeArray<Vector2i>();
+            for (int i = 0; i < Resolutions.Length; i++)
+            {
+                Resolutions[i] = new Vector2i(ref b);
+            }
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -142,7 +150,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-            b.SerializeStructArray(ResolutionsXy, 0);
+            b.SerializeArray(Resolutions, 0);
         }
         
         public void Dispose()
@@ -152,7 +160,12 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosValidate()
         {
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
-            if (ResolutionsXy is null) throw new System.NullReferenceException(nameof(ResolutionsXy));
+            if (Resolutions is null) throw new System.NullReferenceException(nameof(Resolutions));
+            for (int i = 0; i < Resolutions.Length; i++)
+            {
+                if (Resolutions[i] is null) throw new System.NullReferenceException($"{nameof(Resolutions)}[{i}]");
+                Resolutions[i].RosValidate();
+            }
         }
     
         public int RosMessageLength
@@ -160,9 +173,11 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 9;
                 size += BuiltIns.UTF8.GetByteCount(Message);
-                size += 4 * ResolutionsXy.Length;
+                size += 8 * Resolutions.Length;
                 return size;
             }
         }
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 }

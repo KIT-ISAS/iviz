@@ -52,6 +52,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
         [Preserve] public const string RosMd5Sum = "dd7d344324fd86c32836f4fe1bc7b322";
+        
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -112,6 +114,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
                 return size;
             }
         }
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 
     [DataContract]
@@ -171,5 +175,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
                 return size;
             }
         }
+    
+        public override string ToString() => Extensions.ToString(this);
     }
 }
