@@ -121,7 +121,7 @@ namespace Iviz.XmlRpc
                     }
                     else
                     {
-                        await CreateContextTask().WaitForWithTimeout(2000).AwaitNoThrow(this);
+                        await CreateContextTask().AwaitForWithTimeout(2000).AwaitNoThrow(this);
                     }
                 }
                 catch (Exception e)
@@ -168,7 +168,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                await Task.WhenAll(backgroundTasks.Select(tuple => tuple.task)).WaitFor(timeoutInMs);
+                await Task.WhenAll(backgroundTasks.Select(tuple => tuple.task)).AwaitFor(timeoutInMs);
             }
             catch (Exception e)
             {

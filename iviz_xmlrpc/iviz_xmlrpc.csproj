@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>8</LangVersion>
+        <LangVersion>9</LangVersion>
         <AssemblyName>Iviz.XmlRpc</AssemblyName>
         <RootNamespace>Iviz.XmlRpc</RootNamespace>
         <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
       <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.4.0" />
     </ItemGroup>
 

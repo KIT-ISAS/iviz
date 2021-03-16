@@ -9,7 +9,7 @@ using Iviz.Msgs;
 namespace Iviz.XmlRpc
 {
     /// <summary>
-    /// Handler for an HTTP request.
+    /// Handler for an HTTP request that was sent to our server by another node .
     /// </summary>
     public sealed class HttpListenerContext : IDisposable
     {
@@ -35,104 +35,15 @@ namespace Iviz.XmlRpc
         /// <summary>
         /// Retrieves the HTTP request.
         /// </summary>
-        /// <param name="timeoutInMs">Maximal time to wait</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>An awaitable task</returns>
         /// <exception cref="TimeoutException">Wait time exceeded</exception>
         /// <exception cref="ParseException">The HTTP request could not be understood</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public async Task<string> GetRequestAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        public async Task<string> GetRequestAsync(CancellationToken token = default)
         {
-            StreamReader stream = new StreamReader(client.GetStream(), BuiltIns.UTF8);
-
-            int length = -1;
-            while (true)
-            {
-                Task<string?> readTask = stream.ReadLineAsync();
-                if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
-                {
-                    token.ThrowIfCancellationRequested();
-                    throw new TimeoutException("Read line timed out!", readTask.Exception);
-                }
-
-                string? line = await readTask;
-                if (line == null)
-                {
-                    if (!client.Connected)
-                    {
-                        throw new RpcConnectionException("Partner closed the connection.");
-                    }
-
-                    throw new ParseException("Read line returned empty value!");
-                }
-
-                if (CheckHeaderLine(line, "Content-Length", out string? lengthStr))
-                {
-                    if (!int.TryParse(lengthStr, out length))
-                    {
-                        throw new ParseException($"Cannot parse length '{lengthStr}'");
-                    }
-                }
-                else if (string.IsNullOrEmpty(line) || line == "\r")
-                {
-                    break;
-                }
-            }
-
-            if (length == -1)
-            {
-                throw new ParseException("Content-Length not found in HTTP header");
-            }
-
-            using var buffer = new Rent<char>(length);
-            
-            int numRead = 0;
-            while (BuiltIns.UTF8.GetByteCount(buffer.Array, 0, numRead) < length)
-            {
-                Task<int> readTask = stream.ReadAsync(buffer.Array, numRead, length - numRead);
-                if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
-                {
-                    token.ThrowIfCancellationRequested();
-                    throw new TimeoutException("Read line timed out!", readTask.Exception);
-                }
-
-                numRead += await readTask;
-            }
-
-
-            return new string(buffer.Array, 0, numRead);
-        }
-
-        static bool CheckHeaderLine(string line, string key, out string? value)
-        {
-            if (line.Length < key.Length + 1 ||
-                string.Compare(line, 0, key, 0, key.Length, true, BuiltIns.Culture) != 0)
-            {
-                value = null;
-                return false;
-            }
-
-            int start = key.Length + 1;
-            if (start == line.Length)
-            {
-                value = null;
-                return false;
-            }
-
-            if (line[start] == ' ')
-            {
-                start++;
-            }
-
-            int end = line.Length - 1;
-            if (line[end] == '\r')
-            {
-                end--;
-            }
-
-            value = line.Substring(start, end + 1 - start);
-            return true;
+            return (await HttpRequest.ReadIncomingData(client.GetStream(), false, token)).inData;
         }
 
         /// <summary>
@@ -153,10 +64,10 @@ namespace Iviz.XmlRpc
             }
 
             int msgOutLength = BuiltIns.UTF8.GetByteCount(msgOut);
-            string str = "HTTP/1.0 200 OK\r\n" + 
-                         "Server: iviz XML-RPC\r\n" + 
+            string str = "HTTP/1.0 200 OK\r\n" +
+                         "Server: iviz XML-RPC\r\n" +
                          "Connection: close\r\n" +
-                         "Content-Type: text/xml; charset=utf-8\r\n" + 
+                         "Content-Type: text/xml; charset=utf-8\r\n" +
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
                          msgOut;
 

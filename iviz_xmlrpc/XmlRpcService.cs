@@ -55,7 +55,18 @@ namespace Iviz.XmlRpc
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>    
-    public class RpcConnectionException : XmlRpcException
+    public class HttpConnectionException : XmlRpcException
+    {
+        public HttpConnectionException(string message) : base(message)
+        {
+        }
+
+        public HttpConnectionException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    public class RpcConnectionException : HttpConnectionException
     {
         public RpcConnectionException(string message) : base(message)
         {
@@ -66,6 +77,10 @@ namespace Iviz.XmlRpc
         }
     }
 
+
+    /// <summary>
+    /// Functions for XML-RPC calls.
+    /// </summary>
     public static class XmlRpcService
     {
         static void Assert(string? received, string expected)
@@ -172,15 +187,15 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static string CreateRequest(string method, Arg[] args)
+        internal static string CreateRequest(string method, Arg[] args)
         {
             string[] entries = new string[4 + args.Length * 3];
             entries[0] = "<?xml version=\"1.0\"?>\n" +
-                           "<methodCall>\n" +
-                           "<methodName>";
+                         "<methodCall>\n" +
+                         "<methodName>";
             entries[1] = method;
             entries[2] = "</methodName>\n" +
-                           "<params>\n";
+                         "<params>\n";
             int o = 3;
             foreach (Arg arg in args)
             {
@@ -195,7 +210,7 @@ namespace Iviz.XmlRpc
             return string.Concat(entries);
         }
 
-        static object ProcessResponse(string inData)
+        internal static object ProcessResponse(string inData)
         {
             XmlDocument document = new XmlDocument();
             document.LoadXml(inData);
@@ -239,19 +254,18 @@ namespace Iviz.XmlRpc
         }
 
         /// <summary>
-        /// Calls an XML-RPC method.
+        /// Calls an XML-RPC method. The connection to the server is closed after the call.
         /// </summary>
         /// <param name="remoteUri">Uri of the callee.</param>
         /// <param name="callerUri">Uri of the caller.</param>
         /// <param name="method">Name of the XML-RPC method.</param>
         /// <param name="args">List of arguments.</param>
-        /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
         public static async ValueTask<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, Arg[] args,
-            int timeoutInMs = 2000, CancellationToken token = default)
+            CancellationToken token = default)
         {
             if (remoteUri is null)
             {
@@ -271,11 +285,12 @@ namespace Iviz.XmlRpc
             string outData = CreateRequest(method, args);
             string inData;
 
-            using HttpRequest request = new HttpRequest(callerUri, remoteUri);
+            using HttpRequest request = new (callerUri, remoteUri);
             try
             {
-                await request.StartAsync(timeoutInMs, token).Caf();
-                inData = await request.RequestAsync(outData, timeoutInMs, token).Caf();
+                await request.StartAsync(token);
+                await request.SendRequestAsync(outData, false, false, token);
+                (inData, _, _) = await request.GetResponseAsync(token);
             }
             catch (OperationCanceledException)
             {
@@ -285,58 +300,26 @@ namespace Iviz.XmlRpc
             {
                 throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
-            
+
             return ProcessResponse(inData);
         }
 
         /// <summary>
-        /// Calls an XML-RPC method.
+        /// Calls an XML-RPC method. The connection to the server is closed after the call.
+        /// For async contexts use <see cref="MethodCallAsync"/>.
         /// </summary>
         /// <param name="remoteUri">Uri of the callee.</param>
         /// <param name="callerUri">Uri of the caller.</param>
         /// <param name="method">Name of the XML-RPC method.</param>
         /// <param name="args">List of arguments.</param>
-        /// <param name="timeoutInMs">Timeout in milliseconds.</param>
         /// <param name="token">Optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
         public static object MethodCall(Uri remoteUri, Uri callerUri, string method, Arg[] args,
-            int timeoutInMs = 2000, CancellationToken token = default)
+            CancellationToken token = default)
         {
-            if (remoteUri is null)
-            {
-                throw new ArgumentNullException(nameof(remoteUri));
-            }
-
-            if (callerUri is null)
-            {
-                throw new ArgumentNullException(nameof(callerUri));
-            }
-
-            if (args is null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
-
-            string outData = CreateRequest(method, args);
-            string inData;
-
-            using HttpRequest request = new HttpRequest(callerUri, remoteUri);
-            try
-            {
-                request.Start(timeoutInMs, token);
-                inData = request.Request(outData, timeoutInMs);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
-            }
-
-            return ProcessResponse(inData);
+            return Task.Run(() => MethodCallAsync(remoteUri, callerUri, method, args, token).AsTask(), token)
+                .WaitAndRethrow();
         }
 
         /// <summary>
@@ -367,7 +350,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(methods));
             }
 
-            string inData = await httpContext.GetRequestAsync(token: token).Caf();
+            string inData = await httpContext.GetRequestAsync(token: token);
 
             try
             {
@@ -391,12 +374,12 @@ namespace Iviz.XmlRpc
                                  "</methodResponse>\n" +
                                  "\n";
 
-                await httpContext.RespondAsync(outData, token: token).Caf();
+                await httpContext.RespondAsync(outData, token: token);
 
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
                 {
-                    await lateCallback(args, token).Caf();
+                    await lateCallback(args, token);
                 }
             }
             catch (ParseException e)
@@ -408,7 +391,7 @@ namespace Iviz.XmlRpc
                                 "</fault>\n" +
                                 "</methodResponse>\n";
 
-                await httpContext.RespondAsync(buffer, token: token).Caf();
+                await httpContext.RespondAsync(buffer, token: token);
             }
             catch (OperationCanceledException)
             {
@@ -417,7 +400,7 @@ namespace Iviz.XmlRpc
             catch (Exception e)
             {
                 Logger.LogErrorFormat("XmlRpcService: Error during parsing {0}", e.ToString());
-                await httpContext.RespondWithUnexpectedErrorAsync(token: token).Caf();
+                await httpContext.RespondWithUnexpectedErrorAsync(token: token);
                 throw;
             }
         }

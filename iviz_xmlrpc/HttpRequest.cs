@@ -1,135 +1,282 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Sockets;
-using System.Runtime.ExceptionServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 
 namespace Iviz.XmlRpc
 {
+    /// <summary>
+    /// Handler for an HTTP request that was sent by us to another server.
+    /// </summary>
     internal sealed class HttpRequest : IDisposable
     {
-        const int DefaultTimeoutInMs = 2000;
-
         readonly Uri callerUri;
-        readonly Uri uri;
+        readonly Uri remoteUri;
         readonly TcpClient client;
+        bool disposed;
 
-        public HttpRequest(Uri callerUri, Uri uri)
+        public bool IsAlive => !disposed && client.Connected;
+
+        public HttpRequest(Uri callerUri, Uri remoteUri)
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
-            this.uri = uri ?? throw new ArgumentNullException(nameof(uri));
-            client = new TcpClient(AddressFamily.InterNetworkV6) {Client = {DualMode = true, NoDelay = true}};
+            this.remoteUri = remoteUri ?? throw new ArgumentNullException(nameof(remoteUri));
+            client = new TcpClient(AddressFamily.InterNetworkV6)
+                {Client = {DualMode = true}, ReceiveTimeout = 3000, SendTimeout = 3000};
         }
 
-        public void Start(int timeoutInMs, CancellationToken token)
+        public async Task StartAsync(CancellationToken token)
         {
-            Task.Run(() => StartAsync(timeoutInMs, token).Caf(), token).WaitAndRethrow();
+            await client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
         }
 
-        public Task StartAsync(int timeoutInMs, CancellationToken token)
+        string CreateRequest(string msgIn, bool keepAlive)
         {
-            return client.TryConnectAsync(uri.Host, uri.Port, token, timeoutInMs);
-        }
-
-        string CreateRequest(string msgIn)
-        {
-            return $"POST {Uri.UnescapeDataString(uri.AbsolutePath)} HTTP/1.0\r\n" +
+            return $"POST {Uri.UnescapeDataString(remoteUri.AbsolutePath)} " +
+                   (keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n") +
                    "User-Agent: iviz XML-RPC\r\n" +
                    $"Host: {callerUri.Host}\r\n" +
                    $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
+                   "Accept-Encoding: gzip\r\n" +
                    "Content-Type: text/xml; charset=utf-8\r\n" +
-                   $"\r\n{msgIn}" +
-                   "\r\n";
+                   $"\r\n{msgIn}";
         }
 
-        static string ProcessResponse(string response)
+        (string, Rent<byte>, int length) CreateRequestGzipped(string msgIn, bool keepAlive = false)
         {
-            if (response.Length == 0)
+            using var srcBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(msgIn.Length));
+            int srcLength = BuiltIns.UTF8.GetBytes(msgIn, 0, msgIn.Length, srcBytes.Array, 0);
+
+            var dstBytes = new Rent<byte>(srcBytes.Length);
+
+            using MemoryStream outputStream = new(dstBytes.Array);
+            using (GZipStream compressionStream = new(outputStream, CompressionMode.Compress, true))
             {
-                throw new IOException("Partner closed connection or returned empty response");
+                compressionStream.Write(srcBytes.Array, 0, srcLength);
             }
 
-            int index = response.IndexOf("\r\n\r\n", StringComparison.InvariantCulture);
-            if (index == -1)
+            string header =
+                $"POST {Uri.UnescapeDataString(remoteUri.AbsolutePath)} " +
+                (keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n") +
+                "User-Agent: iviz XML-RPC\r\n" +
+                $"Host: {callerUri.Host}\r\n" +
+                "Accept-Encoding: gzip\r\n" +
+                "Content-Encoding: gzip\r\n" +
+                $"Content-Length: {outputStream.Position.ToString()}\r\n" +
+                "Content-Type: text/xml; charset=utf-8\r\n" +
+                "\r\n";
+
+            return (header, dstBytes, (int) outputStream.Position);
+        }
+
+        internal async Task<int> SendRequestAsync(string msgIn, bool keepAlive, bool gzipped, CancellationToken token)
+        {
+            var stream = client.GetStream();
+            if (gzipped)
             {
-                index = response.IndexOf("\n\n", StringComparison.InvariantCulture);
-                if (index == -1)
+                (string header, var payloadBytes, int length) = CreateRequestGzipped(msgIn, keepAlive);
+                using (payloadBytes)
                 {
-                    throw new ParseException(
-                        $"Cannot find double line-end in HTTP header (received {response.Length} bytes)");
+                    using (var headerBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(header.Length)))
+                    {
+                        int headerSize = BuiltIns.UTF8.GetBytes(header, 0, header.Length, headerBytes.Array, 0);
+                        await stream.WriteChunkAsync(headerBytes.Array, headerSize, token);
+                    }
+
+                    await stream.FlushAsync(token).AwaitWithToken(token);
+                    await stream.WriteAsync(payloadBytes.Array, 0, length, token).AwaitWithToken(token);
+                    await stream.FlushAsync(token).AwaitWithToken(token);
                 }
 
-                index += 2;
+                return length;
+            }
+
+            string content = CreateRequest(msgIn, keepAlive);
+            using (var contentBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(content.Length)))
+            {
+                int contentSize = BuiltIns.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
+                await stream.WriteChunkAsync(contentBytes.Array, contentSize, token);
+            }
+
+            await stream.FlushAsync(token).AwaitWithToken(token);
+            return content.Length;
+        }
+
+        static async Task<int> ReadHeaderAsync(NetworkStream stream, byte[] buffer, CancellationToken token)
+        {
+            byte[] singleByte = new byte[1];
+            int pos = 0;
+            while (pos < buffer.Length)
+            {
+                buffer[pos] = stream.DataAvailable
+                    ? (byte) stream.ReadByte()
+                    : await stream.ReadChunkAsync(singleByte, 1, token)
+                        ? singleByte[0]
+                        : throw new IOException("Partner closed connection");
+
+                if (pos > 4 &&
+                    buffer[pos] == '\n' &&
+                    buffer[pos - 3] == '\r' &&
+                    buffer[pos - 2] == '\n' &&
+                    buffer[pos - 1] == '\r')
+                {
+                    return pos + 1;
+                }
+
+                pos++;
+            }
+
+            throw new ParseException("End of header not found");
+        }
+
+        static async Task<(int, string?, bool)> ParseHeaderAsync(StreamReader reader, bool validateFirstLine,
+            CancellationToken token)
+        {
+            int? length = null;
+            string? encoding = null;
+            bool? connectionClose = false;
+
+            string? firstLine = await reader.ReadLineAsync().AwaitWithToken(token);
+            if (firstLine == null)
+            {
+                throw new IOException("Partner closed connection!");
+            }
+
+            if (validateFirstLine)
+            {
+                int firstSpace = firstLine.IndexOf(' ');
+                if (firstSpace < 0
+                    || firstSpace + 3 >= firstLine.Length 
+                    || firstLine[firstSpace + 1] != '2' 
+                    || firstLine[firstSpace + 2] != '0' 
+                    || firstLine[firstSpace + 3] != '0')
+                {
+                    throw new HttpConnectionException($"Request failed with header: {firstLine}");
+                }
+            }
+
+            while (true)
+            {
+                string? line = await reader.ReadLineAsync().AwaitWithToken(token);
+
+                if (line == null)
+                {
+                    throw new IOException("Partner closed connection!");
+                }
+
+                if (length == null && CheckHeaderLine(line, "Content-Length", out string? lengthStr) &&
+                    int.TryParse(lengthStr, out int lengthVal))
+                {
+                    length = lengthVal;
+                }
+                else if (encoding == null && CheckHeaderLine(line, "Content-Encoding", out string? tmpEncodingStr))
+                {
+                    encoding = tmpEncodingStr;
+                }
+                else if (connectionClose == null && CheckHeaderLine(line, "Connection", out string? connectionStr) &&
+                         connectionStr.Equals("close", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    connectionClose = true;
+                }
+                else if (string.IsNullOrEmpty(line) || line == "\r")
+                {
+                    break;
+                }
+            }
+
+            if (length == null || length < 0)
+            {
+                throw new ParseException("Content-Length not found in HTTP header");
+            }
+
+            return (length.Value, encoding, connectionClose ?? false);
+        }
+
+        internal async Task<(string, int, bool)> GetResponseAsync(CancellationToken token)
+        {
+            return await ReadIncomingData(client.GetStream(), true, token);
+        }
+
+        internal static async Task<(string inData, int length, bool shouldClose)> ReadIncomingData(NetworkStream stream,
+            bool isRequest, CancellationToken token)
+        {
+            const int maxHeaderSize = 4096;
+            const int maxPayloadSize = 8192;
+            int headerLength;
+            int contentLength;
+            string? encodingStr;
+            bool connectionClose;
+
+            using (var headerBytes = new Rent<byte>(maxHeaderSize))
+            {
+                headerLength = await ReadHeaderAsync(stream, headerBytes.Array, token);
+                using var reader = new StreamReader(new MemoryStream(headerBytes.Array, 0, headerLength));
+                (contentLength, encodingStr, connectionClose) = await ParseHeaderAsync(reader, isRequest, token);
+            }
+
+            using var content = new Rent<byte>(contentLength);
+            if (!await stream.ReadChunkAsync(content.Array, content.Length, token))
+            {
+                throw new IOException("Partner closed connection");
+            }
+
+            string result;
+            if (encodingStr != null &&
+                (encodingStr.Equals("gzip", StringComparison.InvariantCultureIgnoreCase) ||
+                 encodingStr.Equals("x-gzip", StringComparison.InvariantCultureIgnoreCase)))
+            {
+                using var outputBytes = new Rent<byte>(maxPayloadSize);
+                using var outputStream = new MemoryStream(outputBytes.Array);
+                using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
+                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    await decompressionStream.CopyToAsync(outputStream);
+                }
+
+                result = BuiltIns.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
             }
             else
             {
-                index += 4;
+                result = BuiltIns.UTF8.GetString(content.Array, 0, content.Length);
             }
 
-            return response.Substring(index);
+            return (result, headerLength + contentLength, connectionClose);
         }
 
-        internal string Request(string msgIn, int timeoutInMs)
+        static bool CheckHeaderLine(string line, string key, out string value)
         {
-            string response;
-            using (Stream stream = client.GetStream())
+            if (line.Length < key.Length + 1 ||
+                string.Compare(line, 0, key, 0, key.Length, true, BuiltIns.Culture) != 0)
             {
-                stream.ReadTimeout = timeoutInMs;
-                stream.WriteTimeout = timeoutInMs;
-
-                StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
-                writer.Write(CreateRequest(msgIn));
-                writer.Flush();
-
-                StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
-                response = reader.ReadToEnd();
+                value = "";
+                return false;
             }
 
-            return ProcessResponse(response);
-        }
-
-        internal async ValueTask<string> RequestAsync(string msgIn, int timeoutInMs, CancellationToken token)
-        {
-            string response;
-            using (Stream stream = client.GetStream())
+            int start = key.Length + 1;
+            if (start == line.Length)
             {
-                StreamWriter writer = new StreamWriter(stream, BuiltIns.UTF8);
-                try
-                {
-                    await writer.WriteChunkAsync(CreateRequest(msgIn), token, timeoutInMs);
-                }
-                catch (Exception)
-                {
-                    writer.Close();
-                    throw;
-                }
-
-                await writer.FlushAsync().Caf();
-
-                StreamReader reader = new StreamReader(stream, BuiltIns.UTF8);
-                Task<string> readTask = reader.ReadToEndAsync();
-                if (!await readTask.WaitFor(timeoutInMs, token) || !readTask.RanToCompletion())
-                {
-                    reader.Close();
-                    token.ThrowIfCancellationRequested();
-                    if (readTask.IsFaulted)
-                    {
-                        ExceptionDispatchInfo.Capture(readTask.Exception!.InnerException!).Throw();
-                    }
-
-                    throw new TimeoutException("HttpRequest: Request response timed out!", readTask.Exception);
-                }
-
-                response = readTask.Result;
+                value = "";
+                return false;
             }
 
-            return ProcessResponse(response);
+            if (line[start] == ' ')
+            {
+                start++;
+            }
+
+            int end = line.Length - 1;
+            if (line[end] == '\r')
+            {
+                end--;
+            }
+
+            value = line.Substring(start, end + 1 - start);
+            return true;
         }
 
-        bool disposed;
 
         public void Dispose()
         {
@@ -140,6 +287,11 @@ namespace Iviz.XmlRpc
 
             disposed = true;
             client.Close();
+        }
+
+        public override string ToString()
+        {
+            return $"[HttpRequest uri={remoteUri}]";
         }
     }
 }

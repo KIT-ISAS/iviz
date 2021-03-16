@@ -19,37 +19,48 @@ namespace Iviz.XmlRpc
         /// <summary>
         /// Waits for the task to complete.
         /// Only use this if the async function that generated the task does not support a cancellation token.
-        /// Note: A timeout doesn't cancel the task in the argument. You need to cancel that task through other means.
         /// </summary>
         /// <param name="task">The task to be awaited</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
         /// <param name="token">An optional token to cancel the waiting</param>
         /// <returns>An awaitable task, with true if the task in the argument finished before the given time</returns>
         /// <exception cref="TaskCanceledException">If the token expires</exception>
-        public static async Task<bool> WaitFor(this Task task, int timeoutInMs, CancellationToken token = default)
+        public static async Task<bool> AwaitFor(this Task task, int timeoutInMs, CancellationToken token = default)
         {
-            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+            if (timeoutInMs == -1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeoutInMs));
+            }
+
+            token.ThrowIfCancellationRequested();
+            if (task.IsCompleted)
+            {
+                return true;
+            }
+
+            using var tokenSource = !token.CanBeCanceled
+                ? new CancellationTokenSource()
+                : CancellationTokenSource.CreateLinkedTokenSource(token);
             tokenSource.CancelAfter(timeoutInMs);
 
-            var timeout = new TaskCompletionSource<object>();
+            var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
 
-            Task result = await (task, timeoutTask).WhenAny().Caf();
+            Task result = await (task, timeoutTask).WhenAny();
             return result == task;
         }
 
         /// <summary>
         /// Waits for the task to complete, and throws a timeout exception if it doesn't.
         /// Only use this if the async function that generated the task does not support a cancellation token.
-        /// Note: A timeout doesn't cancel the task in the argument. You need to cancel that task through other means.
         /// </summary>
         /// <param name="task">The task to be awaited</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
         /// <param name="errorMessage">Optional error message to appear in the timeout exception</param>
         /// <param name="token">An optional cancellation token</param>
         /// <exception cref="TimeoutException">If the task did not complete in time</exception>
-        public static async Task WaitForWithTimeout(this Task? task, int timeoutInMs, string? errorMessage = null,
+        public static async Task AwaitForWithTimeout(this Task? task, int timeoutInMs, string? errorMessage = null,
             CancellationToken token = default)
         {
             if (task == null)
@@ -57,14 +68,22 @@ namespace Iviz.XmlRpc
                 return;
             }
 
-            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+            if (task.IsCompleted)
+            {
+                await task;
+                return;
+            }
+
+            using var tokenSource = !token.CanBeCanceled
+                ? new CancellationTokenSource()
+                : CancellationTokenSource.CreateLinkedTokenSource(token);
             tokenSource.CancelAfter(timeoutInMs);
 
-            var timeout = new TaskCompletionSource<object>();
+            var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
+            using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
 
-            Task result = await (task, timeoutTask).WhenAny().Caf();
+            Task result = await (task, timeoutTask).WhenAny();
             if (result != task)
             {
                 throw new TimeoutException(errorMessage);
@@ -241,7 +260,7 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public static async Task<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
+        public static async ValueTask<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
         {
             if (t == null)
             {
@@ -288,7 +307,6 @@ namespace Iviz.XmlRpc
             }
         }
 
-
         public static async Task WhenAll<TA>(this EnumeratorUtils.SelectEnumerable<TA, Task> ts)
         {
             List<Exception>? es = null;
@@ -322,8 +340,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                es ??= new List<Exception>();
-                es.Add(e);
+                es ??= new List<Exception> {e};
             }
 
             try
@@ -342,37 +359,85 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public static async ValueTask<Task> WhenAny(this (Task, Task) ts)
+        public static async ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
         {
-            return await Task.WhenAny(ts.Item1, ts.Item2);
-        }
-    }
-
-    public static class StreamUtils
-    {
-        internal static async Task WriteChunkAsync(this StreamWriter writer, string text, CancellationToken token,
-            int timeoutInMs)
-        {
-            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-            tokenSource.CancelAfter(timeoutInMs);
-
-#if !NETSTANDARD2_0
-            await writer.WriteAsync(text.AsMemory(), tokenSource.Token).Caf();
-#else
-            var timeout = new TaskCompletionSource<object>();
-            var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
-
-            Task writeTask = writer.WriteAsync(text);
-            Task resultTask = await (writeTask, timeoutTask).WhenAny().Caf();
-            if (resultTask == timeoutTask)
+            var (t1, t2) = ts;
+            if (t1.IsCompleted)
             {
-                token.ThrowIfCanceled(timeoutTask);
-                throw new TimeoutException($"Writing operation timed out");
+                return t1;
             }
 
-            await writeTask.Caf();
-#endif
+            if (t2.IsCompleted)
+            {
+                return t2;
+            }
+            
+            return await Task.WhenAny(t1, t2);
+        }
+
+        const int MaxTokenWait = 5000;
+        
+        public static async Task AwaitWithToken(this Task task, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (task.IsCompleted)
+            {
+                await task;
+                return;
+            }
+
+            /*
+            var timeout = new TaskCompletionSource<object?>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(() => timeout.SetResult(null));
+
+            Task resultTask = await (task, timeoutTask).WhenAny();
+            if (resultTask == timeoutTask)
+            {
+                token.ThrowIfCancellationRequested();
+                throw new TimeoutException("Operation timed out");
+            }
+            */
+            var timeoutTask = Task.Delay(MaxTokenWait, token);
+            await await (task, timeoutTask).WhenAny();
+            if (!task.IsCompleted)
+            {
+                token.ThrowIfCancellationRequested();
+                throw new TimeoutException("Operation timed out");
+            }
+        }
+
+        public static async Task<T> AwaitWithToken<T>(this Task<T> task, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (task.IsCompleted)
+            {
+                return await task;
+            }
+
+            /*
+            var timeout = new TaskCompletionSource<object?>();
+            var timeoutTask = timeout.Task;
+            using var registration = token.Register(() => timeout.TrySetResult(null));
+
+            Task resultTask = await (task, timeoutTask).WhenAny();
+            if (resultTask == timeoutTask)
+            {
+                token.ThrowIfCancellationRequested();
+                throw new TimeoutException("Operation timed out");
+            }
+            */
+            var timeoutTask = Task.Delay(MaxTokenWait, token);
+            await (task, timeoutTask).WhenAny();
+            if (!task.IsCompleted)
+            {
+                token.ThrowIfCancellationRequested();
+                throw new TimeoutException("Operation timed out");
+            }
+
+            return await task;
         }
     }
 
@@ -381,19 +446,27 @@ namespace Iviz.XmlRpc
         public static readonly Dictionary<string, string> GlobalResolver = new Dictionary<string, string>();
 
         public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
-            CancellationToken token, int timeoutInMs)
+            CancellationToken token, int timeoutInMs = -1)
         {
+            token.ThrowIfCancellationRequested();
+
             if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
             {
                 hostname = resolvedHostname;
             }
 
-            using CancellationTokenSource tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-            tokenSource.CancelAfter(timeoutInMs);
 #if NET5_0
+            using var tokenSource = !token.CanBeCanceled
+                ? new CancellationTokenSource()
+                : CancellationTokenSource.CreateLinkedTokenSource(token);
+            if (timeoutInMs != -1)
+            {
+                tokenSource.CancelAfter(timeoutInMs);
+            }
+            
             try
             {
-                await client.ConnectAsync(hostname, port, tokenSource.Token).Caf();
+                await client.ConnectAsync(hostname, port, tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -401,19 +474,28 @@ namespace Iviz.XmlRpc
                 throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
             }
 #else
-            var timeout = new TaskCompletionSource<object>();
-            var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetCanceled());
-
-            Task connectionTask = client.ConnectAsync(hostname, port);
-            Task resultTask = await (timeoutTask, connectionTask).WhenAny().Caf();
-            if (resultTask == timeoutTask)
+            if (timeoutInMs == -1)
             {
-                token.ThrowIfCanceled(timeoutTask);
-                throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
-            }
+                if (!token.CanBeCanceled)
+                {
+                    throw new InvalidOperationException("Either a timeout or a cancellable token should be provided");
+                }
 
-            await connectionTask.Caf();
+                await client.ConnectAsync(hostname, port).AwaitWithToken(token);
+            }
+            else
+            {
+                //Logger.LogDebug("entering connectasync");
+                Task connectionTask = client.ConnectAsync(hostname, port);
+                if (!await connectionTask.AwaitFor(timeoutInMs, token))
+                {
+                    //Logger.LogDebug("leaving connectasync xx");
+                    token.ThrowIfCancellationRequested();
+                    throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
+                }
+
+                //Logger.LogDebug("leaving connectasync");
+            }
 #endif
         }
     }
