@@ -106,7 +106,7 @@ namespace Iviz.Roslib
 
             if (length == 0)
             {
-                return new Rent<byte>(0);
+                return Rent.Empty<byte>();
             }
 
             var readBuffer = new Rent<byte>(length);
@@ -151,21 +151,33 @@ namespace Iviz.Roslib
             await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token).Caf();
             await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token).Caf();
 
-            var statusBuffer = new byte[1];
-            if (!await stream.ReadChunkAsync(statusBuffer, 1, token))
-            {
-                throw new IOException("Partner closed the connection");
-            }
+            byte statusByte = await ReadOneByteAsync(stream, token);
 
             using var readBuffer = await ReceivePacketAsync(stream, token);
 
-            if (statusBuffer[0] == ErrorByte)
+            if (statusByte == ErrorByte)
             {
                 throw new RosServiceCallFailed(serviceInfo.Service,
                     BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Length));
             }
 
             service.Response = Buffer.Deserialize(service.Response, readBuffer.Array, readBuffer.Length);
+        }
+
+        static async Task<byte> ReadOneByteAsync(NetworkStream stream, CancellationToken token)
+        {
+            if (stream.DataAvailable)
+            {
+                return (byte) stream.ReadByte();
+            }
+
+            byte[] statusBuffer = new byte[1];
+            if (!await stream.ReadChunkAsync(statusBuffer, 1, token))
+            {
+                throw new IOException("Partner closed the connection");
+            }
+
+            return statusBuffer[0];
         }
     }
 }

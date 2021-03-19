@@ -64,7 +64,7 @@ namespace Iviz.XmlRpc
             }
 
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
-            using (TcpClient client = new TcpClient(AddressFamily.InterNetworkV6)
+            using (TcpClient client = new(AddressFamily.InterNetworkV6)
                 {Client = {DualMode = true, NoDelay = true}})
             {
                 client.Connect(IPAddress.Loopback, LocalPort);

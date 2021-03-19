@@ -108,7 +108,7 @@ namespace Iviz.Roslib
         public void Start(int timeoutInMs)
         {
             connectionTimeoutInMs = timeoutInMs;
-            task = Task.Run(StartSession, runningTs.Token);
+            task = TaskUtils.StartLongTask(StartSession, runningTs.Token);
         }
 
         async ValueTask<TcpClient?> TryToConnect(Endpoint testEndpoint)

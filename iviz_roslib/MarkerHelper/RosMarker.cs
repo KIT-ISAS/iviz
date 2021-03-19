@@ -82,7 +82,7 @@ namespace Iviz.Roslib.MarkerHelper
             if (publisher.IsAlive)
             {
                 Clear();
-                await ApplyChangesAsync().AwaitNoThrow(this);
+                ApplyChanges();
             }
 
             await publisher.DisposeAsync();
@@ -470,8 +470,10 @@ namespace Iviz.Roslib.MarkerHelper
                 throw new InvalidOperationException("Start has not been called!");
             }
 
-            Marker[] toSend = markers.Where(marker => marker != InvalidMarker).ToArray();
-            MarkerArray array = new(toSend);
+            var array = new MarkerArray()
+            {
+                Markers = markers.Where(marker => marker != InvalidMarker).ToArray()
+            };
 
             for (int id = 0; id < markers.Count; id++)
             {
@@ -482,28 +484,6 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             publisher.Write(array);
-        }
-
-        public async Task ApplyChangesAsync()
-        {
-            if (!publisher.IsAlive)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
-            Marker[] toSend = markers.Where(marker => marker != InvalidMarker).ToArray();
-            MarkerArray array = new(toSend);
-
-            for (int id = 0; id < markers.Count; id++)
-            {
-                if (markers[id] != InvalidMarker && markers[id].Action == Marker.DELETE)
-                {
-                    markers[id] = InvalidMarker;
-                }
-            }
-
-            using CancellationTokenSource tokenSource = new(1000);
-            await publisher.WriteAsync(array, RosPublishPolicy.WaitUntilSent, tokenSource.Token).AwaitNoThrow(this);
         }
     }
 

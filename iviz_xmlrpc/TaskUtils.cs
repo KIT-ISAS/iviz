@@ -16,6 +16,13 @@ namespace Iviz.XmlRpc
     /// </summary>
     public static class TaskUtils
     {
+        public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
+        {
+            return Task.Factory.StartNew(task, token, 
+                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);            
+        }        
+        
         /// <summary>
         /// Waits for the task to complete.
         /// Only use this if the async function that generated the task does not support a cancellation token.

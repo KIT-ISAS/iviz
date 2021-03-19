@@ -86,7 +86,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public void Start()
         {
-            task = Task.Run(Run);
+            task = TaskUtils.StartLongTask(Run);
         }
 
         public override string ToString()

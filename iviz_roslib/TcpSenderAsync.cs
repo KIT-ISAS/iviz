@@ -94,7 +94,7 @@ namespace Iviz.Roslib
             listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
             listener.Start();
             Endpoint = new Endpoint((IPEndPoint) listener.LocalEndpoint);
-            task = Task.Run(async () => await StartSession(managerSignal));
+            task = TaskUtils.StartLongTask(async () => await StartSession(managerSignal), runningTs.Token);
         }
 
         public string RemoteCallerId { get; }
@@ -149,7 +149,7 @@ namespace Iviz.Roslib
 
             if (length == 0)
             {
-                return new Rent<byte>(0);
+                return Rent.Empty<byte>();;
             }
 
             var readBuffer = new Rent<byte>(length);
@@ -343,7 +343,9 @@ namespace Iviz.Roslib
             {
                 runningTs.Cancel();
             }
-            catch (ObjectDisposedException) { }
+            catch (ObjectDisposedException)
+            {
+            }
 
             Status = SenderStatus.Dead;
             listener.Stop();
@@ -351,7 +353,7 @@ namespace Iviz.Roslib
             TryRelease(managerSignal);
 
             foreach (var (_, msgSignal) in messageQueue)
-            { 
+            {
                 msgSignal?.TrySetException(new RosQueueException(
                     $"Connection for '{RemoteCallerId}' is shutting down", this));
             }
@@ -380,7 +382,7 @@ namespace Iviz.Roslib
 
             void WriteLengthToBuffer(uint i)
             {
-                var array = writeBuffer.Array;
+                byte[] array = writeBuffer.Array;
                 array[3] = (byte) (i >> 0x18);
                 array[0] = (byte) i;
                 array[1] = (byte) (i >> 8);
@@ -422,7 +424,7 @@ namespace Iviz.Roslib
                 {
                     try
                     {
-                        var (msg, msgLength, msgSignal) = tmpQueue[i];
+                        (T msg, int msgLength, var msgSignal) = tmpQueue[i];
                         writeBuffer.EnsureCapability(msgLength + 4);
 
                         uint sendLength = Buffer.Serialize(msg, writeBuffer.Array, 4);

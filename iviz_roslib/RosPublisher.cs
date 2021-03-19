@@ -142,7 +142,6 @@ namespace Iviz.Roslib
             AssertIsAlive();
             message.RosValidate();
 
-            using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
 
             switch (policy)
             {
@@ -150,7 +149,10 @@ namespace Iviz.Roslib
                     manager.Publish(message);
                     return true;
                 case RosPublishPolicy.WaitUntilSent:
+                {
+                    using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
                     return await manager.PublishAndWaitAsync(message, linkedToken.Token);
+                }
                 default:
                     return false;
             }

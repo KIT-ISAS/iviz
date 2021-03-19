@@ -38,7 +38,7 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
                 this, serviceInfo.Service, serviceInfo.Type, Uri);
 
-            task = Task.Run(RunLoop);
+            task = TaskUtils.StartLongTask(RunLoop);
         }
 
         public Uri Uri { get; }

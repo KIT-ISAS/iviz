@@ -40,7 +40,7 @@ namespace Iviz.Roslib
             this.remoteEndPoint = remoteEndPoint;
             this.serviceInfo = serviceInfo;
 
-            task = Task.Run(Run, runningTs.Token);
+            task = TaskUtils.StartLongTask(Run, runningTs.Token);            
         }
 
         public bool IsAlive => !task.IsCompleted;
@@ -67,7 +67,7 @@ namespace Iviz.Roslib
             int length = BitConverter.ToInt32(lengthBuffer, 0);
             if (length == 0)
             {
-                return new Rent<byte>(0);
+                return Rent.Empty<byte>();
             }
 
             var readBuffer = new Rent<byte>(length);
