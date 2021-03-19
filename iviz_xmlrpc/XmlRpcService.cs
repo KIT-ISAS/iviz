@@ -77,6 +77,8 @@ namespace Iviz.XmlRpc
         }
     }
 
+    
+    
 
     /// <summary>
     /// Functions for XML-RPC calls.
@@ -91,7 +93,7 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static object Parse(XmlNode? value)
+        static XmlRpcValue Parse(XmlNode? value)
         {
             if (value == null)
             {
@@ -101,13 +103,13 @@ namespace Iviz.XmlRpc
             Assert(value.Name, "value");
             if (!value.HasChildNodes)
             {
-                return value.InnerText ?? throw new ParseException("Expected text node but received null!");
+                return new XmlRpcValue(value.InnerText);
             }
 
             XmlNode? primitive = value.FirstChild;
             if (primitive is XmlText)
             {
-                return primitive.InnerText ?? throw new ParseException("Expected text node but received null!");
+                return new XmlRpcValue(primitive.InnerText);
             }
 
             switch (primitive?.Name)
@@ -117,37 +119,37 @@ namespace Iviz.XmlRpc
                 case "double":
                     return double.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture,
                         out double @double)
-                        ? (object) @double
+                        ? new XmlRpcValue(@double)
                         : throw new ParseException($"Could not parse '{primitive.InnerText}' as double!");
                 case "i4":
                 case "int":
                     return int.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture, out int @int)
-                        ? (object) @int
+                        ? new XmlRpcValue(@int)
                         : throw new ParseException($"Could not parse '{primitive.InnerText}' as integer!");
                 case "boolean":
-                    return primitive.InnerText == "1";
+                    return new XmlRpcValue(primitive.InnerText == "1");
                 case "string":
-                    return primitive.InnerText;
+                    return new XmlRpcValue(primitive.InnerText);
                 case "array":
                     XmlNode? data = primitive.FirstChild;
                     Assert(data?.Name, "data");
-                    return data!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray();
+                    return new XmlRpcValue(data!.ChildNodes.Cast<XmlNode?>().Select(Parse).ToArray());
                 case "dateTime.iso8601":
                     return DateTime.TryParseExact(primitive.InnerText, "yyyy-MM-ddTHH:mm:ssZ",
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt)
-                        ? (object) dt
-                        : (object) DateTime.MinValue;
+                        ? new XmlRpcValue(dt)
+                        : new XmlRpcValue(DateTime.MinValue);
                 case "base64":
                     try
                     {
-                        return Convert.FromBase64String(primitive.InnerText);
+                        return new XmlRpcValue(Convert.FromBase64String(primitive.InnerText));
                     }
                     catch (FormatException e)
                     {
                         throw new ParseException($"Could not parse '{primitive.InnerText}' as base64!", e);
                     }
                 case "struct":
-                    List<(string, object)> structValue = new List<(string, object)>();
+                    List<(string, XmlRpcValue)> structValue = new();
                     foreach (XmlNode? member in primitive.ChildNodes)
                     {
                         if (member == null || member.Name != "member")
@@ -156,7 +158,7 @@ namespace Iviz.XmlRpc
                         }
 
                         string? entryName = null;
-                        object? entryValue = null;
+                        XmlRpcValue entryValue = default;
                         foreach (XmlNode? entry in member.ChildNodes)
                         {
                             switch (entry?.Name)
@@ -172,7 +174,7 @@ namespace Iviz.XmlRpc
                             }
                         }
 
-                        if (entryName is null || entryValue is null)
+                        if (entryName is null || entryValue.IsEmpty)
                         {
                             Logger.Log("XmlRpc.Service: Invalid struct entry");
                             continue;
@@ -181,13 +183,13 @@ namespace Iviz.XmlRpc
                         structValue.Add((entryName, entryValue));
                     }
 
-                    return structValue;
+                    return new XmlRpcValue(structValue.ToArray());
                 default:
                     throw new ParseException($"Could not parse type '{primitive.Name}'");
             }
         }
-
-        internal static string CreateRequest(string method, Arg[] args)
+        
+        internal static string CreateRequest(string method, XmlRpcArg[] args)
         {
             string[] entries = new string[4 + args.Length * 3];
             entries[0] = "<?xml version=\"1.0\"?>\n" +
@@ -197,7 +199,7 @@ namespace Iviz.XmlRpc
             entries[2] = "</methodName>\n" +
                          "<params>\n";
             int o = 3;
-            foreach (Arg arg in args)
+            foreach (XmlRpcArg arg in args)
             {
                 entries[o++] = "<param>";
                 entries[o++] = arg;
@@ -210,9 +212,9 @@ namespace Iviz.XmlRpc
             return string.Concat(entries);
         }
 
-        internal static object ProcessResponse(string inData)
+        internal static XmlRpcValue ProcessResponse(string inData)
         {
-            XmlDocument document = new XmlDocument();
+            XmlDocument document = new();
             document.LoadXml(inData);
             XmlNode? root = document.FirstChild;
             while (root != null && root.Name != "methodResponse")
@@ -252,7 +254,7 @@ namespace Iviz.XmlRpc
                     throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
             }
         }
-
+        
         /// <summary>
         /// Calls an XML-RPC method. The connection to the server is closed after the call.
         /// </summary>
@@ -264,7 +266,7 @@ namespace Iviz.XmlRpc
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
-        public static async ValueTask<object> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, Arg[] args,
+        public static async ValueTask<XmlRpcValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
             CancellationToken token = default)
         {
             if (remoteUri is null)
@@ -315,7 +317,7 @@ namespace Iviz.XmlRpc
         /// <param name="token">Optional cancellation token</param>
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>        
-        public static object MethodCall(Uri remoteUri, Uri callerUri, string method, Arg[] args,
+        public static XmlRpcValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
             CancellationToken token = default)
         {
             return Task.Run(() => MethodCallAsync(remoteUri, callerUri, method, args, token).AsTask(), token)
@@ -336,8 +338,8 @@ namespace Iviz.XmlRpc
         /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
-            IReadOnlyDictionary<string, Func<object[], Arg[]>> methods,
-            IReadOnlyDictionary<string, Func<object[], CancellationToken, Task>>? lateCallbacks = null,
+            IReadOnlyDictionary<string, Func<XmlRpcValue[], XmlRpcArg[]>> methods,
+            IReadOnlyDictionary<string, Func<XmlRpcValue[], CancellationToken, Task>>? lateCallbacks = null,
             CancellationToken token = default)
         {
             if (httpContext is null)
@@ -362,7 +364,7 @@ namespace Iviz.XmlRpc
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
 
-                Arg response = (Arg) method(args);
+                XmlRpcArg response = (XmlRpcArg) method(args);
 
                 string outData = "<?xml version=\"1.0\"?>\n" +
                                  "<methodResponse>\n" +
@@ -387,7 +389,7 @@ namespace Iviz.XmlRpc
                 string buffer = "<?xml version=\"1.0\"?>\n" +
                                 "<methodResponse>\n" +
                                 "<fault>\n" +
-                                $"{new Arg(e.Message).ToString()}\n" +
+                                $"{new XmlRpcArg(e.Message).ToString()}\n" +
                                 "</fault>\n" +
                                 "</methodResponse>\n";
 
@@ -405,9 +407,9 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static (string methodName, object[] args) ParseResponseXml(string inData)
+        static (string methodName, XmlRpcValue[] args) ParseResponseXml(string inData)
         {
-            XmlDocument document = new XmlDocument();
+            XmlDocument document = new();
             document.LoadXml(inData);
 
             XmlNode? root = document.FirstChild;
@@ -422,7 +424,7 @@ namespace Iviz.XmlRpc
             }
 
             string? methodName = null;
-            object[]? args = null;
+            XmlRpcValue[]? args = null;
             XmlNode? child = root.FirstChild;
             do
             {
@@ -432,15 +434,12 @@ namespace Iviz.XmlRpc
                         throw new ParseException("Expected 'params', 'fault', or 'methodName'; got null instead");
                     case "params":
                     {
-                        args = new object[child.ChildNodes.Count];
+                        args = new XmlRpcValue[child.ChildNodes.Count];
                         for (int i = 0; i < child.ChildNodes.Count; i++)
                         {
                             XmlNode? param = child.ChildNodes[i];
                             Assert(param?.Name, "param");
-                            object? arg = Parse(param?.FirstChild);
-                            args[i] = arg ??
-                                      throw new ParseException(
-                                          $"Could not parse argument '{param?.FirstChild?.InnerText}'");
+                            args[i] = Parse(param?.FirstChild);
                         }
 
                         break;

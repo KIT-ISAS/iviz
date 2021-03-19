@@ -102,6 +102,7 @@ namespace Iviz.Hololens
             }
             catch (Exception e)
             {
+                Debug.Log(e);
                 Logger.Error("Error initializing Hololens Manager", e);
             }
         }

@@ -59,25 +59,17 @@ namespace Iviz.XmlRpc
         }
 
         /// <summary>
-        /// Waits for the task to complete, and throws a timeout exception if it doesn't.
+        /// Waits a given time for the task to complete, and suppresses all exceptions.
         /// Only use this if the async function that generated the task does not support a cancellation token.
         /// </summary>
         /// <param name="task">The task to be awaited</param>
+        /// <param name="caller">The name of the caller, used in the error message</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
-        /// <param name="errorMessage">Optional error message to appear in the timeout exception</param>
         /// <param name="token">An optional cancellation token</param>
-        /// <exception cref="TimeoutException">If the task did not complete in time</exception>
-        public static async Task AwaitForWithTimeout(this Task? task, int timeoutInMs, string? errorMessage = null,
-            CancellationToken token = default)
+        public static async Task AwaitNoThrow(this Task? task, int timeoutInMs, object caller, CancellationToken token = default)
         {
-            if (task == null)
+            if (task == null || task.IsCompleted)
             {
-                return;
-            }
-
-            if (task.IsCompleted)
-            {
-                await task;
                 return;
             }
 
@@ -91,10 +83,14 @@ namespace Iviz.XmlRpc
             using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
 
             Task result = await (task, timeoutTask).WhenAny();
+            
             if (result != task)
             {
-                throw new TimeoutException(errorMessage);
+                Logger.LogErrorFormat("{0}: Task wait timed out");
+                return;
             }
+
+            await task.AwaitNoThrow(caller);
         }
 
 
@@ -181,24 +177,32 @@ namespace Iviz.XmlRpc
 
             return default!;
         }
-
-        public static T WaitNoThrow<T>(this ValueTask<T> t, object caller)
+        
+        public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
         {
+            if (t == null || t.IsCompleted)
+            {
+                return;
+            }
+
             try
             {
-                return t.GetAwaiter().GetResult();
+                t.Wait(timeoutInMs);
             }
             catch (Exception e)
             {
+                if (e is AggregateException && e.InnerException != null)
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e.InnerException);
+                    return;
+                }
+                
                 if (!(e is OperationCanceledException))
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
-
-                return default!;
             }
-        }
-
+        }        
 
         /// <summary>
         /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
@@ -206,7 +210,7 @@ namespace Iviz.XmlRpc
         /// <param name="t">The task to await.</param>
         public static void WaitAndRethrow(this Task? t)
         {
-            if (t == null)
+            if (t == null || t.RanToCompletion())
             {
                 return;
             }
@@ -249,7 +253,7 @@ namespace Iviz.XmlRpc
 
         public static async Task AwaitNoThrow(this Task? t, object caller)
         {
-            if (t == null)
+            if (t == null || t.RanToCompletion())
             {
                 return;
             }

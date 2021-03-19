@@ -97,10 +97,7 @@ namespace Iviz.Roslib
             runningTs.Cancel();
             tcpClient?.Dispose();
 
-            await task
-                .AwaitForWithTimeout(DisposeTimeoutInMs, "Receiver task dispose timed out.", token)
-                .AwaitNoThrow(this);
-
+            await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
             runningTs.Dispose();
         }
 

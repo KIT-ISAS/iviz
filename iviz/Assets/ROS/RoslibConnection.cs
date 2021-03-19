@@ -151,7 +151,7 @@ namespace Iviz.Ros
                     Core.Logger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    (bool success, object hosts) =
+                    (bool success, XmlRpcValue hosts) =
                         await client.Parameters.GetParameterAsync("/iviz/hosts", token).Caf();
                     if (success)
                     {
@@ -233,28 +233,28 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void ParseHostsParam([CanBeNull] object hostsObj)
+        static void ParseHostsParam([CanBeNull] XmlRpcValue hostsObj)
         {
             try
             {
-                if (hostsObj == null)
+                if (hostsObj.IsEmpty)
                 {
                     return;
                 }
 
-                if (!(hostsObj is object[] array))
+                if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
                 {
                     Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
                     return;
                 }
 
                 Dictionary<string, string> hosts = new Dictionary<string, string>();
-                foreach (object entry in array)
+                foreach (XmlRpcValue entry in array)
                 {
-                    if (!(entry is object[] pair) ||
+                    if (!entry.TryGetArray(out XmlRpcValue[] pair) ||
                         pair.Length != 2 ||
-                        !(pair[0] is string hostname) ||
-                        !(pair[1] is string address))
+                        !pair[0].TryGetString(out string hostname) ||
+                        !pair[1].TryGetString(out string address))
                     {
                         Core.Logger.Error(
                             "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
@@ -381,7 +381,7 @@ namespace Iviz.Ros
         static Task DelayByPlatform(CancellationToken token) => Settings.IsHololens
             ? Task.Delay(Random.Next(0, 1000), token)
             : Task.CompletedTask;
-        
+
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
@@ -904,7 +904,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        public async ValueTask<(object result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
+        public async ValueTask<(XmlRpcValue result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
@@ -914,7 +914,7 @@ namespace Iviz.Ros
 
             if (token.IsCancellationRequested)
             {
-                return (null, "Cancellation requested");
+                return (default, "Cancellation requested");
             }
 
             using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
@@ -925,29 +925,30 @@ namespace Iviz.Ros
                 {
                     if (client?.Parameters == null)
                     {
-                        return (null, "Not connected");
+                        return (default, "Not connected");
                     }
 
-                    var (success, param) = await client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
+                    (bool success, XmlRpcValue param) =
+                        await client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
                     if (!success)
                     {
-                        return (null, $"'{parameter}' not found");
+                        return (default, $"'{parameter}' not found");
                     }
 
                     return (param, null);
                 }
                 catch (OperationCanceledException)
                 {
-                    return (null, "Operation timed out");
+                    return (default, "Operation timed out");
                 }
                 catch (XmlRpcException)
                 {
-                    return (null, "Failed to read parameter");
+                    return (default, "Failed to read parameter");
                 }
                 catch (Exception e)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
-                    return (null, "Unknown error");
+                    return (default, "Unknown error");
                 }
             }
         }
