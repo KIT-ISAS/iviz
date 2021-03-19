@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -13,20 +14,25 @@ namespace Iviz.Roslib
 {
     internal sealed class TcpSenderManager<TMessage> where TMessage : IMessage
     {
-        const int NewSenderTimeoutInMs = 1000;
         const int DefaultTimeoutInMs = 5000;
 
-        readonly ConcurrentDictionary<string, TcpSenderAsync<TMessage>> connectionsByCallerId =
-            new();
-
+        readonly ConcurrentSet<TcpSenderAsync<TMessage>> senders = new();
         readonly RosPublisher<TMessage> publisher;
         readonly TopicInfo<TMessage> topicInfo;
+        readonly CancellationTokenSource tokenSource = new();
+        readonly TcpListener listener;
+        readonly Task task;
+
+        NullableMessage<TMessage> latchedMessage;
+
+        bool KeepRunning => !tokenSource.IsCancellationRequested;
+
         int maxQueueSizeInBytes;
-
         bool latching;
-        readonly Nullable<TMessage> latchedMessage = new ();
-
         bool forceTcpNoDelay;
+        bool disposed;
+
+        public Endpoint Endpoint => new((IPEndPoint) listener.LocalEndpoint);
 
         public bool ForceTcpNoDelay
         {
@@ -39,30 +45,17 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                foreach (var pair in connectionsByCallerId)
+                foreach (var sender in senders)
                 {
-                    pair.Value.TcpNoDelay = true;
+                    sender.TcpNoDelay = true;
                 }
             }
-        }
-
-        public TcpSenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
-        {
-            this.publisher = publisher;
-            this.topicInfo = topicInfo;
         }
 
         public string Topic => topicInfo.Topic;
         public string TopicType => topicInfo.Type;
 
-        public int NumConnections
-        {
-            get
-            {
-                TryToCleanup(default).WaitNoThrow(this);
-                return connectionsByCallerId.Count;
-            }
-        }
+        public int NumConnections => senders.Count(sender => sender.IsAlive);
 
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
@@ -72,7 +65,7 @@ namespace Iviz.Roslib
             set
             {
                 latching = value;
-                latchedMessage.Unset();
+                latchedMessage = default;
             }
         }
 
@@ -87,97 +80,98 @@ namespace Iviz.Roslib
                 }
 
                 maxQueueSizeInBytes = value;
-                foreach (TcpSenderAsync<TMessage> sender in connectionsByCallerId.Values)
+                foreach (TcpSenderAsync<TMessage> sender in senders)
                 {
                     sender.MaxQueueSizeInBytes = value;
                 }
             }
         }
 
-        public Endpoint? CreateConnectionRpc(string remoteCallerId)
+        public TcpSenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
         {
-            // while we're here
-            Task cleanupTask = TryToCleanup(default);
+            this.publisher = publisher;
+            this.topicInfo = topicInfo;
 
-            Logger.LogDebugFormat("{0}: '{1}' is requesting {2}", this, remoteCallerId, Topic);
-            TcpSenderAsync<TMessage> newSender; //= new(remoteCallerId, topicInfo, Latching);
+            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
+            listener.Start();
 
-            using (SemaphoreSlim managerSignal = new(0))
-            {
-                newSender =
-                    new TcpSenderAsync<TMessage>(remoteCallerId, topicInfo, Latching, TimeoutInMs, managerSignal);
-                //endPoint = newSender.Start(TimeoutInMs, managerSignal);
+            task = TaskUtils.StartLongTask(RunLoop);
 
-                connectionsByCallerId.AddOrUpdate(remoteCallerId, newSender, (_, oldSender) =>
-                {
-                    // in case of double requests, we kill the old connection
-                    // this happens if our uri is set multiple times because a previous client did not
-                    // shut down gracefully
-
-                    Logger.LogDebugFormat("{0}: '{1}' duplicate.\n--Retaining \t{2}\n--Killing \t{3}",
-                        this, oldSender.RemoteCallerId, newSender, oldSender);
-                    return newSender;
-                });
-
-                // wait until newSender is ready to accept
-                // should last only a couple of ms
-                if (!managerSignal.Wait(NewSenderTimeoutInMs))
-                {
-                    // or maybe not. either the requester took too long, or did a double request,
-                    // and this is the one that got killed
-                    Logger.LogFormat("{0}: Sender start timed out!", this);
-                }
-            }
-
-            if (Latching && latchedMessage.HasValue)
-            {
-                newSender.Publish(latchedMessage.Value);
-            }
-
-            newSender.MaxQueueSizeInBytes = MaxQueueSizeInBytes;
-            publisher.RaiseNumConnectionsChanged();
-
-            cleanupTask.WaitNoThrow(this);
-
-            // return null if this connection got killed, which gets translated later as an error response
-            //return !newSender.IsAlive ? null : endPoint;
-            return !newSender.IsAlive ? null : newSender.Endpoint;
+            Logger.LogDebugFormat("{0}: Starting at :{1}", this, Endpoint.Port.ToString());
         }
 
-        Task TryToCleanup(CancellationToken token)
+
+        async Task RunLoop()
         {
-            var toDelete = connectionsByCallerId.Values.Where(sender => !sender.IsAlive).ToArray();
-            if (toDelete.Length == 0)
+            try
             {
-                return Task.CompletedTask;
+                while (KeepRunning)
+                {
+                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    if (!KeepRunning)
+                    {
+                        break;
+                    }
+
+                    if (client.Client.RemoteEndPoint == null || client.Client.LocalEndPoint == null)
+                    {
+                        Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
+                        continue;
+                    }
+
+                    senders.Add(new TcpSenderAsync<TMessage>(client, topicInfo, latchedMessage));
+                    await CleanupAsync(tokenSource.Token);
+                }
+            }
+            catch (Exception e)
+            {
+                if (!(e is ObjectDisposedException || e is OperationCanceledException))
+                {
+                    Logger.LogFormat("{0}: Stopped thread {1}", this, e);
+                }
+
+                return;
             }
 
-            return Task.Run(async () =>
-            {
-                var tasks = toDelete.Select(async sender =>
-                {
-                    await sender.DisposeAsync(token).AwaitNoThrow(this);
-                    if (connectionsByCallerId.RemovePair(sender.RemoteCallerId, sender))
-                    {
-                        Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
-                    }
-                });
-                await tasks.WhenAll().AwaitNoThrow(this);
+            Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
+        }
 
-                publisher.RaiseNumConnectionsChanged();
-            }, token);
+        async Task CleanupAsync(CancellationToken token)
+        {
+            if (senders.Count == 0)
+            {
+                return;
+            }
+            
+            var toDelete = senders.Where(sender => !sender.IsAlive).ToArray();
+            if (toDelete.Length == 0)
+            {
+                return;
+            }
+
+            var tasks = toDelete.Select(async sender =>
+            {
+                await sender.DisposeAsync(token).AwaitNoThrow(this);
+                if (senders.Remove(sender))
+                {
+                    Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
+                }
+            });
+            await tasks.WhenAll().AwaitNoThrow(this);
+
+            publisher.RaiseNumConnectionsChanged();
         }
 
         public void Publish(in TMessage msg)
         {
             if (Latching)
             {
-                latchedMessage.Value = msg;
+                latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            foreach (var pair in connectionsByCallerId)
+            foreach (var pair in senders)
             {
-                pair.Value.Publish(msg);
+                pair.Publish(msg);
             }
         }
 
@@ -185,69 +179,72 @@ namespace Iviz.Roslib
         {
             if (Latching)
             {
-                latchedMessage.Value = msg;
+                latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            if (connectionsByCallerId.IsEmpty)
+            if (senders.Count == 0)
             {
                 return false;
             }
 
-            await connectionsByCallerId
-                .Select(pair => pair.Value.PublishAndWaitAsync(msg, token))
-                .WhenAll();
+            await senders.Select(pair => pair.PublishAndWaitAsync(msg, token)).WhenAll();
             return true;
         }
 
-        public void Stop()
+        public void Dispose()
         {
-            Task.Run(() => StopAsync(default)).WaitNoThrow(this);
+            Task.Run(() => DisposeAsync(default)).WaitNoThrow(this);
         }
 
-        public async Task StopAsync(CancellationToken token)
+        public async Task DisposeAsync(CancellationToken token)
         {
-            await connectionsByCallerId.Values.Select(sender => sender.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
-            connectionsByCallerId.Clear();
-            latchedMessage.Unset();
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            tokenSource.Cancel();
+
+            using (TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
+            {
+                await client.ConnectAsync(IPAddress.Loopback, Endpoint.Port);
+            }
+
+            listener.Stop();
+            if (!await task.AwaitFor(2000, token))
+            {
+                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
+            }
+
+            await senders.Select(sender => sender.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
+            senders.Clear();
+            latchedMessage = default;
         }
 
         public ReadOnlyCollection<PublisherSenderState> GetStates()
         {
             return new(
-                connectionsByCallerId.Values.Select(sender => sender.State).ToArray()
+                senders.Select(sender => sender.State).ToArray()
             );
         }
 
         public ReadOnlyCollection<IRosTcpSender> GetConnections()
         {
-            return connectionsByCallerId.Values.Cast<IRosTcpSender>().ToArray().AsReadOnly();
+            return senders.Cast<IRosTcpSender>().ToArray().AsReadOnly();
         }
 
         public override string ToString()
         {
             return $"[TcpSenderManager '{Topic}']";
         }
-
-        class Nullable<T>
-        {
-            T? element;
-            public bool HasValue { get; private set; }
-
-            public T Value
-            {
-                get => HasValue ? element! : throw new NullReferenceException();
-                set
-                {
-                    element = value ?? throw new ArgumentNullException(nameof(value));
-                    HasValue = true;
-                }
-            }
-
-            public void Unset()
-            {
-                element = default;
-                HasValue = false;
-            }
-        }
+    }
+    
+    internal readonly struct NullableMessage<T> where T : IMessage
+    {
+        readonly T? element;
+        public bool HasValue { get; }
+        public T Value => HasValue ? element! : throw new NullReferenceException();
+        public NullableMessage(T? element) => (this.element, HasValue) = (element, true);
     }
 }

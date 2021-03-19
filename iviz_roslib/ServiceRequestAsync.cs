@@ -176,20 +176,20 @@ namespace Iviz.Roslib
                 };
             }
 
-            await stream.WriteHeaderAsync(contents, runningTs.Token).Caf();
+            await stream.WriteHeaderAsync(contents, runningTs.Token);
         }
 
         async Task ProcessHandshake(NetworkStream stream)
         {
             List<string> fields;
-            using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
+            using (var readBuffer = await ReceivePacket(stream, runningTs.Token))
             {
                 fields = BaseUtils.ParseHeader(readBuffer);
             }
 
             string? errorMessage = ProcessRemoteHeader(fields);
 
-            await SendHeader(stream, errorMessage).Caf();
+            await SendHeader(stream, errorMessage);
 
             if (errorMessage != null)
             {
@@ -203,7 +203,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await ProcessHandshake(stream).Caf();
+                await ProcessHandshake(stream);
             }
             catch (Exception e)
             {
@@ -231,7 +231,7 @@ namespace Iviz.Roslib
                 try
                 {
                     TService serviceMsg;
-                    using (var readBuffer = await ReceivePacket(stream, runningTs.Token).Caf())
+                    using (var readBuffer = await ReceivePacket(stream, runningTs.Token))
                     {
                         serviceMsg = (TService) serviceInfo.Generator.Create();
                         serviceMsg.Request =
@@ -284,17 +284,17 @@ namespace Iviz.Roslib
                         WriteHeader(writeBuffer.Array, resultStatus, msgLength);
                         Buffer.Serialize(responseMsg, writeBuffer.Array, 5);
 
-                        await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Length, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Length, runningTs.Token);
                     }
                     else
                     {
                         byte[] statusByte = {resultStatus};
-                        await stream.WriteChunkAsync(statusByte, 1, runningTs.Token).Caf();
-                        await stream.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token)
-                            .Caf();
+                        await stream.WriteChunkAsync(statusByte, 1, runningTs.Token);
+                        await stream.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token);
+                            
 
                         byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
-                        await stream.WriteChunkAsync(tmpBuffer, tmpBuffer.Length, runningTs.Token).Caf();
+                        await stream.WriteChunkAsync(tmpBuffer, tmpBuffer.Length, runningTs.Token);
                     }
                 }
                 catch (Exception e)

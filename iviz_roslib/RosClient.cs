@@ -581,7 +581,7 @@ namespace Iviz.Roslib
         /// </summary>
         public async Task EnsureCleanSlateAsync(CancellationToken token = default)
         {
-            SystemState state = await GetSystemStateAsync(token).Caf();
+            SystemState state = await GetSystemStateAsync(token);
             List<Task> tasks = new();
             tasks.AddRange(
                 state.Subscribers
@@ -597,7 +597,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await tasks.WhenAll().Caf();
+                await tasks.WhenAll();
             }
             catch (Exception e)
             {
@@ -694,7 +694,7 @@ namespace Iviz.Roslib
             RegisterSubscriberResponse masterResponse;
             try
             {
-                masterResponse = await RosMasterApi.RegisterSubscriberAsync(topic, topicInfo.Type, token).Caf();
+                masterResponse = await RosMasterApi.RegisterSubscriberAsync(topic, topicInfo.Type, token);
             }
             catch (Exception e)
             {
@@ -838,7 +838,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <param name="token">An optional cancellation token</param>
         /// <returns>A pair containing a token that can be used to unsubscribe from this topic, and the subscriber object.</returns>
-        public async ValueTask<(string id, RosSubscriber<T> subscriber)>
+        public ValueTask<(string id, RosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
                 CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new()
@@ -851,13 +851,13 @@ namespace Iviz.Roslib
             string resolvedTopic = ResolveResourceName(topic);
             if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
-                return await CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, token).Caf();
+                return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, token);
             }
 
             var newSubscriber = baseSubscriber as RosSubscriber<T>;
             RosSubscriber<T> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
                 $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
-            return (subscriber.Subscribe(callback), subscriber);
+            return new((subscriber.Subscribe(callback), subscriber));
         }
 
         async ValueTask<(string id, IRosSubscriber<T> subscriber)>
@@ -895,7 +895,7 @@ namespace Iviz.Roslib
             }
 
             var subscriber = subscribersByTopic.Values.FirstOrDefault(s => s.ContainsId(topicId));
-            return subscriber != null && await subscriber.UnsubscribeAsync(topicId).Caf();
+            return subscriber != null && await subscriber.UnsubscribeAsync(topicId);
         }
 
         internal void RemoveSubscriber(IRosSubscriber subscriber)
@@ -907,7 +907,7 @@ namespace Iviz.Roslib
         internal async Task RemoveSubscriberAsync(IRosSubscriber subscriber, CancellationToken token)
         {
             subscribersByTopic.TryRemove(subscriber.Topic, out _);
-            await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, token).Caf();
+            await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, token);
         }
 
         /// <summary>
@@ -996,7 +996,7 @@ namespace Iviz.Roslib
             RegisterPublisherResponse? response;
             try
             {
-                response = await RosMasterApi.RegisterPublisherAsync(topic, topicInfo.Type, token).Caf();
+                response = await RosMasterApi.RegisterPublisherAsync(topic, topicInfo.Type, token);
             }
             catch (Exception e)
             {
@@ -1068,7 +1068,7 @@ namespace Iviz.Roslib
             RosPublisher<T> publisher;
             if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
             {
-                publisher = (RosPublisher<T>) await CreatePublisherAsync<T>(resolvedTopic, token).Caf();
+                publisher = (RosPublisher<T>) await CreatePublisherAsync<T>(resolvedTopic, token);
             }
             else
             {
@@ -1198,9 +1198,9 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(topicId));
             }
 
-            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(publ => publ.ContainsId(topicId));
+            IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
-            return publisher != null && await publisher.UnadvertiseAsync(topicId).Caf();
+            return publisher != null && await publisher.UnadvertiseAsync(topicId);
         }
 
         internal async Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
@@ -1262,7 +1262,7 @@ namespace Iviz.Roslib
         public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
             CancellationToken token = default)
         {
-            var response = await RosMasterApi.GetPublishedTopicsAsync(token: token).Caf();
+            var response = await RosMasterApi.GetPublishedTopicsAsync(token: token);
             if (!response.IsValid)
             {
                 throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
@@ -1299,7 +1299,7 @@ namespace Iviz.Roslib
         public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
             CancellationToken token = default)
         {
-            var response = await RosMasterApi.GetTopicTypesAsync(token: token).Caf();
+            var response = await RosMasterApi.GetTopicTypesAsync(token: token);
             if (!response.IsValid)
             {
                 throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
@@ -1339,7 +1339,7 @@ namespace Iviz.Roslib
         /// <returns>List of advertised topics, subscribed topics, and offered services, together with the involved nodes.</returns>
         public async ValueTask<SystemState> GetSystemStateAsync(CancellationToken token = default)
         {
-            var response = await RosMasterApi.GetSystemStateAsync(token).Caf();
+            var response = await RosMasterApi.GetSystemStateAsync(token);
             if (!response.IsValid)
             {
                 throw new RosRpcException($"Failed to retrieve system state: {response.StatusMessage}");
@@ -1377,7 +1377,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await subscriber.PublisherUpdateRcpAsync(publishers, token).Caf();
+                await subscriber.PublisherUpdateRcpAsync(publishers, token);
             }
             catch (OperationCanceledException)
             {
@@ -1398,15 +1398,7 @@ namespace Iviz.Roslib
                 return null;
             }
 
-            try
-            {
-                return publisher.RequestTopicRpc(remoteCallerId);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("EE {0}: RequestTopicRpc failed: {1}", this, e);
-                return null;
-            }
+            return publisher.RequestTopicRpc();
         }
 
         /// <summary>
@@ -1440,8 +1432,8 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, publishers.Select(async publisher =>
             {
-                await publisher.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this).Caf();
+                await publisher.DisposeAsync(innerToken).AwaitNoThrow(this);
+                await RosMasterApi.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this);
             }));
 
             var subscribers = subscribersByTopic.Values.ToArray();
@@ -1449,8 +1441,8 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, subscribers.Select(async subscriber =>
             {
-                await subscriber.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
-                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this).Caf();
+                await subscriber.DisposeAsync(innerToken).AwaitNoThrow(this);
+                await RosMasterApi.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this);
             }));
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
@@ -1466,14 +1458,14 @@ namespace Iviz.Roslib
 
             EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
-                await senderManager.DisposeAsync(innerToken).AwaitNoThrow(this).Caf();
+                await senderManager.DisposeAsync(innerToken).AwaitNoThrow(this);
                 await RosMasterApi
                     .UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
-                    .AwaitNoThrow(this).Caf();
+                    .AwaitNoThrow(this);
             }));
 
             Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
-            Task finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny().Caf();
+            Task finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
             if (finalTask == timeoutTask)
             {
                 Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
@@ -1603,7 +1595,7 @@ namespace Iviz.Roslib
             using CancellationTokenSource timeoutTs = new(timeoutInMs);
             try
             {
-                return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token).Caf();
+                return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1616,7 +1608,7 @@ namespace Iviz.Roslib
             where TT : IService, new() where TU : IResponse
         {
             TT service = new() {Request = request};
-            await CallServiceAsync(serviceName, service, persistent, token).Caf();
+            await CallServiceAsync(serviceName, service, persistent, token);
             return (TU) service.Response;
         }
 
@@ -1661,7 +1653,7 @@ namespace Iviz.Roslib
                     // is there a persistent connection? use it
                     try
                     {
-                        await existingReceiver.ExecuteAsync(service, token).Caf();
+                        await existingReceiver.ExecuteAsync(service, token);
                         return service;
                     }
                     catch (Exception e)
@@ -1674,7 +1666,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token).Caf();
+            LookupServiceResponse response = await RosMasterApi.LookupServiceAsync(resolvedServiceName, token);
             if (!response.IsValid)
             {
                 throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
@@ -1688,8 +1680,8 @@ namespace Iviz.Roslib
                 try
                 {
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
-                    await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
-                    await serviceCaller.ExecuteAsync(service, token).Caf();
+                    await serviceCaller.StartAsync(serviceUri, persistent, token);
+                    await serviceCaller.ExecuteAsync(service, token);
                     return service;
                 }
                 catch (Exception e)
@@ -1704,8 +1696,8 @@ namespace Iviz.Roslib
             try
             {
                 using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
-                await serviceCaller.StartAsync(serviceUri, persistent, token).Caf();
-                await serviceCaller.ExecuteAsync(service, token).Caf();
+                await serviceCaller.StartAsync(serviceUri, persistent, token);
+                await serviceCaller.ExecuteAsync(service, token);
                 return service;
             }
             catch (Exception e) when (!(e is OperationCanceledException || e is RosServiceCallFailed))
@@ -1793,7 +1785,7 @@ namespace Iviz.Roslib
 
             try
             {
-                await RosMasterApi.RegisterServiceAsync(resolvedServiceName, advertisedService.Uri, token).Caf();
+                await RosMasterApi.RegisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
             }
             catch (Exception e)
             {

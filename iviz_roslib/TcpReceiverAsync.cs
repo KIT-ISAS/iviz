@@ -309,8 +309,7 @@ namespace Iviz.Roslib
 
                 TcpClient? newTcpClient = await KeepReconnecting();
                 IPEndPoint? newEndPoint;
-                if (newTcpClient == null
-                    || (newEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
+                if (newTcpClient == null)
                 {
                     Logger.LogDebugFormat(KeepRunning
                             ? "{0}: Ran out of retries. Leaving!"
@@ -318,6 +317,14 @@ namespace Iviz.Roslib
                         this);
                     break;
                 }
+
+                if ((newEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
+                {
+                    Logger.LogDebugFormat( "{0}: Connection interrupted! Getting out.", this);
+                    break;                    
+                }
+                
+                
 
                 Endpoint = new Endpoint(newEndPoint);
                 Logger.LogDebugFormat("{0}: Connected!", this);
@@ -335,15 +342,15 @@ namespace Iviz.Roslib
                 {
                     switch (e)
                     {
-                        case ObjectDisposedException _:
-                        case OperationCanceledException _:
+                        case ObjectDisposedException:
+                        case OperationCanceledException:
                             break;
-                        case IOException _:
-                        case SocketException _:
-                        case TimeoutException _:
+                        case IOException:
+                        case SocketException:
+                        case TimeoutException:
                             Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                             break;
-                        case RoslibException _:
+                        case RoslibException:
                             errorDescription = e.Message;
                             Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
                             break;
@@ -407,13 +414,13 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += fixedSizeWithHeader;
 
-                if (IsPaused)
+                if (!IsPaused)
                 {
-                    continue;
+                    T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
+                    manager.MessageCallback(message, this);
                 }
 
-                T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
-                manager.MessageCallback(message, this);
+                await Task.Yield();
             }
         }
 
@@ -449,6 +456,8 @@ namespace Iviz.Roslib
                     T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
                     manager.MessageCallback(message, this);
                 }
+
+                await Task.Yield();
             }
         }
 

@@ -267,9 +267,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="token">A cancellation token that makes the function stop blocking when cancelled. If not provided, waits indefinitely.</param>
         /// <returns>False if the channel has been disposed</returns>
-        public async ValueTask<bool> WaitToReadAsync(CancellationToken token = default)
+        public ValueTask<bool> WaitToReadAsync(CancellationToken token = default)
         {
-            return await messageQueue.OutputAvailableAsync(token);
+            return new(messageQueue.OutputAvailableAsync(token));
         }
 
 
@@ -341,10 +341,10 @@ namespace Iviz.Roslib
         /// <returns>The message that arrived.</returns>
         /// <exception cref="OperationCanceledException">Thrown if the token is canceled</exception>
         /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-        public async ValueTask<T> ReadAsync(CancellationToken token = default)
+        public ValueTask<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return await messageQueue.TakeAsync(token);
+            return new ValueTask<T>(messageQueue.TakeAsync(token));
         }
 
 

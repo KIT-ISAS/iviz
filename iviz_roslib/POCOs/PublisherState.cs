@@ -7,7 +7,6 @@ namespace Iviz.Roslib
     public sealed class PublisherSenderState : JsonToString
     {
         public bool IsAlive { get; internal set; }
-        public bool Latching { get; internal set; }
         public SenderStatus Status { get; internal set; }
         public Endpoint? Endpoint { get; internal set; }
         public string RemoteId { get; internal set; } = "";

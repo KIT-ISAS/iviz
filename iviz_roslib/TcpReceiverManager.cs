@@ -105,7 +105,7 @@ namespace Iviz.Roslib
             NodeClient.RequestTopicResponse response;
             try
             {
-                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic, token).Caf();
+                response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic, token);
             }
             catch (Exception e)
             {
@@ -153,7 +153,7 @@ namespace Iviz.Roslib
         {
             try
             {
-                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token).Caf();
+                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token);
                 CreateConnection(remoteEndpoint, remoteUri);
                 return true;
             }
@@ -195,7 +195,7 @@ namespace Iviz.Roslib
                     .ToArray();
 
                 var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
-                await deleteTasks.WhenAll().AwaitNoThrow(this).Caf();
+                await deleteTasks.WhenAll().AwaitNoThrow(this);
 
                 var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
                 bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this);
@@ -228,7 +228,7 @@ namespace Iviz.Roslib
                 return receiver.DisposeAsync(token);
             });
 
-            await tasks.WhenAll().AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this);
 
             return true;
         }

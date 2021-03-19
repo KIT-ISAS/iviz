@@ -120,10 +120,10 @@ namespace Iviz.Roslib
         /// </summary>
         public bool ForceTcpNoDelay { get; set; }
 
-        internal Endpoint? RequestTopicRpc(string remoteCallerId);
+        internal Endpoint? RequestTopicRpc();
         
         /// <summary>
-        /// Async version of Dispose(), for NET Core 2.0 where IAsyncDisposable is not available.
+        /// Async version of Dispose(), for NET Standard 2.0 where IAsyncDisposable is not available.
         /// </summary>
         /// <returns>The awaitable dispose task.</returns>
         Task DisposeAsync(CancellationToken token);

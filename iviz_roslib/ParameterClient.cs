@@ -49,7 +49,7 @@ namespace Iviz.Roslib.XmlRpc
             }
 
             value.ThrowIfEmpty();
-            return (await SetParamAsync(key, value, token).Caf()).IsValid;
+            return (await SetParamAsync(key, value, token)).IsValid;
         }
 
         public bool GetParameter(string key, out XmlRpcValue value)
@@ -73,7 +73,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            var response = await GetParamAsync(key, token).Caf();
+            var response = await GetParamAsync(key, token);
             bool success = response.IsValid;
             return (success, success ? response.ParameterValue : default);
         }
@@ -91,7 +91,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public async ValueTask<ReadOnlyCollection<string>> GetParameterNamesAsync(CancellationToken token = default)
         {
-            var response = await GetParamNamesAsync(token).Caf();
+            var response = await GetParamNamesAsync(token);
             if (response.IsValid)
             {
                 return response.ParameterNameList!;
@@ -118,7 +118,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await DeleteParamAsync(key, token).Caf()).IsValid;
+            return (await DeleteParamAsync(key, token)).IsValid;
         }
 
         public bool HasParameter(string key)
@@ -138,7 +138,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await HasParamAsync(key, token).Caf()).HasParam;
+            return (await HasParamAsync(key, token)).HasParam;
         }
 
         public bool SubscribeParameter(string key)
@@ -158,7 +158,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await SubscribeParamAsync(key, token).Caf()).IsValid;
+            return (await SubscribeParamAsync(key, token)).IsValid;
         }
 
         public bool UnsubscribeParameter(string key)
@@ -178,7 +178,7 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(key));
             }
 
-            return (await UnsubscribeParamAsync(key, token).Caf()).IsValid;
+            return (await UnsubscribeParamAsync(key, token)).IsValid;
         }
 
         DefaultResponse DeleteParam(string key)
@@ -191,7 +191,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<DefaultResponse> DeleteParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key};
-            var response = await MethodCallAsync("deleteParam", args, token).Caf();
+            var response = await MethodCallAsync("deleteParam", args, token);
             return new DefaultResponse(response);
         }
 
@@ -205,7 +205,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<DefaultResponse> SetParamAsync(string key, XmlRpcArg value, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key, value};
-            var response = await MethodCallAsync("setParam", args, token).Caf();
+            var response = await MethodCallAsync("setParam", args, token);
             return new DefaultResponse(response);
         }
 
@@ -219,7 +219,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<GetParamResponse> GetParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key};
-            var response = await MethodCallAsync("getParam", args, token).Caf();
+            var response = await MethodCallAsync("getParam", args, token);
             return new GetParamResponse(response);
         }
 
@@ -233,7 +233,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<SearchParamResponse> SearchParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key};
-            var response = await MethodCallAsync("searchParam", args, token).Caf();
+            var response = await MethodCallAsync("searchParam", args, token);
             return new SearchParamResponse(response);
         }
 
@@ -248,7 +248,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<SubscribeParamResponse> SubscribeParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key, CallerUri};
-            var response = await MethodCallAsync("subscribeParam", args, token).Caf();
+            var response = await MethodCallAsync("subscribeParam", args, token);
             return new SubscribeParamResponse(response);
         }
 
@@ -262,7 +262,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<UnsubscribeParamResponse> UnsubscribeParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key, CallerUri};
-            var response = await MethodCallAsync("unsubscribeParam", args, token).Caf();
+            var response = await MethodCallAsync("unsubscribeParam", args, token);
             return new UnsubscribeParamResponse(response);
         }
 
@@ -276,7 +276,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<HasParamResponse> HasParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key};
-            var response = await MethodCallAsync("hasParam", args, token).Caf();
+            var response = await MethodCallAsync("hasParam", args, token);
             return new HasParamResponse(response);
         }
 
@@ -290,7 +290,7 @@ namespace Iviz.Roslib.XmlRpc
         async ValueTask<GetParamNamesResponse> GetParamNamesAsync(CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId};
-            var response = await MethodCallAsync("getParamNames", args, token).Caf();
+            var response = await MethodCallAsync("getParamNames", args, token);
             return new GetParamNamesResponse(response);
         }
 

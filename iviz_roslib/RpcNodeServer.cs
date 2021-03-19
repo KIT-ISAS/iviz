@@ -106,8 +106,8 @@ namespace Iviz.Roslib.XmlRpc
             }
             finally
             {
-                await listener.AwaitRunningTasks().Caf();
-                Logger.LogDebugFormat("{0}: Leaving thread", this);
+                await listener.AwaitRunningTasks();
+                Logger.LogDebugFormat("{0}: Leaving task", this);
             }
         }
 
@@ -116,7 +116,7 @@ namespace Iviz.Roslib.XmlRpc
             using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             try
             {
-                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token).Caf();
+                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, linkedTs.Token);
             }
             catch (OperationCanceledException)
             {
@@ -266,7 +266,7 @@ namespace Iviz.Roslib.XmlRpc
 
             try
             {
-                await client.PublisherUpdateRcpAsync(topic, publisherUris, token).Caf();
+                await client.PublisherUpdateRcpAsync(topic, publisherUris, token);
             }
             catch (OperationCanceledException)
             {

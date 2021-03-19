@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource runningTs = new();
         bool disposed;
         int totalPublishers;
-        
+
         internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;
@@ -158,10 +158,9 @@ namespace Iviz.Roslib
             }
         }
 
-        Endpoint? IRosPublisher.RequestTopicRpc(string remoteCallerId)
+        Endpoint? IRosPublisher.RequestTopicRpc()
         {
-            Endpoint? localEndpoint = manager.CreateConnectionRpc(remoteCallerId);
-            return localEndpoint == null ? null : new Endpoint(client.CallerUri.Host, localEndpoint.Value.Port);
+            return disposed ? null : new Endpoint(client.CallerUri.Host, manager.Endpoint.Port);
         }
 
         void IDisposable.Dispose()
@@ -179,7 +178,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
-            await manager.StopAsync(token).AwaitNoThrow(this);
+            await manager.DisposeAsync(token).AwaitNoThrow(this);
             NumSubscribersChanged = null;
             runningTs.Dispose();
         }
@@ -194,11 +193,11 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
-            manager.Stop();
+            manager.Dispose();
             NumSubscribersChanged = null;
             runningTs.Dispose();
-        }        
-        
+        }
+
         public string Advertise()
         {
             AssertIsAlive();
@@ -236,7 +235,7 @@ namespace Iviz.Roslib
 
             if (ids.Count == 0)
             {
-                await RemovePublisherAsync(token).Caf();
+                await RemovePublisherAsync(token);
             }
 
             return removed;
@@ -246,7 +245,7 @@ namespace Iviz.Roslib
         {
             Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
             Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-            await (disposeTask, unadvertiseTask).WhenAll().Caf();            
+            await (disposeTask, unadvertiseTask).WhenAll();
         }
 
         public bool ContainsId(string id)
@@ -263,7 +262,7 @@ namespace Iviz.Roslib
         {
             return type == typeof(T);
         }
-        
+
         /// <summary>
         ///     Called when the number of subscribers has changed.
         /// </summary>

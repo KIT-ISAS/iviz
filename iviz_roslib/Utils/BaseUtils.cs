@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -92,17 +94,6 @@ namespace Iviz.Roslib.Utils
             return new(t);
         }
 
-        public static bool RemovePair<TT, TU>(this ConcurrentDictionary<TT, TU> dictionary, TT t, TU u)
-            where TT : notnull
-        {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-
-            return ((ICollection<KeyValuePair<TT, TU>>) dictionary).Remove(new KeyValuePair<TT, TU>(t, u));
-        }
-
         public static int Sum<T>(this T[] ts, Func<T, int> selector)
         {
             int sum = 0;
@@ -151,7 +142,7 @@ namespace Iviz.Roslib.Utils
         }
 
         /// <summary>
-        ///     A string hash that does not change every run unlike <see cref="string.GetHashCode"/>
+        ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
         /// </summary>
         /// <param name="str">String to calculate the hash from</param>
         /// <returns>A hash integer</returns>
@@ -199,7 +190,18 @@ namespace Iviz.Roslib.Utils
         public static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
         {
             UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
-            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort}/");
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort.ToString()}/");
         }
     }
+    
+    public sealed class ConcurrentSet<T> : IEnumerable<T> where T : notnull 
+    {
+        readonly ConcurrentDictionary<T, object?> backend = new();
+        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Add(T s) => backend[s] = null;
+        public bool Remove(T s) => backend.TryRemove(s, out _);
+        public int Count => backend.Count;
+        public void Clear() => backend.Clear();
+    }    
 }

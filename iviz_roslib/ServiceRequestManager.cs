@@ -33,10 +33,9 @@ namespace Iviz.Roslib
             listener.Start();
 
             IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
-            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port}/");
+            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port.ToString()}/");
 
-            Logger.LogDebugFormat("{0}: Starting {1} [{2}] at {3}",
-                this, serviceInfo.Service, serviceInfo.Type, Uri);
+            Logger.LogDebugFormat("{0}: Starting!", this);
 
             task = TaskUtils.StartLongTask(RunLoop);
         }
@@ -52,15 +51,14 @@ namespace Iviz.Roslib
             {
                 while (KeepRunning)
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync().Caf();
+                    TcpClient client = await listener.AcceptTcpClientAsync();
                     if (!KeepRunning)
                     {
                         break;
                     }
 
                     IPEndPoint? endPoint;
-                    if (client == null
-                        || (endPoint = (IPEndPoint?) client.Client.RemoteEndPoint) == null)
+                    if ((endPoint = (IPEndPoint?) client.Client.RemoteEndPoint) == null)
                     {
                         Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
                         continue;
@@ -82,7 +80,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            Logger.LogDebugFormat("{0}: Leaving thread (normally)", this); // also expected
+            Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
         }
 
         async Task CleanupAsync(CancellationToken token)
@@ -92,10 +90,10 @@ namespace Iviz.Roslib
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
                     this, request.Hostname);
-                await request.StopAsync(token).Caf();
+                await request.StopAsync(token);
                 requests.Remove(request);
             });
-            await tasks.WhenAll().AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this);
         }
 
         public async Task DisposeAsync(CancellationToken token)
@@ -116,14 +114,14 @@ namespace Iviz.Roslib
             }
 
             listener.Stop();
-            if (!await task.AwaitFor(2000, token).Caf())
+            if (!await task.AwaitFor(2000, token))
             {
                 Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
 
 
             Task[] tasks = requests.Select(request => request.StopAsync(token)).ToArray();
-            await tasks.WhenAll().AwaitNoThrow(this).Caf();
+            await tasks.WhenAll().AwaitNoThrow(this);
             requests.Clear();
             
             tokenSource.Dispose();

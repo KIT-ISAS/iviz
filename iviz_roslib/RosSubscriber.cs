@@ -286,7 +286,7 @@ namespace Iviz.Roslib
                 callbacks = EmptyCallback;
                 Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
-                await (disposeTask, unsubscribeTask).WhenAll().Caf();
+                await (disposeTask, unsubscribeTask).WhenAll();
             }
 
             return removed;

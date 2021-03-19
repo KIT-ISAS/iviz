@@ -32,7 +32,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
         {
             XmlRpcArg[] args = {CallerId, topic, SupportedProtocols};
-            var response = await MethodCallAsync("requestTopic", args, token).Caf();
+            var response = await MethodCallAsync("requestTopic", args, token);
             return new RequestTopicResponse(response);
         }
 
@@ -46,7 +46,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<GetMasterUriResponse> GetMasterUriAsync(CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId};
-            var response = await MethodCallAsync("getMasterUri", args, token).Caf();
+            var response = await MethodCallAsync("getMasterUri", args, token);
             return new GetMasterUriResponse(response);
         }
 
@@ -60,7 +60,7 @@ namespace Iviz.Roslib.XmlRpc
         public async ValueTask<GetPidResponse> GetPidAsync(CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId};
-            var response = await MethodCallAsync("getPid", args, token).Caf();
+            var response = await MethodCallAsync("getPid", args, token);
             return new GetPidResponse(response);
         }
 
@@ -84,7 +84,7 @@ namespace Iviz.Roslib.XmlRpc
             XmlRpcValue tmp;
             try
             {
-                tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, ts.Token).Caf();
+                tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, ts.Token);
             }
             catch (OperationCanceledException)
             {

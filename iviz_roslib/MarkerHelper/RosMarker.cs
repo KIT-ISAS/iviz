@@ -291,7 +291,7 @@ namespace Iviz.Roslib.MarkerHelper
 
         public static Marker CreateLines(string ns = "", int id = 0, Point[]? lines = null, ColorRGBA[]? colors = null,
             in ColorRGBA? color = null,
-            in Pose? pose = null, double scale = 1, string frameId = "")
+            in Pose? pose = null, double width = 1, string frameId = "")
         {
             if (lines != null && lines.Length % 2 != 0)
             {
@@ -311,7 +311,7 @@ namespace Iviz.Roslib.MarkerHelper
                 Type = Marker.LINE_LIST,
                 Action = Marker.ADD,
                 Pose = pose ?? Pose.Identity,
-                Scale = scale * Vector3.One,
+                Scale = width * Vector3.One,
                 Color = color ?? ColorRGBA.White,
                 Points = lines ?? Array.Empty<Point>(),
                 Colors = colors ?? Array.Empty<ColorRGBA>(),
@@ -319,7 +319,7 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
-        public int CreateLineStrip(Point[] lines, Pose? pose = null, ColorRGBA? color = null, double scale = 1,
+        public int CreateLineStrip(Point[] lines, Pose? pose = null, ColorRGBA? color = null, double width = 1,
             string frameId = "",
             int replaceId = -1)
         {
@@ -329,11 +329,11 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             int id = replaceId != -1 ? replaceId : GetFreeId();
-            markers[id] = CreateLineStrip(ns, id, lines, null, color, pose, scale, frameId);
+            markers[id] = CreateLineStrip(ns, id, lines, null, color, pose, width, frameId);
             return id;
         }
 
-        public int CreateLineStrip(Point[] lines, ColorRGBA[] colors, Pose? pose = null, double scale = 1,
+        public int CreateLineStrip(Point[] lines, ColorRGBA[] colors, Pose? pose = null, double width = 1,
             string frameId = "", int replaceId = -1)
         {
             if (colors == null)
@@ -342,7 +342,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             int id = replaceId != -1 ? replaceId : GetFreeId();
-            markers[id] = CreateLineStrip(ns, id, lines, colors, ColorRGBA.White, pose, scale, frameId);
+            markers[id] = CreateLineStrip(ns, id, lines, colors, ColorRGBA.White, pose, width, frameId);
             return id;
         }
 
@@ -416,6 +416,30 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
+        public static Marker CreateTriangleList(string ns = "", int id = 0, Point[]? positions = null,
+            ColorRGBA[]? colors = null, ColorRGBA? color = null, Pose? pose = null,
+            Vector3? scale = null, string frameId = "")
+        {
+            if (colors != null && positions != null && colors.Length != positions.Length)
+            {
+                throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
+            }
+
+            return new Marker
+            {
+                Header = (0, frameId),
+                Ns = ns ?? "",
+                Id = id,
+                Type = Marker.TRIANGLE_LIST,
+                Action = Marker.ADD,
+                Pose = pose ?? Pose.Identity,
+                Scale = scale ?? Vector3.One,
+                Color = color ?? ColorRGBA.White,
+                Points = positions ?? Array.Empty<Point>(),
+                Colors = colors ?? Array.Empty<ColorRGBA>(),
+                FrameLocked = true
+            };
+        }
 
         public void Erase(int id)
         {

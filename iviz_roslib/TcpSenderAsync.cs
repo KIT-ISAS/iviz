@@ -28,8 +28,8 @@ namespace Iviz.Roslib
     public interface IRosTcpSender
     {
         string Topic { get; }
-        string RemoteCallerId { get; }
-        Endpoint? RemoteEndpoint { get; }
+        string? RemoteCallerId { get; }
+        Endpoint RemoteEndpoint { get; }
         Endpoint Endpoint { get; }
         IReadOnlyList<string>? TcpHeader { get; }
         PublisherSenderState State { get; }
@@ -40,18 +40,15 @@ namespace Iviz.Roslib
     internal sealed class TcpSenderAsync<T> : IRosTcpSender where T : IMessage
     {
         const int MaxSizeInPacketsWithoutConstraint = 2;
-        const int MaxConnectionRetries = 3;
 
         readonly SemaphoreSlim signal = new(0);
         readonly ConcurrentQueue<(T msg, TaskCompletionSource? signal)> messageQueue = new();
         readonly CancellationTokenSource runningTs = new();
         readonly TopicInfo<T> topicInfo;
-        readonly bool latching;
-        readonly Task? task;
-        readonly TcpListener listener;
-        readonly int timeoutInMs;
+        readonly Task task;
         readonly byte[] lengthBuffer = new byte[4];
 
+        readonly TcpClient tcpClient;
 
         long bytesDropped;
         long bytesSent;
@@ -59,57 +56,31 @@ namespace Iviz.Roslib
 
         long numDropped;
         long numSent;
-        TcpClient? tcpClient;
-        bool tcpNoDelay;
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
         public Endpoint Endpoint { get; }
-        public Endpoint? RemoteEndpoint { get; private set; }
+        public Endpoint RemoteEndpoint { get; }
         public IReadOnlyList<string>? TcpHeader { get; private set; }
         public SenderStatus Status { get; private set; }
 
         public bool TcpNoDelay
         {
-            get => tcpNoDelay;
-            set
-            {
-                tcpNoDelay = value;
-                if (tcpClient != null)
-                {
-                    tcpClient.NoDelay = true;
-                }
-            }
+            get => tcpClient.NoDelay;
+            set => tcpClient.NoDelay = value;
         }
 
-
-        public TcpSenderAsync(string remoteCallerId, TopicInfo<T> topicInfo, bool latching, int timeoutInMs,
-            SemaphoreSlim managerSignal)
-        {
-            RemoteCallerId = remoteCallerId;
-            Status = SenderStatus.Inactive;
-            this.timeoutInMs = timeoutInMs;
-            this.topicInfo = topicInfo;
-            this.latching = latching;
-
-            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
-            listener.Start();
-            Endpoint = new Endpoint((IPEndPoint) listener.LocalEndpoint);
-            task = TaskUtils.StartLongTask(async () => await StartSession(managerSignal), runningTs.Token);
-        }
-
-        public string RemoteCallerId { get; }
+        public string? RemoteCallerId { get; private set; }
         public string Topic => topicInfo.Topic;
-        public bool IsAlive => task != null && !task.IsCompleted;
+        public bool IsAlive => !task.IsCompleted;
         public int MaxQueueSizeInBytes { get; set; } = 50000;
 
         public PublisherSenderState State =>
             new()
             {
                 IsAlive = IsAlive,
-                Latching = latching,
                 Status = Status,
                 Endpoint = Endpoint,
-                RemoteId = RemoteCallerId,
+                RemoteId = RemoteCallerId ?? "",
                 RemoteEndpoint = RemoteEndpoint,
                 CurrentQueueSize = messageQueue.Count,
                 MaxQueueSize = MaxQueueSizeInBytes,
@@ -118,6 +89,18 @@ namespace Iviz.Roslib
                 NumDropped = numDropped,
                 BytesDropped = bytesDropped
             };
+
+        public TcpSenderAsync(TcpClient client, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg)
+        {
+            Status = SenderStatus.Inactive;
+            this.topicInfo = topicInfo;
+
+            tcpClient = client;
+            Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint!);
+            RemoteEndpoint = new Endpoint((IPEndPoint) tcpClient.Client.RemoteEndPoint!);
+            task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
+        }
+
 
         public async Task DisposeAsync(CancellationToken token)
         {
@@ -130,10 +113,7 @@ namespace Iviz.Roslib
 
             runningTs.Cancel();
 
-            if (task != null)
-            {
-                await task.AwaitNoThrow(5000, this, token);
-            }
+            await task.AwaitNoThrow(5000, this, token);
 
             runningTs.Dispose();
         }
@@ -149,7 +129,7 @@ namespace Iviz.Roslib
 
             if (length == 0)
             {
-                return Rent.Empty<byte>();;
+                return Rent.Empty<byte>();
             }
 
             var readBuffer = new Rent<byte>(length);
@@ -169,7 +149,7 @@ namespace Iviz.Roslib
             return readBuffer;
         }
 
-        async Task SendHeader(NetworkStream stream, string? errorMessage)
+        async Task SendHeader(NetworkStream stream, bool latching, string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -219,10 +199,13 @@ namespace Iviz.Roslib
                 values[key] = field.Substring(index + 1);
             }
 
-            if (!values.TryGetValue("callerid", out string? receivedId) || receivedId != RemoteCallerId)
+            if (values.TryGetValue("callerid", out string? receivedId))
             {
-                return
-                    $"error=Expected callerid '{RemoteCallerId}' but partner provided '{receivedId}', closing connection";
+                RemoteCallerId = receivedId;
+            }
+            else
+            {
+                return "error=Missing entry 'callerid'";
             }
 
             if (!values.TryGetValue("topic", out string? receivedTopic) || receivedTopic != topicInfo.Topic)
@@ -261,7 +244,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async Task ProcessHandshake(NetworkStream stream)
+        async Task ProcessHandshake(NetworkStream stream, bool latching)
         {
             List<string> fields;
             using (Rent<byte> readBuffer = await ReceivePacket(stream))
@@ -271,7 +254,7 @@ namespace Iviz.Roslib
 
             string? errorMessage = ProcessRemoteHeader(fields);
 
-            await SendHeader(stream, errorMessage);
+            await SendHeader(stream, latching, errorMessage);
 
             if (errorMessage != null)
             {
@@ -279,63 +262,35 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task StartSession(SemaphoreSlim? managerSignal)
+        async Task StartSession(NullableMessage<T> latchedMsg)
         {
             Status = SenderStatus.Waiting;
 
-            for (int round = 0; round < MaxConnectionRetries && KeepRunning; round++)
+            try
             {
-                try
+                using (tcpClient)
+                using (NetworkStream stream = tcpClient.GetStream())
                 {
-                    Task<TcpClient> connectionTask = listener!.AcceptTcpClientAsync();
-
-                    TryRelease(managerSignal);
-                    managerSignal = null;
-
-                    if (!KeepRunning)
-                    {
-                        break;
-                    }
-
-                    TcpClient newTcpClient;
-                    IPEndPoint? newRemoteEndPoint;
-                    if (!await connectionTask.AwaitFor(timeoutInMs, runningTs.Token)
-                        || !connectionTask.RanToCompletion()
-                        || (newTcpClient = await connectionTask) == null
-                        || (newRemoteEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint) == null)
-                    {
-                        Logger.LogFormat("{0}: Connection timed out (round {1}/{2}): {3}",
-                            this, (round + 1).ToString(), MaxConnectionRetries.ToString(), connectionTask.Exception);
-                        continue;
-                    }
-
-                    round = 0;
-
-                    using (tcpClient = newTcpClient)
-                    using (NetworkStream stream = tcpClient.GetStream())
-                    {
-                        Status = SenderStatus.Active;
-                        RemoteEndpoint = new Endpoint(newRemoteEndPoint);
-                        Logger.LogDebugFormat("{0}: Started!", this);
-                        await ProcessLoop(stream);
-                    }
+                    Status = SenderStatus.Active;
+                    Logger.LogDebugFormat("{0}: Started!", this);
+                    await ProcessLoop(stream, latchedMsg);
                 }
-                catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                switch (e)
                 {
-                    switch (e)
-                    {
-                        case OperationCanceledException _:
-                        case ObjectDisposedException _:
-                            break;
-                        case IOException _:
-                        case TimeoutException _:
-                        case SocketException _:
-                            Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
-                            break;
-                        default:
-                            Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
-                            break;
-                    }
+                    case OperationCanceledException:
+                    case ObjectDisposedException:
+                        break;
+                    case IOException:
+                    case TimeoutException:
+                    case SocketException:
+                        Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                    default:
+                        Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
                 }
             }
 
@@ -348,25 +303,10 @@ namespace Iviz.Roslib
             }
 
             Status = SenderStatus.Dead;
-            listener.Stop();
-            tcpClient = null;
-            TryRelease(managerSignal);
-
             foreach (var (_, msgSignal) in messageQueue)
             {
                 msgSignal?.TrySetException(new RosQueueException(
                     $"Connection for '{RemoteCallerId}' is shutting down", this));
-            }
-        }
-
-        static void TryRelease(SemaphoreSlim? s)
-        {
-            try
-            {
-                s?.Release();
-            }
-            catch (ObjectDisposedException)
-            {
             }
         }
 
@@ -376,7 +316,7 @@ namespace Iviz.Roslib
         RosQueueOverflowException CreateOverflowException() =>
             new($"Message could not be sent to node '{RemoteCallerId}'", this);
 
-        async Task ProcessLoop(NetworkStream stream)
+        async Task ProcessLoop(NetworkStream stream, NullableMessage<T> latchedMsg)
         {
             using ResizableRent<byte> writeBuffer = new(4);
 
@@ -389,7 +329,12 @@ namespace Iviz.Roslib
                 array[2] = (byte) (i >> 0x10);
             }
 
-            await ProcessHandshake(stream);
+            await ProcessHandshake(stream, latchedMsg.HasValue);
+
+            if (latchedMsg.HasValue)
+            {
+                Publish(latchedMsg.Value);
+            }
 
             List<(T msg, int msgLength, TaskCompletionSource? signal)> tmpQueue = new();
 

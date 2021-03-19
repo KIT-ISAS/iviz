@@ -67,10 +67,10 @@ namespace Iviz.Roslib
 
         async Task ProcessHandshakeAsync(NetworkStream stream, bool persistent, CancellationToken token)
         {
-            await SendHeaderAsync(stream, persistent, token).Caf();
+            await SendHeaderAsync(stream, persistent, token);
 
             List<string> responses;
-            using (var readBuffer = await ReceivePacketAsync(stream, token).Caf())
+            using (var readBuffer = await ReceivePacketAsync(stream, token))
             {
                 responses = BaseUtils.ParseHeader(readBuffer);
             }
@@ -148,8 +148,8 @@ namespace Iviz.Roslib
             uint sendLength = Buffer.Serialize(requestMsg, writeBuffer.Array);
 
             var stream = tcpClient.GetStream();
-            await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token).Caf();
-            await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token).Caf();
+            await stream.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token);
+            await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token);
 
             byte statusByte = await ReadOneByteAsync(stream, token);
 
