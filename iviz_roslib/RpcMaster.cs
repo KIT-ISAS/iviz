@@ -29,7 +29,7 @@ namespace Iviz.Roslib.XmlRpc
         public string CallerId { get; }
         public int TimeoutInMs { get; set; } = 3000;
 
-        readonly Arg[] callerIdArgCache;
+        readonly XmlRpcArg[] callerIdArgCache;
 
         readonly List<XmlRpcConnection> rpcConnections = new List<XmlRpcConnection>();
 
@@ -46,7 +46,7 @@ namespace Iviz.Roslib.XmlRpc
             MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
-            callerIdArgCache = new Arg[] {CallerId};
+            callerIdArgCache = new XmlRpcArg[] {CallerId};
             //rpcConnection[0] = new XmlRpcConnection(masterUri);
             //rpcConnection[1] = new XmlRpcConnection(masterUri);
 
@@ -78,15 +78,15 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetUriResponse GetUri()
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = MethodCall("getUri", args);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = MethodCall("getUri", args);
             return new GetUriResponse(response);
         }
 
         public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getUri", args, token);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = await MethodCallAsync("getUri", args, token);
             return new GetUriResponse(response);
         }
 
@@ -97,8 +97,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(nodeId));
             }
 
-            Arg[] args = {CallerId, nodeId};
-            object[] response = MethodCall("lookupNode", args);
+            XmlRpcArg[] args = {CallerId, nodeId};
+            var response = MethodCall("lookupNode", args);
             return new LookupNodeResponse(response);
         }
 
@@ -109,37 +109,37 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(nodeId));
             }
 
-            Arg[] args = {CallerId, nodeId};
-            object[] response = await MethodCallAsync("lookupNode", args, token);
+            XmlRpcArg[] args = {CallerId, nodeId};
+            var response = await MethodCallAsync("lookupNode", args, token);
             return new LookupNodeResponse(response);
         }
 
         public GetPublishedTopicsResponse GetPublishedTopics(string subgraph = "")
         {
-            Arg[] args = {CallerId, subgraph};
-            object[] response = MethodCall("getPublishedTopics", args);
+            XmlRpcArg[] args = {CallerId, subgraph};
+            var response = MethodCall("getPublishedTopics", args);
             return new GetPublishedTopicsResponse(response);
         }
 
         public async ValueTask<GetPublishedTopicsResponse> GetPublishedTopicsAsync(string subgraph = "",
             CancellationToken token = default)
         {
-            Arg[] args = {CallerId, subgraph};
-            object[] response = await MethodCallAsync("getPublishedTopics", args, token);
+            XmlRpcArg[] args = {CallerId, subgraph};
+            var response = await MethodCallAsync("getPublishedTopics", args, token);
             return new GetPublishedTopicsResponse(response);
         }
 
         public GetPublishedTopicsResponse GetTopicTypes()
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = MethodCall("getTopicTypes", args);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = MethodCall("getTopicTypes", args);
             return new GetPublishedTopicsResponse(response);
         }
 
         public async ValueTask<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getTopicTypes", args, token);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = await MethodCallAsync("getTopicTypes", args, token);
             return new GetPublishedTopicsResponse(response);
         }
 
@@ -155,8 +155,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topicType));
             }
 
-            Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = MethodCall("registerSubscriber", args);
+            XmlRpcArg[] args = {CallerId, topic, topicType, CallerUri};
+            var response = MethodCall("registerSubscriber", args);
             return new RegisterSubscriberResponse(response);
         }
 
@@ -173,8 +173,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topicType));
             }
 
-            Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerSubscriber", args, token);
+            XmlRpcArg[] args = {CallerId, topic, topicType, CallerUri};
+            var response = await MethodCallAsync("registerSubscriber", args, token);
             return new RegisterSubscriberResponse(response);
         }
 
@@ -185,8 +185,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = MethodCall("unregisterSubscriber", args);
+            XmlRpcArg[] args = {CallerId, topic, CallerUri};
+            var response = MethodCall("unregisterSubscriber", args);
             return new UnregisterSubscriberResponse(response);
         }
 
@@ -198,8 +198,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterSubscriber", args, token);
+            XmlRpcArg[] args = {CallerId, topic, CallerUri};
+            var response = await MethodCallAsync("unregisterSubscriber", args, token);
             return new UnregisterSubscriberResponse(response);
         }
 
@@ -215,8 +215,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topicType));
             }
 
-            Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = MethodCall("registerPublisher", args);
+            XmlRpcArg[] args = {CallerId, topic, topicType, CallerUri};
+            var response = MethodCall("registerPublisher", args);
             return new RegisterPublisherResponse(response);
         }
 
@@ -233,8 +233,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topicType));
             }
 
-            Arg[] args = {CallerId, topic, topicType, CallerUri};
-            object[] response = await MethodCallAsync("registerPublisher", args, token);
+            XmlRpcArg[] args = {CallerId, topic, topicType, CallerUri};
+            var response = await MethodCallAsync("registerPublisher", args, token);
             return new RegisterPublisherResponse(response);
         }
 
@@ -245,8 +245,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = MethodCall("unregisterPublisher", args);
+            XmlRpcArg[] args = {CallerId, topic, CallerUri};
+            var response = MethodCall("unregisterPublisher", args);
             return new UnregisterPublisherResponse(response);
         }
 
@@ -258,22 +258,22 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(topic));
             }
 
-            Arg[] args = {CallerId, topic, CallerUri};
-            object[] response = await MethodCallAsync("unregisterPublisher", args, token);
+            XmlRpcArg[] args = {CallerId, topic, CallerUri};
+            var response = await MethodCallAsync("unregisterPublisher", args, token);
             return new UnregisterPublisherResponse(response);
         }
 
         public GetSystemStateResponse GetSystemState()
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = MethodCall("getSystemState", args);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
         }
 
         public async ValueTask<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
-            Arg[] args = callerIdArgCache;
-            object[] response = await MethodCallAsync("getSystemState", args, token);
+            XmlRpcArg[] args = callerIdArgCache;
+            var response = await MethodCallAsync("getSystemState", args, token);
             return new GetSystemStateResponse(response);
         }
 
@@ -284,8 +284,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(service));
             }
 
-            Arg[] args = {CallerId, service};
-            object[] response = MethodCall("lookupService", args);
+            XmlRpcArg[] args = {CallerId, service};
+            var response = MethodCall("lookupService", args);
             return new LookupServiceResponse(response);
         }
 
@@ -297,8 +297,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(service));
             }
 
-            Arg[] args = {CallerId, service};
-            object[] response = await MethodCallAsync("lookupService", args, token);
+            XmlRpcArg[] args = {CallerId, service};
+            var response = await MethodCallAsync("lookupService", args, token);
             return new LookupServiceResponse(response);
         }
 
@@ -314,8 +314,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(rosRpcUri));
             }
 
-            Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
-            object[] response = MethodCall("registerService", args);
+            XmlRpcArg[] args = {CallerId, service, rosRpcUri, CallerUri};
+            var response = MethodCall("registerService", args);
             return new DefaultResponse(response);
         }
 
@@ -332,8 +332,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(rosRpcUri));
             }
 
-            Arg[] args = {CallerId, service, rosRpcUri, CallerUri};
-            object[] response = await MethodCallAsync("registerService", args, token);
+            XmlRpcArg[] args = {CallerId, service, rosRpcUri, CallerUri};
+            var response = await MethodCallAsync("registerService", args, token);
             return new DefaultResponse(response);
         }
 
@@ -349,8 +349,8 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(rosRpcUri));
             }
 
-            Arg[] args = {CallerId, service, rosRpcUri};
-            object[] response = MethodCall("unregisterService", args);
+            XmlRpcArg[] args = {CallerId, service, rosRpcUri};
+            var response = MethodCall("unregisterService", args);
             return new UnregisterServiceResponse(response);
         }
 
@@ -367,30 +367,31 @@ namespace Iviz.Roslib.XmlRpc
                 throw new ArgumentNullException(nameof(rosRpcUri));
             }
 
-            Arg[] args = {CallerId, service, rosRpcUri};
-            object[] response = await MethodCallAsync("unregisterService", args, token);
+            XmlRpcArg[] args = {CallerId, service, rosRpcUri};
+            var response = await MethodCallAsync("unregisterService", args, token);
             return new UnregisterServiceResponse(response);
         }
 
-        internal object[] MethodCall(string function, Arg[] args)
+        internal XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
         {
             using CancellationTokenSource ts = new(TimeoutInMs);
 
-            object tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
-            if (tmp is object[] result)
+            XmlRpcValue tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
+            if (!tmp.TryGetArray(out XmlRpcValue[] result))
             {
-                return result;
+                throw new ParseException($"Rpc Response: Expected type object[], got {tmp}");
             }
 
-            throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+            return result;
         }
 
-        internal async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
+        internal async ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args,
+            CancellationToken token)
         {
             using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
             ts.CancelAfter(TimeoutInMs);
 
-            object tmp;
+            XmlRpcValue tmp;
             try
             {
                 XmlRpcConnection freeConnection = rpcConnections.Min()!;
@@ -408,9 +409,9 @@ namespace Iviz.Roslib.XmlRpc
                 throw;
             }
 
-            if (!(tmp is object[] result))
+            if (!tmp.TryGetArray(out XmlRpcValue[] result))
             {
-                throw new ParseException($"Rpc Response: Expected type object[], got {tmp.GetType().Name}");
+                throw new ParseException($"Rpc Response: Expected type object[], got {tmp}");
             }
 
             return result;
@@ -419,7 +420,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public abstract class BaseResponse
     {
-        private protected bool hasParseError;
+        bool hasParseError;
 
         public int Code { get; protected set; }
         public string StatusMessage { get; protected set; } = "";
@@ -463,12 +464,12 @@ namespace Iviz.Roslib.XmlRpc
         public ReadOnlyCollection<TopicTuple> Subscribers { get; } = Empty;
         public ReadOnlyCollection<TopicTuple> Services { get; } = Empty;
 
-        internal GetSystemStateResponse(object[]? a)
+        internal GetSystemStateResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -482,7 +483,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is object[] root) || root.Length != 3)
+            if (!a[2].TryGetArray(out XmlRpcValue[] root) || root.Length != 3)
             {
                 MarkError();
                 return;
@@ -494,9 +495,9 @@ namespace Iviz.Roslib.XmlRpc
             Services = CreateTuple(root[2]);
         }
 
-        ReadOnlyCollection<TopicTuple> CreateTuple(object root)
+        ReadOnlyCollection<TopicTuple> CreateTuple(XmlRpcValue root)
         {
-            if (!(root is object[] objTuples))
+            if (!root.TryGetArray(out XmlRpcValue[] objTuples))
             {
                 MarkError();
                 return Empty;
@@ -505,16 +506,27 @@ namespace Iviz.Roslib.XmlRpc
             List<TopicTuple> result = new();
             foreach (var objTuple in objTuples)
             {
-                if (!(objTuple is object[] tuple) ||
+                if (!objTuple.TryGetArray(out XmlRpcValue[] tuple) ||
                     tuple.Length != 2 ||
-                    !(tuple[0] is string topic) ||
-                    !(tuple[1] is object[] tmp))
+                    !tuple[0].TryGetString(out string topic) ||
+                    !tuple[1].TryGetArray(out XmlRpcValue[] tmpMembers))
                 {
                     MarkError();
                     return Empty;
                 }
 
-                string[] members = tmp.Cast<string>().ToArray();
+                string[] members = new string[tmpMembers.Length];
+                for (int i = 0; i < members.Length; i++)
+                {
+                    if (!tmpMembers[i].TryGetString(out string member))
+                    {
+                        MarkError();
+                        return Empty;
+                    }
+
+                    members[i] = member;
+                }
+
                 result.Add(new TopicTuple(topic, members));
             }
 
@@ -524,7 +536,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class DefaultResponse : BaseResponse
     {
-        internal DefaultResponse(object[]? _)
+        internal DefaultResponse(XmlRpcValue[]? _)
         {
             Code = StatusCode.Success;
         }
@@ -534,12 +546,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public Uri? Uri { get; }
 
-        internal GetUriResponse(object[]? a)
+        internal GetUriResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -553,7 +565,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is string uriStr))
+            if (!a[2].TryGetString(out string uriStr))
             {
                 MarkError();
                 return;
@@ -567,7 +579,7 @@ namespace Iviz.Roslib.XmlRpc
             else
             {
                 Logger.Log("Rpc Response: Failed to parse GetUriResponse uri: " + a[2]);
-                hasParseError = true;
+                MarkError();
                 Uri = null;
             }
         }
@@ -577,12 +589,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public Uri? Uri { get; }
 
-        internal LookupNodeResponse(object[]? a)
+        internal LookupNodeResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -596,7 +608,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is string uriStr))
+            if (!a[2].TryGetString(out string uriStr))
             {
                 MarkError();
                 return;
@@ -609,8 +621,8 @@ namespace Iviz.Roslib.XmlRpc
             }
             else
             {
-                Logger.Log($"{this}: Failed to parse LookupNodeResponse uri: " + a[2]);
-                hasParseError = true;
+                Logger.Log($"{this}: Failed to parse LookupNodeResponse uri: {uriStr}");
+                MarkError();
                 Uri = null;
             }
         }
@@ -622,12 +634,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<(string name, string type)> Topics { get; } = Empty;
 
-        internal GetPublishedTopicsResponse(object[]? a)
+        internal GetPublishedTopicsResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -641,7 +653,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is object[] objTopics))
+            if (!a[2].TryGetArray(out XmlRpcValue[] objTopics))
             {
                 MarkError();
                 return;
@@ -650,10 +662,10 @@ namespace Iviz.Roslib.XmlRpc
             List<(string, string)> topics = new();
             foreach (var objTopic in objTopics)
             {
-                if (!(objTopic is object[] topic) ||
+                if (!objTopic.TryGetArray(out XmlRpcValue[] topic) ||
                     topic.Length != 2 ||
-                    !(topic[0] is string topicName) ||
-                    !(topic[1] is string topicType))
+                    !topic[0].TryGetString(out string topicName) ||
+                    !topic[1].TryGetString(out string topicType))
                 {
                     MarkError();
                     return;
@@ -672,12 +684,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<Uri> Publishers { get; } = Empty;
 
-        internal RegisterSubscriberResponse(object[]? a)
+        internal RegisterSubscriberResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -691,7 +703,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is object[] objUriStrings))
+            if (!a[2].TryGetArray(out XmlRpcValue[] objUriStrings))
             {
                 MarkError();
                 return;
@@ -701,12 +713,11 @@ namespace Iviz.Roslib.XmlRpc
             List<Uri> publishers = new();
             foreach (var objUriStr in objUriStrings)
             {
-                if (!(objUriStr is string uriStr) ||
+                if (!objUriStr.TryGetString(out string uriStr) ||
                     !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? publisher))
                 {
                     Logger.Log($"RcpMaster: Invalid uri '{objUriStr}'");
-                    Code = StatusCode.Error;
-                    hasParseError = true;
+                    MarkError();
                     return;
                 }
 
@@ -721,12 +732,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnsubscribed { get; }
 
-        internal UnregisterSubscriberResponse(object[]? a)
+        internal UnregisterSubscriberResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -740,7 +751,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is int numUnsubscribed))
+            if (!a[2].TryGetInteger(out int numUnsubscribed))
             {
                 MarkError();
                 return;
@@ -756,12 +767,12 @@ namespace Iviz.Roslib.XmlRpc
 
         public ReadOnlyCollection<string> Subscribers { get; } = Empty;
 
-        internal RegisterPublisherResponse(object[]? a)
+        internal RegisterPublisherResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -775,7 +786,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is object[] objSubscriberStrs))
+            if (!a[2].TryGetArray(out XmlRpcValue[] objSubscriberStrs))
             {
                 MarkError();
                 return;
@@ -784,7 +795,7 @@ namespace Iviz.Roslib.XmlRpc
             List<string> subscribers = new();
             foreach (var objSubscriberStr in objSubscriberStrs)
             {
-                if (!(objSubscriberStr is string subscriberStr))
+                if (!objSubscriberStr.TryGetString(out string subscriberStr))
                 {
                     MarkError();
                     return;
@@ -801,12 +812,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnregistered { get; }
 
-        internal UnregisterPublisherResponse(object[]? a)
+        internal UnregisterPublisherResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -820,7 +831,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is int numUnregistered))
+            if (!a[2].TryGetInteger(out int numUnregistered))
             {
                 MarkError();
                 return;
@@ -834,12 +845,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public Uri? ServiceUrl { get; }
 
-        internal LookupServiceResponse(object[]? a)
+        internal LookupServiceResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -853,7 +864,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is string uriStr) ||
+            if (!a[2].TryGetString(out string uriStr) ||
                 !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
                 MarkError();
@@ -868,12 +879,12 @@ namespace Iviz.Roslib.XmlRpc
     {
         public int NumUnregistered { get; }
 
-        internal UnregisterServiceResponse(object[]? a)
+        internal UnregisterServiceResponse(XmlRpcValue[]? a)
         {
             if (a is null ||
                 a.Length != 3 ||
-                !(a[0] is int code) ||
-                !(a[1] is string statusMessage))
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
                 MarkError();
                 return;
@@ -887,7 +898,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            if (!(a[2] is int numUnregistered))
+            if (!a[2].TryGetInteger(out int numUnregistered))
             {
                 MarkError();
                 return;

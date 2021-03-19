@@ -198,7 +198,7 @@ namespace Iviz.Roslib
                 await deleteTasks.WhenAll().AwaitNoThrow(this).Caf();
 
                 var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
-                bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this).Caf();
+                bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this);
                 numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync(token);
             }
 

@@ -38,7 +38,7 @@ namespace Iviz.XmlRpc
             this.remoteUri = remoteUri ?? throw new ArgumentNullException(nameof(remoteUri));
         }
 
-        public async ValueTask<object> MethodCallAsync(Uri callerUri, string method, Arg[] args,
+        public async ValueTask<XmlRpcValue> MethodCallAsync(Uri callerUri, string method, XmlRpcArg[] args,
             CancellationToken token = default)
         {
             if (disposed)

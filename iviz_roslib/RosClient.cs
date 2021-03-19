@@ -45,7 +45,7 @@ namespace Iviz.Roslib
         public ShutdownActionCall? ShutdownAction { get; set; }
 
         public delegate void ParamUpdateActionCall(
-            string callerId, string parameterKey, object parametervalue,
+            string callerId, string parameterKey, XmlRpcValue parameterValue,
             out int status, out string response);
 
         /// <summary>

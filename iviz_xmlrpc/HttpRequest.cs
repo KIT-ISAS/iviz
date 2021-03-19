@@ -28,9 +28,9 @@ namespace Iviz.XmlRpc
                 {Client = {DualMode = true}, ReceiveTimeout = 3000, SendTimeout = 3000};
         }
 
-        public async Task StartAsync(CancellationToken token)
+        public Task StartAsync(CancellationToken token)
         {
-            await client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
+            return client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
         }
 
         string CreateRequest(string msgIn, bool keepAlive)
@@ -132,26 +132,25 @@ namespace Iviz.XmlRpc
             throw new ParseException("End of header not found");
         }
 
-        static async Task<(int, string?, bool)> ParseHeaderAsync(StreamReader reader, bool validateFirstLine,
-            CancellationToken token)
+        static (int, string?, bool) ParseHeader(TextReader reader, bool validateFirstLine)
         {
             int? length = null;
             string? encoding = null;
             bool? connectionClose = false;
 
-            string? firstLine = await reader.ReadLineAsync().AwaitWithToken(token);
+            string? firstLine = reader.ReadLine();
             if (firstLine == null)
             {
-                throw new IOException("Partner closed connection!");
+                throw new ParseException("Failed to parse header lines");
             }
 
             if (validateFirstLine)
             {
                 int firstSpace = firstLine.IndexOf(' ');
                 if (firstSpace < 0
-                    || firstSpace + 3 >= firstLine.Length 
-                    || firstLine[firstSpace + 1] != '2' 
-                    || firstLine[firstSpace + 2] != '0' 
+                    || firstSpace + 3 >= firstLine.Length
+                    || firstLine[firstSpace + 1] != '2'
+                    || firstLine[firstSpace + 2] != '0'
                     || firstLine[firstSpace + 3] != '0')
                 {
                     throw new HttpConnectionException($"Request failed with header: {firstLine}");
@@ -160,23 +159,25 @@ namespace Iviz.XmlRpc
 
             while (true)
             {
-                string? line = await reader.ReadLineAsync().AwaitWithToken(token);
+                string? line = reader.ReadLine();
 
                 if (line == null)
                 {
-                    throw new IOException("Partner closed connection!");
+                    throw new ParseException("Failed to parse header lines");
                 }
 
-                if (length == null && CheckHeaderLine(line, "Content-Length", out string? lengthStr) &&
+                if (length == null && CheckHeaderLineForKey(line, "Content-Length", out string? lengthStr) &&
                     int.TryParse(lengthStr, out int lengthVal))
                 {
                     length = lengthVal;
                 }
-                else if (encoding == null && CheckHeaderLine(line, "Content-Encoding", out string? tmpEncodingStr))
+                else if (encoding == null &&
+                         CheckHeaderLineForKey(line, "Content-Encoding", out string? tmpEncodingStr))
                 {
                     encoding = tmpEncodingStr;
                 }
-                else if (connectionClose == null && CheckHeaderLine(line, "Connection", out string? connectionStr) &&
+                else if (connectionClose == null &&
+                         CheckHeaderLineForKey(line, "Connection", out string? connectionStr) &&
                          connectionStr.Equals("close", StringComparison.InvariantCultureIgnoreCase))
                 {
                     connectionClose = true;
@@ -195,13 +196,13 @@ namespace Iviz.XmlRpc
             return (length.Value, encoding, connectionClose ?? false);
         }
 
-        internal async Task<(string, int, bool)> GetResponseAsync(CancellationToken token)
+        internal Task<(string, int, bool)> GetResponseAsync(CancellationToken token)
         {
-            return await ReadIncomingData(client.GetStream(), true, token);
+            return ReadIncomingDataAsync(client.GetStream(), true, token);
         }
 
-        internal static async Task<(string inData, int length, bool shouldClose)> ReadIncomingData(NetworkStream stream,
-            bool isRequest, CancellationToken token)
+        internal static async Task<(string inData, int length, bool shouldClose)>
+            ReadIncomingDataAsync(NetworkStream stream, bool isRequest, CancellationToken token)
         {
             const int maxHeaderSize = 4096;
             const int maxPayloadSize = 8192;
@@ -214,7 +215,7 @@ namespace Iviz.XmlRpc
             {
                 headerLength = await ReadHeaderAsync(stream, headerBytes.Array, token);
                 using var reader = new StreamReader(new MemoryStream(headerBytes.Array, 0, headerLength));
-                (contentLength, encodingStr, connectionClose) = await ParseHeaderAsync(reader, isRequest, token);
+                (contentLength, encodingStr, connectionClose) = ParseHeader(reader, isRequest);
             }
 
             using var content = new Rent<byte>(contentLength);
@@ -246,7 +247,7 @@ namespace Iviz.XmlRpc
             return (result, headerLength + contentLength, connectionClose);
         }
 
-        static bool CheckHeaderLine(string line, string key, out string value)
+        static bool CheckHeaderLineForKey(string line, string key, out string value)
         {
             if (line.Length < key.Length + 1 ||
                 string.Compare(line, 0, key, 0, key.Length, true, BuiltIns.Culture) != 0)

@@ -24,64 +24,64 @@ namespace Iviz.Roslib.XmlRpc
 
         public RequestTopicResponse RequestTopic(string topic)
         {
-            Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[] response = MethodCall("requestTopic", args);
+            XmlRpcArg[] args = {CallerId, topic, SupportedProtocols};
+            var response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
         }
 
         public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
         {
-            Arg[] args = {CallerId, topic, SupportedProtocols};
-            object[] response = await MethodCallAsync("requestTopic", args, token).Caf();
+            XmlRpcArg[] args = {CallerId, topic, SupportedProtocols};
+            var response = await MethodCallAsync("requestTopic", args, token).Caf();
             return new RequestTopicResponse(response);
         }
 
         public GetMasterUriResponse GetMasterUri()
         {
-            Arg[] args = {CallerId};
-            object[] response = MethodCall("getMasterUri", args);
+            XmlRpcArg[] args = {CallerId};
+            var response = MethodCall("getMasterUri", args);
             return new GetMasterUriResponse(response);
         }
 
         public async ValueTask<GetMasterUriResponse> GetMasterUriAsync(CancellationToken token = default)
         {
-            Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getMasterUri", args, token).Caf();
+            XmlRpcArg[] args = {CallerId};
+            var response = await MethodCallAsync("getMasterUri", args, token).Caf();
             return new GetMasterUriResponse(response);
         }
 
         public GetPidResponse GetPid()
         {
-            Arg[] args = {CallerId};
-            object[] response = MethodCall("getPid", args);
+            XmlRpcArg[] args = {CallerId};
+            var response = MethodCall("getPid", args);
             return new GetPidResponse(response);
         }
 
         public async ValueTask<GetPidResponse> GetPidAsync(CancellationToken token = default)
         {
-            Arg[] args = {CallerId};
-            object[] response = await MethodCallAsync("getPid", args, token).Caf();
+            XmlRpcArg[] args = {CallerId};
+            var response = await MethodCallAsync("getPid", args, token).Caf();
             return new GetPidResponse(response);
         }
 
-        object[] MethodCall(string function, Arg[] args)
+        XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
         {
-            object tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
-            if (tmp is object[] result)
+            XmlRpcValue tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
+            if (tmp.TryGetArray(out XmlRpcValue[] result))
             {
                 return result;
             }
 
             throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                      $"Expected type object[], got {tmp.GetType().Name}");
+                                      $"Expected type object[], got {tmp}");
         }
 
-        async ValueTask<object[]> MethodCallAsync(string function, Arg[] args, CancellationToken token)
+        async ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
         {
             using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
             ts.CancelAfter(TimeoutInMs);
 
-            object tmp;
+            XmlRpcValue tmp;
             try
             {
                 tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, ts.Token).Caf();
@@ -96,12 +96,12 @@ namespace Iviz.Roslib.XmlRpc
                 throw;
             }
 
-            if (!(tmp is object[] result))
+            if (!tmp.TryGetArray(out XmlRpcValue[] result))
             {
                 throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                          $"Expected type object[], got {tmp.GetType().Name}");
+                                          $"Expected type object[], got {tmp}");
             }
-            
+
             return result;
         }
 
@@ -124,12 +124,12 @@ namespace Iviz.Roslib.XmlRpc
         {
             public ProtocolResponse? Protocol { get; }
 
-            public RequestTopicResponse(object[]? a)
+            public RequestTopicResponse(XmlRpcValue[]? a)
             {
                 if (a is null ||
                     a.Length != 3 ||
-                    !(a[0] is int code) ||
-                    !(a[1] is string statusMessage))
+                    !a[0].TryGetInteger(out int code) ||
+                    !a[1].TryGetString(out string statusMessage))
                 {
                     MarkError();
                     return;
@@ -142,12 +142,12 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return;
                 }
-                
-                if (!(a[2] is object[] protocols))
+
+                if (!a[2].TryGetArray(out XmlRpcValue[] protocols))
                 {
                     MarkError();
                     return;
-                }                
+                }
 
                 if (protocols.Length == 0)
                 {
@@ -155,39 +155,34 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                switch (protocols[0])
+                if (protocols[0].TryGetString(out string tmpType))
                 {
-                    case string tmpType:
+                    if (protocols.Length < 3 ||
+                        !protocols[1].TryGetString(out string hostname) ||
+                        !protocols[2].TryGetInteger(out int port))
                     {
-                        if (protocols.Length < 3 ||
-                            !(protocols[1] is string hostname) ||
-                            !(protocols[2] is int port))
-                        {
-                            MarkError();
-                            return;
-                        }
-
-                        Protocol = new ProtocolResponse(tmpType, hostname, port);
-                        break;
-                    }
-                    case object[] innerProtocols:
-                    {
-                        if (innerProtocols.Length < 3 ||
-                            !(innerProtocols[0] is string type) ||
-                            !(innerProtocols[1] is string hostname) ||
-                            !(innerProtocols[2] is int port))
-                        {
-                            MarkError();
-                            return;
-                        }
-
-                        Protocol = new ProtocolResponse(type, hostname, port);
-                        break;
-                    }
-                    default:
-                        Code = StatusCode.Error;
-                        hasParseError = true;
+                        MarkError();
                         return;
+                    }
+
+                    Protocol = new ProtocolResponse(tmpType, hostname, port);
+                }
+                else if (protocols[0].TryGetArray(out XmlRpcValue[] innerProtocols))
+                {
+                    if (innerProtocols.Length < 3 ||
+                        !innerProtocols[0].TryGetString(out string type) ||
+                        !innerProtocols[1].TryGetString(out string hostname) ||
+                        !innerProtocols[2].TryGetInteger(out int port))
+                    {
+                        MarkError();
+                        return;
+                    }
+
+                    Protocol = new ProtocolResponse(type, hostname, port);
+                }
+                else
+                {
+                    MarkError();
                 }
             }
         }
@@ -196,13 +191,13 @@ namespace Iviz.Roslib.XmlRpc
         {
             public Uri? Uri { get; }
 
-            public GetMasterUriResponse(object[]? a)
+            public GetMasterUriResponse(XmlRpcValue[]? a)
             {
                 if (a is null ||
                     a.Length != 3 ||
-                    !(a[0] is int code) ||
-                    !(a[1] is string statusMessage) ||
-                    !(a[2] is string uriStr) ||
+                    !a[0].TryGetInteger(out int code) ||
+                    !a[1].TryGetString(out string statusMessage) ||
+                    !a[2].TryGetString(out string uriStr) ||
                     !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
                 {
                     MarkError();
@@ -225,13 +220,13 @@ namespace Iviz.Roslib.XmlRpc
         {
             public int Pid { get; }
 
-            public GetPidResponse(object[]? a)
+            public GetPidResponse(XmlRpcValue[]? a)
             {
                 if (a is null ||
                     a.Length != 3 ||
-                    !(a[0] is int code) ||
-                    !(a[1] is string statusMessage) ||
-                    !(a[2] is int pid))
+                    !a[0].TryGetInteger(out int code) ||
+                    !a[1].TryGetString(out string statusMessage) ||
+                    !a[2].TryGetInteger(out int pid))
                 {
                     MarkError();
                     return;
@@ -244,7 +239,7 @@ namespace Iviz.Roslib.XmlRpc
                 {
                     return;
                 }
-                
+
                 Pid = pid;
             }
         }

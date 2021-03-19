@@ -43,7 +43,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
         public async Task<string> GetRequestAsync(CancellationToken token = default)
         {
-            return (await HttpRequest.ReadIncomingData(client.GetStream(), false, token)).inData;
+            return (await HttpRequest.ReadIncomingDataAsync(client.GetStream(), false, token)).inData;
         }
 
         /// <summary>

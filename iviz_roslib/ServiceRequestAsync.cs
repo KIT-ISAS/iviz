@@ -52,7 +52,7 @@ namespace Iviz.Roslib
         {
             tcpClient.Close();
             runningTs.Cancel();
-            await task.AwaitForWithTimeout(2000, token: token).AwaitNoThrow(this);
+            await task.AwaitNoThrow(2000, this, token);
             runningTs.Dispose();
         }
 
