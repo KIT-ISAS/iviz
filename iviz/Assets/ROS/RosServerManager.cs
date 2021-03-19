@@ -64,7 +64,7 @@ namespace Iviz.Ros
                 }
 
                 // start in background
-                serverTask = Task.Run(() => server.StartAsync());
+                serverTask = TaskUtils.StartLongTask(() => server.StartAsync());
             }
             catch (Exception e)
             {

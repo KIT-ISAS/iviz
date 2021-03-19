@@ -26,7 +26,7 @@ namespace Iviz.Ros
     public sealed class RoslibConnection : RosConnection
     {
         static readonly Action<string> LogInternalIfHololens =
-            Settings.IsHololens ? (Action<string>) Core.Logger.Internal : Core.Logger.Debug;
+            Settings.IsHololens ? (Action<string>) Core.Logger.Internal : Logger.LogDebug;
 
         static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
         readonly ConcurrentDictionary<int, IRosPublisher> publishers = new ConcurrentDictionary<int, IRosPublisher>();
@@ -813,7 +813,7 @@ namespace Iviz.Ros
             }
 
             CancellationToken token = connectionTs.Token;
-            Task.Run(async () =>
+            TaskUtils.StartLongTask(async () =>
             {
                 if (token.IsCancellationRequested)
                 {
