@@ -354,7 +354,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            object parameterValue;
+            XmlRpcValue parameterValue;
             string errorMsg;
             try
             {
@@ -379,7 +379,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (!(parameterValue is string robotDescription))
+            if (!parameterValue.TryGetString(out string robotDescription))
             {
                 Core.Logger.Debug($"{this}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";
