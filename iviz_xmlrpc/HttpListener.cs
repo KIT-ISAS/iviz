@@ -97,9 +97,6 @@ namespace Iviz.XmlRpc
         /// </summary>
         /// <param name="handler">
         /// Function to call when a request arrives.
-        /// The function should take the form 'async Task Handler(HttpListenerContext context) {}'
-        /// Use await context.GetRequest() to get the request string.
-        /// Use await context.Respond() to send the response.
         /// </param>
         /// <param name="runInBackground">
         /// If true, multiple requests can run at the same time.
@@ -118,7 +115,7 @@ namespace Iviz.XmlRpc
             while (KeepRunning)
                 try
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync().Caf();
+                    TcpClient client = await listener.AcceptTcpClientAsync();
 
                     if (!KeepRunning)
                     {
@@ -152,7 +149,7 @@ namespace Iviz.XmlRpc
                     return;
                 }
 
-            Logger.LogDebugFormat("{0}: Leaving thread normally", this);
+            Logger.LogDebugFormat("{0}: Leaving task", this);
         }
 
 

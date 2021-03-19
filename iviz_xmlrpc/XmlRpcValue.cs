@@ -23,7 +23,7 @@ namespace Iviz.XmlRpc
             Struct
         }
 
-        readonly double d;
+        readonly long l;
         readonly object? o;
         readonly Type type;
 
@@ -33,55 +33,55 @@ namespace Iviz.XmlRpc
         public XmlRpcValue(double d)
         {
             o = null;
-            this.d = d;
+            l = DoubleLongReinterpret.ToLong(d);
             type = Type.Double;
         }
 
         public XmlRpcValue(bool b)
         {
             o = null;
-            d = b ? 1 : 0;
+            l = b ? 1 : 0;
             type = Type.Boolean;
         }
 
         public XmlRpcValue(int i)
         {
             o = null;
-            d = i;
+            l = i;
             type = Type.Integer;
         }
 
         public XmlRpcValue(string s)
         {
-            d = 0;
+            l = 0;
             o = s;
             type = Type.String;
         }
 
         public XmlRpcValue(DateTime dt)
         {
-            d = DoubleLongReinterpret.AsDouble(dt.Ticks);
+            l = dt.Ticks;
             o = null;
             type = Type.DateTime;
         }
 
         public XmlRpcValue(byte[] bs)
         {
-            d = 0;
+            l = 0;
             o = bs;
             type = Type.Base64;
         }
 
         public XmlRpcValue(XmlRpcValue[] os)
         {
-            d = 0;
+            l = 0;
             o = os;
             type = Type.Array;
         }
 
         public XmlRpcValue((string Key, XmlRpcValue Value)[] vs)
         {
-            d = 0;
+            l = 0;
             o = vs;
             type = Type.Struct;
         }
@@ -90,7 +90,7 @@ namespace Iviz.XmlRpc
         {
             if (type == Type.Boolean)
             {
-                value = (d != 0);
+                value = (l != 0);
                 return true;
             }
 
@@ -102,7 +102,7 @@ namespace Iviz.XmlRpc
         {
             if (type == Type.Double)
             {
-                value = d;
+                value = DoubleLongReinterpret.ToDouble(l);
                 return true;
             }
 
@@ -114,7 +114,7 @@ namespace Iviz.XmlRpc
         {
             if (type == Type.Integer)
             {
-                value = (int) d;
+                value = (int) l;
                 return true;
             }
 
@@ -138,7 +138,7 @@ namespace Iviz.XmlRpc
         {
             if (type == Type.DateTime)
             {
-                value = new DateTime(DoubleLongReinterpret.AsLong(d));
+                value = new DateTime(l);
                 return true;
             }
 
@@ -184,11 +184,11 @@ namespace Iviz.XmlRpc
 
         public XmlRpcArg AsArg() => type switch
         {
-            Type.Integer => (int) d,
+            Type.Integer => (int) l,
             Type.Empty => throw new InvalidOperationException("Empty object"),
-            Type.Double => d,
-            Type.Boolean => d != 0,
-            Type.DateTime => new DateTime(DoubleLongReinterpret.AsLong(d)),
+            Type.Double => DoubleLongReinterpret.ToDouble(l),
+            Type.Boolean => l != 0,
+            Type.DateTime => new DateTime(l),
             Type.String => (string) o!,
             Type.Array => ((XmlRpcValue[]) o!).Select(wrapper => wrapper.AsArg()).ToArray(),
             Type.Base64 => (byte[]) o!,
@@ -199,11 +199,11 @@ namespace Iviz.XmlRpc
 
         public override string ToString() => type switch
         {
-            Type.Integer => $"[int:{((int)d).ToString()}]",
+            Type.Integer => $"[int:{((int)l).ToString()}]",
             Type.Empty => "[empty]",
-            Type.Double => $"[double:{d.ToString(BuiltIns.Culture)}]",
-            Type.Boolean => d != 0 ? "[bool:true]" : "[bool:false]",
-            Type.DateTime => $"[datetime:{new DateTime(DoubleLongReinterpret.AsLong(d)).ToString(BuiltIns.Culture)}]",
+            Type.Double => $"[double:{DoubleLongReinterpret.ToDouble(l).ToString(BuiltIns.Culture)}]",
+            Type.Boolean => l != 0 ? "[bool:true]" : "[bool:false]",
+            Type.DateTime => $"[datetime:{new DateTime(l).ToString(BuiltIns.Culture)}]",
             Type.String => $"[string:{(string) o!}]",
             Type.Array => $"[array:{((Array) o!).Length.ToString()} elems]",
             Type.Base64 => $"[base64:{((Array) o!).Length.ToString()} bytes]",
@@ -220,8 +220,8 @@ namespace Iviz.XmlRpc
             DoubleLongReinterpret(long ll) => (d, l) = (0, ll);
             DoubleLongReinterpret(double dd) => (l, d) = (0, dd);
 
-            public static double AsDouble(long l) => new DoubleLongReinterpret(l).d;
-            public static long AsLong(double d) => new DoubleLongReinterpret(d).l;
+            public static double ToDouble(long l) => new DoubleLongReinterpret(l).d;
+            public static long ToLong(double d) => new DoubleLongReinterpret(d).l;
         }
     }
 }

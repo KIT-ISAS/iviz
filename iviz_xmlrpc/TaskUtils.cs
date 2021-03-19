@@ -18,9 +18,8 @@ namespace Iviz.XmlRpc
     {
         public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
         {
-            return Task.Factory.StartNew(task, token, 
-                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);            
+            // todo: do something here?
+            return Task.Run(task, token);
         }        
         
         /// <summary>
@@ -370,20 +369,20 @@ namespace Iviz.XmlRpc
             }
         }
 
-        public static async ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
+        public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
         {
             var (t1, t2) = ts;
             if (t1.IsCompleted)
             {
-                return t1;
+                return new(t1);
             }
 
             if (t2.IsCompleted)
             {
-                return t2;
+                return new(t2);
             }
             
-            return await Task.WhenAny(t1, t2);
+            return new(Task.WhenAny(t1, t2));
         }
 
         const int MaxTokenWait = 5000;
