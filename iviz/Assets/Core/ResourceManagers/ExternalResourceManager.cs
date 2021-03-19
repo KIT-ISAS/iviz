@@ -125,7 +125,7 @@ namespace Iviz.Displays
             }
         }
 
-        public async Task ClearModelCacheAsync(CancellationToken token = default)
+        public Task ClearModelCacheAsync(CancellationToken token = default)
         {
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();
@@ -159,12 +159,12 @@ namespace Iviz.Displays
             loadedScenes.Clear();
             loadedTextures.Clear();
 
-            await WriteResourceFileAsync(token);
+            return WriteResourceFileAsync(token);
         }
 
-        async Task WriteResourceFileAsync(CancellationToken token)
+        Task WriteResourceFileAsync(CancellationToken token)
         {
-            await FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
+            return FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
                 JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);
         }
 
@@ -294,7 +294,7 @@ namespace Iviz.Displays
             return TryGetModel(uriString, out resource) || TryGetScene(uriString, out resource);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         public async ValueTask<Info<GameObject>> TryGetGameObjectAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token = default)
         {
@@ -350,7 +350,7 @@ namespace Iviz.Displays
             return loadedModels.TryGetValue(uriString, out resource);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> TryGetModelAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -381,7 +381,7 @@ namespace Iviz.Displays
                 : await TryGetModelFromServerAsync(uriString, provider, token);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -430,7 +430,7 @@ namespace Iviz.Displays
             return loadedScenes.TryGetValue(uriString, out resource);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> TryGetSceneAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -456,7 +456,7 @@ namespace Iviz.Displays
                 : await TryGetSceneFromServerAsync(uriString, provider, token);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -480,7 +480,7 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         public async ValueTask<Info<Texture2D>> TryGetTextureAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -526,7 +526,7 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
@@ -552,7 +552,7 @@ namespace Iviz.Displays
         }
 
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> LoadLocalModelAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -587,7 +587,7 @@ namespace Iviz.Displays
             return resource;
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
             CancellationToken token)
         {
@@ -620,7 +620,7 @@ namespace Iviz.Displays
             return resource;
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> LoadLocalSceneAsync([NotNull] string uriString, [NotNull] string localPath,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -656,7 +656,7 @@ namespace Iviz.Displays
             return resource;
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<GameObject>> ProcessModelResponseAsync([NotNull] string uriString,
             [NotNull] GetModelResourceResponse msg, [NotNull] IExternalServiceProvider provider,
             CancellationToken token)
@@ -697,7 +697,7 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         async ValueTask<Info<Texture2D>> ProcessTextureResponseAsync([NotNull] string uriString,
             [NotNull] GetModelTextureResponse msg, CancellationToken token)
         {
@@ -772,7 +772,6 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull]
         [ItemNotNull]
         async ValueTask<GameObject> CreateModelObjectAsync([NotNull] string uriString, [NotNull] Model msg,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
@@ -793,7 +792,6 @@ namespace Iviz.Displays
             Spot
         }
 
-        [NotNull]
         [ItemNotNull]
         async ValueTask<GameObject> CreateSceneNodeAsync([NotNull] Scene scene,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)

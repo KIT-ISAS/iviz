@@ -8,11 +8,6 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class AssetWrapperResource : MarkerResource
     {
-        protected override void Awake()
-        {
-            IgnoreBoxCollider();
-        }
-        
         public override int Layer
         {
             get => base.Layer;

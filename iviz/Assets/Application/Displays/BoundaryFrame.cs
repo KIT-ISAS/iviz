@@ -85,7 +85,8 @@ namespace Iviz.Controllers
                 Vector3 size = bounds.size.Abs();
 
                 float minAxisLength = Mathf.Min(Mathf.Min(size.x, size.y), size.z);
-                FrameAxisLength = minAxisLength * 0.1f;
+                float maxAxisLength = Mathf.Max(Mathf.Max(size.x, size.y), size.z);
+                FrameAxisLength = Mathf.Min(maxAxisLength * 0.1f, minAxisLength * 0.5f);
                 frames[0].transform.localPosition = center + new Vector3(size.x, -size.y, size.z) / 2;
                 frames[1].transform.localPosition = center + new Vector3(size.x, -size.y, -size.z) / 2;
                 frames[2].transform.localPosition = center + new Vector3(-size.x, -size.y, -size.z) / 2;
@@ -172,20 +173,12 @@ namespace Iviz.Controllers
                 CreateFrameLink(frameLinkHolder)
             };
 
-            foreach (var (frameLink, direction) in frameLinks.Zip(Directions))
-            {
-                frameLink.transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
-                frameLink.transform.localPosition = -0.5f * frameAxisLength * direction;
-            }
-
-            /*
             frameLinks[0].transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
             frameLinks[0].transform.localPosition = -0.5f * frameAxisLength * Vector3.right;
             frameLinks[1].transform.localScale = new Vector3(frameAxisWidth, frameAxisWidth, frameAxisLength);
             frameLinks[1].transform.localPosition = -0.5f * frameAxisLength * Vector3.forward;
             frameLinks[2].transform.localScale = new Vector3(frameAxisWidth, frameAxisLength, frameAxisWidth);
             frameLinks[2].transform.localPosition = 0.5f * frameAxisLength * Vector3.up;
-            */
 
             return frameLinkHolder;
         }

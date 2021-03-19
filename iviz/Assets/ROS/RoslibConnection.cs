@@ -128,7 +128,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -161,21 +161,21 @@ namespace Iviz.Ros
                     LogInternalIfHololens("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
-                        .Select(topic => Task.Run(() => ReAdvertiseService(topic, token).AwaitNoThrow(this), token))
+                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this))
                         .WhenAll().Caf();
                     LogInternalIfHololens("+++ Done advertising services");
 
                     LogInternalIfHololens("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
-                        .Select(topic => Task.Run(() => ReAdvertise(topic, token).AwaitNoThrow(this), token))
+                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this))
                         .WhenAll().Caf();
                     LogInternalIfHololens("+++ Done readvertising");
 
                     LogInternalIfHololens("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
-                        .Select(topic => Task.Run(() => ReSubscribe(topic, token).AwaitNoThrow(this), token))
+                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this))
                         .WhenAll().Caf();
                     LogInternalIfHololens("+++ Done resubscribing");
 

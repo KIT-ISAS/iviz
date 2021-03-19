@@ -57,7 +57,7 @@ namespace Iviz.Displays
         static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
             IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
-            switch (msg.OrientationHint.ToString().ToUpperInvariant())
+            switch (msg.OrientationHint.ToUpperInvariant())
             {
                 case "Z_UP":
                     root.transform.localRotation = Quaternion.Euler(0, -90, 0);
@@ -226,7 +226,7 @@ namespace Iviz.Displays
         }
 
         [ItemCanBeNull]
-        static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
+        static ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
             [NotNull] string localPath, IExternalServiceProvider provider, CancellationToken token)
         {
             Uri uri = new Uri(uriString);
@@ -238,7 +238,7 @@ namespace Iviz.Displays
             }
             
             string textureUri = $"{uri.Scheme}://{uri.Host}{directoryName}/{localPath}";
-            return await Resource.GetTextureResourceAsync(textureUri, provider, token);
+            return Resource.GetTextureResourceAsync(textureUri, provider, token);
         }
 
         static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)

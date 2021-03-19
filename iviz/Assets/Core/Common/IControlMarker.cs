@@ -11,9 +11,9 @@ namespace Iviz.Displays
         ClickOnly,
 
         MoveAxisX,
-        MovePlaneYZ,
+        MovePlaneYz,
         RotateAxisX,
-        MovePlaneYZ_RotateAxisX,
+        MovePlaneYzRotateAxisX,
         Frame,
 
         Move3D,

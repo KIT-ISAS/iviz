@@ -36,6 +36,11 @@ namespace Iviz.Displays
         [SerializeField] Transform targetTransform;
         [SerializeField] InteractionModeType interactionMode;
 
+        DraggableTranslation draggableTranslation;
+        DraggableRotation draggableRotation;
+        DraggablePlane draggablePlane;
+
+
         BoundaryFrame frame;
 
         bool handlesPointToCamera;
@@ -157,6 +162,50 @@ namespace Iviz.Displays
             }
         }
 
+        enum BoundaryMode
+        {
+            None,
+            MoveAxisX,
+            MovePlaneYZ
+        }
+
+        void SetBoundaryMode(BoundaryMode mode)
+        {
+            switch (mode)
+            {
+                case BoundaryMode.None:
+                    Destroy(draggableTranslation);
+                    Destroy(draggablePlane);
+                    break;
+                case BoundaryMode.MoveAxisX:
+                    Destroy(draggableRotation);
+                    Destroy(draggablePlane);
+                    if (draggableTranslation == null)
+                    {
+                        draggableTranslation =gameObject.AddComponent<DraggableTranslation>();
+                        draggableTranslation.TargetTransform = TargetTransform;
+                        draggableTranslation.Moved += RaiseMoved;
+                        draggableTranslation.PointerDown += PointerDown;
+                        draggableTranslation.PointerUp += PointerUp;
+                    }
+
+                    break;
+                case BoundaryMode.MovePlaneYZ:
+                    Destroy(draggableRotation);
+                    Destroy(draggableTranslation);
+                    if (draggablePlane == null)
+                    {
+                        draggablePlane =gameObject.AddComponent<DraggablePlane>();
+                        draggablePlane.TargetTransform = TargetTransform;
+                        draggablePlane.Moved += RaiseMoved;
+                        draggablePlane.PointerDown += PointerDown;
+                        draggablePlane.PointerUp += PointerUp;
+                    }
+
+                    break;
+            }
+        }
+
         public InteractionModeType InteractionMode
         {
             get => interactionMode;
@@ -182,36 +231,29 @@ namespace Iviz.Displays
                     case InteractionModeType.ClickOnly:
                         holderCollider.enabled = true;
                         frame.Visible = true;
+                        SetBoundaryMode(BoundaryMode.None);
                         break;
                     case InteractionModeType.MoveAxisX:
+                        holderCollider.enabled = true;
                         arrowPx.SetActive(true);
                         arrowMx.SetActive(true);
+                        SetBoundaryMode(BoundaryMode.MoveAxisX);
                         break;
-                    case InteractionModeType.MovePlaneYZ:
-                        //arrowPy.SetActive(true);
-                        //arrowMy.SetActive(true);
-                        //arrowPz.SetActive(true);
-                        //arrowMz.SetActive(true);
+                    case InteractionModeType.MovePlaneYz:
+                        holderCollider.enabled = true;
                         ringXPlane.SetActive(true);
+                        SetBoundaryMode(BoundaryMode.MovePlaneYZ);
                         break;
                     case InteractionModeType.RotateAxisX:
                         ringX.SetActive(true);
                         break;
-                    case InteractionModeType.MovePlaneYZ_RotateAxisX:
-                        //arrowPy.SetActive(true);
-                        //arrowMy.SetActive(true);
-                        //arrowPz.SetActive(true);
-                        //arrowMz.SetActive(true);
+                    case InteractionModeType.MovePlaneYzRotateAxisX:
+                        holderCollider.enabled = true;
                         ringX.SetActive(true);
                         ringXPlane.SetActive(true);
+                        SetBoundaryMode(BoundaryMode.MovePlaneYZ);
                         break;
                     case InteractionModeType.Frame:
-                        //arrowPx.SetActive(true);
-                        //arrowMx.SetActive(true);
-                        //arrowPy.SetActive(true);
-                        //arrowMy.SetActive(true);
-                        //arrowPz.SetActive(true);
-                        //arrowMZ.SetActive(true);
                         ringZ.SetActive(true);
                         ringZPlane.SetActive(true);
                         break;
@@ -261,9 +303,9 @@ namespace Iviz.Displays
                     case InteractionModeType.MoveAxisX:
                         holderScale = newBounds.size.z;
                         break;
-                    case InteractionModeType.MovePlaneYZ:
+                    case InteractionModeType.MovePlaneYz:
                     case InteractionModeType.RotateAxisX:
-                    case InteractionModeType.MovePlaneYZ_RotateAxisX:
+                    case InteractionModeType.MovePlaneYzRotateAxisX:
                         holderScale = Mathf.Max(newBounds.size.x, newBounds.size.y);
                         break;
                     default:
@@ -277,7 +319,7 @@ namespace Iviz.Displays
                 holderCollider.size = newBounds.size / (2 * holderScale);
 
                 float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
-                float absoluteScaleY = transform.lossyScale.y; 
+                float absoluteScaleY = transform.lossyScale.y;
                 menuObject.transform.localScale = 0.5f * Vector3.one;
                 menuObject.GetComponent<Billboard>().Offset =
                     new Vector3(0, 1.5f * maxScale + newBounds.center.y, 0.1f * maxScale) * absoluteScaleY;
@@ -308,6 +350,8 @@ namespace Iviz.Displays
 
         public void Suspend()
         {
+            SetBoundaryMode(BoundaryMode.None);
+            
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
             InteractionMode = InteractionModeType.None;
@@ -362,7 +406,7 @@ namespace Iviz.Displays
             frame.Layer = LayerType.IgnoreRaycast;
             frame.Color = FrameInactiveColor;
 
-            InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
+            InteractionMode = InteractionModeType.MovePlaneYzRotateAxisX;
         }
 
         void LateUpdate()
@@ -393,6 +437,7 @@ namespace Iviz.Displays
         }
 
         bool canMove;
+
         public void OnPointerDown([NotNull] PointerEventData eventData)
         {
             if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)

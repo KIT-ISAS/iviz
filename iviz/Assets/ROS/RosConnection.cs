@@ -29,7 +29,7 @@ namespace Iviz.Ros
 
         protected RosConnection()
         {
-            task = Task.Run(Run);
+            task = TaskUtils.StartLongTask(Run);
         }
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;

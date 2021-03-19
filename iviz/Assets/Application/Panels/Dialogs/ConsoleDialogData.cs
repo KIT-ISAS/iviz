@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
-using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -305,14 +303,6 @@ namespace Iviz.App
 
             dialog.Text.SetText(description);
             queueIsDirty = false;
-        }
-        
-        sealed class ConcurrentSet<T> : IEnumerable<T>
-        {
-            readonly ConcurrentDictionary<T, object> backend = new ConcurrentDictionary<T, object>();
-            public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-            public void Add([NotNull] T s) => backend[s] = null;
         }
     }
 }

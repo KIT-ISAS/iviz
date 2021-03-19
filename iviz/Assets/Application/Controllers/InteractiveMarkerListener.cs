@@ -341,7 +341,7 @@ namespace Iviz.Controllers
                 position != null
             );
             Publisher.Publish(msg);
-            Logger.Info($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
+            Logger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnInteractiveControlObjectMoved(
@@ -361,7 +361,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
-            Logger.Info($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
+            Logger.Debug($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
         }
 
         internal void OnInteractiveControlObjectMenuSelect(
@@ -381,7 +381,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
-            Logger.Info($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
+            Logger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 
         void DestroyAllMarkers()

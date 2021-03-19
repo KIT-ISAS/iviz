@@ -586,13 +586,13 @@ namespace Iviz.Controllers
                 return;
             }
 
+            lineResource.ElementScale = elementScale;
+
             if (HasSameHash(msg))
             {
-                //Debug.Log("Same message!");
                 return;
             }
 
-            lineResource.ElementScale = elementScale;
             LineResource.DirectLineSetter setterCallback =
                 isStrip ? LineHelper.GetLineSetterForStrip(msg) : LineHelper.GetLineSetterForList(msg);
             lineResource.SetDirect(setterCallback, isStrip ? msg.Points.Length - 1 : msg.Points.Length / 2);
@@ -645,13 +645,14 @@ namespace Iviz.Controllers
                 return;
             }
 
+            meshList.ElementScale3 = msg.Scale.Ros2Unity().Abs();
+
             if (HasSameHash(msg))
             {
                 return;
             }
 
             PointListResource.DirectPointSetter setterCallback = PointHelper.GetPointSetter(msg);
-            meshList.ElementScale3 = msg.Scale.Ros2Unity().Abs();
             meshList.SetDirect(setterCallback, msg.Points.Length);
         }
 
@@ -995,18 +996,23 @@ namespace Iviz.Controllers
             previousHash = null;
         }
 
-        static uint CalculateMarkerHash([NotNull] Marker msg)
+        static uint CalculateMarkerHash([NotNull] Marker msg, bool useSize)
         {
             uint hash = Crc32.Compute(msg.Type);
             hash = Crc32.Compute(msg.Color, hash);
             hash = Crc32.Compute(msg.Points, hash);
             hash = Crc32.Compute(msg.Colors, hash);
+            if (useSize)
+            {
+                hash = Crc32.Compute(msg.Scale, hash);
+            }
+
             return hash;
         }
 
-        bool HasSameHash([NotNull] Marker msg)
+        bool HasSameHash([NotNull] Marker msg, bool useScale = false)
         {
-            uint currentHash = CalculateMarkerHash(msg);
+            uint currentHash = CalculateMarkerHash(msg, useScale);
             if (previousHash == currentHash)
             {
                 return true;

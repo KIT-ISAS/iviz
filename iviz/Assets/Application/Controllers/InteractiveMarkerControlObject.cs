@@ -207,13 +207,13 @@ namespace Iviz.Controllers
                         mControl.InteractionMode = InteractionModeType.MoveAxisX;
                         break;
                     case InteractionMode.MovePlane:
-                        mControl.InteractionMode = InteractionModeType.MovePlaneYZ;
+                        mControl.InteractionMode = InteractionModeType.MovePlaneYz;
                         break;
                     case InteractionMode.RotateAxis:
                         mControl.InteractionMode = InteractionModeType.RotateAxisX;
                         break;
                     case InteractionMode.MoveRotate:
-                        mControl.InteractionMode = InteractionModeType.MovePlaneYZ_RotateAxisX;
+                        mControl.InteractionMode = InteractionModeType.MovePlaneYzRotateAxisX;
                         break;
                     case InteractionMode.Move3D:
                         mControl.InteractionMode = InteractionModeType.Move3D;
