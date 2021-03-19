@@ -97,5 +97,6 @@ namespace Iviz.Msgs.IvizMsgs
         public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);
         public readonly Vector3f Normalized => this / Norm;
         public readonly Vector3f Cross(in Vector3f v) => new Vector3f(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+        public static implicit operator Vector3f(in (float X, float Y, float Z) p) => new Vector3f(p.X, p.Y, p.Z);
     }
 }
