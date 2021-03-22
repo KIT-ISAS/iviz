@@ -10,8 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_roslib", "iviz_roslib\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_test", "iviz_test\iviz_test.csproj", "{31BE8877-06FD-41AE-9AFE-55C420060723}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iviz_bridge", "iviz_bridge\iviz_bridge.csproj", "{C4E99EC9-02D5-4770-B748-116127B2BA5E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_model_service", "iviz_model_service\iviz_model_service.csproj", "{34265C03-B3F5-43B0-85F1-95C6BCBE9437}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_urdf", "iviz_urdf\iviz_urdf.csproj", "{A7115C73-1777-402A-AA29-CEDD974463D2}"
@@ -56,10 +54,6 @@ Global
 		{31BE8877-06FD-41AE-9AFE-55C420060723}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31BE8877-06FD-41AE-9AFE-55C420060723}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31BE8877-06FD-41AE-9AFE-55C420060723}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4E99EC9-02D5-4770-B748-116127B2BA5E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34265C03-B3F5-43B0-85F1-95C6BCBE9437}.Release|Any CPU.ActiveCfg = Release|Any CPU
