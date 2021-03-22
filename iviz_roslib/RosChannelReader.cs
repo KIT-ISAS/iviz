@@ -39,7 +39,7 @@ namespace Iviz.Roslib
         /// Use this only as an estimate for the number of elements.
         /// </summary>
         public int Count => backQueue.Count;
-        
+
         public IRosSubscriber<T> Subscriber =>
             subscriber ?? throw new InvalidOperationException("Channel has not been started!");
 
@@ -476,6 +476,14 @@ namespace Iviz.Roslib
 
     public static class RosChannelReader
     {
+        public static async ValueTask<RosChannelReader<T>> CreateAsync<T>(IRosClient client, string topic)
+            where T : IMessage, IDeserializable<T>, new()
+        {
+            var writer = new RosChannelReader<T>();
+            await writer.StartAsync(client, topic);
+            return writer;
+        }
+
         public static IRosChannelReader CreateInstance(Type msgType)
         {
             if (typeof(IMessage) == msgType || !typeof(IMessage).IsAssignableFrom(msgType))

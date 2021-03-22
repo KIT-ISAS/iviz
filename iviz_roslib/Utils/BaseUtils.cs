@@ -15,6 +15,8 @@ namespace Iviz.Roslib.Utils
 {
     public static class BaseUtils
     {
+        public static readonly Random Random = new();
+
         public const string GenericExceptionFormat = "{0}: {1}";
 
         static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);

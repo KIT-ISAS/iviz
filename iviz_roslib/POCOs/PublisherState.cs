@@ -26,23 +26,16 @@ namespace Iviz.Roslib
         public ReadOnlyCollection<string> TopicIds { get; }
         public ReadOnlyCollection<PublisherSenderState> Senders { get; }
 
-        internal PublisherTopicState(string topic, string type, IList<string> topicIds,
-            IList<PublisherSenderState> senders)
-        {
-            Topic = topic;
-            Type = type;
-            TopicIds = topicIds.AsReadOnly();
-            Senders = senders.AsReadOnly();
-        }
+        internal PublisherTopicState(string topic, string type,
+            IList<string> topicIds,
+            IList<PublisherSenderState> senders) =>
+            (Topic, Type, TopicIds, Senders) = (topic, type, topicIds.AsReadOnly(), senders.AsReadOnly());
     }
 
     public sealed class PublisherState : JsonToString
     {
         public ReadOnlyCollection<PublisherTopicState> Topics { get; }
 
-        internal PublisherState(IList<PublisherTopicState> topics)
-        {
-            Topics = topics.AsReadOnly();
-        }
+        internal PublisherState(IList<PublisherTopicState> topics) => Topics = topics.AsReadOnly();
     }
 }

@@ -47,7 +47,6 @@ namespace Iviz.Roslib
         readonly TopicInfo<T> topicInfo;
         readonly Task task;
         readonly byte[] lengthBuffer = new byte[4];
-
         readonly TcpClient tcpClient;
 
         long bytesDropped;
@@ -269,11 +268,10 @@ namespace Iviz.Roslib
             try
             {
                 using (tcpClient)
-                using (NetworkStream stream = tcpClient.GetStream())
                 {
                     Status = SenderStatus.Active;
                     Logger.LogDebugFormat("{0}: Started!", this);
-                    await ProcessLoop(stream, latchedMsg);
+                    await ProcessLoop(tcpClient.GetStream(), latchedMsg);
                 }
             }
             catch (Exception e)

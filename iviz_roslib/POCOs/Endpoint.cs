@@ -13,35 +13,17 @@ namespace Iviz.Roslib
         [DataMember] public string Hostname { get; }
         [DataMember] public int Port { get; }
 
-        internal Endpoint(string hostname, int port)
-        {
-            Hostname = hostname;
-            Port = port;
-        }
-        
-        internal Endpoint(IPEndPoint endPoint)
-        {
-            Hostname = endPoint.Address.ToString();
-            Port = endPoint.Port;
-        }
-        
-        public bool Equals(Endpoint? other)
-        {
-            return other != null && Hostname == other.Value.Hostname && Port == other.Value.Port;
-        }
+        internal Endpoint(string hostname, int port) => (Hostname, Port) = (hostname, port);
 
-        public bool Equals(Endpoint other)
-        {
-            var (hostname, port) = other;
-            return Hostname == hostname && Port == port;
-        }
+        internal Endpoint(IPEndPoint endPoint) => (Hostname, Port) = (endPoint.Address.ToString(), endPoint.Port);
 
+        public bool Equals(Endpoint? other) =>
+            other != null && Hostname == other.Value.Hostname && Port == other.Value.Port;
+
+        public bool Equals(Endpoint other) => (other.Hostname, other.Port) == (Hostname, Port);
 
         public void Deconstruct(out string hostname, out int port) => (hostname, port) = (Hostname, Port);
 
-        public override string ToString()
-        {
-            return $"[Endpoint '{Hostname}':{Port}]";
-        }
+        public override string ToString() => $"[Endpoint '{Hostname}':{Port}]";
     }
 }

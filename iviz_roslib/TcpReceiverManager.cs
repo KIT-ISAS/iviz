@@ -1,7 +1,4 @@
-﻿
-
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -134,7 +131,7 @@ namespace Iviz.Roslib
                 return null;
             }
 
-            if (response.Protocol.Port == 0)
+            if (string.IsNullOrEmpty(response.Protocol.Hostname) || response.Protocol.Port == 0)
             {
                 Logger.LogErrorFormat("{0}: Connection request to publisher {1} returned an uninitialized address!",
                     this, remoteUri);
@@ -171,11 +168,9 @@ namespace Iviz.Roslib
 
         void CreateConnection(Endpoint? remoteEndpoint, Uri remoteUri)
         {
-            TcpReceiverAsync<T> connection =
-                new(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay) {IsPaused = IsPaused};
-
-            connectionsByUri[remoteUri] = connection;
-            connection.Start(TimeoutInMs);
+            connectionsByUri[remoteUri] =
+                new TcpReceiverAsync<T>(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay, TimeoutInMs)
+                    {IsPaused = IsPaused};
         }
 
         public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
@@ -246,7 +241,7 @@ namespace Iviz.Roslib
                 receivers = connectionsByUri.Values.ToArray();
                 connectionsByUri.Clear();
             }
-            
+
             await receivers.Select(receiver => receiver.DisposeAsync(token)).WhenAll();
             subscriber.RaiseNumPublishersChanged();
         }
