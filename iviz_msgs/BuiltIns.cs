@@ -238,5 +238,27 @@ namespace Iviz.Msgs
         {
             return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
         }
+
+        public static byte[] SerializeToArray(this ISerializable o)
+        {
+            byte[] bytes = new byte[o.RosMessageLength];
+            Buffer.Serialize(o, bytes);
+            return bytes;
+        }
+        
+        public static uint SerializeToArray<T>(this T o, byte[] bytes, int offset = 0) where T : ISerializable
+        {
+            return Buffer.Serialize(o, bytes, offset);
+        }
+
+        public static T DeserializeFromArray<T>(this T generator, byte[] bytes, int size = -1, int offset = 0) where T : ISerializable
+        {
+            return Buffer.Deserialize(generator, bytes, size, offset);
+        }        
+        
+        public static T DeserializeFromArray<T>(this IDeserializable<T> generator, byte[] bytes, int size = -1, int offset = 0) where T : ISerializable
+        {
+            return Buffer.Deserialize(generator, bytes, size, offset);
+        }          
     }
 }

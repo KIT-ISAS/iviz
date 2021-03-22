@@ -418,7 +418,7 @@ namespace Iviz.Msgs
         /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public unsafe static T Deserialize<T>(T generator, byte[] buffer, int size = -1, int offset = 0) where T : ISerializable
+        public static unsafe T Deserialize<T>(T generator, byte[] buffer, int size = -1, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {
@@ -435,15 +435,21 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (size != -1 && buffer.Length < size)
+            if (size < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }            
 
+            int span = (size == -1) ? buffer.Length : size;
+            if (offset + span > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }            
+
+            
             fixed (byte* bPtr = buffer)
             {
-                int span = (size == -1) ? buffer.Length : size;
-                Buffer b = new Buffer(bPtr + offset, bPtr + span);
+                Buffer b = new Buffer(bPtr + offset, bPtr + offset + span);
                 return (T) generator.RosDeserialize(ref b);
             }
         }
@@ -465,7 +471,7 @@ namespace Iviz.Msgs
         /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1, int offset = 0)
+        public static unsafe T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1, int offset = 0)
             where T : ISerializable
         {
             if (buffer == null)
@@ -478,7 +484,7 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (size != -1 && buffer.Length < size)
+            if (size < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
@@ -488,16 +494,15 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(generator));
             }
 
-            return DeserializeImpl(generator, buffer, size, offset);
-        }
-
-        static unsafe T DeserializeImpl<T>(IDeserializable<T> generator, byte[] buffer, int size, int offset)
-            where T : ISerializable
-        {
+            int span = (size == -1) ? buffer.Length : size;
+            if (offset + span > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }            
+            
             fixed (byte* bPtr = buffer)
             {
-                int span = (size == -1) ? buffer.Length : size;
-                Buffer b = new Buffer(bPtr + offset, bPtr + span);
+                Buffer b = new Buffer(bPtr + offset, bPtr + offset + span);
                 return generator.RosDeserialize(ref b);
             }
         }
