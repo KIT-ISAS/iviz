@@ -24,7 +24,7 @@
 		238647F225F73C3200DA5604 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E125F73C3200DA5604 /* dictionary.cpp */; };
 		238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647E225F73C3200DA5604 /* OpenCv.hpp */; };
 		238647F425F73C3200DA5604 /* OpenCv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E325F73C3200DA5604 /* OpenCv.cpp */; };
-		238647F625F7440000DA5604 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 238647F525F7440000DA5604 /* opencv2.framework */; };
+		239F617B25F74C09000CC38F /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239F617A25F74C09000CC38F /* opencv2.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,9 +38,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		2359D2EB25F4BCBD00316810 /* IvizOpencv_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IvizOpencv_iOS.framework; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv_iOS.framework"; sourceTree = "<absolute>"; };
-		2359D2EE25F4BCBD00316810 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		238647CC25F73BF900DA5604 /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "IvizOpencv-iOSTests.xctest"; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv-iOSTests.xctest"; sourceTree = "<absolute>"; };
 		238647D225F73C3200DA5604 /* dictionary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dictionary.hpp; sourceTree = "<group>"; };
 		238647D325F73C3200DA5604 /* charuco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = charuco.hpp; sourceTree = "<group>"; };
 		238647D425F73C3200DA5604 /* aruco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = aruco.hpp; sourceTree = "<group>"; };
@@ -58,9 +55,11 @@
 		238647E125F73C3200DA5604 /* dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dictionary.cpp; sourceTree = "<group>"; };
 		238647E225F73C3200DA5604 /* OpenCv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OpenCv.hpp; sourceTree = "<group>"; };
 		238647E325F73C3200DA5604 /* OpenCv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenCv.cpp; sourceTree = "<group>"; };
-		238647F525F7440000DA5604 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = opencv2.framework; path = IvizOpencv/opencv2.framework; sourceTree = "<group>"; };
 		2391451225F3AAFA0073171E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2391453825F3C9090073171E /* IvizOpencv.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IvizOpencv.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		239F617425F749A8000CC38F /* IvizOpencv_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IvizOpencv_iOS.framework; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv_iOS.framework"; sourceTree = "<absolute>"; };
+		239F617525F749A8000CC38F /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "IvizOpencv-iOSTests.xctest"; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv-iOSTests.xctest"; sourceTree = "<absolute>"; };
+		239F617A25F74C09000CC38F /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,21 +81,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				238647F625F7440000DA5604 /* opencv2.framework in Frameworks */,
+				239F617B25F74C09000CC38F /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2359D2EC25F4BCBD00316810 /* IvizOpencv-iOS */ = {
-			isa = PBXGroup;
-			children = (
-				2359D2EE25F4BCBD00316810 /* Info.plist */,
-			);
-			path = "IvizOpencv-iOS";
-			sourceTree = "<group>";
-		};
 		238647CD25F73C3200DA5604 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -168,7 +159,6 @@
 				238647CD25F73C3200DA5604 /* src */,
 				2391451125F3AAFA0073171E /* IvizOpencv */,
 				2391453825F3C9090073171E /* IvizOpencv.bundle */,
-				2359D2EC25F4BCBD00316810 /* IvizOpencv-iOS */,
 				2391453925F3D98C0073171E /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -184,7 +174,7 @@
 		2391453925F3D98C0073171E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				238647F525F7440000DA5604 /* opencv2.framework */,
+				239F617A25F74C09000CC38F /* opencv2.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -235,7 +225,7 @@
 			);
 			name = "IvizOpencv-iOS";
 			productName = "IvizOpencv-iOS";
-			productReference = 2359D2EB25F4BCBD00316810 /* IvizOpencv_iOS.framework */;
+			productReference = 239F617425F749A8000CC38F /* IvizOpencv_iOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		2359D2F225F4BCBD00316810 /* IvizOpencv-iOSTests */ = {
@@ -253,7 +243,7 @@
 			);
 			name = "IvizOpencv-iOSTests";
 			productName = "IvizOpencv-iOSTests";
-			productReference = 238647CC25F73BF900DA5604 /* IvizOpencv-iOSTests.xctest */;
+			productReference = 239F617525F749A8000CC38F /* IvizOpencv-iOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		2391450E25F3AAFA0073171E /* IvizOpencv */ = {
