@@ -10,7 +10,6 @@ using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -416,7 +415,7 @@ namespace Iviz.Roslib
 
                 if (!IsPaused)
                 {
-                    T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, fixedSizeWithHeader, 4);
+                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, fixedSizeWithHeader, 4);
                     manager.MessageCallback(message, this);
                 }
 
@@ -453,7 +452,7 @@ namespace Iviz.Roslib
                     numReceived++;
                     bytesReceived += rcvLength + 4;
 
-                    T message = Buffer.Deserialize(topicInfo.Generator, readBuffer.Array, rcvLength);
+                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
                     manager.MessageCallback(message, this);
                 }
 
