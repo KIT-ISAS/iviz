@@ -182,7 +182,7 @@ namespace Iviz.Displays
                     Destroy(draggablePlane);
                     if (draggableTranslation == null)
                     {
-                        draggableTranslation =gameObject.AddComponent<DraggableTranslation>();
+                        draggableTranslation = gameObject.AddComponent<DraggableTranslation>();
                         draggableTranslation.TargetTransform = TargetTransform;
                         draggableTranslation.Moved += RaiseMoved;
                         draggableTranslation.PointerDown += PointerDown;
@@ -195,7 +195,7 @@ namespace Iviz.Displays
                     Destroy(draggableTranslation);
                     if (draggablePlane == null)
                     {
-                        draggablePlane =gameObject.AddComponent<DraggablePlane>();
+                        draggablePlane = gameObject.AddComponent<DraggablePlane>();
                         draggablePlane.TargetTransform = TargetTransform;
                         draggablePlane.Moved += RaiseMoved;
                         draggablePlane.PointerDown += PointerDown;
@@ -351,7 +351,7 @@ namespace Iviz.Displays
         public void Suspend()
         {
             SetBoundaryMode(BoundaryMode.None);
-            
+
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
             InteractionMode = InteractionModeType.None;
@@ -367,7 +367,7 @@ namespace Iviz.Displays
 
         void RaiseMoved(in Pose pose)
         {
-            if (canMove)
+            if (isEngaged)
             {
                 Moved?.Invoke(pose);
             }
@@ -375,13 +375,23 @@ namespace Iviz.Displays
 
         void RaisePointerUp()
         {
+            if (!isEngaged)
+            {
+                return;
+            }
+
             PointerUp?.Invoke();
-            canMove = false;
+            isEngaged = false;
         }
 
         void RaisePointerDown()
         {
-            canMove = true;
+            if (isEngaged)
+            {
+                return;
+            }
+
+            isEngaged = true;
             PointerDown?.Invoke();
         }
 
@@ -436,9 +446,9 @@ namespace Iviz.Displays
             transform.rotation = TfListener.OriginFrame.transform.rotation;
         }
 
-        bool canMove;
+        bool isEngaged;
 
-        public void OnPointerDown([NotNull] PointerEventData eventData)
+        void IPointerDownHandler.OnPointerDown([NotNull] PointerEventData eventData)
         {
             if (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject)
             {
@@ -448,7 +458,7 @@ namespace Iviz.Displays
             RaisePointerDown();
         }
 
-        public void OnPointerUp([NotNull] PointerEventData eventData)
+        void IPointerUpHandler.OnPointerUp([NotNull] PointerEventData eventData)
         {
             if (eventData.pointerCurrentRaycast.gameObject == menuObject)
             {
