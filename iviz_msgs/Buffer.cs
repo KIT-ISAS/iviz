@@ -415,9 +415,10 @@ namespace Iviz.Msgs
         /// <param name="size">
         /// Optional. The expected size of the message inside of the array. Must be less or equal the array size.
         /// </param>
+        /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(T generator, byte[] buffer, int size = -1) where T : ISerializable
+        public static T Deserialize<T>(T generator, byte[] buffer, int size = -1, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {
@@ -428,11 +429,21 @@ namespace Iviz.Msgs
             {
                 throw new ArgumentNullException(nameof(generator));
             }
+            
+            if (offset < 0 || buffer.Length < offset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (size != -1 && buffer.Length < size)
+            {
+                throw new ArgumentOutOfRangeException(nameof(size));
+            }
 
             fixed (byte* bPtr = buffer)
             {
                 int span = (size == -1) ? buffer.Length : size;
-                Buffer b = new Buffer(bPtr, bPtr + span);
+                var b = new Buffer(bPtr + offset, bPtr + span);
                 return (T) generator.RosDeserialize(ref b);
             }
         }
