@@ -14,13 +14,8 @@ namespace Iviz.Roslib.XmlRpc
         public int TimeoutInMs { get; }
         public Uri Uri { get; }
 
-        public NodeClient(string callerId, Uri callerUri, Uri otherUri, int timeoutInMs = 2000)
-        {
-            CallerId = callerId;
-            CallerUri = callerUri;
-            Uri = otherUri;
-            TimeoutInMs = timeoutInMs;
-        }
+        public NodeClient(string callerId, Uri callerUri, Uri otherUri, int timeoutInMs = 2000) =>
+            (CallerId, CallerUri, Uri, TimeoutInMs) = (callerId, callerUri, otherUri, timeoutInMs);
 
         public RequestTopicResponse RequestTopic(string topic)
         {
@@ -106,28 +101,23 @@ namespace Iviz.Roslib.XmlRpc
         }
 
 
-        public class ProtocolResponse
+        public sealed class ProtocolResponse
         {
             public string Type { get; }
             public string Hostname { get; }
             public int Port { get; }
 
-            public ProtocolResponse(string type, string hostname, int port)
-            {
-                Type = type;
-                Hostname = hostname;
-                Port = port;
-            }
+            public ProtocolResponse(string type, string hostname, int port) =>
+                (Type, Hostname, Port) = (type, hostname, port);
         }
 
-        public class RequestTopicResponse : BaseResponse
+        public sealed class RequestTopicResponse : BaseResponse
         {
             public ProtocolResponse? Protocol { get; }
 
-            public RequestTopicResponse(XmlRpcValue[]? a)
+            public RequestTopicResponse(XmlRpcValue[] a)
             {
-                if (a is null ||
-                    a.Length != 3 ||
+                if (a.Length != 3 ||
                     !a[0].TryGetInteger(out int code) ||
                     !a[1].TryGetString(out string statusMessage))
                 {
@@ -187,14 +177,13 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        public class GetMasterUriResponse : BaseResponse
+        public sealed class GetMasterUriResponse : BaseResponse
         {
             public Uri? Uri { get; }
 
-            public GetMasterUriResponse(XmlRpcValue[]? a)
+            public GetMasterUriResponse(XmlRpcValue[] a)
             {
-                if (a is null ||
-                    a.Length != 3 ||
+                if (a.Length != 3 ||
                     !a[0].TryGetInteger(out int code) ||
                     !a[1].TryGetString(out string statusMessage) ||
                     !a[2].TryGetString(out string uriStr) ||
@@ -216,14 +205,13 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        public class GetPidResponse : BaseResponse
+        public sealed class GetPidResponse : BaseResponse
         {
             public int Pid { get; }
 
-            public GetPidResponse(XmlRpcValue[]? a)
+            public GetPidResponse(XmlRpcValue[] a)
             {
-                if (a is null ||
-                    a.Length != 3 ||
+                if (a.Length != 3 ||
                     !a[0].TryGetInteger(out int code) ||
                     !a[1].TryGetString(out string statusMessage) ||
                     !a[2].TryGetInteger(out int pid))

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>9</LangVersion>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Iviz.Rosbag</RootNamespace>
+        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+        <AssemblyName>Iviz.Rosbag.Lib</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Buffers" Version="4.5.1" />
+      <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_dynamic_msg_lib\iviz_dynamic_msg_lib.csproj" />
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -31,7 +31,7 @@ namespace Iviz.Roslib.XmlRpc
 
         readonly XmlRpcArg[] callerIdArgCache;
 
-        readonly List<XmlRpcConnection> rpcConnections = new List<XmlRpcConnection>();
+        readonly List<XmlRpcConnection> rpcConnections = new();
 
         public long BytesReceived => rpcConnections.Sum(connection => connection.BytesReceived);
         public long BytesSent => rpcConnections.Sum(connection => connection.BytesSent);
@@ -47,8 +47,6 @@ namespace Iviz.Roslib.XmlRpc
             CallerUri = callerUri;
             CallerId = callerId;
             callerIdArgCache = new XmlRpcArg[] {CallerId};
-            //rpcConnection[0] = new XmlRpcConnection(masterUri);
-            //rpcConnection[1] = new XmlRpcConnection(masterUri);
 
             if (numParallelConnections <= 0)
             {
@@ -63,8 +61,6 @@ namespace Iviz.Roslib.XmlRpc
 
         public void Dispose()
         {
-            //rpcConnection[0].Dispose();
-            //rpcConnection[1].Dispose();
             foreach (var connection in rpcConnections)
             {
                 connection.Dispose();
@@ -439,7 +435,7 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    public class TopicTuple
+    public sealed class TopicTuple
     {
         public string Topic { get; }
         public ReadOnlyCollection<string> Members { get; }

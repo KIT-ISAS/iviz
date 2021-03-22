@@ -156,7 +156,7 @@ namespace Iviz.MsgsGen
             return BlittableStructs.Contains(resolvedName);
         }
 
-        public ClassInfo(string package, string messageName, string messageDefinition, bool forceStruct = false)
+        public ClassInfo(string? package, string messageName, string messageDefinition, bool forceStruct = false)
         {
             if (messageName == null)
             {
@@ -181,8 +181,8 @@ namespace Iviz.MsgsGen
                 throw new InvalidOperationException("Could not find the package this message belongs to");
             }
 
-            RosPackage = package;
-            CsPackage = MsgParser.CsIfiy(package);
+            RosPackage = package!;
+            CsPackage = MsgParser.CsIfiy(package!);
             Name = messageName;
             fullMessageText = messageDefinition.Replace("\r\n", "\n");
 

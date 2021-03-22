@@ -17,15 +17,8 @@ namespace Iviz.Roslib
         /// </summary>
         public string Type { get; }
 
-        internal BriefTopicInfo(string topic, string type)
-        {
-            Topic = topic;
-            Type = type;
-        }
+        internal BriefTopicInfo(string topic, string type) => (Topic, Type) = (topic, type);
 
-        public override string ToString()
-        {
-            return $"[Topic='{Topic}' Type='{Type}']";
-        }
+        public override string ToString() => $"[Topic='{Topic}' Type='{Type}']";
     }
 }

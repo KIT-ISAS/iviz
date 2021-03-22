@@ -13,11 +13,7 @@ namespace Iviz.Roslib
         internal SystemState(
             ReadOnlyCollection<TopicTuple> publishers,
             ReadOnlyCollection<TopicTuple> subscribers,
-            ReadOnlyCollection<TopicTuple> services)
-        {
-            Publishers = publishers;
-            Subscribers = subscribers;
-            Services = services;
-        }
+            ReadOnlyCollection<TopicTuple> services) =>
+            (Publishers, Subscribers, Services) = (publishers, subscribers, services);
     }
 }

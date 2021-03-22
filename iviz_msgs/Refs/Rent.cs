@@ -58,8 +58,8 @@ namespace Iviz.Msgs
         }
 
         public RentEnumerator<T> GetEnumerator() => new(Array, Length);
-
-        public T this[int index]
+        
+        public ref T this[int index]
         {
             get
             {
@@ -67,19 +67,12 @@ namespace Iviz.Msgs
                 {
                     throw new IndexOutOfRangeException();
                 }
-
-                return Array[index];
-            }
-            set
-            {
-                if ((uint) index >= Length)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                Array[index] = value;
+                
+                return ref Array[index];                
             }
         }
+
+        
     }
 
     public static class Rent

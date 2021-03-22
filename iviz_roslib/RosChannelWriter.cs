@@ -219,6 +219,14 @@ namespace Iviz.Roslib
 
     public static class RosChannelWriter
     {
+        public static async ValueTask<RosChannelWriter<T>> CreateAsync<T>(IRosClient client, string topic)
+            where T : IMessage
+        {
+            var writer = new RosChannelWriter<T>();
+            await writer.StartAsync(client, topic);
+            return writer;
+        }
+
         public static IRosChannelWriter CreateInstance(Type msgType)
         {
             if (typeof(IMessage) == msgType || !typeof(IMessage).IsAssignableFrom(msgType))
