@@ -112,6 +112,7 @@ namespace BigGustave
             stream.WriteCrc();
         }
 
+        /*
         static byte[] Compress(byte[] data)
         {
             using (var compressStream = new MemoryStream())
@@ -123,74 +124,78 @@ namespace BigGustave
                 return compressStream.ToArray();
             }
         }
+        */
 
         static byte[] Compress(byte[] data, int height, int stride)
         {
             using var compressStream = new MemoryStream();
-            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
-
             compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
-            for (int v = 0, offset = 0; v < height; v++, offset += stride)
+
+            using (var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest))
             {
-                compressor.WriteByte(0);
-                compressor.Write(data, offset, stride);
+                for (int v = 0, offset = 0; v < height; v++, offset += stride)
+                {
+                    compressor.WriteByte(0);
+                    compressor.Write(data, offset, stride);
+                }
             }
 
-            compressor.Close();
             return compressStream.ToArray();
         }
 
         static unsafe byte[] CompressFlipRb4(byte[] data, int height, int stride)
         {
             using var compressStream = new MemoryStream();
-            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
+            compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
 
-            fixed (byte* srcPtr = data)
+            using (var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest))
             {
-                byte* srcPtrOff = srcPtr;
-                compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
-                for (int v = 0; v < height; v++)
+                fixed (byte* srcPtr = data)
                 {
-                    compressor.WriteByte(0);
-                    for (int u = 0; u < stride; u += 4, srcPtrOff += 4)
+                    byte* srcPtrOff = srcPtr;
+                    for (int v = 0; v < height; v++)
                     {
-                        byte tmp = srcPtrOff[0];
-                        srcPtrOff[0] = srcPtrOff[2];
-                        srcPtrOff[2] = tmp;
-                    }
+                        compressor.WriteByte(0);
+                        for (int u = 0; u < stride; u += 4, srcPtrOff += 4)
+                        {
+                            byte tmp = srcPtrOff[0];
+                            srcPtrOff[0] = srcPtrOff[2];
+                            srcPtrOff[2] = tmp;
+                        }
 
-                    compressor.Write(data, v * stride, stride);
+                        compressor.Write(data, v * stride, stride);
+                    }
                 }
             }
 
-            compressor.Close();
             return compressStream.ToArray();
         }
-        
+
         static unsafe byte[] CompressFlipRb3(byte[] data, int height, int stride)
         {
             using var compressStream = new MemoryStream();
-            using var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest);
+            compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
 
-            fixed (byte* srcPtr = data)
+            using (var compressor = new DeflateStream(compressStream, CompressionLevel.Fastest))
             {
-                byte* srcPtrOff = srcPtr;
-                compressStream.Write(FakeDeflateHeader, 0, FakeDeflateHeader.Length);
-                for (int v = 0; v < height; v++)
+                fixed (byte* srcPtr = data)
                 {
-                    compressor.WriteByte(0);
-                    for (int u = 0; u < stride; u += 3, srcPtrOff += 3)
+                    byte* srcPtrOff = srcPtr;
+                    for (int v = 0; v < height; v++)
                     {
-                        byte tmp = srcPtrOff[0];
-                        srcPtrOff[0] = srcPtrOff[2];
-                        srcPtrOff[2] = tmp;
-                    }
+                        compressor.WriteByte(0);
+                        for (int u = 0; u < stride; u += 3, srcPtrOff += 3)
+                        {
+                            byte tmp = srcPtrOff[0];
+                            srcPtrOff[0] = srcPtrOff[2];
+                            srcPtrOff[2] = tmp;
+                        }
 
-                    compressor.Write(data, v * stride, stride);
+                        compressor.Write(data, v * stride, stride);
+                    }
                 }
             }
 
-            compressor.Close();
             return compressStream.ToArray();
         }
     }

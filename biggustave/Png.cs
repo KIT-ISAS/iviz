@@ -78,5 +78,16 @@
                 return PngOpener.Open(memoryStream, chunkVisitor);
             }
         }
+
+        public void WriteTo(byte[] bytes)
+        {
+            int srcOffset = RowOffset;
+            int dstOffset = 0;
+            int rowSize = RowSize;
+            for (int i = Height; i != 0; i--, srcOffset += RowStep, dstOffset += rowSize)
+            {
+                Buffer.BlockCopy(Data, srcOffset, bytes, dstOffset, rowSize);
+            }
+        }
     }
 }
