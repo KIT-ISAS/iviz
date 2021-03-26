@@ -77,7 +77,7 @@ namespace Iviz.Msgs
 
     public static class Rent
     {
-        public static Rent<T> Empty<T>() where T : unmanaged => new();
+        public static Rent<T> Empty<T>() where T : unmanaged => new(0);
     }
     
 }
