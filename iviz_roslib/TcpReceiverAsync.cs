@@ -393,6 +393,8 @@ namespace Iviz.Roslib
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, fixedSizeWithHeader, 4);
                     manager.MessageCallback(message, this);
                 }
+
+                await Task.Yield();
             }
         }
 
@@ -428,6 +430,8 @@ namespace Iviz.Roslib
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
                     manager.MessageCallback(message, this);
                 }
+
+                await Task.Yield();
             }
         }
 
