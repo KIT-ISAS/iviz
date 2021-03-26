@@ -11,7 +11,7 @@ namespace Iviz.XmlRpc
     /// <summary>
     /// Handler for an HTTP request that was sent by us to another server.
     /// </summary>
-    internal sealed class HttpRequest : IDisposable
+    public sealed class HttpRequest : IDisposable
     {
         readonly Uri callerUri;
         readonly Uri remoteUri;
@@ -205,7 +205,6 @@ namespace Iviz.XmlRpc
             ReadIncomingDataAsync(NetworkStream stream, bool isRequest, CancellationToken token)
         {
             const int maxHeaderSize = 4096;
-            const int maxPayloadSize = 8192;
             int headerLength;
             int contentLength;
             string? encodingStr;
@@ -229,15 +228,7 @@ namespace Iviz.XmlRpc
                 (encodingStr.Equals("gzip", StringComparison.InvariantCultureIgnoreCase) ||
                  encodingStr.Equals("x-gzip", StringComparison.InvariantCultureIgnoreCase)))
             {
-                using var outputBytes = new Rent<byte>(maxPayloadSize);
-                using var outputStream = new MemoryStream(outputBytes.Array);
-                using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
-                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
-                {
-                    await decompressionStream.CopyToAsync(outputStream);
-                }
-
-                result = BuiltIns.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
+                result = Decompress(content);
             }
             else
             {
@@ -245,6 +236,36 @@ namespace Iviz.XmlRpc
             }
 
             return (result, headerLength + contentLength, connectionClose);
+        }
+
+        static string Decompress(in Rent<byte> content)
+        {
+            const int maxPayloadSize = 65536;
+
+            using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
+
+            try
+            {
+                using var outputBytes = new Rent<byte>(maxPayloadSize);
+                using var outputStream = new MemoryStream(outputBytes.Array);
+                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    decompressionStream.CopyTo(outputStream);
+                }
+
+                return BuiltIns.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
+            }
+            catch (NotSupportedException)
+            {
+                // bigger than maxPayloadSize! we create a new array instead of renting
+                using var outputStream = new MemoryStream();
+                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    decompressionStream.CopyTo(outputStream);
+                }
+
+                return BuiltIns.UTF8.GetString(outputStream.GetBuffer(), 0, (int) outputStream.Position);
+            }
         }
 
         static bool CheckHeaderLineForKey(string line, string key, out string value)
