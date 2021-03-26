@@ -116,9 +116,18 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            var clickedTopic = topics
-                .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
-                .ElementAtOrDefault(index);
+            TopicWithResource clickedTopic;
+            if (panel.ShowAll.Value)
+            {
+                clickedTopic = topics[index];
+            }
+            else
+            {
+                clickedTopic = topics
+                    .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
+                    .ElementAtOrDefault(index);
+            }
+
             if (clickedTopic.Topic == null)
             {
                 return;
