@@ -11,7 +11,6 @@ using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Buffer = Iviz.Msgs.Buffer;
 using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
 
 namespace Iviz.Roslib
@@ -99,8 +98,7 @@ namespace Iviz.Roslib
             RemoteEndpoint = new Endpoint((IPEndPoint) tcpClient.Client.RemoteEndPoint!);
             task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
         }
-
-
+        
         public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
@@ -370,7 +368,7 @@ namespace Iviz.Roslib
                         (T msg, int msgLength, var msgSignal) = tmpQueue[i];
                         writeBuffer.EnsureCapability(msgLength + 4);
 
-                        uint sendLength = Buffer.Serialize(msg, writeBuffer.Array, 4);
+                        uint sendLength = msg.SerializeToArray(writeBuffer.Array, 4);
 
                         WriteLengthToBuffer(sendLength);
                         await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token);

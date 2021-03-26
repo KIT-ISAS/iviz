@@ -7,32 +7,32 @@ namespace Iviz.Msgs
     /// <summary>
     /// Contains utilities to (de)serialize ROS messages from a byte array. 
     /// </summary>
-    public unsafe struct Buffer
+    public struct Buffer
     {
         /// <summary>
         /// Current position.
         /// </summary>
-        byte* ptr;
+        unsafe byte* ptr;
 
         /// <summary>
         /// Maximal position.
         /// </summary>
-        readonly byte* end;
+        readonly unsafe byte* end;
 
-        public Buffer(byte* ptr, byte* end)
+        unsafe Buffer(byte* ptr, byte* end)
         {
             this.ptr = ptr;
             this.end = end;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void MemoryCopy(void* dst, void* src, uint size)
+        static unsafe void MemoryCopy(void* dst, void* src, uint size)
         {
             System.Buffer.MemoryCopy(src, dst, size, size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        readonly void ThrowIfOutOfRange(uint off)
+        readonly unsafe void ThrowIfOutOfRange(uint off)
         {
             if (ptr + off <= end)
             {
@@ -77,7 +77,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string DeserializeString()
+        public unsafe string DeserializeString()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -94,7 +94,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public StringRef DeserializeStringS()
+        public unsafe StringRef DeserializeStringS()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -117,7 +117,7 @@ namespace Iviz.Msgs
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string[] DeserializeStringArray()
+        public unsafe string[] DeserializeStringArray()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -138,7 +138,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UniqueRef<StringRef> DeserializeStringArrayS()
+        public unsafe UniqueRef<StringRef> DeserializeStringArrayS()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -159,7 +159,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Deserialize<T>() where T : unmanaged
+        public unsafe T Deserialize<T>() where T : unmanaged
         {
             ThrowIfOutOfRange((uint) sizeof(T));
             T val = *(T*) ptr;
@@ -168,7 +168,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize<T>(out T t) where T : unmanaged
+        public unsafe void Deserialize<T>(out T t) where T : unmanaged
         {
             ThrowIfOutOfRange((uint) sizeof(T));
             t = *(T*) ptr;
@@ -176,7 +176,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] DeserializeStructArray<T>() where T : unmanaged
+        public unsafe T[] DeserializeStructArray<T>() where T : unmanaged
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -185,7 +185,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] DeserializeStructArray<T>(uint count) where T : unmanaged
+        public unsafe T[] DeserializeStructArray<T>(uint count) where T : unmanaged
         {
             ThrowIfOutOfRange(count * (uint) sizeof(T));
             T[] val = new T[count];
@@ -200,7 +200,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UniqueRef<T> DeserializeStructArrayS<T>() where T : unmanaged
+        public unsafe UniqueRef<T> DeserializeStructArrayS<T>() where T : unmanaged
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -209,7 +209,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UniqueRef<T> DeserializeStructArrayS<T>(uint count) where T : unmanaged
+        public unsafe UniqueRef<T> DeserializeStructArrayS<T>(uint count) where T : unmanaged
         {
             ThrowIfOutOfRange(count * (uint) sizeof(T));
             UniqueRef<T> val = new(count);
@@ -224,7 +224,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T[] DeserializeArray<T>() where T : IMessage, new()
+        public unsafe T[] DeserializeArray<T>() where T : IMessage, new()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -233,7 +233,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public UniqueRef<T> DeserializeArrayS<T>() where T : IMessage, new()
+        public unsafe UniqueRef<T> DeserializeArrayS<T>() where T : IMessage, new()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
@@ -242,7 +242,7 @@ namespace Iviz.Msgs
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Serialize<T>(in T val) where T : unmanaged
+        public unsafe void Serialize<T>(in T val) where T : unmanaged
         {
             ThrowIfOutOfRange((uint) sizeof(T));
             *(T*) ptr = val;
@@ -250,7 +250,7 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Serialize(string val)
+        public unsafe void Serialize(string val)
         {
             uint count = (uint) BuiltIns.UTF8.GetByteCount(val);
             ThrowIfOutOfRange(4 + count);
@@ -275,7 +275,7 @@ namespace Iviz.Msgs
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray(string[] val, uint count = 0)
+        public unsafe void SerializeArray(string[] val, uint count = 0)
         {
             if (count == 0)
             {
@@ -295,7 +295,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray(UniqueRef<StringRef> val, uint count = 0)
+        public unsafe void SerializeArray(UniqueRef<StringRef> val, uint count = 0)
         {
             if (count == 0)
             {
@@ -315,7 +315,7 @@ namespace Iviz.Msgs
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeStructArray<T>(T[] val, uint count = 0) where T : unmanaged
+        public unsafe void SerializeStructArray<T>(T[] val, uint count = 0) where T : unmanaged
         {
             if (count == 0)
             {
@@ -339,7 +339,7 @@ namespace Iviz.Msgs
         
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeStructArray<T>(UniqueRef<T> val, uint count = 0) where T : unmanaged
+        public unsafe void SerializeStructArray<T>(UniqueRef<T> val, uint count = 0) where T : unmanaged
         {
             if (count == 0)
             {
@@ -362,7 +362,7 @@ namespace Iviz.Msgs
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray<T>(T[] val, uint count = 0) where T : IMessage
+        public unsafe void SerializeArray<T>(T[] val, uint count = 0) where T : IMessage
         {
             if (count == 0)
             {
@@ -382,7 +382,7 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SerializeArray<T>(UniqueRef<T> val, uint count = 0) where T : IMessage
+        public unsafe void SerializeArray<T>(UniqueRef<T> val, uint count = 0) where T : IMessage
         {
             if (count == 0)
             {
@@ -418,7 +418,7 @@ namespace Iviz.Msgs
         /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(T generator, byte[] buffer, int size = -1, int offset = 0) where T : ISerializable
+        public static unsafe T Deserialize<T>(T generator, byte[] buffer, int size = -1, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {
@@ -435,15 +435,21 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (size != -1 && buffer.Length < size)
+            if (size < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
-            }
+            }            
 
+            int span = (size == -1) ? buffer.Length : size;
+            if (offset + span > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }            
+
+            
             fixed (byte* bPtr = buffer)
             {
-                int span = (size == -1) ? buffer.Length : size;
-                var b = new Buffer(bPtr + offset, bPtr + span);
+                Buffer b = new Buffer(bPtr + offset, bPtr + offset + span);
                 return (T) generator.RosDeserialize(ref b);
             }
         }
@@ -465,7 +471,7 @@ namespace Iviz.Msgs
         /// <param name="offset">Optional. Offset within the array.</param>
         /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
-        public static T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1, int offset = 0)
+        public static unsafe T Deserialize<T>(IDeserializable<T> generator, byte[] buffer, int size = -1, int offset = 0)
             where T : ISerializable
         {
             if (buffer == null)
@@ -478,7 +484,7 @@ namespace Iviz.Msgs
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
-            if (size != -1 && buffer.Length < size)
+            if (size < -1)
             {
                 throw new ArgumentOutOfRangeException(nameof(size));
             }
@@ -488,16 +494,15 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(generator));
             }
 
-            return DeserializeImpl(generator, buffer, size, offset);
-        }
-
-        static T DeserializeImpl<T>(IDeserializable<T> generator, byte[] buffer, int size, int offset)
-            where T : ISerializable
-        {
+            int span = (size == -1) ? buffer.Length : size;
+            if (offset + span > buffer.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }            
+            
             fixed (byte* bPtr = buffer)
             {
-                int span = (size == -1) ? buffer.Length : size;
-                Buffer b = new Buffer(bPtr + offset, bPtr + span);
+                Buffer b = new Buffer(bPtr + offset, bPtr + offset + span);
                 return generator.RosDeserialize(ref b);
             }
         }
@@ -509,7 +514,7 @@ namespace Iviz.Msgs
         /// <param name="buffer">The destination byte array.</param>
         /// <param name="offset">Optional offset at which to start writing</param>
         /// <returns>The number of bytes written.</returns>
-        public static uint Serialize<T>(in T message, byte[] buffer, int offset = 0) where T : ISerializable
+        public static unsafe uint Serialize<T>(in T message, byte[] buffer, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {

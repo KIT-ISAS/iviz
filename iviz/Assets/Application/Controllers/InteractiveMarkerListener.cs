@@ -361,7 +361,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
-            Logger.Debug($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
+            //Logger.Debug($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
         }
 
         internal void OnInteractiveControlObjectMenuSelect(

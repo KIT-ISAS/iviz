@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -40,7 +39,7 @@ namespace Iviz.Roslib
             this.remoteEndPoint = remoteEndPoint;
             this.serviceInfo = serviceInfo;
 
-            task = TaskUtils.StartLongTask(Run, runningTs.Token);            
+            task = TaskUtils.StartLongTask(Run, runningTs.Token);
         }
 
         public bool IsAlive => !task.IsCompleted;
@@ -235,7 +234,7 @@ namespace Iviz.Roslib
                     {
                         serviceMsg = (TService) serviceInfo.Generator.Create();
                         serviceMsg.Request =
-                            Buffer.Deserialize(serviceMsg.Request, readBuffer.Array, readBuffer.Length);
+                            serviceMsg.Request.DeserializeFromArray(readBuffer.Array, readBuffer.Length);
                     }
 
                     byte resultStatus;
@@ -282,7 +281,7 @@ namespace Iviz.Roslib
                         using var writeBuffer = new Rent<byte>(msgLength + 5);
 
                         WriteHeader(writeBuffer.Array, resultStatus, msgLength);
-                        Buffer.Serialize(responseMsg, writeBuffer.Array, 5);
+                        responseMsg.SerializeToArray(writeBuffer.Array, 5);
 
                         await stream.WriteChunkAsync(writeBuffer.Array, writeBuffer.Length, runningTs.Token);
                     }
@@ -291,7 +290,7 @@ namespace Iviz.Roslib
                         byte[] statusByte = {resultStatus};
                         await stream.WriteChunkAsync(statusByte, 1, runningTs.Token);
                         await stream.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token);
-                            
+
 
                         byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
                         await stream.WriteChunkAsync(tmpBuffer, tmpBuffer.Length, runningTs.Token);
