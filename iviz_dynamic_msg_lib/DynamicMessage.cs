@@ -37,6 +37,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         public FieldType Type => FieldType.DynamicMessage;
 
+        public bool IsInitialized => !string.IsNullOrEmpty(RosType);
+
         public DynamicMessage()
         {
             RosType = "";
@@ -223,9 +225,14 @@ namespace Iviz.MsgsGen.Dynamic
         {
         }
 
-        public static bool IsDynamic<T>() where T : IMessage
+        public static bool IsDynamic<T>()
         {
             return typeof(DynamicMessage) == typeof(T);
+        }
+        
+        public static bool IsGenericMessage<T>()
+        {
+            return typeof(IMessage) == typeof(T);
         }
 
         [Preserve] public const string RosMessageType = "*";

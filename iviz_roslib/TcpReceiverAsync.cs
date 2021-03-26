@@ -257,7 +257,7 @@ namespace Iviz.Roslib
 
             TcpHeader = responses.AsReadOnly();
 
-            if (DynamicMessage.IsDynamic<T>())
+            if (DynamicMessage.IsDynamic<T>() || DynamicMessage.IsGenericMessage<T>())
             {
                 GenerateDynamicTopicInfo(responses);
             }
@@ -280,7 +280,18 @@ namespace Iviz.Roslib
                     "Partner did not send type and definition, required to instantiate dynamic messages.");
             }
 
-            DynamicMessage generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
+            Type? lookupMsgName;
+            object? lookupGenerator;
+            if (DynamicMessage.IsGenericMessage<T>()
+                && (lookupMsgName = BuiltIns.TryGetTypeFromMessageName(dynamicMsgName)) != null
+                && (lookupGenerator = Activator.CreateInstance(lookupMsgName)) != null)
+            {
+                topicInfo = new TopicInfo<T>(callerId, topicName, (IDeserializable<T>) lookupGenerator);
+                return;
+            }
+
+            DynamicMessage generator =
+                DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
             topicInfo = new TopicInfo<T>(callerId, topicName, generator);
         }
 

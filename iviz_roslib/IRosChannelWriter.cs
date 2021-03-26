@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.MsgsGen.Dynamic;
 
 namespace Iviz.Roslib
 {
@@ -11,9 +12,12 @@ namespace Iviz.Roslib
         , IAsyncDisposable
 #endif
     {
+        bool Started { get; }
         public IRosPublisher Publisher { get; }
+        public Task StartAsync(IRosClient client, string topic, DynamicMessage generator, CancellationToken token = default);
         public Task StartAsync(IRosClient client, string topic, CancellationToken token = default);
         public void Start(IRosClient client, string topic);
+        public void Start(IRosClient client, string topic, DynamicMessage generator);
         public void Write(IMessage msg);
         public void WriteAll(IEnumerable<IMessage> messages);
 #if !NETSTANDARD2_0

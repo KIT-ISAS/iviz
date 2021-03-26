@@ -53,16 +53,27 @@ namespace Iviz.Roslib
             this.generator = generator;
         }
 
-        public TopicInfo(string callerId, string topic, IDeserializable<T>? generator = null)
+        public TopicInfo(string callerId, string topic)
             : this(
                 BuiltIns.DecompressDependencies(typeof(T)),
                 callerId, topic,
                 BuiltIns.GetMd5Sum(typeof(T)),
                 BuiltIns.GetMessageType(typeof(T)),
-                generator
+                null
             )
         {
         }
+
+        public TopicInfo(string callerId, string topic, IDeserializable<T> generator)
+            : this(
+                BuiltIns.DecompressDependencies(generator.GetType()),
+                callerId, topic,
+                BuiltIns.GetMd5Sum(generator.GetType()),
+                BuiltIns.GetMessageType(generator.GetType()),
+                generator
+            )
+        {
+        }        
 
         public TopicInfo(string callerId, string topic, DynamicMessage generator)
             : this(

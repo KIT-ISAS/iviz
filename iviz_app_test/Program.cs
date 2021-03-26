@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Msgs.Tf2Msgs;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.Rosbag;
 using Iviz.Roslib;
 
@@ -14,15 +17,6 @@ namespace iviz_app_test
             string path = "/Users/akzeac/Shared/ISAS_IPR.bag";
             using var file = new RosbagFile(path);
 
-            /*
-            var connections = file.GetAllRecords().Where(record => record.OpCode == OpCode.Connection);
-            foreach (var record in connections)
-            {
-                var connection = record.Connection;
-                Console.WriteLine(connection.Topic + " -> " + connection.MessageType);
-            }
-            */
-
             var topics = new HashSet<string>
             {
                 "/tf",
@@ -31,19 +25,33 @@ namespace iviz_app_test
                 "/sick_visionary_t_driver/points",
             };
 
+            var client = await RosClient.CreateAsync();
+
+            var msg = file.GetAllMessages().First();
+            time referenceTime = msg.Time;
+
             var messages = file.GetAllMessagesWhere(connection => topics.Contains(connection.Topic));
 
-            var publishers = new Dictionary<string, IRosChannelWriter>
-            {
-                ["/tf"] = await RosChannelWriter.CreateAsync<TFMessage>(null, "/tf"),
-            };
-            
+            var publishers = new Dictionary<string, IRosChannelWriter>();
+
             foreach (var message in messages)
             {
-                if (publishers.TryGetValue(message.Topic!, out var publisher))
+                var innerMessage = message.Message;
+                if (message.Topic == null)
                 {
-                    publisher.Write(message.Message);
+                    continue;
                 }
+
+                if (!publishers.TryGetValue(message.Topic, out var publisher))
+                {
+                    publisher = RosChannelWriter.CreateFor(innerMessage);
+                    await (innerMessage is DynamicMessage dynamicMessage
+                        ? publisher.StartAsync(client, message.Topic, dynamicMessage)
+                        : publisher.StartAsync(client, message.Topic));
+                    publishers[message.Topic] = publisher;
+                }
+
+                publisher.Write(innerMessage);
             }
         }
     }

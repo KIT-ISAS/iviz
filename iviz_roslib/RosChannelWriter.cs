@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
@@ -15,6 +16,8 @@ namespace Iviz.Roslib
         bool disposed;
         bool latchingEnabled;
         bool forceTcpNoDelay;
+
+        public bool Started => publisher != null;
 
         public IRosPublisher<T> Publisher =>
             publisher ?? throw new InvalidOperationException("Publisher has not been started!");
@@ -67,7 +70,41 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(client));
             }
 
+            if (DynamicMessage.IsDynamic<T>())
+            {
+                throw new InvalidOperationException(
+                    "This function cannot be used in channels for dynamic messages. Use the overload with the generator.");
+            }
+
             publisherId = client.Advertise(topic, out publisher);
+            publisher.LatchingEnabled = LatchingEnabled;
+            publisher.ForceTcpNoDelay = ForceTcpNoDelay;
+        }
+
+        public void Start(IRosClient client, string topic, DynamicMessage generator)
+        {
+            if (!DynamicMessage.IsDynamic<T>())
+            {
+                throw new InvalidOperationException("This function can only be used in channels for dynamic messages");
+            }
+
+            if (!generator.IsInitialized)
+            {
+                throw new InvalidOperationException("The generator has not been initialized");
+            }
+
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            if (generator == null)
+            {
+                throw new ArgumentNullException(nameof(generator));
+            }
+
+            publisherId = client.Advertise(topic, generator, out var dynamicPublisher);
+            publisher = (IRosPublisher<T>) dynamicPublisher;
             publisher.LatchingEnabled = LatchingEnabled;
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
@@ -83,6 +120,33 @@ namespace Iviz.Roslib
             publisher.LatchingEnabled = LatchingEnabled;
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
+
+        public async Task StartAsync(IRosClient client, string topic, DynamicMessage generator,
+            CancellationToken token = default)
+        {
+            if (!DynamicMessage.IsDynamic<T>())
+            {
+                throw new InvalidOperationException("This function can only be used in channels for dynamic messages");
+            }
+
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+
+            if (generator == null)
+            {
+                throw new ArgumentNullException(nameof(generator));
+            }
+
+            IRosPublisher<DynamicMessage> dynamicPublisher;
+            (publisherId, dynamicPublisher) = await client.AdvertiseAsync(topic, generator, token);
+
+            publisher = (IRosPublisher<T>) dynamicPublisher;
+            publisher.LatchingEnabled = LatchingEnabled;
+            publisher.ForceTcpNoDelay = ForceTcpNoDelay;
+        }
+
 
         public void Write(T msg)
         {
@@ -227,9 +291,34 @@ namespace Iviz.Roslib
             return writer;
         }
 
-        public static IRosChannelWriter CreateInstance(Type msgType)
+        public static IRosChannelWriter CreateFor(IMessage msg)
         {
-            if (typeof(IMessage) == msgType || !typeof(IMessage).IsAssignableFrom(msgType))
+            return CreateFor(msg.GetType());
+        }
+
+        public static async ValueTask<IRosChannelWriter> CreateForAsync(IMessage msg, IRosClient client,
+            string topic, CancellationToken token = default)
+        {
+            var writer = CreateFor(msg);
+            await writer.StartAsync(client, topic, token);
+            return writer;
+        }
+
+        public static IRosChannelWriter CreateFor(IMessage msg, IRosClient client, string topic)
+        {
+            var writer = CreateFor(msg.GetType());
+            writer.Start(client, topic);
+            return writer;
+        }
+
+        public static IRosChannelWriter CreateFor(Type msgType)
+        {
+            if (typeof(IMessage) == msgType)
+            {
+                return new RosChannelWriter<IMessage>();
+            }
+
+            if (!typeof(IMessage).IsAssignableFrom(msgType))
             {
                 throw new ArgumentException("msgType is not a message type", nameof(msgType));
             }
