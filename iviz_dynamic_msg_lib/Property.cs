@@ -20,5 +20,51 @@ namespace Iviz.MsgsGen.Dynamic
             name = Name;
             value = Value;
         }
+
+        public bool TrySet<T>(T value) where T : unmanaged
+        {
+            if (Value is not StructField<T> valueAsT)
+            {
+                return false;
+            }
+
+            valueAsT.Value = value;
+            return true;
+        }
+        
+        public bool TryGet<T>(out T value) where T : unmanaged
+        {
+            if (Value is not StructField<T> valueAsT)
+            {
+                value = default;
+                return false;
+            }
+
+            value = valueAsT.Value;
+            return true;
+        } 
+
+        public bool TrySet(string value)
+        {
+            if (Value is not StringField valueAsString)
+            {
+                return false;
+            }
+
+            valueAsString.Value = value;
+            return true;
+        }
+        
+        public bool TryGet(out string value)
+        {
+            if (Value is not StringField valueAsString)
+            {
+                value = "";
+                return false;
+            }
+
+            value = valueAsString.Value;
+            return true;
+        } 
     }
 }
