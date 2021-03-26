@@ -198,7 +198,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate);
+            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate) {MaxQueueSize = 50};
 
             int lastSlash = config.Topic.LastIndexOf('/');
             string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);

@@ -68,12 +68,7 @@ namespace Iviz.Hololens
 
         void Initialize()
         {
-            //ThreadPool.GetMinThreads(out var wt, out var ct);
-            //Debug.Log("Current settings: wt: " + wt + " ct: " + ct);
             ThreadPool.SetMinThreads(25, 20);
-            //Debug.Log("New settings: wt: " + 25 + " ct: " + 20);
-            //ThreadPool.GetMaxThreads(out wt, out ct);
-            //Debug.Log("Max settings: wt: " + wt + " ct: " + ct);
             
             try
             {

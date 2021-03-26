@@ -116,7 +116,15 @@ namespace Iviz.App
 
         void OnItemClicked(int index, string _)
         {
-            var moduleData = ModuleListPanel.CreateModuleForTopic(topics[index].Topic, topics[index].Type);
+            var clickedTopic = topics
+                .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
+                .ElementAtOrDefault(index);
+            if (clickedTopic.Topic == null)
+            {
+                return;
+            }
+
+            var moduleData = ModuleListPanel.CreateModuleForTopic(clickedTopic.Topic, clickedTopic.Type);
             Close();
             moduleData.ShowPanel();
         }

@@ -34,6 +34,9 @@ namespace Iviz.Displays
 
         public Material LineConnectorMaterial;
         public Material TextMaterial;
-        
+
+        public AudioClip Click;
+        public AudioClip Screenshot;
+
     }
 }

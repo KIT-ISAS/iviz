@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
@@ -16,6 +17,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
 using Buffer = System.Buffer;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
@@ -50,7 +52,7 @@ namespace Iviz.Controllers
 
     static class ServiceFunctions
     {
-        const int DefaultTimeoutInMs = 4500;
+        const int DefaultTimeoutInMs = 5000;
 
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
         [NotNull] static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
@@ -485,6 +487,9 @@ namespace Iviz.Controllers
                     {
                         await Settings.ScreenshotManager.StartAsync(
                             srv.Request.ResolutionX, srv.Request.ResolutionY, false);
+                        
+                        var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+                        AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
                     }
                     catch (Exception e)
                     {
@@ -498,7 +503,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    Logger.Error("ControllerService: Unexpected timeout in StartCaptureAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -545,7 +550,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    Logger.Error("ControllerService: Unexpected timeout in StopCaptureAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -597,7 +602,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    Logger.Error("ControllerService: Unexpected timeout in CaptureScreenshotAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -641,7 +646,7 @@ namespace Iviz.Controllers
 
                 switch (ss.Format)
                 {
-                    case "bgra":
+                    case ScreenshotFormat.Bgra:
                         bpp = 4;
                         flipRb = true;
                         break;

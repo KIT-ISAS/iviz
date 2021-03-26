@@ -82,7 +82,7 @@ namespace Iviz.Core
             new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Quaternion Unity2Ros(this Quaternion quaternion) =>
+        public static Quaternion Unity2Ros(this Quaternion quaternion) =>
             new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
 

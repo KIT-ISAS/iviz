@@ -159,6 +159,9 @@ namespace Iviz.Controllers
                 {
                     parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
+
+                var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+                AudioSource.PlayClipAtPoint(assetHolder.Click, Settings.MainCamera.transform.position);
             };
 
             Control.MenuClicked += unityPositionHint => { parent.ShowMenu(unityPositionHint); };

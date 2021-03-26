@@ -171,9 +171,14 @@ namespace Iviz.Core
                                             .Value;
     }
 
+    public enum ScreenshotFormat
+    {
+        Bgra
+    }
+
     public class Screenshot : IDisposable
     {
-        public string Format { get; }
+        public ScreenshotFormat Format { get; }
         public time Timestamp { get; }
         public int Width { get; }
         public int Height { get; }
@@ -187,7 +192,7 @@ namespace Iviz.Core
 
         public UniqueRef<byte> Bytes { get; }
 
-        public Screenshot(string format, int width, int height, int bpp, float fx, float cx, float fy, float cy,
+        public Screenshot(ScreenshotFormat format, int width, int height, int bpp, float fx, float cx, float fy, float cy,
             in Pose cameraPose, UniqueRef<byte> bytes)
         {
             Format = format;
