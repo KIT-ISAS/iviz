@@ -5,6 +5,7 @@
         <RootNamespace>Iviz.Rosmaster</RootNamespace>
         <LangVersion>8</LangVersion>
         <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
