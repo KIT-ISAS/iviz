@@ -122,8 +122,8 @@ namespace Iviz.XmlRpc
                     if (msDiff > 5000)
                     {
                         // bad stuff. this is way higher than the timeout. it means that the 
-                        // task can cancelled a long time ago and it wasn't processed.
-                        // most likely ran out of threads!
+                        // task was cancelled a long time ago and it wasn't processed.
+                        // most likely ran out of threadpool threads!
                         Logger.LogErrorFormat("{0}: Request FAILED with {1} ms for '{2}' XXXXXXXXXXX", this, msDiff,
                             method);
                     }

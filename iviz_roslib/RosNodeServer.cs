@@ -10,27 +10,27 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    internal sealed class NodeServer
+    internal sealed class RosNodeServer
     {
-        static readonly XmlRpcArg[] DefaultOkResponse = OkResponse(0);
+        static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
 
         readonly RosClient client;
         readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, Task>> lateCallbacks;
         readonly HttpListener listener;
 
-        readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg[]>> methods;
+        readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
         readonly CancellationTokenSource runningTs = new();
 
         Task? task;
         bool disposed;
 
-        public NodeServer(RosClient client)
+        public RosNodeServer(RosClient client)
         {
             this.client = client;
 
             listener = new HttpListener(client.CallerUri.Port);
 
-            methods = new Dictionary<string, Func<XmlRpcValue[], XmlRpcArg[]>>
+            methods = new Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>>
             {
                 ["getBusStats"] = GetBusStats,
                 ["getBusInfo"] = GetBusInfo,
@@ -95,7 +95,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public override string ToString()
         {
-            return $"[NodeServer {Uri}]";
+            return $"[RosNodeServer {Uri}]";
         }
 
         async Task Run()
@@ -127,23 +127,23 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        static XmlRpcArg[] OkResponse(XmlRpcArg arg)
+        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg)
         {
-            return new XmlRpcArg[] {StatusCode.Success, "ok", arg};
+            return (StatusCode.Success, "ok", arg);
         }
 
-        static XmlRpcArg[] ErrorResponse(string msg)
+        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg)
         {
-            return new XmlRpcArg[] {StatusCode.Error, msg, 0};
+            return (StatusCode.Error, msg, 0);
         }
 
-        static XmlRpcArg[] GetBusStats(XmlRpcValue[] _)
+        static XmlRpcArg GetBusStats(XmlRpcValue[] _)
         {
             Logger.Log("Was called: getBusStats");
             return ErrorResponse("Not implemented yet");
         }
 
-        XmlRpcArg[] GetBusInfo(XmlRpcValue[] _)
+        XmlRpcArg GetBusInfo(XmlRpcValue[] _)
         {
             var busInfo = client.GetBusInfoRcp();
             XmlRpcArg[][] response = busInfo.Select(BusInfoToArg).ToArray();
@@ -168,16 +168,16 @@ namespace Iviz.Roslib.XmlRpc
             };
         }
 
-        XmlRpcArg[] GetMasterUri(XmlRpcValue[] _)
+        XmlRpcArg GetMasterUri(XmlRpcValue[] _)
         {
             return OkResponse(client.MasterUri);
         }
 
-        XmlRpcArg[] Shutdown(XmlRpcValue[] args)
+        XmlRpcArg Shutdown(XmlRpcValue[] args)
         {
             if (client.ShutdownAction == null)
             {
-                return new XmlRpcArg[] {StatusCode.Failure, "No shutdown handler set", 0};
+                return (StatusCode.Failure, "No shutdown handler set", 0);
             }
 
             if (args.Length < 2 ||
@@ -185,7 +185,6 @@ namespace Iviz.Roslib.XmlRpc
                 !args[1].TryGetString(out string reason))
             {
                 return ErrorResponse("Failed to parse arguments");
-                ;
             }
 
             client.ShutdownAction(callerId, reason, out _, out _);
@@ -193,7 +192,7 @@ namespace Iviz.Roslib.XmlRpc
             return DefaultOkResponse;
         }
 
-        static XmlRpcArg[] GetPid(XmlRpcValue[] _)
+        static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
 #if NET5_0
             int id = Environment.ProcessId;
@@ -203,19 +202,19 @@ namespace Iviz.Roslib.XmlRpc
             return OkResponse(id);
         }
 
-        XmlRpcArg[] GetSubscriptions(XmlRpcValue[] _)
+        XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
         {
             var subscriptions = client.GetSubscriptionsRcp();
             return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type))));
         }
 
-        XmlRpcArg[] GetPublications(XmlRpcValue[] _)
+        XmlRpcArg GetPublications(XmlRpcValue[] _)
         {
             var publications = client.GetPublicationsRcp();
             return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type))));
         }
 
-        XmlRpcArg[] ParamUpdate(XmlRpcValue[] args)
+        XmlRpcArg ParamUpdate(XmlRpcValue[] args)
         {
             if (client.ParamUpdateAction == null)
             {
@@ -235,7 +234,7 @@ namespace Iviz.Roslib.XmlRpc
             return DefaultOkResponse;
         }
 
-        static XmlRpcArg[] PublisherUpdate(XmlRpcValue[] args)
+        static XmlRpcArg PublisherUpdate(XmlRpcValue[] args)
         {
             // processing happens in PublisherUpdateLateCallback
             return DefaultOkResponse;
@@ -278,7 +277,7 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        XmlRpcArg[] RequestTopic(XmlRpcValue[] args)
+        XmlRpcArg RequestTopic(XmlRpcValue[] args)
         {
             if (args.Length < 3 ||
                 !args[0].TryGetString(out string callerId) ||
@@ -290,7 +289,7 @@ namespace Iviz.Roslib.XmlRpc
 
             if (protocols.Length == 0)
             {
-                return new XmlRpcArg[] {StatusCode.Failure, "No compatible protocols found", 0};
+                return (StatusCode.Failure, "No compatible protocols found", 0);
             }
 
             bool success = protocols.Any(entry =>
@@ -302,7 +301,7 @@ namespace Iviz.Roslib.XmlRpc
 
             if (!success)
             {
-                return new XmlRpcArg[] {StatusCode.Failure, "Client only supports TCPROS", 0};
+                return (StatusCode.Failure, "Client only supports TCPROS", 0);
             }
 
             Endpoint? endpoint;
@@ -313,15 +312,15 @@ namespace Iviz.Roslib.XmlRpc
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Error in RequestTopic: {1}", this, e);
-                return new XmlRpcArg[] {StatusCode.Error, $"Unknown error: {e.Message}", 0};
+                return (StatusCode.Error, $"Unknown error: {e.Message}", 0);
             }
 
             return endpoint?.Hostname == null
-                ? new XmlRpcArg[] {StatusCode.Error, "Internal error [duplicate request]", 0}
+                ? (StatusCode.Error, "Internal error [duplicate request]", 0)
                 : OkResponse(new XmlRpcArg[] {"TCPROS", endpoint.Value.Hostname, endpoint.Value.Port});
         }
 
-        XmlRpcArg[] SystemMulticall(XmlRpcValue[] args)
+        XmlRpcArg SystemMulticall(XmlRpcValue[] args)
         {
             if (args.Length != 1 ||
                 !args[0].TryGetArray(out XmlRpcValue[] calls))
@@ -379,7 +378,7 @@ namespace Iviz.Roslib.XmlRpc
                     return ErrorResponse("Method not found");
                 }
 
-                XmlRpcArg response = (XmlRpcArg) method(arguments);
+                XmlRpcArg response = method(arguments);
                 responses.Add(response);
 
                 if (lateCallbacks != null &&

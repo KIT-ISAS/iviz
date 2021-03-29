@@ -12,9 +12,10 @@ using NUnit.Framework;
 using Iviz.XmlRpc;
 using String = Iviz.Msgs.StdMsgs.String;
 
-namespace iviz_utils_tests
+namespace Iviz.UtilsTests
 {
-    public class Tests
+    [Category("Network"), Ignore("")]
+    public class NetworkTests
     {
         static readonly Uri CallerUri = new Uri("http://localhost:7613");
         static readonly Uri OtherCallerUri = new Uri("http://localhost:7614");
@@ -96,7 +97,7 @@ namespace iviz_utils_tests
         public void TestRosClientConnection()
         {
             using var _ = new RosClient(MasterUri, CallerId, CallerUri);
-            Uri testMasterUri = new NodeClient(CallerId, OtherCallerUri, CallerUri).GetMasterUri().Uri;
+            Uri testMasterUri = new RosNodeClient(CallerId, OtherCallerUri, CallerUri).GetMasterUri().Uri;
             Assert.True(testMasterUri == MasterUri);
             Assert.Catch<RosUriBindingException>(() => new RosClient(MasterUri, CallerId, CallerUri));
         }
@@ -113,7 +114,7 @@ namespace iviz_utils_tests
                     tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
             }
 
-            var newSystemState = new RosMasterApi(MasterUri, CallerId, CallerUri).GetSystemState();
+            var newSystemState = new RosMasterClient(MasterUri, CallerId, CallerUri).GetSystemState();
             Assert.False(newSystemState.Publishers.Any(tuple =>
                 tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
         }
@@ -130,7 +131,7 @@ namespace iviz_utils_tests
                     tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
             }
 
-            var newSystemState = await new RosMasterApi(MasterUri, CallerId, CallerUri).GetSystemStateAsync();
+            var newSystemState = await new RosMasterClient(MasterUri, CallerId, CallerUri).GetSystemStateAsync();
             Assert.False(newSystemState.Publishers.Any(tuple =>
                 tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
         }
@@ -243,30 +244,7 @@ namespace iviz_utils_tests
                 break;
             }
         }
-
-        [Test]
-        public void TestDynamicMessage()
-        {
-            const string fakeHeaderDefinition = "uint32 seq\ntime stamp\nstring frame_id";
-
-            ClassInfo clazz = new ClassInfo(null, "iviz_test/Header", fakeHeaderDefinition);
-            DynamicMessage message = new DynamicMessage(clazz);
-
-            Assert.True(message.Fields.Count == 3);
-
-            Assert.True(message.Fields[0].TrySet((uint) 0));
-            Assert.False(message.Fields[0].TrySet(0)); // int, not uint
-            Assert.False(message.Fields[0].TrySet("a"));
-
-            Assert.True(message.Fields[1].TrySet(new time(DateTime.Now)));
-            Assert.False(message.Fields[1].TrySet("a"));
-
-            Assert.True(message.Fields[2].TrySet("map"));
-            Assert.False(message.Fields[2].TrySet(0));
-
-            Assert.True(message.RosInstanceMd5Sum == Iviz.Msgs.StdMsgs.Header.RosMd5Sum);
-        }
-
+        
         [Test]
         public async Task TestRosClientParametersAsync()
         {
@@ -299,53 +277,6 @@ namespace iviz_utils_tests
             Assert.True(success && value.TryGetArray(out var emptyValueArray)
                                 && emptyValueArray.Length == 0);
             Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
-        }
-
-        [Test]
-        public void RentTest()
-        {
-            using (var rent = new Rent<byte>(100))
-            {
-                Assert.True(rent.Array != null && rent.Array.Length >= rent.Length);
-                Assert.Catch<IndexOutOfRangeException>(() =>
-                {
-                    int _ = rent[100];
-                });
-            }
-
-            using (var rent = new Rent<byte>(1000))
-            {
-                Assert.True(rent.Array != null && rent.Array.Length >= rent.Length);
-            }
-
-            using (var rent = new Rent<byte>(0))
-            {
-                Assert.True(rent.Array != null && rent.Array.Length == 0);
-            }
-
-            using (var rent = Rent.Empty<byte>())
-            {
-                Assert.True(rent.Array != null && rent.Array.Length == 0);
-            }
-
-            var rent2 = new UniqueRef<string>(200, true);
-            Assert.True(rent2.Array != null && rent2.Array.Length >= rent2.Length);
-
-            string[] rent2Array = rent2.Array;
-
-            rent2.Dispose();
-
-            Assert.Catch<IndexOutOfRangeException>(() =>
-            {
-                string _ = rent2[0];
-            });
-
-            Assert.Catch<ObjectDisposedException>(() =>
-            {
-                var _ = rent2.Array;
-            });
-
-            Assert.True(rent2Array[0] == null);
         }
     }
 }

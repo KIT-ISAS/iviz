@@ -22,7 +22,7 @@ namespace Iviz.Roslib.XmlRpc
     /// <summary>
     /// Implements communication to the ROS master API.
     /// </summary>
-    public sealed class RosMasterApi : IDisposable
+    public sealed class RosMasterClient : IDisposable
     {
         public Uri MasterUri { get; }
         public Uri CallerUri { get; }
@@ -39,9 +39,7 @@ namespace Iviz.Roslib.XmlRpc
         public int TotalRequests => rpcConnections.Sum(connection => connection.TotalRequests);
         public int AvgTimeInQueueInMs => rpcConnections[0].AvgTimeInQueueInMs;
 
-        //readonly XmlRpcConnection rpcConnection;
-
-        public RosMasterApi(Uri masterUri, string callerId, Uri callerUri, int numParallelConnections = 1)
+        public RosMasterClient(Uri masterUri, string callerId, Uri callerUri, int numParallelConnections = 1)
         {
             MasterUri = masterUri;
             CallerUri = callerUri;
@@ -69,7 +67,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public override string ToString()
         {
-            return $"[Master masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
+            return $"[RosMasterClient masterUri={MasterUri} callerUri={CallerUri} callerId={CallerId}]";
         }
 
         public GetUriResponse GetUri()

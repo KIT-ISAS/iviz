@@ -1,14 +1,11 @@
 ﻿//#define DEBUG__
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using System.Xml;
 using Iviz.Msgs;
 
@@ -338,7 +335,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
         public static async Task MethodResponseAsync(
             HttpListenerContext httpContext,
-            IReadOnlyDictionary<string, Func<XmlRpcValue[], XmlRpcArg[]>> methods,
+            IReadOnlyDictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods,
             IReadOnlyDictionary<string, Func<XmlRpcValue[], CancellationToken, Task>>? lateCallbacks = null,
             CancellationToken token = default)
         {
@@ -358,7 +355,6 @@ namespace Iviz.XmlRpc
             {
                 var (methodName, args) = ParseResponseXml(inData);
 
-                //Console.WriteLine(methodName);
                 if (!methods.TryGetValue(methodName, out var method))
                 {
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");

@@ -17,17 +17,12 @@ namespace Iviz.XmlRpc
                 readonly IReadOnlyList<TB> b;
                 int currentIndex;
 
-                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
-                {
-                    this.a = a;
-                    this.b = b;
-                    currentIndex = -1;
-                }
+                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b) =>
+                    (this.a, this.b, currentIndex) = (a, b, -1);
 
                 public bool MoveNext()
                 {
-                    bool isLastIndex = currentIndex == Math.Min(a.Count, b.Count) - 1;
-                    if (isLastIndex)
+                    if (currentIndex == Math.Min(a.Count, b.Count) - 1)
                     {
                         return false;
                     }
@@ -36,10 +31,7 @@ namespace Iviz.XmlRpc
                     return true;
                 }
 
-                public void Reset()
-                {
-                    currentIndex = -1;
-                }
+                public void Reset() => currentIndex = -1;
 
                 public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
 
@@ -50,26 +42,13 @@ namespace Iviz.XmlRpc
                 }
             }
 
-            internal ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b)
-            {
-                this.a = a;
-                this.b = b;
-            }
+            internal ZipEnumerable(IReadOnlyList<TA> a, IReadOnlyList<TB> b) => (this.a, this.b) = (a, b);
 
-            public ZipEnumerator GetEnumerator()
-            {
-                return new ZipEnumerator(a, b);
-            }
+            public ZipEnumerator GetEnumerator() => new ZipEnumerator(a, b);
 
-            IEnumerator<(TA, TB)> IEnumerable<(TA First, TB Second)>.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator<(TA, TB)> IEnumerable<(TA First, TB Second)>.GetEnumerator() => GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public int Count => Math.Min(a.Count, b.Count);
 
@@ -113,17 +92,12 @@ namespace Iviz.XmlRpc
                 readonly Func<TA, TB> f;
                 int currentIndex;
 
-                internal SelectEnumerator(IReadOnlyList<TA> a, Func<TA, TB> f)
-                {
-                    this.a = a;
-                    this.f = f;
-                    currentIndex = -1;
-                }
+                internal SelectEnumerator(IReadOnlyList<TA> a, Func<TA, TB> f) =>
+                    (this.a, this.f, currentIndex) = (a, f, -1);
 
                 public bool MoveNext()
                 {
-                    bool isLastIndex = currentIndex == a.Count - 1;
-                    if (isLastIndex)
+                    if (currentIndex == a.Count - 1)
                     {
                         return false;
                     }
@@ -132,10 +106,7 @@ namespace Iviz.XmlRpc
                     return true;
                 }
 
-                public void Reset()
-                {
-                    currentIndex = -1;
-                }
+                public void Reset() => currentIndex = -1;
 
                 public TB Current => f(a[currentIndex]);
 
@@ -146,26 +117,13 @@ namespace Iviz.XmlRpc
                 }
             }
 
-            internal SelectEnumerable(IReadOnlyList<TA> a, Func<TA, TB> f)
-            {
-                this.a = a;
-                this.f = f;
-            }
+            internal SelectEnumerable(IReadOnlyList<TA> a, Func<TA, TB> f) => (this.a, this.f) = (a, f);
 
-            public SelectEnumerator GetEnumerator()
-            {
-                return new SelectEnumerator(a, f);
-            }
+            public SelectEnumerator GetEnumerator() => new SelectEnumerator(a, f);
 
-            IEnumerator<TB> IEnumerable<TB>.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator<TB> IEnumerable<TB>.GetEnumerator() => GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public TB[] ToArray()
             {

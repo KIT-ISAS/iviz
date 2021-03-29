@@ -244,7 +244,7 @@ namespace Iviz.MsgsGen.Dynamic
         [Preserve] public const string RosDependenciesBase64 = "";
 
 
-        public static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
+        static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
         {
             if (fullRosMsgName == null)
             {

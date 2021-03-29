@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Newtonsoft.Json;
@@ -166,7 +167,7 @@ namespace Iviz.Msgs
 
         public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
         {
-            string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
+            string guessName = $"{assemblyName}.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
             return Type.GetType(guessName);
         }
 
@@ -239,7 +240,7 @@ namespace Iviz.Msgs
             return JsonConvert.SerializeObject(o, indented ? Formatting.Indented : Formatting.None);
         }
 
-        public static byte[] SerializeToArray(this ISerializable o)
+        public static byte[] SerializeToArray<T>(this T o) where T : ISerializable
         {
             byte[] bytes = new byte[o.RosMessageLength];
             Buffer.Serialize(o, bytes);

@@ -5,7 +5,7 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
-    public sealed class NodeClient
+    public sealed class RosNodeClient
     {
         static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
 
@@ -14,7 +14,7 @@ namespace Iviz.Roslib.XmlRpc
         public int TimeoutInMs { get; }
         public Uri Uri { get; }
 
-        public NodeClient(string callerId, Uri callerUri, Uri partnerUri, int timeoutInMs = 2000) =>
+        public RosNodeClient(string callerId, Uri callerUri, Uri partnerUri, int timeoutInMs = 2000) =>
             (CallerId, CallerUri, Uri, TimeoutInMs) = (callerId, callerUri, partnerUri, timeoutInMs);
 
         public RequestTopicResponse RequestTopic(string topic)
@@ -99,7 +99,11 @@ namespace Iviz.Roslib.XmlRpc
 
             return result;
         }
-
+        
+        public override string ToString()
+        {
+            return $"[RosNodeClient {Uri}]";
+        }
 
         public sealed class ProtocolResponse
         {

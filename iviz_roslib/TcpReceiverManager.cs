@@ -99,7 +99,7 @@ namespace Iviz.Roslib
 
         internal async ValueTask<Endpoint?> RequestConnectionFromPublisherAsync(Uri remoteUri, CancellationToken token)
         {
-            NodeClient.RequestTopicResponse response;
+            RosNodeClient.RequestTopicResponse response;
             try
             {
                 response = await client.CreateTalker(remoteUri).RequestTopicAsync(Topic, token);

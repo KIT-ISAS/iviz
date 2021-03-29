@@ -18,14 +18,17 @@ namespace Iviz.XmlRpc
         readonly TcpClient client;
         bool disposed;
 
-        public bool IsAlive => !disposed && client.Connected;
+        public bool IsAlive => !disposed && SocketIsAlive(client.Client);
 
+        static bool SocketIsAlive(Socket socket) =>
+            !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;
+        
         public HttpRequest(Uri callerUri, Uri remoteUri)
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.remoteUri = remoteUri ?? throw new ArgumentNullException(nameof(remoteUri));
             client = new TcpClient(AddressFamily.InterNetworkV6)
-                {Client = {DualMode = true}, ReceiveTimeout = 3000, SendTimeout = 3000};
+                {Client = {DualMode = true}, ReceiveTimeout = 3000, SendTimeout = 3000, NoDelay = true};
         }
 
         public Task StartAsync(CancellationToken token)
@@ -136,7 +139,7 @@ namespace Iviz.XmlRpc
         {
             int? length = null;
             string? encoding = null;
-            bool? connectionClose = false;
+            bool? connectionClose = true;
 
             string? firstLine = reader.ReadLine();
             if (firstLine == null)
@@ -156,7 +159,7 @@ namespace Iviz.XmlRpc
                     throw new HttpConnectionException($"Request failed with header: {firstLine}");
                 }
             }
-
+            
             while (true)
             {
                 string? line = reader.ReadLine();

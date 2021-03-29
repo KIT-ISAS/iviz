@@ -14,13 +14,13 @@ namespace Iviz.Roslib.XmlRpc
     /// </summary>
     public sealed class ParameterClient
     {
-        readonly RosMasterApi backend;
+        readonly RosMasterClient backend;
 
         public Uri MasterUri => backend.MasterUri;
         public Uri CallerUri => backend.CallerUri;
         public string CallerId => backend.CallerId;
 
-        public ParameterClient(RosMasterApi backend)
+        public ParameterClient(RosMasterClient backend)
         {
             this.backend = backend;
         }

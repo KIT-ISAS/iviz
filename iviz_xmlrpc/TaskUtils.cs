@@ -20,8 +20,8 @@ namespace Iviz.XmlRpc
         {
             // todo: do something here?
             return Task.Run(task, token);
-        }        
-        
+        }
+
         /// <summary>
         /// Waits for the task to complete.
         /// Only use this if the async function that generated the task does not support a cancellation token.
@@ -65,7 +65,8 @@ namespace Iviz.XmlRpc
         /// <param name="caller">The name of the caller, used in the error message</param>
         /// <param name="timeoutInMs">The maximal amount to wait</param>
         /// <param name="token">An optional cancellation token</param>
-        public static async Task AwaitNoThrow(this Task? task, int timeoutInMs, object caller, CancellationToken token = default)
+        public static async Task AwaitNoThrow(this Task? task, int timeoutInMs, object caller,
+            CancellationToken token = default)
         {
             if (task == null || task.IsCompleted)
             {
@@ -82,7 +83,7 @@ namespace Iviz.XmlRpc
             using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
 
             Task result = await (task, timeoutTask).WhenAny();
-            
+
             if (result != task)
             {
                 Logger.LogErrorFormat("{0}: Task wait timed out");
@@ -176,7 +177,7 @@ namespace Iviz.XmlRpc
 
             return default!;
         }
-        
+
         public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
         {
             if (t == null || t.IsCompleted)
@@ -195,13 +196,13 @@ namespace Iviz.XmlRpc
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e.InnerException);
                     return;
                 }
-                
+
                 if (!(e is OperationCanceledException))
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
             }
-        }        
+        }
 
         /// <summary>
         /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
@@ -374,19 +375,19 @@ namespace Iviz.XmlRpc
             var (t1, t2) = ts;
             if (t1.IsCompleted)
             {
-                return new(t1);
+                return new ValueTask<Task>(t1);
             }
 
             if (t2.IsCompleted)
             {
-                return new(t2);
+                return new ValueTask<Task>(t2);
             }
-            
+
             return new(Task.WhenAny(t1, t2));
         }
 
         const int MaxTokenWait = 5000;
-        
+
         public static async Task AwaitWithToken(this Task task, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -473,7 +474,7 @@ namespace Iviz.XmlRpc
             {
                 tokenSource.CancelAfter(timeoutInMs);
             }
-            
+
             try
             {
                 await client.ConnectAsync(hostname, port, tokenSource.Token);

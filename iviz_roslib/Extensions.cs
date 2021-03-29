@@ -53,7 +53,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    var result = await client.RosMasterApi.LookupServiceAsync(service, token);
+                    var result = await client.RosMasterClient.LookupServiceAsync(service, token);
                     if (result.IsValid)
                     {
                         return;
@@ -190,7 +190,7 @@ namespace Iviz.Roslib
             {
                 try
                 {
-                    var result = await client.RosMasterApi.GetPublishedTopicsAsync(token: token);
+                    var result = await client.RosMasterClient.GetPublishedTopicsAsync(token: token);
                     if (result.IsValid && result.Topics.Any(tuple => tuple.name == topic))
                     {
                         return;

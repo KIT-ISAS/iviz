@@ -31,16 +31,19 @@ namespace Iviz.XmlRpc
 
         XmlRpcArg(int f)
         {
-            content = f == 0
-                ? "<value><i4>0</i4></value>\n"
-                : $"<value><i4>{f.ToString(BuiltIns.Culture)}</i4></value>\n";
+            content = f switch
+            {
+                0 => "<value><i4>0</i4></value>\n",
+                1 => "<value><i4>1</i4></value>\n",
+                _ => $"<value><i4>{f.ToString(BuiltIns.Culture)}</i4></value>\n"
+            };
         }
 
-        XmlRpcArg(Uri f) : this(ThrowIfNull(f).ToString())
+        XmlRpcArg(Uri f) : this(f.ToString())
         {
         }
 
-        public XmlRpcArg(IEnumerable<Uri> f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(Uri[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -59,27 +62,27 @@ namespace Iviz.XmlRpc
             content = $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
         }
 
-        public XmlRpcArg(string[] f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(string[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        public XmlRpcArg(IEnumerable<string> f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(IEnumerable<string> f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        public XmlRpcArg(string[][] f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(string[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        XmlRpcArg((string A, string B) f) : this(new XmlRpcArg[] {ThrowIfNull(f.A), ThrowIfNull(f.B)})
+        XmlRpcArg((string A, string B) f) : this(((XmlRpcArg) f.A, (XmlRpcArg) f.B))
         {
         }
 
-        public XmlRpcArg(IEnumerable<(string, string)> f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(IEnumerable<(string, string)> f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        public XmlRpcArg((string, string)[] f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg((string, string)[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -102,7 +105,41 @@ namespace Iviz.XmlRpc
             content = string.Concat(fs);
         }
 
-        public XmlRpcArg(XmlRpcArg[][] f) : this(ThrowIfNull(f).Select(x => new XmlRpcArg(x)).ToArray())
+
+        XmlRpcArg((int code, string message, XmlRpcArg arg) f)
+        {
+            content =
+                "<value><array><data>" +
+                new XmlRpcArg(f.code).content +
+                new XmlRpcArg(f.message).content +
+                f.arg.content +
+                "</data></array></value>";
+        }
+
+        XmlRpcArg((XmlRpcArg first, XmlRpcArg second) f)
+        {
+            content =
+                "<value><array><data>" +
+                f.first.content +
+                f.second.content +
+                "</data></array></value>";
+        }
+
+        XmlRpcArg((XmlRpcArg first, XmlRpcArg second, XmlRpcArg third) f)
+        {
+            content =
+                "<value><array><data>" +
+                f.first.content +
+                f.second.content +
+                f.third.content +
+                "</data></array></value>";
+        }
+
+        XmlRpcArg(XmlRpcArg[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        {
+        }
+
+        XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -133,11 +170,6 @@ namespace Iviz.XmlRpc
 
             builder.Append("</struct></value>");
             content = builder.ToString();
-        }
-
-        static T ThrowIfNull<T>(T t)
-        {
-            return t ?? throw new NullReferenceException(nameof(t));
         }
 
         public override string ToString()
@@ -172,20 +204,27 @@ namespace Iviz.XmlRpc
         public static implicit operator XmlRpcArg(string f) => new(f);
 
         public static implicit operator XmlRpcArg(string[] f) => new(f);
-        
+
         public static implicit operator XmlRpcArg(string[][] f) => new(f);
-        
+
         public static implicit operator XmlRpcArg((string, string) f) => new(f);
 
 
         public static implicit operator XmlRpcArg((string, string)[] f) => new(f);
-        
+
         public static implicit operator XmlRpcArg((string name, XmlRpcArg value)[] f) => new(f);
-        
+
         public static implicit operator XmlRpcArg(XmlRpcArg[] f) => new(f);
-        
+
         public static implicit operator XmlRpcArg(XmlRpcArg[][] f) => new(f);
 
+        public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg) f) => new(f);
+
+        public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) => new(f);
+
+        public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg, XmlRpcArg) f) => new(f);
+
+        public static implicit operator XmlRpcArg((int, string, XmlRpcArg) f) => new(f);
 
         /*
         public static XmlRpcArg Create(object o)
