@@ -156,6 +156,13 @@ namespace Iviz.MsgsGen
             return BlittableStructs.Contains(resolvedName);
         }
 
+        /// <summary>
+        /// Creates a message class for a single message defined in text form. 
+        /// </summary>
+        /// <param name="package">The name of the package. Leave this as null if the package name is included in <see cref="messageName"/>.</param>
+        /// <param name="messageName">The name of the message. If this is a fully qualified name (e.g., std_msgs/Header instead of just Header), leave <see cref="package"/> as null.</param>
+        /// <param name="messageDefinition">The definition of the message, as would be found in a .msg file.</param>
+        /// <param name="forceStruct">Whether to construct this message as a struct instead of a class. You should probably leave this as false.</param>
         public ClassInfo(string? package, string messageName, string messageDefinition, bool forceStruct = false)
         {
             if (messageName == null)
@@ -200,12 +207,12 @@ namespace Iviz.MsgsGen
         }
 
 
-        public ClassInfo(string package, string name, IEnumerable<IElement> newElements) :
+        public ClassInfo(string? package, string name, IEnumerable<IElement> newElements) :
             this(package, name, newElements, null, ActionMessageType.None)
         {
         }
 
-        internal ClassInfo(string package, string name, IEnumerable<IElement> newElements,
+        internal ClassInfo(string? package, string messageName, IEnumerable<IElement> newElements,
             string? actionRoot, ActionMessageType actionMessageType)
         {
             if (package == null)
@@ -213,9 +220,22 @@ namespace Iviz.MsgsGen
                 throw new ArgumentNullException(nameof(package));
             }
 
-            if (name == null)
+            int lastSlash = messageName.LastIndexOf('/');
+            if (lastSlash != -1)
             {
-                throw new ArgumentNullException(nameof(name));
+                if (!string.IsNullOrEmpty(package))
+                {
+                    throw new ArgumentException(
+                        "messageName contains a package, but package is not null. Only one of both must be set!");
+                }
+
+                package = messageName.Substring(0, lastSlash);
+                messageName = messageName.Substring(lastSlash + 1);
+            }        
+            
+            if (messageName == null)
+            {
+                throw new ArgumentNullException(nameof(messageName));
             }
 
             if (newElements == null)
@@ -223,11 +243,11 @@ namespace Iviz.MsgsGen
                 throw new ArgumentNullException(nameof(newElements));
             }
 
-            Console.WriteLine($"-- Parsing synthetic '{package}/{name}'");
+            Console.WriteLine($"-- Parsing synthetic '{package}/{messageName}'");
 
             RosPackage = package;
             CsPackage = MsgParser.CsIfiy(package);
-            Name = name;
+            Name = messageName;
 
             elements = newElements.ToArray();
             Elements = new ReadOnlyCollection<IElement>(elements);
