@@ -119,15 +119,15 @@ namespace Iviz.Roslib
 
         async ValueTask<TcpClient?> KeepReconnecting()
         {
-            for (int i = 0; i < MaxConnectionRetries && KeepRunning; i++)
+            RemoteEndpoint ??= await manager.RequestConnectionFromPublisherAsync(RemoteUri, runningTs.Token);
+
+            for (int numTry = 0; numTry < MaxConnectionRetries && KeepRunning; numTry++)
             {
-                if (RemoteEndpoint != null)
+                TcpClient? client;
+                if (RemoteEndpoint != null &&
+                    (client = await TryToConnect(RemoteEndpoint.Value)) != null)
                 {
-                    TcpClient? client = await TryToConnect(RemoteEndpoint.Value);
-                    if (client != null)
-                    {
-                        return client;
-                    }
+                    return client;
                 }
 
                 if (!KeepRunning)
@@ -137,7 +137,7 @@ namespace Iviz.Roslib
 
                 try
                 {
-                    await Task.Delay(WaitTimeInMsFromTry(i), runningTs.Token);
+                    await Task.Delay(WaitTimeInMsFromTry(numTry), runningTs.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -158,10 +158,10 @@ namespace Iviz.Roslib
             return null;
         }
 
-        static int WaitTimeInMsFromTry(int index)
+        static int WaitTimeInMsFromTry(int numTry)
         {
             return BaseUtils.Random.Next(0, 1000) +
-                   index switch
+                   numTry switch
                    {
                        < 10 => 2000,
                        < 50 => 5000,
@@ -212,14 +212,14 @@ namespace Iviz.Roslib
             return length;
         }
 
-        async ValueTask<int> ReceiveAndIgnore(NetworkStream stream, byte[] bufferForSize)
+        async ValueTask<int> ReceiveAndIgnore(NetworkStream stream, byte[] tmpBuffer)
         {
-            if (!await stream.ReadChunkAsync(bufferForSize, 4, runningTs.Token))
+            if (!await stream.ReadChunkAsync(tmpBuffer, 4, runningTs.Token))
             {
                 return -1;
             }
 
-            int length = BitConverter.ToInt32(bufferForSize, 0);
+            int length = BitConverter.ToInt32(tmpBuffer, 0);
             if (length == 0)
             {
                 return 0;
@@ -250,8 +250,8 @@ namespace Iviz.Roslib
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
-                string errorMsg = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-                throw new RosHandshakeException($"Failed handshake: {errorMsg}");
+                string description = index != -1 ? responses[0].Substring(index + 1) : responses[0];
+                throw new RosHandshakeException(description);
             }
 
             TcpHeader = responses.AsReadOnly();
@@ -344,6 +344,7 @@ namespace Iviz.Roslib
                         case RoslibException:
                             errorDescription = e.Message;
                             Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
+                            TryCancel();
                             break;
                         default:
                             Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
@@ -353,6 +354,13 @@ namespace Iviz.Roslib
             }
 
             tcpClient = null;
+            TryCancel();
+
+            Logger.LogDebugFormat("{0}: Stopped!", this);
+        }
+
+        void TryCancel()
+        {
             try
             {
                 runningTs.Cancel();
@@ -360,8 +368,6 @@ namespace Iviz.Roslib
             catch (ObjectDisposedException)
             {
             }
-
-            Logger.LogDebugFormat("{0}: Stopped!", this);
         }
 
         async Task ProcessLoop(NetworkStream stream)
@@ -414,30 +420,23 @@ namespace Iviz.Roslib
             using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
             {
-                if (IsPaused)
-                {
-                    int rcvLength = await ReceiveAndIgnore(stream, readBuffer.Array);
-                    if (rcvLength == -1)
-                    {
-                        Logger.LogDebugFormat("{0}: Partner closed connection", this);
-                        return;
-                    }
+                bool isPaused = IsPaused;
+                
+                int rcvLength = isPaused
+                    ? await ReceiveAndIgnore(stream, readBuffer.Array)
+                    : await ReceivePacket(stream, readBuffer);
 
-                    numReceived++;
-                    bytesReceived += rcvLength + 4;
+                if (rcvLength == -1)
+                {
+                    Logger.LogDebugFormat("{0}: Partner closed connection", this);
+                    return;
                 }
-                else
+
+                numReceived++;
+                bytesReceived += rcvLength + 4;
+
+                if (!isPaused)
                 {
-                    int rcvLength = await ReceivePacket(stream, readBuffer);
-                    if (rcvLength == -1)
-                    {
-                        Logger.LogDebugFormat("{0}: Partner closed connection", this);
-                        return;
-                    }
-
-                    numReceived++;
-                    bytesReceived += rcvLength + 4;
-
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
                     manager.MessageCallback(message, this);
                 }

@@ -5,7 +5,7 @@ using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
 {
-    public sealed class SubscriberReceiverState
+    public sealed class SubscriberReceiverState : JsonToString
     {
         public bool IsAlive { get; internal set; }
         public bool IsConnected { get; internal set;}
@@ -23,7 +23,7 @@ namespace Iviz.Roslib
         }
     }
 
-    public sealed class SubscriberTopicState
+    public sealed class SubscriberTopicState : JsonToString
     {
         public string Topic { get; }
         public string Type { get; }

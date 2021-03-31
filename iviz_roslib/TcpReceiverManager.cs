@@ -57,14 +57,9 @@ namespace Iviz.Roslib
         public int NumConnections => connectionsByUri.Count;
 
         public int NumActiveConnections => connectionsByUri.Count(pair => pair.Value.IsConnected);
+        
 
-        public int GetTotalActiveConnections(int timeoutInMs)
-        {
-            using CancellationTokenSource tokenSource = new(timeoutInMs);
-            return Task.Run(() => GetTotalActiveConnectionsAsync(tokenSource.Token).AsTask(), tokenSource.Token)
-                .WaitNoThrow(this);
-        }
-
+        /*
         public async ValueTask<int> GetTotalActiveConnectionsAsync(CancellationToken token)
         {
             int numActiveConnections = NumActiveConnections;
@@ -93,6 +88,7 @@ namespace Iviz.Roslib
 
             return numActiveConnections;
         }
+        */
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
@@ -146,12 +142,13 @@ namespace Iviz.Roslib
             subscriber.MessageCallback(msg, receiver);
         }
 
+        /*
         async ValueTask<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
         {
             try
             {
-                Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token);
-                CreateConnection(remoteEndpoint, remoteUri);
+                //Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token);
+                CreateConnection(null, remoteUri);
                 return true;
             }
             catch (OperationCanceledException)
@@ -165,39 +162,53 @@ namespace Iviz.Roslib
                 return false;
             }
         }
+        */
 
-        void CreateConnection(Endpoint? remoteEndpoint, Uri remoteUri)
+        void CreateConnection(Uri remoteUri, Endpoint? remoteEndpointHint = null)
         {
             connectionsByUri[remoteUri] =
-                new TcpReceiverAsync<T>(this, remoteUri, remoteEndpoint, topicInfo, RequestNoDelay, TimeoutInMs)
+                new TcpReceiverAsync<T>(this, remoteUri, remoteEndpointHint, topicInfo, RequestNoDelay, TimeoutInMs)
                     {IsPaused = IsPaused};
         }
 
         public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            bool numConnectionsChanged;
+            bool numConnectionsHasChanged = false;
 
             using (await mutex.LockAsync(token))
             {
                 HashSet<Uri> newPublishers = new(publisherUris);
                 allPublisherUris = newPublishers;
 
-                IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+                if (connectionsByUri.Keys.Any(key => !newPublishers.Contains(key)))
+                {
+                    TcpReceiverAsync<T>[] toDelete = connectionsByUri
+                        .Where(pair => !newPublishers.Contains(pair.Key))
+                        .Select(pair => pair.Value)
+                        .ToArray();
 
-                TcpReceiverAsync<T>[] toDelete = connectionsByUri
-                    .Where(pair => !newPublishers.Contains(pair.Key))
-                    .Select(pair => pair.Value)
-                    .ToArray();
+                    var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
+                    await deleteTasks.WhenAll().AwaitNoThrow(this);
+                }
 
-                var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
-                await deleteTasks.WhenAll().AwaitNoThrow(this);
+                if (newPublishers.Any(uri => !connectionsByUri.ContainsKey(uri)))
+                {
+                    /*
+                    IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+                    var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
+                    bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this);
+                    numConnectionsHasChanged = (results != null && results.Any(b => b)) | await CleanupAsync(token);
+                    */
 
-                var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
-                bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this);
-                numConnectionsChanged = (results != null && results.Any(b => b)) | await CleanupAsync(token);
+                    IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+                    foreach (Uri remoteUri in toAdd)
+                    {
+                        CreateConnection(remoteUri);
+                    }
+                }
             }
 
-            if (numConnectionsChanged)
+            if (numConnectionsHasChanged)
             {
                 subscriber.RaiseNumPublishersChanged();
             }
