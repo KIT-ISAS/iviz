@@ -41,11 +41,14 @@ namespace Iviz.RosMaster
 
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
-        public Uri MasterUri { get; }
-        public string MasterCallerId { get; }
-
         readonly Task? backgroundTask;
 
+        bool disposed; 
+        
+        public Uri MasterUri { get; }
+        
+        public string MasterCallerId { get; }
+        
         static class StatusCode
         {
             public const int Error = -1;
@@ -93,8 +96,6 @@ namespace Iviz.RosMaster
 
             backgroundTask = startInBackground ? StartAsync() : null;
         }
-
-        bool disposed;
 
         public void Dispose()
         {
@@ -151,6 +152,12 @@ namespace Iviz.RosMaster
 
         public async Task StartAsync()
         {
+            if (backgroundTask != null)
+            {
+                throw new InvalidOperationException(
+                    "RosMasterServer has already been initialized as a background task");
+            }
+            
             Logger.Log($"** {this}: Starting at {MasterUri}");
             AddKey("/run_id", Guid.NewGuid().ToString());
             Task startTask = Task.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this));
@@ -210,20 +217,11 @@ namespace Iviz.RosMaster
 
         static readonly (int code, string msg, XmlRpcArg arg) DefaultOkResponse = OkResponse(0);
 
-        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg)
-        {
-            return (StatusCode.Success, "ok", arg);
-        }
+        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "ok", arg);
 
-        static (int code, string msg, XmlRpcArg arg) FailResponse()
-        {
-            return (StatusCode.Failure, "", 0);
-        }
+        static (int code, string msg, XmlRpcArg arg) FailResponse() => (StatusCode.Failure, "Request failed", 0);
 
-        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg)
-        {
-            return (StatusCode.Error, msg, 0);
-        }
+        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
 
         static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
