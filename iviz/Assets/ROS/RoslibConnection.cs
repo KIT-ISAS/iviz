@@ -144,7 +144,7 @@ namespace Iviz.Ros
 
                 await client.CheckOwnUriAsync(token);
 
-                client.RosMasterApi.TimeoutInMs = rpcTimeoutInMs;
+                client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
 
                 AddTask(async () =>
                 {
@@ -186,7 +186,7 @@ namespace Iviz.Ros
 
                     Core.Logger.Internal("Finished resubscribing and readvertising!");
 
-                    watchdogTask = WatchdogAsync(client.RosMasterApi, token);
+                    watchdogTask = WatchdogAsync(client.RosMasterClient, token);
                 });
 
                 Core.Logger.Debug("*** Connected!");
@@ -303,7 +303,7 @@ namespace Iviz.Ros
         }
 
         static async Task WatchdogAsync(
-            [NotNull] RosMasterApi masterApi,
+            [NotNull] RosMasterClient masterApi,
             CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
@@ -1020,7 +1020,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            var masterApi = mClient.RosMasterApi;
+            var masterApi = mClient.RosMasterClient;
             builder.Append("<b>** ROS Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
                 .Append(" requests | Ping ")
                 .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
