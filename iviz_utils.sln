@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_rosbag_lib", "iviz_ros
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_app_test", "iviz_app_test\iviz_app_test.csproj", "{84644686-DBCC-4531-BFAE-049F13C51466}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_utils_tests", "iviz_utils_tests\iviz_utils_tests.csproj", "{D426E606-432C-4314-B451-285C6AEA44F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{84644686-DBCC-4531-BFAE-049F13C51466}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84644686-DBCC-4531-BFAE-049F13C51466}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84644686-DBCC-4531-BFAE-049F13C51466}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D426E606-432C-4314-B451-285C6AEA44F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D426E606-432C-4314-B451-285C6AEA44F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D426E606-432C-4314-B451-285C6AEA44F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D426E606-432C-4314-B451-285C6AEA44F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
