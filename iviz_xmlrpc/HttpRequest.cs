@@ -139,7 +139,7 @@ namespace Iviz.XmlRpc
         {
             int? length = null;
             string? encoding = null;
-            bool? connectionClose = true;
+            bool? connectionClose = null;
 
             string? firstLine = reader.ReadLine();
             if (firstLine == null)

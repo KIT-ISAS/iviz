@@ -206,6 +206,8 @@ namespace Iviz.Roslib
                         CreateConnection(remoteUri);
                     }
                 }
+
+                numConnectionsHasChanged |= await CleanupAsync(token);
             }
 
             if (numConnectionsHasChanged)
@@ -221,6 +223,11 @@ namespace Iviz.Roslib
 
         async ValueTask<bool> CleanupAsync(CancellationToken token)
         {
+            if (connectionsByUri.Values.All(receiver => receiver.IsAlive))
+            {
+                return false;
+            }
+            
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             if (toDelete.Length == 0)
             {
