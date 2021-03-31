@@ -12,7 +12,7 @@ namespace Iviz.XmlRpc
     /// <summary>
     /// A very simple HTTP listener for XML-RPC calls
     /// </summary>
-    public sealed class HttpListener : IDisposable
+    public sealed class HttpListener
     {
         const int AnyPort = 0;
         const int DefaultHttpPort = 80;
@@ -47,10 +47,12 @@ namespace Iviz.XmlRpc
         /// </summary>
         public int LocalPort { get; }
 
+        
         public void Dispose()
         {
-            DisposeAsync(true).WaitNoThrow(this);
+            DisposeAsync(true).WaitNoThrow(this); // shouldn't block
         }
+        
 
         public Task DisposeAsync()
         {

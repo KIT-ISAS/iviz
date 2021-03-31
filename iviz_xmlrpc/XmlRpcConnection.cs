@@ -137,7 +137,7 @@ namespace Iviz.XmlRpc
 
         async Task<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
         {
-            Logger.LogFormat("{0}: Starting new connection", this);
+            Logger.LogDebugFormat("{0}: Starting new connection", this);
 
             while (true)
             {

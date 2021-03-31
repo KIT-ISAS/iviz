@@ -56,6 +56,11 @@ namespace Iviz.XmlRpc
 
             public (TA First, TB Second)[] ToArray()
             {
+                if (Count == 0)
+                {
+                    return Array.Empty<(TA, TB)>();
+                }
+
                 (TA, TB)[] array = new (TA, TB)[Count];
                 for (int i = 0; i < array.Length; i++)
                 {
@@ -127,6 +132,11 @@ namespace Iviz.XmlRpc
 
             public TB[] ToArray()
             {
+                if (a.Count == 0)
+                {
+                    return Array.Empty<TB>();
+                }
+
                 TB[] array = new TB[a.Count];
                 for (int i = 0; i < a.Count; i++)
                 {
