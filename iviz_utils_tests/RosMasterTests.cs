@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
@@ -70,33 +71,49 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriter.CreateAsync<String>(client, topicName);
-            publisher.LatchingEnabled = true;
-
-            var systemState = await client.GetSystemStateAsync();
-            Assert.True(
-                systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
-
-            const string msgText = "test message";
-            publisher.Write(new String(msgText));
-
-            await using var subscriber = await RosChannelReader.CreateAsync<String>(client, topicName);
-
-            using var source = new CancellationTokenSource(5000);
-
-            await foreach (var msg in subscriber.ReadAllAsync(source.Token))
+            await using (var publisher = await RosChannelWriter.CreateAsync<String>(client, topicName))
             {
-                if (msg.Data == msgText)
+                publisher.LatchingEnabled = true;
+
+                var systemState = await client.GetSystemStateAsync();
+                Assert.True(
+                    systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+
+                const string msgText = "test message";
+                publisher.Write(new String(msgText));
+
+                await using (var subscriber = await RosChannelReader.CreateAsync<String>(client, topicName))
                 {
-                    break;
-                }
-            }
+                    var systemState2 = await client.GetSystemStateAsync();
+                    Assert.True(
+                        systemState2.Subscribers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+
+                    using var source = new CancellationTokenSource(5000);
+
+                    await foreach (var msg in subscriber.ReadAllAsync(source.Token))
+                    {
+                        if (msg.Data == msgText)
+                        {
+                            break;
+                        }
+                    }
+                } // auto unsubscribe
+                
+                var systemState3 = await client.GetSystemStateAsync();
+                Assert.False(
+                    systemState3.Subscribers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+                
+            } // auto unadvertise
+
+            var systemState4 = await client.GetSystemStateAsync();
+            Assert.False(
+                systemState4.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
         }
 
         [Test]
         public async Task TestGenericChannelReaderAsync()
         {
-            const string topicName = "/my_test_topic_xyz";
+            const string topicName = "/my_test_topic_xyz_a";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
             await using var publisher = await RosChannelWriter.CreateAsync<String>(client, topicName);
             publisher.LatchingEnabled = true;
@@ -137,6 +154,72 @@ namespace Iviz.UtilsTests
             publisher.Write(Empty.Singleton);
 
             await using var subscriber = await RosChannelReader.CreateAsync<Empty>(client, topicName);
+
+            using var source = new CancellationTokenSource(5000);
+
+            await subscriber.ReadAsync(source.Token);
+        }
+        
+        [Test]
+        public async Task TestChannelsWithFixedSizeMessageAsync()
+        {
+            const string topicName = "/my_test_topic_xyz_fixed";
+            await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
+            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            publisher.LatchingEnabled = true;
+
+            var systemState = await client.GetSystemStateAsync();
+            Assert.True(
+                systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+
+            publisher.Write(default);
+
+            await using var subscriber = await RosChannelReader.CreateAsync<Twist>(client, topicName);
+
+            using var source = new CancellationTokenSource(5000);
+
+            await subscriber.ReadAsync(source.Token);
+        }
+        
+        [Test]
+        public async Task TestChannelsWithFalseMessageAsync()
+        {
+            const string topicName = "/my_test_topic_xyz_false";
+            await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
+            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            publisher.LatchingEnabled = true;
+
+            var systemState = await client.GetSystemStateAsync();
+            Assert.True(
+                systemState.Publishers.Any(tuple => tuple.Topic == topicName && tuple.Members.Contains(CallerId)));
+
+            publisher.Write(default);
+
+            await using var subscriber = await RosChannelReader.CreateAsync<Empty>(client, topicName);
+
+            Assert.True(subscriber.Subscriber.TopicType != publisher.Publisher.TopicType);
+
+            await Task.Delay(1000);
+            
+            var state = subscriber.Subscriber.GetState();
+            Assert.True(state.Receivers.Count > 0);
+            Assert.False(state.Receivers[0].IsConnected);
+            Assert.False(state.Receivers[0].IsAlive);
+            Assert.NotNull(state.Receivers[0].ErrorDescription);
+        }
+        
+        [Test]
+        public async Task TestChannelsSubscribeNoPublishersAsync()
+        {
+            const string topicName = "/my_test_topic_xyz_fixed_no_pub";
+            await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
+
+            await using var subscriber = await RosChannelReader.CreateAsync<Twist>(client, topicName);
+            await Task.Delay(1000);
+            
+            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            publisher.LatchingEnabled = true;
+            publisher.Write(default);
 
             using var source = new CancellationTokenSource(5000);
 
