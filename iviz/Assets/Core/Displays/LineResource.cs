@@ -252,7 +252,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer) null);
             }
 
             Destroy(mesh);
@@ -346,7 +346,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer) null);
             }
 
             if (lineBuffer.Capacity != 0)
@@ -371,7 +371,7 @@ namespace Iviz.Displays
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
-            Properties.SetBuffer(LinesID, null);
+            Properties.SetBuffer(LinesID, (ComputeBuffer) null);
         }
     }
 }

@@ -238,7 +238,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsID, null);
+            Properties.SetBuffer(PointsID, (ComputeBuffer) null);
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsID, null);
+                Properties.SetBuffer(PointsID, (ComputeBuffer) null);
             }
 
             if (pointBuffer.Capacity != 0)

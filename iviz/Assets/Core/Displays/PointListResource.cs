@@ -193,7 +193,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
             }
 
             pointBuffer.Dispose();
@@ -327,7 +327,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
             }
 
             if (pointBuffer.Capacity != 0)
@@ -349,7 +349,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, null);
+            Properties.SetBuffer(PointsId, (ComputeBuffer) null);
         }
 
         protected override void UpdateProperties()

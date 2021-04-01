@@ -146,6 +146,34 @@ namespace Iviz.Core
                    && Mathf.Approximately(p.rotation.w, 1);
         }
 
+        public static bool EqualsApprox(this Pose p, in Pose q)
+        {
+            return Mathf.Approximately(p.position.x, q.position.x)
+                   && Mathf.Approximately(p.position.y, q.position.y)
+                   && Mathf.Approximately(p.position.z, q.position.z)
+                   && Mathf.Approximately(p.rotation.x, q.rotation.x)
+                   && Mathf.Approximately(p.rotation.y, q.rotation.y)
+                   && Mathf.Approximately(p.rotation.z, q.rotation.z)
+                   && Mathf.Approximately(p.rotation.w, q.rotation.w);
+        }
+
+        public static Vector4 GetColumnIn(this Matrix4x4 m, int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return new Vector4(m.m00, m.m10, m.m20, m.m30);
+                case 1:
+                    return new Vector4(m.m01, m.m11, m.m21, m.m31);
+                case 2:
+                    return new Vector4(m.m02, m.m12, m.m22, m.m32);
+                case 3:
+                    return new Vector4(m.m03, m.m13, m.m23, m.m33);
+                default:
+                    throw new IndexOutOfRangeException("Invalid column index!");
+            }
+        }
+        
         public static Pose Lerp(this Pose p, in Pose o, float t)
         {
             return new Pose(
