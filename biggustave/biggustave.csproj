@@ -3,8 +3,8 @@
     <PropertyGroup>
         <AssemblyName>BigGustave</AssemblyName>
         <RootNamespace>BigGustave</RootNamespace>
-        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
-        <LangVersion>9</LangVersion>        
+        <LangVersion>9</LangVersion>
+        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>        
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -36,10 +36,10 @@
         /// <summary>
         /// Calculate the CRC32 for data.
         /// </summary>
-        public static uint Calculate(byte[] data)
+        public static uint Calculate(byte[] data, int length)
         {
             var crc32 = uint.MaxValue;
-            for (var i = 0; i < data.Length; i++)
+            for (var i = 0; i < length; i++)
             {
                 var index = (crc32 ^ data[i]) & 0xFF;
                 crc32 = (crc32 >> 8) ^ Lookup[index];

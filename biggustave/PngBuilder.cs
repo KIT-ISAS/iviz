@@ -138,6 +138,9 @@ namespace BigGustave
                     compressor.WriteByte(0);
                     compressor.Write(data, offset, stride);
                 }
+                
+                compressor.Flush();
+                compressor.Close();
             }
 
             return compressStream.ToArray();
@@ -166,6 +169,9 @@ namespace BigGustave
                         compressor.Write(data, v * stride, stride);
                     }
                 }
+
+                compressor.Flush();
+                compressor.Close();
             }
 
             return compressStream.ToArray();
@@ -194,6 +200,9 @@ namespace BigGustave
                         compressor.Write(data, v * stride, stride);
                     }
                 }
+
+                compressor.Flush();
+                compressor.Close();
             }
 
             return compressStream.ToArray();
