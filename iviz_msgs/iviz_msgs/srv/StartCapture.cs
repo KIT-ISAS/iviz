@@ -51,7 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/StartCapture";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "b242a981d2c0da9273f6509826da0ce2";
+        [Preserve] public const string RosMd5Sum = "ddc13484ad3a5f74f6f36b363081b7e2";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -61,6 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "resolution_x")] public int ResolutionX { get; set; }
         [DataMember (Name = "resolution_y")] public int ResolutionY { get; set; }
+        [DataMember (Name = "with_holograms")] public bool WithHolograms { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public StartCaptureRequest()
@@ -68,10 +69,11 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public StartCaptureRequest(int ResolutionX, int ResolutionY)
+        public StartCaptureRequest(int ResolutionX, int ResolutionY, bool WithHolograms)
         {
             this.ResolutionX = ResolutionX;
             this.ResolutionY = ResolutionY;
+            this.WithHolograms = WithHolograms;
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -79,6 +81,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             ResolutionX = b.Deserialize<int>();
             ResolutionY = b.Deserialize<int>();
+            WithHolograms = b.Deserialize<bool>();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -95,6 +98,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(ResolutionX);
             b.Serialize(ResolutionY);
+            b.Serialize(WithHolograms);
         }
         
         public void Dispose()
@@ -106,7 +110,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary>
-        [Preserve] public const int RosFixedMessageLength = 8;
+        [Preserve] public const int RosFixedMessageLength = 9;
         
         public int RosMessageLength => RosFixedMessageLength;
     

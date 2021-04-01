@@ -1,5 +1,6 @@
 int32 resolution_x
 int32 resolution_y
+bool with_holograms
 ---
 bool success
 string message
