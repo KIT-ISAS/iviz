@@ -50,7 +50,7 @@ namespace Iviz.App
             }
         }
 
-        void OnItemClicked(int index, string _)
+        void OnItemClicked(int index, int _)
         {
             var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();

@@ -42,7 +42,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public Vector2 MeasuredIntensityBounds { get; private set; }
+        public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
         public override TfFrame Frame => node.Parent;
 
@@ -216,11 +216,6 @@ namespace Iviz.Controllers
             resource.Set(width, height,
                 (float) msg.Info.LengthX, (float) msg.Info.LengthY,
                 msg.Data[layer].Data, length);
-            MeasuredIntensityBounds = resource.IntensityBounds;
-            if (ForceMinMax)
-            {
-                resource.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-            }
         }
 
         public override void StopController()

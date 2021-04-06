@@ -43,7 +43,7 @@ namespace Iviz.App
             gameObject.SetActive(true);
         }
 
-        void OnItemClicked(int id, string _)
+        void OnItemClicked(int id, int _)
         {
             var entry = currentEntries[id];
             if (entry.LinkedEntry != null)

@@ -39,7 +39,6 @@ namespace Iviz.Displays
             MeshRenderer.material = material;
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
-            IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
         }
 
@@ -83,7 +82,13 @@ namespace Iviz.Displays
 
             BoxCollider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
             BoxCollider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
-            IntensityBounds = new Vector2(min, max);
+
+            var span = new Vector2(min, max);
+            MeasuredIntensityBounds = span;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = span;
+            }
         }
 
         void EnsureSize(int newWidth, int newHeight)

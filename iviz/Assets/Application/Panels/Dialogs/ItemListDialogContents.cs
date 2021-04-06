@@ -17,12 +17,21 @@ namespace Iviz.App
 
         static float BaseButtonHeight => baseButtonHeight != 0
             ? baseButtonHeight
-            : baseButtonHeight = ((RectTransform) Resource.Widgets.TopicsButton.Object.transform).rect.height;
+            : baseButtonHeight = ((RectTransform) Resource.Widgets.ItemButton.Object.transform).rect.height;
 
 
         readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
         protected float yOffset = 5;
         protected float buttonHeight;
+
+        [CanBeNull] Info<GameObject> buttonType;
+
+        [NotNull]
+        public Info<GameObject> ButtonType
+        {
+            get => buttonType ?? (buttonType = Resource.Widgets.ItemButton);
+            set => buttonType = value;
+        }
 
         [SerializeField] GameObject contentObject = null;
         [SerializeField] Text emptyText = null;
@@ -30,7 +39,7 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget closeButton = null;
         [SerializeField] Canvas canvas = null;
 
-        public event Action<int, string> ItemClicked;
+        public event Action<int, int> ItemClicked;
         public event Action CloseClicked;
 
         public string Title
@@ -47,18 +56,16 @@ namespace Iviz.App
 
         public sealed class ItemEntry
         {
-            readonly GameObject buttonObject;
-            readonly Text text;
-            readonly Button button;
-
+            readonly ItemButton button;
             readonly float buttonHeight;
             readonly float yOffset;
+            readonly Info<GameObject> buttonType;
             int index;
 
-            [NotNull] RectTransform ButtonTransform => (RectTransform) buttonObject.transform;
-
-            public ItemEntry(int index, [NotNull] GameObject parent, float buttonHeight, float yOffset,
-                [NotNull] Action<int, string> callback)
+            public ItemEntry(int index,
+                [NotNull] GameObject parent, float buttonHeight, float yOffset,
+                [NotNull] Info<GameObject> buttonType,
+                [NotNull] Action<int, int> callback)
             {
                 if (parent == null)
                 {
@@ -77,18 +84,14 @@ namespace Iviz.App
 
                 this.buttonHeight = buttonHeight;
                 this.yOffset = yOffset;
-                buttonObject = ResourcePool.Rent(Resource.Widgets.TopicsButton, parent.transform, false);
-
-                RectTransform mTransform = ButtonTransform;
-                Vector2 sizeDelta = mTransform.sizeDelta;
-                mTransform.sizeDelta = new Vector2(sizeDelta.x, buttonHeight);
-
-                text = buttonObject.GetComponentInChildren<Text>();
-                button = buttonObject.GetComponentInChildren<Button>();
-                button.onClick.AddListener(() => callback(Index, Text));
+                this.buttonType = buttonType;
+                
+                button = ResourcePool.Rent<ItemButton>(buttonType, parent.transform, false);
+                button.Height = buttonHeight;
+                button.Clicked += subIndex => callback(Index, subIndex);
+                button.Active = true;
 
                 Index = index;
-                buttonObject.SetActive(true);
             }
 
             int Index
@@ -98,27 +101,27 @@ namespace Iviz.App
                 {
                     index = value;
                     float y = yOffset + index * (yOffset + buttonHeight);
-                    ButtonTransform.anchoredPosition = new Vector2(0, -y);
+                    button.AnchoredPosition = new Vector2(0, -y);
                 }
             }
 
             public string Text
             {
-                get => text.text;
+                get => button.Text;
                 set
                 {
-                    text.text = value;
+                    button.Text = value;
                     int lineBreaks = value.Count(x => x == '\n');
                     switch (lineBreaks)
                     {
                         case 2:
-                            text.fontSize = 11;
+                            button.FontSize = 11;
                             break;
                         case 3:
-                            text.fontSize = 10;
+                            button.FontSize = 10;
                             break;
                         default:
-                            text.fontSize = 12;
+                            button.FontSize = 12;
                             break;
                     }
                 }
@@ -126,23 +129,20 @@ namespace Iviz.App
 
             public bool Interactable
             {
-                get => button.interactable;
-                set => button.interactable = value;
+                get => button.Interactable;
+                set => button.Interactable = value;
             }
 
-            public void Invalidate()
+            public void Dispose()
             {
-                button.onClick.RemoveAllListeners();
-                button.interactable = true;
+                button.Suspend();
 
                 if (!Mathf.Approximately(buttonHeight, BaseButtonHeight))
                 {
-                    RectTransform mTransform = ButtonTransform;
-                    Vector2 sizeDelta = mTransform.sizeDelta;
-                    mTransform.sizeDelta = new Vector2(sizeDelta.x, BaseButtonHeight);
+                    button.Height = BaseButtonHeight;
                 }
 
-                ResourcePool.Return(Resource.Widgets.TopicsButton, buttonObject);
+                ResourcePool.Return(buttonType, button.gameObject);
             }
         }
 
@@ -181,7 +181,7 @@ namespace Iviz.App
 
                     for (int j = i; j < itemEntries.Count; j++)
                     {
-                        itemEntries[j].Invalidate();
+                        itemEntries[j].Dispose();
                     }
 
                     itemEntries.RemoveRange(i, itemEntries.Count - i);
@@ -196,7 +196,8 @@ namespace Iviz.App
                     {
                         if (i >= itemEntries.Count)
                         {
-                            itemEntries.Add(new ItemEntry(i, contentObject, buttonHeight, yOffset, RaiseClicked));
+                            itemEntries.Add(new ItemEntry(i, contentObject, buttonHeight, yOffset,
+                                ButtonType, RaiseClicked));
                         }
 
                         itemEntries[i++].Text = str;
@@ -214,15 +215,14 @@ namespace Iviz.App
             set => gameObject.SetActive(value);
         }
 
-        // Use this for initialization
         protected virtual void Start()
         {
             closeButton.Clicked += RaiseClose;
         }
 
-        void RaiseClicked(int id, string text)
+        void RaiseClicked(int id, int subId)
         {
-            ItemClicked?.Invoke(id, text);
+            ItemClicked?.Invoke(id, subId);
         }
 
         void RaiseClose()

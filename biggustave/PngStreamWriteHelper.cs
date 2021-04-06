@@ -7,8 +7,9 @@
 
     internal class PngStreamWriteHelper : Stream
     {
-        private readonly Stream inner;
-        private readonly List<byte> written = new List<byte>();
+        readonly Stream inner;
+        //private readonly List<byte> written = new List<byte>();
+        readonly MemoryStream written = new MemoryStream();
 
         public override bool CanRead => inner.CanRead;
 
@@ -33,7 +34,8 @@
 
         public void WriteChunkHeader(byte[] header)
         {
-            written.Clear();
+            //written.Clear();
+            written.Position = 0;
             Write(header, 0, header.Length);
         }
 
@@ -50,13 +52,14 @@
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            written.AddRange(buffer.Skip(offset).Take(count));
+            //written.AddRange(buffer.Skip(offset).Take(count));
+            written.Write(buffer, offset, count);
             inner.Write(buffer, offset, count);
         }
 
         public void WriteCrc()
         {
-            var result = (int)Crc32.Calculate(written);
+            int result = (int)Crc32.Calculate(written.GetBuffer(), (int) written.Position);
             StreamHelper.WriteBigEndianInt32(inner, result);
         }
     }

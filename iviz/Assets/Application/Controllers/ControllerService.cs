@@ -486,10 +486,7 @@ namespace Iviz.Controllers
                     try
                     {
                         await Settings.ScreenshotManager.StartAsync(
-                            srv.Request.ResolutionX, srv.Request.ResolutionY, false);
-                        
-                        var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-                        AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
+                            srv.Request.ResolutionX, srv.Request.ResolutionY, srv.Request.WithHolograms);
                     }
                     catch (Exception e)
                     {
@@ -587,8 +584,20 @@ namespace Iviz.Controllers
                 {
                     try
                     {
+                        var assetHolder = UnityEngine.Resources
+                            .Load<GameObject>("App Asset Holder")
+                            .GetComponent<AppAssetHolder>();
+                        AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
+
                         ss = await Settings.ScreenshotManager.TakeScreenshotColorAsync();
                         pose = TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose();
+
+                        if (Settings.IsHololens)
+                        {
+                            // make camera point to +Z instead of +X
+                            Iviz.Msgs.GeometryMsgs.Quaternion toCameraFrame = (0.5, -0.5, 0.5, -0.5);
+                            pose = new Pose(pose.Value.Position, pose.Value.Orientation * toCameraFrame);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -649,6 +658,10 @@ namespace Iviz.Controllers
                     case ScreenshotFormat.Bgra:
                         bpp = 4;
                         flipRb = true;
+                        break;
+                    case ScreenshotFormat.Rgb:
+                        bpp = 3;
+                        flipRb = false;
                         break;
                     default:
                         throw new InvalidOperationException("Unknown screenshot format");

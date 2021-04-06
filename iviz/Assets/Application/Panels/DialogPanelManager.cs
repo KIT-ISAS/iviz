@@ -14,6 +14,7 @@ namespace Iviz.App
         AddTopic,
         Image,
         Tf,
+        Load,
         SaveAs,
         Marker,
         Network,
@@ -42,13 +43,14 @@ namespace Iviz.App
             parentCanvas = GetComponentInParent<Canvas>();
 
             gameObject.SetActive(false);
-            (DialogPanelType type, IDialogPanelContents panel)[] list =
+            (DialogPanelType type, IDialogPanelContents panel)[] panels =
             {
                 (DialogPanelType.AddModule, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
                 (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
                 (DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
                 (DialogPanelType.Tf, CreatePanel<TfDialogContents>(Resource.Widgets.TfPanel)),
                 (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogContents>(Resource.Widgets.SaveAsPanel)),
+                (DialogPanelType.Load, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
                 (DialogPanelType.AddTopic, CreatePanel<AddTopicDialogContents>(Resource.Widgets.AddTopicPanel)),
                 (DialogPanelType.Marker, CreatePanel<MarkerDialogContents>(Resource.Widgets.MarkerPanel)),
                 (DialogPanelType.Network, CreatePanel<NetworkDialogContents>(Resource.Widgets.NetworkPanel)),
@@ -57,7 +59,7 @@ namespace Iviz.App
                 (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
             };
 
-            foreach (var (type, panel) in list)
+            foreach (var (type, panel) in panels)
             {
                 panelByType.Add(type, panel);
                 panel.Active = false;
@@ -79,6 +81,8 @@ namespace Iviz.App
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
+
+            //Span<byte> var numbers = stackalloc byte[1024];
         }
 
         void UpdateSelected()
@@ -101,7 +105,9 @@ namespace Iviz.App
                 throw new InvalidOperationException("There is no panel for this type!");
             }
 
-            return cm is T contents ? contents : throw new InvalidOperationException("Panel type does not match!");
+            return cm is T contents 
+                ? contents 
+                : throw new InvalidOperationException("Panel type does not match!");
         }
 
         void SelectPanelFor(DialogData newSelected)
@@ -177,7 +183,7 @@ namespace Iviz.App
         [NotNull]
         public override string ToString()
         {
-            return "[DialogPanelPanager]";
+            return "[DialogPanelManager]";
         }
     }
 }

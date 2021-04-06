@@ -84,6 +84,10 @@ namespace Iviz.Displays
                 UpdateProperties();
             }
         }
+        
+        public Vector2 MeasuredIntensityBounds { get; protected set; }
+        
+        public bool OverrideIntensityBounds { get; set; }
 
         /// <summary>
         /// Whether to use a flipped version of IntensityBounds.

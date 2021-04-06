@@ -143,7 +143,7 @@ namespace Iviz.App
         [NotNull]
         GameObject CreatePanelObject([NotNull] string panelName)
         {
-            GameObject o = Instantiate(UnityEngine.Resources.Load<GameObject>("Widgets/Data Panel"), transform);
+            GameObject o = Resource.Widgets.DataPanel.Instantiate(transform);
             o.name = panelName;
             return o;
         }

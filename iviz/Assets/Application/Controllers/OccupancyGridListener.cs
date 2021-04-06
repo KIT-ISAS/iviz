@@ -85,7 +85,8 @@ namespace Iviz.Controllers
                     numValid = 0;
                 }
 
-                return $"{numCellsX}x{numCellsY} cells | {cellSize} m/cell\n{numValid} valid";
+                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | {cellSize.ToString("#,0.###")} m/cell</b>\n" +
+                       $"{numValid.ToString("N0")} valid";
             }
         }
 

@@ -309,7 +309,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Description = $"<b>{width.ToString()}x{height.ToString()} {encoding}</b>";
+            Description = $"<b>{width.ToString()}x{height.ToString()} pixels | {encoding}</b>";
 
             switch (encoding)
             {

@@ -5,6 +5,7 @@ using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -17,7 +18,7 @@ namespace Iviz.Displays
         [SerializeField] float pointSize;
         [SerializeField] Resource.ColormapId colormap;
         [SerializeField] bool useIntensityNotRange;
-        [SerializeField] bool forceMinMax;
+        [SerializeField] bool overrideMinMax;
         [SerializeField] bool flipMinMax;
         [SerializeField] float minIntensity;
         [SerializeField] float maxIntensity;
@@ -49,7 +50,9 @@ namespace Iviz.Displays
             private set => size = value;
         }
 
-        public Vector2 MeasuredIntensityBounds { get; private set; }
+        public Vector2 MeasuredIntensityBounds => useLines 
+            ? lines.MeasuredIntensityBounds 
+            : pointCloud.MeasuredIntensityBounds;
 
         public float PointSize
         {
@@ -79,12 +82,14 @@ namespace Iviz.Displays
             set => useIntensityNotRange = value;
         }
 
-        public bool ForceMinMax
+        public bool OverrideMinMax
         {
-            get => forceMinMax;
+            get => overrideMinMax;
             set
             {
-                forceMinMax = value;
+                overrideMinMax = value;
+                pointCloud.OverrideIntensityBounds = value;
+                lines.OverrideIntensityBounds = value;
                 if (value)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -115,7 +120,7 @@ namespace Iviz.Displays
             set
             {
                 minIntensity = value;
-                if (ForceMinMax)
+                if (OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -129,7 +134,7 @@ namespace Iviz.Displays
             set
             {
                 maxIntensity = value;
-                if (ForceMinMax)
+                if (OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
@@ -235,7 +240,7 @@ namespace Iviz.Displays
             lines.ReturnToPool();
         }
 
-        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax, 
+        public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax,
             [NotNull] float[] ranges, [NotNull] float[] intensities)
         {
             if (ranges == null)
@@ -311,11 +316,6 @@ namespace Iviz.Displays
         void SetPoints()
         {
             pointCloud.Set(pointBuffer);
-            MeasuredIntensityBounds = pointCloud.IntensityBounds;
-            if (ForceMinMax)
-            {
-                pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-            }
         }
 
         void SetLines()
@@ -344,11 +344,6 @@ namespace Iviz.Displays
             }
 
             lines.Set(lineBuffer, false);
-            MeasuredIntensityBounds = lines.IntensityBounds;
-            if (ForceMinMax)
-            {
-                lines.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-            }
         }
     }
 }

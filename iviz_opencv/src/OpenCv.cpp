@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/aruco.hpp>
+#include <opencv2/objdetect.hpp>
+#include <opencv2/imgproc.hpp>
+#include <Eigen/Geometry>
 
 struct Context
 {
@@ -18,6 +21,7 @@ struct Context
     cv::Ptr<cv::aruco::DetectorParameters> parameters;
     std::vector<int> markerIds;
     std::vector<std::vector<cv::Point2f>> markerCorners;
+    std::vector<std::string> markerCodes;
     cv::Mat cameraMatrix;
 };
 
@@ -237,14 +241,74 @@ extern "C" {
         if (ctx->parameters == nullptr)
         {
             ctx->parameters = cv::aruco::DetectorParameters::create();
+            ctx->parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
         }
         
         cv::aruco::detectMarkers(ctx->image, ctx->dictionary, ctx->markerCorners,
                                  ctx->markerIds, ctx->parameters, rejectedCandidates);
+        
         return true;
     }
     
-    int GetNumDetectedArucoMarkers(const void *ctx_base)
+    bool DetectQrMarkers(void *ctx_base)
+    {
+        if (ctx_base == nullptr)
+        {
+            LogError("[OpenCV native] Context cannot be null");
+            return false;
+        }
+        
+        Context *ctx = (Context*) ctx_base;
+        
+        ctx->markerCorners.clear();
+        ctx->markerIds.clear();
+        
+        if (ctx->image.empty())
+        {
+            LogError("[OpenCV native] Image is empty");
+            return false;
+        }
+        
+        if (ctx->dictionary == nullptr)
+        {
+            LogError("[OpenCV native] Dictionary is empty");
+            return false;
+        }
+        
+        std::vector<std::vector<cv::Point2f>> rejectedCandidates;
+        if (ctx->parameters == nullptr)
+        {
+            ctx->parameters = cv::aruco::DetectorParameters::create();
+            ctx->parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
+        }
+        
+        cv::QRCodeDetector qrcode;
+        std::vector<cv::Point2f> corners;
+        
+        ctx->markerCodes.clear();
+        qrcode.detectAndDecodeMulti(ctx->image, ctx->markerCodes, corners);
+        
+        ctx->markerCorners.clear();
+        for (int i = 0; i < corners.size(); i += 4)
+        {
+            std::vector<cv::Point2f> subCorners;
+            subCorners.push_back(corners[i]);
+            subCorners.push_back(corners[i+1]);
+            subCorners.push_back(corners[i+2]);
+            subCorners.push_back(corners[i+3]);
+            ctx->markerCorners.push_back(subCorners);
+        }
+        
+        if (ctx->markerCorners.size() != ctx->markerCodes.size())
+        {
+            LogError("[OpenCV native] Inconsistent sizes: " + std::to_string(ctx->markerCorners.size()) +
+                     " and " + std::to_string(ctx->markerCodes.size()));
+        }
+        
+        return true;
+    }
+    
+    int GetNumDetectedMarkers(const void *ctx_base)
     {
         if (ctx_base == nullptr)
         {
@@ -253,7 +317,7 @@ extern "C" {
         }
         
         const Context *ctx = (const Context*) ctx_base;
-        return (int) ctx->markerIds.size();
+        return (int) ctx->markerCorners.size();
     }
     
     bool GetArucoMarkerIds(const void *ctx_base, int *arrayPtr, int arraySize)
@@ -281,7 +345,33 @@ extern "C" {
         return true;
     }
     
-    bool GetArucoMarkerCorners(const void *ctx_base, float *arrayPtr, int arraySize)
+    bool GetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize)
+    {
+        if (ctx_base == nullptr)
+        {
+            LogError("[OpenCV native] Context cannot be null");
+            return false;
+        }
+        
+        const Context *ctx = (const Context*) ctx_base;
+        if (arraySize < ctx->markerCodes.size())
+        {
+            LogError("[OpenCV native] Array size is too small. Given: " + std::to_string(arraySize) +
+                     ", needed: " + std::to_string(ctx->markerCodes.size()));
+            return false;
+        }
+        
+        for (int i = 0; i < ctx->markerCodes.size(); i++)
+        {
+            arrayPtr[i] = ctx->markerCodes[i].c_str();
+            arrayLengths[i] = (int) ctx->markerCodes[i].length();
+        }
+        
+        return true;
+    }
+    
+    
+    bool GetMarkerCorners(const void *ctx_base, float *arrayPtr, int arraySize)
     {
         if (ctx_base == nullptr)
         {
@@ -346,8 +436,7 @@ extern "C" {
         return true;
     }
     
-    bool EstimateArucoPose(const void *ctx_base, float markerSize, int* markerIndices, int markerIndicesLength,
-                           float *rotations, int rotationsSize, float *translations, int translationsSize)
+    bool EstimateMarkerPoses(const void *ctx_base, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize)
     {
         if (ctx_base == nullptr)
         {
@@ -375,33 +464,19 @@ extern "C" {
             return false;
         }
 
-        std::vector<std::vector<cv::Point2f>> markerCorners;
-        for (int i = 0; i < markerIndicesLength; i++)
-        {
-            int markerIndex = markerIndices[i];
-            if (markerIndex < 0 || markerIndex >= ctx->markerCorners.size())
-            {
-                LogError("[OpenCV native] Index at position " + std::to_string(i) + " points to marker " +
-                         std::to_string(markerIndex) + " which is out of range");
-                return false;
-            }
-            
-            markerCorners.push_back(ctx->markerCorners[markerIndex]);
-        }
-        
         std::vector<cv::Vec3d> rvecs, tvecs;
-        cv::aruco::estimatePoseSingleMarkers(markerCorners, markerSize, ctx->cameraMatrix, distCoeffs, rvecs, tvecs);
+        cv::aruco::estimatePoseSingleMarkers(ctx->markerCorners, markerSize, ctx->cameraMatrix, distCoeffs, rvecs, tvecs);
 
         if (rotationsSize < rvecs.size() * 3)
         {
-            LogError("[OpenCV native] Rotatino array size is too small. Given: " + std::to_string(rotationsSize) +
+            LogError("[OpenCV native] Rotation array size is too small. Given: " + std::to_string(rotationsSize) +
                      ", needed: " + std::to_string(rvecs.size() * 3));
             return false;
         }
 
         if (translationsSize < tvecs.size() * 3)
         {
-            LogError("[OpenCV native] Rotation array size is too small. Given: " + std::to_string(translationsSize) +
+            LogError("[OpenCV native] Translation array size is too small. Given: " + std::to_string(translationsSize) +
                      ", needed: " + std::to_string(tvecs.size() * 3));
             return false;
         }
@@ -428,6 +503,75 @@ extern "C" {
     {
         Context *ctx = (Context*) ctx_base;
         delete ctx;
+    }
+    
+    bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize)
+    {
+        if (inputSize % 3 != 0)
+        {
+            LogError("[OpenCV native] Invalid inputSize");
+            return false;
+        }
+
+        if (outputSize % 3 != 0)
+        {
+            LogError("[OpenCV native] Invalid outputSize");
+            return false;
+        }
+
+        if (inputSize != outputSize)
+        {
+            LogError("[OpenCV native] Input and output sizes do not match");
+            return false;
+        }
+        
+        if (resultSize < 7)
+        {
+            LogError("[OpenCV native] Result size is too small");
+            return false;
+        }
+
+        
+        Eigen::Matrix3Xf input(3, inputSize / 3);
+        for (int i = 0; i < inputSize; i += 3)
+        {
+            input(0, i) = inputs[i];
+            input(1, i) = inputs[i + 1];
+            input(2, i) = inputs[i + 2];
+        }
+        
+        Eigen::Matrix3Xf output(3, outputSize / 3);
+        for (int i = 0; i < outputSize; i += 3)
+        {
+            output(0, i) = outputs[i];
+            output(1, i) = outputs[i + 1];
+            output(2, i) = outputs[i + 2];
+        }
+
+        Eigen::Matrix4f T = Eigen::umeyama(input, output, estimateScale);
+        
+        Eigen::Matrix3f R = T.topLeftCorner<3, 3>();
+        float scale;
+        if (estimateScale)
+        {
+            scale = R.col(0).norm();
+            R /= scale;
+        }
+        else
+        {
+            scale = 1;
+        }
+        
+        Eigen::AngleAxisf aa(R);
+        result[0] = aa.angle() * aa.axis()(0);
+        result[1] = aa.angle() * aa.axis()(1);
+        result[2] = aa.angle() * aa.axis()(2);
+        result[3] = T(0, 3);
+        result[4] = T(1, 3);
+        result[5] = T(2, 3);
+        result[6] = scale;
+        
+        return true;
     }
     
 }

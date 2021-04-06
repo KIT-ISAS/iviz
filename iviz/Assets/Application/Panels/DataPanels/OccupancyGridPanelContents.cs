@@ -28,7 +28,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Occupancy\nGrid");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            Description = p.AddDataLabel("").SetAlignment(TextAnchor.MiddleCenter);
+            Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.gray);

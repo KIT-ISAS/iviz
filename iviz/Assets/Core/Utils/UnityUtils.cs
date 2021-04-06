@@ -8,10 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
+using Color32 = UnityEngine.Color32;
+using Mesh = UnityEngine.Mesh;
 
 namespace Iviz.Core
 {
@@ -146,6 +149,34 @@ namespace Iviz.Core
                    && Mathf.Approximately(p.rotation.w, 1);
         }
 
+        public static bool EqualsApprox(this Pose p, in Pose q)
+        {
+            return Mathf.Approximately(p.position.x, q.position.x)
+                   && Mathf.Approximately(p.position.y, q.position.y)
+                   && Mathf.Approximately(p.position.z, q.position.z)
+                   && Mathf.Approximately(p.rotation.x, q.rotation.x)
+                   && Mathf.Approximately(p.rotation.y, q.rotation.y)
+                   && Mathf.Approximately(p.rotation.z, q.rotation.z)
+                   && Mathf.Approximately(p.rotation.w, q.rotation.w);
+        }
+
+        public static Vector4 GetColumnIn(this Matrix4x4 m, int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return new Vector4(m.m00, m.m10, m.m20, m.m30);
+                case 1:
+                    return new Vector4(m.m01, m.m11, m.m21, m.m31);
+                case 2:
+                    return new Vector4(m.m02, m.m12, m.m22, m.m32);
+                case 3:
+                    return new Vector4(m.m03, m.m13, m.m23, m.m33);
+                default:
+                    throw new IndexOutOfRangeException("Invalid column index!");
+            }
+        }
+        
         public static Pose Lerp(this Pose p, in Pose o, float t)
         {
             return new Pose(
@@ -525,7 +556,7 @@ namespace Iviz.Core
         {
             using (var bytes = await ReadAllBytesAsync(filePath, token))
             {
-                return BuiltIns.UTF8.GetString(bytes.Array);
+                return BuiltIns.UTF8.GetString(bytes.Array, 0, bytes.Length);
             }
         }
     }
@@ -605,6 +636,9 @@ namespace Iviz.Core
 
         public static void Deconstruct(this Vector3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
+
+        public static void Deconstruct(this Vector3f v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.X, v.Y, v.Z);
 
         public static void Deconstruct(this Vector2 v, out float x, out float y) =>
             (x, y) = (v.x, v.y);

@@ -229,11 +229,6 @@ namespace Iviz.Roslib
             }
             
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
-            if (toDelete.Length == 0)
-            {
-                return false;
-            }
-
             var tasks = toDelete.Select(receiver =>
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);

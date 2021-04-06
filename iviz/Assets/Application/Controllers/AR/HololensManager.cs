@@ -10,12 +10,17 @@ using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.XmlRpc;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TMPro;
+using Unity.Collections;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 #if UNITY_WSA
 using Microsoft.MixedReality.Toolkit;
+using UnityEngine.XR.ARSubsystems;
+using UnityEngine.XR.WSA;
 
 #endif
 
@@ -69,7 +74,7 @@ namespace Iviz.Hololens
         void Initialize()
         {
             ThreadPool.SetMinThreads(25, 20);
-            
+
             try
             {
                 Logger.Debug("Hololens Manager: Initializing!");
@@ -324,7 +329,7 @@ namespace Iviz.Hololens
 
 
             AddFrame(TfListener.OriginFrame, 0);
-            hololensHandMenu.SetPalm(candidates.Select(
+            hololensHandMenu.SetPalm(Enumerable.Select(candidates,
                 frame => new HololensMenuEntry(frame.Id, () => MenuListClick(frame.Id))));
         }
 
@@ -337,7 +342,7 @@ namespace Iviz.Hololens
                 TfListener.RootFrame.transform.localScale = scale * Vector3.one;
             }
 
-            hololensHandMenu.SetPalm(scales.Select(
+            hololensHandMenu.SetPalm(Enumerable.Select(scales,
                 scale => new HololensMenuEntry(scale.ToString(BuiltIns.Culture), () => MenuListClick(scale))));
         }
 
@@ -385,15 +390,24 @@ namespace Iviz.Hololens
 
         void StartOriginPlaceMode()
         {
+            if (RootFrame.gameObject.TryGetComponent<WorldAnchor>(out var component))
+            {
+                Destroy(component);
+            }
+
             RootFrame.transform.SetPose(InfinitePose);
             floorFrame.gameObject.SetActive(true);
+
             CoreServices.SpatialAwarenessSystem.Enable();
         }
 
         void StartWorld()
         {
             floorFrame.gameObject.SetActive(false);
-            RootFrame.transform.SetPose(floorFrame.OriginPose);
+            RootFrame.Transform.SetPose(floorFrame.OriginPose);
+
+            WriteAnchor(floorFrame.OriginPose);
+
             CoreServices.SpatialAwarenessSystem.Disable();
         }
 
@@ -551,7 +565,23 @@ namespace Iviz.Hololens
         Light MainLight => mainLight != null
             ? mainLight
             : (mainLight = GameObject.Find("MainLight")?.GetComponent<Light>());
+
+
+        bool WriteAnchor(in Pose newWorldPose)
+        {
+            if (RootFrame.gameObject.TryGetComponent<WorldAnchor>(out var component))
+            {
+                Destroy(component);
+            }
+
+            ;
+
+            RootFrame.Transform.SetPose(newWorldPose);
+            RootFrame.gameObject.AddComponent<WorldAnchor>();
+            return true;
+        }
     }
+
 
 #else
     class HololensManager : MonoBehaviour

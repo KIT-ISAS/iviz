@@ -78,8 +78,8 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj3JPQqAMAxA4T3gHQLuTuJJvECQFAOa1DTiz+m1S7fv8XqcVynonJ0LaxQkRXP5SSGm" +
-                "KIrJmbFkWrjWcVKwa33JfB8A0mYU04h309P0Nl3QwQc5jmFPbgAAAA==";
+                "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
+                "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
@@ -94,5 +94,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
         public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
+        public static Quaternion Rodrigues(in Vector3 rod) => Extensions.Rodrigues(rod);
     }
 }

@@ -34,7 +34,7 @@ Shader "iviz/DepthCloud"
 			float4x4 _LocalToWorld;
 			float4x4 _WorldToLocal;
 
-			//float _PointSize;
+			float _PointSize;
 			sampler2D _ColorTexture;
 			sampler2D _DepthTexture;
 
@@ -76,13 +76,12 @@ Shader "iviz/DepthCloud"
 				inst /= 2;
 #endif				
 
-				float2 extent = abs(UNITY_MATRIX_P._11_22);
-				float2 quadVertex = _Quad[id] * _Scale;
+				float2 extent = abs(float2(UNITY_MATRIX_P._11, UNITY_MATRIX_P._22));
+				float2 quadVertex = _Quad[id];
 				float2 center = _Points[inst];
 
 				float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r * 65.535;
-				//float2 size = z * _PointSize * extent;
-				float2 size = z * extent;
+				float2 size = z * extent * _PointSize;
 
 				float4 pos;
 				pos.xy = (center * _Pos_ST.xy + _Pos_ST.zw) * z;

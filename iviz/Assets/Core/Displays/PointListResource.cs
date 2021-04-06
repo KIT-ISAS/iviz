@@ -193,7 +193,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
             }
 
             pointBuffer.Dispose();
@@ -318,7 +318,11 @@ namespace Iviz.Displays
             MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
-            IntensityBounds = span;
+            MeasuredIntensityBounds = span;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = span;
+            }
         }
 
         protected override void Rebuild()
@@ -327,7 +331,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
             }
 
             if (pointBuffer.Capacity != 0)
@@ -349,7 +353,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, null);
+            Properties.SetBuffer(PointsId, (ComputeBuffer) null);
         }
 
         protected override void UpdateProperties()

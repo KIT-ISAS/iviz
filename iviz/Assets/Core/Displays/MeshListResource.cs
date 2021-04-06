@@ -156,7 +156,6 @@ namespace Iviz.Displays
             UseColormap = true;
             MeshResource = Resource.Displays.Sphere;
             ElementScale3 = Vector3.one;
-            IntensityBounds = new Vector2(0, 1);
             Colormap = Resource.ColormapId.gray;
 
             argsComputeBuffer =
@@ -238,7 +237,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsID, null);
+            Properties.SetBuffer(PointsID, (ComputeBuffer) null);
         }
 
         /// <summary>
@@ -345,7 +344,12 @@ namespace Iviz.Displays
 
             BoxCollider.size = pointBounds.size + meshBounds.size;
             BoxCollider.center = pointBounds.center + meshBounds.center;
-            IntensityBounds = span;
+
+            MeasuredIntensityBounds = span;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = span;
+            }
         }
 
         protected override void Rebuild()
@@ -354,7 +358,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsID, null);
+                Properties.SetBuffer(PointsID, (ComputeBuffer) null);
             }
 
             if (pointBuffer.Capacity != 0)

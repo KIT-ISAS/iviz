@@ -1,4 +1,5 @@
 ﻿using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -12,7 +13,6 @@ namespace Iviz.App
 
         public ToggleWidget UseIntensity { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
-        public DataLabelWidget MinMax { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -31,15 +31,14 @@ namespace Iviz.App
             p.AddHeadTitleWidget("LaserScan");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            NumPoints = p.AddDataLabel("Number of Points");
-            MinMax = p.AddDataLabel("Min/Max");
+            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.hsv);
             UseIntensity = p.AddToggle("Use Intensity instead of Range");
 
-            ForceMinMax = p.AddToggle("Colormap Force Min/Max");
+            ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddNumberInputField("Colormap Min");
             MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");

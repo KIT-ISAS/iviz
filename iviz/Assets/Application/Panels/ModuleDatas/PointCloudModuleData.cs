@@ -46,13 +46,7 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.NumPoints.Label = 
-                $"<b>{listener.Size} Points</b>\n" +
-                (listener.Size == 0 ? "Empty" :
-                    listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
-                    "Color");
+            panel.NumPoints.Label = BuildDescriptionString();
 
             panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
@@ -68,11 +62,11 @@ namespace Iviz.App
 
             panel.HideButton.State = listener.Visible;
 
-            panel.ForceMinMax.Value = listener.ForceMinMax;
+            panel.ForceMinMax.Value = listener.OverrideMinMax;
             panel.MinIntensity.Value = listener.MinIntensity;
             panel.MaxIntensity.Value = listener.MaxIntensity;
-            panel.MinIntensity.Interactable = listener.ForceMinMax;
-            panel.MaxIntensity.Interactable = listener.ForceMinMax;
+            panel.MinIntensity.Interactable = listener.OverrideMinMax;
+            panel.MaxIntensity.Interactable = listener.OverrideMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
 
             panel.PointSize.ValueChanged += f =>
@@ -100,7 +94,7 @@ namespace Iviz.App
             };
             panel.ForceMinMax.ValueChanged += f =>
             {
-                listener.ForceMinMax = f;
+                listener.OverrideMinMax = f;
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
@@ -125,11 +119,18 @@ namespace Iviz.App
 
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.NumPoints.Label = 
-                $"<b>{listener.Size} Points</b>\n" +
+            panel.NumPoints.Label = BuildDescriptionString();
+        }
+
+        string BuildDescriptionString()
+        {
+            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            return 
+                $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
                 (listener.Size == 0 ? "Empty" :
-                listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
-                "Color");
+                    listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
+                    "Color");
         }
         
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
@@ -152,8 +153,8 @@ namespace Iviz.App
                     case nameof(PointCloudConfiguration.Colormap):
                         listener.Colormap = config.Colormap;
                         break;
-                    case nameof(PointCloudConfiguration.ForceMinMax):
-                        listener.ForceMinMax = config.ForceMinMax;
+                    case nameof(PointCloudConfiguration.OverrideMinMax):
+                        listener.OverrideMinMax = config.OverrideMinMax;
                         break;
                     case nameof(PointCloudConfiguration.MinIntensity):
                         listener.MinIntensity = config.MinIntensity;
