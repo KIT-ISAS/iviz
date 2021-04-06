@@ -31,12 +31,15 @@ extern "C"
     
     bool SetDictionary(void *ctx, int value);
     bool DetectArucoMarkers(void *ctx);
-    int GetNumDetectedArucoMarkers(const void *ctx);
+    bool DetectQrMarkers(void *ctx_base);
+    int GetNumDetectedMarkers(const void *ctx);
     bool GetArucoMarkerIds(const void *ctx, int *arrayPtr, int arraySize);
-    bool GetArucoMarkerCorners(const void *ctx, float *arrayPtr, int arraySize);
+    bool GetQrMarkerCodes(const void *ctx_base, const void **arrayPtr, int *arrayLengths, int arraySize);
+    bool GetMarkerCorners(const void *ctx, float *arrayPtr, int arraySize);
     bool SetCameraMatrix(void *ctx, float *arrayPtr, int arraySize);
-    bool EstimateArucoPose(const void *ctx, float markerSize, int* markerIndices, int markerIndicesLength,
-                           float *rotations, int rotationsSize, float *translations, int translationsSize);
+    bool EstimateMarkerPoses(const void *ctx, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize);
+    
+    bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize);
     
     void DisposeContext(void *ctx);
 }
