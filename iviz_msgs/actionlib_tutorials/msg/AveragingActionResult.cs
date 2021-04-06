@@ -83,25 +83,24 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1WTW8bNxC9L6D/QECH2EXttEk/UgM6qLLqOHASw1Z7NbjL0S5bLqmSXMv6933DXa2k" +
-                "WEJ0SC3YXksi3zy+eTOc9yQVeVGlRyaLqJ01On+oQxleXzlp7qOMTRAhPbLxI3lZalveUWhMFD49Btno" +
-                "G78G2cf7qwtEVS2T94nfIBsK8LFKeiVqilLJKMXcgb8uK/Jnhh7JMNd6QUqkb+NqQeEcG2eVDgI/JVmc" +
-                "wZiVaAIWRScKV9eN1YWMJKKuaWc/dmorpFhIH3XRGOmx3nmlLS+fe1kTo+Mn0L8N2YLE9eUF1thARRM1" +
-                "CK2AUHiSAbrhS5E12sa3b3hDNpwt3RneUoks9MFFrGRksvS0gMTMU4YLxPiuPdw5sKEOIYoK4iR99oC3" +
-                "4VQgCCjQwhWVOAHz21WsnAUgiUfptcwNMXABBYD6ije9Ot1CZtoXwkrr1vAt4ibGMbC2x+UznVXImeHT" +
-                "h6aEgFi48O5RKyzNVwmkMJpsFLCel36V8a42ZDb8gzXGIuxKGcFThuAKjQQosdSxykL0jJ6y8aBV9r8Z" +
-                "8mCBDDL+H8kt8WAKnON367Jp39xOP11ef7oS69dI/IC/7ExK20Qlg1hRZE/mxBIVbe47jdrgSLtHFXaY" +
-                "48ns+q+p2ML8cReTk9J4D3Hhw5xYpqOAb++m04+3s+llD/xmF9hTQXA3nImswyH8CQogRCHnEWbWkU/v" +
-                "OUf0lErBltmG6PPXEL/wSVKh9RwKc2GIEXQMaxQQPZmRr1GAhrtBpNOO8v2fk8l0erlF+e0u5SWQZVFp" +
-                "dAkFKxaswrzhVrBPiENhxr9/vtvowmF+2hMmd+noqknO3HDfG0k19FVp2BXBoRLmUpvG0yF6d9MP08kW" +
-                "v5H4+Tk9T39Twfz20uGack380i7ff51jToVEW02YfbAGrTJKMOUmgWat7aM0Wh06QOe8vlJG4pcXcF5v" +
-                "PetiKsKN+frk9QpPxjc3m0oeiV+PJZgTbivay/AYdZGT59naJW3n2td8r/EN0qchtWZmQmrnENs2efcN" +
-                "DnGczGyKnfJrA/DNccATN5/vZ9tQI/FbAhzbtRjdBQIkoZA1BqFWBNlLwCjn7SAQYHCjkm75EbUXGNux" +
-                "2izpUuP4qBzE2m2d2XBsjFumkYQXohTwj9vcVyDT3VVcY2JrwOItivKm5OlqfaFFeorZi95m15c8ZLEJ" +
-                "2kGk0ylEzjgfKd3MUHVZaUwY6Vbe6irJIKR4IrpOA0yasfZIhf1k2UI4KAXWCIMO1QukyxjsZszQ5m9J" +
-                "CN1Dr90HV5LnrpIYbQ8MHX80mG7IQDcGvdVuIuZEKpfFP2zIbNgNshgqQ5AlZxjZCQsq9FwX63pIDAIb" +
-                "iNGxqVsAUnWT6gKtTmPV+Tp/WPUS2YsN0qMh2Osv5vNBls2Nkzxs8ozptfMP0paG+o/lwiGr9SD7DyMB" +
-                "8kEJDAAA";
+                "H4sIAAAAAAAAE71WTXPbNhC981dgxofYnVppk36kntFBlVRHGSfx2GqvHpBckWhBQMWHZP37vgUpSnKs" +
+                "RockGtu0JODtw9u3i31LsiQn6vTIZBGUNVrlD42v/MtrK/V9kCF64dMjG63IyUqZ6o581EG49MiGX/iV" +
+                "vb+/vkLMsuXxtmV3JkDGlNKVoqEgSxmkWFiQV1VN7lLTijQTbZZUivRt2CzJD7BxXisv8FORwQG03ojo" +
+                "sShYUdimiUYVMpAIqqGD/dipjJBiKV1QRdTSYb11pTK8fOFkQ4yOH0//RjIFidnkCmuMpyIGBUIbIBSO" +
+                "pIdo+FJkUZnw+hVvyM7ma3uJt1QhBX1wEWoZmCw9LqEv85T+CjG+aw83ADbEIUQpvThPnz3grb8QCAIK" +
+                "tLRFLc7B/HYTamsASGIlnZK5JgYuoABQX/CmFxd7yCZBG2nsFr5F3MU4Bdb0uHymyxo503x6HysIiIVL" +
+                "Z1eqxNJ8k0AKrcgEAd856TYZ72pDZmd/sMZYhF0pI3hK722hkIBSrFWoMx8co6dsPKgy+0puPFobGf+L" +
+                "zFZ4cHxO8JttwbRvbqcfJrMP12L7Goof8JdtSWmbqKUXGwpsyJxYn6JNfCdQGxs5d6i/DnM0ns/+moo9" +
+                "zB8PMTkj0TkoCxPmxBqdBHx7N52+v51PJz3wq0NgRwXB2rAlUg578Cdwvw9CLgKcrAKf3nGC6DHVgaky" +
+                "8T+vM/zCJEmF1nCoyqUmRlDBb1FA9HxOrkH1aW4FgS46yvd/jsfT6WSP8utDymsgy6JWxLR9LFiFReQ+" +
+                "8JwQx8KMfv94t9OFw/z0TJjcpqOXMdlyx/3ZSGWkz0rDrvAWZbCQSkdHx+jdTd9Nx3v8huLnT+k5+puK" +
+                "cMQBqaBsDE/t8v3nOeZUSPTUhNkHi+iTQYIpdwh0amVWUqvy2AE65/WVMhS/fAPn9dYzNqQi3JmvT16v" +
+                "8Hh0c7Or5KH49VSCOeGqomcZnqIucvJptg5Jm4VyDV9qfH2E/S6QmFB5cIh9m7z5Aoc4TWY2xUH5tQH4" +
+                "2jjiiZuP9/N9qKH4LQGOzFaM7vYAkiiRNQahVgTZS8Aog3YK8DC4LpNu+Qm15xnbstos6Vrh+KgcaZ60" +
+                "zuxspLVdp3mEF6IUHNdtf1mBTHdRcY2JvdGKt5SUx4rnqu1tFugxZN/wKptNstYB7QjSieQDp5vPk+5k" +
+                "SLquFWaLdB/vtZTkDip5Fpql0SV2d8xTnbCfDPsHpyTPAmHEoWaJXGmN3Yzp2+StCaF76K31YEly3FIS" +
+                "o/1RoeOP7tKNF2jFoLc5zMKCqMxl8Q+7ETva+RXjpPeyojY1fkmFWqhiWwyJgR906DzrtQtAqompKNDn" +
+                "FFYNtsnjIeSrpy5EJEdBrpdPhvIsW2grecbk0dIp6x6kqTT1H8ulRUqb7D98rCbg/AsAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

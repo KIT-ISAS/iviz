@@ -82,8 +82,8 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACnPOz8tLTS5JTXHOyUzNK4mOVUgGM4q5eLlsqQx4uXyD3a0UivKLk4oyU9JT43OL04v1" +
-                "nVFdwMtVXFKUmZeukFkQn5iSUpRaXMxVkpmbqpAMUZeZnxcP4gPdBwAMDjqfvAAAAA==";
+                "H4sIAAAAAAAAE3POz8tLTS5JTXHOyUzNK4mOVUgGM4q5uGypDLh8g92tFIryi5OKMlPSU+Nzi9OL9Z1R" +
+                "7ecqLinKzEtXyCyIT0xJKUotLuYqycxNVUiGKMvMz4sH8bm4AIb8WuK4AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -27,6 +27,14 @@ namespace Iviz.Msgs
             return (System.Math.Sin(angleInRad / 2) * axis, System.Math.Cos(angleInRad / 2));
         }
 
+        public static Quaternion Rodrigues(in Vector3 rod)
+        {
+            double angle = rod.Norm;
+            return angle == 0
+                ? Quaternion.Identity
+                : AngleAxis(angle, rod / angle);
+        }
+
         public static Quaternion Normalize(in Quaternion q)
         {
             double norm = System.Math.Sqrt(q.X * q.X + q.Y * q.Y + q.Z * q.Z + q.W * q.W);
@@ -84,6 +92,11 @@ namespace Iviz.Msgs
         public static void Deconstruct(this Vector3 v, out double X, out double Y, out double Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
 
+        public static void Deconstruct(this Vector3f v, out float X, out float Y, out float Z) =>
+            (X, Y, Z) = (v.X, v.Y, v.Z);
+        
+        public static void Deconstruct(this Vector2f v, out float X, out float Y) => (X, Y) = (v.X, v.Y);
+        
         public static Quaternion WithX(this Quaternion p, double x) => new(x, p.Y, p.Z, p.W);
         public static Quaternion WithY(this Quaternion p, double y) => new(p.X, y, p.Z, p.W);
         public static Quaternion WithZ(this Quaternion p, double z) => new(p.X, p.Y, z, p.W);
