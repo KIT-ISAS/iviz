@@ -23,7 +23,7 @@ namespace Iviz.Roslib
         internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;
-            manager = new TcpSenderManager<T>(this, topicInfo);
+            manager = new TcpSenderManager<T>(this, topicInfo) {ForceTcpNoDelay = true};
         }
 
         /// <summary>
