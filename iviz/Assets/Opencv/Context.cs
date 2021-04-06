@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.IvizMsgs;
+using Iviz.Roslib.Utils;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
+using UnityEditorInternal;
 
 namespace Iviz.Opencv
 {
@@ -72,11 +78,11 @@ namespace Iviz.Opencv
             }
             catch (EntryPointNotFoundException e)
             {
-                Debug.LogError(e);
+                UnityEngine.Debug.LogError(e);
             }
             catch (DllNotFoundException e)
             {
-                Debug.LogError(e);
+                UnityEngine.Debug.LogError(e);
             }
         }
 
@@ -84,7 +90,7 @@ namespace Iviz.Opencv
         {
             if (imageSize > image.Length)
             {
-                throw new InvalidOperationException("Image size is too small");
+                throw new ArgumentException("Image size is too small", nameof(image));
             }
 
             if (disposed)
@@ -93,6 +99,29 @@ namespace Iviz.Opencv
             }
 
             UnsafeUtility.MemCpy(imagePtr.ToPointer(), image.GetUnsafePtr(), imageSize);
+        }
+
+        public unsafe void SetImageDataFlipY(in NativeArray<byte> image)
+        {
+            if (imageSize > image.Length)
+            {
+                throw new ArgumentException("Image size is too small", nameof(image));
+            }
+
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
+            }
+
+            int stride = Width * 3;
+            byte* src = (byte*) image.GetUnsafePtr();
+            byte* dst = (byte*) imagePtr.ToPointer();
+            for (int v = 0; v < Height; v++)
+            {
+                byte* srcOff = src + stride * v;
+                byte* dstOff = dst + stride * (Height - v - 1);
+                UnsafeUtility.MemCpy(dstOff, srcOff, stride);
+            }
         }
 
         public void SetImageData([NotNull] byte[] image)
@@ -104,7 +133,7 @@ namespace Iviz.Opencv
 
             if (Width * Height * 3 > image.Length)
             {
-                throw new InvalidOperationException("Image size is too small");
+                throw new ArgumentException("Image size is too small", nameof(image));
             }
 
             Native.CopyFrom(ContextPtr, image, image.Length);
@@ -119,7 +148,7 @@ namespace Iviz.Opencv
 
             if (Width * Height * 3 > image.Length)
             {
-                throw new InvalidOperationException("Image size is too small");
+                throw new ArgumentException("Image size is too small", nameof(image));
             }
 
             Native.CopyTo(ContextPtr, image, image.Length);
@@ -150,12 +179,18 @@ namespace Iviz.Opencv
         public int DetectArucoMarkers()
         {
             Native.DetectArucoMarkers(ContextPtr);
-            return Native.GetNumDetectedArucoMarkers(ContextPtr);
+            return Native.GetNumDetectedMarkers(ContextPtr);
         }
 
-        public IEnumerable<int> GetDetectedArucoIds()
+        public int DetectQrMarkers()
         {
-            int numDetected = Native.GetNumDetectedArucoMarkers(ContextPtr);
+            Native.DetectQrMarkers(ContextPtr);
+            return Native.GetNumDetectedMarkers(ContextPtr);
+        }
+
+        public int[] GetDetectedArucoIds()
+        {
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
                 throw new InvalidOperationException("An error happened in the native call");
@@ -163,27 +198,54 @@ namespace Iviz.Opencv
 
             if (numDetected == 0)
             {
-                yield break;
+                return Array.Empty<int>();
             }
 
-            using (var indices = new Rent<int>(numDetected))
+
+            int[] indices = new int[numDetected];
+            if (!Native.GetArucoMarkerIds(ContextPtr, indices, indices.Length))
             {
-                if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length))
+                throw new InvalidOperationException("An error happened in the native call");
+            }
+
+            return indices;
+        }
+
+        public string[] GetDetectedQrCodes()
+        {
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            if (numDetected < 0)
+            {
+                throw new InvalidOperationException("An error happened in the native call");
+            }
+
+            if (numDetected == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+
+            using (var pointers = new Rent<IntPtr>(numDetected))
+            using (var pointerLengths = new Rent<int>(numDetected))
+            {
+                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected))
                 {
                     throw new InvalidOperationException("An error happened in the native call");
                 }
 
-                foreach (int index in indices)
+                string[] indices = new string[numDetected];
+                for (int i = 0; i < numDetected; i++)
                 {
-                    yield return index;
+                    indices[i] = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
                 }
+
+                return indices;
             }
         }
 
-
-        public IEnumerable<DetectedArucoMarker> EstimateMarkerPoses(float markerSize)
+        public ArucoMarkerPoses[] EstimateArucoMarkerPoses(float markerSizeInM)
         {
-            int numDetected = Native.GetNumDetectedArucoMarkers(ContextPtr);
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
                 throw new InvalidOperationException("An error happened in the native call");
@@ -191,36 +253,210 @@ namespace Iviz.Opencv
 
             if (numDetected == 0)
             {
-                yield break;
+                return Array.Empty<ArucoMarkerPoses>();
             }
+
+            var markers = new ArucoMarkerPoses[numDetected];
 
             using (var indices = new Rent<int>(numDetected))
             using (var rotations = new Rent<float>(3 * numDetected))
             using (var translations = new Rent<float>(3 * numDetected))
             {
                 if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
-                    !Native.EstimateArucoPose(ContextPtr, markerSize, indices.Array, indices.Length, rotations.Array,
-                        rotations.Length, translations.Array, translations.Length))
+                    !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
+                        translations.Array, translations.Length))
                 {
                     throw new InvalidOperationException("An error happened in the native call");
                 }
 
                 for (int i = 0; i < numDetected; i++)
                 {
-                    Vector3 translation = new Vector3(
+                    Vector3 translation = (
                         translations[3 * i + 0],
                         translations[3 * i + 1],
-                        translations[3 * i + 2]).Ros2Unity();
-                    Vector3 angleAxis = new Vector3(
+                        translations[3 * i + 2]);
+                    Vector3 angleAxis = (
                         rotations[3 * i + 0],
                         rotations[3 * i + 1],
-                        rotations[3 * i + 2]).Ros2Unity();
-                    float angle = angleAxis.sqrMagnitude;
-                    Quaternion rotation = Mathf.Approximately(angle, 0)
-                        ? Quaternion.identity
+                        rotations[3 * i + 2]);
+                    double angle = angleAxis.Norm;
+                    var rotation = angle == 0
+                        ? Quaternion.Identity
                         : Quaternion.AngleAxis(angle, angleAxis / angle);
-                    yield return new DetectedArucoMarker(indices[i], new Pose(translation, rotation));
+                    markers[i] = new ArucoMarkerPoses(indices[i], new Pose(translation, rotation));
                 }
+            }
+
+            return markers;
+        }
+
+        public QrMarkerPoses[] EstimateQrMarkerPoses(float markerSizeInM)
+        {
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            if (numDetected < 0)
+            {
+                throw new InvalidOperationException("An error happened in the native call");
+            }
+
+            if (numDetected == 0)
+            {
+                return Array.Empty<QrMarkerPoses>();
+            }
+
+            var markers = new QrMarkerPoses[numDetected];
+
+            using (var pointers = new Rent<IntPtr>(numDetected))
+            using (var pointerLengths = new Rent<int>(numDetected))
+            using (var rotations = new Rent<float>(3 * numDetected))
+            using (var translations = new Rent<float>(3 * numDetected))
+            {
+                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
+                    !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
+                        translations.Array, translations.Length))
+                {
+                    throw new InvalidOperationException("An error happened in the native call");
+                }
+
+                for (int i = 0; i < numDetected; i++)
+                {
+                    string code = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
+                    Vector3 translation = (
+                        translations[3 * i + 0],
+                        translations[3 * i + 1],
+                        translations[3 * i + 2]);
+                    Vector3 angleAxis = (
+                        rotations[3 * i + 0],
+                        rotations[3 * i + 1],
+                        rotations[3 * i + 2]);
+                    double angle = angleAxis.Norm;
+                    var rotation = angle == 0
+                        ? Quaternion.Identity
+                        : Quaternion.AngleAxis(angle, angleAxis / angle);
+                    markers[i] = new QrMarkerPoses(code, new Pose(translation, rotation));
+                }
+            }
+
+            return markers;
+        }
+
+        public QrMarkerCorners[] GetDetectedQrCorners()
+        {
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            if (numDetected < 0)
+            {
+                throw new InvalidOperationException("An error happened in the native call");
+            }
+
+            if (numDetected == 0)
+            {
+                return Array.Empty<QrMarkerCorners>();
+            }
+
+            var markers = new QrMarkerCorners[numDetected];
+
+            using (var pointers = new Rent<IntPtr>(numDetected))
+            using (var pointerLengths = new Rent<int>(numDetected))
+            using (var corners = new Rent<float>(8 * numDetected))
+            {
+                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
+                    !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
+                {
+                    throw new InvalidOperationException("An error happened in the native call");
+                }
+
+                int o = 0;
+                for (int i = 0; i < numDetected; i++)
+                {
+                    string code = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
+                    markers[i] = new QrMarkerCorners(code, new Vector2f[]
+                    {
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                    });
+                }
+            }
+
+            return markers;
+        }
+
+        public ArucoMarkerCorners[] GetDetectedArucoCorners()
+        {
+            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
+            if (numDetected < 0)
+            {
+                throw new InvalidOperationException("An error happened in the native call");
+            }
+
+            if (numDetected == 0)
+            {
+                return Array.Empty<ArucoMarkerCorners>();
+            }
+
+            var markers = new ArucoMarkerCorners[numDetected];
+
+            using (var indices = new Rent<int>(numDetected))
+            using (var corners = new Rent<float>(8 * numDetected))
+            {
+                if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
+                    !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
+                {
+                    throw new InvalidOperationException("An error happened in the native call");
+                }
+
+                int o = 0;
+                for (int i = 0; i < numDetected; i++)
+                {
+                    markers[i] = new ArucoMarkerCorners(indices[i], new Vector2f[]
+                    {
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                        (corners[o++], corners[o++]),
+                    });
+                }
+            }
+
+            return markers;
+        }
+
+        static (float, Transform) Umeyama(Vector3f[] input, Vector3f[] output, bool estimateScale)
+        {
+            if (input.Length != output.Length)
+            {
+                throw new InvalidOperationException("Input and output lengths do not match");
+            }
+
+            using (var inputFloats = new Rent<float>(input.Length * 3))
+            using (var outputFloats = new Rent<float>(output.Length * 3))
+            using (var resultFloats = new Rent<float>(7))
+            {
+                int o = 0;
+                foreach (var v in input)
+                {
+                    (inputFloats[o], inputFloats[o + 1], inputFloats[o + 2]) = v;
+                    o += 3;
+                }
+
+                o = 0;
+                foreach (var v in output)
+                {
+                    (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
+                    o += 3;
+                }
+
+                Native.EstimateUmeyama(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
+                    estimateScale, resultFloats.Array, resultFloats.Length);
+                
+                Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
+                Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
+                double angle = angleAxis.Norm;
+                var rotation = angle == 0
+                    ? Quaternion.Identity
+                    : Quaternion.AngleAxis(angle, angleAxis / angle);
+
+                return (resultFloats[6], (translation, rotation));
             }
         }
 
@@ -236,10 +472,7 @@ namespace Iviz.Opencv
             ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
-        
-        
-        
-        
+
 
         ~Context()
         {
@@ -294,21 +527,31 @@ namespace Iviz.Opencv
             public static extern bool DetectArucoMarkers(IntPtr ctx);
 
             [DllImport("IvizOpencv")]
-            public static extern int GetNumDetectedArucoMarkers(IntPtr ctx);
+            public static extern bool DetectQrMarkers(IntPtr ctx);
+
+            [DllImport("IvizOpencv")]
+            public static extern int GetNumDetectedMarkers(IntPtr ctx);
 
             [DllImport("IvizOpencv")]
             public static extern bool GetArucoMarkerIds(IntPtr ctx, int[] arrayPtr, int arraySize);
 
             [DllImport("IvizOpencv")]
-            public static extern bool GetArucoMarkerCorners(IntPtr ctx, float[] arrayPtr, int arraySize);
+            public static extern bool GetQrMarkerCodes(IntPtr ctx, IntPtr[] arrayPtr, int[] arrayLengths,
+                int arraySize);
+
+            [DllImport("IvizOpencv")]
+            public static extern bool GetMarkerCorners(IntPtr ctx, float[] arrayPtr, int arraySize);
 
             [DllImport("IvizOpencv")]
             public static extern bool SetCameraMatrix(IntPtr ctx, float[] arrayPtr, int arraySize);
 
             [DllImport("IvizOpencv")]
-            public static extern bool EstimateArucoPose(IntPtr ctx, float markerSize, int[] markerIndices,
-                int markerIndicesLength, float[] rotations, int rotationsSize, float[] translations,
-                int translationsSize);
+            public static extern bool EstimateMarkerPoses(IntPtr ctx, float markerSize, float[] rotations,
+                int rotationsSize, float[] translations, int translationsSize);
+
+            [DllImport("IvizOpencv")]
+            public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
+                bool estimateScale, float[] result, int resultSize);
         }
     }
 
@@ -345,28 +588,46 @@ namespace Iviz.Opencv
         DictApriltag36H11
     };
 
-    public readonly struct DetectedArucoMarker
+    public readonly struct ArucoMarkerPoses
     {
         public int Id { get; }
         public Pose Pose { get; }
 
-        public DetectedArucoMarker(int id, in Pose pose)
-        {
-            Id = id;
-            Pose = pose;
-        }
+        public ArucoMarkerPoses(int id, in Pose pose) => (Id, Pose) = (id, pose);
+
+        public override string ToString() => "{\"Id\":" + Id + ", \"Pose\":" + Pose + "}";
     }
 
-    static class OpencvUtils
+    [Serializable]
+    public readonly struct ArucoMarkerCorners
     {
-        static Vector3 OpencvToUnity(this Vector3 p)
-        {
-            return new Vector3(p.x, -p.y, p.z);
-        }
+        public int Id { get; }
+        public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        static Quaternion OpencvToUnity(this Quaternion q)
-        {
-            return new Quaternion(q.x, -q.y, q.z, -q.w);
-        }
+        public ArucoMarkerCorners(int id, Vector2f[] corners) => (Id, Corners) = (id, corners.AsReadOnly());
+
+        public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
+                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
+    }
+
+    public readonly struct QrMarkerPoses
+    {
+        public string Code { get; }
+        public Pose Pose { get; }
+
+        public QrMarkerPoses(string code, in Pose pose) => (Code, Pose) = (code, pose);
+
+        public override string ToString() => "{\"Code\":" + Code + ", \"Pose\":" + Pose + "}";
+    }
+
+    public readonly struct QrMarkerCorners
+    {
+        public string Code { get; }
+        public ReadOnlyCollection<Vector2f> Corners { get; }
+
+        public QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners.AsReadOnly());
+
+        public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
+                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }
 }

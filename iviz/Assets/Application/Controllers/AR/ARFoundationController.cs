@@ -8,6 +8,7 @@ using BitMiracle.LibJpeg.Classic;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -120,7 +121,8 @@ namespace Iviz.Controllers
             set
             {
                 base.Visible = value;
-                resource.Visible = value && UseMarker;
+                //resource.Visible = value && UseMarker;
+                resource.Visible = value;
                 mainCamera.gameObject.SetActive(!value);
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
@@ -177,6 +179,7 @@ namespace Iviz.Controllers
         //bool hasSetupModePose;
         //bool markerFound;
 
+        /*
         public override bool UseMarker
         {
             get => base.UseMarker;
@@ -235,6 +238,8 @@ namespace Iviz.Controllers
                 resource.Offset = value.Ros2Unity();
             }
         }
+                */
+
 
         protected override bool PinRootMarker
         {
@@ -477,6 +482,7 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
         {
             Pose? newPose = null;
@@ -507,8 +513,9 @@ namespace Iviz.Controllers
 
             //markerFound = true;
         }
+        */
 
-        public Task<Screenshot> CaptureImage()
+        public Task<Screenshot> TakeScreenshotColorAsync()
         {
             var cameraManager = arCamera.GetComponent<ARCameraManager>();
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
@@ -526,6 +533,17 @@ namespace Iviz.Controllers
 
             TaskCompletionSource<Screenshot> task = new TaskCompletionSource<Screenshot>();
             
+            int width = image.width;
+            int height = image.height;
+            int halfWidth = width / 2;
+            int halfHeight = height / 2;
+            var projectionMatrix = arCamera.projectionMatrix;
+            float fx = halfWidth * projectionMatrix.m00;
+            float fy = halfHeight * projectionMatrix.m11;
+            float cx = halfWidth * (1 - projectionMatrix.m02);
+            float cy = halfHeight * (1 + projectionMatrix.m12);
+            var pose = arCamera.transform.AsPose();
+            
             using (image)
             {
                 try
@@ -536,11 +554,14 @@ namespace Iviz.Controllers
                         {
                             Debug.LogErrorFormat("Request failed with status {0}", status);
                             task.TrySetResult(null);
+                            return;
                         }
-                        else
-                        {
-                            task.TrySetResult(null);
-                        }
+
+                        var bytes = new UniqueRef<byte>(array.Length);
+                        NativeArray<byte>.Copy(array, bytes.Array, array.Length);
+
+                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, fx, cx, fy, cy, pose, bytes);
+                        task.TrySetResult(s);
                     });
                 }
                 catch (Exception e)

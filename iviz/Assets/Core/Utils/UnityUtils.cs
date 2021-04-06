@@ -8,10 +8,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
+using Color32 = UnityEngine.Color32;
+using Mesh = UnityEngine.Mesh;
 
 namespace Iviz.Core
 {
@@ -553,7 +556,7 @@ namespace Iviz.Core
         {
             using (var bytes = await ReadAllBytesAsync(filePath, token))
             {
-                return BuiltIns.UTF8.GetString(bytes.Array);
+                return BuiltIns.UTF8.GetString(bytes.Array, 0, bytes.Length);
             }
         }
     }
@@ -633,6 +636,9 @@ namespace Iviz.Core
 
         public static void Deconstruct(this Vector3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
+
+        public static void Deconstruct(this Vector3f v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.X, v.Y, v.Z);
 
         public static void Deconstruct(this float3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);

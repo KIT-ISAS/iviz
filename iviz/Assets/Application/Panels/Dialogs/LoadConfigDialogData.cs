@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Iviz.Core;
+using Iviz.Resources;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
@@ -9,16 +11,16 @@ namespace Iviz.App
 {
     public sealed class LoadConfigDialogData : DialogData
     {
-        [NotNull] readonly ItemListDialogContents itemList;
-        public override IDialogPanelContents Panel => itemList;
-
         const string Suffix = ".config.json";
 
-        readonly List<string> files = new List<string>();
+        [NotNull] readonly ItemListDialogContents itemList;
+        [NotNull] readonly List<string> files = new List<string>();
+        public override IDialogPanelContents Panel => itemList;
 
         public LoadConfigDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.Load);
+            itemList.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 
         public static IEnumerable<string> SavedFiles => Directory.GetFiles(Settings.SavedFolder)
@@ -29,12 +31,18 @@ namespace Iviz.App
             files.Clear();
             files.AddRange(SavedFiles.Select(GetFileName));
             itemList.Title = "Load Config File";
-            itemList.Items = files;
+            itemList.Items = files.Select(file => $"<b>{file}</b>");
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;
             itemList.EmptyText = "No Config Files Found";
         }
-
+        void ReadAllFiles()
+        {
+            files.Clear();
+            files.AddRange(SavedFiles.Select(GetFileName));
+            itemList.Items = files.Select(file => $"<b>{file}</b>");
+        }
+        
         [NotNull]
         static string GetFileName([NotNull] string s)
         {
@@ -42,10 +50,28 @@ namespace Iviz.App
             return fs.Substring(0, fs.Length - Suffix.Length);
         }
 
-        void OnItemClicked(int index, string _)
+        void OnItemClicked(int index, int subIndex)
         {
-            ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
-            Close();
+            switch (subIndex)
+            {
+                case 0:
+                    ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
+                    Close();
+                    break;
+                case 1:
+                    string filename = $"{Settings.SavedFolder}/{files[index]}{Suffix}";
+                    try
+                    {
+                        File.Delete(filename);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Internal("Error deleting config file", e);
+                    }
+
+                    ReadAllFiles();
+                    break;
+            }
         }
     }
 }

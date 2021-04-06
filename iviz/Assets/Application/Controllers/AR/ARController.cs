@@ -33,11 +33,13 @@ namespace Iviz.Controllers
 
         /* NonSerializable */
         public float WorldAngle { get; set; }
+        /*
         [DataMember] public bool SearchMarker { get; set; }
         [DataMember] public bool MarkerHorizontal { get; set; } = true;
         [DataMember] public int MarkerAngle { get; set; }
         [DataMember] public string MarkerFrame { get; set; } = "";
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
+        */
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
         /* NonSerializable */
@@ -78,7 +80,7 @@ namespace Iviz.Controllers
         protected Canvas canvas;
         protected FrameNode node;
 
-        [CanBeNull] public static bool HasARController => Instance != null;
+        public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
         
         public ARConfiguration Config
@@ -88,11 +90,13 @@ namespace Iviz.Controllers
             {
                 Visible = value.Visible;
                 WorldScale = value.WorldScale;
+                /*
                 UseMarker = value.SearchMarker;
                 MarkerHorizontal = value.MarkerHorizontal;
                 MarkerAngle = value.MarkerAngle;
                 MarkerFrame = value.MarkerFrame;
                 MarkerOffset = value.MarkerOffset;
+                */
                 OcclusionQuality = value.OcclusionQuality;
             }
         }
@@ -139,6 +143,7 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         public virtual bool UseMarker
         {
             get => config.SearchMarker;
@@ -168,6 +173,7 @@ namespace Iviz.Controllers
             get => config.MarkerOffset;
             set => config.MarkerOffset = value;
         }
+        */
 
         static float TfRootScale
         {

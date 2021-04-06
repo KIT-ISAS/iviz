@@ -100,6 +100,10 @@ namespace Iviz.Displays
             pointBuffer = new NativeList<float4>(Allocator.Persistent);
             resource = ResourcePool.RentDisplay<MeshListResource>(transform);
 
+            resource.OverrideIntensityBounds = true;
+            resource.IntensityBounds = new Vector2(0, 1);
+
+
             NumCellsX = 10;
             NumCellsY = 10;
             CellSize = 1.0f;
@@ -155,7 +159,6 @@ namespace Iviz.Displays
             {
                 resource.transform.SetLocalPose(pose);
                 resource.SetDirect(pointBuffer);
-                resource.IntensityBounds = new Vector2(0, 1);
                 IsProcessing = false;
             });
         }

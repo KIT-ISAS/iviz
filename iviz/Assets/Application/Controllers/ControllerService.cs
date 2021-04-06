@@ -659,6 +659,10 @@ namespace Iviz.Controllers
                         bpp = 4;
                         flipRb = true;
                         break;
+                    case ScreenshotFormat.Rgb:
+                        bpp = 3;
+                        flipRb = false;
+                        break;
                     default:
                         throw new InvalidOperationException("Unknown screenshot format");
                 }

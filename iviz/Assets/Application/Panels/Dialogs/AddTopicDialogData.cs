@@ -114,7 +114,7 @@ namespace Iviz.App
             panel.EmptyText = ConnectionManager.IsConnected ? "No Topics Available" : "(Not Connected)";
         }
 
-        void OnItemClicked(int index, string _)
+        void OnItemClicked(int index, int _)
         {
             TopicWithResource clickedTopic;
             if (panel.ShowAll.Value)

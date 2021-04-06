@@ -141,6 +141,7 @@ namespace Iviz.App
                     case nameof(ARConfiguration.Visible):
                         controller.Visible = config.Visible;
                         break;
+                    /*
                     case nameof(ARConfiguration.SearchMarker):
                         controller.Visible = config.Visible;
                         break;
@@ -156,7 +157,7 @@ namespace Iviz.App
                     case nameof(ARConfiguration.MarkerOffset):
                         controller.Visible = config.Visible;
                         break;
-
+                        */
                     default:
                         Core.Logger.Error($"{this}: Unknown field '{field}'");
                         break;

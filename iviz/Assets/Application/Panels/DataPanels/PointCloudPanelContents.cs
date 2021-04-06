@@ -40,7 +40,7 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)Resource.ColormapId.hsv);
 
-            ForceMinMax = p.AddToggle("Colormap Force Min/Max");
+            ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddNumberInputField("Colormap Min");
             MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");

@@ -49,7 +49,7 @@ namespace Iviz.Resources
         /// Constructs a unique identifier from a resource path. The instance will be loaded the first time it is needed.
         /// </summary>
         /// <param name="resourceName">Path to the resource.</param>
-        public Info([NotNull] string resourceName) : this(resourceName, null, null)
+        public Info([NotNull] string resourceName) : this(resourceName, null)
         {
             if (resourceName == null)
             {
@@ -61,7 +61,7 @@ namespace Iviz.Resources
         /// Constructs a unique identifier from an existing instance
         /// </summary>
         /// <param name="baseObject">Loaded instance of this type, if already available.</param>
-        public Info([NotNull] T baseObject) : this(null, baseObject, null)
+        public Info([NotNull] T baseObject) : this(null, baseObject)
         {
             if (baseObject == null)
             {
@@ -69,61 +69,37 @@ namespace Iviz.Resources
             }
         }
 
-        Info([CanBeNull] string resourceName, [CanBeNull] T baseObject, object _)
-        {
-            this.resourceName = resourceName;
-            this.baseObject = baseObject;
-        }
-
+        Info([CanBeNull] string resourceName, [CanBeNull] T baseObject) =>
+            (this.resourceName, this.baseObject) = (resourceName, baseObject);
+        
+        
         /// <summary>
         /// Name of this resource.
         /// </summary>
         [NotNull]
         public string Name => Object.name;
 
-        public override string ToString()
-        {
-            return Object == null ? "[null]" : Object.ToString();
-        }
+        public override string ToString() => Object == null ? "[null]" : Object.ToString();
 
         /// <summary>
         /// Instantiates a clone of the resource.
         /// </summary>
         /// <param name="parent">If not null, sets the clone parent to this.</param>
         /// <returns>An instantiated clone.</returns>
-        public T Instantiate([CanBeNull] Transform parent = null)
-        {
-            if (Object == null)
-            {
-                throw new ResourceNotFoundException("Tried to instantiate from a resource that could not be found.");
-            }
+        public T Instantiate([CanBeNull] Transform parent = null) =>
+            Object != null
+                ? UnityEngine.Object.Instantiate(Object, parent)
+                : throw new ResourceNotFoundException("Tried to instantiate from a resource that could not be found.");
 
-            return UnityEngine.Object.Instantiate(Object, parent);
-        }
+        public bool Equals(Info<T> other) => other != null && Id == other.Id;
 
-        public bool Equals(Info<T> other)
-        {
-            return other != null && Id == other.Id;
-        }
+        public override bool Equals(object obj) => obj != null && obj is Info<T> info && Id == info.Id;
 
-        public override bool Equals(object obj)
-        {
-            return obj != null && obj is Info<T> info && Id == info.Id;
-        }
+        public static bool operator ==([CanBeNull] Info<T> a, [CanBeNull] Info<T> b) =>
+            ReferenceEquals(a, b) || (!(a is null) && a.Equals(b));
 
-        public static bool operator ==([CanBeNull] Info<T> a, [CanBeNull] Info<T> b)
-        {
-            return ReferenceEquals(a, b) || (!(a is null) && a.Equals(b));
-        }
+        public static bool operator !=([CanBeNull] Info<T> a, [CanBeNull] Info<T> b) => !(a == b);
 
-        public static bool operator !=([CanBeNull] Info<T> a, [CanBeNull] Info<T> b)
-        {
-            return !(a == b);
-        }
-
-        public override int GetHashCode()
-        {
-            return Id.GetHashCode();
-        }
+        public override int GetHashCode() => Id.GetHashCode();
     }
 }

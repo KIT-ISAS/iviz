@@ -208,7 +208,6 @@ namespace Iviz.Displays
 
             ElementScale = 0.1f;
             UseColormap = false;
-            IntensityBounds = new Vector2(0, 1);
         }
 
         void Update()
@@ -332,7 +331,12 @@ namespace Iviz.Displays
             MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
-            IntensityBounds = span;
+            
+            MeasuredIntensityBounds = span;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = span;
+            }
         }
 
         protected override void Rebuild()

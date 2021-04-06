@@ -28,7 +28,7 @@ namespace Iviz.Controllers
         [DataMember] public string IntensityChannel { get; set; } = "z";
         [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
-        [DataMember] public bool ForceMinMax { get; set; }
+        [DataMember] public bool OverrideMinMax { get; set; }
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
@@ -72,7 +72,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public Vector2 MeasuredIntensityBounds { get; private set; }
+        public Vector2 MeasuredIntensityBounds => pointCloud.MeasuredIntensityBounds;
 
         public int Size { get; private set; }
 
@@ -88,7 +88,7 @@ namespace Iviz.Controllers
                 IntensityChannel = value.IntensityChannel;
                 PointSize = value.PointSize;
                 Colormap = value.Colormap;
-                ForceMinMax = value.ForceMinMax;
+                OverrideMinMax = value.OverrideMinMax;
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
@@ -131,20 +131,16 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool ForceMinMax
+        public bool OverrideMinMax
         {
-            get => config.ForceMinMax;
+            get => config.OverrideMinMax;
             set
             {
-                config.ForceMinMax = value;
-                if (config.ForceMinMax)
-                {
-                    pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                }
-                else
-                {
-                    pointCloud.IntensityBounds = MeasuredIntensityBounds;
-                }
+                config.OverrideMinMax = value;
+                pointCloud.OverrideIntensityBounds = value;
+                pointCloud.IntensityBounds = value
+                    ? new Vector2(MinIntensity, MaxIntensity) 
+                    : MeasuredIntensityBounds;
             }
         }
 
@@ -165,7 +161,7 @@ namespace Iviz.Controllers
             set
             {
                 config.MinIntensity = value;
-                if (config.ForceMinMax)
+                if (config.OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                 }
@@ -178,7 +174,7 @@ namespace Iviz.Controllers
             set
             {
                 config.MaxIntensity = value;
-                if (config.ForceMinMax)
+                if (config.OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                 }
@@ -344,12 +340,6 @@ namespace Iviz.Controllers
                         Size = numPoints;
                         pointCloud.UseColormap = !rgbaHint;
                         pointCloud.SetDirect(pointBuffer);
-
-                        MeasuredIntensityBounds = pointCloud.IntensityBounds;
-                        if (ForceMinMax)
-                        {
-                            pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                        }
                     }
                     finally
                     {

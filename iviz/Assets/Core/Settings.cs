@@ -173,6 +173,7 @@ namespace Iviz.Core
 
     public enum ScreenshotFormat
     {
+        Rgb,
         Bgra
     }
 
@@ -226,6 +227,5 @@ namespace Iviz.Core
         Task StartAsync(int width, int height, bool withHolograms);
         Task StopAsync();
         Task<Screenshot> TakeScreenshotColorAsync();
-        Task<Screenshot> TakeScreenshotGrey();
     }
 }

@@ -46,11 +46,7 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
-
-            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+            panel.NumPoints.Label = BuildDescriptionString();
 
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
@@ -66,18 +62,9 @@ namespace Iviz.App
 
             panel.UseLines.Value = listener.UseLines;
 
-            panel.UseIntensity.ValueChanged += f =>
-            {
-                listener.UseIntensity = f;
-            };
-            panel.PointSize.ValueChanged += f =>
-            {
-                listener.PointSize = f;
-            };
-            panel.Colormap.ValueChanged += (i, _) =>
-            {
-                listener.Colormap = (Resource.ColormapId) i;
-            };
+            panel.UseIntensity.ValueChanged += f => { listener.UseIntensity = f; };
+            panel.PointSize.ValueChanged += f => { listener.PointSize = f; };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (Resource.ColormapId) i; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -95,32 +82,26 @@ namespace Iviz.App
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
-            panel.FlipMinMax.ValueChanged += f =>
-            {
-                listener.FlipMinMax = f;
-            };
-            panel.MinIntensity.ValueChanged += f =>
-            {
-                listener.MinIntensity = f;
-            };
-            panel.MaxIntensity.ValueChanged += f =>
-            {
-                listener.MaxIntensity = f;
-            };
-            panel.UseLines.ValueChanged += f =>
-            {
-                listener.UseLines = f;
-            };
+            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
+            panel.MinIntensity.ValueChanged += f => { listener.MinIntensity = f; };
+            panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
+            panel.UseLines.ValueChanged += f => { listener.UseLines = f; };
         }
 
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            panel.NumPoints.Label = $"Number of Points: {listener.Size}";
+            panel.NumPoints.Label = BuildDescriptionString();
+        }
 
+        string BuildDescriptionString()
+        {
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+            return $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
+                   (listener.Size == 0
+                       ? "Empty"
+                       : $"[{minIntensityStr} .. {maxIntensityStr}]");
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

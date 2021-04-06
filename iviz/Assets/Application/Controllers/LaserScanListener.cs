@@ -108,7 +108,7 @@ namespace Iviz.Controllers
             set
             {
                 config.ForceMinMax = value;
-                resource.ForceMinMax = value;
+                resource.OverrideMinMax = value;
             }
         }
 
