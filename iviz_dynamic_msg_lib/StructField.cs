@@ -12,7 +12,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         object IField.Value => Value;
 
-        public int RosMessageLength => Marshal.SizeOf<T>();
+        public int RosLength => Marshal.SizeOf<T>();
 
         public void RosValidate()
         {

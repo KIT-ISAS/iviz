@@ -6,7 +6,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    public sealed class StructArrayFieldFixed<T> : IField where T : unmanaged
+    public sealed class StructFixedArrayField<T> : IField where T : unmanaged
     {
         public uint Count { get; }
 
@@ -16,9 +16,9 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.StructFixedArray;
 
-        public int RosMessageLength => (int) Count * Marshal.SizeOf<T>();
+        public int RosLength => (int) Count * Marshal.SizeOf<T>();
 
-        public StructArrayFieldFixed(uint count)
+        public StructFixedArrayField(uint count)
         {
             Count = count;
             Value = new T[Count];
@@ -49,7 +49,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public IField Generate()
         {
-            return new StructArrayFieldFixed<T>(Count);
+            return new StructFixedArrayField<T>(Count);
         }
     }
 }

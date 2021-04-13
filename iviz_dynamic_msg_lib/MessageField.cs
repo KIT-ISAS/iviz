@@ -15,7 +15,7 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.Message;
         
-        public int RosMessageLength => Value.RosMessageLength;
+        public int RosLength => Value.RosMessageLength;
 
         public void RosValidate()
         {

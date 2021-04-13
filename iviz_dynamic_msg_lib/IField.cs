@@ -24,7 +24,7 @@ namespace Iviz.MsgsGen.Dynamic
     {
         FieldType Type { get; }
         object Value { get; }
-        int RosMessageLength { get; }
+        int RosLength { get; }
         void RosValidate();
         void RosSerialize(ref Buffer b);
         void RosDeserializeInPlace(ref Buffer b);

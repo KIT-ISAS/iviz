@@ -5,37 +5,36 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    internal sealed class DynamicMessageArrayFieldFixed : IField
+    public sealed class MessageFixedArrayField<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
     {
-        readonly DynamicMessage generator;
-        
+        static readonly IDeserializable<T> Generator = new T();
+
         public uint Count { get; }
-        public DynamicMessage[] Value { get; set; }
+
+        public T[] Value { get; set; }
 
         object IField.Value => Value;
+        
+        public FieldType Type => FieldType.MessageFixedArray;
 
-        public FieldType Type => FieldType.DynamicMessageFixedArray;
-
-        public DynamicMessageArrayFieldFixed(uint count, DynamicMessage generator)
+        public MessageFixedArrayField(uint count)
         {
             Count = count;
-            this.generator = generator;
-
-            Value = new DynamicMessage[count];
+            Value = new T[count];
             for (int i = 0; i < count; i++)
             {
-                Value[i] = new DynamicMessage(generator);
+                Value[i] = new T();
             }
         }
 
-        public int RosMessageLength
+        public int RosLength
         {
             get
             {
                 int size = 0;
-                foreach (DynamicMessage field in Value)
+                for (int i = 0; i < Count; i++)
                 {
-                    size += field.RosMessageLength;
+                    size += Value[i].RosMessageLength;
                 }
 
                 return size;
@@ -53,6 +52,16 @@ namespace Iviz.MsgsGen.Dynamic
             {
                 throw new IndexOutOfRangeException();
             }
+
+            for (int i = 0; i < Value.Length; i++)
+            {
+                if (Value[i] is null)
+                {
+                    throw new NullReferenceException($"{nameof(Value)}[{i}]");
+                }
+
+                Value[i].RosValidate();
+            }
         }
 
         public void RosSerialize(ref Buffer b)
@@ -64,13 +73,13 @@ namespace Iviz.MsgsGen.Dynamic
         {
             for (int i = 0; i < Count; i++)
             {
-                Value[i].RosDeserializeInPlace(ref b);
+                Value[i] = Generator.RosDeserialize(ref b);
             }
         }
 
         public IField Generate()
         {
-            return new DynamicMessageArrayFieldFixed(Count, generator);
+            return new MessageFixedArrayField<T>(Count);
         }
     }
 }

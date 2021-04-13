@@ -5,34 +5,37 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    public sealed class StringArrayFieldFixed : IField
+    internal sealed class DynamicMessageFixedArrayField : IField
     {
+        readonly DynamicMessage generator;
+        
         public uint Count { get; }
-
-        public string[] Value { get; set; }
+        public DynamicMessage[] Value { get; set; }
 
         object IField.Value => Value;
-        
-        public FieldType Type => FieldType.StringFixedArray;
 
-        public StringArrayFieldFixed(uint count)
+        public FieldType Type => FieldType.DynamicMessageFixedArray;
+
+        public DynamicMessageFixedArrayField(uint count, DynamicMessage generator)
         {
             Count = count;
-            Value = new string[count];
+            this.generator = generator;
+
+            Value = new DynamicMessage[count];
             for (int i = 0; i < count; i++)
             {
-                Value[i] = "";
+                Value[i] = new DynamicMessage(generator);
             }
         }
 
-        public int RosMessageLength
+        public int RosLength
         {
             get
             {
-                int size = 4 * (int) Count;
-                for (int i = 0; i < Count; i++)
+                int size = 0;
+                foreach (DynamicMessage field in Value)
                 {
-                    size += BuiltIns.UTF8.GetByteCount(Value[i]);
+                    size += field.RosLength;
                 }
 
                 return size;
@@ -50,14 +53,6 @@ namespace Iviz.MsgsGen.Dynamic
             {
                 throw new IndexOutOfRangeException();
             }
-
-            for (int i = 0; i < Value.Length; i++)
-            {
-                if (Value[i] is null)
-                {
-                    throw new NullReferenceException($"{nameof(Value)}[{i}]");
-                }
-            }
         }
 
         public void RosSerialize(ref Buffer b)
@@ -67,12 +62,15 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref Buffer b)
         {
-            Value = b.DeserializeStringArray(Count);
+            foreach (DynamicMessage t in Value)
+            {
+                t.RosDeserializeInPlace(ref b);
+            }
         }
 
         public IField Generate()
         {
-            return new StringArrayFieldFixed(Count);
+            return new DynamicMessageFixedArrayField(Count, generator);
         }
     }
 }

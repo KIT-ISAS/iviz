@@ -13,7 +13,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public FieldType Type => FieldType.String;
         
-        public int RosMessageLength => 4 + BuiltIns.UTF8.GetByteCount(Value);
+        public int RosLength => 4 + BuiltIns.UTF8.GetByteCount(Value);
 
         public void RosValidate()
         {
