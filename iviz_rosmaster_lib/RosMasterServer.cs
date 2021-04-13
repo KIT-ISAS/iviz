@@ -139,7 +139,7 @@ namespace Iviz.RosMaster
 
         public void AddKey(string key, XmlRpcArg value)
         {
-            Logger.Log($"** Adding key '{key}'");
+            //Logger.Log($"** Adding key '{key}'");
             parameters[key] = value;
         }
 
@@ -158,7 +158,7 @@ namespace Iviz.RosMaster
                     "RosMasterServer has already been initialized as a background task");
             }
             
-            Logger.Log($"** {this}: Starting at {MasterUri}");
+            Logger.Log($"** {this}: Starting!");
             AddKey("/run_id", Guid.NewGuid().ToString());
             Task startTask = Task.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this));
             Task rosoutTask = Task.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this));
@@ -265,7 +265,7 @@ namespace Iviz.RosMaster
             }
 
             publishers[callerId] = callerUri;
-            Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic}");
+            Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic} [{topicType}]");
 
             var currentSubscribers =
                 subscribersByTopic.TryGetValue(topic, out var subscribers)
@@ -734,10 +734,6 @@ namespace Iviz.RosMaster
             }
 
             bool success = parameters.ContainsKey(key);
-            if (!success)
-            {
-                //Console.WriteLine("****© " + key + " is missing");
-            }
 
             return OkResponse(success);
         }
