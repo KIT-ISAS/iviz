@@ -20,7 +20,15 @@ namespace Iviz.Msgs
 
         static string GetClassStringConstant(Type type, string name)
         {
-            string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
+            Type? currentType = type;
+            string? constant;
+            do
+            {
+                constant = currentType.GetField(name)?.GetRawConstantValue() as string
+                           ?? currentType.GetProperty(name)?.GetValue(null) as string;
+                currentType = currentType.BaseType;
+            } while (constant == null && currentType != null);
+
             if (constant == null)
             {
                 throw new ArgumentException($"Failed to resolve constant '{name}' in class {type.FullName}",
@@ -242,6 +250,7 @@ namespace Iviz.Msgs
 
         public static byte[] SerializeToArray<T>(this T o) where T : ISerializable
         {
+            o.RosValidate();
             byte[] bytes = new byte[o.RosMessageLength];
             Buffer.Serialize(o, bytes);
             return bytes;

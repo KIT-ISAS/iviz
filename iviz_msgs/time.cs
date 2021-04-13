@@ -89,7 +89,7 @@ namespace Iviz.Msgs
 
         public override string ToString()
         {
-            return $"{{\"secs\":{Secs},\"nsecs\":{Nsecs}}}";
+            return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
         }
 
         static long? cachedTicksDiff;

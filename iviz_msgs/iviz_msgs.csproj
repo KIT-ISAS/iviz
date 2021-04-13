@@ -5,17 +5,15 @@
     <RootNamespace>Iviz.Msgs</RootNamespace>
     <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
     <Nullable>enable</Nullable>
+    <LangVersion>9</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <LangVersion>9</LangVersion>
     <DefineConstants>TRACE;ENABLE_PROFILER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

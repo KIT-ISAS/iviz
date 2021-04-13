@@ -125,7 +125,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                if (!(e is ObjectDisposedException || e is OperationCanceledException))
+                if (e is not (ObjectDisposedException or OperationCanceledException))
                 {
                     Logger.LogFormat("{0}: Stopped thread {1}", this, e);
                 }

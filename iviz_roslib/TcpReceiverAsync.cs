@@ -107,7 +107,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                if (!(e is IOException || e is SocketException || e is OperationCanceledException))
+                if (e is not (IOException or SocketException or OperationCanceledException))
                 {
                     Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
                 }
@@ -198,7 +198,7 @@ namespace Iviz.Roslib
             }
 
             const int maxMessageLength = 64 * 1024 * 1024;
-            if (length < 0 || length > maxMessageLength)
+            if (length is < 0 or > maxMessageLength)
             {
                 throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
             }

@@ -5,36 +5,34 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsGen.Dynamic
 {
     [Preserve]
-    public sealed class MessageArrayFieldFixed<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
+    public sealed class StringFixedArrayField : IField
     {
-        static readonly IDeserializable<T> Generator = new T();
-
         public uint Count { get; }
 
-        public T[] Value { get; set; }
+        public string[] Value { get; set; }
 
         object IField.Value => Value;
         
-        public FieldType Type => FieldType.MessageFixedArray;
+        public FieldType Type => FieldType.StringFixedArray;
 
-        public MessageArrayFieldFixed(uint count)
+        public StringFixedArrayField(uint count)
         {
             Count = count;
-            Value = new T[count];
+            Value = new string[count];
             for (int i = 0; i < count; i++)
             {
-                Value[i] = new T();
+                Value[i] = "";
             }
         }
 
-        public int RosMessageLength
+        public int RosLength
         {
             get
             {
-                int size = 0;
+                int size = 4 * (int) Count;
                 for (int i = 0; i < Count; i++)
                 {
-                    size += Value[i].RosMessageLength;
+                    size += BuiltIns.UTF8.GetByteCount(Value[i]);
                 }
 
                 return size;
@@ -59,8 +57,6 @@ namespace Iviz.MsgsGen.Dynamic
                 {
                     throw new NullReferenceException($"{nameof(Value)}[{i}]");
                 }
-
-                Value[i].RosValidate();
             }
         }
 
@@ -71,15 +67,12 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref Buffer b)
         {
-            for (int i = 0; i < Count; i++)
-            {
-                Value[i] = Generator.RosDeserialize(ref b);
-            }
+            Value = b.DeserializeStringArray(Count);
         }
 
         public IField Generate()
         {
-            return new MessageArrayFieldFixed<T>(Count);
+            return new StringFixedArrayField(Count);
         }
     }
 }

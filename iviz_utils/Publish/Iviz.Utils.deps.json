@@ -13,6 +13,7 @@
           "BitMiracle.LibJpeg.NET": "1.5.324",
           "Iviz.ModelService.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
+          "Iviz.MsgsWrapper": "1.0.0",
           "Iviz.Roslib": "1.0.0",
           "Iviz.Rosmaster.Lib": "1.0.0",
           "Iviz.Urdf": "1.0.0",
@@ -162,6 +163,14 @@
         },
         "runtime": {
           "Iviz.MsgsGen.Lib.dll": {}
+        }
+      },
+      "Iviz.MsgsWrapper/1.0.0": {
+        "dependencies": {
+          "Iviz.Msgs": "1.0.0"
+        },
+        "runtime": {
+          "Iviz.MsgsWrapper.dll": {}
         }
       },
       "Iviz.Roslib/1.0.0": {
@@ -321,6 +330,11 @@
       "sha512": ""
     },
     "Iviz.MsgsGen.Lib/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.MsgsWrapper/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

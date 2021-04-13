@@ -14,7 +14,7 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.StructArray;
 
-        public int RosMessageLength => 4 + Value.Length * Marshal.SizeOf<T>();
+        public int RosLength => 4 + Value.Length * Marshal.SizeOf<T>();
 
         public void RosValidate()
         {

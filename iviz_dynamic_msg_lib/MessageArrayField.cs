@@ -15,7 +15,7 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.MessageArray;
         
-        public int RosMessageLength
+        public int RosLength
         {
             get
             {

@@ -20,21 +20,9 @@ namespace Iviz.XmlRpc
                 internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b) =>
                     (this.a, this.b, currentIndex) = (a, b, -1);
 
-                public bool MoveNext()
-                {
-                    if (currentIndex == Math.Min(a.Count, b.Count) - 1)
-                    {
-                        return false;
-                    }
-
-                    currentIndex++;
-                    return true;
-                }
-
+                public bool MoveNext() => ++currentIndex < Math.Min(a.Count, b.Count);
                 public void Reset() => currentIndex = -1;
-
                 public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
-
                 object IEnumerator.Current => Current;
 
                 public void Dispose()
@@ -100,21 +88,9 @@ namespace Iviz.XmlRpc
                 internal SelectEnumerator(IReadOnlyList<TA> a, Func<TA, TB> f) =>
                     (this.a, this.f, currentIndex) = (a, f, -1);
 
-                public bool MoveNext()
-                {
-                    if (currentIndex == a.Count - 1)
-                    {
-                        return false;
-                    }
-
-                    currentIndex++;
-                    return true;
-                }
-
+                public bool MoveNext() => ++currentIndex < a.Count;
                 public void Reset() => currentIndex = -1;
-
                 public TB Current => f(a[currentIndex]);
-
                 object? IEnumerator.Current => Current;
 
                 public void Dispose()
@@ -123,11 +99,8 @@ namespace Iviz.XmlRpc
             }
 
             internal SelectEnumerable(IReadOnlyList<TA> a, Func<TA, TB> f) => (this.a, this.f) = (a, f);
-
             public SelectEnumerator GetEnumerator() => new SelectEnumerator(a, f);
-
             IEnumerator<TB> IEnumerable<TB>.GetEnumerator() => GetEnumerator();
-
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public TB[] ToArray()
@@ -196,29 +169,12 @@ namespace Iviz.XmlRpc
             {
                 readonly T[] a;
                 int currentIndex;
-
-                public RefEnumerator(T[] a)
-                {
-                    this.a = a;
-                    currentIndex = -1;
-                }
-
-                public bool MoveNext()
-                {
-                    if (currentIndex == a.Length - 1)
-                    {
-                        return false;
-                    }
-
-                    currentIndex++;
-                    return true;
-                }
-
+                public RefEnumerator(T[] a) => (this.a, currentIndex) = (a, -1);
+                public bool MoveNext() => ++currentIndex < a.Length;
                 public ref T Current => ref a[currentIndex];
             }
 
             public RefEnumerable(T[] a) => this.a = a;
-
             public RefEnumerator GetEnumerator() => new RefEnumerator(a);
         }
 

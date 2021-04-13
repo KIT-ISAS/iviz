@@ -36,8 +36,7 @@ namespace Iviz.RosMaster
             try
             {
                 masterUri ??= new Uri($"http://{Dns.GetHostName()}:{RosMasterServer.DefaultPort}/");
-                using RosMasterServer rosMasterServer = new RosMasterServer(masterUri);
-                Console.WriteLine($"** Iviz.RosMaster: Starting at uri {rosMasterServer.MasterUri} ...");
+                await using var rosMasterServer = new RosMasterServer(masterUri);
                 rosMasterServer.AddKey("/rosdistro", "noetic");
                 rosMasterServer.AddKey("/rosversion", "1.15.8");
                 await rosMasterServer.StartAsync();

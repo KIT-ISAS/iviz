@@ -21,14 +21,14 @@ namespace Iviz.MsgsGen.Dynamic
             this.generator = generator;
         }
 
-        public int RosMessageLength
+        public int RosLength
         {
             get
             {
                 int size = 4;
                 foreach (DynamicMessage field in Value)
                 {
-                    size += field.RosMessageLength;
+                    size += field.RosLength;
                 }
 
                 return size;
