@@ -12,7 +12,7 @@ using NUnit.Framework;
 
 namespace Iviz.UtilsTests
 {
-    [Category("Iviz")]
+    [Category("Iviz"), Ignore("")]
     public class IvizTests
     {
         static readonly Uri CallerUri = new Uri("http://localhost:7613");
@@ -28,8 +28,7 @@ namespace Iviz.UtilsTests
         {
             client ??= new RosClient(MasterUri, CallerId, CallerUri);
         }
-
-
+        
         [Test]
         public async Task TestAddModule()
         {
