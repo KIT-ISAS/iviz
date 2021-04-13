@@ -1,5 +1,5 @@
 {
-    "name": "Iviz.Opencv",
+    "name": "Iviz.MarkerDetection",
     "references": [
         "GUID:31a80e3fb3ac64b8385cd739784d42de",
         "GUID:d8b63aba1907145bea998dd612889d6b"

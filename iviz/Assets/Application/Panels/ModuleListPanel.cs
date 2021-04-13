@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Opencv;
+using Iviz.MarkerDetection;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;

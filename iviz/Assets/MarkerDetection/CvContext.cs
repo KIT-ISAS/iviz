@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using AOT;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -9,14 +9,10 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using UnityEditorInternal;
 
-namespace Iviz.Opencv
+namespace Iviz.MarkerDetection
 {
-    public class Context : IDisposable
+    public class CvContext : IDisposable
     {
         static bool loggerSet;
         readonly IntPtr mContextPtr;
@@ -46,13 +42,13 @@ namespace Iviz.Opencv
             }
         }
 
-        public unsafe Context(int width, int height)
+        public CvContext(int width, int height)
         {
             if (!loggerSet)
             {
-                Native.SetupDebug(Core.Logger.Debug);
-                Native.SetupInfo(Core.Logger.Debug);
-                Native.SetupError(Core.Logger.Error);
+                Native.SetupDebug(Native.Debug);
+                Native.SetupInfo(Native.Info);
+                Native.SetupError(Native.Error);
                 loggerSet = true;
             }
 
@@ -86,57 +82,54 @@ namespace Iviz.Opencv
             }
         }
 
-        public unsafe void SetImageData(in NativeArray<byte> image)
-        {
-            if (imageSize > image.Length)
-            {
-                throw new ArgumentException("Image size is too small", nameof(image));
-            }
-
-            if (disposed)
-            {
-                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
-            }
-
-            UnsafeUtility.MemCpy(imagePtr.ToPointer(), image.GetUnsafePtr(), imageSize);
-        }
-
-        public unsafe void SetImageDataFlipY(in NativeArray<byte> image)
-        {
-            if (imageSize > image.Length)
-            {
-                throw new ArgumentException("Image size is too small", nameof(image));
-            }
-
-            if (disposed)
-            {
-                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
-            }
-
-            int stride = Width * 3;
-            byte* src = (byte*) image.GetUnsafePtr();
-            byte* dst = (byte*) imagePtr.ToPointer();
-            for (int v = 0; v < Height; v++)
-            {
-                byte* srcOff = src + stride * v;
-                byte* dstOff = dst + stride * (Height - v - 1);
-                UnsafeUtility.MemCpy(dstOff, srcOff, stride);
-            }
-        }
-
-        public void SetImageData([NotNull] byte[] image)
+        public void SetImageData([NotNull] byte[] image, int bpp)
         {
             if (image == null)
             {
                 throw new ArgumentNullException(nameof(image));
             }
 
-            if (Width * Height * 3 > image.Length)
+            if (bpp != 3)
+            {
+                return;
+            }
+            
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
+            }
+
+            if (Width * Height * bpp > image.Length)
+            {
+                throw new ArgumentException("Image size is too small", nameof(image));
+            }
+            
+            
+            Marshal.Copy(image, 0, imagePtr, Width * Height * 3);
+        }
+
+        public void SetImageDataFlipY(byte[] image, int bpp)
+        {
+            if (imageSize > image.Length)
             {
                 throw new ArgumentException("Image size is too small", nameof(image));
             }
 
-            Native.CopyFrom(ContextPtr, image, image.Length);
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
+            }
+
+            if (bpp != 3)
+            {
+                return;
+            }
+
+            int stride = Width * 3;
+            for (int v = 0; v < Height; v++)
+            {
+                Marshal.Copy(image, stride * v, imagePtr + stride * (Height - v - 1), stride);
+            }
         }
 
         public void GetImageData([NotNull] byte[] image)
@@ -243,7 +236,7 @@ namespace Iviz.Opencv
             }
         }
 
-        public ArucoMarkerPoses[] EstimateArucoMarkerPoses(float markerSizeInM)
+        public ArucoMarkerPose[] EstimateArucoMarkerPoses(float markerSizeInM)
         {
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
@@ -253,10 +246,10 @@ namespace Iviz.Opencv
 
             if (numDetected == 0)
             {
-                return Array.Empty<ArucoMarkerPoses>();
+                return Array.Empty<ArucoMarkerPose>();
             }
 
-            var markers = new ArucoMarkerPoses[numDetected];
+            var markers = new ArucoMarkerPose[numDetected];
 
             using (var indices = new Rent<int>(numDetected))
             using (var rotations = new Rent<float>(3 * numDetected))
@@ -283,14 +276,14 @@ namespace Iviz.Opencv
                     var rotation = angle == 0
                         ? Quaternion.Identity
                         : Quaternion.AngleAxis(angle, angleAxis / angle);
-                    markers[i] = new ArucoMarkerPoses(indices[i], new Pose(translation, rotation));
+                    markers[i] = new ArucoMarkerPose(indices[i], new Pose(translation, rotation));
                 }
             }
 
             return markers;
         }
 
-        public QrMarkerPoses[] EstimateQrMarkerPoses(float markerSizeInM)
+        public QrMarkerPose[] EstimateQrMarkerPoses(float markerSizeInM)
         {
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
@@ -300,10 +293,10 @@ namespace Iviz.Opencv
 
             if (numDetected == 0)
             {
-                return Array.Empty<QrMarkerPoses>();
+                return Array.Empty<QrMarkerPose>();
             }
 
-            var markers = new QrMarkerPoses[numDetected];
+            var markers = new QrMarkerPose[numDetected];
 
             using (var pointers = new Rent<IntPtr>(numDetected))
             using (var pointerLengths = new Rent<int>(numDetected))
@@ -332,7 +325,7 @@ namespace Iviz.Opencv
                     var rotation = angle == 0
                         ? Quaternion.Identity
                         : Quaternion.AngleAxis(angle, angleAxis / angle);
-                    markers[i] = new QrMarkerPoses(code, new Pose(translation, rotation));
+                    markers[i] = new QrMarkerPose(code, new Pose(translation, rotation));
                 }
             }
 
@@ -448,7 +441,7 @@ namespace Iviz.Opencv
 
                 Native.EstimateUmeyama(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
                     estimateScale, resultFloats.Array, resultFloats.Length);
-                
+
                 Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
                 Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
                 double angle = angleAxis.Norm;
@@ -474,82 +467,102 @@ namespace Iviz.Opencv
         }
 
 
-        ~Context()
+        ~CvContext()
         {
             ReleaseUnmanagedResources();
         }
 
         static class Native
         {
+            const string IvizOpencvDll = Settings.IsMobile ? "__Internal" : "IvizOpencv";
+            
             public delegate void Callback(string s);
+            
+            [MonoPInvokeCallback(typeof(Callback))]
+            public static void Debug([CanBeNull] string t)
+            {
+                UnityEngine.Debug.Log(t);
+            }
 
-            [DllImport("IvizOpencv")]
+            [MonoPInvokeCallback(typeof(Callback))]
+            public static void Info([CanBeNull] string t)
+            {
+                UnityEngine.Debug.LogWarning(t);
+            }
+
+            [MonoPInvokeCallback(typeof(Callback))]
+            public static void Error([CanBeNull] string t)
+            {
+                UnityEngine.Debug.LogError(t);
+            }
+
+            [DllImport(IvizOpencvDll)]
             public static extern IntPtr CreateContext(int width, int height);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern void DisposeContext(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern void SetupDebug(Callback callback);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern void SetupInfo(Callback callback);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern void SetupError(Callback callback);
 
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern int ImageWidth(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern int ImageHeight(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern int ImageFormat(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern int ImageSize(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool CopyFrom(IntPtr ctx, /* const */ byte[] ptr, int size);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool CopyTo( /* const */ IntPtr ctx, byte[] ptr, int size);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern IntPtr GetImagePtr(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool SetDictionary(IntPtr ctx, int value);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool DetectArucoMarkers(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool DetectQrMarkers(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern int GetNumDetectedMarkers(IntPtr ctx);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool GetArucoMarkerIds(IntPtr ctx, int[] arrayPtr, int arraySize);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool GetQrMarkerCodes(IntPtr ctx, IntPtr[] arrayPtr, int[] arrayLengths,
                 int arraySize);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool GetMarkerCorners(IntPtr ctx, float[] arrayPtr, int arraySize);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool SetCameraMatrix(IntPtr ctx, float[] arrayPtr, int arraySize);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool EstimateMarkerPoses(IntPtr ctx, float markerSize, float[] rotations,
                 int rotationsSize, float[] translations, int translationsSize);
 
-            [DllImport("IvizOpencv")]
+            [DllImport(IvizOpencvDll)]
             public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
                 bool estimateScale, float[] result, int resultSize);
         }
@@ -588,18 +601,22 @@ namespace Iviz.Opencv
         DictApriltag36H11
     };
 
-    public readonly struct ArucoMarkerPoses
+    public class ArucoMarkerPose
     {
         public int Id { get; }
         public Pose Pose { get; }
 
-        public ArucoMarkerPoses(int id, in Pose pose) => (Id, Pose) = (id, pose);
+        public ArucoMarkerPose(int id, in Pose pose) => (Id, Pose) = (id, pose);
 
         public override string ToString() => "{\"Id\":" + Id + ", \"Pose\":" + Pose + "}";
     }
 
-    [Serializable]
-    public readonly struct ArucoMarkerCorners
+    public interface IMarkerCorners
+    {
+        ReadOnlyCollection<Vector2f> Corners { get; }
+    }
+    
+    public sealed class ArucoMarkerCorners : IMarkerCorners
     {
         public int Id { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }
@@ -610,17 +627,17 @@ namespace Iviz.Opencv
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }
 
-    public readonly struct QrMarkerPoses
+    public sealed class QrMarkerPose
     {
         public string Code { get; }
         public Pose Pose { get; }
 
-        public QrMarkerPoses(string code, in Pose pose) => (Code, Pose) = (code, pose);
+        public QrMarkerPose(string code, in Pose pose) => (Code, Pose) = (code, pose);
 
         public override string ToString() => "{\"Code\":" + Code + ", \"Pose\":" + Pose + "}";
     }
 
-    public readonly struct QrMarkerCorners
+    public sealed class QrMarkerCorners : IMarkerCorners
     {
         public string Code { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }

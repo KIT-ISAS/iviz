@@ -1,5 +1,6 @@
 ﻿
 using UnityEngine;
+using UnityEngine.Timeline;
 
 namespace Iviz.App
 {
@@ -20,6 +21,12 @@ namespace Iviz.App
         //public Vector3SliderWidget MarkerOffset { get; private set; }
         public DropdownWidget OcclusionQuality { get; private set; }
         public DataLabelWidget Description { get; private set; }
+
+
+        public ToggleWidget DetectArucos { get; private set; }
+        public ToggleWidget DetectQrs { get; private set; }
+        public SenderWidget MarkerSender { get; private set; }
+        public SenderWidget HeadSender { get; private set; }
 
         //public ToggleWidget PublishHead { get; private set; }
         //public ToggleWidget PublishPlanes { get; private set; }
@@ -49,6 +56,13 @@ namespace Iviz.App
             //PublishPlanes = p.AddToggle("Publish Planes as Markers");
             //HeadSender = p.AddSender();
             //MarkersSender = p.AddSender();
+
+            DetectArucos = p.AddToggle("Detect Arucos");
+            DetectQrs = p.AddToggle("Detect QRs");
+
+            MarkerSender = p.AddSender();
+            HeadSender = p.AddSender();
+
             p.UpdateSize();
             gameObject.SetActive(false);
         }

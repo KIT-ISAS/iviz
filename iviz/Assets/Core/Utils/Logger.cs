@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
+using AOT;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
