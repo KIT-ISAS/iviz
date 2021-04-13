@@ -89,7 +89,6 @@ namespace Iviz.XmlRpc
                         await stream.WriteChunkAsync(headerBytes.Array, headerSize, token);
                     }
 
-                    await stream.FlushAsync(token).AwaitWithToken(token);
                     await stream.WriteAsync(payloadBytes.Array, 0, length, token).AwaitWithToken(token);
                     await stream.FlushAsync(token).AwaitWithToken(token);
                 }

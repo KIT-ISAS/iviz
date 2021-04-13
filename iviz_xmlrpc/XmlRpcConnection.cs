@@ -71,7 +71,7 @@ namespace Iviz.XmlRpc
             {
                 Interlocked.Decrement(ref queueSize);
 
-                if (request != null && !request.IsAlive)
+                if (request is {IsAlive: false})
                 {
                     request.Dispose();
                     request = null;
@@ -108,7 +108,7 @@ namespace Iviz.XmlRpc
                     request?.Dispose();
                     request = null;
 
-                    if (e is OperationCanceledException || e is ObjectDisposedException)
+                    if (e is OperationCanceledException or ObjectDisposedException)
                     {
                         throw;
                     }
