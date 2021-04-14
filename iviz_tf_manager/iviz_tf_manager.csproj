@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <AssemblyName>Iviz.TfManager</AssemblyName>
+        <RootNamespace>Iviz.TfManager</RootNamespace>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    </ItemGroup>
+
+</Project>
