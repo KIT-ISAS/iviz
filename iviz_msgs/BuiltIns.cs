@@ -12,6 +12,27 @@ using Newtonsoft.Json;
 
 namespace Iviz.Msgs
 {
+    public class RosInvalidMessageException : Exception
+    {
+        public RosInvalidMessageException(string msg) : base(msg)
+        {
+        }
+    }
+
+    public class RosInvalidSizeForFixedArrayException : RosInvalidMessageException
+    {
+        public RosInvalidSizeForFixedArrayException() : base(
+            "Array size does not match the fixed size of the message definition")
+        {
+        }
+
+        public RosInvalidSizeForFixedArrayException(string name, int size, int expected) : base(
+            $"Array '{name}' with size {size.ToString()} does not match the fixed size " +
+            $"{expected.ToString()} of the message definition")
+        {
+        }
+    }
+
     public static class BuiltIns
     {
         public static UTF8Encoding UTF8 { get; } = new(false);
@@ -31,8 +52,7 @@ namespace Iviz.Msgs
 
             if (constant == null)
             {
-                throw new ArgumentException($"Failed to resolve constant '{name}' in class {type.FullName}",
-                    nameof(name));
+                throw new RosInvalidMessageException($"Failed to resolve constant '{name}' in class {type.FullName}");
             }
 
             return constant;
@@ -55,6 +75,8 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosMessageType");
         }
 
+        public static string GetMessageType<T>() where T : IMessage => GetMessageType(typeof(T));
+
         /// <summary>
         /// Returns the ROS service name of the given service type.
         /// </summary>
@@ -71,6 +93,8 @@ namespace Iviz.Msgs
 
             return GetClassStringConstant(type, "RosServiceType");
         }
+
+        public static string GetServiceType<T>() where T : IService => GetServiceType(typeof(T));
 
         /// <summary>
         /// Returns the MD5 value of the given message or service type.
@@ -89,15 +113,18 @@ namespace Iviz.Msgs
             return GetClassStringConstant(type, "RosMd5Sum");
         }
 
+        public static string GetMd5Sum<T>() => GetMd5Sum(typeof(T));
+
         /// <summary>
         /// Checks if the size of the ROS message type is fixed, and returns it.
         /// </summary>
-        /// <param name="type">The message type. Should derive from IMessage.</param>
+        /// <param name="T">The message type. Should derive from IMessage.</param>
         /// <param name="size">The fixed size, if it exists.</param>
         /// <returns>True if the message has a fixed size.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the type is null.</exception>
-        public static bool TryGetFixedSize(Type type, out int size)
+        public static bool TryGetFixedSize<T>(out int size) where T : IMessage
         {
+            var type = typeof(T);
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
@@ -118,6 +145,8 @@ namespace Iviz.Msgs
         {
             return GetClassStringConstant(type, "RosDependenciesBase64");
         }
+
+        public static string DecompressDependencies<T>() where T : ISerializable => DecompressDependencies(typeof(T));
 
         public static string DecompressDependencies(Type type)
         {
@@ -232,7 +261,7 @@ namespace Iviz.Msgs
             UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
             return bytes;
         }
-        
+
         public static string ToJsonString(this ISerializable o, bool indented = true)
         {
             return ToJsonString((object) o, indented);
@@ -255,20 +284,22 @@ namespace Iviz.Msgs
             Buffer.Serialize(o, bytes);
             return bytes;
         }
-        
+
         public static uint SerializeToArray<T>(this T o, byte[] bytes, int offset = 0) where T : ISerializable
         {
             return Buffer.Serialize(o, bytes, offset);
         }
 
-        public static T DeserializeFromArray<T>(this T generator, byte[] bytes, int size = -1, int offset = 0) where T : ISerializable
+        public static T DeserializeFromArray<T>(this T generator, byte[] bytes, int size = -1, int offset = 0)
+            where T : ISerializable
         {
             return Buffer.Deserialize(generator, bytes, size, offset);
-        }        
-        
-        public static T DeserializeFromArray<T>(this IDeserializable<T> generator, byte[] bytes, int size = -1, int offset = 0) where T : ISerializable
+        }
+
+        public static T DeserializeFromArray<T>(this IDeserializable<T> generator, byte[] bytes, int size = -1,
+            int offset = 0) where T : ISerializable
         {
             return Buffer.Deserialize(generator, bytes, size, offset);
-        }          
+        }
     }
 }
