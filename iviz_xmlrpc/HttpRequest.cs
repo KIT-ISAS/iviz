@@ -18,11 +18,8 @@ namespace Iviz.XmlRpc
         readonly TcpClient client;
         bool disposed;
 
-        public bool IsAlive => !disposed && SocketIsAlive(client.Client);
+        public bool IsAlive => !disposed && client.Client.CheckIfAlive();
 
-        static bool SocketIsAlive(Socket socket) =>
-            !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;
-        
         public HttpRequest(Uri callerUri, Uri remoteUri)
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));

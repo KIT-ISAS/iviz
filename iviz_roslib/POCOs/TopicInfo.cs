@@ -55,10 +55,10 @@ namespace Iviz.Roslib
 
         public TopicInfo(string callerId, string topic)
             : this(
-                BuiltIns.DecompressDependencies(typeof(T)),
+                BuiltIns.DecompressDependencies<T>(),
                 callerId, topic,
-                BuiltIns.GetMd5Sum(typeof(T)),
-                BuiltIns.GetMessageType(typeof(T)),
+                BuiltIns.GetMd5Sum<T>(),
+                BuiltIns.GetMessageType<T>(),
                 null
             )
         {

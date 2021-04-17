@@ -509,5 +509,8 @@ namespace Iviz.XmlRpc
             }
 #endif
         }
+        
+        public static bool CheckIfAlive(this Socket socket) =>
+            !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;        
     }
 }
