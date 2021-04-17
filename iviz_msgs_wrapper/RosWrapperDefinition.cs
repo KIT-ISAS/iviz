@@ -12,7 +12,7 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsWrapper
 {
-    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IMessage, new()
+    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IDeserializable<T>, new()
     {
         public string RosMessageType { get; }
         public string RosDefinition { get; }
@@ -60,14 +60,25 @@ namespace Iviz.MsgsWrapper
                 {
                     initializer(property, bi);
                 }
+                else if (propertyType.IsArray)
+                {
+                    var elementType = propertyType.GetElementType()!;
+                    if (elementType.IsEnum)
+                    {
+                        InitializeEnumArrayProperty(property, bi);
+                    }
+                    else if (typeof(IMessage).IsAssignableFrom(elementType))
+                    {
+                        InitializeMessageArrayProperty(property, bi);
+                    }
+                }
+                else if (propertyType.IsEnum)
+                {
+                    InitializeEnumProperty(property, bi);
+                }
                 else if (typeof(IMessage).IsAssignableFrom(propertyType))
                 {
                     InitializeMessageProperty(property, bi);
-                }
-                else if (propertyType.IsArray &&
-                         typeof(IMessage).IsAssignableFrom(propertyType.GetElementType()))
-                {
-                    InitializeMessageArrayProperty(property, bi);
                 }
             }
 

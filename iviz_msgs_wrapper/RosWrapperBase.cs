@@ -15,7 +15,7 @@ using Iviz.Msgs.StdMsgs;
 namespace Iviz.MsgsWrapper
 {
     using static RosWrapperBase;
-    
+
     /// <summary>
     /// Determines the name of the ROS message. Must be a string constant.
     /// </summary>
@@ -59,7 +59,7 @@ namespace Iviz.MsgsWrapper
         };
     }
 
-    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IMessage, new()
+    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IDeserializable<T>, new()
     {
         sealed class BuilderInfo
         {
@@ -251,14 +251,14 @@ namespace Iviz.MsgsWrapper
             bi.BufferForMd5.Append(BuiltIns.GetMd5Sum(elementType)).Append(" ").Append(propertyName)
                 .Append("\n"); // no [] here!
 
+            IMessageField<T> field;
             if (fixedSize == null)
             {
                 bi.RosDefinition.Append(BuiltIns.GetMessageType(elementType)).Append("[] ")
                     .AppendLine(propertyName);
 
                 Type fieldType = typeof(MessageArrayField<,>).MakeGenericType(typeof(T), elementType);
-                IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, propertyName)!;
-                bi.Fields.Add(field);
+                field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, propertyName)!;
             }
             else
             {
@@ -266,17 +266,62 @@ namespace Iviz.MsgsWrapper
                 bi.RosDefinition.Append(BuiltIns.GetMessageType(elementType)).Append("[").Append(size).Append("] ")
                     .AppendLine(propertyName);
                 Type fieldType = typeof(MessageFixedArrayField<,>).MakeGenericType(typeof(T), elementType);
-                IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, size, propertyName)!;
-                bi.Fields.Add(field);
+                field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, size, propertyName)!;
             }
+
+            bi.Fields.Add(field);
         }
+
+        static void InitializeEnumProperty(PropertyInfo property, BuilderInfo bi)
+        {
+            string propertyName = GetPropertyName(property);
+            Type underlyingType = Enum.GetUnderlyingType(property.PropertyType);
+            string builtInName = BuiltInNames[underlyingType];
+
+            bi.RosDefinition.Append(builtInName).Append(" ").AppendLine(propertyName);
+            bi.BufferForMd5.Append(builtInName).Append(" ").Append(propertyName).Append("\n");
+
+            Type structType = typeof(StructField<,>).MakeGenericType(typeof(T), property.PropertyType);
+            IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(structType, property)!;
+            bi.Fields.Add(field);
+        }
+
+        static void InitializeEnumArrayProperty(PropertyInfo property, BuilderInfo bi)
+        {
+            string propertyName = GetPropertyName(property);
+            Type underlyingType = Enum.GetUnderlyingType(property.PropertyType);
+            string builtInName = BuiltInNames[underlyingType];
+
+            uint? fixedSize = property.GetCustomAttribute<FixedSizeArrayAttribute>()?.Size;
+            IMessageField<T> field;
+            if (fixedSize == null)
+            {
+                bi.RosDefinition.Append(builtInName).Append("[] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append(builtInName).Append("[] ").Append(propertyName).Append("\n");
+
+                Type structType = typeof(StructArrayField<,>).MakeGenericType(typeof(T), property.PropertyType);
+                field = (IMessageField<T>) Activator.CreateInstance(structType, property, propertyName)!;
+            }
+            else
+            {
+                uint size = fixedSize.Value;
+                bi.RosDefinition.Append(builtInName).Append("[").Append(size).Append("] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append(builtInName).Append("[").Append(size).Append("] ").Append(propertyName)
+                    .Append("\n");
+                Type structType = typeof(StructFixedArrayField<,>).MakeGenericType(typeof(T), property.PropertyType);
+                field = (IMessageField<T>) Activator.CreateInstance(structType, property, size, propertyName)!;
+            }
+
+            bi.Fields.Add(field);
+        }
+
 
         static void InitializeConstant(BuilderInfo bi, FieldInfo field, string fieldType)
         {
             string entry = fieldType == "string"
                 ? $"{fieldType} {GetPropertyName(field)}=\"{field.GetRawConstantValue()}\""
                 : $"{fieldType} {GetPropertyName(field)}={field.GetRawConstantValue()}";
-                
+
             bi.RosDefinition.AppendLine(entry);
             bi.BufferForMd5.AppendLine(entry);
         }
@@ -289,7 +334,7 @@ namespace Iviz.MsgsWrapper
             string inputForMd5 = bi.BufferForMd5.Length == 0
                 ? ""
                 : bi.BufferForMd5.ToString(0, bi.BufferForMd5.Length - 1); // remove trailing \n
-            
+
             byte[] data = md5Hash.ComputeHash(BuiltIns.UTF8.GetBytes(inputForMd5));
             var md5HashBuilder = new StringBuilder(data.Length * 2);
             foreach (byte b in data)
