@@ -48,7 +48,7 @@ namespace Iviz.MsgsGen.Dynamic
 
             if (Value.Length != Count)
             {
-                throw new IndexOutOfRangeException();
+                throw new RosInvalidSizeForFixedArrayException();
             }
 
             for (int i = 0; i < Value.Length; i++)

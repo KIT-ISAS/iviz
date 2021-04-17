@@ -927,7 +927,9 @@ namespace Iviz.MsgsGen
                         lines.Add(
                             $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
                         lines.Add(
-                            $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) throw new System.IndexOutOfRangeException();");
+                            $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
+                            $"throw new RosInvalidSizeForFixedArrayException(nameof({variable.CsFieldName}), " +
+                            $"{variable.CsFieldName}.Length, {variable.ArraySize});");
                     }
                 }
                 else if (!variable.IsArray &&
