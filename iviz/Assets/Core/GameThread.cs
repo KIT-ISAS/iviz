@@ -86,7 +86,14 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during action call", e);
+                    if (!Settings.IsMobile)
+                    {
+                        Logger.Error($"{this}: Error during action call " + e);
+                    }
+                    else
+                    {
+                        Logger.Error($"{this}: Error during action call", e);
+                    }
                 }
             }
 

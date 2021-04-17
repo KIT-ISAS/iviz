@@ -171,7 +171,7 @@ namespace Iviz.Controllers
                 config.ScaleZ = value;
 
                 float yScale = Mathf.Approximately(cellSize, 0) ? 1 : value / cellSize;
-                cubeNode.transform.localScale = new Vector3(1, yScale, 1);
+                cubeNode.Transform.localScale = new Vector3(1, yScale, 1);
             }
         }
 
@@ -319,8 +319,8 @@ namespace Iviz.Controllers
                 {
                     gridTiles[j] = ResourcePool.Rent<OccupancyGridResource>(
                         Resource.Displays.OccupancyGridResource,
-                        cubeNode.transform);
-                    gridTiles[j].transform.SetLocalPose(Pose.identity);
+                        cubeNode.Transform);
+                    gridTiles[j].Transform.SetLocalPose(Pose.identity);
                     gridTiles[j].Colormap = Colormap;
                     gridTiles[j].FlipMinMax = FlipMinMax;
                 }
@@ -375,7 +375,7 @@ namespace Iviz.Controllers
                     for (int j = textureTiles.Count; j < tileTotalSize; j++)
                     {
                         textureTiles.Add(
-                            ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.transform));
+                            ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform));
                         textureTiles[j].Visible = Visible;
                         textureTiles[j].Colormap = Colormap;
                         textureTiles[j].FlipMinMax = FlipMinMax;

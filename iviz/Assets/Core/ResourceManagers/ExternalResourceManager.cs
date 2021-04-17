@@ -385,43 +385,41 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            using (var msg = new GetModelResource {Request = {Uri = uriString}})
+            var msg = new GetModelResource {Request = {Uri = uriString}};
+            try
             {
-                try
+                bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, token);
+                if (!hasClient)
                 {
-                    bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, token);
-                    if (!hasClient)
-                    {
-                        Debug.LogWarning("ExternalResourceManager: Call service failed, no connection");
-                        return null;
-                    }
-
-                    if (msg.Response.Success)
-                    {
-                        return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception)
-                {
-                    temporaryBlacklist[uriString] = Time.time;
-                    throw;
+                    Debug.LogWarning("ExternalResourceManager: Call service failed, no connection");
+                    return null;
                 }
 
-                if (!string.IsNullOrWhiteSpace(msg.Response.Message))
+                if (msg.Response.Success)
                 {
-                    Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
+                    return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
                 }
-                else
-                {
-                    Logger.Debug(StrCallServiceFailed);
-                }
-
-                return null;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                temporaryBlacklist[uriString] = Time.time;
+                throw;
+            }
+
+            if (!string.IsNullOrWhiteSpace(msg.Response.Message))
+            {
+                Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
+            }
+            else
+            {
+                Logger.Debug(StrCallServiceFailed);
+            }
+
+            return null;
         }
 
         [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
@@ -460,24 +458,22 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            using (var msg = new GetSdf {Request = {Uri = uriString}})
+            var msg = new GetSdf {Request = {Uri = uriString}};
+            if (await provider.CallServiceAsync(SceneServiceName, msg, token) && msg.Response.Success)
             {
-                if (await provider.CallServiceAsync(SceneServiceName, msg, token) && msg.Response.Success)
-                {
-                    return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
-                }
-
-                if (!string.IsNullOrWhiteSpace(msg.Response.Message))
-                {
-                    Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
-                }
-                else
-                {
-                    Logger.Debug(StrCallServiceFailed);
-                }
-
-                return null;
+                return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
             }
+
+            if (!string.IsNullOrWhiteSpace(msg.Response.Message))
+            {
+                Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
+            }
+            else
+            {
+                Logger.Debug(StrCallServiceFailed);
+            }
+
+            return null;
         }
 
         [ItemCanBeNull]
@@ -530,25 +526,23 @@ namespace Iviz.Displays
         async ValueTask<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
-            using (var msg = new GetModelTexture {Request = {Uri = uriString}})
+            var msg = new GetModelTexture {Request = {Uri = uriString}};
+            if (await provider.CallServiceAsync(TextureServiceName, msg, token) && msg.Response.Success)
             {
-                if (await provider.CallServiceAsync(TextureServiceName, msg, token) && msg.Response.Success)
-                {
-                    return await ProcessTextureResponseAsync(uriString, msg.Response, token);
-                }
-
-                if (!string.IsNullOrWhiteSpace(msg.Response.Message))
-                {
-                    Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
-                }
-                else
-                {
-                    Logger.Debug(StrCallServiceFailed);
-                }
-
-                temporaryBlacklist.Add(uriString, currentTime);
-                return null;
+                return await ProcessTextureResponseAsync(uriString, msg.Response, token);
             }
+
+            if (!string.IsNullOrWhiteSpace(msg.Response.Message))
+            {
+                Logger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
+            }
+            else
+            {
+                Logger.Debug(StrCallServiceFailed);
+            }
+
+            temporaryBlacklist.Add(uriString, currentTime);
+            return null;
         }
 
 

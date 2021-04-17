@@ -160,6 +160,7 @@ namespace Iviz.App
                 case Resource.ModuleType.Path: return new PathModuleData(c);
                 case Resource.ModuleType.GridMap: return new GridMapModuleData(c);
                 case Resource.ModuleType.Octomap: return new OctomapModuleData(c);
+                case Resource.ModuleType.ARGuiSystem: return new ARGuiModuleData(c);
                 default: throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType);
             }
         }

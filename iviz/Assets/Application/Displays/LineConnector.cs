@@ -52,12 +52,6 @@ namespace Iviz.Displays
             line.SetPositions(positions);
         }
 
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-
         public bool Visible
         {
             get => gameObject.activeSelf;

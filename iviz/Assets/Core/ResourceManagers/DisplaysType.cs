@@ -54,6 +54,11 @@ namespace Iviz.Resources
         public Info<GameObject> InteractiveControl { get; }
         public Info<GameObject> GridMap { get; }
         public Info<GameObject> OccupancyGridTextureResource { get; }
+        
+        public Info<GameObject> ARDialog { get; }
+        public Info<GameObject> ARDialogIcon { get; }
+        public Info<GameObject> ARDialogMenu { get; }
+        public Info<GameObject> ARDialogShort { get; }
 
         public DisplaysType()
         {
@@ -84,6 +89,11 @@ namespace Iviz.Resources
             InteractiveControl = new Info<GameObject>(appAssetHolder.InteractiveControl);
             GridMap = new Info<GameObject>(appAssetHolder.GridMap);
             OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
+            
+            ARDialog = new Info<GameObject>(appAssetHolder.ARDialog);
+            ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
+            ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
+            ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
 
             resourceByType = CreateTypeDictionary(this);
         }

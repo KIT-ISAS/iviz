@@ -59,6 +59,7 @@ namespace Iviz.App
                 case Resource.ModuleType.Path: return o.AddComponent<PathPanelContents>();
                 case Resource.ModuleType.GridMap: return o.AddComponent<GridMapPanelContents>();
                 case Resource.ModuleType.Octomap: return o.AddComponent<OctomapPanelContents>();
+                case Resource.ModuleType.ARGuiSystem: return o.AddComponent<ARGuiPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

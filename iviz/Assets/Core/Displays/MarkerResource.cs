@@ -14,6 +14,9 @@ namespace Iviz.Displays
         bool colliderEnabled = true;
 
         protected bool HasBoxCollider => boxCollider != null;
+        
+        Transform mTransform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         [NotNull]
         protected BoxCollider BoxCollider
@@ -26,7 +29,7 @@ namespace Iviz.Displays
         protected Bounds WorldBounds => BoxCollider.bounds;
 
         [NotNull]
-        public string Name
+        public string Name 
         {
             get => gameObject.name;
             set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
@@ -34,8 +37,8 @@ namespace Iviz.Displays
 
         public Transform Parent
         {
-            get => transform.parent;
-            set => transform.parent = value;
+            get => Transform.parent;
+            set => Transform.parent = value;
         }
 
         protected virtual void Awake()

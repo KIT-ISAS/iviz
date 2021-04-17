@@ -6,6 +6,7 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
 namespace Iviz.Displays
@@ -116,6 +117,12 @@ namespace Iviz.Displays
                 MainRenderer.SetPropertyMetallic(metallic);
             }
         }
+        
+        public bool CastsShadows
+        {
+            get => MainRenderer.shadowCastingMode == ShadowCastingMode.On;
+            set => MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
+        }        
 
         public Mesh Mesh => MeshFilter.sharedMesh;
 
@@ -189,6 +196,7 @@ namespace Iviz.Displays
             EmissiveColor = Color.black;
             ColliderEnabled = true;
             OcclusionOnly = false;
+            CastsShadows = true;
         }
 
         void SetEffectiveColor()

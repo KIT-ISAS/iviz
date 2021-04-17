@@ -68,7 +68,8 @@ namespace Iviz.Resources
             Path,
             GridMap,
             Robot,
-            Octomap
+            Octomap,
+            ARGuiSystem,
         }
 
 
@@ -113,6 +114,7 @@ namespace Iviz.Resources
                     {GridMap.RosMessageType, ModuleType.GridMap},
                     {Octomap.RosMessageType, ModuleType.Octomap},
                     {OctomapWithPose.RosMessageType, ModuleType.Octomap},
+                    {"iviz_msgs/Dialog", ModuleType.ARGuiSystem},
                 }
             );
 
