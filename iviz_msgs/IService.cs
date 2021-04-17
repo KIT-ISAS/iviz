@@ -7,7 +7,7 @@ namespace Iviz.Msgs
     /// Interface for all ROS services.
     /// All classes representing ROS services derive from this.
     /// </summary>
-    public interface IService : IDisposable
+    public interface IService
     {
         /// <summary>
         /// Create an empty service message.
