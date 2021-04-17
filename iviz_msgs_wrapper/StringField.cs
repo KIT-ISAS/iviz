@@ -5,7 +5,7 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsWrapper
 {
-    internal sealed class StringField<T> : IMessageField<T> where T : IMessage  
+    internal sealed class StringField<T> : IMessageField<T> where T : IDeserializable<T>, ISerializable
     {
         readonly Func<T, string> getter;
         readonly Action<T, string> setter;

@@ -1,32 +1,30 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
-using System.Text;
 using Iviz.Msgs;
 using Buffer = Iviz.Msgs.Buffer;
+using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.MsgsWrapper
 {
-    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IDeserializable<T>, new()
+    internal sealed partial class RosSerializableDefinition<T> where T : ISerializable, IDeserializable<T>, new()
     {
-        public string RosMessageType { get; }
+        public string RosType { get; }
         public string RosDefinition { get; }
+        public string RosInputForMd5 { get; }
         public string RosMessageMd5 { get; }
         public string RosDependencies { get; }
-        public string RosDependenciesBase64 => CompressDependencies(RosDependencies);
+        public string RosDependenciesBase64 => RosWrapperBase.CompressDependencies(RosDependencies);
 
         readonly IMessageField<T>[] messageFields;
 
-        public RosWrapperDefinition()
+        public RosSerializableDefinition()
         {
             try
             {
-                RosMessageType = BuiltIns.GetMessageType<T>();
+                RosType = typeof(IMessage).IsAssignableFrom(typeof(T)) 
+                    ? BuiltIns.GetMessageType(typeof(T)) 
+                    : "";
             }
             catch (RosInvalidMessageException)
             {
@@ -87,7 +85,7 @@ namespace Iviz.MsgsWrapper
 
             messageFields = bi.Fields.ToArray();
 
-            RosMessageMd5 = CreateMd5(bi);
+            (RosInputForMd5, RosMessageMd5) = CreateMd5(bi);
 
             RosDependencies = CreateDependencies(RosDefinition);
         }

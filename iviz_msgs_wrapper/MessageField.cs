@@ -6,8 +6,8 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class MessageField<T, TField> : IMessageField<T> 
-        where T : RosMessageWrapper<T>, IMessage, new()    
-        where TField : IMessage, IDeserializable<TField>, new()
+        where T : IDeserializable<T>, ISerializable   
+        where TField : IDeserializable<TField>, ISerializable, new()
     {
         static readonly IDeserializable<TField> Generator = new TField();
         static readonly bool IsValueType = typeof(T).IsValueType;

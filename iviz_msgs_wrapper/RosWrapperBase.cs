@@ -11,6 +11,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.StdMsgs;
+using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.MsgsWrapper
 {
@@ -19,7 +20,7 @@ namespace Iviz.MsgsWrapper
     /// <summary>
     /// Determines the name of the ROS message. Must be a string constant.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class MessageNameAttribute : Attribute
     {
     }
@@ -30,7 +31,8 @@ namespace Iviz.MsgsWrapper
     [AttributeUsage(AttributeTargets.Property)]
     public class FixedSizeArrayAttribute : Attribute
     {
-        public uint Size;
+        public uint Size { get; }
+        public FixedSizeArrayAttribute(uint size) => Size = size;
     }
 
     /// <summary>
@@ -70,9 +72,106 @@ namespace Iviz.MsgsWrapper
             [typeof(duration)] = "duration",
             [typeof(string)] = "string",
         };
+        
+        public static string CompressDependencies(string rosDependencies)
+        {
+            byte[] inputBytes = BuiltIns.UTF8.GetBytes(rosDependencies);
+            using var outputStream = new MemoryStream();
+            using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+            {
+                gZipStream.Write(inputBytes, 0, inputBytes.Length);
+            }
+
+            return Convert.ToBase64String(outputStream.ToArray());            
+        }
+        
+        public static string CreateMd5(string inputForMd5)
+        {
+#pragma warning disable CA5351
+            using MD5 md5Hash = MD5.Create();
+#pragma warning restore CA5351            
+            byte[] data = md5Hash.ComputeHash(BuiltIns.UTF8.GetBytes(inputForMd5));
+            var md5HashBuilder = new StringBuilder(data.Length * 2);
+            foreach (byte b in data)
+            {
+                md5HashBuilder.Append(b.ToString("x2", BuiltIns.Culture));
+            }
+
+            return md5HashBuilder.ToString();            
+        }        
+        
+        public static void AddDependency(StringBuilder rosDependencies, Type type, HashSet<Type> alreadyWritten,
+            bool first = false)
+        {
+            if (alreadyWritten.Contains(type))
+            {
+                return;
+            }
+
+            const string dependencySeparator =
+                "================================================================================";
+
+            alreadyWritten.Add(type);
+            if (!first)
+            {
+                rosDependencies.AppendLine(dependencySeparator);
+                rosDependencies.Append("MSG: ").AppendLine(BuiltIns.GetMessageType(type));
+
+                string typeDependencies = BuiltIns.DecompressDependencies(type);
+                int separatorIndex = typeDependencies.IndexOf(dependencySeparator, StringComparison.Ordinal);
+                if (separatorIndex == -1)
+                {
+                    rosDependencies.Append(typeDependencies);
+                }
+                else
+                {
+                    rosDependencies.Append(typeDependencies, 0, separatorIndex);
+                }
+            }
+
+            if (type.IsValueType)
+            {
+                foreach (var field in type.GetFields())
+                {
+                    if (typeof(IMessage).IsAssignableFrom(field.FieldType))
+                    {
+                        AddDependency(rosDependencies, field.FieldType, alreadyWritten);
+                    }
+                    else if (field.FieldType.IsArray &&
+                             typeof(IMessage).IsAssignableFrom(field.FieldType.GetElementType()))
+                    {
+                        AddDependency(rosDependencies, field.FieldType.GetElementType()!, alreadyWritten);
+                    }
+                }
+
+                return;
+            }
+
+            foreach (var property in type.GetProperties())
+            {
+                if (property.GetGetMethod() == null
+                    || property.GetSetMethod() == null
+                    || property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null
+                )
+                {
+                    continue;
+                }
+
+                if (typeof(IMessage).IsAssignableFrom(property.PropertyType))
+                {
+                    AddDependency(rosDependencies, property.PropertyType, alreadyWritten);
+                }
+                else if (property.PropertyType.IsArray &&
+                         typeof(IMessage).IsAssignableFrom(property.PropertyType.GetElementType()))
+                {
+                    AddDependency(rosDependencies, property.PropertyType.GetElementType()!, alreadyWritten);
+                }
+            }
+        }
+        
     }
 
-    internal sealed partial class RosWrapperDefinition<T> where T : RosMessageWrapper<T>, IDeserializable<T>, new()
+    internal sealed partial class RosSerializableDefinition<T> where T : ISerializable, IDeserializable<T>, new()
     {
         sealed class BuilderInfo
         {
@@ -340,23 +439,12 @@ namespace Iviz.MsgsWrapper
             bi.BufferForMd5.AppendLine(entry);
         }
 
-        static string CreateMd5(BuilderInfo bi)
+        static (string inputForMd5, string md5Hash) CreateMd5(BuilderInfo bi)
         {
-#pragma warning disable CA5351
-            using MD5 md5Hash = MD5.Create();
-#pragma warning restore CA5351
             string inputForMd5 = bi.BufferForMd5.Length == 0
                 ? ""
                 : bi.BufferForMd5.ToString(0, bi.BufferForMd5.Length - 1); // remove trailing \n
-
-            byte[] data = md5Hash.ComputeHash(BuiltIns.UTF8.GetBytes(inputForMd5));
-            var md5HashBuilder = new StringBuilder(data.Length * 2);
-            foreach (byte b in data)
-            {
-                md5HashBuilder.Append(b.ToString("x2", BuiltIns.Culture));
-            }
-
-            return md5HashBuilder.ToString();
+            return (inputForMd5, RosWrapperBase.CreateMd5(inputForMd5));
         }
 
         static string CreateDependencies(string rosDefinition)
@@ -369,86 +457,12 @@ namespace Iviz.MsgsWrapper
 
             return rosDependencies.ToString();
         }
-
-        static string CompressDependencies(string rosDependencies)
+        
+        internal static string CreatePartialDependencies(HashSet<Type> alreadyWritten)
         {
-            byte[] inputBytes = BuiltIns.UTF8.GetBytes(rosDependencies);
-            using var outputStream = new MemoryStream();
-            using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
-            {
-                gZipStream.Write(inputBytes, 0, inputBytes.Length);
-            }
-
-            return Convert.ToBase64String(outputStream.ToArray());            
-        }
-
-        static void AddDependency(StringBuilder rosDependencies, Type type, HashSet<Type> alreadyWritten,
-            bool first = false)
-        {
-            if (alreadyWritten.Contains(type))
-            {
-                return;
-            }
-
-            const string dependencySeparator =
-                "================================================================================";
-
-            alreadyWritten.Add(type);
-            if (!first)
-            {
-                rosDependencies.AppendLine(dependencySeparator);
-                rosDependencies.Append("MSG: ").AppendLine(BuiltIns.GetMessageType(type));
-
-                string typeDependencies = BuiltIns.DecompressDependencies(type);
-                int separatorIndex = typeDependencies.IndexOf(dependencySeparator, StringComparison.Ordinal);
-                if (separatorIndex == -1)
-                {
-                    rosDependencies.Append(typeDependencies);
-                }
-                else
-                {
-                    rosDependencies.Append(typeDependencies, 0, separatorIndex);
-                }
-            }
-
-            if (type.IsValueType)
-            {
-                foreach (var field in type.GetFields())
-                {
-                    if (typeof(IMessage).IsAssignableFrom(field.FieldType))
-                    {
-                        AddDependency(rosDependencies, field.FieldType, alreadyWritten);
-                    }
-                    else if (field.FieldType.IsArray &&
-                             typeof(IMessage).IsAssignableFrom(field.FieldType.GetElementType()))
-                    {
-                        AddDependency(rosDependencies, field.FieldType.GetElementType()!, alreadyWritten);
-                    }
-                }
-
-                return;
-            }
-
-            foreach (var property in type.GetProperties())
-            {
-                if (property.GetGetMethod() == null
-                    || property.GetSetMethod() == null
-                    || property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null
-                )
-                {
-                    continue;
-                }
-
-                if (typeof(IMessage).IsAssignableFrom(property.PropertyType))
-                {
-                    AddDependency(rosDependencies, property.PropertyType, alreadyWritten);
-                }
-                else if (property.PropertyType.IsArray &&
-                         typeof(IMessage).IsAssignableFrom(property.PropertyType.GetElementType()))
-                {
-                    AddDependency(rosDependencies, property.PropertyType.GetElementType()!, alreadyWritten);
-                }
-            }
+            var rosDependencies = new StringBuilder(100);
+            AddDependency(rosDependencies, typeof(T), alreadyWritten, true);
+            return rosDependencies.ToString();
         }
     }
 }

@@ -13,23 +13,23 @@ namespace Iviz.MsgsWrapper
     public abstract class RosMessageWrapper<T> : IMessage, IDeserializable<T>
         where T : RosMessageWrapper<T>, IMessage, new()
     {
-        static RosWrapperDefinition<T>? msgDefinition;
-        static RosWrapperDefinition<T> MsgDefinition => msgDefinition ??= new RosWrapperDefinition<T>();
+        static RosSerializableDefinition<T>? definition;
+        static RosSerializableDefinition<T> Definition => definition ??= new RosSerializableDefinition<T>();
 
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public static string RosMd5Sum => MsgDefinition.RosMessageMd5;
+        [Preserve] public static string RosMd5Sum => Definition.RosMessageMd5;
 
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public static string RosDependenciesBase64 => MsgDefinition.RosDependenciesBase64;
+        [Preserve] public static string RosDependenciesBase64 => Definition.RosDependenciesBase64;
 
         /// <summary> Concatenated dependencies file. </summary>
-        public static string RosDependencies => MsgDefinition.RosDependencies;
+        public static string RosDependencies => Definition.RosDependencies;
 
-        public void RosSerialize(ref Buffer b) => MsgDefinition.Serialize((T) this, ref b);
+        public void RosSerialize(ref Buffer b) => Definition.Serialize((T) this, ref b);
 
-        [IgnoreDataMember] public int RosMessageLength => MsgDefinition.GetLength((T) this);
+        [IgnoreDataMember] public int RosMessageLength => Definition.GetLength((T) this);
 
-        public void RosValidate() => MsgDefinition.Validate((T) this);
+        public void RosValidate() => Definition.Validate((T) this);
 
         ISerializable ISerializable.RosDeserialize(ref Buffer b) => RosDeserialize(ref b);
 
@@ -37,25 +37,25 @@ namespace Iviz.MsgsWrapper
         {
             if (typeof(T) != GetType())
             {
-                
+                throw new RosInvalidMessageException("Message types do not match");
             }
         }
         
         public T RosDeserialize(ref Buffer b)
         {
             var msg = new T();
-            MsgDefinition.Deserialize(msg, ref b);
+            Definition.Deserialize(msg, ref b);
             return msg;
         }
 
         /// <summary>
         /// Creates a ROS definition for this message (the contents of a .msg file).
         /// </summary>
-        [IgnoreDataMember] public static string RosDefinition => MsgDefinition.RosDefinition;
+        [IgnoreDataMember] public static string RosDefinition => Definition.RosDefinition;
 
         /// <summary>
         /// Alias for the name of the message.
         /// </summary>
-        [IgnoreDataMember] public string RosType => MsgDefinition.RosMessageType;
+        [IgnoreDataMember] public string RosType => Definition.RosType;
     }
 }
