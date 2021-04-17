@@ -10,6 +10,9 @@ namespace Iviz.Displays
 
         [CanBeNull] protected abstract IDisplay Display { get; }
 
+        Transform mTransform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        
         public string Name
         {
             get => gameObject.name;
@@ -32,12 +35,6 @@ namespace Iviz.Displays
             }
         }
 
-        public Transform Parent
-        {
-            get => transform.parent;
-            set => transform.parent = value;
-        }
-        
         public virtual void Suspend()
         {
             Display?.Suspend();

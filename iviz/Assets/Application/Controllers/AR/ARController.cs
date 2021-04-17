@@ -1,15 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Core;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.StdMsgs;
+using Iviz.MarkerDetection;
 using Iviz.Resources;
-using Iviz.Roslib;
+using Iviz.Ros;
 using Iviz.Roslib.Utils;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
-using UnityEngine.XR.ARSubsystems;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -31,18 +40,15 @@ namespace Iviz.Controllers
         /* NonSerializable */
         public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
 
-        /* NonSerializable */
-        public float WorldAngle { get; set; }
-        /*
-        [DataMember] public bool SearchMarker { get; set; }
-        [DataMember] public bool MarkerHorizontal { get; set; } = true;
-        [DataMember] public int MarkerAngle { get; set; }
-        [DataMember] public string MarkerFrame { get; set; } = "";
+        [DataMember] public bool EnableQrDetection { get; set; }
+        [DataMember] public bool EnableArucoDetection { get; set; }
+
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
-        */
+
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
         /* NonSerializable */
+        public float WorldAngle { get; set; }
         public bool ShowARJoystick { get; set; }
 
         /* NonSerializable */
@@ -78,7 +84,11 @@ namespace Iviz.Controllers
         Vector3? joyVelocityPos;
 
         protected Canvas canvas;
-        protected FrameNode node;
+
+        MarkerDetector detector;
+        public Sender<PoseStamped> HeadSender { get; private set; }
+        public Sender<DetectedMarker> MarkerSender { get; private set; }
+        
 
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
@@ -90,13 +100,7 @@ namespace Iviz.Controllers
             {
                 Visible = value.Visible;
                 WorldScale = value.WorldScale;
-                /*
-                UseMarker = value.SearchMarker;
-                MarkerHorizontal = value.MarkerHorizontal;
-                MarkerAngle = value.MarkerAngle;
-                MarkerFrame = value.MarkerFrame;
-                MarkerOffset = value.MarkerOffset;
-                */
+
                 OcclusionQuality = value.OcclusionQuality;
             }
         }
@@ -142,6 +146,32 @@ namespace Iviz.Controllers
                 ARModeChanged?.Invoke(value);
             }
         }
+
+        public bool EnableQrDetection
+        {
+            get => config.EnableQrDetection;
+            set
+            {
+                config.EnableQrDetection = value;
+                if (detector != null)
+                {
+                    detector.EnableQr = value;
+                }
+            }
+        }
+        
+        public bool EnableArucoDetection
+        {
+            get => config.EnableArucoDetection;
+            set
+            {
+                config.EnableArucoDetection = value;
+                if (detector != null)
+                {
+                    detector.EnableAruco = value;
+                }
+            }
+        }        
 
         /*
         public virtual bool UseMarker
@@ -215,7 +245,7 @@ namespace Iviz.Controllers
                 canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             }
 
-            node = FrameNode.Instantiate("AR Node");
+            //node = FrameNode.Instantiate("AR Node");
 
             PinControlButton.Visible = true;
             ShowARJoystickButton.Visible = true;
@@ -228,6 +258,12 @@ namespace Iviz.Controllers
             ARJoystick.PointerUp += OnARJoystickPointerUp;
 
             GuiInputModule.Instance.UpdateQualityLevel();
+
+            HeadSender = new Sender<PoseStamped>("head");
+            MarkerSender = new Sender<DetectedMarker>("markers");
+
+            detector = new MarkerDetector();
+            detector.MarkerDetected += OnMarkerDetected;
         }
 
         void OnARJoystickChangedAngle(float dA)
@@ -321,31 +357,7 @@ namespace Iviz.Controllers
             get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
             set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
         }
-
-        public virtual void StopController()
-        {
-            Visible = false;
-            WorldScale = 1;
-
-            PinControlButton.Visible = false;
-            ShowARJoystickButton.Visible = false;
-
-            WorldPoseChanged = null;
-            ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
-            ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
-            ARJoystick.PointerUp -= OnARJoystickPointerUp;
-            PinControlButton.Clicked -= OnPinControlButtonClicked;
-            ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
-            ShowARJoystick = false;
-            Instance = null;
-            
-            GuiInputModule.Instance.UpdateQualityLevel();
-        }
-
-        void IController.ResetController()
-        {
-        }
-
+        
         public TfFrame Frame => TfListener.Instance.FixedFrame;
 
         public static event Action<bool> ARModeChanged;
@@ -399,6 +411,71 @@ namespace Iviz.Controllers
         {
             return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
         }
+
+        uint headSeq;
+        public virtual void Update()
+        {
+            if (!Visible)
+            {
+                return;
+            }
+            
+            HeadSender.Publish(new PoseStamped(
+                new Header(headSeq++, time.Now(), TfListener.FixedFrameId ?? ""),
+                TfListener.RelativePoseToFixedFrame(Settings.MainCameraTransform.AsPose()).Unity2RosPose().ToCameraFrame()
+                ));
+        }
+
+        uint markerSeq;
+        void OnMarkerDetected(Screenshot screenshot, IEnumerable<IMarkerCorners> markers)
+        {
+            foreach (var marker in markers)
+            {
+                DetectedMarker detectedMarker = new DetectedMarker
+                {
+                    MarkerType =  marker is ArucoMarkerCorners ? DetectedMarker.MARKER_ARUCO : DetectedMarker.MARKER_QR,
+                    Header =new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId ?? ""), 
+                    ArucoId = marker is ArucoMarkerCorners aruco ? (uint) aruco.Id : 0,
+                    QrCode = marker is QrMarkerCorners qr ? qr.Code : "",
+                    CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose).Unity2RosPose().ToCameraFrame(),
+                    Corners = marker.Corners.Select(corner => new Msgs.GeometryMsgs.Vector3(corner.X, corner.Y, 0)).ToArray(),
+                    Intrinsic = new double[]{screenshot.Fx, 0, screenshot.Cx, 0, screenshot.Fy, screenshot.Cy, 0, 0, 1},
+                    MarkerPose = Msgs.GeometryMsgs.Pose.Identity,
+                    MarkerSize = 0,
+                };
+                
+                MarkerSender.Publish(detectedMarker);
+            }
+        }
+        
+        public virtual void StopController()
+        {
+            Visible = false;
+            WorldScale = 1;
+
+            PinControlButton.Visible = false;
+            ShowARJoystickButton.Visible = false;
+
+            WorldPoseChanged = null;
+            ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
+            ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
+            ARJoystick.PointerUp -= OnARJoystickPointerUp;
+            PinControlButton.Clicked -= OnPinControlButtonClicked;
+            ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
+            ShowARJoystick = false;
+            Instance = null;
+            
+            GuiInputModule.Instance.UpdateQualityLevel();
+            
+            HeadSender.Stop();
+            MarkerSender.Stop();
+            
+            detector.Dispose();
+        }
+
+        void IController.ResetController()
+        {
+        }        
 
         /*
         void OnDestroy()

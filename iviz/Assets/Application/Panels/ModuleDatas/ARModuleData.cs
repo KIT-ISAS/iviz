@@ -52,19 +52,6 @@ namespace Iviz.App
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
 
-            /*
-            panel.SearchMarker.Value = controller.UseMarker;
-            panel.MarkerHorizontal.Value = controller.MarkerHorizontal;
-            panel.MarkerAngle.Value = controller.MarkerAngle;
-            panel.MarkerFrame.Value = controller.MarkerFrame;
-
-            List<string> frameHints = new List<string> {NoneString};
-            frameHints.AddRange(TfListener.FramesUsableAsHints);
-            panel.MarkerFrame.Hints = frameHints;
-
-            panel.MarkerOffset.Value = controller.MarkerOffset;
-            */
-
             panel.OcclusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
             panel.OcclusionQuality.Index = (int) controller.OcclusionQuality;
 
@@ -72,30 +59,10 @@ namespace Iviz.App
 
             panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
             
-            /*
-            panel.SearchMarker.ValueChanged += f =>
-            {
-                controller.UseMarker = f;
-                CheckInteractable();
-            };
-            panel.MarkerHorizontal.ValueChanged += f => controller.MarkerHorizontal = f;
-            panel.MarkerAngle.ValueChanged += f => controller.MarkerAngle = (int) f;
-            panel.MarkerFrame.EndEdit += f =>
-            {
-                if (f == NoneString)
-                {
-                    panel.MarkerFrame.Value = "";
-                    controller.MarkerFrame = "";
-                }
-                else
-                {
-                    controller.MarkerFrame = f;
-                }
+            panel.DetectArucos.Value = controller.EnableArucoDetection;
+            panel.DetectQrs.Value = controller.EnableQrDetection;
+            
 
-                CheckInteractable();
-            };
-            panel.MarkerOffset.ValueChanged += f => controller.MarkerOffset = f;
-            */
 
             panel.OcclusionQuality.ValueChanged += (i, _) =>
                 controller.OcclusionQuality = (OcclusionQualityType) i;
@@ -113,6 +80,12 @@ namespace Iviz.App
                 panel.HideButton.State = controller.Visible;
                 UpdateModuleButton();
             };
+
+            panel.DetectArucos.ValueChanged += f => controller.EnableArucoDetection = f;
+            panel.DetectQrs.ValueChanged += f => controller.EnableQrDetection = f;
+            
+            panel.HeadSender.Set(controller.HeadSender);
+            panel.MarkerSender.Set(controller.MarkerSender);
         }
 
         public override void UpdatePanel()

@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS service and its service type, including dependencies.
     /// </summary>
-    internal sealed class ServiceInfo<T> : JsonToString
+    internal sealed class ServiceInfo<T> : JsonToString where T : IService
     {
         /// <summary>
         /// ROS name of this node.
@@ -46,8 +46,8 @@ namespace Iviz.Roslib
         public ServiceInfo(string callerId, string service, T generator = default)
         : this(
                 callerId, service,
-                BuiltIns.GetMd5Sum(typeof(T)),
-                BuiltIns.GetServiceType(typeof(T)),
+                BuiltIns.GetMd5Sum<T>(),
+                BuiltIns.GetServiceType<T>(),
                 generator
                 )
         {

@@ -166,32 +166,32 @@ namespace Iviz.Controllers
             frameLinkHolder.transform.SetParentLocal(parent.transform);
             frameLinkHolder.transform.localRotation = rotation;
 
-            GameObject[] frameLinks =
+            MeshMarkerResource[] frameLinks =
             {
                 CreateFrameLink(frameLinkHolder),
                 CreateFrameLink(frameLinkHolder),
                 CreateFrameLink(frameLinkHolder)
             };
 
-            frameLinks[0].transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
-            frameLinks[0].transform.localPosition = -0.5f * frameAxisLength * Vector3.right;
-            frameLinks[1].transform.localScale = new Vector3(frameAxisWidth, frameAxisWidth, frameAxisLength);
-            frameLinks[1].transform.localPosition = -0.5f * frameAxisLength * Vector3.forward;
-            frameLinks[2].transform.localScale = new Vector3(frameAxisWidth, frameAxisLength, frameAxisWidth);
-            frameLinks[2].transform.localPosition = 0.5f * frameAxisLength * Vector3.up;
+            frameLinks[0].Transform.localScale = new Vector3(frameAxisLength, frameAxisWidth, frameAxisWidth);
+            frameLinks[0].Transform.localPosition = -0.5f * frameAxisLength * Vector3.right;
+            frameLinks[1].Transform.localScale = new Vector3(frameAxisWidth, frameAxisWidth, frameAxisLength);
+            frameLinks[1].Transform.localPosition = -0.5f * frameAxisLength * Vector3.forward;
+            frameLinks[2].Transform.localScale = new Vector3(frameAxisWidth, frameAxisLength, frameAxisWidth);
+            frameLinks[2].Transform.localPosition = 0.5f * frameAxisLength * Vector3.up;
 
             return frameLinkHolder;
         }
 
         [NotNull]
-        GameObject CreateFrameLink([NotNull] GameObject frameLinkHolder)
+        MeshMarkerResource CreateFrameLink([NotNull] GameObject frameLinkHolder)
         {
             var frameLink =
                 ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
             frameLink.Name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;
-            return frameLink.gameObject;
+            return frameLink;
         }
     }
 }

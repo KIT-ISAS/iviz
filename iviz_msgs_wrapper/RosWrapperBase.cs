@@ -24,19 +24,32 @@ namespace Iviz.MsgsWrapper
     {
     }
 
+    /// <summary>
+    /// Tells the wrapper that the array with this attribute has a fixed length.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public class FixedSizeArrayAttribute : Attribute
     {
         public uint Size;
     }
 
+    /// <summary>
+    /// Tells the wrapper to rename the property to the given name.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public class RenameToAttribute : Attribute
     {
         public string Name { get; }
         public RenameToAttribute(string name) => Name = name;
     }
-
+    
+    public class RosIncompleteWrapperException : RosInvalidMessageException
+    {
+        public RosIncompleteWrapperException(string msg) : base(msg)
+        {
+        }
+    }
+    
     internal static class RosWrapperBase
     {
         public static readonly Dictionary<Type, string> BuiltInNames = new()
@@ -103,6 +116,7 @@ namespace Iviz.MsgsWrapper
             [typeof(string)] = InitializeStringProperty,
             [typeof(string[])] = InitializeStringArrayProperty,
 
+            // a long list of types to ensure that the AOT stripper does not remove them
             [typeof(Vector3)] = InitializeMessageProperty<Vector3>,
             [typeof(Vector3[])] = InitializeMessageArrayProperty<Vector3>,
             [typeof(Point)] = InitializeMessageProperty<Point>,
@@ -176,8 +190,8 @@ namespace Iviz.MsgsWrapper
             where TField : struct, IMessage, IDeserializable<TField>
         {
             string propertyName = GetPropertyName(property);
-            bi.RosDefinition.Append(BuiltIns.GetMessageType(typeof(TField))).Append(" ").AppendLine(propertyName);
-            bi.BufferForMd5.Append(BuiltIns.GetMd5Sum(typeof(TField))).Append(" ").Append(propertyName).Append("\n");
+            bi.RosDefinition.Append(BuiltIns.GetMessageType<TField>()).Append(" ").AppendLine(propertyName);
+            bi.BufferForMd5.Append(BuiltIns.GetMd5Sum<TField>()).Append(" ").Append(propertyName).Append("\n");
             bi.Fields.Add(new MessageField<T, TField>(property, propertyName));
         }
 
@@ -185,18 +199,18 @@ namespace Iviz.MsgsWrapper
             where TField : struct, IMessage, IDeserializable<TField>
         {
             string propertyName = GetPropertyName(property);
-            bi.BufferForMd5.Append(BuiltIns.GetMd5Sum(typeof(TField))).Append(" ").Append(propertyName)
+            bi.BufferForMd5.Append(BuiltIns.GetMd5Sum<TField>()).Append(" ").Append(propertyName)
                 .Append("\n"); // no [] here!
             uint? fixedSize = property.GetCustomAttribute<FixedSizeArrayAttribute>()?.Size;
             if (fixedSize == null)
             {
-                bi.RosDefinition.Append(BuiltIns.GetMessageType(typeof(TField))).Append("[] ").AppendLine(propertyName);
+                bi.RosDefinition.Append(BuiltIns.GetMessageType<TField>()).Append("[] ").AppendLine(propertyName);
                 bi.Fields.Add(new MessageArrayField<T, TField>(property, propertyName));
             }
             else
             {
                 uint size = fixedSize.Value;
-                bi.RosDefinition.Append(BuiltIns.GetMessageType(typeof(TField))).Append("[").Append(size).Append("] ")
+                bi.RosDefinition.Append(BuiltIns.GetMessageType<TField>()).Append("[").Append(size).Append("] ")
                     .AppendLine(propertyName);
                 bi.Fields.Add(new MessageFixedArrayField<T, TField>(property, size, propertyName));
             }
@@ -353,14 +367,19 @@ namespace Iviz.MsgsWrapper
             var alreadyWritten = new HashSet<Type>();
             AddDependency(rosDependencies, typeof(T), alreadyWritten, true);
 
-            byte[] inputBytes = BuiltIns.UTF8.GetBytes(rosDependencies.ToString());
+            return rosDependencies.ToString();
+        }
+
+        static string CompressDependencies(string rosDependencies)
+        {
+            byte[] inputBytes = BuiltIns.UTF8.GetBytes(rosDependencies);
             using var outputStream = new MemoryStream();
             using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
             {
                 gZipStream.Write(inputBytes, 0, inputBytes.Length);
             }
 
-            return Convert.ToBase64String(outputStream.ToArray());
+            return Convert.ToBase64String(outputStream.ToArray());            
         }
 
         static void AddDependency(StringBuilder rosDependencies, Type type, HashSet<Type> alreadyWritten,

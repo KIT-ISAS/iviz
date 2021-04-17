@@ -31,7 +31,12 @@ namespace Iviz.Displays
         public GameObject TFFrame;
         public GameObject Trail;
         public GameObject Triangle;
-
+        
+        public GameObject ARDialog;
+        public GameObject ARDialogIcon;
+        public GameObject ARDialogMenu;
+        public GameObject ARDialogShort;
+        
         public Material LineConnectorMaterial;
         public Material TextMaterial;
 

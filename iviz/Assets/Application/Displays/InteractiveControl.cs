@@ -443,7 +443,7 @@ namespace Iviz.Displays
 
         void RotateBackToFixed()
         {
-            transform.rotation = TfListener.OriginFrame.transform.rotation;
+            transform.rotation = TfListener.OriginFrame.Transform.rotation;
         }
 
         bool isEngaged;

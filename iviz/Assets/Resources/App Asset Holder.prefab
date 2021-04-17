@@ -83,6 +83,14 @@ MonoBehaviour:
   Trail: {fileID: 3045043143408952572, guid: 287fc9c08ef9d4183b317a1693cc66f8, type: 3}
   Triangle: {fileID: 1279096251387851904, guid: 303e22e8ab8f349fbae59eed70100b13,
     type: 3}
+  ARDialog: {fileID: 9024825353754890543, guid: cfab43ef0e4b942cba702ea098eb3d39,
+    type: 3}
+  ARDialogIcon: {fileID: 9024825353754890543, guid: 4f0b632fd70f3407a948d3a91b8100da,
+    type: 3}
+  ARDialogMenu: {fileID: 9024825353754890543, guid: 596955ea6035442359b73ae4ea9a32f7,
+    type: 3}
+  ARDialogShort: {fileID: 9024825353754890543, guid: b1c93fc2196764d308b15a8a360a5f2e,
+    type: 3}
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
     type: 2}
   TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}

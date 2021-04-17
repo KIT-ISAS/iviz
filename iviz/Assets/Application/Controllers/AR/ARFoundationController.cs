@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using Iviz.Roslib;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using BitMiracle.LibJpeg.Classic;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
@@ -22,7 +17,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARFoundationController : ARController
+    public sealed class ARFoundationController : ARController, IScreenshotManager
     {
         const float AnchorPauseTimeInSec = 2;
 
@@ -35,11 +30,12 @@ namespace Iviz.Controllers
         [SerializeField] AxisFrameResource setupModeFrame = null;
 
         Camera mainCamera;
+        ARCameraManager cameraManager;
         ARSession arSession;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
-        ARMarkerResource resource;
+        //ARMarkerResource resource;
         ARAnchorManager anchorManager;
         AROcclusionManager occlusionManager;
         [CanBeNull] ARAnchorResource worldAnchor;
@@ -122,7 +118,7 @@ namespace Iviz.Controllers
             {
                 base.Visible = value;
                 //resource.Visible = value && UseMarker;
-                resource.Visible = value;
+                //resource.Visible = value;
                 mainCamera.gameObject.SetActive(!value);
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
@@ -283,15 +279,15 @@ namespace Iviz.Controllers
             tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = arSessionOrigin.GetComponent<ARRaycastManager>();
             anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
+            cameraManager = arCamera.GetComponent<ARCameraManager>();
             lastAnchorMoved = Time.time;
 
             defaultCullingMask = arCamera.cullingMask;
-            var cameraManager = arCamera.GetComponent<ARCameraManager>();
 
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
-            resource = ResourcePool.Rent<ARMarkerResource>(Resource.Displays.ARMarkerResource);
-            resource.Parent = node.transform;
+            //resource = ResourcePool.Rent<ARMarkerResource>(Resource.Displays.ARMarkerResource);
+            //resource.Parent = node.transform;
 
             Config = new ARConfiguration();
 
@@ -312,6 +308,8 @@ namespace Iviz.Controllers
             WorldPoseChanged += OnWorldPoseChanged;
 
             OcclusionQuality = OcclusionQualityType.Off;
+
+            Settings.ScreenshotManager = this;
         }
 
         void ArSetOnClicked()
@@ -352,8 +350,10 @@ namespace Iviz.Controllers
 
         float? lastAnchorMoved;
 
-        void Update()
+        public override void Update()
         {
+            base.Update();
+            
             if (SetupModeEnabled)
             {
                 Transform cameraTransform = arCamera.transform;
@@ -515,9 +515,33 @@ namespace Iviz.Controllers
         }
         */
 
+        bool IScreenshotManager.Started => true;
+
+        IEnumerable<(int width, int height)> IScreenshotManager.GetResolutions()
+        {
+            /*
+            using (var configurations = cameraManager.GetConfigurations(Allocator.Temp))
+            {
+                var resolutions = new (int width, int height)[configurations.Length];
+                for (int i = 0; i < configurations.Length; i++)
+                {
+                    resolutions[i] = (configurations[i].width, configurations[i].height);
+                }
+
+                return resolutions;
+            }
+            */
+            var configuration = cameraManager.subsystem.currentConfiguration;
+            return configuration == null
+                ? Array.Empty<(int width, int height)>()
+                : new[] {(configuration.Value.width, configuration.Value.height)};
+        }
+
+        Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
+        Task IScreenshotManager.StopAsync() => Task.CompletedTask;
+
         public Task<Screenshot> TakeScreenshotColorAsync()
         {
-            var cameraManager = arCamera.GetComponent<ARCameraManager>();
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {
                 return Task.FromResult<Screenshot>(null);
@@ -528,22 +552,14 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.RGB24,
-                transformation = XRCpuImage.Transformation.MirrorY
             };
 
             TaskCompletionSource<Screenshot> task = new TaskCompletionSource<Screenshot>();
-            
+
             int width = image.width;
             int height = image.height;
-            int halfWidth = width / 2;
-            int halfHeight = height / 2;
-            var projectionMatrix = arCamera.projectionMatrix;
-            float fx = halfWidth * projectionMatrix.m00;
-            float fy = halfHeight * projectionMatrix.m11;
-            float cx = halfWidth * (1 - projectionMatrix.m02);
-            float cy = halfHeight * (1 + projectionMatrix.m12);
             var pose = arCamera.transform.AsPose();
-            
+
             using (image)
             {
                 try
@@ -560,7 +576,21 @@ namespace Iviz.Controllers
                         var bytes = new UniqueRef<byte>(array.Length);
                         NativeArray<byte>.Copy(array, bytes.Array, array.Length);
 
-                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, fx, cx, fy, cy, pose, bytes);
+                        float fx, fy, cx, cy;
+                        if (cameraManager.TryGetIntrinsics(out var intrinsics))
+                        {
+                            (fx, fy, cx, cy) =
+                                (intrinsics.focalLength.x, intrinsics.focalLength.y,
+                                    intrinsics.principalPoint.x, intrinsics.principalPoint.y);
+                        }
+                        else
+                        {
+                            (fx, fy, cx, cy) = (0, 0, 0, 0);
+                        }
+
+                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, 
+                            fx, cx, fy, cy, pose, bytes);
+
                         task.TrySetResult(s);
                     });
                 }
@@ -582,6 +612,8 @@ namespace Iviz.Controllers
 
             ArSet.Visible = false;
             ArInfoPanel.SetActive(false);
+            
+            Settings.ScreenshotManager = null;
         }
     }
 }

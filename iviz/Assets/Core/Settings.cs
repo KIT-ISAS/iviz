@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
@@ -170,56 +169,7 @@ namespace Iviz.Core
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
                                             .Value;
     }
-
-    public enum ScreenshotFormat
-    {
-        Rgb,
-        Bgra
-    }
-
-    public class Screenshot : IDisposable
-    {
-        public ScreenshotFormat Format { get; }
-        public time Timestamp { get; }
-        public int Width { get; }
-        public int Height { get; }
-        public int Bpp { get; }
-
-        public float Fx { get; }
-        public float Cx { get; }
-        public float Fy { get; }
-        public float Cy { get; }
-        public Pose CameraPose { get; }
-
-        public UniqueRef<byte> Bytes { get; }
-
-        public Screenshot(ScreenshotFormat format, int width, int height, int bpp, float fx, float cx, float fy, float cy,
-            in Pose cameraPose, UniqueRef<byte> bytes)
-        {
-            Format = format;
-            Timestamp = time.Now();
-            Width = width;
-            Height = height;
-            Bpp = bpp;
-            Fx = fx;
-            Cx = cx;
-            Fy = fy;
-            Cy = cy;
-            CameraPose = cameraPose;
-            Bytes = bytes;
-        }
-
-        public void Dispose()
-        {
-            Bytes.Dispose();
-        }
-
-        public override string ToString()
-        {
-            return $"[Screenshot width={Width} height={Height} At={CameraPose}]";
-        }
-    }
-
+    
     public interface IScreenshotManager
     {
         bool Started { get; }

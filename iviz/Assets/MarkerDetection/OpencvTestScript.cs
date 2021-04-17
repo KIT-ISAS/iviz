@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Iviz.Opencv
+namespace Iviz.MarkerDetection
 {
     public class OpencvTestScript : MonoBehaviour
     {
@@ -13,10 +13,10 @@ namespace Iviz.Opencv
             texture.LoadImage(bytes);
 
             
-            Context context = new Context(texture.width, texture.height);
+            CvContext cvContext = new CvContext(texture.width, texture.height);
 
 
-            context.SetImageDataFlipY(texture.GetRawTextureData<byte>());
+            cvContext.SetImageDataFlipY(texture.GetRawTextureData(), 3);
             
             /*
             int numArucos = context.DetectArucoMarkers();
@@ -24,10 +24,10 @@ namespace Iviz.Opencv
             Debug.Log(string.Join(", ", context.GetDetectedArucoIds()));
             Debug.Log(string.Join(", ", context.GetDetectedArucoCorners()));
             */
-            int numQrs = context.DetectQrMarkers();
+            int numQrs = cvContext.DetectQrMarkers();
             Debug.Log(numQrs);
-            Debug.Log(string.Join(", ", context.GetDetectedQrCodes()));
-            Debug.Log(string.Join(", ", context.GetDetectedQrCorners()));
+            Debug.Log(string.Join(", ", cvContext.GetDetectedQrCodes()));
+            //Debug.Log(string.Join(", ", cvContext.GetDetectedQrCorners()));
         }
     }
 }

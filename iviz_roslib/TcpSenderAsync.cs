@@ -69,7 +69,7 @@ namespace Iviz.Roslib
 
         public string? RemoteCallerId { get; private set; }
         public string Topic => topicInfo.Topic;
-        public bool IsAlive => !task.IsCompleted;
+        public bool IsAlive => !task.IsCompleted && tcpClient.Client.CheckIfAlive();
         public int MaxQueueSizeInBytes { get; set; } = 50000;
 
         public PublisherSenderState State =>

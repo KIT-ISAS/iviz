@@ -374,7 +374,7 @@ namespace Iviz.Roslib
         {
             await ProcessHandshake(stream);
 
-            bool hasFixedSize = BuiltIns.TryGetFixedSize(typeof(T), out int fixedSize);
+            bool hasFixedSize = BuiltIns.TryGetFixedSize<T>(out int fixedSize);
 
             await (hasFixedSize
                 ? ProcessLoopFixed(stream, fixedSize)

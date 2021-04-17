@@ -6,13 +6,12 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class MessageField<T, TField> : IMessageField<T> 
-        where T : RosMessageWrapper<T>, new()    
+        where T : RosMessageWrapper<T>, IMessage, new()    
         where TField : IMessage, IDeserializable<TField>, new()
     {
         static readonly IDeserializable<TField> Generator = new TField();
         static readonly bool IsValueType = typeof(T).IsValueType;
-        static readonly int? FieldSize =
-            BuiltIns.TryGetFixedSize(typeof(TField), out int realFieldSize) ? realFieldSize : null;
+        static readonly int? FieldSize = BuiltIns.TryGetFixedSize<TField>(out int realFieldSize) ? realFieldSize : null;
 
         readonly Func<T, TField> getter;
         readonly Action<T, TField> setter;

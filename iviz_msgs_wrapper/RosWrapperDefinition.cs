@@ -17,7 +17,8 @@ namespace Iviz.MsgsWrapper
         public string RosMessageType { get; }
         public string RosDefinition { get; }
         public string RosMessageMd5 { get; }
-        public string RosDependenciesBase64 { get; }
+        public string RosDependencies { get; }
+        public string RosDependenciesBase64 => CompressDependencies(RosDependencies);
 
         readonly IMessageField<T>[] messageFields;
 
@@ -25,11 +26,11 @@ namespace Iviz.MsgsWrapper
         {
             try
             {
-                RosMessageType = BuiltIns.GetMessageType(typeof(T));
+                RosMessageType = BuiltIns.GetMessageType<T>();
             }
-            catch (ArgumentException)
+            catch (RosInvalidMessageException)
             {
-                throw new InvalidOperationException(
+                throw new RosIncompleteWrapperException(
                     $"Type '{typeof(T).Name}' must have a string constant named RosMessageType. " +
                     "It should also be tagged with the attribute [MessageName].");
             }
@@ -88,7 +89,7 @@ namespace Iviz.MsgsWrapper
 
             RosMessageMd5 = CreateMd5(bi);
 
-            RosDependenciesBase64 = CreateDependencies(RosDefinition);
+            RosDependencies = CreateDependencies(RosDefinition);
         }
 
         public void Serialize(T msg, ref Buffer b)

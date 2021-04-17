@@ -9,7 +9,7 @@ namespace Iviz.Controllers
     {
         string Description { get; }
     }
-    
+
     /// <summary>
     /// Class for displays that want to attach themselves to a TF frame.
     /// This increases the reference count of the frame, and prevents the TFListener from
@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         TfFrame parent;
 
         Transform mTransform;
-        [NotNull] public Transform Transform => mTransform.SafeNull() ?? (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         IFrameNodeOwner owner;
         
@@ -105,14 +105,9 @@ namespace Iviz.Controllers
 
             GameObject obj = new GameObject(name);
             SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
-            if (TfListener.Instance != null)
+            if (TfListener.Instance != null && TfListener.MapFrame != null)
             {
                 node.Parent = TfListener.MapFrame;
-            }
-            else
-            {
-                // TF not initialized yet
-                node.transform.parent = TfListener.UnityFrame.transform;
             }
 
             node.owner = owner;

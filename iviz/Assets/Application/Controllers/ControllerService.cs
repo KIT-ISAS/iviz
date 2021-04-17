@@ -464,6 +464,7 @@ namespace Iviz.Controllers
                 return;
             }
 
+            srv.Response.Success = true;
             srv.Response.Resolutions = Settings.ScreenshotManager.GetResolutions()
                 .Select(resolution => new Vector2i(resolution.width, resolution.height))
                 .ToArray();
@@ -590,14 +591,7 @@ namespace Iviz.Controllers
                         AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
 
                         ss = await Settings.ScreenshotManager.TakeScreenshotColorAsync();
-                        pose = TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose();
-
-                        if (Settings.IsHololens)
-                        {
-                            // make camera point to +Z instead of +X
-                            Iviz.Msgs.GeometryMsgs.Quaternion toCameraFrame = (0.5, -0.5, 0.5, -0.5);
-                            pose = new Pose(pose.Value.Position, pose.Value.Orientation * toCameraFrame);
-                        }
+                        pose = TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame();
                     }
                     catch (Exception e)
                     {
@@ -636,11 +630,11 @@ namespace Iviz.Controllers
             srv.Response.Width = ss.Width;
             srv.Response.Height = ss.Height;
             srv.Response.Bpp = ss.Bpp;
-            srv.Response.Header = new Header(screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId ?? "");
+            srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId ?? "");
             srv.Response.Intrinsics = new double[] {ss.Fx, 0, ss.Cx, 0, ss.Fy, ss.Cy, 0, 0, 1};
             srv.Response.Pose = pose ?? Pose.Identity;
 
-            using (ss.Bytes)
+            using (ss)
             {
                 srv.Response.Data = await CompressAsync(ss);
             }

@@ -9,12 +9,9 @@ namespace Iviz.Displays
 
         static readonly Quaternion PointToX = Quaternion.AngleAxis(90, Vector3.up);
 
-        Transform mTransform;
-
         protected override void Awake()
         {
             base.Awake();
-            mTransform = transform;
             Reset();
         }
 
@@ -24,8 +21,8 @@ namespace Iviz.Displays
             float scaleX = diff.Magnitude();
             float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX * 0.15f, MaxArrowWidth);
 
-            mTransform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
-            mTransform.localPosition = a;
+            Transform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
+            Transform.localPosition = a;
 
             if (Mathf.Approximately(scaleX, 0))
             {
@@ -48,19 +45,19 @@ namespace Iviz.Displays
             m.SetColumn(1, y);
             m.SetColumn(2, z);
 
-            mTransform.localRotation = m.rotation;
+            Transform.localRotation = m.rotation;
         }
 
         public void Set(in Vector3 scale)
         {
-            mTransform.localScale = new Vector3(scale.z, scale.y, scale.x);
-            mTransform.SetLocalPose(Pose.identity.WithRotation(PointToX));
+            Transform.localScale = new Vector3(scale.z, scale.y, scale.x);
+            Transform.SetLocalPose(Pose.identity.WithRotation(PointToX));
         }
 
         public void Reset()
         {
-            mTransform.localScale = Vector3.zero;
-            mTransform.SetLocalPose(Pose.identity);
+            Transform.localScale = Vector3.zero;
+            Transform.SetLocalPose(Pose.identity);
         }
 
         public override void Suspend()
