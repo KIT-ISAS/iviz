@@ -2,7 +2,7 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsWrapper
 {
-    internal interface IMessageField<in T> where T : RosMessageWrapper<T>, IMessage, new()
+    internal interface IMessageField<in T> where T : IMessage
     {
         void RosSerialize(T msg, ref Buffer b);
         void RosDeserialize(T msg, ref Buffer b);

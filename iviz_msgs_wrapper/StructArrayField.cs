@@ -7,7 +7,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class StructArrayField<T, TField> : IMessageField<T>
-        where T : RosMessageWrapper<T>, IMessage, new()
+        where T : IMessage
         where TField : unmanaged
     {
         static readonly int FieldSize = Marshal.SizeOf<TField>();

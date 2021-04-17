@@ -5,14 +5,13 @@ using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsWrapper
 {
-    internal sealed class MessageFixedArrayField<T, TField> : IMessageField<T> 
-        where T : RosMessageWrapper<T>, IMessage, new()    
+    internal sealed class MessageFixedArrayField<T, TField> : IMessageField<T>
+        where T : IMessage
         where TField : IMessage, IDeserializable<TField>, new()
     {
         static readonly IDeserializable<TField> Generator = new TField();
         static readonly bool IsValueType = typeof(T).IsValueType;
-        static readonly int? FieldSize =
-            BuiltIns.TryGetFixedSize(typeof(TField), out int realFieldSize) ? realFieldSize : null;
+        static readonly int? FieldSize = BuiltIns.TryGetFixedSize<TField>(out int realFieldSize) ? realFieldSize : null;
 
         readonly Func<T, TField[]> getter;
         readonly Action<T, TField[]> setter;
@@ -69,24 +68,23 @@ namespace Iviz.MsgsWrapper
 
             if (array.Length != arraySize)
             {
-                throw new IndexOutOfRangeException();
+                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Length, (int) arraySize);
             }
-            
+
             if (IsValueType)
             {
                 return;
             }
-            
+
             for (int i = 0; i < array.Length; i++)
             {
                 if (array[i] is null)
                 {
                     throw new NullReferenceException($"Element '{propertyName}[{i}]' is null");
                 }
-                
+
                 array[i].RosValidate();
             }
-            
         }
     }
 }

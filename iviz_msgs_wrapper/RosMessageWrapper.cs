@@ -22,28 +22,40 @@ namespace Iviz.MsgsWrapper
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public static string RosDependenciesBase64 => MsgDefinition.RosDependenciesBase64;
 
+        /// <summary> Concatenated dependencies file. </summary>
+        public static string RosDependencies => MsgDefinition.RosDependencies;
+
         public void RosSerialize(ref Buffer b) => MsgDefinition.Serialize((T) this, ref b);
 
         [IgnoreDataMember] public int RosMessageLength => MsgDefinition.GetLength((T) this);
 
         public void RosValidate() => MsgDefinition.Validate((T) this);
 
-        public ISerializable RosDeserialize(ref Buffer b)
+        ISerializable ISerializable.RosDeserialize(ref Buffer b) => RosDeserialize(ref b);
+
+        protected RosMessageWrapper()
+        {
+            if (typeof(T) != GetType())
+            {
+                
+            }
+        }
+        
+        public T RosDeserialize(ref Buffer b)
         {
             var msg = new T();
             MsgDefinition.Deserialize(msg, ref b);
             return msg;
         }
 
-        T IDeserializable<T>.RosDeserialize(ref Buffer b)
-        {
-            var msg = new T();
-            MsgDefinition.Deserialize(msg, ref b);
-            return msg;
-        }
-
+        /// <summary>
+        /// Creates a ROS definition for this message (the contents of a .msg file).
+        /// </summary>
         [IgnoreDataMember] public static string RosDefinition => MsgDefinition.RosDefinition;
 
+        /// <summary>
+        /// Alias for the name of the message.
+        /// </summary>
         [IgnoreDataMember] public string RosType => MsgDefinition.RosMessageType;
     }
 }

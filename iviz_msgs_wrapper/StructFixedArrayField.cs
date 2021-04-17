@@ -7,7 +7,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class StructFixedArrayField<T, TField> : IMessageField<T>
-        where T : RosMessageWrapper<T>, IMessage, new()
+        where T : IMessage
         where TField : unmanaged
     {
         static readonly int FieldSize = Marshal.SizeOf<TField>();
@@ -41,7 +41,7 @@ namespace Iviz.MsgsWrapper
 
             if (array.Length != arraySize)
             {
-                throw new IndexOutOfRangeException();
+                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Length, (int) arraySize);
             }
         }
     }
