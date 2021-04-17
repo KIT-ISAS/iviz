@@ -116,7 +116,7 @@ namespace Iviz.Displays
             resource.SetDirect(lineSetterDelegate, measurements.Count);
         }
 
-        bool? LineSetter(ref NativeList<float4x2> lineBuffer)
+        bool? LineSetter(NativeList<float4x2> lineBuffer)
         {
             int i = 1;
             Color32 colorA = Color.WithAlpha(0);
@@ -128,7 +128,7 @@ namespace Iviz.Displays
                 LineWithColor line = new LineWithColor(a, colorA, b, colorB);
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
 
                 colorA = colorB;

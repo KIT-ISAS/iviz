@@ -15,7 +15,7 @@ namespace Iviz.Displays
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
 
-        NativeList<float4> pointBuffer;
+        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
         MeshListResource resource;
 
         protected override IDisplay Display => resource;
@@ -97,12 +97,10 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            pointBuffer = new NativeList<float4>(Allocator.Persistent);
             resource = ResourcePool.RentDisplay<MeshListResource>(transform);
 
             resource.OverrideIntensityBounds = true;
             resource.IntensityBounds = new Vector2(0, 1);
-
 
             NumCellsX = 10;
             NumCellsY = 10;
@@ -158,7 +156,7 @@ namespace Iviz.Displays
             GameThread.PostImmediate(() =>
             {
                 resource.transform.SetLocalPose(pose);
-                resource.SetDirect(pointBuffer);
+                resource.SetDirect(pointBuffer.AsArray());
                 IsProcessing = false;
             });
         }

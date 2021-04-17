@@ -37,22 +37,21 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
-            NativeArray<float4> output = new NativeArray<float4>(2, Allocator.Persistent);
-
-            MinMaxJobPoints job = new MinMaxJobPoints
+            using (var output = new NativeArray<float4>(2, Allocator.Persistent))
             {
-                input = pointBuffer.Slice(0, size),
-                output = output
-            };
-            job.Schedule().Complete();
+                MinMaxJobPoints job = new MinMaxJobPoints
+                {
+                    input = pointBuffer.Slice(0, size),
+                    output = output
+                };
+                job.Schedule().Complete();
 
-            Vector3 positionMin = output[0].xyz;
-            Vector3 positionMax = output[1].xyz;
+                Vector3 positionMin = output[0].xyz;
+                Vector3 positionMax = output[1].xyz;
 
-            bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-            intensitySpan = new Vector2(output[0].w, output[1].w);
-
-            output.Dispose();
+                bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+                intensitySpan = new Vector2(output[0].w, output[1].w);
+            }
         }
 
         [BurstCompile(CompileSynchronously = true)]
@@ -86,22 +85,21 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
-            NativeArray<float4> output = new NativeArray<float4>(2, Allocator.Persistent);
-
-            MinMaxJobLines job = new MinMaxJobLines
+            using (var output = new NativeArray<float4>(2, Allocator.Persistent))
             {
-                input = pointBuffer.Slice(0, size),
-                output = output
-            };
-            job.Schedule().Complete();
+                MinMaxJobLines job = new MinMaxJobLines
+                {
+                    input = pointBuffer.Slice(0, size),
+                    output = output
+                };
+                job.Schedule().Complete();
 
-            Vector3 positionMin = output[0].xyz;
-            Vector3 positionMax = output[1].xyz;
+                Vector3 positionMin = output[0].xyz;
+                Vector3 positionMax = output[1].xyz;
 
-            bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-            intensitySpan = new Vector2(output[0].w, output[1].w);
-
-            output.Dispose();
+                bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+                intensitySpan = new Vector2(output[0].w, output[1].w);
+            }
         }
     }
 

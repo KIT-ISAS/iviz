@@ -16,15 +16,15 @@ namespace Iviz.Displays
     {
         static readonly float WhiteBits = PointWithColor.FloatFromColorBits(Color.white);
         
-        readonly float4x2 f;
+        public readonly float4x2 f;
 
         public float3 A => f.c0.xyz;
 
-        public Color32 ColorA => PointWithColor.ColorFromFloatBits(f.c0.w);
+        Color32 ColorA => PointWithColor.ColorFromFloatBits(f.c0.w);
 
         public float3 B => f.c1.xyz;
 
-        public Color32 ColorB => PointWithColor.ColorFromFloatBits(f.c1.w);
+        Color32 ColorB => PointWithColor.ColorFromFloatBits(f.c1.w);
 
         float4 PA => f.c0;
 
@@ -65,18 +65,9 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public LineWithColor(in PointWithColor start, in PointWithColor end)
         {
-            f.c0 = start;
-            f.c1 = end;
+            f.c0 = start.f;
+            f.c1 = end.f;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public LineWithColor(in float4x2 f)
-        {
-            this.f = f;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
-        public static implicit operator float4x2(in LineWithColor c) => c.f;
 
         /// <summary>
         /// Do the positions have a Nan? (ignores intensity) 

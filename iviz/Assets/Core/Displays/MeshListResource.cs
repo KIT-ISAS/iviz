@@ -32,7 +32,7 @@ namespace Iviz.Displays
         [CanBeNull] ComputeBuffer argsComputeBuffer;
         [CanBeNull] Info<GameObject> meshResource;
 
-        NativeList<float4> pointBuffer;
+        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
         
         [CanBeNull] ComputeBuffer pointComputeBuffer;
         bool useIntensityForScaleY;
@@ -151,8 +151,6 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            pointBuffer = new NativeList<float4>(Allocator.Persistent);
-
             UseColormap = true;
             MeshResource = Resource.Displays.Sphere;
             ElementScale3 = Vector3.one;
@@ -244,19 +242,19 @@ namespace Iviz.Displays
         /// Sets the instance positions and colors with the given enumeration.
         /// </summary>
         /// <param name="points">The list of positions and colors.</param>
-        public void Set([NotNull] List<PointWithColor> points)
+        public void Set([NotNull] NativeList<PointWithColor> points)
         {
-            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, points.Count);
+            pointBuffer.EnsureCapacity(points.Length);
 
             pointBuffer.Clear();
-            foreach (PointWithColor t in points)
+            foreach (ref PointWithColor t in points.Ref())
             {
                 if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.Add(t);
+                pointBuffer.Add(t.f);
             }
 
             UpdateBuffer();
@@ -288,11 +286,11 @@ namespace Iviz.Displays
 
             if (reserve != 0)
             {
-                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
+                pointBuffer.EnsureCapacity(reserve);
             }
 
             pointBuffer.Clear();
-            callback(ref pointBuffer);
+            callback(pointBuffer);
             UpdateBuffer();
         }
 
@@ -324,7 +322,7 @@ namespace Iviz.Displays
             }
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
-            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds pointBounds, out Vector2 span);
+            MinMaxJob.CalculateBounds(pointBuffer.AsArray(), Size, out Bounds pointBounds, out Vector2 span);
 
             bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
             int instanceCount = isSinglePassStereo ? 2 * Size : Size;

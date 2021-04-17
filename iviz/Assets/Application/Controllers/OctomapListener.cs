@@ -133,7 +133,7 @@ namespace Iviz.Controllers
             resource.IntensityBounds = WhiteBounds;
         }
 
-        void SetterFunction(ref NativeList<float4> buffer)
+        void SetterFunction(NativeList<float4> buffer)
         {
             if (helper == null || !Mathf.Approximately(helper.Resolution, (float) lastMsg.Resolution))
             {
@@ -149,7 +149,7 @@ namespace Iviz.Controllers
                 }
 
                 var enumerator = helper.EnumerateLeavesBinary(lastMsg.Data, 0, MaxDepth);
-                buffer.Capacity = Math.Max(buffer.Capacity, enumerator.NumberOfNodes / 2);
+                buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
                 foreach (var leaf in enumerator)
                 {
                     buffer.Add(leaf);
@@ -172,7 +172,7 @@ namespace Iviz.Controllers
                 }
 
                 var enumerator = helper.EnumerateLeaves(lastMsg.Data, 0, valueStride, MaxDepth);
-                buffer.Capacity = Math.Max(buffer.Capacity, enumerator.NumberOfNodes / 2);
+                buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
                 foreach (var leaf in enumerator)
                 {
                     buffer.Add(leaf);

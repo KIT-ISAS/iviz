@@ -50,7 +50,7 @@ namespace Iviz.Controllers
                 : lineStripTintColor;
         }
 
-        bool? ProcessLineStripSingleColor(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineStripSingleColor(NativeList<float4x2> lineBuffer)
         {
             float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
             for (int i = 0; i < points.Length - 1; i++)
@@ -61,14 +61,14 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 
             return color32.a < 255;
         }
 
-        bool? ProcessLineStripNoTint(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineStripNoTint(NativeList<float4x2> lineBuffer)
         {
             for (int i = 0; i < points.Length - 1; i++)
             {
@@ -78,14 +78,14 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 
             return null;
         }
 
-        bool? ProcessLineStripTintColor(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineStripTintColor(NativeList<float4x2> lineBuffer)
         {
             Color color = color32;
             for (int i = 0; i < points.Length - 1; i++)
@@ -96,7 +96,7 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 
@@ -119,7 +119,7 @@ namespace Iviz.Controllers
                 : lineListTintColor;
         }
 
-        bool? ProcessLineListSingleColor(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineListSingleColor(NativeList<float4x2> lineBuffer)
         {
             float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
             for (int i = 0; i < points.Length / 2; i++)
@@ -130,14 +130,14 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 
             return color32.a < 255;
         }
 
-        bool? ProcessLineListNoTint(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineListNoTint(NativeList<float4x2> lineBuffer)
         {
             for (int i = 0; i < points.Length / 2; i++)
             {
@@ -147,14 +147,14 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 
             return null;
         }
 
-        bool? ProcessLineListTintColor(ref NativeList<float4x2> lineBuffer)
+        bool? ProcessLineListTintColor(NativeList<float4x2> lineBuffer)
         {
             Color color = color32;
             for (int i = 0; i < points.Length / 2; i++)
@@ -165,7 +165,7 @@ namespace Iviz.Controllers
                 );
                 if (LineResource.IsElementValid(line))
                 {
-                    lineBuffer.Add(line);
+                    lineBuffer.Add(line.f);
                 }
             }
 

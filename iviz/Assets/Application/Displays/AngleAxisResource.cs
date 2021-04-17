@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace Iviz.Displays
 {
     public sealed class AngleAxisResource : DisplayWrapperResource, ISupportsTint
     {
-        readonly List<LineWithColor> lines = new List<LineWithColor>();
+        readonly NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
 
         Color color;
         LineResource resource;
@@ -20,7 +21,7 @@ namespace Iviz.Displays
             set
             {
                 color = value;
-                for (int i = 0; i < lines.Count; i++)
+                for (int i = 0; i < lines.Length; i++)
                 {
                     LineWithColor prevLine = lines[i];
                     lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
@@ -28,6 +29,11 @@ namespace Iviz.Displays
 
                 resource.Set(lines, color.a < 1);
             }
+        }
+
+        void OnDestroy()
+        {
+            lines.Dispose();
         }
 
         void Awake()

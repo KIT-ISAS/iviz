@@ -22,17 +22,18 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class PointListResource : MarkerResourceWithColormap
     {
-        public delegate void DirectPointSetter(ref NativeList<float4> pointBuffer);
+        public delegate void DirectPointSetter(NativeList<float4> pointBuffer);
 
         public const float MaxPositionMagnitude = 1e3f;
 
         static readonly int PointsId = Shader.PropertyToID("_Points");
         static readonly int ScaleId = Shader.PropertyToID("_Scale");
 
+        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
+
         bool isDirty;
         Mesh mesh;
         bool processing;
-        NativeList<float4> pointBuffer;
         [CanBeNull] MeshRenderer meshRenderer;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
 
@@ -83,7 +84,6 @@ namespace Iviz.Displays
             }
 
             base.Awake();
-            pointBuffer = new NativeList<float4>(Allocator.Persistent);
             ElementScale = 0.1f;
         }
 
@@ -209,23 +209,23 @@ namespace Iviz.Displays
         ///     Sets the list of points.
         /// </summary>
         /// <param name="points">The list of points.</param>
-        public void Set([NotNull] List<PointWithColor> points)
+        public void Set([NotNull] NativeList<PointWithColor> points)
         {
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
             }
 
-            pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, points.Count);
+            pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
-            foreach (PointWithColor t in points)
+            foreach (ref PointWithColor t in points.Ref())
             {
                 if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.Add(t);
+                pointBuffer.Add(t.f);
             }
 
             isDirty = true;
@@ -264,13 +264,13 @@ namespace Iviz.Displays
 
             if (reserve != 0)
             {
-                pointBuffer.Capacity = Math.Max(pointBuffer.Capacity, reserve);
+                pointBuffer.EnsureCapacity(reserve);
             }
 
             pointBuffer.Clear();
             if (reserve < 1000)
             {
-                callback(ref pointBuffer);
+                callback(pointBuffer);
                 isDirty = true;
                 processing = false;
             }
@@ -281,7 +281,7 @@ namespace Iviz.Displays
                 {
                     try
                     {
-                        callback(ref pointBuffer);
+                        callback(pointBuffer);
                         isDirty = true;
                     }
                     catch (Exception e)
@@ -315,7 +315,7 @@ namespace Iviz.Displays
 
         void UpdateStats()
         {
-            MinMaxJob.CalculateBounds(pointBuffer, Size, out Bounds bounds, out Vector2 span);
+            MinMaxJob.CalculateBounds(pointBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
             MeasuredIntensityBounds = span;

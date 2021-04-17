@@ -34,16 +34,11 @@ namespace Iviz.Displays
             }
         }
 
-        static readonly float WhiteBits = FloatFromColorBits(UnityEngine.Color.white);
-
-        readonly float4 f;
-
-        public float X => f.x;
-        public float Y => f.y;
-        public float Z => f.z;
+        public readonly float4 f;
+        
         public float3 Position => f.xyz;
-        public Color32 Color => ColorFromFloatBits(f.w);
-        public float Intensity => f.w;
+        Color32 Color => ColorFromFloatBits(f.w);
+        float Intensity => f.w;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, Color32 color) :
@@ -52,19 +47,7 @@ namespace Iviz.Displays
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public PointWithColor(in Vector3 position) :
-            this(position.x, position.y, position.z, WhiteBits)
-        {
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, float intensity) :
-            this(position.x, position.y, position.z, intensity)
-        {
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public PointWithColor(in float3 position, float intensity) :
             this(position.x, position.y, position.z, intensity)
         {
         }
@@ -78,18 +61,6 @@ namespace Iviz.Displays
             f.w = w;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public PointWithColor(float x, float y, float z) :
-            this(x, y, z, WhiteBits)
-        {
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public PointWithColor(in float4 f)
-        {
-            this.f = f;
-        }
-        
         /// <summary>
         /// Do the positions have a Nan? (ignores intensity) 
         /// </summary>        
@@ -97,14 +68,9 @@ namespace Iviz.Displays
         public bool HasNaN() => f.HasNaN();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]        
-        public static implicit operator float4(in PointWithColor c)
-        {
-            return c.f;
-        }
-
         public override string ToString()
         {
-            return $"[x={X} y={Y} z={Z} i={Intensity} c={Color}]";
+            return $"[x={f.x} y={f.y} z={f.z} i={Intensity} c={Color}]";
         }
     }
 }

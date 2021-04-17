@@ -126,7 +126,7 @@ namespace Iviz.Controllers
         }
 
         readonly List<Pose> savedPoses = new List<Pose>();
-        readonly List<LineWithColor> lines = new List<LineWithColor>();
+        readonly NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
 
         public PathListener([NotNull] IModuleData moduleData)
         {
@@ -296,6 +296,7 @@ namespace Iviz.Controllers
             resource.ReturnToPool();
             node.Stop();
             UnityEngine.Object.Destroy(node.gameObject);
+            lines.Dispose();
         }
     }
 }

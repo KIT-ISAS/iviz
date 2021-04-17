@@ -31,10 +31,9 @@ namespace Iviz.Displays
 
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
-
-        //readonly CapsuleLinesHelper capsuleHelper = new CapsuleLinesHelper();
-
-        NativeList<float4x2> lineBuffer;
+        
+        readonly NativeList<float4x2> lineBuffer = new NativeList<float4x2>();
+        
         [CanBeNull] ComputeBuffer lineComputeBuffer;
 
         bool linesNeedAlpha;
@@ -75,24 +74,24 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="lines">The line list.</param>
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
-        public void Set([NotNull] List<LineWithColor> lines, bool? overrideNeedsAlpha = null)
+        public void Set([NotNull] NativeList<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, lines.Count);
+            lineBuffer.EnsureCapacity(lines.Length);
 
             lineBuffer.Clear();
-            foreach (LineWithColor t in lines)
+            foreach (ref LineWithColor t in lines.Ref())
             {
                 if (!IsElementValid(t))
                 {
                     continue;
                 }
 
-                lineBuffer.Add(t);
+                lineBuffer.Add(t.f);
             }
 
             linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
@@ -119,7 +118,7 @@ namespace Iviz.Displays
         /// and returns true if alpha is needed, false if not, or null to request a manual check.
         /// </summary>
         /// <param name="lineBuffer">The line list to be set</param>
-        public delegate bool? DirectLineSetter(ref NativeList<float4x2> lineBuffer);
+        public delegate bool? DirectLineSetter(NativeList<float4x2> lineBuffer);
 
         /// <summary>
         /// Exposes the line list directly for manual setting.
@@ -138,11 +137,11 @@ namespace Iviz.Displays
 
             if (reserve != 0)
             {
-                lineBuffer.Capacity = Math.Max(lineBuffer.Capacity, reserve);
+                lineBuffer.EnsureCapacity(reserve);
             }
 
             lineBuffer.Clear();
-            bool? overrideNeedsAlpha = callback(ref lineBuffer);
+            bool? overrideNeedsAlpha = callback(lineBuffer);
 
             linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
 
@@ -158,7 +157,7 @@ namespace Iviz.Displays
 
         bool CheckIfAlphaNeeded()
         {
-            foreach (float4x2 t in lineBuffer)
+            foreach (ref float4x2 t in lineBuffer.Ref())
             {
                 Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
                 Color32 cB = PointWithColor.ColorFromFloatBits(t.c1.w);
@@ -199,7 +198,6 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            lineBuffer = new NativeList<float4x2>(Allocator.Persistent);
             mesh = new Mesh {name = "Line Capsules"};
             GetComponent<MeshFilter>().sharedMesh = mesh;
             MeshRenderer.SetPropertyBlock(Properties);
@@ -292,9 +290,7 @@ namespace Iviz.Displays
                 MeshRenderer.enabled = false;
                 return;
             }
-
-            //capsuleHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale);
-            //capsuleHelper.UpdateMesh(mesh);
+            
             CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, mesh);
 
             CalculateBounds();
@@ -328,7 +324,7 @@ namespace Iviz.Displays
 
         void CalculateBounds()
         {
-            MinMaxJob.CalculateBounds(lineBuffer, Size, out Bounds bounds, out Vector2 span);
+            MinMaxJob.CalculateBounds(lineBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
             

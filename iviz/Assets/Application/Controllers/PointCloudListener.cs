@@ -45,6 +45,7 @@ namespace Iviz.Controllers
         readonly List<string> fieldNames = new List<string> {"x", "y", "z"};
         readonly FrameNode node;
         readonly PointListResource pointCloud;
+        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
 
         bool disposed;
         bool isProcessing;
@@ -59,7 +60,6 @@ namespace Iviz.Controllers
             }
         }
 
-        NativeList<float4> pointBuffer = new NativeList<float4>(Allocator.Persistent);
 
         public PointCloudListener([NotNull] IModuleData moduleData)
         {
@@ -139,7 +139,7 @@ namespace Iviz.Controllers
                 config.OverrideMinMax = value;
                 pointCloud.OverrideIntensityBounds = value;
                 pointCloud.IntensityBounds = value
-                    ? new Vector2(MinIntensity, MaxIntensity) 
+                    ? new Vector2(MinIntensity, MaxIntensity)
                     : MeasuredIntensityBounds;
             }
         }
@@ -339,7 +339,7 @@ namespace Iviz.Controllers
 
                         Size = numPoints;
                         pointCloud.UseColormap = !rgbaHint;
-                        pointCloud.SetDirect(pointBuffer);
+                        pointCloud.SetDirect(pointBuffer.AsArray());
                     }
                     finally
                     {
@@ -349,7 +349,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error handling point cloud", e);
+                Logger.Error($"{this}: Error handling point cloud" + e);
                 IsProcessing = false;
             }
         }
@@ -434,7 +434,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int iOffset, int iType)
+        unsafe void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int iOffset, int iType)
         {
             const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 
@@ -443,182 +443,179 @@ namespace Iviz.Controllers
             int height = (int) msg.Height;
             int width = (int) msg.Width;
 
-            pointBuffer.ResizeUninitialized(width * height);
+            pointBuffer.EnsureCapacity(width * height);
 
-            unsafe
+            var pointBufferPtr = pointBuffer.GetUnsafePtr();
+            fixed (byte* dataPtr = dataSrc)
             {
-                var pointBufferPtr = (float4*) pointBuffer.GetUnsafePtr();
-                fixed (byte* dataPtr = dataSrc)
+                float4* pointBufferOff = pointBufferPtr;
+                byte* dataRowOff = dataPtr;
+                switch (iType)
                 {
-                    var pointBufferOff = pointBufferPtr;
-                    var dataRowOff = dataPtr;
-                    switch (iType)
-                    {
-                        case PointField.FLOAT32 when iOffset == 12:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                    case PointField.FLOAT32 when iOffset == 12:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float4 data = *(float4*) dataOff;
+                                if (data.HasNaN() || data.xyz.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float4 data = *(float4*) dataOff;
-                                    if (data.HasNaN() || data.xyz.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, data.w);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.FLOAT32:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, data.w);
+                            }
+                        }
+
+                        break;
+                    case PointField.FLOAT32:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    float f = *(float*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.FLOAT64:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                float f = *(float*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.FLOAT64:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    double f = *(double*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, (float) f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.INT8:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                double f = *(double*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, (float) f);
+                            }
+                        }
+
+                        break;
+                    case PointField.INT8:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    sbyte f = *(sbyte*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.UINT8:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                sbyte f = *(sbyte*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.UINT8:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    byte f = *(dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.INT16:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                byte f = *(dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.INT16:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    short f = *(short*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.UINT16:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                short f = *(short*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.UINT16:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    ushort f = *(ushort*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.INT32:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                ushort f = *(ushort*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.INT32:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    int f = *(int*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
-                            }
 
-                            break;
-                        case PointField.UINT32:
-                            for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                                int f = *(int*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                            }
+                        }
+
+                        break;
+                    case PointField.UINT32:
+                        for (int v = height; v > 0; v--, dataRowOff += rowStep)
+                        {
+                            byte* dataOff = dataRowOff;
+                            for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
-                                var dataOff = dataRowOff;
-                                for (int u = width; u > 0; u--, dataOff += pointStep)
+                                float3 data = *(float3*) dataOff;
+                                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                                 {
-                                    float3 data = *(float3*) dataOff;
-                                    if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                                    {
-                                        continue;
-                                    }
-
-                                    uint f = *(uint*) (dataOff + iOffset);
-                                    *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
+                                    continue;
                                 }
+
+                                uint f = *(uint*) (dataOff + iOffset);
+                                *pointBufferOff++ = new float4(-data.y, data.z, data.x, f);
                             }
+                        }
 
-                            break;
-                    }
-
-                    pointBuffer.ResizeUninitialized((int) (pointBufferOff - pointBufferPtr));
+                        break;
                 }
+
+                pointBuffer.Resize((int) (pointBufferOff - pointBufferPtr));
             }
         }
 

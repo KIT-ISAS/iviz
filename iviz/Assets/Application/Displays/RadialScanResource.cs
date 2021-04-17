@@ -25,8 +25,8 @@ namespace Iviz.Displays
         [SerializeField] bool useLines;
         [SerializeField] float maxLineDistance;
 
-        readonly List<LineWithColor> lineBuffer = new List<LineWithColor>();
-        readonly List<PointWithColor> pointBuffer = new List<PointWithColor>();
+        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+        readonly NativeList<PointWithColor> pointBuffer = new NativeList<PointWithColor>();
 
         (float angleMin, float angleIncrement, int length) cacheProperties;
         readonly List<Vector2> cache = new List<Vector2>();
@@ -240,6 +240,12 @@ namespace Iviz.Displays
             lines.ReturnToPool();
         }
 
+        void OnDestroy()
+        {
+            lineBuffer.Dispose();
+            pointBuffer.Dispose();
+        }
+
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax,
             [NotNull] float[] ranges, [NotNull] float[] intensities)
         {
@@ -301,7 +307,7 @@ namespace Iviz.Displays
                     useIntensity ? intensities[i] : range));
             }
 
-            Size = pointBuffer.Count;
+            Size = pointBuffer.Length;
 
             if (!UseLines)
             {
@@ -320,7 +326,7 @@ namespace Iviz.Displays
 
         void SetLines()
         {
-            int numPoints = pointBuffer.Count;
+            int numPoints = pointBuffer.Length;
             lineBuffer.Clear();
 
             for (int i = 0; i < numPoints - 1; i++)

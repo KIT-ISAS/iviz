@@ -42,7 +42,7 @@ namespace Iviz.Controllers
             return color == Color.white ? noTint : tintColor;
         }
 
-        void ProcessSingleColor(ref NativeList<float4> pointBuffer)
+        void ProcessSingleColor(NativeList<float4> pointBuffer)
         {
             float colorAsFloat = PointWithColor.FloatFromColorBits(color);
             foreach (var rosPoint in points)
@@ -50,12 +50,12 @@ namespace Iviz.Controllers
                 PointWithColor point = new PointWithColor(rosPoint.Ros2Unity(), colorAsFloat);
                 if (PointListResource.IsElementValid(point))
                 {
-                    pointBuffer.Add(point);
+                    pointBuffer.Add(point.f);
                 }
             }
         }
 
-        void ProcessNoTint(ref NativeList<float4> pointBuffer)
+        void ProcessNoTint(NativeList<float4> pointBuffer)
         {
             for (int i = 0; i < points.Length; i++)
             {
@@ -75,12 +75,12 @@ namespace Iviz.Controllers
                 );
                 if (PointListResource.IsElementValid(point))
                 {
-                    pointBuffer.Add(point);
+                    pointBuffer.Add(point.f);
                 }
             }
         }
 
-        void ProcessTintColor(ref NativeList<float4> pointBuffer)
+        void ProcessTintColor(NativeList<float4> pointBuffer)
         {
             float4 mRgba = new float4(color.r, color.g, color.b, color.a);
             for (int i = 0; i < points.Length; i++)
@@ -100,55 +100,9 @@ namespace Iviz.Controllers
                 );
                 if (PointListResource.IsElementValid(point))
                 {
-                    pointBuffer.Add(point);
+                    pointBuffer.Add(point.f);
                 }
             }
         }
     }
-
-    /*
-    [BurstCompile]
-    struct MyJob : IJobParallelFor, IDisposable
-    {
-        [ReadOnly] NativeArray<float3> points;
-        [ReadOnly] NativeArray<float4> colors;
-        [ReadOnly] readonly float4 mRgba;
-        [WriteOnly] NativeList<float4> pointBuffer;
-
-        public MyJob(Point[] points, ColorRGBA[] colors, Color color, NativeList<float4> pointBuffer)
-        {
-            this.points = new NativeArray<float3>(points.Length, Allocator.Temp);
-            this.points.Reinterpret<Point>().CopyFrom(points);
-            this.colors = new NativeArray<float4>(colors.Length, Allocator.Temp);
-            this.colors.Reinterpret<ColorRGBA>().CopyFrom(colors);
-            mRgba = new float4(color.r, color.g, color.b, color.a);
-            this.pointBuffer = pointBuffer;
-        }
-
-        public void Dispose()
-        {
-            points.Dispose();
-            colors.Dispose();
-        }
-
-        public void Execute(int i)
-        {
-                float4 rgba = colors[i];
-                int4 rgbaAsInt = math.min(new int4(rgba * mRgba * 255), 255);
-                int4 rgbaTmp = new int4(rgbaAsInt.x << 24, rgbaAsInt.y << 16, rgbaAsInt.z << 8, rgbaAsInt.w) & 0xff;
-                int rgba32 = rgbaTmp.x + rgbaTmp.y + rgbaTmp.z + rgbaTmp.w;
-                float rgbaAsFloat;
-                unsafe
-                {
-                    rgbaAsFloat = *(float*) &rgba32;
-                }
-
-                float4 point = new float4(points[i].Ros2Unity(), rgbaAsFloat);
-                if (!(float.IsNaN(point.x) || float.IsNaN(point.y) || float.IsNaN(point.z)))
-                {
-                    pointBuffer.Add(point);
-                }
-        }
-    }
-    */
 }
