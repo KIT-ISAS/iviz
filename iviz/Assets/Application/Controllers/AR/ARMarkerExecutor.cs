@@ -74,17 +74,10 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    if (!frames.TryGetValue(tfExecutor.Tf, out ARTfFrame tfFrame))
-                    {
-                        tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
-                        tfFrame.Caption = tfExecutor.Tf;
-                        frames[tfExecutor.Tf] = tfFrame;
-                    }
-
-                    Msgs.GeometryMsgs.Transform rosPoseToFixedFrame;
+                    Msgs.GeometryMsgs.Transform rosMarkerPose;
                     try
                     {
-                        rosPoseToFixedFrame = SolvePnp(marker, tfExecutor.Size * 0.001f);
+                        rosMarkerPose = SolvePnp(marker, tfExecutor.Size * 0.001f);
                     }
                     catch (CvMarkerException)
                     {
@@ -92,10 +85,30 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    Pose absoluteUnityPose = TfListener.FixedFramePose.Multiply(rosPoseToFixedFrame.Ros2Unity());
-                    tfFrame.transform.SetPose(absoluteUnityPose);
+                    const double maxMarkerDistance = 1.5;
+
+                    Msgs.GeometryMsgs.Vector3 cameraPosition = marker.CameraPose.Position;
+                    double distanceMarkerToCamera = (cameraPosition - rosMarkerPose.Translation).Norm;
+                    if (distanceMarkerToCamera > maxMarkerDistance)
+                    {
+                        Logger.Debug($"{this}: Detected marker at distance {distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
+                                     "discarding.");
+                        return;
+                    }
                     
-                    TfListener.Publish(TfListener.FixedFrameId, tfExecutor.Tf, rosPoseToFixedFrame);
+                    if (!frames.TryGetValue(tfExecutor.Tf, out ARTfFrame tfFrame))
+                    {
+                        tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
+                        tfFrame.Caption = tfExecutor.Tf;
+                        frames[tfExecutor.Tf] = tfFrame;
+                    }
+
+                    
+                    Pose absoluteUnityPose = TfListener.FixedFramePose.Multiply(rosMarkerPose.Ros2Unity());
+                    tfFrame.transform.SetPose(absoluteUnityPose);
+                    tfFrame.CheckOrientationBillboard();
+                    
+                    TfListener.Publish(TfListener.FixedFrameId, tfExecutor.Tf, rosMarkerPose);
                     
                     break;
                 default:

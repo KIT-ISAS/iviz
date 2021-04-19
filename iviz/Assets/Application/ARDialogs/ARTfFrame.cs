@@ -8,9 +8,27 @@ namespace Iviz.App.ARDialogs
     public class ARTfFrame : MarkerResource
     {
         [SerializeField] Transform pivotTransform;
-        [SerializeField] bool billboard;
         [SerializeField] TMP_Text text;
         float? currentAngle;
+        bool billboardMode;
+
+        bool BillboardMode
+        {
+            get => billboardMode;
+            set
+            {
+                if (billboardMode == value)
+                {
+                    return;
+                }
+                
+                billboardMode = value;
+                if (!billboardMode)
+                {
+                    pivotTransform.SetLocalPose(Pose.identity);
+                }
+            }
+        }
 
         public string Caption
         {
@@ -18,9 +36,20 @@ namespace Iviz.App.ARDialogs
             set => text.text = value;
         }
 
+        protected override void Awake()
+        {
+            base.Awake();
+            CheckOrientationBillboard();
+        }
+        
+        public void CheckOrientationBillboard()
+        {
+            BillboardMode = Vector3.Dot(Vector3.up, transform.rotation * Vector3.up) > 1 - 0.01f;
+        }
+
         void Update()
         {
-            if (billboard)
+            if (BillboardMode)
             {
                 UpdateRotation();
             }
