@@ -7,22 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		238647E425F73C3200DA5604 /* dictionary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D225F73C3200DA5604 /* dictionary.hpp */; };
-		238647E525F73C3200DA5604 /* charuco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D325F73C3200DA5604 /* charuco.hpp */; };
-		238647E625F73C3200DA5604 /* aruco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D425F73C3200DA5604 /* aruco.hpp */; };
+		238647E425F73C3200DA5604 /* dictionary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D225F73C3200DA5604 /* dictionary.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647E525F73C3200DA5604 /* charuco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D325F73C3200DA5604 /* charuco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647E625F73C3200DA5604 /* aruco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D425F73C3200DA5604 /* aruco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		238647E725F73C3200DA5604 /* zmaxheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647D625F73C3200DA5604 /* zmaxheap.cpp */; };
-		238647E825F73C3200DA5604 /* precomp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D725F73C3200DA5604 /* precomp.hpp */; };
-		238647E925F73C3200DA5604 /* unionfind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D825F73C3200DA5604 /* unionfind.hpp */; };
-		238647EA25F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D925F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp */; };
-		238647EB25F73C3200DA5604 /* zarray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DA25F73C3200DA5604 /* zarray.hpp */; };
-		238647EC25F73C3200DA5604 /* apriltag_quad_thresh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DB25F73C3200DA5604 /* apriltag_quad_thresh.hpp */; };
+		238647E825F73C3200DA5604 /* precomp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D725F73C3200DA5604 /* precomp.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647E925F73C3200DA5604 /* unionfind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D825F73C3200DA5604 /* unionfind.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647EA25F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D925F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647EB25F73C3200DA5604 /* zarray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DA25F73C3200DA5604 /* zarray.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647EC25F73C3200DA5604 /* apriltag_quad_thresh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DB25F73C3200DA5604 /* apriltag_quad_thresh.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		238647ED25F73C3200DA5604 /* aruco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DC25F73C3200DA5604 /* aruco.cpp */; };
 		238647EE25F73C3200DA5604 /* charuco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DD25F73C3200DA5604 /* charuco.cpp */; };
-		238647EF25F73C3200DA5604 /* predefined_dictionaries.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DE25F73C3200DA5604 /* predefined_dictionaries.hpp */; };
-		238647F025F73C3200DA5604 /* zmaxheap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DF25F73C3200DA5604 /* zmaxheap.hpp */; };
+		238647EF25F73C3200DA5604 /* predefined_dictionaries.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DE25F73C3200DA5604 /* predefined_dictionaries.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238647F025F73C3200DA5604 /* zmaxheap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DF25F73C3200DA5604 /* zmaxheap.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		238647F125F73C3200DA5604 /* apriltag_quad_thresh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E025F73C3200DA5604 /* apriltag_quad_thresh.cpp */; };
 		238647F225F73C3200DA5604 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E125F73C3200DA5604 /* dictionary.cpp */; };
-		238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647E225F73C3200DA5604 /* OpenCv.hpp */; };
+		238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647E225F73C3200DA5604 /* OpenCv.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
 		238647F425F73C3200DA5604 /* OpenCv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E325F73C3200DA5604 /* OpenCv.cpp */; };
 		239F617B25F74C09000CC38F /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239F617A25F74C09000CC38F /* opencv2.framework */; };
 /* End PBXBuildFile section */
@@ -57,9 +57,9 @@
 		238647E325F73C3200DA5604 /* OpenCv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenCv.cpp; sourceTree = "<group>"; };
 		2391451225F3AAFA0073171E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2391453825F3C9090073171E /* IvizOpencv.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IvizOpencv.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
-		239F617425F749A8000CC38F /* IvizOpencv_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IvizOpencv_iOS.framework; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv_iOS.framework"; sourceTree = "<absolute>"; };
-		239F617525F749A8000CC38F /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "IvizOpencv-iOSTests.xctest"; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv-iOSTests.xctest"; sourceTree = "<absolute>"; };
 		239F617A25F74C09000CC38F /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
+		23F8E0F0261A498E00C7434A /* IvizOpencv_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IvizOpencv_iOS.framework; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv_iOS.framework"; sourceTree = "<absolute>"; };
+		23F8E0F1261A498E00C7434A /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "IvizOpencv-iOSTests.xctest"; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv-iOSTests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,10 +193,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */,
 				238647EB25F73C3200DA5604 /* zarray.hpp in Headers */,
 				238647EC25F73C3200DA5604 /* apriltag_quad_thresh.hpp in Headers */,
 				238647F025F73C3200DA5604 /* zmaxheap.hpp in Headers */,
-				238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */,
 				238647E525F73C3200DA5604 /* charuco.hpp in Headers */,
 				238647E925F73C3200DA5604 /* unionfind.hpp in Headers */,
 				238647EF25F73C3200DA5604 /* predefined_dictionaries.hpp in Headers */,
@@ -225,7 +225,7 @@
 			);
 			name = "IvizOpencv-iOS";
 			productName = "IvizOpencv-iOS";
-			productReference = 239F617425F749A8000CC38F /* IvizOpencv_iOS.framework */;
+			productReference = 23F8E0F0261A498E00C7434A /* IvizOpencv_iOS.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		2359D2F225F4BCBD00316810 /* IvizOpencv-iOSTests */ = {
@@ -243,7 +243,7 @@
 			);
 			name = "IvizOpencv-iOSTests";
 			productName = "IvizOpencv-iOSTests";
-			productReference = 239F617525F749A8000CC38F /* IvizOpencv-iOSTests.xctest */;
+			productReference = 23F8E0F1261A498E00C7434A /* IvizOpencv-iOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		2391450E25F3AAFA0073171E /* IvizOpencv */ = {
@@ -599,7 +599,10 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/IvizOpencv",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../src/aruco/include";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../src/aruco/include",
+					/usr/local/include/eigen3,
+				);
 				INFOPLIST_FILE = IvizOpencv/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				MACH_O_TYPE = mh_bundle;
@@ -625,7 +628,10 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/IvizOpencv",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../src/aruco/include";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../src/aruco/include",
+					/usr/local/include/eigen3,
+				);
 				INFOPLIST_FILE = IvizOpencv/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				MACH_O_TYPE = mh_bundle;

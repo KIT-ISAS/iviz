@@ -12,6 +12,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/objdetect.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/calib3d.hpp>
 #include <Eigen/Geometry>
 
 struct Context
@@ -504,7 +505,90 @@ extern "C" {
         Context *ctx = (Context*) ctx_base;
         delete ctx;
     }
+
+    bool EstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize)
+    {
+        if (inputSize % 2 != 0)
+        {
+            LogError("[OpenCV native] Invalid inputSize");
+            return false;
+        }
+        
+        if (outputSize % 3 != 0)
+        {
+            LogError("[OpenCV native] Invalid outputSize");
+            return false;
+        }
+
+        if (outputSize * 2 != inputSize * 3)
+        {
+            LogError("[OpenCV native] outputSize and inputSize do not match");
+            return false;
+        }
+
+        
+        if (cameraArraySize < 6)
+        {
+            LogError("[OpenCV native] Invalid cameraArraySize");
+            return false;
+        }
+
+        if (resultSize < 6)
+        {
+            LogError("[OpenCV native] Invalid resultSize");
+            return false;
+        }
+
+        cv::Mat input(inputSize / 2, 2, CV_32F);
+        for (int i = 0; i < inputSize / 2; i++)
+        {
+            input.at<float>(i, 0) = inputs[2 * i];
+            input.at<float>(i, 1) = inputs[2 * i + 1];
+        }
+        
+        cv::Mat output(outputSize / 3, 3, CV_32F);
+        for (int i = 0; i < outputSize / 3; i++)
+        {
+            output.at<float>(i, 0) = outputs[3 * i];
+            output.at<float>(i, 1) = outputs[3 * i + 1];
+            output.at<float>(i, 2) = outputs[3 * i + 2];
+        }
+        
+        cv::Mat cameraMatrix(3, 3, CV_32F);
     
+        cameraMatrix.at<float>(0, 0) = cameraArray[0];
+        cameraMatrix.at<float>(0, 1) = cameraArray[1];
+        cameraMatrix.at<float>(0, 2) = cameraArray[2];
+        cameraMatrix.at<float>(1, 0) = cameraArray[3];
+        cameraMatrix.at<float>(1, 1) = cameraArray[4];
+        cameraMatrix.at<float>(1, 2) = cameraArray[5];
+        cameraMatrix.at<float>(2, 0) = 0;
+        cameraMatrix.at<float>(2, 1) = 0;
+        cameraMatrix.at<float>(2, 2) = 1;
+        
+        cv::Mat distCoeffs = cv::Mat::zeros(1, 5, CV_32F);
+        
+        cv::Mat rvec = cv::Mat(3, 1, CV_64F);
+        cv::Mat tvec = cv::Mat(3, 1, CV_64F);
+        
+        bool success = cv::solvePnP(output, input, cameraMatrix, distCoeffs, rvec, tvec);
+        if (!success)
+        {
+            LogInfo("[OpenCV native] cv::solvePnp failed");
+            return false;
+        }
+        
+        result[0] = (float) rvec.at<double>(0);
+        result[1] = (float) rvec.at<double>(1);
+        result[2] = (float) rvec.at<double>(2);
+        result[3] = (float) tvec.at<double>(0);
+        result[4] = (float) tvec.at<double>(1);
+        result[5] = (float) tvec.at<double>(2);
+
+        return true;
+
+    }
+
     bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize)
     {
         if (inputSize % 3 != 0)
