@@ -44,14 +44,14 @@ namespace Iviz.MsgsWrapper
         public string Name { get; }
         public RenameToAttribute(string name) => Name = name;
     }
-    
+
     public class RosIncompleteWrapperException : RosInvalidMessageException
     {
         public RosIncompleteWrapperException(string msg) : base(msg)
         {
         }
     }
-    
+
     internal static class RosWrapperBase
     {
         public static readonly Dictionary<Type, string> BuiltInNames = new()
@@ -72,7 +72,7 @@ namespace Iviz.MsgsWrapper
             [typeof(duration)] = "duration",
             [typeof(string)] = "string",
         };
-        
+
         public static string CompressDependencies(string rosDependencies)
         {
             byte[] inputBytes = BuiltIns.UTF8.GetBytes(rosDependencies);
@@ -82,14 +82,14 @@ namespace Iviz.MsgsWrapper
                 gZipStream.Write(inputBytes, 0, inputBytes.Length);
             }
 
-            return Convert.ToBase64String(outputStream.ToArray());            
+            return Convert.ToBase64String(outputStream.ToArray());
         }
-        
+
         public static string CreateMd5(string inputForMd5)
         {
 #pragma warning disable CA5351
             using MD5 md5Hash = MD5.Create();
-#pragma warning restore CA5351            
+#pragma warning restore CA5351
             byte[] data = md5Hash.ComputeHash(BuiltIns.UTF8.GetBytes(inputForMd5));
             var md5HashBuilder = new StringBuilder(data.Length * 2);
             foreach (byte b in data)
@@ -97,9 +97,9 @@ namespace Iviz.MsgsWrapper
                 md5HashBuilder.Append(b.ToString("x2", BuiltIns.Culture));
             }
 
-            return md5HashBuilder.ToString();            
-        }        
-        
+            return md5HashBuilder.ToString();
+        }
+
         public static void AddDependency(StringBuilder rosDependencies, Type type, HashSet<Type> alreadyWritten,
             bool first = false)
         {
@@ -168,7 +168,6 @@ namespace Iviz.MsgsWrapper
                 }
             }
         }
-        
     }
 
     internal sealed partial class RosSerializableDefinition<T> where T : ISerializable, IDeserializable<T>, new()
@@ -211,41 +210,60 @@ namespace Iviz.MsgsWrapper
             [typeof(double[])] = InitializeArrayProperty<double>,
             [typeof(time[])] = InitializeArrayProperty<time>,
             [typeof(duration[])] = InitializeArrayProperty<duration>,
+            
+            [typeof(List<bool>)] = InitializeListProperty<bool>,
+            [typeof(List<char>)] = InitializeListProperty<char>,
+            [typeof(List<sbyte>)] = InitializeListProperty<sbyte>,
+            [typeof(List<byte>)] = InitializeListProperty<byte>,
+            [typeof(List<ushort>)] = InitializeListProperty<ushort>,
+            [typeof(List<short>)] = InitializeListProperty<short>,
+            [typeof(List<uint>)] = InitializeListProperty<uint>,
+            [typeof(List<int>)] = InitializeListProperty<int>,
+            [typeof(List<ulong>)] = InitializeListProperty<ulong>,
+            [typeof(List<long>)] = InitializeListProperty<long>,
+            [typeof(List<float>)] = InitializeListProperty<float>,
+            [typeof(List<double>)] = InitializeListProperty<double>,
+            [typeof(List<time>)] = InitializeListProperty<time>,
+            [typeof(List<duration>)] = InitializeListProperty<duration>,            
 
             [typeof(string)] = InitializeStringProperty,
             [typeof(string[])] = InitializeStringArrayProperty,
+            [typeof(List<string>)] = InitializeStringListProperty,
+
 
             // a long list of types to ensure that the AOT stripper does not remove them
-            [typeof(Vector3)] = InitializeMessageProperty<Vector3>,
-            [typeof(Vector3[])] = InitializeMessageArrayProperty<Vector3>,
-            [typeof(Point)] = InitializeMessageProperty<Point>,
-            [typeof(Point[])] = InitializeMessageArrayProperty<Point>,
-            [typeof(Point32)] = InitializeMessageProperty<Point32>,
-            [typeof(Point32[])] = InitializeMessageArrayProperty<Point32>,
-            [typeof(Quaternion)] = InitializeMessageProperty<Quaternion>,
-            [typeof(Quaternion[])] = InitializeMessageArrayProperty<Quaternion>,
-            [typeof(Pose)] = InitializeMessageProperty<Pose>,
-            [typeof(Pose[])] = InitializeMessageArrayProperty<Pose>,
-            [typeof(Transform)] = InitializeMessageProperty<Transform>,
-            [typeof(Transform[])] = InitializeMessageArrayProperty<Transform>,
-            [typeof(Twist)] = InitializeMessageProperty<Twist>,
-            [typeof(Twist[])] = InitializeMessageArrayProperty<Twist>,
-            [typeof(ColorRGBA)] = InitializeMessageProperty<ColorRGBA>,
-            [typeof(ColorRGBA[])] = InitializeMessageArrayProperty<ColorRGBA>,
-            [typeof(Color32)] = InitializeMessageProperty<Color32>,
-            [typeof(Color32[])] = InitializeMessageArrayProperty<Color32>,
-            [typeof(Vector2f)] = InitializeMessageProperty<Vector2f>,
-            [typeof(Vector2f[])] = InitializeMessageArrayProperty<Vector2f>,
-            [typeof(Vector3f)] = InitializeMessageProperty<Vector3f>,
-            [typeof(Vector3f[])] = InitializeMessageArrayProperty<Vector3f>,
-            [typeof(Triangle)] = InitializeMessageProperty<Triangle>,
-            [typeof(Triangle[])] = InitializeMessageArrayProperty<Triangle>,
+            [typeof(Vector3)] = InitializeProperty<Vector3>,
+            [typeof(Point)] = InitializeProperty<Point>,
+            [typeof(Point32)] = InitializeProperty<Point32>,
+            [typeof(Quaternion)] = InitializeProperty<Quaternion>,
+            [typeof(Pose)] = InitializeProperty<Pose>,
+            [typeof(Transform)] = InitializeProperty<Transform>,
+            [typeof(Twist)] = InitializeProperty<Twist>,
+            [typeof(ColorRGBA)] = InitializeProperty<ColorRGBA>,
+            [typeof(Color32)] = InitializeProperty<Color32>,
+            [typeof(Vector2f)] = InitializeProperty<Vector2f>,
+            [typeof(Vector3f)] = InitializeProperty<Vector3f>,
+            [typeof(Triangle)] = InitializeProperty<Triangle>,
             [typeof(Header)] = InitializeMessageProperty<Header>,
-            [typeof(Header[])] = InitializeMessageArrayProperty<Header>,
             [typeof(TransformStamped)] = InitializeMessageProperty<TransformStamped>,
-            [typeof(TransformStamped[])] = InitializeMessageArrayProperty<TransformStamped>,
             [typeof(Log)] = InitializeMessageProperty<Log>,
+            
+            [typeof(Vector3[])] = InitializeArrayProperty<Vector3>,
+            [typeof(Point[])] = InitializeArrayProperty<Point>,
+            [typeof(Point32[])] = InitializeArrayProperty<Point32>,
+            [typeof(Quaternion[])] = InitializeArrayProperty<Quaternion>,
+            [typeof(Pose[])] = InitializeArrayProperty<Pose>,
+            [typeof(Transform[])] = InitializeArrayProperty<Transform>,
+            [typeof(Twist[])] = InitializeArrayProperty<Twist>,
+            [typeof(ColorRGBA[])] = InitializeArrayProperty<ColorRGBA>,
+            [typeof(Color32[])] = InitializeArrayProperty<Color32>,
+            [typeof(Vector2f[])] = InitializeArrayProperty<Vector2f>,
+            [typeof(Vector3f[])] = InitializeArrayProperty<Vector3f>,
+            [typeof(Triangle[])] = InitializeArrayProperty<Triangle>,
+            [typeof(Header[])] = InitializeMessageArrayProperty<Header>,
+            [typeof(TransformStamped[])] = InitializeMessageArrayProperty<TransformStamped>,
             [typeof(Log[])] = InitializeMessageArrayProperty<Log>,
+            
         };
 
         static string GetPropertyName(MemberInfo property)
@@ -285,6 +303,28 @@ namespace Iviz.MsgsWrapper
             }
         }
 
+        static void InitializeListProperty<TField>(PropertyInfo property, BuilderInfo bi) where TField : unmanaged
+        {
+            string propertyName = GetPropertyName(property);
+            string builtInName = BuiltInNames[typeof(TField)];
+            uint? fixedSize = property.GetCustomAttribute<FixedSizeArrayAttribute>()?.Size;
+            if (fixedSize == null)
+            {
+                bi.RosDefinition.Append(builtInName).Append("[] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append(builtInName).Append("[] ").Append(propertyName).Append("\n");
+                bi.Fields.Add(new StructListField<T, TField>(property, propertyName));
+            }
+            else
+            {
+                uint size = fixedSize.Value;
+                bi.RosDefinition.Append(builtInName).Append("[").Append(size).Append("] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append(builtInName).Append("[").Append(size).Append("] ").Append(propertyName)
+                    .Append("\n");
+                bi.Fields.Add(new StructFixedListField<T, TField>(property, size, propertyName));
+            }
+        }
+
+        [Preserve]
         static void InitializeMessageProperty<TField>(PropertyInfo property, BuilderInfo bi)
             where TField : struct, IMessage, IDeserializable<TField>
         {
@@ -294,6 +334,7 @@ namespace Iviz.MsgsWrapper
             bi.Fields.Add(new MessageField<T, TField>(property, propertyName));
         }
 
+        [Preserve]
         static void InitializeMessageArrayProperty<TField>(PropertyInfo property, BuilderInfo bi)
             where TField : struct, IMessage, IDeserializable<TField>
         {
@@ -341,6 +382,25 @@ namespace Iviz.MsgsWrapper
                 bi.Fields.Add(new StringFixedArrayField<T>(property, size, propertyName));
             }
         }
+        
+        static void InitializeStringListProperty(PropertyInfo property, BuilderInfo bi)
+        {
+            string propertyName = GetPropertyName(property);
+            uint? fixedSize = property.GetCustomAttribute<FixedSizeArrayAttribute>()?.Size;
+            if (fixedSize == null)
+            {
+                bi.RosDefinition.Append("string[] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append("string[] ").Append(propertyName).Append("\n");
+                bi.Fields.Add(new StringListField<T>(property, propertyName));
+            }
+            else
+            {
+                uint size = fixedSize.Value;
+                bi.RosDefinition.Append("string[").Append(size).Append("] ").AppendLine(propertyName);
+                bi.BufferForMd5.Append("string[").Append(size).Append("] ").Append(propertyName).Append("\n");
+                bi.Fields.Add(new StringFixedListField<T>(property, size, propertyName));
+            }
+        }        
 
         static void InitializeMessageProperty(PropertyInfo property, BuilderInfo bi)
         {
@@ -457,7 +517,7 @@ namespace Iviz.MsgsWrapper
 
             return rosDependencies.ToString();
         }
-        
+
         internal static string CreatePartialDependencies(HashSet<Type> alreadyWritten)
         {
             var rosDependencies = new StringBuilder(100);

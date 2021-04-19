@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
@@ -48,7 +49,7 @@ namespace Iviz.MsgsWrapper
             foreach (var property in typeof(T).GetProperties())
             {
                 if (property.GetGetMethod() == null
-                    || property.GetSetMethod() == null
+                    || (property.GetType().GetGenericTypeDefinition() != typeof(List<>) && property.GetSetMethod() == null)
                     || property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null)
                 {
                     continue;
