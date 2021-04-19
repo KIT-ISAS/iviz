@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;

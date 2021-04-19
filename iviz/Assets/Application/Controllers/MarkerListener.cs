@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Iviz.App;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -20,19 +19,6 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class MarkerConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; }
-        [DataMember] public bool TriangleListFlipWinding { get; set; } = true;
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Marker;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
     public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
         readonly MarkerConfiguration config = new MarkerConfiguration();
@@ -60,7 +46,7 @@ namespace Iviz.Controllers
                 config.Topic = value.Topic;
                 config.Type = value.Type;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint;
+                Tint = value.Tint.ToUnityColor();
                 Visible = value.Visible;
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
             }
@@ -82,10 +68,10 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint;
+            get => config.Tint.ToUnityColor();
             set
             {
-                config.Tint = value;
+                config.Tint = value.ToRos();
 
                 foreach (var marker in markers.Values)
                 {

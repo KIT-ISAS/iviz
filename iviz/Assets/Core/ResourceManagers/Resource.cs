@@ -27,7 +27,7 @@ namespace Iviz.Resources
     public static class Resource
     {
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum ColormapId
+        public enum ColormapId : byte
         {
             lines,
             pink,
@@ -49,7 +49,7 @@ namespace Iviz.Resources
         /// Module type.
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public enum ModuleType
+        public enum ModuleType : byte
         {
             Invalid = 0,
             Grid,

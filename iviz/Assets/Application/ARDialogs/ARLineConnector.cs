@@ -104,14 +104,14 @@ namespace Iviz.App.ARDialogs
             spheres[1].Transform.position = mid;
             spheres[2].Transform.position = b;
 
-            var segments = new[]
+            var segments = new NativeList<LineWithColor>
             {
                 new LineWithColor(a, mid, color),
                 new LineWithColor(mid, b, color)
             };
             
             lines.transform.SetPose(Pose.identity);
-            lines.Set(segments.ToList());
+            lines.Set(segments);
         }
     }
 }

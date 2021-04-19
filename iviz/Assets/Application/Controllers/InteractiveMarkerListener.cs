@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Text;
 using Iviz.App;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -19,16 +17,6 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public class InteractiveMarkerConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public bool DescriptionsVisible { get; set; }
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.InteractiveMarker;
-        [DataMember] public bool Visible { get; set; } = true; 
-    }
-
     public sealed class InteractiveMarkerListener : ListenerController, IMarkerDialogListener
     {
         const string FeedbackFormatStr = "{0}/feedback";

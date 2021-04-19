@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using System.Runtime.Serialization;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.OctomapMsgs;
@@ -8,7 +8,6 @@ using Iviz.Octree;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -17,18 +16,6 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class OctomapConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public SerializableColor Tint { get; set; } = new Color(0.5f, 0.5f, 1);
-        [DataMember] public int MaxDepth { get; set; } = 16;
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
-    }
-
     public sealed class OctomapListener : ListenerController
     {
         static readonly Vector2 WhiteBounds = new Vector2(-10, 1);
@@ -51,7 +38,7 @@ namespace Iviz.Controllers
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
-                Tint = value.Tint;
+                Tint = value.Tint.ToUnityColor();
             }
         }
 
@@ -67,10 +54,10 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint;
+            get => config.Tint.ToUnityColor();
             set
             {
-                config.Tint = value;
+                config.Tint = value.ToRos();
                 resource.Tint = value;
             }
         }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -102,7 +104,7 @@ namespace Iviz.App
                         listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(MarkerConfiguration.Tint):
-                        listener.Tint = config.Tint;
+                        listener.Tint = config.Tint.ToUnityColor();
                         break;
                     case nameof(MarkerConfiguration.TriangleListFlipWinding):
                         listener.TriangleListFlipWinding = config.TriangleListFlipWinding;

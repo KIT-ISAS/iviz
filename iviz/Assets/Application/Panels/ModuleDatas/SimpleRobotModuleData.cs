@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -37,7 +38,7 @@ namespace Iviz.App
             Robot = new SimpleRobotController(this);
             if (constructor.Configuration != null)
             {
-                Robot.Config = (SimpleRobotConfiguration) constructor.Configuration;
+                Robot.Config = (RobotConfiguration) constructor.Configuration;
             }
 
             panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(Resource.ModuleType.Robot);
@@ -191,7 +192,12 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
-            var config = JsonConvert.DeserializeObject<SimpleRobotConfiguration>(configAsJson);
+            var config = JsonConvert.DeserializeObject<RobotConfiguration>(configAsJson);
+            UpdateConfiguration(config, fields);
+        }
+
+        void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
+        {
             bool hasRobotName = false;
             bool hasSourceParameter = false;
 
@@ -199,38 +205,38 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(SimpleRobotConfiguration.Visible):
+                    case nameof(RobotConfiguration.Visible):
                         Robot.Visible = config.Visible;
                         break;
-                    case nameof(SimpleRobotConfiguration.SourceParameter) when config.SourceParameter != Robot.Config.SourceParameter:
+                    case nameof(RobotConfiguration.SourceParameter) when config.SourceParameter != Robot.Config.SourceParameter:
                         hasSourceParameter = true;
                         break;
-                    case nameof(SimpleRobotConfiguration.SourceParameter):
+                    case nameof(RobotConfiguration.SourceParameter):
                         break;
-                    case nameof(SimpleRobotConfiguration.SavedRobotName) when config.SavedRobotName != Robot.Config.SavedRobotName:
+                    case nameof(RobotConfiguration.SavedRobotName) when config.SavedRobotName != Robot.Config.SavedRobotName:
                         hasRobotName = true;
                         break;
-                    case nameof(SimpleRobotConfiguration.SavedRobotName):
+                    case nameof(RobotConfiguration.SavedRobotName):
                         break;
-                    case nameof(SimpleRobotConfiguration.FramePrefix):
+                    case nameof(RobotConfiguration.FramePrefix):
                         Robot.FramePrefix = config.FramePrefix;
                         break;
-                    case nameof(SimpleRobotConfiguration.FrameSuffix):
+                    case nameof(RobotConfiguration.FrameSuffix):
                         Robot.FrameSuffix = config.FrameSuffix;
                         break;
-                    case nameof(SimpleRobotConfiguration.AttachedToTf):
+                    case nameof(RobotConfiguration.AttachedToTf):
                         Robot.AttachedToTf = config.AttachedToTf;
                         break;
-                    case nameof(SimpleRobotConfiguration.RenderAsOcclusionOnly):
+                    case nameof(RobotConfiguration.RenderAsOcclusionOnly):
                         Robot.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
-                    case nameof(SimpleRobotConfiguration.Tint):
-                        Robot.Tint = config.Tint;
+                    case nameof(RobotConfiguration.Tint):
+                        Robot.Tint = config.Tint.ToUnityColor();
                         break;
-                    case nameof(SimpleRobotConfiguration.Metallic):
+                    case nameof(RobotConfiguration.Metallic):
                         Robot.Metallic = config.Metallic;
                         break;
-                    case nameof(SimpleRobotConfiguration.Smoothness):
+                    case nameof(RobotConfiguration.Smoothness):
                         Robot.Smoothness = config.Smoothness;
                         break;
                     default:

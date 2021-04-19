@@ -61,7 +61,7 @@ namespace Iviz.MarkerDetection
 
                 while (!Token.IsCancellationRequested)
                 {
-                    Logger.Info("Starting loop " + Enabled + " " + enableQr + " " + enableAruco);
+                    //Logger.Info("Starting loop " + Enabled + " " + enableQr + " " + enableAruco);
                     await Task.Delay(2000, Token);
 
                     if (Settings.ScreenshotManager == null || !Enabled)

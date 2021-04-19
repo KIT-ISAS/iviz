@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -85,7 +86,7 @@ namespace Iviz.App
                         listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(OctomapConfiguration.Tint):
-                        listener.Tint = config.Tint;
+                        listener.Tint = config.Tint.ToUnityColor();
                         break;
                     case nameof(OctomapConfiguration.MaxDepth):
                         listener.MaxDepth = config.MaxDepth;

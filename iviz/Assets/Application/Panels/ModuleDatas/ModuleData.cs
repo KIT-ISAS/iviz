@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -90,9 +91,11 @@ namespace Iviz.App
             SetupPanel();
         }
 
+        /*
         public virtual void CleanupPanel()
         {
         }
+        */
 
         public virtual void UpdatePanel()
         {

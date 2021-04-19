@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.App.ARDialogs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GridMapMsgs;
@@ -10,12 +11,15 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
+using UnityEngine.Scripting;
 
 namespace Iviz.Controllers
 {
     [DataContract]
-    public class ARGuiConfiguration : JsonToString, IConfiguration
+    public class ARGuiConfiguration : RosMessageWrapper<ARGuiConfiguration>, IConfiguration
     {
+        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/ARGuiConfiguration";
+
         [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.ARGuiSystem;
         [DataMember] public bool Visible { get; set; } = true;
@@ -24,7 +28,7 @@ namespace Iviz.Controllers
 
     public class IvizDialog : RosMessageWrapper<IvizDialog>
     {
-        [MessageName] public const string RosMessageType = "iviz_msgs/Dialog";
+        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/Dialog";
 
         public const byte ActionAdd = 0;
         public const byte ActionRemove = 1;
@@ -59,7 +63,7 @@ namespace Iviz.Controllers
 
     public class IvizDialogFeedback : RosMessageWrapper<IvizDialogFeedback>
     {
-        [MessageName] public const string RosMessageType = "iviz_msgs/DialogFeedback";
+        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/DialogFeedback";
         public string Id { get; set; } = "";
     }
 

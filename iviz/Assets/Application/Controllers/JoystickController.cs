@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;

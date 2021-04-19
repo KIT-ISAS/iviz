@@ -2,6 +2,7 @@
 using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using JetBrains.Annotations;

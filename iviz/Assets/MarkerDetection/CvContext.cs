@@ -12,6 +12,14 @@ using JetBrains.Annotations;
 
 namespace Iviz.MarkerDetection
 {
+    public class CvMarkerException : Exception
+    {
+        public CvMarkerException() : base("An error happened in the native call") {}
+        public CvMarkerException(string message) : base(message)
+        {
+        }
+    }
+
     public class CvContext : IDisposable
     {
         static bool loggerSet;
@@ -37,7 +45,7 @@ namespace Iviz.MarkerDetection
                 dictionaryName = value;
                 if (!Native.SetDictionary(ContextPtr, (int) value))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
             }
         }
@@ -93,7 +101,7 @@ namespace Iviz.MarkerDetection
             {
                 return;
             }
-            
+
             if (disposed)
             {
                 throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
@@ -103,8 +111,8 @@ namespace Iviz.MarkerDetection
             {
                 throw new ArgumentException("Image size is too small", nameof(image));
             }
-            
-            
+
+
             Marshal.Copy(image, 0, imagePtr, Width * Height * 3);
         }
 
@@ -164,7 +172,7 @@ namespace Iviz.MarkerDetection
                 array.Array[8] = 1;
                 if (!Native.SetCameraMatrix(ContextPtr, array.Array, array.Length))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
             }
         }
@@ -186,7 +194,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -198,7 +206,7 @@ namespace Iviz.MarkerDetection
             int[] indices = new int[numDetected];
             if (!Native.GetArucoMarkerIds(ContextPtr, indices, indices.Length))
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             return indices;
@@ -209,7 +217,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -223,7 +231,7 @@ namespace Iviz.MarkerDetection
             {
                 if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
 
                 string[] indices = new string[numDetected];
@@ -241,7 +249,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -259,7 +267,7 @@ namespace Iviz.MarkerDetection
                     !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
                         translations.Array, translations.Length))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
 
                 for (int i = 0; i < numDetected; i++)
@@ -288,7 +296,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -307,7 +315,7 @@ namespace Iviz.MarkerDetection
                     !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
                         translations.Array, translations.Length))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
 
                 for (int i = 0; i < numDetected; i++)
@@ -337,7 +345,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -354,7 +362,7 @@ namespace Iviz.MarkerDetection
                 if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
                     !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
 
                 int o = 0;
@@ -379,7 +387,7 @@ namespace Iviz.MarkerDetection
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
-                throw new InvalidOperationException("An error happened in the native call");
+                throw new CvMarkerException();
             }
 
             if (numDetected == 0)
@@ -395,7 +403,7 @@ namespace Iviz.MarkerDetection
                 if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
                     !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
                 {
-                    throw new InvalidOperationException("An error happened in the native call");
+                    throw new CvMarkerException();
                 }
 
                 int o = 0;
@@ -414,11 +422,11 @@ namespace Iviz.MarkerDetection
             return markers;
         }
 
-        static (float, Transform) Umeyama(Vector3f[] input, Vector3f[] output, bool estimateScale)
+        public static (float, Transform) Umeyama(Vector3f[] input, Vector3f[] output, bool estimateScale)
         {
             if (input.Length != output.Length)
             {
-                throw new InvalidOperationException("Input and output lengths do not match");
+                throw new ArgumentException("Input and output lengths do not match");
             }
 
             using (var inputFloats = new Rent<float>(input.Length * 3))
@@ -453,6 +461,56 @@ namespace Iviz.MarkerDetection
             }
         }
 
+        public static Pose SolvePnp(Vector2f[] input, Vector3f[] output, float fx, float cx, float fy, float cy)
+        {
+            if (input.Length != output.Length)
+            {
+                throw new ArgumentException("Input and output lengths do not match");
+            }
+
+            using (var inputFloats = new Rent<float>(input.Length * 2))
+            using (var outputFloats = new Rent<float>(output.Length * 3))
+            using (var cameraFloats = new Rent<float>(6))
+            using (var resultFloats = new Rent<float>(6))
+            {
+                int o = 0;
+                foreach (var v in input)
+                {
+                    (inputFloats[o], inputFloats[o + 1]) = v;
+                    o += 2;
+                }
+
+                o = 0;
+                foreach (var v in output)
+                {
+                    (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
+                    o += 3;
+                }
+
+                cameraFloats[0] = fx;
+                cameraFloats[1] = 0;
+                cameraFloats[2] = cx;
+                cameraFloats[3] = 0;
+                cameraFloats[4] = fy;
+                cameraFloats[5] = cy;
+
+                if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
+                    cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))
+                {
+                    throw new CvMarkerException();
+                }
+
+                Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
+                Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
+                double angle = angleAxis.Norm;
+                var rotation = angle == 0
+                    ? Quaternion.Identity
+                    : Quaternion.AngleAxis(angle, angleAxis / angle);
+
+                return (translation, rotation);
+            }
+        }
+
         void ReleaseUnmanagedResources()
         {
             Native.DisposeContext(mContextPtr);
@@ -475,9 +533,9 @@ namespace Iviz.MarkerDetection
         static class Native
         {
             const string IvizOpencvDll = Settings.IsMobile ? "__Internal" : "IvizOpencv";
-            
+
             public delegate void Callback(string s);
-            
+
             [MonoPInvokeCallback(typeof(Callback))]
             public static void Debug([CanBeNull] string t)
             {
@@ -563,6 +621,10 @@ namespace Iviz.MarkerDetection
                 int rotationsSize, float[] translations, int translationsSize);
 
             [DllImport(IvizOpencvDll)]
+            public static extern bool EstimatePnp(float[] inputs, int inputSize, float[] outputs, int outputSize,
+                float[] cameraArray, int cameraArraySize, float[] result, int resultSize);
+
+            [DllImport(IvizOpencvDll)]
             public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
                 bool estimateScale, float[] result, int resultSize);
         }
@@ -615,7 +677,7 @@ namespace Iviz.MarkerDetection
     {
         ReadOnlyCollection<Vector2f> Corners { get; }
     }
-    
+
     public sealed class ArucoMarkerCorners : IMarkerCorners
     {
         public int Id { get; }

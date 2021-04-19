@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
 using JetBrains.Annotations;

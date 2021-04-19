@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -21,22 +20,6 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public class PointCloudConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string IntensityChannel { get; set; } = "z";
-        [DataMember] public float PointSize { get; set; } = 0.03f;
-        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
-        [DataMember] public bool OverrideMinMax { get; set; }
-        [DataMember] public float MinIntensity { get; set; }
-        [DataMember] public float MaxIntensity { get; set; } = 1;
-        [DataMember] public bool FlipMinMax { get; set; }
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.PointCloud;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
     public sealed class PointCloudListener : ListenerController
     {
         static readonly PointField EmptyPointField = new PointField();

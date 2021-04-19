@@ -59,6 +59,7 @@ namespace Iviz.Resources
         public Info<GameObject> ARDialogIcon { get; }
         public Info<GameObject> ARDialogMenu { get; }
         public Info<GameObject> ARDialogShort { get; }
+        public Info<GameObject> ARTfFrame { get; }
 
         public DisplaysType()
         {
@@ -94,6 +95,7 @@ namespace Iviz.Resources
             ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
             ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
             ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
+            ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
 
             resourceByType = CreateTypeDictionary(this);
         }

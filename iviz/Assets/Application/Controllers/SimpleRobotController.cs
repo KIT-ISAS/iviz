@@ -1,6 +1,6 @@
 using System;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -14,29 +14,12 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class SimpleRobotConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string SourceParameter { get; set; } = "";
-        [DataMember] public string SavedRobotName { get; set; } = "";
-        [DataMember] public string FramePrefix { get; set; } = "";
-        [DataMember] public string FrameSuffix { get; set; } = "";
-        [DataMember] public bool AttachedToTf { get; set; }
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; }
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-        [DataMember] public float Metallic { get; set; } = 0.5f;
-        [DataMember] public float Smoothness { get; set; } = Settings.IsHololens ? 0.25f : 0.5f;
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Robot;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
     /// <summary>
     /// Controller for robots.
     /// </summary>
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
-        readonly SimpleRobotConfiguration config = new SimpleRobotConfiguration();
+        readonly RobotConfiguration config = new RobotConfiguration();
         readonly FrameNode node;
         Task robotLoadingTask;
 
@@ -45,7 +28,7 @@ namespace Iviz.Controllers
             node = FrameNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            Config = new SimpleRobotConfiguration();
+            Config = new RobotConfiguration();
         }
 
         RobotModel robot;
@@ -69,7 +52,7 @@ namespace Iviz.Controllers
 
         [CanBeNull] GameObject RobotObject => Robot?.BaseLinkObject;
 
-        public SimpleRobotConfiguration Config
+        public RobotConfiguration Config
         {
             get => config;
             set
@@ -79,7 +62,7 @@ namespace Iviz.Controllers
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint;
+                Tint = value.Tint.ToUnityColor();
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
 
@@ -175,10 +158,10 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint;
+            get => config.Tint.ToUnityColor();
             set
             {
-                config.Tint = value;
+                config.Tint = value.ToRos();
                 if (Robot is null)
                 {
                     return;

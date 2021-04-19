@@ -1,6 +1,6 @@
 ﻿using Iviz.Resources;
 
-namespace Iviz.Controllers
+namespace Iviz.Msgs.IvizCommonMsgs
 {
     /// <summary>
     /// Common interface for the configuration classes of the controllers.
@@ -20,6 +20,6 @@ namespace Iviz.Controllers
         /// <summary>
         /// Whether the controller is visible. 
         /// </summary>
-        bool Visible { get; set; }
+        bool Visible { get; }
     }
 }

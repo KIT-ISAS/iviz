@@ -31,7 +31,7 @@ namespace Iviz.Ros
         long frameBandwidthUp;
         uint logSeq;
 
-        public static LogLevel MinLogLevel { get; set; } = LogLevel.Info;
+        public static LogLevel MinLogLevel { get; set; } = LogLevel.Debug;
 
         Sender<Log> logSender;
 

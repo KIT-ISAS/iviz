@@ -2,6 +2,7 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;

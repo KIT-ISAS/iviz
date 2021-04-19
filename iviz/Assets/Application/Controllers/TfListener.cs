@@ -2,8 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -12,7 +12,6 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
@@ -25,19 +24,6 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class TfConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public float FrameSize { get; set; } = 0.125f;
-        [DataMember] public bool FrameLabelsVisible { get; set; }
-        [DataMember] public bool ParentConnectorVisible { get; set; }
-        [DataMember] public bool KeepAllFrames { get; set; } = true;
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.TF;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
     public sealed class TfListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
@@ -500,22 +486,20 @@ namespace Iviz.Controllers
                 Quaternion.Inverse(fixedFrame.rotation) * rotation
             );
         }
+        
+        public static Pose FixedFramePose =>  Instance.FixedFrame.Transform.AsPose();
 
         public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
-            in Pose unityPose)
+            in Msgs.GeometryMsgs.Transform rosTransform)
         {
             TFMessage msg = new TFMessage
             (
                 new[]
                 {
-                    new TransformStamped
-                    (
-                        (tfSeq++, parentFrame),
-                        childFrame ?? "",
-                        RelativePoseToOrigin(unityPose).Unity2RosTransform()
-                    )
+                    new TransformStamped((tfSeq++, parentFrame), childFrame ?? "", rosTransform)
                 }
             );
+            
             Publish(msg);
         }
     }
