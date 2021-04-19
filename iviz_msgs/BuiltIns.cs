@@ -122,7 +122,7 @@ namespace Iviz.Msgs
         /// <param name="size">The fixed size, if it exists.</param>
         /// <returns>True if the message has a fixed size.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the type is null.</exception>
-        public static bool TryGetFixedSize<T>(out int size) where T : IMessage
+        public static bool TryGetFixedSize<T>(out int size) where T : ISerializable
         {
             var type = typeof(T);
             if (type == null)

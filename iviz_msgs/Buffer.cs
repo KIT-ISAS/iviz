@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -75,13 +76,29 @@ namespace Iviz.Msgs
                     $"Cannot write {array.Length} values into array of fixed size {size}.");
             }
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ThrowIfWrongSize<T>(List<T> array, uint size)
+        {
+            if (array is null)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
 
+            if (array.Count != size)
+            {
+                throw new IndexOutOfRangeException(
+                    $"Cannot write {array.Count} values into array of fixed size {size}.");
+            }
+        }        
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string DeserializeString()
         {
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
+            
             if (count == 0)
             {
                 return string.Empty;
@@ -159,6 +176,26 @@ namespace Iviz.Msgs
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void DeserializeStringList(List<string> list)
+        {
+            ThrowIfOutOfRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            DeserializeStringArray(list, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void DeserializeStringArray(List<string> list, uint count)
+        {
+            list.Clear();
+            if (list.Capacity < count) list.Capacity = (int) count;
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = DeserializeString();
+            }
+        }        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe T Deserialize<T>() where T : unmanaged
         {
             ThrowIfOutOfRange((uint) sizeof(T));
@@ -222,6 +259,33 @@ namespace Iviz.Msgs
 
             return val;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void DeserializeStructList<T>(List<T> list) where T : unmanaged
+        {
+            ThrowIfOutOfRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            DeserializeStructList(list, count);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void DeserializeStructList<T>(List<T> list, uint count) where T : unmanaged
+        {
+            ThrowIfOutOfRange(count * (uint) sizeof(T));
+            list.Clear();
+            if (list.Capacity < count) list.Capacity = (int) count;
+
+            T* tPtr = (T*) ptr;
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(*tPtr++);
+            }
+
+            uint size = count * (uint) sizeof(T);
+            ptr += size;
+        }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe T[] DeserializeArray<T>() where T : IMessage, new()
@@ -231,6 +295,17 @@ namespace Iviz.Msgs
             ptr += 4;
             return count == 0 ? Array.Empty<T>() : new T[count];
         }
+        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe uint DeserializeList<T>(List<T> list) where T : IMessage, new()
+        {
+            ThrowIfOutOfRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            if (list.Capacity < count) list.Capacity = (int) count;
+            return count;
+        }        
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe UniqueRef<T> DeserializeArrayS<T>() where T : IMessage, new()
@@ -312,6 +387,26 @@ namespace Iviz.Msgs
             {
                 Serialize(str);
             }
+        }       
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SerializeArray(List<string> val, uint count = 0)
+        {
+            if (count == 0)
+            {
+                ThrowIfOutOfRange(4);
+                *(int*) ptr = val.Count;
+                ptr += 4;
+            }
+            else
+            {
+                ThrowIfWrongSize(val, count);
+            }
+
+            foreach (string str in val)
+            {
+                Serialize(str);
+            }
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -337,6 +432,7 @@ namespace Iviz.Msgs
             }
         }
         
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void SerializeStructArray<T>(UniqueRef<T> val, uint count = 0) where T : unmanaged
@@ -359,6 +455,31 @@ namespace Iviz.Msgs
                 MemoryCopy(ptr, bPtr, size);
                 ptr += size;
             }
+        }    
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SerializeStructList<T>(List<T> val, uint count = 0) where T : unmanaged
+        {
+            if (count == 0)
+            {
+                ThrowIfOutOfRange((uint) (4 + val.Count * sizeof(T)));
+                *(int*) ptr = val.Count;
+                ptr += 4;
+            }
+            else
+            {
+                ThrowIfWrongSize(val, count);
+                ThrowIfOutOfRange(count * (uint) sizeof(T));
+            }
+
+            T* tPtr = (T*) ptr;
+            foreach (T v in val)
+            {
+                *tPtr++ = v;
+            }
+
+            uint size = (uint) (val.Count * sizeof(T));
+            ptr += size;
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

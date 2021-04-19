@@ -17,7 +17,9 @@ namespace Iviz.Msgs
             );
         }
 
-        public static Vector3 Multiply(in Vector3 qv, double w, in Vector3 v)
+        public static Vector3 Multiply(in Quaternion q, in Vector3 v) => Multiply(q.XYZ, q.W, v);
+
+        static Vector3 Multiply(in Vector3 qv, double w, in Vector3 v)
         {
             return v + 2 * qv.Cross(qv.Cross(v) + w * v);
         }
