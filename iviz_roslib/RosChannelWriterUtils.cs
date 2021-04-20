@@ -281,9 +281,15 @@ namespace Iviz.Roslib
 #endif
     }
 
-    public static class RosChannelWriter
+    public static class RosChannelWriterUtils
     {
-        public static async ValueTask<RosChannelWriter<T>> CreateAsync<T>(IRosClient client, string topic, bool latchingEnabled = false)
+        public static RosChannelWriter<T> CreateWriter<T>(this IRosClient client, string topic, bool latchingEnabled = false)
+            where T : IMessage
+        {
+            return new RosChannelWriter<T>(client, topic) {LatchingEnabled = latchingEnabled};
+        }
+        
+        public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic, bool latchingEnabled = false)
             where T : IMessage
         {
             var writer = new RosChannelWriter<T>() {LatchingEnabled = latchingEnabled};
@@ -291,27 +297,27 @@ namespace Iviz.Roslib
             return writer;
         }
 
-        public static IRosChannelWriter CreateFor(IMessage msg)
+        public static IRosChannelWriter CreateWriterForMessage(IMessage msg)
         {
-            return CreateFor(msg.GetType());
+            return CreateWriterForMessage(msg.GetType());
         }
 
-        public static async ValueTask<IRosChannelWriter> CreateForAsync(IMessage msg, IRosClient client,
+        public static async ValueTask<IRosChannelWriter> CreateWriterForMessageAsync(this IRosClient client, IMessage msg,
             string topic, CancellationToken token = default)
         {
-            var writer = CreateFor(msg);
+            var writer = CreateWriterForMessage(msg);
             await writer.StartAsync(client, topic, token);
             return writer;
         }
 
-        public static IRosChannelWriter CreateFor(IMessage msg, IRosClient client, string topic)
+        public static IRosChannelWriter CreateWriterForMessage(this IRosClient client, IMessage msg, string topic)
         {
-            var writer = CreateFor(msg.GetType());
+            var writer = CreateWriterForMessage(msg.GetType());
             writer.Start(client, topic);
             return writer;
         }
 
-        public static IRosChannelWriter CreateFor(Type msgType)
+        public static IRosChannelWriter CreateWriterForMessage(Type msgType)
         {
             if (typeof(IMessage) == msgType)
             {
