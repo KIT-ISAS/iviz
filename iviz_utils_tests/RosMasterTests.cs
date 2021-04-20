@@ -71,7 +71,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using (var publisher = await RosChannelWriter.CreateAsync<String>(client, topicName))
+            await using (var publisher = await RosChannelWriterUtils.CreateWriterAsync<String>(client, topicName))
             {
                 publisher.LatchingEnabled = true;
 
@@ -82,7 +82,7 @@ namespace Iviz.UtilsTests
                 const string msgText = "test message";
                 publisher.Write(new String(msgText));
 
-                await using (var subscriber = await RosChannelReader.CreateAsync<String>(client, topicName))
+                await using (var subscriber = await client.CreateReaderAsync<String>(topicName))
                 {
                     var systemState2 = await client.GetSystemStateAsync();
                     Assert.True(
@@ -115,7 +115,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_a";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriter.CreateAsync<String>(client, topicName);
+            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<String>(client, topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -126,7 +126,7 @@ namespace Iviz.UtilsTests
             publisher.Write(new String(msgText));
 
             // reader has no message type, it will use whatever the publisher sends during handshake
-            await using var subscriber = await RosChannelReader.CreateAsync(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync(topicName);
 
             using var source = new CancellationTokenSource(5000);
 
@@ -144,7 +144,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_empty";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriter.CreateAsync<Empty>(client, topicName);
+            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Empty>(client, topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -153,7 +153,7 @@ namespace Iviz.UtilsTests
 
             publisher.Write(Empty.Singleton);
 
-            await using var subscriber = await RosChannelReader.CreateAsync<Empty>(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync<Empty>(topicName);
 
             using var source = new CancellationTokenSource(5000);
 
@@ -165,7 +165,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_fixed";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Twist>(client, topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -174,7 +174,7 @@ namespace Iviz.UtilsTests
 
             publisher.Write(default);
 
-            await using var subscriber = await RosChannelReader.CreateAsync<Twist>(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync<Twist>(topicName);
 
             using var source = new CancellationTokenSource(5000);
 
@@ -186,7 +186,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_false";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Twist>(client, topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -195,7 +195,7 @@ namespace Iviz.UtilsTests
 
             publisher.Write(default);
 
-            await using var subscriber = await RosChannelReader.CreateAsync<Empty>(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync<Empty>(topicName);
 
             Assert.True(subscriber.Subscriber.TopicType != publisher.Publisher.TopicType);
 
@@ -214,10 +214,10 @@ namespace Iviz.UtilsTests
             const string topicName = "/my_test_topic_xyz_fixed_no_pub";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
 
-            await using var subscriber = await RosChannelReader.CreateAsync<Twist>(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync<Twist>(topicName);
             await Task.Delay(1000);
             
-            await using var publisher = await RosChannelWriter.CreateAsync<Twist>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
             publisher.LatchingEnabled = true;
             publisher.Write(default);
 
