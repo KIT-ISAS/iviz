@@ -2,6 +2,7 @@ using System;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -71,7 +72,7 @@ namespace Iviz.Displays
             MeshRenderer.sharedMaterial = material;
 
             base.Awake();
-            Colormap = Resource.ColormapId.hsv;
+            Colormap = ColormapId.hsv;
             FlipMinMax = false;
         }
 

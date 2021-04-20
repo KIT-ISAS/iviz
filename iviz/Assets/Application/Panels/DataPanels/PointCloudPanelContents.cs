@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -38,7 +39,7 @@ namespace Iviz.App
                         .SetOptions(DefaultChannels);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
-                        .SetIndex((int)Resource.ColormapId.hsv);
+                        .SetIndex((int)ColormapId.hsv);
 
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddNumberInputField("Colormap Min");

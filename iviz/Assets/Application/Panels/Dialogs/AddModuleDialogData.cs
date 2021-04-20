@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Iviz.Roslib;
 using Iviz.XmlRpc;
@@ -9,19 +10,19 @@ namespace Iviz.App
 {
     public sealed class AddModuleDialogData : DialogData
     {
-        static readonly List<(string Caption, Resource.ModuleType Module)> Modules = new List<(string, Resource.ModuleType)>
+        static readonly List<(string Caption, ModuleType Module)> Modules = new List<(string, ModuleType)>
         {
-            ("<b>AugmentedReality</b>\nManager for augmented reality", Resource.ModuleType.AugmentedReality),
-            ("<b>Robot</b>\nRobot from the parameter server", Resource.ModuleType.Robot),
-            ("<b>DepthCloud</b>\nPoint cloud generator for depth images", Resource.ModuleType.DepthCloud),
-            ("<b>Joystick</b>\nOn-screen joystick", Resource.ModuleType.Joystick),
-            ("<b>Grid</b>\nA reference plane", Resource.ModuleType.Grid),
+            ("<b>AugmentedReality</b>\nManager for augmented reality", ModuleType.AugmentedReality),
+            ("<b>Robot</b>\nRobot from the parameter server", ModuleType.Robot),
+            ("<b>DepthCloud</b>\nPoint cloud generator for depth images", ModuleType.DepthCloud),
+            ("<b>Joystick</b>\nOn-screen joystick", ModuleType.Joystick),
+            ("<b>Grid</b>\nA reference plane", ModuleType.Grid),
         };
 
-        static readonly Resource.ModuleType[] UniqueModules =
+        static readonly ModuleType[] UniqueModules =
         {
-            Resource.ModuleType.AugmentedReality,
-            Resource.ModuleType.Joystick
+            ModuleType.AugmentedReality,
+            ModuleType.Joystick
         };
 
         [NotNull] readonly ItemListDialogContents itemList;
@@ -39,7 +40,7 @@ namespace Iviz.App
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;
 
-            foreach (Resource.ModuleType module in UniqueModules)
+            foreach (ModuleType module in UniqueModules)
             {
                 bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module);
                 if (hasModule)

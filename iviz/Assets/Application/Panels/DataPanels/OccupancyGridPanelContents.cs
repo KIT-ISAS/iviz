@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
@@ -31,7 +32,7 @@ namespace Iviz.App
             Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
-                        .SetIndex((int)Resource.ColormapId.gray);
+                        .SetIndex((int)ColormapId.gray);
             FlipColors = p.AddToggle("Colormap Flip Min/Max");
             ShowTexture = p.AddToggle("Show As Textured Plane");
 

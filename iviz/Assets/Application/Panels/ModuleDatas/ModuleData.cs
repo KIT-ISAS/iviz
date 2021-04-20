@@ -44,7 +44,7 @@ namespace Iviz.App
 
         [NotNull] public string Topic { get; }
         [NotNull] public string Type { get; }
-        public abstract Resource.ModuleType ModuleType { get; }
+        public abstract ModuleType ModuleType { get; }
         [NotNull] public abstract DataPanelContents Panel { get; }
         [NotNull] public abstract IController Controller { get; }
         [NotNull] public abstract IConfiguration Configuration { get; }
@@ -146,24 +146,24 @@ namespace Iviz.App
 
             switch (c.ModuleType)
             {
-                case Resource.ModuleType.TF: return new TfModuleData(c);
-                case Resource.ModuleType.PointCloud: return new PointCloudModuleData(c);
-                case Resource.ModuleType.Grid: return new GridModuleData(c);
-                case Resource.ModuleType.Image: return new ImageModuleData(c);
-                case Resource.ModuleType.Robot: return new SimpleRobotModuleData(c);
-                case Resource.ModuleType.Marker: return new MarkerModuleData(c);
-                case Resource.ModuleType.InteractiveMarker: return new InteractiveMarkerModuleData(c);
-                case Resource.ModuleType.JointState: return new JointStateModuleData(c);
-                case Resource.ModuleType.DepthCloud: return new DepthCloudModuleData(c);
-                case Resource.ModuleType.LaserScan: return new LaserScanModuleData(c);
-                case Resource.ModuleType.AugmentedReality: return new ARModuleData(c);
-                case Resource.ModuleType.Magnitude: return new MagnitudeModuleData(c);
-                case Resource.ModuleType.OccupancyGrid: return new OccupancyGridModuleData(c);
-                case Resource.ModuleType.Joystick: return new JoystickModuleData(c);
-                case Resource.ModuleType.Path: return new PathModuleData(c);
-                case Resource.ModuleType.GridMap: return new GridMapModuleData(c);
-                case Resource.ModuleType.Octomap: return new OctomapModuleData(c);
-                case Resource.ModuleType.ARGuiSystem: return new ARGuiModuleData(c);
+                case ModuleType.TF: return new TfModuleData(c);
+                case ModuleType.PointCloud: return new PointCloudModuleData(c);
+                case ModuleType.Grid: return new GridModuleData(c);
+                case ModuleType.Image: return new ImageModuleData(c);
+                case ModuleType.Robot: return new SimpleRobotModuleData(c);
+                case ModuleType.Marker: return new MarkerModuleData(c);
+                case ModuleType.InteractiveMarker: return new InteractiveMarkerModuleData(c);
+                case ModuleType.JointState: return new JointStateModuleData(c);
+                case ModuleType.DepthCloud: return new DepthCloudModuleData(c);
+                case ModuleType.LaserScan: return new LaserScanModuleData(c);
+                case ModuleType.AugmentedReality: return new ARModuleData(c);
+                case ModuleType.Magnitude: return new MagnitudeModuleData(c);
+                case ModuleType.OccupancyGrid: return new OccupancyGridModuleData(c);
+                case ModuleType.Joystick: return new JoystickModuleData(c);
+                case ModuleType.Path: return new PathModuleData(c);
+                case ModuleType.GridMap: return new GridMapModuleData(c);
+                case ModuleType.Octomap: return new OctomapModuleData(c);
+                case ModuleType.GuiDialog: return new GuiDialogModuleData(c);
                 default: throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType);
             }
         }

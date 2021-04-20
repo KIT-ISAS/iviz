@@ -2,7 +2,6 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.MsgsWrapper;
-using Iviz.Resources;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -17,7 +16,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public bool ParentConnectorVisible { get; set; }
         [DataMember] public bool KeepAllFrames { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.TF;
+        [DataMember] public ModuleType ModuleType => ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
     }
 }

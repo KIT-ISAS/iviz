@@ -226,11 +226,11 @@ namespace Iviz.App
             Logger.Internal("<b>Welcome to iviz</b>");
             Logger.Info("Welcome to iviz! This is the log console.");
 
-            CreateModule(Resource.ModuleType.TF, TfListener.DefaultTopic);
+            CreateModule(ModuleType.TF, TfListener.DefaultTopic);
 
             if (!Settings.IsHololens)
             {
-                CreateModule(Resource.ModuleType.Grid);
+                CreateModule(ModuleType.Grid);
             }
 
             save.onClick.AddListener(saveConfigData.Show);
@@ -630,11 +630,11 @@ namespace Iviz.App
         void CheckIfInteractableNeeded()
         {
             InteractableButton.Visible =
-                ModuleDatas.Any(module => module.ModuleType == Resource.ModuleType.InteractiveMarker);
+                ModuleDatas.Any(module => module.ModuleType == ModuleType.InteractiveMarker);
         }
 
         [NotNull]
-        public ModuleData CreateModule(Resource.ModuleType resource,
+        public ModuleData CreateModule(ModuleType resource,
             [NotNull] string topic = "",
             [NotNull] string type = "",
             [CanBeNull] IConfiguration configuration = null,
@@ -663,7 +663,7 @@ namespace Iviz.App
             moduleDatas.Add(moduleData);
             Buttons.CreateButtonObject(moduleData);
 
-            if (moduleData.ModuleType == Resource.ModuleType.InteractiveMarker)
+            if (moduleData.ModuleType == ModuleType.InteractiveMarker)
             {
                 InteractableButton.Visible = true;
             }
@@ -684,7 +684,7 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
+            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out var resource))
             {
                 throw new ArgumentException(nameof(type));
             }
@@ -701,7 +701,7 @@ namespace Iviz.App
 
             RemoveModule(moduleDatas.IndexOf(entry));
 
-            if (entry.ModuleType == Resource.ModuleType.InteractiveMarker)
+            if (entry.ModuleType == ModuleType.InteractiveMarker)
             {
                 CheckIfInteractableNeeded();
             }

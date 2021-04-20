@@ -1,5 +1,4 @@
 using System.Runtime.Serialization;
-using Iviz.Msgs;
 using Iviz.MsgsWrapper;
 
 namespace Iviz.Msgs.IvizCommonMsgs

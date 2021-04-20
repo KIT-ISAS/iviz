@@ -172,7 +172,14 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this} Error during callback: ", e);
+                    if (!Settings.IsMobile)
+                    {
+                        Logger.Error($"{this} Error during callback: {e}");
+                    }
+                    else
+                    {
+                        Logger.Error($"{this} Error during callback: ", e);
+                    }
                 }
             }
 

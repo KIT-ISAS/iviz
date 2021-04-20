@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -9,8 +10,8 @@ namespace Iviz.App
 {
     public sealed class DataPanelManager : MonoBehaviour
     {
-        readonly Dictionary<Resource.ModuleType, DataPanelContents> panelByResourceType =
-            new Dictionary<Resource.ModuleType, DataPanelContents>();
+        readonly Dictionary<ModuleType, DataPanelContents> panelByResourceType =
+            new Dictionary<ModuleType, DataPanelContents>();
 
         DataPanelContents defaultPanel;
 
@@ -42,7 +43,7 @@ namespace Iviz.App
             GameThread.EverySecond -= UpdateSelected;
         }
 
-        [NotNull] public T GetPanelByResourceType<T>(Resource.ModuleType resource) where T : DataPanelContents
+        [NotNull] public T GetPanelByResourceType<T>(ModuleType resource) where T : DataPanelContents
         {
             if (panelByResourceType.TryGetValue(resource, out DataPanelContents existingContents))
             {

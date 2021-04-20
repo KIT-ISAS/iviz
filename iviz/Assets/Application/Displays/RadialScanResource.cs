@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace Iviz.Displays
     {
         [SerializeField] int size;
         [SerializeField] float pointSize;
-        [SerializeField] Resource.ColormapId colormap;
+        [SerializeField] ColormapId colormap;
         [SerializeField] bool useIntensityNotRange;
         [SerializeField] bool overrideMinMax;
         [SerializeField] bool flipMinMax;
@@ -65,7 +66,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => colormap;
             set
@@ -188,7 +189,7 @@ namespace Iviz.Displays
             MinIntensity = 0;
             MaxIntensity = 1;
             UseLines = true;
-            Colormap = Resource.ColormapId.hsv;
+            Colormap = ColormapId.hsv;
             PointSize = 0.01f;
             MaxLineDistance = 0.3f;
         }

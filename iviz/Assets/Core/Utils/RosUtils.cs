@@ -75,6 +75,7 @@ namespace Iviz.Core
         public static readonly Quaternion Unity2RosRotation = new Quaternion(0.5f, -0.5f, -0.5f, 0.5f);
 
         //----
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Unity2Ros(this Vector3 vector3) => new Vector3(vector3.z, -vector3.x, vector3.y);
 
@@ -101,6 +102,12 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion RosRpy2Unity(this Msgs.GeometryMsgs.Vector3 v) => v.ToUnity().RosRpy2Unity();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ToUnity(this Msgs.IvizMsgs.Vector3f v) => new Vector3(v.X, v.Y, v.Z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Ros2Unity(this Msgs.IvizMsgs.Vector3f v) => v.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)

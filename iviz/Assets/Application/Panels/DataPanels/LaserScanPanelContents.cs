@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
@@ -35,7 +36,7 @@ namespace Iviz.App
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
-                        .SetIndex((int)Resource.ColormapId.hsv);
+                        .SetIndex((int)ColormapId.hsv);
             UseIntensity = p.AddToggle("Use Intensity instead of Range");
 
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");

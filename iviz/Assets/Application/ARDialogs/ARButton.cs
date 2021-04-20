@@ -15,17 +15,18 @@ namespace Iviz.App.ARDialogs
         [SerializeField] Texture2D[] icons;
         [SerializeField] TextMesh text;
         [SerializeField] MeshRenderer iconMeshRenderer;
-        
+
         Material material;
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
 
-        public event Action Clicked; 
-        
+        public event Action Clicked;
+
         public enum ButtonIcon
         {
             Cross,
             Ok,
             Forward,
+            Backward
         }
 
         public string Caption
@@ -48,9 +49,26 @@ namespace Iviz.App.ARDialogs
             set
             {
                 icon = value;
-                Material.mainTexture = icons[(int) value];
+                Material.mainTexture = value == ButtonIcon.Backward
+                    ? icons[(int) ButtonIcon.Forward]
+                    : icons[(int) value];
                 (float x, _, float z) = iconMeshRenderer.transform.localRotation.eulerAngles;
-                iconMeshRenderer.transform.localRotation = Quaternion.Euler(x, value == ButtonIcon.Cross ? 45 : 180, z);
+
+                Quaternion rotation;
+                switch (value)
+                {
+                    case ButtonIcon.Cross:
+                        rotation = Quaternion.Euler(x, 45, z);
+                        break;
+                    case ButtonIcon.Backward:
+                        rotation = Quaternion.Euler(x, 0, z);
+                        break;
+                    default:
+                        rotation = Quaternion.Euler(x, 180, z);
+                        break;
+                }
+
+                iconMeshRenderer.transform.localRotation = rotation;
             }
         }
 
@@ -58,7 +76,7 @@ namespace Iviz.App.ARDialogs
         {
             Icon = ButtonIcon.Ok;
             iconMeshRenderer.material = Material;
-            
+
             if (Settings.IsHololens)
             {
                 var meshRenderers = transform.GetComponentsInChildren<MeshRenderer>();

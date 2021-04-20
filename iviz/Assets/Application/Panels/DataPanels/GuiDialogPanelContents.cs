@@ -6,7 +6,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARModuleData"/> 
     /// </summary>
-    public sealed class ARGuiPanelContents : ListenerPanelContents
+    public sealed class GuiDialogPanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -22,7 +22,7 @@ namespace Iviz.App
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("AR Dialogs");
+            p.AddHeadTitleWidget("GUI Dialogs");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             Listener = p.AddListener();

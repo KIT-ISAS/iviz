@@ -58,9 +58,9 @@ namespace Iviz.Controllers
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
         [NotNull] static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
-        static readonly (Resource.ModuleType module, string name)[] ModuleNames =
-            typeof(Resource.ModuleType).GetEnumValues()
-                .Cast<Resource.ModuleType>()
+        static readonly (ModuleType module, string name)[] ModuleNames =
+            typeof(ModuleType).GetEnumValues()
+                .Cast<ModuleType>()
                 .Select(module => (module, module.ToString()))
                 .ToArray();
 
@@ -101,7 +101,7 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static Resource.ModuleType ModuleTypeFromString(string moduleName)
+        static ModuleType ModuleTypeFromString(string moduleName)
         {
             return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
         }
@@ -118,19 +118,19 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            Resource.ModuleType moduleType = ModuleTypeFromString(moduleTypeStr);
+            ModuleType moduleType = ModuleTypeFromString(moduleTypeStr);
 
-            if (moduleType == Resource.ModuleType.Invalid)
+            if (moduleType == ModuleType.Invalid)
             {
                 result.message = "EE Invalid module type";
                 return result;
             }
 
-            if (moduleType != Resource.ModuleType.Grid &&
-                moduleType != Resource.ModuleType.DepthCloud &&
-                moduleType != Resource.ModuleType.AugmentedReality &&
-                moduleType != Resource.ModuleType.Joystick &&
-                moduleType != Resource.ModuleType.Robot)
+            if (moduleType != ModuleType.Grid &&
+                moduleType != ModuleType.DepthCloud &&
+                moduleType != ModuleType.AugmentedReality &&
+                moduleType != ModuleType.Joystick &&
+                moduleType != ModuleType.Robot)
             {
                 result.message = "EE Cannot create module of that type, use AddModuleFromTopic instead";
                 return result;
@@ -236,7 +236,7 @@ namespace Iviz.Controllers
                 return ("", false, $"EE Failed to find topic '{topic}'");
             }
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out Resource.ModuleType resource))
+            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out ModuleType resource))
             {
                 result.message = $"EE Type '{type}' is unsupported";
             }

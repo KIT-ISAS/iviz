@@ -91,7 +91,8 @@ namespace Iviz.Controllers
                     double distanceMarkerToCamera = (cameraPosition - rosMarkerPose.Translation).Norm;
                     if (distanceMarkerToCamera > maxMarkerDistance)
                     {
-                        Logger.Debug($"{this}: Detected marker at distance {distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
+                        Logger.Debug($"{this}: Detected marker at distance " +
+                                     $"{distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
                                      "discarding.");
                         return;
                     }

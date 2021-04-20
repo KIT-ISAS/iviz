@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Iviz.Displays
         static readonly int TintId = Shader.PropertyToID("_Tint");
         static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
 
-        [SerializeField] Resource.ColormapId colormap;
+        [SerializeField] ColormapId colormap;
         [SerializeField] Vector2 intensityBounds;
         [SerializeField] bool flipMinMax;
         [SerializeField] Color tint;
@@ -39,7 +40,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The colormap to be used if <see cref="UseColormap"/> is active.
         /// </summary>
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => colormap;
             set

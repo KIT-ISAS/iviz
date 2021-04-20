@@ -25,10 +25,10 @@ namespace Iviz.Controllers
     public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
+        [DataMember] public ModuleType ModuleType => ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.gray;
+        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.gray;
         [DataMember] public bool FlipMinMax { get; set; } = true;
         [DataMember] public bool CubesVisible { get; set; } = false;
         [DataMember] public bool TextureVisible { get; set; } = true;
@@ -128,7 +128,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => config.Colormap;
             set

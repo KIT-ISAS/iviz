@@ -20,13 +20,13 @@ namespace Iviz.Controllers
     public class GridMapConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.GridMap;
+        [DataMember] public ModuleType ModuleType => ModuleType.GridMap;
         [DataMember] public bool Visible { get; set; } = true;
 
         [DataMember] public string Topic { get; set; } = "";
 
         [DataMember] public string IntensityChannel { get; set; } = "";
-        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
         [DataMember] public bool ForceMinMax { get; set; }
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
@@ -81,7 +81,7 @@ namespace Iviz.Controllers
             set => config.IntensityChannel = value;
         } 
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => config.Colormap;
             set

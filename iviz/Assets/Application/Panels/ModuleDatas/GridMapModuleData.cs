@@ -11,7 +11,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="GridMapPanelContents"/> 
     /// </summary>
-
     public sealed class GridMapModuleData : ListenerModuleData
     {
         [NotNull] readonly GridMapListener listener;
@@ -20,14 +19,14 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.GridMap;
+        public override ModuleType ModuleType => ModuleType.GridMap;
         public override IConfiguration Configuration => listener.Config;
 
 
         public GridMapModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+            base(constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(Resource.ModuleType.GridMap);
+            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(ModuleType.GridMap);
             listener = new GridMapListener(this);
             if (constructor.Configuration == null)
             {
@@ -35,8 +34,9 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (GridMapConfiguration)constructor.Configuration;
+                listener.Config = (GridMapConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -50,8 +50,8 @@ namespace Iviz.App
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
             panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
 
-            panel.Colormap.Index = (int)listener.Colormap;
-            
+            panel.Colormap.Index = (int) listener.Colormap;
+
             panel.IntensityChannel.Options = listener.FieldNames;
             if (listener.FieldNames.Count != 0)
             {
@@ -67,14 +67,8 @@ namespace Iviz.App
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
 
-            panel.IntensityChannel.ValueChanged += (_, s) =>
-            {
-                listener.IntensityChannel = s;
-            };
-            panel.Colormap.ValueChanged += (i, _) =>
-            {
-                listener.Colormap = (Resource.ColormapId)i;
-            };
+            panel.IntensityChannel.ValueChanged += (_, s) => { listener.IntensityChannel = s; };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -92,24 +86,15 @@ namespace Iviz.App
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
-            panel.FlipMinMax.ValueChanged += f =>
-            {
-                listener.FlipMinMax = f;
-            };
-            panel.MinIntensity.ValueChanged += f =>
-            {
-                listener.MinIntensity = f;
-            };
-            panel.MaxIntensity.ValueChanged += f =>
-            {
-                listener.MaxIntensity = f;
-            };
+            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
+            panel.MinIntensity.ValueChanged += f => { listener.MinIntensity = f; };
+            panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
         }
 
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            
+
             panel.IntensityChannel.Options = listener.FieldNames;
             if (listener.FieldNames.Count != 0 && listener.IntensityChannel.Length == 0)
             {
@@ -121,7 +106,7 @@ namespace Iviz.App
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
             panel.MinMax.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<GridMapConfiguration>(configAsJson);
@@ -156,7 +141,7 @@ namespace Iviz.App
             }
 
             ResetPanel();
-        }             
+        }
 
         public override void AddToState(StateConfiguration config)
         {

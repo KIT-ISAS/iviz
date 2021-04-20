@@ -162,7 +162,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9024825353580627598}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.061, z: -0.05}
+  m_LocalPosition: {x: -0.4, y: 0.061, z: -0.05}
   m_LocalScale: {x: 1, y: 1, z: 0.01}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -215,14 +215,12 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9024825353580627598}
-  m_Text: 'The validation
-
-    has <b>failed</b>.'
+  m_Text: Test
   m_OffsetZ: 0
   m_CharacterSize: 0.02
   m_LineSpacing: 1
-  m_Anchor: 4
-  m_Alignment: 1
+  m_Anchor: 3
+  m_Alignment: 0
   m_TabSize: 4
   m_FontSize: 30
   m_FontStyle: 0
@@ -292,6 +290,11 @@ MonoBehaviour:
   button2: {fileID: 7931353698432923384}
   button3: {fileID: 7931353699346708742}
   connector: {fileID: 586438443107256636}
+  iconMeshRenderer: {fileID: 0}
+  icons: []
+  menuButtons: []
+  upButton: {fileID: 0}
+  downButton: {fileID: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 ﻿using Iviz.Roslib;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.XmlRpc;
@@ -21,9 +22,9 @@ namespace Iviz.App
             public string Topic { get; }
             public string Type { get; }
             public string ShortType { get; }
-            public Resource.ModuleType ResourceType { get; }
+            public ModuleType ResourceType { get; }
 
-            public TopicWithResource([NotNull] string topic, [NotNull] string type, Resource.ModuleType resourceType)
+            public TopicWithResource([NotNull] string topic, [NotNull] string type, ModuleType resourceType)
             {
                 Topic = topic;
                 Type = type;
@@ -35,7 +36,7 @@ namespace Iviz.App
 
             public override string ToString()
             {
-                string type = (ResourceType == Resource.ModuleType.Invalid) ? Type : ShortType;
+                string type = (ResourceType == ModuleType.Invalid) ? Type : ShortType;
                 return $"{Resource.Font.Split(Topic, MaxLineWidth)}\n" +
                        $"<b>{Resource.Font.Split(type, MaxLineWidth)}</b>";
             }
@@ -63,9 +64,9 @@ namespace Iviz.App
                 }
 
                 bool resourceFound =
-                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out Resource.ModuleType resource);
+                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out ModuleType resource);
                 yield return new TopicWithResource(topic, msgType,
-                    resourceFound ? resource : Resource.ModuleType.Invalid);
+                    resourceFound ? resource : ModuleType.Invalid);
             }
         }
 
@@ -98,7 +99,7 @@ namespace Iviz.App
 
                 foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
                 {
-                    if (topic.ResourceType == Resource.ModuleType.Invalid)
+                    if (topic.ResourceType == ModuleType.Invalid)
                     {
                         item.Interactable = false;
                     }
@@ -107,7 +108,7 @@ namespace Iviz.App
             else
             {
                 panel.Items = topics
-                    .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
+                    .Where(topic => topic.ResourceType != ModuleType.Invalid)
                     .Select(topic => topic.ToString());
             }
 
@@ -124,7 +125,7 @@ namespace Iviz.App
             else
             {
                 clickedTopic = topics
-                    .Where(topic => topic.ResourceType != Resource.ModuleType.Invalid)
+                    .Where(topic => topic.ResourceType != ModuleType.Invalid)
                     .ElementAtOrDefault(index);
             }
 

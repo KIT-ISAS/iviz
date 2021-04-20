@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Iviz.Core;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -154,7 +155,7 @@ namespace Iviz.Displays
             UseColormap = true;
             MeshResource = Resource.Displays.Sphere;
             ElementScale3 = Vector3.one;
-            Colormap = Resource.ColormapId.gray;
+            Colormap = ColormapId.gray;
 
             argsComputeBuffer =
                 new ComputeBuffer(1, argsBuffer.Length * sizeof(uint), ComputeBufferType.IndirectArguments);

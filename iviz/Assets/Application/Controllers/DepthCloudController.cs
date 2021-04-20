@@ -20,7 +20,7 @@ namespace Iviz.Controllers
         [DataMember] public float PointSize { get; set; } = 1f;
         [DataMember] public float FovAngle { get; set; } = 1.0f * Mathf.Rad2Deg;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.DepthCloud;
+        [DataMember] public ModuleType ModuleType => ModuleType.DepthCloud;
         [DataMember] public bool Visible { get; set; } = true;
     }
 

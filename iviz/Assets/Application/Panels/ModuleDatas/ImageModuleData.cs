@@ -20,7 +20,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.Image;
+        public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
         [NotNull] public ImageListener Image => listener;
@@ -33,7 +33,7 @@ namespace Iviz.App
             base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(Resource.ModuleType.Image);
+            panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(ModuleType.Image);
             listener = new ImageListener(this);
             if (constructor.Configuration != null)
             {
@@ -79,7 +79,7 @@ namespace Iviz.App
 
             panel.Colormap.ValueChanged += (i, _) =>
             {
-                listener.Colormap = (Resource.ColormapId)i;
+                listener.Colormap = (ColormapId)i;
             };
             panel.Min.ValueChanged += f =>
             {

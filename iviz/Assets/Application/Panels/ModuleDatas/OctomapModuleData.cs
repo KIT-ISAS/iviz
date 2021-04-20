@@ -22,7 +22,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.Octomap;
+        public override ModuleType ModuleType => ModuleType.Octomap;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -30,7 +30,7 @@ namespace Iviz.App
         base(constructor.GetConfiguration<OctomapConfiguration>()?.Topic ?? constructor.Topic, 
             constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<OctomapPanelContents>(Resource.ModuleType.Octomap);
+            panel = DataPanelManager.GetPanelByResourceType<OctomapPanelContents>(ModuleType.Octomap);
             listener = new OctomapListener(this);
             if (constructor.Configuration == null)
             {

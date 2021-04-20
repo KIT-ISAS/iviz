@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Iviz.Displays;
+using Iviz.Msgs.IvizCommonMsgs;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -9,7 +10,7 @@ namespace Iviz.Resources
     {
         public const int Size = 14;
         public const int AtlasSize = 16;
-        public ReadOnlyDictionary<Resource.ColormapId, Texture2D> Textures { get; }
+        public ReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
         public ReadOnlyCollection<string> Names { get; }
         
         public ColormapsType()
@@ -34,25 +35,25 @@ namespace Iviz.Resources
             Names = new ReadOnlyCollection<string>(names);
 
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
-            Dictionary<Resource.ColormapId, Texture2D> textures = new Dictionary<Resource.ColormapId, Texture2D>()
+            Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>()
             {
-                [Resource.ColormapId.autumn] = assetHolder.Autumn,
-                [Resource.ColormapId.bone] = assetHolder.Bone,
-                [Resource.ColormapId.cool] = assetHolder.Cool,
-                [Resource.ColormapId.copper] = assetHolder.Copper,
-                [Resource.ColormapId.gray] = assetHolder.Gray,
-                [Resource.ColormapId.hot] = assetHolder.Hot,
-                [Resource.ColormapId.hsv] = assetHolder.Hsv,
-                [Resource.ColormapId.jet] = assetHolder.Jet,
-                [Resource.ColormapId.lines] = assetHolder.Lines,
-                [Resource.ColormapId.parula] = assetHolder.Parula,
-                [Resource.ColormapId.pink] = assetHolder.Pink,
-                [Resource.ColormapId.spring] = assetHolder.Spring,
-                [Resource.ColormapId.summer] = assetHolder.Summer,
-                [Resource.ColormapId.winter] = assetHolder.Winter,
+                [ColormapId.autumn] = assetHolder.Autumn,
+                [ColormapId.bone] = assetHolder.Bone,
+                [ColormapId.cool] = assetHolder.Cool,
+                [ColormapId.copper] = assetHolder.Copper,
+                [ColormapId.gray] = assetHolder.Gray,
+                [ColormapId.hot] = assetHolder.Hot,
+                [ColormapId.hsv] = assetHolder.Hsv,
+                [ColormapId.jet] = assetHolder.Jet,
+                [ColormapId.lines] = assetHolder.Lines,
+                [ColormapId.parula] = assetHolder.Parula,
+                [ColormapId.pink] = assetHolder.Pink,
+                [ColormapId.spring] = assetHolder.Spring,
+                [ColormapId.summer] = assetHolder.Summer,
+                [ColormapId.winter] = assetHolder.Winter,
             };
 
-            Textures = new ReadOnlyDictionary<Resource.ColormapId, Texture2D>(textures);
+            Textures = new ReadOnlyDictionary<ColormapId, Texture2D>(textures);
         }
     }
 }

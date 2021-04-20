@@ -21,7 +21,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.JointState;
+        public override ModuleType ModuleType => ModuleType.JointState;
 
         public override IConfiguration Configuration => listener.Config;
 
@@ -29,7 +29,7 @@ namespace Iviz.App
             base(constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(Resource.ModuleType.JointState);
+            panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(ModuleType.JointState);
             listener = new JointStateListener(this);
             if (constructor.Configuration != null)
             {
@@ -125,7 +125,7 @@ namespace Iviz.App
                 throw new InvalidOperationException($"No robot with id '{robotId}' found");
             }
 
-            if (robotData.ModuleType != Resource.ModuleType.Robot)
+            if (robotData.ModuleType != ModuleType.Robot)
             {
                 throw new InvalidOperationException($"Module with id '{robotId}' is not a robot");
             }

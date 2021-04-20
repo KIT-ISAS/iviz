@@ -3,7 +3,6 @@ using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MsgsWrapper;
-using Iviz.Resources;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -13,7 +12,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/OctomapConfiguration";
 
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
+        [DataMember] public ModuleType ModuleType => ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public ColorRGBA Tint { get; set; } = new ColorRGBA(0.5f, 0.5f, 1, 1);

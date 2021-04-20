@@ -16,6 +16,8 @@ namespace Iviz.App.ARDialogs
         int layer;
         Color32 color;
 
+        readonly NativeList<LineWithColor> lineSegments = new NativeList<LineWithColor>();
+
         public Func<Vector3> Start { get; set; }
         public Func<Vector3> End { get; set; }
 
@@ -23,7 +25,7 @@ namespace Iviz.App.ARDialogs
 
         void Awake()
         {
-            lines = ResourcePool.RentDisplay<LineResource>(transform);
+            lines = ResourcePool.RentDisplay<LineResource>(TfListener.ListenersFrame.Transform);
             lines.ElementScale = 0.005f;
 
             spheres = new MeshMarkerResource[3];
@@ -55,6 +57,7 @@ namespace Iviz.App.ARDialogs
         public void Suspend()
         {
             Color = Color.cyan;
+            lineSegments.Clear();
         }
 
         public bool Visible
@@ -69,11 +72,17 @@ namespace Iviz.App.ARDialogs
             set
             {
                 color = value;
-                foreach (var sphere in spheres)
-                {
-                    sphere.Color = color;
-                    sphere.EmissiveColor = color;
-                }
+
+                Color32 colorMid = color.WithAlpha(130);
+                Color32 colorB = color.WithAlpha(10);
+
+                spheres[0].Color = color;
+                spheres[1].Color = colorMid;
+                spheres[2].Color = colorB;
+                
+                spheres[0].EmissiveColor = color;
+                spheres[1].EmissiveColor = colorMid;
+                spheres[2].EmissiveColor = colorB;
             }
         }
 
@@ -82,6 +91,7 @@ namespace Iviz.App.ARDialogs
         public void SplitForRecycle()
         {
             ResourcePool.ReturnDisplay(lines);
+
             foreach (var sphere in spheres)
             {
                 sphere.EmissiveColor = Color.black;
@@ -104,14 +114,18 @@ namespace Iviz.App.ARDialogs
             spheres[1].Transform.position = mid;
             spheres[2].Transform.position = b;
 
-            var segments = new NativeList<LineWithColor>
-            {
-                new LineWithColor(a, mid, color),
-                new LineWithColor(mid, b, color)
-            };
-            
-            lines.transform.SetPose(Pose.identity);
-            lines.Set(segments);
+            Color32 colorMid = color.WithAlpha(130);
+            Color32 colorB = color.WithAlpha(10);
+
+            lineSegments.Clear();
+            lineSegments.Add(new LineWithColor(a, color, mid, colorMid));
+            lineSegments.Add(new LineWithColor(mid, colorMid, b, colorB));
+            lines.Set(lineSegments);
+        }
+
+        void OnDestroy()
+        {
+            lineSegments.Dispose();
         }
     }
 }
