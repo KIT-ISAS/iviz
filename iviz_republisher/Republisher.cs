@@ -102,13 +102,13 @@ namespace Iviz.Republisher
             
             try
             {
-                await using var reader = await RosChannelReader.CreateAsync(sourceClient, topic, Token);
+                await using var reader = await sourceClient.CreateReaderAsync(topic, Token);
 
                 Console.WriteLine($"** Transferring '{topic}'!");
                 
                 await foreach (var msg in reader.ReadAllAsync(Token))
                 {
-                    writer ??= await RosChannelWriter.CreateForAsync(msg, destClient, topic, Token);
+                    writer ??= await destClient.CreateWriterForMessageAsync(msg, topic, Token);
                     writer.Write(msg);
                 }
 
