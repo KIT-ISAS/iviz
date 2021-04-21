@@ -77,9 +77,11 @@ namespace Iviz.Roslib
             if (responses.Count != 0 && responses[0].HasPrefix("error"))
             {
                 int index = responses[0].IndexOf('=');
-                throw new RosHandshakeException(index != -1
-                    ? $"Failed handshake: {responses[0].Substring(index + 1)}"
-                    : $"Failed handshake: {responses[0]}");
+                throw new RosHandshakeException(
+                    "Partner sent error message: [" +
+                    (index != -1
+                    ? responses[0].Substring(index + 1)
+                    : responses[0]) + "]");
             }
         }
 

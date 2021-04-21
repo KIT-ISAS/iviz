@@ -251,7 +251,7 @@ namespace Iviz.Roslib
             {
                 int index = responses[0].IndexOf('=');
                 string description = index != -1 ? responses[0].Substring(index + 1) : responses[0];
-                throw new RosHandshakeException(description);
+                throw new RosHandshakeException($"Partner sent error message: [{description}]");
             }
 
             TcpHeader = responses.AsReadOnly();
