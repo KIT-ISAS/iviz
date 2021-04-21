@@ -18,7 +18,7 @@ namespace Iviz.App
         [NotNull] readonly DepthCloudPanelContents panel;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.DepthCloud;
+        public override ModuleType ModuleType => ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
@@ -28,7 +28,7 @@ namespace Iviz.App
         public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) : 
             base(constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(Resource.ModuleType.DepthCloud);
+            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
 
             controller = new DepthCloudController(this);
             if (constructor.Configuration != null)
@@ -56,7 +56,7 @@ namespace Iviz.App
             depthImageCandidates.Add(NoneStr);
             depthImageCandidates.AddRange(
                 ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Where(data => data.ModuleType == ModuleType.Image)
                     .Select(data => data.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
@@ -73,7 +73,7 @@ namespace Iviz.App
             colorImageCandidates.Add(NoneStr);
             colorImageCandidates.AddRange(
                 ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Where(data => data.ModuleType == ModuleType.Image)
                     .Select(data => data.Topic)
             );
             panel.Color.Options = colorImageCandidates;
@@ -130,7 +130,7 @@ namespace Iviz.App
             depthImageCandidates.Add(NoneStr);
             depthImageCandidates.AddRange(
                 ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Where(data => data.ModuleType == ModuleType.Image)
                     .Select(data => data.Topic)
             );
             panel.Depth.Options = depthImageCandidates;
@@ -139,7 +139,7 @@ namespace Iviz.App
             colorImageCandidates.Add(NoneStr);
             colorImageCandidates.AddRange(
                 ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == Resource.ModuleType.Image)
+                    .Where(data => data.ModuleType == ModuleType.Image)
                     .Select(data => data.Topic)
             );
             panel.Color.Options = colorImageCandidates;
@@ -191,7 +191,7 @@ namespace Iviz.App
                 throw new InvalidOperationException($"No image with id '{imageId}' found");
             }
 
-            if (imageData.ModuleType != Resource.ModuleType.Image)
+            if (imageData.ModuleType != ModuleType.Image)
             {
                 throw new InvalidOperationException($"Module with id '{imageId}' is not an image");
             }

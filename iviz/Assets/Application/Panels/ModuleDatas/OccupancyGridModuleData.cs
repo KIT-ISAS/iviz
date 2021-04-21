@@ -12,7 +12,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="OccupancyGridPanelContents"/> 
     /// </summary>
-
     public sealed class OccupancyGridModuleData : ListenerModuleData
     {
         [NotNull] readonly OccupancyGridListener listener;
@@ -21,15 +20,15 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.OccupancyGrid;
+        public override ModuleType ModuleType => ModuleType.OccupancyGrid;
         public override IConfiguration Configuration => listener.Config;
 
 
         public OccupancyGridModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic, 
-            constructor.Type)
+            base(constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(Resource.ModuleType.OccupancyGrid);
+            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(ModuleType.OccupancyGrid);
             listener = new OccupancyGridListener(this);
             if (constructor.Configuration == null)
             {
@@ -37,8 +36,9 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (OccupancyGridConfiguration)constructor.Configuration;
+                listener.Config = (OccupancyGridConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -48,7 +48,7 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            panel.Colormap.Index = (int)listener.Colormap;
+            panel.Colormap.Index = (int) listener.Colormap;
             panel.HideButton.State = listener.Visible;
             panel.FlipColors.Value = listener.FlipMinMax;
             panel.ScaleZ.Value = listener.ScaleZ;
@@ -70,23 +70,11 @@ namespace Iviz.App
                 listener.Tint = color;
             };
 
-            panel.OcclusionOnlyMode.ValueChanged += f =>
-            {
-                listener.RenderAsOcclusionOnly = f;
-            };
+            panel.OcclusionOnlyMode.ValueChanged += f => { listener.RenderAsOcclusionOnly = f; };
 
-            panel.FlipColors.ValueChanged += f =>
-            {
-                listener.FlipMinMax = f;
-            };
-            panel.ScaleZ.ValueChanged += f =>
-            {
-                listener.ScaleZ = f;
-            };
-            panel.ShowTexture.ValueChanged += f =>
-            {
-                listener.TextureVisible = f;
-            };
+            panel.FlipColors.ValueChanged += f => { listener.FlipMinMax = f; };
+            panel.ScaleZ.ValueChanged += f => { listener.ScaleZ = f; };
+            panel.ShowTexture.ValueChanged += f => { listener.TextureVisible = f; };
             panel.ShowCubes.ValueChanged += f =>
             {
                 listener.CubesVisible = f;
@@ -94,10 +82,7 @@ namespace Iviz.App
                 panel.ScaleZ.Interactable = f;
             };
 
-            panel.Colormap.ValueChanged += (i, _) =>
-            {
-                listener.Colormap = (Resource.ColormapId)i;
-            };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -119,10 +104,10 @@ namespace Iviz.App
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<OccupancyGridConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(OccupancyGridConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -145,12 +130,12 @@ namespace Iviz.App
 
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
 
             ResetPanel();
-        }             
+        }
 
         public override void AddToState(StateConfiguration config)
         {

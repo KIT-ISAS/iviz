@@ -255,7 +255,7 @@ namespace Iviz.Roslib
 
             if (errorMessage != null)
             {
-                throw new RosHandshakeException($"Failed handshake: {errorMessage}");
+                throw new RosHandshakeException($"Partner sent error message: [{errorMessage}]");
             }
         }
 

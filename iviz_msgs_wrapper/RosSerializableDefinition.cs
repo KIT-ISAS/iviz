@@ -49,7 +49,9 @@ namespace Iviz.MsgsWrapper
             foreach (var property in typeof(T).GetProperties())
             {
                 if (property.GetGetMethod() == null
-                    || (property.GetType().GetGenericTypeDefinition() != typeof(List<>) && property.GetSetMethod() == null)
+                    || (property.GetType().IsGenericType 
+                        && property.GetType().GetGenericTypeDefinition() != typeof(List<>) 
+                        && property.GetSetMethod() == null)
                     || property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null)
                 {
                     continue;

@@ -21,14 +21,14 @@ namespace Iviz.App
         [NotNull] public GridController GridController { get; }
         [NotNull] readonly GridPanelContents panel;
 
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.Grid;
+        public override ModuleType ModuleType => ModuleType.Grid;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => GridController.Config;
         public override IController Controller => GridController;
 
         public GridModuleData([NotNull] ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(Resource.ModuleType.Grid);
+            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
 
             GridController = new GridController(this);
             if (constructor.Configuration != null)

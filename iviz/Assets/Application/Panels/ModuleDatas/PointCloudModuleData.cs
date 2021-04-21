@@ -21,14 +21,14 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.PointCloud;
+        public override ModuleType ModuleType => ModuleType.PointCloud;
         public override IConfiguration Configuration => listener.Config;
 
 
         public PointCloudModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(Resource.ModuleType.PointCloud);
+            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(ModuleType.PointCloud);
             listener = new PointCloudListener(this);
             if (constructor.Configuration == null)
             {
@@ -80,7 +80,7 @@ namespace Iviz.App
             };
             panel.Colormap.ValueChanged += (i, _) =>
             {
-                listener.Colormap = (Resource.ColormapId)i;
+                listener.Colormap = (ColormapId)i;
             };
             panel.CloseButton.Clicked += () =>
             {

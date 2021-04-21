@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -76,9 +77,9 @@ namespace Iviz.Displays
         public int Width => Texture != null ? Texture.width : 0;
         public int Height => Texture != null ? Texture.height : 0;
 
-        Resource.ColormapId colormap;
+        ColormapId colormap;
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => colormap;
             set

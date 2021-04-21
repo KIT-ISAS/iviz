@@ -18,7 +18,7 @@ namespace Iviz.Controllers
     public class GridConfiguration : IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.Grid;
+        [DataMember] public ModuleType ModuleType => ModuleType.Grid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = GridController.DefaultColor * 0.25f;

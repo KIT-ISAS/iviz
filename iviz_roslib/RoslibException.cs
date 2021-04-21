@@ -115,14 +115,6 @@ namespace Iviz.Roslib
         public RosHandshakeException(string message) : base(message)
         {
         }
-
-        public RosHandshakeException()
-        {
-        }
-
-        public RosHandshakeException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
     }
 
     public class RosServiceNotFoundException : RoslibException

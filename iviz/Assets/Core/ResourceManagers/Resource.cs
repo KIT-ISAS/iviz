@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.OctomapMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -26,53 +27,6 @@ namespace Iviz.Resources
     /// </summary>
     public static class Resource
     {
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ColormapId : byte
-        {
-            lines,
-            pink,
-            copper,
-            bone,
-            gray,
-            winter,
-            autumn,
-            summer,
-            spring,
-            cool,
-            hot,
-            hsv,
-            jet,
-            parula
-        }
-
-        /// <summary>
-        /// Module type.
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum ModuleType : byte
-        {
-            Invalid = 0,
-            Grid,
-            TF,
-            PointCloud,
-            Image,
-            Marker,
-            InteractiveMarker,
-            JointState,
-            DepthCloud,
-            LaserScan,
-            AugmentedReality,
-            Magnitude,
-            OccupancyGrid,
-            Joystick,
-            Path,
-            GridMap,
-            Robot,
-            Octomap,
-            ARGuiSystem,
-        }
-
-
         static MaterialsType materials;
         static ColormapsType colormaps;
         static DisplaysType displays;
@@ -114,7 +68,8 @@ namespace Iviz.Resources
                     {GridMap.RosMessageType, ModuleType.GridMap},
                     {Octomap.RosMessageType, ModuleType.Octomap},
                     {OctomapWithPose.RosMessageType, ModuleType.Octomap},
-                    {"iviz_msgs/Dialog", ModuleType.ARGuiSystem},
+                    {GuiDialog.RosMessageType, ModuleType.GuiDialog},
+                    {GuiDialogArray.RosMessageType, ModuleType.GuiDialog},
                 }
             );
 

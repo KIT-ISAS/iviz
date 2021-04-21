@@ -20,14 +20,14 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.TF;
+        public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
 
         public TfModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(Resource.ModuleType.TF);
+            panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(ModuleType.TF);
             listener = new TfListener(this);
             if (constructor.Configuration != null)
             {

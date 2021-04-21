@@ -100,7 +100,7 @@ namespace Iviz.Controllers
             resource.UseIntensityForAllScales = true;
             resource.MeshResource = Resource.Displays.Cube;
             resource.UseColormap = false;
-            resource.Colormap = Resource.ColormapId.gray;
+            resource.Colormap = ColormapId.gray;
 
             Config = new OctomapConfiguration();
 

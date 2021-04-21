@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.App
@@ -31,7 +32,7 @@ namespace Iviz.App
             Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
-                .SetIndex((int)Resource.ColormapId.gray);
+                .SetIndex((int)ColormapId.gray);
             Min = p.AddSlider("Colormap Min").SetMinValue(0).SetMaxValue(1);
             Max = p.AddSlider("Colormap Max").SetMinValue(0).SetMaxValue(1);
             FlipMinMax = p.AddToggle("Flip Min/Max");

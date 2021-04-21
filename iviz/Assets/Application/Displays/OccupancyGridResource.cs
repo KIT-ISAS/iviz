@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Core;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -79,7 +80,7 @@ namespace Iviz.Displays
             set => resource.OcclusionOnly = value;
         }
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => resource.Colormap;
             set => resource.Colormap = value;
@@ -106,7 +107,7 @@ namespace Iviz.Displays
             NumCellsY = 10;
             CellSize = 1.0f;
 
-            Colormap = Resource.ColormapId.gray;
+            Colormap = ColormapId.gray;
 
             resource.MeshResource = Resource.Displays.Cube;
             resource.UseColormap = true;

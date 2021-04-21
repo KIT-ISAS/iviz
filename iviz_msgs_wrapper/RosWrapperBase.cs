@@ -210,7 +210,7 @@ namespace Iviz.MsgsWrapper
             [typeof(double[])] = InitializeArrayProperty<double>,
             [typeof(time[])] = InitializeArrayProperty<time>,
             [typeof(duration[])] = InitializeArrayProperty<duration>,
-            
+
             [typeof(List<bool>)] = InitializeListProperty<bool>,
             [typeof(List<char>)] = InitializeListProperty<char>,
             [typeof(List<sbyte>)] = InitializeListProperty<sbyte>,
@@ -224,7 +224,7 @@ namespace Iviz.MsgsWrapper
             [typeof(List<float>)] = InitializeListProperty<float>,
             [typeof(List<double>)] = InitializeListProperty<double>,
             [typeof(List<time>)] = InitializeListProperty<time>,
-            [typeof(List<duration>)] = InitializeListProperty<duration>,            
+            [typeof(List<duration>)] = InitializeListProperty<duration>,
 
             [typeof(string)] = InitializeStringProperty,
             [typeof(string[])] = InitializeStringArrayProperty,
@@ -232,38 +232,37 @@ namespace Iviz.MsgsWrapper
 
 
             // a long list of types to ensure that the AOT stripper does not remove them
-            [typeof(Vector3)] = InitializeProperty<Vector3>,
-            [typeof(Point)] = InitializeProperty<Point>,
-            [typeof(Point32)] = InitializeProperty<Point32>,
-            [typeof(Quaternion)] = InitializeProperty<Quaternion>,
-            [typeof(Pose)] = InitializeProperty<Pose>,
-            [typeof(Transform)] = InitializeProperty<Transform>,
-            [typeof(Twist)] = InitializeProperty<Twist>,
-            [typeof(ColorRGBA)] = InitializeProperty<ColorRGBA>,
-            [typeof(Color32)] = InitializeProperty<Color32>,
-            [typeof(Vector2f)] = InitializeProperty<Vector2f>,
-            [typeof(Vector3f)] = InitializeProperty<Vector3f>,
-            [typeof(Triangle)] = InitializeProperty<Triangle>,
+            [typeof(Vector3)] = InitializeMessageProperty<Vector3>,
+            [typeof(Point)] = InitializeMessageProperty<Point>,
+            [typeof(Point32)] = InitializeMessageProperty<Point32>,
+            [typeof(Quaternion)] = InitializeMessageProperty<Quaternion>,
+            [typeof(Pose)] = InitializeMessageProperty<Pose>,
+            [typeof(Transform)] = InitializeMessageProperty<Transform>,
+            [typeof(Twist)] = InitializeMessageProperty<Twist>,
+            [typeof(ColorRGBA)] = InitializeMessageProperty<ColorRGBA>,
+            [typeof(Color32)] = InitializeMessageProperty<Color32>,
+            [typeof(Vector2f)] = InitializeMessageProperty<Vector2f>,
+            [typeof(Vector3f)] = InitializeMessageProperty<Vector3f>,
+            [typeof(Triangle)] = InitializeMessageProperty<Triangle>,
             [typeof(Header)] = InitializeMessageProperty<Header>,
             [typeof(TransformStamped)] = InitializeMessageProperty<TransformStamped>,
             [typeof(Log)] = InitializeMessageProperty<Log>,
-            
-            [typeof(Vector3[])] = InitializeArrayProperty<Vector3>,
-            [typeof(Point[])] = InitializeArrayProperty<Point>,
-            [typeof(Point32[])] = InitializeArrayProperty<Point32>,
-            [typeof(Quaternion[])] = InitializeArrayProperty<Quaternion>,
-            [typeof(Pose[])] = InitializeArrayProperty<Pose>,
-            [typeof(Transform[])] = InitializeArrayProperty<Transform>,
-            [typeof(Twist[])] = InitializeArrayProperty<Twist>,
-            [typeof(ColorRGBA[])] = InitializeArrayProperty<ColorRGBA>,
-            [typeof(Color32[])] = InitializeArrayProperty<Color32>,
-            [typeof(Vector2f[])] = InitializeArrayProperty<Vector2f>,
-            [typeof(Vector3f[])] = InitializeArrayProperty<Vector3f>,
-            [typeof(Triangle[])] = InitializeArrayProperty<Triangle>,
+
+            [typeof(Vector3[])] = InitializeMessageArrayProperty<Vector3>,
+            [typeof(Point[])] = InitializeMessageArrayProperty<Point>,
+            [typeof(Point32[])] = InitializeMessageArrayProperty<Point32>,
+            [typeof(Quaternion[])] = InitializeMessageArrayProperty<Quaternion>,
+            [typeof(Pose[])] = InitializeMessageArrayProperty<Pose>,
+            [typeof(Transform[])] = InitializeMessageArrayProperty<Transform>,
+            [typeof(Twist[])] = InitializeMessageArrayProperty<Twist>,
+            [typeof(ColorRGBA[])] = InitializeMessageArrayProperty<ColorRGBA>,
+            [typeof(Color32[])] = InitializeMessageArrayProperty<Color32>,
+            [typeof(Vector2f[])] = InitializeMessageArrayProperty<Vector2f>,
+            [typeof(Vector3f[])] = InitializeMessageArrayProperty<Vector3f>,
+            [typeof(Triangle[])] = InitializeMessageArrayProperty<Triangle>,
             [typeof(Header[])] = InitializeMessageArrayProperty<Header>,
             [typeof(TransformStamped[])] = InitializeMessageArrayProperty<TransformStamped>,
             [typeof(Log[])] = InitializeMessageArrayProperty<Log>,
-            
         };
 
         static string GetPropertyName(MemberInfo property)
@@ -382,7 +381,7 @@ namespace Iviz.MsgsWrapper
                 bi.Fields.Add(new StringFixedArrayField<T>(property, size, propertyName));
             }
         }
-        
+
         static void InitializeStringListProperty(PropertyInfo property, BuilderInfo bi)
         {
             string propertyName = GetPropertyName(property);
@@ -400,7 +399,7 @@ namespace Iviz.MsgsWrapper
                 bi.BufferForMd5.Append("string[").Append(size).Append("] ").Append(propertyName).Append("\n");
                 bi.Fields.Add(new StringFixedListField<T>(property, size, propertyName));
             }
-        }        
+        }
 
         static void InitializeMessageProperty(PropertyInfo property, BuilderInfo bi)
         {
@@ -445,6 +444,15 @@ namespace Iviz.MsgsWrapper
             bi.Fields.Add(field);
         }
 
+        /*
+        static TUnderlying Getter<TEnum, TUnderlying>(TEnum t)
+            where TEnum : unmanaged, Enum
+            where TUnderlying : unmanaged
+        {
+            return (TUnderlying) t;
+        }
+        */
+
         static void InitializeEnumProperty(PropertyInfo property, BuilderInfo bi)
         {
             string propertyName = GetPropertyName(property);
@@ -454,7 +462,7 @@ namespace Iviz.MsgsWrapper
             bi.RosDefinition.Append(builtInName).Append(" ").AppendLine(propertyName);
             bi.BufferForMd5.Append(builtInName).Append(" ").Append(propertyName).Append("\n");
 
-            Type structType = typeof(StructField<,>).MakeGenericType(typeof(T), property.PropertyType);
+            Type structType = typeof(StructField<,>).MakeGenericType(typeof(T), underlyingType);
             IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(structType, property)!;
             bi.Fields.Add(field);
         }
@@ -472,7 +480,7 @@ namespace Iviz.MsgsWrapper
                 bi.RosDefinition.Append(builtInName).Append("[] ").AppendLine(propertyName);
                 bi.BufferForMd5.Append(builtInName).Append("[] ").Append(propertyName).Append("\n");
 
-                Type structType = typeof(StructArrayField<,>).MakeGenericType(typeof(T), property.PropertyType);
+                Type structType = typeof(StructArrayField<,>).MakeGenericType(typeof(T), underlyingType);
                 field = (IMessageField<T>) Activator.CreateInstance(structType, property, propertyName)!;
             }
             else
@@ -481,7 +489,7 @@ namespace Iviz.MsgsWrapper
                 bi.RosDefinition.Append(builtInName).Append("[").Append(size).Append("] ").AppendLine(propertyName);
                 bi.BufferForMd5.Append(builtInName).Append("[").Append(size).Append("] ").Append(propertyName)
                     .Append("\n");
-                Type structType = typeof(StructFixedArrayField<,>).MakeGenericType(typeof(T), property.PropertyType);
+                Type structType = typeof(StructFixedArrayField<,>).MakeGenericType(typeof(T), underlyingType);
                 field = (IMessageField<T>) Activator.CreateInstance(structType, property, size, propertyName)!;
             }
 

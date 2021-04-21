@@ -834,7 +834,7 @@ namespace Iviz.Displays
                 UnityEngine.Light light = lightObject.AddComponent<UnityEngine.Light>();
                 light.color = source.Diffuse.ToColor32();
                 light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
-                lightObject.transform.localPosition = source.Position.ToVector3();
+                lightObject.transform.localPosition = source.Position.Ros2Unity();
                 light.range = source.Range != 0 ? source.Range : 20;
                 switch ((SdfLightType) source.Type)
                 {
@@ -843,13 +843,13 @@ namespace Iviz.Displays
                         break;
                     case SdfLightType.Spot:
                         light.type = LightType.Spot;
-                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        light.transform.LookAt(light.transform.position + source.Direction.Ros2Unity());
                         light.spotAngle = source.OuterAngle * Mathf.Rad2Deg;
                         light.innerSpotAngle = source.InnerAngle * Mathf.Rad2Deg;
                         break;
                     case SdfLightType.Directional:
                         light.type = LightType.Directional;
-                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        light.transform.LookAt(light.transform.position + source.Direction.Ros2Unity());
                         break;
                 }
             }

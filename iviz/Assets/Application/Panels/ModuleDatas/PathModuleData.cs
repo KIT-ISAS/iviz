@@ -21,7 +21,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.Path;
+        public override ModuleType ModuleType => ModuleType.Path;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -29,7 +29,7 @@ namespace Iviz.App
         base(constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
             constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(Resource.ModuleType.Path);
+            panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(ModuleType.Path);
             listener = new PathListener(this);
             if (constructor.Configuration == null)
             {

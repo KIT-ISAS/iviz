@@ -9,27 +9,29 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARLineConnector : MonoBehaviour, IDisplay, IRecyclable
+    public class ARLineConnector : MonoBehaviour
     {
+        GameObject node;
         MeshMarkerResource[] spheres;
         LineResource lines;
         int layer;
         Color32 color;
 
+        readonly NativeList<LineWithColor> lineSegments = new NativeList<LineWithColor>();
+
         public Func<Vector3> Start { get; set; }
         public Func<Vector3> End { get; set; }
 
-        public Bounds? Bounds => null;
-
         void Awake()
         {
-            lines = ResourcePool.RentDisplay<LineResource>(transform);
+            node = new GameObject("AR LineConnector Node");
+            lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
             spheres = new MeshMarkerResource[3];
             foreach (ref var sphere in spheres.Ref())
             {
-                sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, transform);
+                sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
                 sphere.CastsShadows = false;
             }
@@ -52,15 +54,14 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        public void Suspend()
-        {
-            Color = Color.cyan;
-        }
-
         public bool Visible
         {
             get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
+            set
+            {
+                gameObject.SetActive(value);
+                node.SetActive(value);
+            }
         }
 
         public Color Color
@@ -69,19 +70,24 @@ namespace Iviz.App.ARDialogs
             set
             {
                 color = value;
-                foreach (var sphere in spheres)
-                {
-                    sphere.Color = color;
-                    sphere.EmissiveColor = color;
-                }
+
+                Color32 colorMid = color.WithAlpha(130);
+                Color32 colorB = color.WithAlpha(10);
+
+                spheres[0].Color = color;
+                spheres[1].Color = colorMid;
+                spheres[2].Color = colorB;
+                
+                spheres[0].EmissiveColor = color;
+                spheres[1].EmissiveColor = colorMid;
+                spheres[2].EmissiveColor = colorB;
             }
         }
-
-        public string Name { get; set; }
 
         public void SplitForRecycle()
         {
             ResourcePool.ReturnDisplay(lines);
+
             foreach (var sphere in spheres)
             {
                 sphere.EmissiveColor = Color.black;
@@ -104,14 +110,19 @@ namespace Iviz.App.ARDialogs
             spheres[1].Transform.position = mid;
             spheres[2].Transform.position = b;
 
-            var segments = new NativeList<LineWithColor>
-            {
-                new LineWithColor(a, mid, color),
-                new LineWithColor(mid, b, color)
-            };
-            
-            lines.transform.SetPose(Pose.identity);
-            lines.Set(segments);
+            Color32 colorMid = color.WithAlpha(130);
+            Color32 colorB = color.WithAlpha(10);
+
+            lineSegments.Clear();
+            lineSegments.Add(new LineWithColor(a, color, mid, colorMid));
+            lineSegments.Add(new LineWithColor(mid, colorMid, b, colorB));
+            lines.Set(lineSegments);
+        }
+
+        void OnDestroy()
+        {
+            lineSegments.Dispose();
+            Destroy(node);
         }
     }
 }

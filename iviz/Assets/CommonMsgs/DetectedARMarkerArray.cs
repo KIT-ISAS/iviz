@@ -1,6 +1,7 @@
+using System;
 using System.Runtime.Serialization;
-using Iviz.Msgs;
 using Iviz.MsgsWrapper;
+using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -9,6 +10,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/DetectedARMarkerArray";
 
-        [DataMember] public DetectedARMarker[] Markers { get; set; }
+        [DataMember, NotNull] public DetectedARMarker[] Markers { get; set; } = Array.Empty<DetectedARMarker>();
     }
 }

@@ -19,7 +19,7 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.Magnitude;
+        public override ModuleType ModuleType => ModuleType.Magnitude;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -27,7 +27,7 @@ namespace Iviz.App
             base(constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(Resource.ModuleType.Magnitude);
+            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(ModuleType.Magnitude);
             listener = new MagnitudeListener(this);
             if (constructor.Configuration == null)
             {

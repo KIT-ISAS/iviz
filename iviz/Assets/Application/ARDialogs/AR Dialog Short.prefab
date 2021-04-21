@@ -197,7 +197,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9024825353580627598}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.008, y: -0.072, z: -0.05}
+  m_LocalPosition: {x: -0.42, y: -0.072, z: -0.05}
   m_LocalScale: {x: 1, y: 1, z: 0.01}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -254,7 +254,7 @@ TextMesh:
   m_OffsetZ: 0
   m_CharacterSize: 0.02
   m_LineSpacing: 1
-  m_Anchor: 4
+  m_Anchor: 3
   m_Alignment: 0
   m_TabSize: 4
   m_FontSize: 30
@@ -318,6 +318,12 @@ MonoBehaviour:
   button2: {fileID: 0}
   button3: {fileID: 0}
   connector: {fileID: 586438443107256636}
+  iconMeshRenderer: {fileID: 0}
+  icons: []
+  menuButtons: []
+  upButton: {fileID: 0}
+  downButton: {fileID: 0}
+  socketPosition: {x: 0, y: -0.4, z: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0

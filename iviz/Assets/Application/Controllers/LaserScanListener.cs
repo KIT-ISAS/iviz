@@ -18,11 +18,11 @@ namespace Iviz.Controllers
     public class LaserScanConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public Resource.ModuleType ModuleType => Resource.ModuleType.LaserScan;
+        [DataMember] public ModuleType ModuleType => ModuleType.LaserScan;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 0.03f;
-        [DataMember] public Resource.ColormapId Colormap { get; set; } = Resource.ColormapId.hsv;
+        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
         [DataMember] public bool UseIntensity { get; set; } = false;
         [DataMember] public bool UseLines { get; set; } = false;
         [DataMember] public bool ForceMinMax { get; set; } = false;
@@ -83,7 +83,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => config.Colormap;
             set

@@ -1,4 +1,5 @@
-﻿using Iviz.Resources;
+﻿using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Resources;
 
 namespace Iviz.App
 {
@@ -31,7 +32,7 @@ namespace Iviz.App
             MinMax = p.AddDataLabel("Min/Max");
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
-                        .SetIndex((int)Resource.ColormapId.hsv);
+                        .SetIndex((int)ColormapId.hsv);
 
             ForceMinMax = p.AddToggle("Colormap Force Min/Max");
             MinIntensity = p.AddNumberInputField("Colormap Min");

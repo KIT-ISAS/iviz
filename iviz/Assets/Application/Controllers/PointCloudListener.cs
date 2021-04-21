@@ -104,7 +104,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public Resource.ColormapId Colormap
+        public ColormapId Colormap
         {
             get => config.Colormap;
             set

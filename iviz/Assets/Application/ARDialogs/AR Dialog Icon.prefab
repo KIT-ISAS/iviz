@@ -69,7 +69,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1237688265730554377}
   m_LocalRotation: {x: -0.0061706007, y: -0.7070799, z: 0.7070799, w: 0.0061706007}
-  m_LocalPosition: {x: -0.309, y: 0.049, z: -0.05}
+  m_LocalPosition: {x: -0.309, y: 0.08, z: -0.05}
   m_LocalScale: {x: 0.02, y: 0.008000001, z: 0.02}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -241,7 +241,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9024825353580627598}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.12, y: 0.042, z: -0.05}
+  m_LocalPosition: {x: -0.14, y: 0.073, z: -0.05}
   m_LocalScale: {x: 1, y: 1, z: 0.01}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -298,7 +298,7 @@ TextMesh:
   m_OffsetZ: 0
   m_CharacterSize: 0.02
   m_LineSpacing: 1
-  m_Anchor: 4
+  m_Anchor: 3
   m_Alignment: 0
   m_TabSize: 4
   m_FontSize: 30
@@ -378,6 +378,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: a0c751427a203774493ae3ee1a91bee6, type: 3}
   - {fileID: 2800000, guid: a845f89bb5a7b43bab201c02881c5ebf, type: 3}
   - {fileID: 2800000, guid: 1d854d40bed339c40bfea37c2b5c3e61, type: 3}
+  menuButtons: []
+  upButton: {fileID: 0}
+  downButton: {fileID: 0}
+  socketPosition: {x: 0, y: -0.6, z: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -666,6 +670,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 791139870075898102, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}

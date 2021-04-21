@@ -5,6 +5,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MsgsWrapper;
+using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -22,9 +23,12 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public Header Header { get; set; }
         [DataMember] public ARMarkerType MarkerType { get; set; }
         [DataMember] public uint ArucoId { get; set; }
-        [DataMember] public string QrCode { get; set; } = "";
-        [DataMember, FixedSizeArray(4)] public Vector2f[] Corners { get; set; } = new Vector2f[4];
-        [DataMember] public Intrinsic Intrinsic { get; set; }
+        [DataMember, NotNull] public string QrCode { get; set; } = "";
+
+        [DataMember, FixedSizeArray(4), NotNull]
+        public Vector2f[] Corners { get; set; } = new Vector2f[4];
+
+        [DataMember, NotNull] public Intrinsic Intrinsic { get; set; } = new Intrinsic();
         [DataMember] public Pose CameraPose { get; set; }
     }
 }

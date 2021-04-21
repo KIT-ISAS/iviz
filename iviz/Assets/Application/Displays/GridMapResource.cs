@@ -1,6 +1,7 @@
 using System;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -39,7 +40,7 @@ namespace Iviz.Displays
             MeshRenderer.material = material;
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
-            Colormap = Resource.ColormapId.gray;
+            Colormap = ColormapId.gray;
         }
 
         protected override void Rebuild()

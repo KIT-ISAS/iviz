@@ -72,6 +72,7 @@ namespace Iviz.UtilsTests
         public void TestInteractiveMarkerMessage()
         {
             Assert.True(BuiltIns.GetMessageType(typeof(MyInteractiveMarker)) == MyInteractiveMarker.RosMessageType);
+            Console.WriteLine(MyInteractiveMarker.RosDefinition);
             Assert.True(
                 BuiltIns.GetMd5Sum(typeof(MyInteractiveMarker)) == BuiltIns.GetMd5Sum(typeof(InteractiveMarker)));
 
@@ -100,6 +101,15 @@ namespace Iviz.UtilsTests
             Assert.True(messageBytes.SequenceEqual(otherMessageBytes));
         }
 
+        enum LevelType : byte
+        {
+            DEBUG = 1, //debug level
+            INFO = 2, //general level
+            WARN = 4, //warning level
+            ERROR = 8, //error level
+            FATAL = 16 //fatal/critical level            
+        };
+
         class MyLog : RosMessageWrapper<MyLog>
         {
             [MessageName] public const string RosMessageType = "iviz_msgs/MyLog";
@@ -111,21 +121,22 @@ namespace Iviz.UtilsTests
             public const byte FATAL = 16; //fatal/critical level
 
             [DataMember(Name = "header")] public Header Header { get; set; }
-            [DataMember(Name = "level")] public byte Level { get; set; }
+            [DataMember(Name = "level")] public LevelType Level { get; set; }
             [DataMember(Name = "name")] public string Name { get; set; } = ""; // name of the node
             [DataMember(Name = "msg")] public string Msg { get; set; } = ""; // message 
             [DataMember(Name = "file")] public string File { get; set; } = ""; // file the message came from
             [DataMember(Name = "function")] public string Function { get; set; } = ""; // function the message came from
             [DataMember(Name = "line")] public uint Line { get; set; } // line the message came from
+
             [DataMember(Name = "topics")]
             public string[] Topics { get; set; } = Array.Empty<string>(); // topic names that the node publishes
         }
-        
+
         [Test]
         public void TestLogMessage()
         {
             Assert.True(BuiltIns.GetMessageType(typeof(MyLog)) == MyLog.RosMessageType);
             Assert.True(BuiltIns.GetMd5Sum(typeof(MyLog)) == BuiltIns.GetMd5Sum(typeof(Log)));
-        }        
+        }
     }
 }

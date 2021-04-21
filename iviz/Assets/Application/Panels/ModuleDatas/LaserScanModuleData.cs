@@ -19,7 +19,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.LaserScan;
+        public override ModuleType ModuleType => ModuleType.LaserScan;
         public override IConfiguration Configuration => listener.Config;
 
 
@@ -27,7 +27,7 @@ namespace Iviz.App
             base(constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(Resource.ModuleType.LaserScan);
+            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(ModuleType.LaserScan);
             listener = new LaserScanListener(this);
             if (constructor.Configuration == null)
             {
@@ -65,7 +65,7 @@ namespace Iviz.App
 
             panel.UseIntensity.ValueChanged += f => { listener.UseIntensity = f; };
             panel.PointSize.ValueChanged += f => { listener.PointSize = f; };
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (Resource.ColormapId) i; };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();

@@ -4,16 +4,18 @@ using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Sdf;
 using JetBrains.Annotations;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Logger = Iviz.Core.Logger;
 using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARDialog : MarkerResource
+    public class ARDialog : MarkerResource, IRecyclable
     {
         [SerializeField] TextMesh title;
         [SerializeField] TextMesh caption;
@@ -29,27 +31,20 @@ namespace Iviz.App.ARDialogs
         [SerializeField] ARButton upButton;
         [SerializeField] ARButton downButton;
 
+        [SerializeField] Vector3 socketPosition;
+
+        public string Id { get; internal set; }
+        public GuiDialogListener Listener { get; internal set; }
+        
         Material material;
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
 
         float? currentAngle;
         Vector3? currentPosition;
 
-        ModeType mode;
         FrameNode node;
-
-        public event Action<int> ButtonClicked;
-        public event Action<int> MenuClicked;
-
-        public enum ModeType
-        {
-            Ok,
-            YesNo,
-            OkCancel,
-            Forward,
-            ForwardBackward,
-        }
-
+        float scale;
+        
         public string Caption
         {
             get => caption.text;
@@ -80,7 +75,6 @@ namespace Iviz.App.ARDialogs
                 if (pivotFrameId != null)
                 {
                     node.AttachTo(pivotFrameId);
-                    connector.End = () => node.Transform.position;
                     currentPosition = null;
                     currentAngle = null;
                 }
@@ -96,70 +90,111 @@ namespace Iviz.App.ARDialogs
         public Vector3 DialogDisplacement { get; set; }
 
         public Vector3 PivotFrameOffset { get; set; }
+        public Vector3 PivotDisplacement { get; set; }
 
-        public ModeType Mode
+        public void SetButtonMode(DialogType value)
         {
-            get => mode;
-            set
+            if (button1 == null || button2 == null || button3 == null)
             {
-                mode = value;
+                Logger.Error($"{this}: Tried to set buttons in an asset that does not support them");
+                return;
+            }
 
-                if (button1 == null || button2 == null || button3 == null)
-                {
-                    throw new InvalidOperationException("This asset does not support buttons");
-                }
+            button1.Active = false;
+            button2.Active = false;
+            button3.Active = false;
 
-                button1.Active = false;
-                button2.Active = false;
-                button3.Active = false;
-                switch (value)
-                {
-                    case ModeType.Ok:
-                        button1.Active = true;
-                        button1.Icon = ARButton.ButtonIcon.Ok;
-                        button1.Caption = "Ok";
-                        break;
-                    case ModeType.Forward:
-                        button1.Active = true;
-                        button1.Icon = ARButton.ButtonIcon.Forward;
-                        button1.Caption = "Ok";
-                        break;
-                    case ModeType.YesNo:
-                        button2.Active = true;
-                        button2.Icon = ARButton.ButtonIcon.Ok;
-                        button2.Caption = "Yes";
-                        button3.Active = true;
-                        button3.Icon = ARButton.ButtonIcon.Cross;
-                        button3.Caption = "No";
-                        break;
-                }
+            switch (value)
+            {
+                case DialogType.ButtonOk:
+                    button1.Active = true;
+                    button1.Icon = ARButton.ButtonIcon.Ok;
+                    button1.Caption = "Ok";
+                    break;
+                case DialogType.ButtonForward:
+                    button1.Active = true;
+                    button1.Icon = ARButton.ButtonIcon.Forward;
+                    button1.Caption = "Ok";
+                    break;
+                case DialogType.ButtonYesNo:
+                    button2.Active = true;
+                    button2.Icon = ARButton.ButtonIcon.Ok;
+                    button2.Caption = "Yes";
+                    button3.Active = true;
+                    button3.Icon = ARButton.ButtonIcon.Cross;
+                    button3.Caption = "No";
+                    break;
+                case DialogType.ButtonForwardBackward:
+                    button2.Active = true;
+                    button2.Icon = ARButton.ButtonIcon.Backward;
+                    button2.Caption = "Back";
+                    button3.Active = true;
+                    button3.Icon = ARButton.ButtonIcon.Forward;
+                    button3.Caption = "Forward";
+                    break;
+                case DialogType.ButtonOkCancel:
+                    button2.Active = true;
+                    button2.Icon = ARButton.ButtonIcon.Ok;
+                    button2.Caption = "Ok";
+                    button3.Active = true;
+                    button3.Icon = ARButton.ButtonIcon.Cross;
+                    button3.Caption = "Cancel";
+                    break;
+                default:
+                    Logger.Error($"{this}: Invalid dialog type for mode {value}");
+                    break;
             }
         }
 
-        public enum IconType
+        enum IconTextureType
         {
             Error,
             Info,
-            Warning,
+            Warn,
             Dialog,
             Dialogs,
             Question
         }
 
-        IconType icon;
+        IconTextureType icon;
 
-        public IconType Icon
+        IconTextureType Icon
         {
             get => icon;
             set
             {
                 icon = value;
-                if (iconMeshRenderer == null)
-                {
-                    throw new InvalidOperationException("This asset does not support icons");
-                }
-
                 Material.mainTexture = icons[(int) value];
+            }
+        }
+
+        public void SetIconMode(IconType value)
+        {
+            if (iconMeshRenderer == null)
+            {
+                throw new InvalidOperationException("This asset does not support icons");
+            }
+
+            switch (value)
+            {
+                case IconType.Error:
+                    Icon = IconTextureType.Error;
+                    break;
+                case IconType.Info:
+                    Icon = IconTextureType.Info;
+                    break;
+                case IconType.Warn:
+                    Icon = IconTextureType.Warn;
+                    break;
+                case IconType.Dialog:
+                    Icon = IconTextureType.Dialog;
+                    break;
+                case IconType.Dialogs:
+                    Icon = IconTextureType.Dialogs;
+                    break;
+                case IconType.Question:
+                    Icon = IconTextureType.Question;
+                    break;
             }
         }
 
@@ -174,7 +209,8 @@ namespace Iviz.App.ARDialogs
                 menuEntries = value.ToArray();
                 if (menuButtons.Length == 0)
                 {
-                    throw new InvalidOperationException("This asset does not support menus");
+                    Logger.Error($"{this}: Trying to set a menu on an asset that does not support them");
+                    return;
                 }
 
                 MenuPage = 0;
@@ -199,17 +235,30 @@ namespace Iviz.App.ARDialogs
                 {
                     menuButtons[i].Visible = false;
                 }
+
+                upButton.Visible = menuPage > 0;
+                downButton.Visible = offset + menuButtons.Length < menuEntries.Length;
+            }
+        }
+
+        public float Scale
+        {
+            get => scale;
+            set
+            {
+                scale = value;
+                transform.localScale = scale * Vector3.one;
             }
         }
 
         void OnButtonClick(int index)
         {
-            ButtonClicked?.Invoke(index);
+            Listener.OnDialogButtonClicked(this, index);
         }
 
         void OnMenuClick(int index)
         {
-            MenuClicked?.Invoke(index + menuButtons.Length * MenuPage);
+            Listener.OnDialogMenuEntryClicked(this, index);
         }
 
         void OnScrollUpClick()
@@ -228,12 +277,23 @@ namespace Iviz.App.ARDialogs
             }
         }
 
+
+        //static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
+        Vector3 BaseDisplacement => -socketPosition;
+        
         protected override void Awake()
         {
             base.Awake();
 
-            connector.Start = () => Transform.position + new Vector3(0, -0.6f, 0);
-            connector.End = () => node.Transform.position + PivotFrameOffset;
+            connector.Start = () => Transform.position - BaseDisplacement * Scale;
+            connector.End = () =>
+            {
+                Vector3 framePosition = node.Transform.position + PivotFrameOffset;
+                
+                return PivotDisplacement.MaxAbsCoeff() == 0
+                    ? framePosition
+                    : framePosition + GetFlatCameraRotation(framePosition) * PivotDisplacement;
+            };
 
             node = FrameNode.Instantiate("ARDialog Node");
 
@@ -257,18 +317,21 @@ namespace Iviz.App.ARDialogs
                 int j = i;
                 menuButtons[i].Clicked += () => OnMenuClick(j);
             }
-            
+
             if (upButton != null)
             {
                 upButton.Clicked += OnScrollUpClick;
             }
-            
+
             if (downButton != null)
             {
                 downButton.Clicked += OnScrollDownClick;
             }
 
-            MenuEntries = new[] {"A", "B", "C"};
+            if (iconMeshRenderer != null)
+            {
+                iconMeshRenderer.material = Material;
+            }
         }
 
         void Update()
@@ -322,12 +385,10 @@ namespace Iviz.App.ARDialogs
             }
 
             Vector3 framePosition = node.Transform.position + PivotFrameOffset;
+            Quaternion cameraRotation = GetFlatCameraRotation(framePosition);
 
-            (float x, _, float z) = framePosition - Settings.MainCameraTransform.position;
-            float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
-            Quaternion cameraRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
+            Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement + BaseDisplacement * Scale;
 
-            Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement;
             if (currentPosition == null)
             {
                 currentPosition = targetPosition;
@@ -347,8 +408,31 @@ namespace Iviz.App.ARDialogs
             Transform.position = currentPosition.Value;
         }
 
+        Quaternion GetFlatCameraRotation(in Vector3 framePosition)
+        {
+            (float x, _, float z) = framePosition - Settings.MainCameraTransform.position;
+            float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
+            return Quaternion.AngleAxis(targetAngle, Vector3.up);
+        }
+
+        public void Initialize()
+        {
+            connector.Visible = true;
+        }
+
         public void Shutdown()
         {
+            connector.Visible = false;
+        }
+
+        public override string ToString()
+        {
+            return $"[Dialog Id='{Id}']";
+        }
+
+        public void SplitForRecycle()
+        {
+            connector.SplitForRecycle();
         }
     }
 }

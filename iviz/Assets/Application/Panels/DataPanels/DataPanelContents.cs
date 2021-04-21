@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -38,28 +39,28 @@ namespace Iviz.App
             }
         }
 
-        public static DataPanelContents AddTo(GameObject o, Resource.ModuleType resource)
+        public static DataPanelContents AddTo(GameObject o, ModuleType resource)
         {
             switch (resource)
             {
-                case Resource.ModuleType.TF: return o.AddComponent<TfPanelContents>();
-                case Resource.ModuleType.PointCloud: return o.AddComponent<PointCloudPanelContents>();
-                case Resource.ModuleType.Grid: return o.AddComponent<GridPanelContents>();
-                case Resource.ModuleType.Image: return o.AddComponent<ImagePanelContents>();
-                case Resource.ModuleType.Robot: return o.AddComponent<SimpleRobotPanelContents>();
-                case Resource.ModuleType.Marker: return o.AddComponent<MarkerPanelContents>();
-                case Resource.ModuleType.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
-                case Resource.ModuleType.JointState: return o.AddComponent<JointStatePanelContents>();
-                case Resource.ModuleType.DepthCloud: return o.AddComponent<DepthCloudPanelContents>();
-                case Resource.ModuleType.LaserScan: return o.AddComponent<LaserScanPanelContents>();
-                case Resource.ModuleType.AugmentedReality: return o.AddComponent<ARPanelContents>();
-                case Resource.ModuleType.Magnitude: return o.AddComponent<MagnitudePanelContents>();
-                case Resource.ModuleType.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
-                case Resource.ModuleType.Joystick: return o.AddComponent<JoystickPanelContents>();
-                case Resource.ModuleType.Path: return o.AddComponent<PathPanelContents>();
-                case Resource.ModuleType.GridMap: return o.AddComponent<GridMapPanelContents>();
-                case Resource.ModuleType.Octomap: return o.AddComponent<OctomapPanelContents>();
-                case Resource.ModuleType.ARGuiSystem: return o.AddComponent<ARGuiPanelContents>();
+                case ModuleType.TF: return o.AddComponent<TfPanelContents>();
+                case ModuleType.PointCloud: return o.AddComponent<PointCloudPanelContents>();
+                case ModuleType.Grid: return o.AddComponent<GridPanelContents>();
+                case ModuleType.Image: return o.AddComponent<ImagePanelContents>();
+                case ModuleType.Robot: return o.AddComponent<SimpleRobotPanelContents>();
+                case ModuleType.Marker: return o.AddComponent<MarkerPanelContents>();
+                case ModuleType.InteractiveMarker: return o.AddComponent<InteractiveMarkerPanelContents>();
+                case ModuleType.JointState: return o.AddComponent<JointStatePanelContents>();
+                case ModuleType.DepthCloud: return o.AddComponent<DepthCloudPanelContents>();
+                case ModuleType.LaserScan: return o.AddComponent<LaserScanPanelContents>();
+                case ModuleType.AugmentedReality: return o.AddComponent<ARPanelContents>();
+                case ModuleType.Magnitude: return o.AddComponent<MagnitudePanelContents>();
+                case ModuleType.OccupancyGrid: return o.AddComponent<OccupancyGridPanelContents>();
+                case ModuleType.Joystick: return o.AddComponent<JoystickPanelContents>();
+                case ModuleType.Path: return o.AddComponent<PathPanelContents>();
+                case ModuleType.GridMap: return o.AddComponent<GridMapPanelContents>();
+                case ModuleType.Octomap: return o.AddComponent<OctomapPanelContents>();
+                case ModuleType.GuiDialog: return o.AddComponent<GuiDialogPanelContents>();
                 default: throw new ArgumentException(nameof(resource));
             }
         }

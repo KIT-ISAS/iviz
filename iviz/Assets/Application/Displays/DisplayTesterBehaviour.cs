@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -79,7 +80,7 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseColormap = false;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(points);
             }
 
@@ -95,7 +96,7 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseColormap = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(points);
             }
 
@@ -111,7 +112,7 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseIntensityForScaleY = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(points);
             }
 
@@ -142,7 +143,7 @@ namespace Iviz.App
                 resource.ElementScale = 0.5f;
                 resource.ElementScale3 = new Vector3(1, 2, 1);
                 resource.UseIntensityForScaleY = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(points);
                 resource.OcclusionOnly = true;
             }
@@ -176,7 +177,7 @@ namespace Iviz.App
                 }
 
                 resource.UseColormap = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(lines);
             }
 
@@ -207,7 +208,7 @@ namespace Iviz.App
 
                 resource.UseColormap = true;
                 resource.Tint = Color.white.WithAlpha(0.25f);
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(lines);
             }
         }
@@ -242,7 +243,7 @@ namespace Iviz.App
                 }
 
                 resource.UseColormap = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(lines);
             }
 
@@ -273,7 +274,7 @@ namespace Iviz.App
 
                 resource.UseColormap = true;
                 resource.Tint = new Color(1, 1, 1, 0.5f);
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(lines);
             }
         }
@@ -303,7 +304,7 @@ namespace Iviz.App
 
                 resource.ElementScale = 0.5f;
                 resource.UseColormap = true;
-                resource.Colormap = Resource.ColormapId.hsv;
+                resource.Colormap = ColormapId.hsv;
                 resource.Set(points);
             }
         }

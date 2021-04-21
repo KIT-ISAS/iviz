@@ -21,7 +21,7 @@ namespace Iviz.App
         protected override ListenerController Listener => listener;
 
         public override DataPanelContents Panel => panel;
-        public override Resource.ModuleType ModuleType => Resource.ModuleType.InteractiveMarker;
+        public override ModuleType ModuleType => ModuleType.InteractiveMarker;
 
         public override IConfiguration Configuration => listener.Config;
 
@@ -29,8 +29,8 @@ namespace Iviz.App
             base(constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(Resource.ModuleType
-                .InteractiveMarker);
+            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(
+                ModuleType.InteractiveMarker);
             listener = new InteractiveMarkerListener(this);
             if (constructor.Configuration != null)
             {
@@ -60,10 +60,7 @@ namespace Iviz.App
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
 
-            panel.DescriptionsVisible.ValueChanged += f =>
-            {
-                listener.DescriptionsVisible = f;
-            };
+            panel.DescriptionsVisible.ValueChanged += f => { listener.DescriptionsVisible = f; };
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -85,10 +82,10 @@ namespace Iviz.App
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<InteractiveMarkerConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(InteractiveMarkerConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -101,7 +98,7 @@ namespace Iviz.App
                         break;
                 }
             }
-            
+
             ResetPanel();
         }
     }

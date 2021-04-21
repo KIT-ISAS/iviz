@@ -12,7 +12,6 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
-
     public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReader
 #if !NETSTANDARD2_0
         , IAsyncEnumerable<T>
@@ -525,8 +524,16 @@ namespace Iviz.Roslib
 
             messageQueue.Add(t);
         }
+    }
 
-        public static async ValueTask<RosChannelReader<T>> CreateAsync<T>(IRosClient client, string topic,
+    public static class RosChannelReaderUtils
+    {
+        public static RosChannelReader CreateReader(this IRosClient client, string topic)
+        {
+            return new RosChannelReader(client, topic);
+        }
+
+        public static async ValueTask<RosChannelReader<T>> CreateReaderAsync<T>(this IRosClient client, string topic,
             CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new()
         {
@@ -535,7 +542,7 @@ namespace Iviz.Roslib
             return writer;
         }
 
-        public static async ValueTask<RosChannelReader> CreateAsync(IRosClient client, string topic,
+        public static async ValueTask<RosChannelReader> CreateReaderAsync(this IRosClient client, string topic,
             CancellationToken token = default)
         {
             var writer = new RosChannelReader();
