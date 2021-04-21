@@ -444,15 +444,6 @@ namespace Iviz.MsgsWrapper
             bi.Fields.Add(field);
         }
 
-        /*
-        static TUnderlying Getter<TEnum, TUnderlying>(TEnum t)
-            where TEnum : unmanaged, Enum
-            where TUnderlying : unmanaged
-        {
-            return (TUnderlying) t;
-        }
-        */
-
         static void InitializeEnumProperty(PropertyInfo property, BuilderInfo bi)
         {
             string propertyName = GetPropertyName(property);
@@ -466,7 +457,7 @@ namespace Iviz.MsgsWrapper
             IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(structType, property)!;
             bi.Fields.Add(field);
         }
-
+        
         static void InitializeEnumArrayProperty(PropertyInfo property, BuilderInfo bi)
         {
             string propertyName = GetPropertyName(property);

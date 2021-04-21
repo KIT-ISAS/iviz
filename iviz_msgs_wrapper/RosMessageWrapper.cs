@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
+using Newtonsoft.Json;
 using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
@@ -57,5 +58,10 @@ namespace Iviz.MsgsWrapper
         /// Alias for the name of the message.
         /// </summary>
         [IgnoreDataMember] public string RosType => Definition.RosType;
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
     }
 }
