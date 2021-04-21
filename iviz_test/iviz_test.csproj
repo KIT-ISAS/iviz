@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -14,6 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+    <ProjectReference Include="..\iviz_msgs_wrapper\iviz_msgs_wrapper.csproj" />
     <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
     <ProjectReference Include="..\iviz_urdf\iviz_urdf.csproj" />
   </ItemGroup>

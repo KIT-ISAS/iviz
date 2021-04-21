@@ -54,7 +54,7 @@ namespace Iviz.Msgs.ShapeMsgs
         public void RosValidate()
         {
             if (Coef is null) throw new System.NullReferenceException(nameof(Coef));
-            if (Coef.Length != 4) throw new System.IndexOutOfRangeException();
+            if (Coef.Length != 4) throw new RosInvalidSizeForFixedArrayException(nameof(Coef), Coef.Length, 4);
         }
     
         /// <summary> Constant size of this message. </summary>

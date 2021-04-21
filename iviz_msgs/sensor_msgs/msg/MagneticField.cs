@@ -71,7 +71,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosValidate()
         {
             if (MagneticFieldCovariance is null) throw new System.NullReferenceException(nameof(MagneticFieldCovariance));
-            if (MagneticFieldCovariance.Length != 9) throw new System.IndexOutOfRangeException();
+            if (MagneticFieldCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(MagneticFieldCovariance), MagneticFieldCovariance.Length, 9);
         }
     
         public int RosMessageLength

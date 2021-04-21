@@ -50,7 +50,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosValidate()
         {
             if (VertexIndices is null) throw new System.NullReferenceException(nameof(VertexIndices));
-            if (VertexIndices.Length != 3) throw new System.IndexOutOfRangeException();
+            if (VertexIndices.Length != 3) throw new RosInvalidSizeForFixedArrayException(nameof(VertexIndices), VertexIndices.Length, 3);
         }
     
         /// <summary> Constant size of this message. </summary>

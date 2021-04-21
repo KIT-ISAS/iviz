@@ -61,7 +61,7 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
             Accel.RosValidate();
             if (Covariance is null) throw new System.NullReferenceException(nameof(Covariance));
-            if (Covariance.Length != 36) throw new System.IndexOutOfRangeException();
+            if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
         }
     
         /// <summary> Constant size of this message. </summary>

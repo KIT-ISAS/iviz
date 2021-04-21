@@ -202,11 +202,11 @@ namespace Iviz.Msgs.SensorMsgs
             if (DistortionModel is null) throw new System.NullReferenceException(nameof(DistortionModel));
             if (D is null) throw new System.NullReferenceException(nameof(D));
             if (K is null) throw new System.NullReferenceException(nameof(K));
-            if (K.Length != 9) throw new System.IndexOutOfRangeException();
+            if (K.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(K), K.Length, 9);
             if (R is null) throw new System.NullReferenceException(nameof(R));
-            if (R.Length != 9) throw new System.IndexOutOfRangeException();
+            if (R.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(R), R.Length, 9);
             if (P is null) throw new System.NullReferenceException(nameof(P));
-            if (P.Length != 12) throw new System.IndexOutOfRangeException();
+            if (P.Length != 12) throw new RosInvalidSizeForFixedArrayException(nameof(P), P.Length, 12);
             if (Roi is null) throw new System.NullReferenceException(nameof(Roi));
             Roi.RosValidate();
         }

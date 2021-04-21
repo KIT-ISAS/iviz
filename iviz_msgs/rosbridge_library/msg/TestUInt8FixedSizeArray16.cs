@@ -49,7 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosValidate()
         {
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
-            if (Data.Length != 16) throw new System.IndexOutOfRangeException();
+            if (Data.Length != 16) throw new RosInvalidSizeForFixedArrayException(nameof(Data), Data.Length, 16);
         }
     
         /// <summary> Constant size of this message. </summary>
