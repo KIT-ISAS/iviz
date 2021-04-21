@@ -26,8 +26,8 @@ namespace Iviz.UtilsTests
         [Test]
         public void TestTransformStampedMessage()
         {
-            Assert.True(BuiltIns.GetMessageType(typeof(MyTransformStamped)) == MyTransformStamped.RosMessageType);
-            Assert.True(BuiltIns.GetMd5Sum(typeof(MyTransformStamped)) == BuiltIns.GetMd5Sum(typeof(TransformStamped)));
+            Assert.True(BuiltIns.GetMessageType<MyTransformStamped>() == MyTransformStamped.RosMessageType);
+            Assert.True(BuiltIns.GetMd5Sum<MyTransformStamped>() == BuiltIns.GetMd5Sum<TransformStamped>());
 
             time now = time.Now();
             TransformStamped real = new TransformStamped()
