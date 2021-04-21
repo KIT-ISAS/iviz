@@ -1,7 +1,10 @@
+using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MsgsWrapper;
+using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -11,6 +14,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         Remove,
         RemoveAll
     }
+
     public enum DialogType : byte
     {
         ButtonOk,
@@ -20,7 +24,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         ButtonForwardBackward,
 
         Short,
-        ModeMenu,
+        MenuMode,
     }
 
     public enum IconType : byte
@@ -41,28 +45,31 @@ namespace Iviz.Msgs.IvizCommonMsgs
         BindToUser,
     }
 
+    [DataContract]
     public sealed class GuiDialog : RosMessageWrapper<GuiDialog>
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/GuiDialog";
 
-        public Header Header { get; set; }
+        [DataMember] public Header Header { get; set; }
 
-        public ActionType Action { get; set; }
-        public string Id { get; set; } = "";
+        [DataMember] public ActionType Action { get; set; }
+        [DataMember, NotNull] public string Id { get; set; } = "";
 
-        public duration Lifetime { get; set; }
-        public float Scale { get; set; } = 1;
+        [DataMember] public duration Lifetime { get; set; }
+        [DataMember] public float Scale { get; set; } = 1;
 
-        public DialogType Type { get; set; }
-        public IconType Icon { get; set; }
+        [DataMember] public DialogType Type { get; set; }
+        [DataMember] public IconType Icon { get; set; }
 
-        public string Title { get; set; } = "";
-        public string Caption { get; set; } = "";
-        
-        public BindingType BindingType { get; set; }
-        
-        public Vector3f TfOffset { get; set; }
-        public Vector3f DialogDisplacement { get; set; }
-        public Vector3f TfDisplacement { get; set; }
+        [DataMember, NotNull] public string Title { get; set; } = "";
+        [DataMember, NotNull] public string Caption { get; set; } = "";
+        [DataMember, NotNull] public string[] MenuEntries { get; set; } = Array.Empty<string>();
+
+
+        [DataMember] public BindingType BindingType { get; set; }
+
+        [DataMember] public Vector3f TfOffset { get; set; }
+        [DataMember] public Vector3f DialogDisplacement { get; set; }
+        [DataMember] public Vector3f TfDisplacement { get; set; }
     }
 }

@@ -323,6 +323,7 @@ MonoBehaviour:
   menuButtons: []
   upButton: {fileID: 0}
   downButton: {fileID: 0}
+  socketPosition: {x: 0, y: -0.4, z: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -9,8 +9,9 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARLineConnector : MonoBehaviour, IDisplay, IRecyclable
+    public class ARLineConnector : MonoBehaviour
     {
+        GameObject node;
         MeshMarkerResource[] spheres;
         LineResource lines;
         int layer;
@@ -21,17 +22,16 @@ namespace Iviz.App.ARDialogs
         public Func<Vector3> Start { get; set; }
         public Func<Vector3> End { get; set; }
 
-        public Bounds? Bounds => null;
-
         void Awake()
         {
-            lines = ResourcePool.RentDisplay<LineResource>(TfListener.ListenersFrame.Transform);
+            node = new GameObject("AR LineConnector Node");
+            lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
             spheres = new MeshMarkerResource[3];
             foreach (ref var sphere in spheres.Ref())
             {
-                sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, transform);
+                sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
                 sphere.CastsShadows = false;
             }
@@ -54,16 +54,14 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        public void Suspend()
-        {
-            Color = Color.cyan;
-            lineSegments.Clear();
-        }
-
         public bool Visible
         {
             get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
+            set
+            {
+                gameObject.SetActive(value);
+                node.SetActive(value);
+            }
         }
 
         public Color Color
@@ -85,8 +83,6 @@ namespace Iviz.App.ARDialogs
                 spheres[2].EmissiveColor = colorB;
             }
         }
-
-        public string Name { get; set; }
 
         public void SplitForRecycle()
         {
@@ -126,6 +122,7 @@ namespace Iviz.App.ARDialogs
         void OnDestroy()
         {
             lineSegments.Dispose();
+            Destroy(node);
         }
     }
 }

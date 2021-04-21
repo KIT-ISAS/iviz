@@ -15,7 +15,7 @@ using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARDialog : MarkerResource
+    public class ARDialog : MarkerResource, IRecyclable
     {
         [SerializeField] TextMesh title;
         [SerializeField] TextMesh caption;
@@ -31,6 +31,11 @@ namespace Iviz.App.ARDialogs
         [SerializeField] ARButton upButton;
         [SerializeField] ARButton downButton;
 
+        [SerializeField] Vector3 socketPosition;
+
+        public string Id { get; internal set; }
+        public GuiDialogListener Listener { get; internal set; }
+        
         Material material;
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
 
@@ -39,10 +44,7 @@ namespace Iviz.App.ARDialogs
 
         FrameNode node;
         float scale;
-
-        public event Action<int> ButtonClicked;
-        public event Action<int> MenuClicked;
-
+        
         public string Caption
         {
             get => caption.text;
@@ -233,6 +235,9 @@ namespace Iviz.App.ARDialogs
                 {
                     menuButtons[i].Visible = false;
                 }
+
+                upButton.Visible = menuPage > 0;
+                downButton.Visible = offset + menuButtons.Length < menuEntries.Length;
             }
         }
 
@@ -248,12 +253,12 @@ namespace Iviz.App.ARDialogs
 
         void OnButtonClick(int index)
         {
-            ButtonClicked?.Invoke(index);
+            Listener.OnDialogButtonClicked(this, index);
         }
 
         void OnMenuClick(int index)
         {
-            MenuClicked?.Invoke(index + menuButtons.Length * MenuPage);
+            Listener.OnDialogMenuEntryClicked(this, index);
         }
 
         void OnScrollUpClick()
@@ -273,7 +278,9 @@ namespace Iviz.App.ARDialogs
         }
 
 
-        static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
+        //static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
+        Vector3 BaseDisplacement => -socketPosition;
+        
         protected override void Awake()
         {
             base.Awake();
@@ -321,7 +328,10 @@ namespace Iviz.App.ARDialogs
                 downButton.Clicked += OnScrollDownClick;
             }
 
-            iconMeshRenderer.material = Material;
+            if (iconMeshRenderer != null)
+            {
+                iconMeshRenderer.material = Material;
+            }
         }
 
         void Update()
@@ -405,8 +415,24 @@ namespace Iviz.App.ARDialogs
             return Quaternion.AngleAxis(targetAngle, Vector3.up);
         }
 
+        public void Initialize()
+        {
+            connector.Visible = true;
+        }
+
         public void Shutdown()
         {
+            connector.Visible = false;
+        }
+
+        public override string ToString()
+        {
+            return $"[Dialog Id='{Id}']";
+        }
+
+        public void SplitForRecycle()
+        {
+            connector.SplitForRecycle();
         }
     }
 }

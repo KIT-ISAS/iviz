@@ -1,5 +1,7 @@
+using System;
 using System.Runtime.Serialization;
 using Iviz.MsgsWrapper;
+using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -7,7 +9,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
     public sealed class GuiDialogArray : RosMessageWrapper<GuiDialogArray>
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/GuiDialogArray";
-        
-        [DataMember] public GuiDialog[] Dialogs { get; set; }
+
+        [DataMember, NotNull] public GuiDialog[] Dialogs { get; set; } = Array.Empty<GuiDialog>();
     }
 }

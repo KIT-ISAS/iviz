@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using Iviz.MsgsWrapper;
+using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
@@ -8,10 +9,10 @@ namespace Iviz.Msgs.IvizCommonMsgs
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/GuiDialogConfiguration";
 
-        [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
+        [DataMember, NotNull] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.GuiDialog;
         [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string Type { get; set; } = "";
+        [DataMember, NotNull] public string Topic { get; set; } = "";
+        [DataMember, NotNull] public string Type { get; set; } = "";
     }
 }

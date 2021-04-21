@@ -69,6 +69,7 @@ namespace Iviz.Resources
                     {Octomap.RosMessageType, ModuleType.Octomap},
                     {OctomapWithPose.RosMessageType, ModuleType.Octomap},
                     {GuiDialog.RosMessageType, ModuleType.GuiDialog},
+                    {GuiDialogArray.RosMessageType, ModuleType.GuiDialog},
                 }
             );
 

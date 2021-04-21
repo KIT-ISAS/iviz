@@ -129,10 +129,17 @@ namespace Iviz.Controllers
                             info = Resource.Displays.ARDialogShort;
                             dialog = ResourcePool.Rent<ARDialog>(info);
                             break;
+                        case DialogType.MenuMode:
+                            info = Resource.Displays.ARDialogMenu;
+                            dialog = ResourcePool.Rent<ARDialog>(info);
+                            dialog.MenuEntries = msg.MenuEntries;
+                            break;
                         default:
                             return;
                     }
 
+                    dialog.Id = msg.Id;
+                    dialog.Listener = this;
                     dialog.Active = true;
                     dialog.Caption = msg.Caption;
                     dialog.Title = msg.Title;
@@ -141,6 +148,7 @@ namespace Iviz.Controllers
                     dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
                     dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
                     dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
+                    dialog.Initialize();
 
                     DateTime expirationTime = msg.Lifetime == default
                         ? DateTime.MaxValue
@@ -187,6 +195,28 @@ namespace Iviz.Controllers
                 ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
                 dialogs.Remove(pair.Key);
             }
+        }
+
+        internal void OnDialogButtonClicked(ARDialog dialog, int button)
+        {
+            FeedbackSender.Publish(new GuiDialogFeedback
+            {
+                EngineId = ConnectionManager.MyId ?? "",
+                DialogId = dialog.Id,
+                FeedbackType = FeedbackType.ButtonClick,
+                EntryId = button,
+            });
+        }
+
+        internal void OnDialogMenuEntryClicked(ARDialog dialog, int entry)
+        {
+            FeedbackSender.Publish(new GuiDialogFeedback
+            {
+                EngineId = ConnectionManager.MyId ?? "",
+                DialogId = dialog.Id,
+                FeedbackType = FeedbackType.ButtonClick,
+                EntryId = entry,
+            });
         }
 
         public override void StopController()
