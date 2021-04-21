@@ -276,13 +276,6 @@ extern "C" {
             return false;
         }
         
-        std::vector<std::vector<cv::Point2f>> rejectedCandidates;
-        if (ctx->parameters == nullptr)
-        {
-            ctx->parameters = cv::aruco::DetectorParameters::create();
-            ctx->parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_CONTOUR;
-        }
-        
         cv::QRCodeDetector qrcode;
         std::vector<cv::Point2f> corners;
         
@@ -434,6 +427,7 @@ extern "C" {
         ctx->cameraMatrix.at<float>(2, 0) = 0;
         ctx->cameraMatrix.at<float>(2, 1) = 0;
         ctx->cameraMatrix.at<float>(2, 2) = 1;
+                
         return true;
     }
     
@@ -544,6 +538,11 @@ extern "C" {
         {
             input.at<float>(i, 0) = inputs[2 * i];
             input.at<float>(i, 1) = inputs[2 * i + 1];
+            /*
+            LogDebug(std::to_string(i));
+            LogDebug(std::to_string(input.at<float>(i, 0)));
+            LogDebug(std::to_string(input.at<float>(i, 1)));
+             */
         }
         
         cv::Mat output(outputSize / 3, 3, CV_32F);
@@ -552,6 +551,12 @@ extern "C" {
             output.at<float>(i, 0) = outputs[3 * i];
             output.at<float>(i, 1) = outputs[3 * i + 1];
             output.at<float>(i, 2) = outputs[3 * i + 2];
+            /*
+            LogDebug(std::to_string(i));
+            LogDebug(std::to_string(output.at<float>(i, 0)));
+            LogDebug(std::to_string(output.at<float>(i, 1)));
+            LogDebug(std::to_string(output.at<float>(i, 2)));
+             */
         }
         
         cv::Mat cameraMatrix(3, 3, CV_32F);
@@ -566,12 +571,21 @@ extern "C" {
         cameraMatrix.at<float>(2, 1) = 0;
         cameraMatrix.at<float>(2, 2) = 1;
         
+        /*
+        LogDebug(std::to_string(cameraMatrix.at<float>(0, 0)));
+        LogDebug(std::to_string(cameraMatrix.at<float>(0, 1)));
+        LogDebug(std::to_string(cameraMatrix.at<float>(0, 2)));
+        LogDebug(std::to_string(cameraMatrix.at<float>(1, 0)));
+        LogDebug(std::to_string(cameraMatrix.at<float>(1, 1)));
+        LogDebug(std::to_string(cameraMatrix.at<float>(1, 2)));
+         */
+
         cv::Mat distCoeffs = cv::Mat::zeros(1, 5, CV_32F);
         
         cv::Mat rvec = cv::Mat(3, 1, CV_64F);
         cv::Mat tvec = cv::Mat(3, 1, CV_64F);
         
-        bool success = cv::solvePnP(output, input, cameraMatrix, distCoeffs, rvec, tvec);
+        bool success = cv::solvePnP(output, input, cameraMatrix, distCoeffs, rvec, tvec, false, cv::SOLVEPNP_IPPE_SQUARE);
         if (!success)
         {
             LogInfo("[OpenCV native] cv::solvePnp failed");
