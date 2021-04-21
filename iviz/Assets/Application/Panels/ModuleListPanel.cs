@@ -482,9 +482,10 @@ namespace Iviz.App
 
         void LoadSimpleConfiguration()
         {
+            string path = Settings.SimpleConfigurationPath;
+
             try
             {
-                string path = Settings.SimpleConfigurationPath;
                 if (!File.Exists(path))
                 {
                     return;
@@ -499,15 +500,19 @@ namespace Iviz.App
                     return; // empty text
                 }
 
-                connectionData.MasterUri = config.MasterUri;
-                connectionData.MyUri = config.MyUri;
+                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri) 
+                    ? null 
+                    : new Uri(config.MasterUri);
+                connectionData.MyUri = string.IsNullOrEmpty(config.MyUri)
+                    ? null
+                    : new Uri(config.MyUri);
                 connectionData.MyId = config.MyId;
-                if (config.LastMasterUris != null)
+                if (config.LastMasterUris.Count != 0)
                 {
                     connectionData.LastMasterUris = config.LastMasterUris;
                 }
 
-                if (Settings.SettingsManager != null && config.Settings != null)
+                if (Settings.SettingsManager != null)
                 {
                     Settings.SettingsManager.Config = config.Settings;
                 }
@@ -515,7 +520,8 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                Debug.Log(e);
+                Logger.Debug($"{this}: Error loading simple configuration" + e);
+                File.Delete(path);
             }
         }
 
@@ -527,11 +533,11 @@ namespace Iviz.App
             {
                 ConnectionConfiguration config = new ConnectionConfiguration
                 {
-                    MasterUri = connectionData.MasterUri,
-                    MyUri = connectionData.MyUri,
-                    MyId = connectionData.MyId,
+                    MasterUri = connectionData.MasterUri?.ToString() ?? "",
+                    MyUri = connectionData.MyUri?.ToString() ?? "",
+                    MyId = connectionData.MyId ?? "",
                     LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
-                    Settings = Settings.SettingsManager?.Config
+                    Settings = Settings.SettingsManager?.Config ?? new SettingsConfiguration()
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -540,11 +546,11 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                //Debug.Log(e);
+                Logger.Debug($"{this}: Error saving simple configuration" + e);
             }
         }
 
-        public static async void UpdateSimpleConfigurationSettings(CancellationToken token = default)
+        static async void UpdateSimpleConfigurationSettings(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -563,6 +569,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
+                Logger.Debug("ModuleListPanel: Error updating simple configuration" + e);
             }
         }
 

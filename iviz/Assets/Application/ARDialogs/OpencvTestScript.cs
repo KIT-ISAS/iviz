@@ -6,9 +6,19 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.StdMsgs;
 using UnityEngine;
+using Transform = Iviz.Msgs.GeometryMsgs.Transform;
 
 namespace Iviz.MarkerDetection
 {
+    /*
+
+{
+  "IvizT": 0,
+  "Size": 175.0,
+  "Tf": "table1"
+}
+
+     */
     public class OpencvTestScript : MonoBehaviour
     {
         ARMarkerExecutor executor = new ARMarkerExecutor();
@@ -17,11 +27,11 @@ namespace Iviz.MarkerDetection
         {
             //byte[] bytes = File.ReadAllBytes("/Users/akzeac/Downloads/IMG_7764.JPG");
             //byte[] bytes = File.ReadAllBytes("/Users/akzeac/Downloads/IMG_0655.JPG");
-            byte[] bytes = File.ReadAllBytes("/Users/akzeac/Downloads/IMG_8109.JPG");
+            byte[] bytes = File.ReadAllBytes("/Users/akzeac/Downloads/IMG_0669.JPG");
             Texture2D texture = new Texture2D(1, 1);
             texture.LoadImage(bytes);
 
-            
+
             CvContext cvContext = new CvContext(texture.width, texture.height);
 
 
@@ -34,6 +44,21 @@ namespace Iviz.MarkerDetection
 
             var qr = cvContext.GetDetectedQrCorners()[0];
 
+            DrawLine(texture,
+                0, 0,
+                texture.width - 1, 0);
+            DrawLine(texture,
+                (int) qr.Corners[0].X, texture.height - 1 - (int) qr.Corners[0].Y,
+                (int) qr.Corners[1].X, texture.height - 1 - (int) qr.Corners[1].Y, Color.blue);
+            DrawLine(texture,
+                (int) qr.Corners[1].X, texture.height - 1 - (int) qr.Corners[1].Y,
+                (int) qr.Corners[2].X, texture.height - 1 - (int) qr.Corners[2].Y);
+            DrawLine(texture,
+                (int) qr.Corners[2].X, texture.height - 1 - (int) qr.Corners[2].Y,
+                (int) qr.Corners[3].X, texture.height - 1 - (int) qr.Corners[3].Y);
+            DrawLine(texture,
+                (int) qr.Corners[3].X, texture.height - 1 - (int) qr.Corners[3].Y,
+                (int) qr.Corners[0].X, texture.height - 1 - (int) qr.Corners[0].Y);
 
 
             var detectedMarker = new DetectedARMarker
@@ -47,9 +72,73 @@ namespace Iviz.MarkerDetection
                 Corners = qr.Corners.ToArray(),
                 Intrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f)
             };
-            
+
             executor.Execute(detectedMarker);
 
+            Msgs.GeometryMsgs.Pose localPoseInRos = Transform.Identity;
+            {
+                var position = localPoseInRos.Position;
+                float x = (float) (position.X / position.Z) * 3000 + texture.width / 2f;
+                float y = (float) (position.Y / position.Z) * 3000 + texture.height / 2f;
+                DrawLine(texture,
+                    (int) x - 15, texture.height - 1 - (int) y,
+                    (int) x + 15, texture.height - 1 - (int) y);
+                DrawLine(texture,
+                    (int) x, texture.height - 1 - (int) y - 15,
+                    (int) x, texture.height - 1 - (int) y + 15);
+            }
+
+            const float size = 0.175f;
+            var objectCorners = new Iviz.Msgs.GeometryMsgs.Vector3[]
+            {
+                (-size / 2, size / 2, 0),
+                (size / 2, size / 2, 0),
+                (size / 2, -size / 2, 0),
+                (-size / 2, -size / 2, 0),
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                var position = (Msgs.GeometryMsgs.Transform) localPoseInRos * objectCorners[i];
+
+                float x = (float) (position.X / position.Z) * 3000 + texture.width / 2f;
+                float y = (float) (position.Y / position.Z) * 3000 + texture.height / 2f;
+                DrawLine(texture,
+                    (int) x - 15, texture.height - 1 - (int) y,
+                    (int) x + 15, texture.height - 1 - (int) y);
+                DrawLine(texture,
+                    (int) x, texture.height - 1 - (int) y - 15,
+                    (int) x, texture.height - 1 - (int) y + 15);
+            }
+
+            byte[] dstBytes = texture.EncodeToPNG();
+            File.WriteAllBytes("/Users/akzeac/Downloads/IMG_0669__2.JPG", dstBytes);
+        }
+
+        void DrawLine(Texture2D t, int x0, int y0, int x1, int y1, Color? color = null)
+        {
+            Color ccolor = color ?? Color.red;
+            int dx = Mathf.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = -Mathf.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int err = dx + dy, e2; /* error value e_xy */
+
+            while (true)
+            {
+                t.SetPixel(x0, y0, ccolor);
+                if (x0 == x1 && y0 == y1) break;
+                e2 = 2 * err;
+                if (e2 > dy)
+                {
+                    err += dy;
+                    x0 += sx;
+                } /* e_xy+e_x > 0 */
+
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y0 += sy;
+                } /* e_xy+e_y < 0 */
+            }
         }
     }
 }

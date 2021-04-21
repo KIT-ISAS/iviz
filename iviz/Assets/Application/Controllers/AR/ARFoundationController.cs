@@ -482,39 +482,6 @@ namespace Iviz.Controllers
             }
         }
 
-        /*
-        void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs obj)
-        {
-            Pose? newPose = null;
-
-            if (obj.added.Count != 0)
-            {
-                newPose = obj.added[0].transform.AsPose();
-            }
-
-            if (obj.updated.Count != 0)
-            {
-                newPose = obj.updated[0].transform.AsPose();
-            }
-
-            if (newPose == null)
-            {
-                return;
-            }
-
-            Pose expectedPose = TfListener.RelativePoseToOrigin(resource.transform.AsPose());
-            Pose registeredPose = newPose.Value.Multiply(expectedPose.Inverse());
-
-            Quaternion corrected =
-                new Quaternion(0, registeredPose.rotation.y, 0, registeredPose.rotation.w).normalized;
-            registeredPose.rotation = corrected;
-
-            SetWorldPose(registeredPose, RootMover.ImageMarker);
-
-            //markerFound = true;
-        }
-        */
-
         bool IScreenshotManager.Started => true;
 
         IEnumerable<(int width, int height)> IScreenshotManager.GetResolutions()
@@ -579,6 +546,9 @@ namespace Iviz.Controllers
                         float fx, fy, cx, cy;
                         if (cameraManager.TryGetIntrinsics(out var intrinsics))
                         {
+                            //Logger.Debug("> " + intrinsics.resolution.x + " " + intrinsics.resolution.y); 
+                            //Logger.Debug("< " + width + " " + height); 
+                            //Logger.Debug("- " + intrinsics.principalPoint.x + " " + intrinsics.principalPoint.y); 
                             (fx, fy, cx, cy) =
                                 (intrinsics.focalLength.x, intrinsics.focalLength.y,
                                     intrinsics.principalPoint.x, intrinsics.principalPoint.y);
@@ -587,6 +557,8 @@ namespace Iviz.Controllers
                         {
                             (fx, fy, cx, cy) = (0, 0, 0, 0);
                         }
+                        
+                        
 
                         Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, 
                             fx, cx, fy, cy, pose, bytes);

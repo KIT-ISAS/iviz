@@ -18,6 +18,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
         {
         }
 
-        public Intrinsic(float fx, float cx, float fy, float cy) => (Fx, Cx, Fy, Cy) = (fx, cy, fy, cy);
+        public Intrinsic(float fx, float cx, float fy, float cy) => (Fx, Cx, Fy, Cy) = (fx, cx, fy, cy);
     }
 }

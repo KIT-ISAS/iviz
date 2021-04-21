@@ -44,7 +44,8 @@ namespace Iviz.App.ARDialogs
         
         public void CheckOrientationBillboard()
         {
-            BillboardMode = Vector3.Dot(Vector3.up, transform.rotation * Vector3.up) > 1 - 0.01f;
+            //BillboardMode = Vector3.Dot(Vector3.up, transform.rotation * Vector3.up) > 1 - 0.01f;
+            BillboardMode = false;
         }
 
         void Update()

@@ -61,7 +61,7 @@ namespace Iviz.Core
 
         static Settings()
         {
-            //AotHelper.EnsureType<StringEnumConverter>();
+            AotHelper.EnsureType<StringEnumConverter>();
         }
 
         /// <summary>

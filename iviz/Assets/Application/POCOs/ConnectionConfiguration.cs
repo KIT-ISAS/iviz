@@ -9,10 +9,10 @@ namespace Iviz.App
     [DataContract]
     public sealed class ConnectionConfiguration
     {
-        [CanBeNull, DataMember] public Uri MasterUri { get; set; }
-        [CanBeNull, DataMember] public Uri MyUri { get; set; }
-        [CanBeNull, DataMember] public string MyId { get; set; }
-        [CanBeNull, DataMember] public List<Uri> LastMasterUris { get; set; }
-        [CanBeNull, DataMember] public SettingsConfiguration Settings { get; set; }
+        [NotNull, DataMember] public string MasterUri { get; set; } = "";
+        [NotNull, DataMember] public string MyUri { get; set; } = "";
+        [NotNull, DataMember] public string MyId { get; set; } = "";
+        [NotNull, DataMember] public List<Uri> LastMasterUris { get; set; } = new List<Uri>();
+        [NotNull, DataMember] public SettingsConfiguration Settings { get; set; } = new SettingsConfiguration();
     }
 }

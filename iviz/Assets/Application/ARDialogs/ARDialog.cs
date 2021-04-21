@@ -5,11 +5,8 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Sdf;
 using JetBrains.Annotations;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Logger = Iviz.Core.Logger;
 using Material = UnityEngine.Material;
 
@@ -279,13 +276,13 @@ namespace Iviz.App.ARDialogs
 
 
         //static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
-        Vector3 BaseDisplacement => -socketPosition;
+        Vector3 BaseDisplacement => -socketPosition * Scale;
         
         protected override void Awake()
         {
             base.Awake();
 
-            connector.Start = () => Transform.position - BaseDisplacement * Scale;
+            connector.Start = () => Transform.position - BaseDisplacement;
             connector.End = () =>
             {
                 Vector3 framePosition = node.Transform.position + PivotFrameOffset;
@@ -387,7 +384,7 @@ namespace Iviz.App.ARDialogs
             Vector3 framePosition = node.Transform.position + PivotFrameOffset;
             Quaternion cameraRotation = GetFlatCameraRotation(framePosition);
 
-            Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement + BaseDisplacement * Scale;
+            Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement + BaseDisplacement;
 
             if (currentPosition == null)
             {

@@ -57,7 +57,7 @@ namespace Iviz.MarkerDetection
                 SemaphoreSlim signal = new SemaphoreSlim(0);
                 List<IMarkerCorners> corners = new List<IMarkerCorners>();
 
-                Logger.Info("Starting detector");
+                //Logger.Info("Starting detector");
 
                 while (!Token.IsCancellationRequested)
                 {
@@ -70,7 +70,7 @@ namespace Iviz.MarkerDetection
                     }
 
 
-                    Logger.Info("Taking screenshot");
+                    //Logger.Info("Taking screenshot");
 
                     Screenshot screenshot = null;
                     GameThread.Post(async () =>
@@ -95,20 +95,20 @@ namespace Iviz.MarkerDetection
                         continue;
                     }
 
-                    Logger.Info("Back from screenshot");
+                    //Logger.Info("Back from screenshot");
 
 
                     if (cvContext != null &&
                         (cvContext.Width != screenshot.Width || cvContext.Height != screenshot.Height))
                     {
-                        Logger.Info("Disposing old");
+                        //Logger.Info("Disposing old");
                         cvContext.Dispose();
                         cvContext = null;
                     }
 
                     if (cvContext == null)
                     {
-                        Logger.Info("Creating new context " + screenshot.Width + " " + screenshot.Height);
+                        //Logger.Info("Creating new context " + screenshot.Width + " " + screenshot.Height);
                         cvContext = new CvContext(screenshot.Width, screenshot.Height);
                     }
 
@@ -118,22 +118,24 @@ namespace Iviz.MarkerDetection
                     }
                     else
                     {
-                        Logger.Info("Setting data");
+                        //Logger.Info("Setting data");
                         cvContext.SetImageData(screenshot.Bytes.Array, screenshot.Bpp);
                     }
 
 
                     corners.Clear();
-                    Logger.Info("Searching for markers: " + enableQr + " " + enableAruco);
+                    //Logger.Info("Searching for markers: " + enableQr + " " + enableAruco);
                     if (EnableQr && cvContext.DetectQrMarkers() != 0)
                     {
-                        Logger.Info("Found QR");
-                        corners.AddRange(cvContext.GetDetectedQrCorners());
+                        var markers = cvContext.GetDetectedQrCorners();
+                        Logger.Debug($"{this}: Found QR with code '{markers[0].Code}'");
+                        corners.AddRange(markers);
                     }
 
                     if (EnableAruco && cvContext.DetectArucoMarkers() != 0)
                     {
-                        Logger.Info("Found Aruco");
+                        var markers = cvContext.GetDetectedArucoCorners();
+                        Logger.Debug($"{this}: Found Aruco with code {markers[0].Id.ToString()}");
                         corners.AddRange(cvContext.GetDetectedArucoCorners());
                     }
 

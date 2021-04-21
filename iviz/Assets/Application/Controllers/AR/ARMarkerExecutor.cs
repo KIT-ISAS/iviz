@@ -7,6 +7,7 @@ using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Roslib.Utils;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
@@ -26,19 +27,19 @@ namespace Iviz.Controllers
         }
 
         [DataContract]
-        class ExecutorBaseMarker
+        sealed class ExecutorBaseMarker : JsonToString
         {
             [DataMember] public ExecutorMarkerType IvizT { get; set; }
         }
 
         [DataContract]
-        class ExecutorTfMarker
+        sealed class ExecutorTfMarker : JsonToString
         {
             [DataMember] public ExecutorMarkerType IvizT => ExecutorMarkerType.TfPublisher;
             [DataMember] public float Size { get; set; }
             [DataMember] public string Tf { get; set; }
         }
-        
+
         public void Execute(DetectedARMarker marker)
         {
             ExecutorBaseMarker baseMarker;
@@ -60,6 +61,7 @@ namespace Iviz.Controllers
                     try
                     {
                         tfExecutor = JsonConvert.DeserializeObject<ExecutorTfMarker>(marker.QrCode);
+                        Logger.Debug($"{this}: Obtained executable marker {tfExecutor}");
                     }
                     catch (JsonException)
                     {
@@ -85,7 +87,7 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    const double maxMarkerDistance = 1.5;
+                    const double maxMarkerDistance = 0.5;
 
                     Msgs.GeometryMsgs.Vector3 cameraPosition = marker.CameraPose.Position;
                     double distanceMarkerToCamera = (cameraPosition - rosMarkerPose.Translation).Norm;
@@ -96,21 +98,22 @@ namespace Iviz.Controllers
                                      "discarding.");
                         return;
                     }
-                    
+
                     if (!frames.TryGetValue(tfExecutor.Tf, out ARTfFrame tfFrame))
                     {
                         tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
                         tfFrame.Caption = tfExecutor.Tf;
                         frames[tfExecutor.Tf] = tfFrame;
+                        Logger.Info("Adding " + tfExecutor.Tf);
                     }
 
-                    
+
                     Pose absoluteUnityPose = TfListener.FixedFramePose.Multiply(rosMarkerPose.Ros2Unity());
                     tfFrame.transform.SetPose(absoluteUnityPose);
                     tfFrame.CheckOrientationBillboard();
-                    
+
                     TfListener.Publish(TfListener.FixedFrameId, tfExecutor.Tf, rosMarkerPose);
-                    
+
                     break;
                 default:
                     Logger.Info($"{this}: Detected unknown code {baseMarker.IvizT}");
@@ -131,6 +134,7 @@ namespace Iviz.Controllers
 
             var localPoseInRos = CvContext.SolvePnp(imageCorners, objectCorners, marker.Intrinsic.Fx,
                 marker.Intrinsic.Cx, marker.Intrinsic.Fy, marker.Intrinsic.Cy);
+
             var absolutePoseInRos = (Msgs.GeometryMsgs.Transform) marker.CameraPose * localPoseInRos;
             return absolutePoseInRos;
         }
