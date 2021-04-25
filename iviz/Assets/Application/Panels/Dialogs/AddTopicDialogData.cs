@@ -99,10 +99,7 @@ namespace Iviz.App
 
                 foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
                 {
-                    if (topic.ResourceType == ModuleType.Invalid)
-                    {
-                        item.Interactable = false;
-                    }
+                    item.Interactable = topic.ResourceType != ModuleType.Invalid;
                 }
             }
             else

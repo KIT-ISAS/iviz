@@ -11,10 +11,13 @@ namespace Iviz.App
     public sealed class SenderWidget : MonoBehaviour, IWidget
     {
         const int Size = 200;
-        [SerializeField] Text text = null;
 
-        [CanBeNull]
-        ISender sender;
+        static readonly Color EnabledColor = new Color(0.59f, 0.79f, 0.90f, 0.90f);
+        
+        [SerializeField] Text text = null;
+        [SerializeField] Image panel = null;
+
+        [CanBeNull] ISender sender;
 
         [CanBeNull]
         ISender Sender
@@ -32,6 +35,10 @@ namespace Iviz.App
                 }
 
                 sender = value;
+                panel.color = value != null 
+                    ? EnabledColor 
+                    : Resource.Colors.DisabledPanelColor;
+                
                 if (value != null)
                 {
                     UpdateStats();
