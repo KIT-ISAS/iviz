@@ -441,6 +441,17 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
+        public static Marker CreateDelete(string ns = "", int id = 0)
+        {
+            return new Marker
+            {
+                Header = (0, ""),
+                Ns = ns ?? "",
+                Id = id,
+                Action = Marker.DELETE,
+            };            
+        }
+
         public void Erase(int id)
         {
             if (id < 0 || id >= markers.Count)
