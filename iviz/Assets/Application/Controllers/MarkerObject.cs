@@ -9,17 +9,13 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    internal enum MarkerType
+    public enum MarkerType
     {
         Arrow = Marker.ARROW,
         Cube = Marker.CUBE,
@@ -57,37 +53,48 @@ namespace Iviz.Controllers
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
 
+        const string FloatFormat = "#,0.###";
+        
         static Crc32Calculator Crc32 => Crc32Calculator.Instance;
 
         readonly StringBuilder description = new StringBuilder(250);
 
-        [CanBeNull] CancellationTokenSource runningTs;
+        Pose currentPose;
+        Vector3 currentScale;
 
         (string Ns, int Id) id;
+
+        MarkerLineHelper lineHelper;
+
+        float metallic;
 
         int numErrors;
         int numWarnings;
 
+        bool occlusionOnly;
+        MarkerPointHelper pointHelper;
+
+        uint? previousHash;
+
         [CanBeNull] IDisplay resource;
         [CanBeNull] Info<GameObject> resourceInfo;
+        [CanBeNull] CancellationTokenSource runningTs;
 
-        MarkerLineHelper lineHelper;
+        float smoothness;
+
+        Color tint;
+
+        bool triangleListFlipWinding;
+
+        
+        public DateTime ExpirationTime { get; private set; }
+        public MarkerType MarkerType { get; private set; }
+
         [NotNull] MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
-
-        MarkerPointHelper pointHelper;
         [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
 
         public Bounds? Bounds =>
             resource == null ? null : resource.Bounds.TransformBound(resource.GetTransform());
-
-        uint? previousHash;
-
-        UnityEngine.Pose currentPose;
-        Vector3 currentScale;
-
-        public DateTime ExpirationTime { get; private set; }
-
-        bool occlusionOnly;
 
         public bool OcclusionOnly
         {
@@ -102,8 +109,6 @@ namespace Iviz.Controllers
             }
         }
 
-        Color tint;
-
         public Color Tint
         {
             get => tint;
@@ -117,8 +122,6 @@ namespace Iviz.Controllers
             }
         }
 
-        float metallic;
-
         public float Metallic
         {
             get => metallic;
@@ -131,8 +134,6 @@ namespace Iviz.Controllers
                 }
             }
         }
-
-        float smoothness;
 
         public float Smoothness
         {
@@ -149,14 +150,8 @@ namespace Iviz.Controllers
 
         public bool Visible
         {
-            get => resource == null || resource.Visible;
-            set
-            {
-                if (resource != null)
-                {
-                    resource.Visible = value;
-                }
-            }
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
         }
 
         public int Layer
@@ -170,8 +165,6 @@ namespace Iviz.Controllers
                 }
             }
         }
-
-        bool triangleListFlipWinding;
 
         public bool TriangleListFlipWinding
         {
@@ -192,6 +185,11 @@ namespace Iviz.Controllers
             }
         }
 
+        void OnDestroy()
+        {
+            StopLoadResourceTask();
+        }
+
         public async Task SetAsync([NotNull] Marker msg)
         {
             if (msg == null)
@@ -199,7 +197,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(msg));
             }
 
-            var newId = MarkerListener.IdFromMessage(msg);
+            (string Ns, int Id) newId = MarkerListener.IdFromMessage(msg);
             if (id != newId)
             {
                 id = newId;
@@ -259,7 +257,8 @@ namespace Iviz.Controllers
 
             UpdateTransform(msg);
 
-            switch (msg.Type())
+            MarkerType = msg.Type();
+            switch (MarkerType)
             {
                 case MarkerType.Arrow:
                     CreateArrow(msg);
@@ -319,8 +318,6 @@ namespace Iviz.Controllers
             return result;
         }
 
-        const string FloatFormat = "#,0.###";
-
         void AppendColor(ColorRGBA c)
         {
             description.Append("Color: ")
@@ -330,7 +327,7 @@ namespace Iviz.Controllers
                 .Append(c.A.ToString(FloatFormat)).AppendLine();
         }
 
-        void AppendScale(Iviz.Msgs.GeometryMsgs.Vector3 c)
+        void AppendScale(Msgs.GeometryMsgs.Vector3 c)
         {
             description.Append("Scale: [")
                 .Append(c.X.ToString(FloatFormat)).Append(" | ")
@@ -356,7 +353,7 @@ namespace Iviz.Controllers
             }
 
             bool hasAlpha = false;
-            foreach (var color in msg.Colors)
+            foreach (ColorRGBA color in msg.Colors)
             {
                 if (color.A < 1)
                 {
@@ -769,7 +766,7 @@ namespace Iviz.Controllers
 
         async Task UpdateResourceAsync([NotNull] Marker msg)
         {
-            Info<GameObject> newResourceInfo = await GetRequestedResource(msg);
+            var newResourceInfo = await GetRequestedResource(msg);
             if (newResourceInfo == resourceInfo)
             {
                 return;
@@ -1026,11 +1023,6 @@ namespace Iviz.Controllers
         public override string ToString()
         {
             return $"[MarkerObject {name}]";
-        }
-
-        void OnDestroy()
-        {
-            StopLoadResourceTask();
         }
     }
 
