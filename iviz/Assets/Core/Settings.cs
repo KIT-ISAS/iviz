@@ -83,6 +83,20 @@ namespace Iviz.Core
 #else
             false;
 #endif
+        
+        public const bool IsIphone =
+#if !UNITY_EDITOR && UNITY_IOS
+            true;
+#else
+            false;
+#endif      
+        
+        public const bool IsAndroid =
+#if !UNITY_EDITOR && UNITY_ANDROID
+            true;
+#else
+            false;
+#endif  
 
         /// <summary>
         /// Is this being run in a Hololens?

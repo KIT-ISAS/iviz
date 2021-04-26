@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using AOT;
@@ -14,7 +15,10 @@ namespace Iviz.MarkerDetection
 {
     public class CvMarkerException : Exception
     {
-        public CvMarkerException() : base("An error happened in the native call") {}
+        public CvMarkerException() : base("An error happened in the native call")
+        {
+        }
+
         public CvMarkerException(string message) : base(message)
         {
         }
@@ -52,14 +56,6 @@ namespace Iviz.MarkerDetection
 
         public CvContext(int width, int height)
         {
-            if (!loggerSet)
-            {
-                Native.SetupDebug(Native.Debug);
-                Native.SetupInfo(Native.Info);
-                Native.SetupError(Native.Error);
-                loggerSet = true;
-            }
-
             if (width <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(width));
@@ -72,6 +68,15 @@ namespace Iviz.MarkerDetection
 
             try
             {
+                if (!loggerSet)
+                {
+                    Native.SetupDebug(Native.Debug);
+                    Native.SetupInfo(Native.Info);
+                    Native.SetupError(Native.Error);
+                    loggerSet = true;
+                }
+
+
                 mContextPtr = Native.CreateContext(width, height);
                 Width = width;
                 Height = height;
@@ -461,7 +466,8 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp(Vector2f[] input, Vector3f[] output, float fx, float cx, float fy, float cy)
+        public static Pose SolvePnp(Vector2f[] input, Vector3f[] output, float fx, float cx, float fy, float cy,
+            SolvePnPMethod method = SolvePnPMethod.Iterative)
         {
             if (input.Length != output.Length)
             {
@@ -532,7 +538,12 @@ namespace Iviz.MarkerDetection
 
         static class Native
         {
-            const string IvizOpencvDll = Settings.IsMobile ? "__Internal" : "IvizOpencv";
+            const string IvizOpencvDll =
+                Settings.IsIphone
+                    ? "__Internal"
+                    : Settings.IsAndroid
+                        ? "ivizopencv-lib"
+                        : "IvizOpencv";
 
             public delegate void Callback(string s);
 
@@ -630,6 +641,44 @@ namespace Iviz.MarkerDetection
         }
     }
 
+    public enum SolvePnPMethod
+    {
+        Iterative = 0,
+
+        /// EPnP: Efficient Perspective-n-Point Camera Pose Estimation @cite lepetit2009epnp
+        Epnp = 1,
+
+        /// Complete Solution Classification for the Perspective-Three-Point Problem @cite gao2003complete
+        P3P = 2,
+
+        /// A Direct Least-Squares (DLS) Method for PnP @cite hesch2011direct
+        /// **Broken implementation. Using this flag will fallback to EPnP.**
+        DLS = 3,
+
+        /// Exhaustive Linearization for Robust Camera Pose and Focal Length Estimation @cite penate2013exhaustive
+        /// **Broken implementation. Using this flag will fallback to EPnP.** \n
+        UPnP = 4,
+
+        /// An Efficient Algebraic Solution to the Perspective-Three-Point Problem @cite Ke17
+        AP3P = 5,
+
+        /// Infinitesimal Plane-Based Pose Estimation.        
+        /// Object points must be coplanar.
+        IPPE = 6,
+
+        /// Infinitesimal Plane-Based Pose Estimation.
+        /// This is a special case suitable for marker pose estimation.
+        /// 4 coplanar object points must be defined in the following order:
+        ///   - point 0: [-squareLength / 2,  squareLength / 2, 0]
+        ///   - point 1: [ squareLength / 2,  squareLength / 2, 0]
+        ///   - point 2: [ squareLength / 2, -squareLength / 2, 0]
+        ///   - point 3: [-squareLength / 2, -squareLength / 2, 0]
+        IPPESquare = 7,
+
+        /// SQPnP: A Consistently Fast and Globally OptimalSolution to the Perspective-n-Point Problem @cite Terzakis20
+        SQPnP = 8,
+    };
+
     public enum ArucoDictionaryName
     {
         Dict4X450 = 0,
@@ -683,7 +732,7 @@ namespace Iviz.MarkerDetection
         public int Id { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        public ArucoMarkerCorners(int id, Vector2f[] corners) => (Id, Corners) = (id, corners.AsReadOnly());
+        internal ArucoMarkerCorners(int id, IList<Vector2f> corners) => (Id, Corners) = (id, corners.AsReadOnly());
 
         public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
@@ -694,7 +743,7 @@ namespace Iviz.MarkerDetection
         public string Code { get; }
         public Pose Pose { get; }
 
-        public QrMarkerPose(string code, in Pose pose) => (Code, Pose) = (code, pose);
+        internal QrMarkerPose(string code, in Pose pose) => (Code, Pose) = (code, pose);
 
         public override string ToString() => "{\"Code\":" + Code + ", \"Pose\":" + Pose + "}";
     }
@@ -704,7 +753,8 @@ namespace Iviz.MarkerDetection
         public string Code { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        public QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners.AsReadOnly());
+        internal QrMarkerCorners(string code, IList<Vector2f> corners) =>
+            (Code, Corners) = (code, corners.AsReadOnly());
 
         public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";

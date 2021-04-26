@@ -14,22 +14,26 @@ namespace Iviz.Displays
         bool colliderEnabled = true;
 
         protected bool HasBoxCollider => boxCollider != null;
-        
+
         Transform mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         [NotNull]
         protected BoxCollider BoxCollider
         {
-            get => boxCollider.SafeNull() ?? throw new NullReferenceException("This asset has no box collider!");
-            set => boxCollider = value.SafeNull() ??
-                                 throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
+            get => boxCollider != null
+                ? boxCollider
+                : (boxCollider = GetComponent<BoxCollider>() ??
+                                 throw new NullReferenceException("This asset has no box collider!"));
+            set => boxCollider = value != null
+                ? value
+                : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
         }
 
         protected Bounds WorldBounds => BoxCollider.bounds;
 
         [NotNull]
-        public string Name 
+        public string Name
         {
             get => gameObject.name;
             set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
@@ -43,11 +47,6 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            if (boxCollider == null)
-            {
-                boxCollider = GetComponent<BoxCollider>();
-            }
-
             ColliderEnabled = ColliderEnabled;
         }
 

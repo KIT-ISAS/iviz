@@ -27,6 +27,8 @@ namespace Iviz.Controllers
     public sealed class TfListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
+        public const string OriginFrameName = "/_origin_";
+
         const string DefaultTopicStatic = "/tf_static";
         const string BaseFrameId = "map";
 
@@ -34,7 +36,6 @@ namespace Iviz.Controllers
 
         readonly TfConfiguration config = new TfConfiguration();
 
-        //readonly AsyncLock mutex = new AsyncLock();
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> messageList =
             new ConcurrentQueue<(TransformStamped[], bool)>();
 
@@ -74,7 +75,7 @@ namespace Iviz.Controllers
             rootFrame.Visible = false;
             rootFrame.AddListener(defaultListener);
 
-            originFrame = Add(CreateFrameObject("/_origin_", RootFrame.Transform, RootFrame));
+            originFrame = Add(CreateFrameObject(OriginFrameName, RootFrame.Transform, RootFrame));
             originFrame.Parent = RootFrame;
             originFrame.ForceInvisible = true;
             originFrame.Visible = false;
@@ -247,7 +248,6 @@ namespace Iviz.Controllers
 
         static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
         {
-            // TODO: Find better way to handle this
             const int maxPoseMagnitude = 10000;
             return Math.Abs(v.X) < maxPoseMagnitude
                    && Math.Abs(v.Y) < maxPoseMagnitude
@@ -486,8 +486,8 @@ namespace Iviz.Controllers
                 Quaternion.Inverse(fixedFrame.rotation) * rotation
             );
         }
-        
-        public static Pose FixedFramePose =>  Instance.FixedFrame.Transform.AsPose();
+
+        public static Pose FixedFramePose => Instance.FixedFrame.Transform.AsPose();
 
         public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
             in Msgs.GeometryMsgs.Transform rosTransform)
@@ -499,7 +499,7 @@ namespace Iviz.Controllers
                     new TransformStamped((tfSeq++, parentFrame), childFrame ?? "", rosTransform)
                 }
             );
-            
+
             Publish(msg);
         }
     }

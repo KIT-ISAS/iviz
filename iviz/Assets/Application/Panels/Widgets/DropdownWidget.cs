@@ -12,7 +12,6 @@ namespace Iviz.App
     public class DropdownWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
-        //[SerializeField] Dropdown dropdown = null;
         [SerializeField] TMP_Dropdown dropdown = null;
 
         [NotNull]
@@ -125,6 +124,13 @@ namespace Iviz.App
         public DropdownWidget SubscribeValueChanged(Action<int, string> f)
         {
             ValueChanged += f;
+            return this;
+        }
+
+        public DropdownWidget OverrideCaption(string f)
+        {
+            dropdown.value = 0;
+            dropdown.captionText.text = f;
             return this;
         }
     }

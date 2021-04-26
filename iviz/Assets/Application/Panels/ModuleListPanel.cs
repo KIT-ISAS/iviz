@@ -80,6 +80,8 @@ namespace Iviz.App
         bool allGuiVisible = true;
 
         Canvas parentCanvas;
+
+        DialogData[] dialogDatas;
         DialogData availableModules;
         DialogData availableTopics;
         ConnectionDialogData connectionData;
@@ -198,6 +200,11 @@ namespace Iviz.App
             ARController.ARModeChanged -= OnARModeChanged;
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
+
+            foreach (var dialogData in dialogDatas)
+            {
+                dialogData.FinalizePanel();
+            }
         }
 
         static string MasterUriToString(Uri uri) =>
@@ -209,16 +216,19 @@ namespace Iviz.App
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
 
-            imageData = new ImageDialogData();
-            tfTreeData = new TfDialogData();
-            loadConfigData = new LoadConfigDialogData();
-            saveConfigData = new SaveConfigDialogData();
-            markerData = new MarkerDialogData();
-            networkData = new NetworkDialogData();
-            connectionData = new ConnectionDialogData();
-            consoleData = new ConsoleDialogData();
-            settingsData = new SettingsDialogData();
-            echoData = new EchoDialogData();
+            dialogDatas = new DialogData[]
+            {
+                imageData = new ImageDialogData(),
+                tfTreeData = new TfDialogData(),
+                loadConfigData = new LoadConfigDialogData(),
+                saveConfigData = new SaveConfigDialogData(),
+                markerData = new MarkerDialogData(),
+                networkData = new NetworkDialogData(),
+                connectionData = new ConnectionDialogData(),
+                consoleData = new ConsoleDialogData(),
+                settingsData = new SettingsDialogData(),
+                echoData = new EchoDialogData()
+            };
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -500,8 +510,8 @@ namespace Iviz.App
                     return; // empty text
                 }
 
-                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri) 
-                    ? null 
+                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri)
+                    ? null
                     : new Uri(config.MasterUri);
                 connectionData.MyUri = string.IsNullOrEmpty(config.MyUri)
                     ? null

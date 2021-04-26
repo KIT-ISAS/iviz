@@ -49,6 +49,17 @@ namespace Iviz.Controllers
                 Tint = value.Tint.ToUnityColor();
                 Visible = value.Visible;
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
+                
+                if (value.VisibleMask.Length != config.VisibleMask.Length)
+                {
+                    Logger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length}");
+                    return;
+                }
+
+                for (int i = 0; i < value.VisibleMask.Length; i++)
+                {
+                    config.VisibleMask[i] = value.VisibleMask[i];
+                }
             }
         }
 
@@ -89,7 +100,7 @@ namespace Iviz.Controllers
 
                 foreach (var marker in markers.Values)
                 {
-                    marker.Visible = value;
+                    marker.Visible = value && config.VisibleMask[(int) marker.MarkerType];
                 }
             }
         }
@@ -132,7 +143,6 @@ namespace Iviz.Controllers
             foreach (var entry in deadEntries)
             {
                 markers.Remove(entry.Key);
-                //Debug.Log("Killing " + entry.Key);
                 DeleteMarkerObject(entry.Value);
             }
         }
@@ -277,6 +287,31 @@ namespace Iviz.Controllers
             return true;
         }
 
+        public IEnumerable<string> GetMaskEntries()
+        {
+            yield return "---";
+            for (int i = 0; i < config.VisibleMask.Length; i++)
+            {
+                string name = ((MarkerType) i).ToString();
+                yield return config.VisibleMask[i] ? name : $"<color=#A0A0A0>({name})</color>";
+            }
+        }
+
+        public void ToggleMaskEntry(int i)
+        {
+            bool newVisible = !config.VisibleMask[i];
+            config.VisibleMask[i] = newVisible;
+
+            MarkerType markerType = (MarkerType) i;
+            foreach (var marker in markers.Values)
+            {
+                if (marker.MarkerType == markerType)
+                {
+                    marker.Visible = newVisible;
+                }
+            }
+        }
+
         async void HandleAsync()
         {
             UniqueRef<Marker> markerList;
@@ -286,7 +321,7 @@ namespace Iviz.Controllers
                 {
                     return;
                 }
-                
+
                 markerList = new UniqueRef<Marker>(markerBuffer.Count);
                 markerBuffer.Values.CopyTo(markerList.Array, 0);
                 markerBuffer.Clear();
@@ -320,13 +355,19 @@ namespace Iviz.Controllers
                         return;
                     }
 
+                    if (msg.Type >= config.VisibleMask.Length)
+                    {
+                        Logger.Debug($"MarkerListener: Unknown type {msg.Type.ToString()}");
+                        return;
+                    }
+
                     if (!markers.TryGetValue(id, out var markerToAdd))
                     {
                         markerToAdd = CreateMarkerObject();
                         markerToAdd.Parent = TfListener.ListenersFrame;
                         markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
                         markerToAdd.Tint = Tint;
-                        markerToAdd.Visible = Visible;
+                        markerToAdd.Visible = Visible && config.VisibleMask[msg.Type];
                         markerToAdd.Layer = LayerType.IgnoreRaycast;
                         markerToAdd.TriangleListFlipWinding = TriangleListFlipWinding;
                         markers[id] = markerToAdd;

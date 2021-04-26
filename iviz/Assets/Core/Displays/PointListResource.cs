@@ -33,7 +33,7 @@ namespace Iviz.Displays
 
         bool isDirty;
         Mesh mesh;
-        bool processing;
+        //bool processing;
         [CanBeNull] MeshRenderer meshRenderer;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
 
@@ -103,6 +103,8 @@ namespace Iviz.Displays
                 return;
             }
 
+            //bool isProcessing = processing;
+
             Properties.SetFloat(ScaleId, ElementScale * transform.lossyScale.x);
 
             if (Settings.SupportsComputeBuffers)
@@ -114,6 +116,12 @@ namespace Iviz.Displays
                 UpdateWithMesh();
             }
 
+            /*
+            if (isProcessing)
+            {
+                processing = false;
+            }
+            */
         }
 
         void UpdateWithComputeBuffers()
@@ -143,9 +151,6 @@ namespace Iviz.Displays
             {
                 return;
             }
-
-            isDirty = false;
-            UpdateStats();
 
             using (var points = new Rent<Vector3>(pointBuffer.Length))
             using (var indices = new Rent<int>(pointBuffer.Length))
@@ -177,7 +182,7 @@ namespace Iviz.Displays
                             indices.Array[i] = i;
                             colors.Array[i] = PointWithColor.ColorFromFloatBits(pointBuffer[i].w);
                         }
-                        
+
                         mesh.Clear();
                         mesh.SetVertices(points);
                         mesh.SetColors(colors);
@@ -185,6 +190,9 @@ namespace Iviz.Displays
                     }
                 }
             }
+
+            isDirty = false;
+            UpdateStats();
         }
 
         void OnDestroy()
@@ -216,6 +224,14 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(points));
             }
 
+            /*
+            if (processing)
+            {
+                Logger.Debug($"{this}: Missed a Set!");
+                return;
+            }
+            */
+
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
             foreach (ref PointWithColor t in points.Ref())
@@ -238,8 +254,17 @@ namespace Iviz.Displays
         /// <param name="points">A native array with the points.</param>
         public void SetDirect(in NativeArray<float4> points)
         {
+            /*
+            if (processing)
+            {
+                Logger.Debug($"{this}: Missed a SetDirect!");
+                return;
+            }
+            */
+
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
+            //processing = false;
             isDirty = true;
         }
 
@@ -256,44 +281,24 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(callback));
             }
 
+            /*
             if (processing)
             {
-                Logger.Error($"{this}: Missed a SetDirect!");
+                Logger.Debug($"{this}: Missed a SetDirect!");
                 return;
             }
+            */
 
+            //processing = true;
             if (reserve != 0)
             {
                 pointBuffer.EnsureCapacity(reserve);
             }
 
             pointBuffer.Clear();
-            if (reserve < 1000)
-            {
-                callback(pointBuffer);
-                isDirty = true;
-                processing = false;
-            }
-            else
-            {
-                processing = true;
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        callback(pointBuffer);
-                        isDirty = true;
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error("Error while parsing point list resource", e);
-                    }
-                    finally
-                    {
-                        processing = false;
-                    }
-                });
-            }
+            callback(pointBuffer);
+            isDirty = true;
+            //processing = false;
         }
 
         void UpdateBuffer()
@@ -354,6 +359,8 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsId, (ComputeBuffer) null);
+
+            //processing = false;
         }
 
         protected override void UpdateProperties()

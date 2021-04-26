@@ -11,6 +11,7 @@
         public SliderWidget Alpha { get; private set; }
         public ToggleWidget TriangleListFlipWinding { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
+        public DropdownWidget Mask { get; private set; }
         public MarkerWidget Marker { get; private set; }
 
         void Awake()
@@ -27,6 +28,7 @@
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
 
+            Mask = p.AddDropdown("Visible Mask");
             Marker = p.AddMarker();
 
             p.UpdateSize();

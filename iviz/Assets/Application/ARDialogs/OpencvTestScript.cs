@@ -11,12 +11,8 @@ using Transform = Iviz.Msgs.GeometryMsgs.Transform;
 namespace Iviz.MarkerDetection
 {
     /*
-
-{
-  "IvizT": 0,
-  "Size": 175.0,
-  "Tf": "table1"
-}
+{"IvizE":0,"Size":176,"Tf":"table1"}
+{"IvizE":1,"Size":176}
 
      */
     public class OpencvTestScript : MonoBehaviour
@@ -115,7 +111,7 @@ namespace Iviz.MarkerDetection
             File.WriteAllBytes("/Users/akzeac/Downloads/IMG_0669__2.JPG", dstBytes);
         }
 
-        void DrawLine(Texture2D t, int x0, int y0, int x1, int y1, Color? color = null)
+        static void DrawLine(Texture2D t, int x0, int y0, int x1, int y1, Color? color = null)
         {
             Color ccolor = color ?? Color.red;
             int dx = Mathf.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;

@@ -35,11 +35,13 @@ namespace Iviz.Displays
         readonly NativeList<float4x2> lineBuffer = new NativeList<float4x2>();
         
         [CanBeNull] ComputeBuffer lineComputeBuffer;
+        [CanBeNull] Mesh mesh;
+        [CanBeNull] MeshRenderer meshRenderer;
 
         bool linesNeedAlpha;
-        Mesh mesh;
 
-        [CanBeNull] MeshRenderer meshRenderer;
+
+        [NotNull] Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
 
         [NotNull]
         MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
@@ -198,8 +200,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            mesh = new Mesh {name = "Line Capsules"};
-            GetComponent<MeshFilter>().sharedMesh = mesh;
+            GetComponent<MeshFilter>().sharedMesh = Mesh;
             MeshRenderer.SetPropertyBlock(Properties);
 
             base.Awake();
@@ -252,7 +253,7 @@ namespace Iviz.Displays
                 Properties.SetBuffer(LinesID, (ComputeBuffer) null);
             }
 
-            Destroy(mesh);
+            Destroy(Mesh);
         }
 
         protected override void UpdateProperties()
@@ -291,7 +292,7 @@ namespace Iviz.Displays
                 return;
             }
             
-            CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, mesh);
+            CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, Mesh);
 
             CalculateBounds();
 
@@ -364,7 +365,7 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
-            mesh.Clear();
+            Mesh.Clear();
             MeshRenderer.enabled = false;
 
             lineBuffer.Clear();

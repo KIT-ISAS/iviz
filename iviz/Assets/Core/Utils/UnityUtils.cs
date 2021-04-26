@@ -39,9 +39,14 @@ namespace Iviz.Core
             return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
         }
 
-        public static float MaxAbsCoeff(this Quaternion p)
+        public static float MaxAbsCoeff(this Vector4 p)
         {
             return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
+        }
+
+        public static Vector4 ToVector(this Quaternion p)
+        {
+            return new Vector4(p.x, p.y, p.z, p.w);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

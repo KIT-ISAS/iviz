@@ -31,11 +31,10 @@ namespace Iviz.Controllers
 
         Camera mainCamera;
         ARCameraManager cameraManager;
-        ARSession arSession;
+        ARSession session;
         ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
-        //ARMarkerResource resource;
         ARAnchorManager anchorManager;
         AROcclusionManager occlusionManager;
         [CanBeNull] ARAnchorResource worldAnchor;
@@ -50,13 +49,13 @@ namespace Iviz.Controllers
         {
             get
             {
-                if (arSession == null || arSession.subsystem == null)
+                if (session == null || session.subsystem == null)
                 {
-                    return "(No AR Subsystem)";
+                    return "<b>(No AR Subsystem)</b>";
                 }
 
                 string trackingState;
-                switch (arSession.subsystem.trackingState)
+                switch (session.subsystem.trackingState)
                 {
                     case TrackingState.Limited:
                         trackingState = "Tracking: Limited";
@@ -72,9 +71,9 @@ namespace Iviz.Controllers
                 string numPlanes =
                     planeManager.trackables.count == 0
                         ? "Planes: None"
-                        : "Planes: " + planeManager.trackables.count;
+                        : "Planes: " + planeManager.trackables.count.ToString();
 
-                return trackingState + "\n" + numPlanes;
+                return $"<b>{trackingState}</b>\n{numPlanes}";
             }
         }
 
@@ -172,70 +171,11 @@ namespace Iviz.Controllers
             }
         }
 
-        //bool hasSetupModePose;
-        //bool markerFound;
-
-        /*
-        public override bool UseMarker
+        public bool EnableAutoFocus
         {
-            get => base.UseMarker;
-            set
-            {
-                base.UseMarker = value;
-                tracker.enabled = value;
-                resource.Visible = Visible && value;
-                if (value)
-                {
-                    tracker.trackedImagesChanged += OnTrackedImagesChanged;
-                }
-                else
-                {
-                    tracker.trackedImagesChanged -= OnTrackedImagesChanged;
-                }
-            }
+            get => cameraManager.autoFocusRequested;
+            set => cameraManager.autoFocusRequested = value;
         }
-
-        public override bool MarkerHorizontal
-        {
-            get => base.MarkerHorizontal;
-            set
-            {
-                base.MarkerHorizontal = value;
-                resource.Horizontal = value;
-            }
-        }
-
-        public override int MarkerAngle
-        {
-            get => base.MarkerAngle;
-            set
-            {
-                base.MarkerAngle = value;
-                resource.Angle = value; // deg
-            }
-        }
-
-        public override string MarkerFrame
-        {
-            get => base.MarkerFrame;
-            set
-            {
-                base.MarkerFrame = value;
-                node.AttachTo(base.MarkerFrame);
-            }
-        }
-
-        public override Vector3 MarkerOffset
-        {
-            get => base.MarkerOffset;
-            set
-            {
-                base.MarkerOffset = value;
-                resource.Offset = value.Ros2Unity();
-            }
-        }
-                */
-
 
         protected override bool PinRootMarker
         {
@@ -273,7 +213,7 @@ namespace Iviz.Controllers
                 arSessionOrigin = GameObject.Find("AR Session Origin").GetComponent<ARSessionOrigin>();
             }
 
-            arSession = GetComponentInChildren<ARSession>();
+            session = GetComponentInChildren<ARSession>();
             occlusionManager = GetComponentInChildren<AROcclusionManager>();
             planeManager = arSessionOrigin.GetComponent<ARPlaneManager>();
             tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();

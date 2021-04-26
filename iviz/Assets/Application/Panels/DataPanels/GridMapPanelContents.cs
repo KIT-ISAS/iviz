@@ -1,5 +1,6 @@
 ﻿using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -10,7 +11,7 @@ namespace Iviz.App
     public sealed class GridMapPanelContents : ListenerPanelContents
     {
         public FrameWidget Frame { get; private set; }
-        public DataLabelWidget MinMax { get; private set; }
+        public DataLabelWidget Description { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public DropdownWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
@@ -28,8 +29,8 @@ namespace Iviz.App
             p.AddHeadTitleWidget("GridMap");
             Listener = p.AddListener();
             Frame = p.AddFrame();
+            Description = p.AddDataLabel("Min/Max").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;
             IntensityChannel = p.AddDropdown("Intensity Channel");
-            MinMax = p.AddDataLabel("Min/Max");
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)ColormapId.hsv);

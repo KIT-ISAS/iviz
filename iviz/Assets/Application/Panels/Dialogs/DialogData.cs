@@ -29,6 +29,10 @@ namespace Iviz.App
         {
         }
 
+        public virtual void FinalizePanel()
+        {
+        }
+
         public void Show()
         {
             DialogPanelManager.TogglePanel(this);

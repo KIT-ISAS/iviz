@@ -335,6 +335,7 @@ namespace Iviz.Displays
             {
                 layer = value;
                 gameObject.layer = value;
+                holderCollider.gameObject.layer = value;
                 foreach (GameObject resource in allResources)
                 {
                     resource.layer = value;

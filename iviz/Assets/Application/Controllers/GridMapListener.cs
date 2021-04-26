@@ -40,6 +40,10 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly FrameNode link;
         readonly GridMapResource resource;
+        
+        int numCellsX;
+        int numCellsY;
+        float cellSize;
 
         public override IModuleData ModuleData { get; }
 
@@ -140,6 +144,20 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
+        public string Description
+        {
+            get
+            {
+                string minIntensityStr = MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
+                string maxIntensityStr = MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+                
+                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
+                    $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
+                    $"[{minIntensityStr} .. {maxIntensityStr}]";
+            }
+        }
+
         readonly List<string> fieldNames = new List<string>();
 
         public ReadOnlyCollection<string> FieldNames { get; }
@@ -217,6 +235,10 @@ namespace Iviz.Controllers
             resource.Set(width, height,
                 (float) msg.Info.LengthX, (float) msg.Info.LengthY,
                 msg.Data[layer].Data, length);
+
+            numCellsX = width;
+            numCellsY = height;
+            cellSize = (float) msg.Info.Resolution;
         }
 
         public override void StopController()

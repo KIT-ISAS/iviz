@@ -87,6 +87,11 @@ namespace Iviz.App
             Logger.LogInternal += OnLogInternal;
         }
 
+        public override void FinalizePanel()
+        {
+            Logger.LogInternal -= OnLogInternal;
+        }
+
         void OnLogInternal(string msg)
         {
             GameThread.Post(() =>

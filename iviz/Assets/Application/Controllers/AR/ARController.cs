@@ -57,11 +57,9 @@ namespace Iviz.Controllers
     {
         public enum RootMover
         {
-            ModuleData,
             Anchor,
-            ImageMarker,
+            Executor,
             ControlMarker,
-            Configuration,
             Setup
         }
 
@@ -170,38 +168,6 @@ namespace Iviz.Controllers
             }
         }
 
-        /*
-        public virtual bool UseMarker
-        {
-            get => config.SearchMarker;
-            set => config.SearchMarker = value;
-        }
-
-        public virtual bool MarkerHorizontal
-        {
-            get => config.MarkerHorizontal;
-            set => config.MarkerHorizontal = value;
-        }
-
-        public virtual int MarkerAngle
-        {
-            get => config.MarkerAngle;
-            set => config.MarkerAngle = value;
-        }
-
-        public virtual string MarkerFrame
-        {
-            get => config.MarkerFrame;
-            set => config.MarkerFrame = value;
-        }
-
-        public virtual Vector3 MarkerOffset
-        {
-            get => config.MarkerOffset;
-            set => config.MarkerOffset = value;
-        }
-        */
-
         static float TfRootScale
         {
             set => TfListener.RootFrame.transform.localScale = value * Vector3.one;
@@ -262,6 +228,9 @@ namespace Iviz.Controllers
             detector.MarkerDetected += OnMarkerDetected;
         }
 
+        static int Sign(float f) => f > 0 ? 1 : f < 0 ? -1 : 0;
+        static int Sign(Vector3 v) => Sign(v.x) + Sign(v.y) + Sign(v.z); // only one of the components is nonzero
+
         void OnARJoystickChangedAngle(float dA)
         {
             if (joyVelocityAngle == null)
@@ -290,17 +259,6 @@ namespace Iviz.Controllers
                 SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
             }
         }
-
-        static int Sign(float f)
-        {
-            return f > 0 ? 1 : f < 0 ? -1 : 0;
-        }
-
-        static int Sign(Vector3 v)
-        {
-            return Sign(v.x) + Sign(v.y) + Sign(v.z); // only one of the components is nonzero
-        }
-
 
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
@@ -382,7 +340,7 @@ namespace Iviz.Controllers
             return angle;
         }
 
-        protected void SetWorldPose(in Pose unityPose, RootMover mover)
+        public void SetWorldPose(in Pose unityPose, RootMover mover)
         {
             float angle = AngleFromPose(unityPose);
             WorldPosition = unityPose.position;
@@ -412,11 +370,6 @@ namespace Iviz.Controllers
 
         public virtual void Update()
         {
-            if (!Visible)
-            {
-                return;
-            }
-
             HeadSender.Publish(new PoseStamped(
                 new Header(headSeq++, time.Now(), TfListener.FixedFrameId ?? ""),
                 TfListener.RelativePoseToFixedFrame(Settings.MainCameraTransform.AsPose()).Unity2RosPose()

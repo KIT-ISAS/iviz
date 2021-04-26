@@ -258,6 +258,7 @@ MonoBehaviour:
   boxCollider: {fileID: 0}
   pivotTransform: {fileID: 6567602140741212447}
   text: {fileID: 6567602140232931346}
+  axisFrame: {fileID: 0}
 --- !u!65 &3386099211009435338
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -421,7 +422,7 @@ PrefabInstance:
     - target: {fileID: 3679770859693412506, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3679770859693412506, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
         type: 3}

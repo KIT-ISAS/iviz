@@ -55,6 +55,8 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
 
+            panel.Mask.Options = listener.GetMaskEntries();
+
             panel.Tint.ValueChanged += f =>
             {
                 Color color = f;
@@ -86,6 +88,13 @@ namespace Iviz.App
                 listener.Visible = !listener.Visible;
                 panel.HideButton.State = listener.Visible;
                 UpdateModuleButton();
+            };
+            panel.Mask.ValueChanged += (i, _) =>
+            {
+                if (i == 0) return;
+                listener.ToggleMaskEntry(i - 1);
+                panel.Mask.Options = listener.GetMaskEntries();
+                panel.Mask.OverrideCaption("---");
             };
         }
 

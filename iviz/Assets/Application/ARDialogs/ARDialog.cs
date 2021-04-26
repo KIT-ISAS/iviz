@@ -420,6 +420,8 @@ namespace Iviz.App.ARDialogs
         public void Shutdown()
         {
             connector.Visible = false;
+            currentAngle = null;
+            currentPosition = null;
         }
 
         public override string ToString()

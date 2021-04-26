@@ -20,7 +20,7 @@ namespace Iviz.App
 
         public ImageDialogData()
         {
-            this.panel = DialogPanelManager.GetPanelByType<ImageDialogContents>(DialogPanelType.Image);
+            panel = DialogPanelManager.GetPanelByType<ImageDialogContents>(DialogPanelType.Image);
         }
 
         public override void SetupPanel()

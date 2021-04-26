@@ -7,7 +7,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.Displays
 {
-    public sealed class ARCameraFovDisplay : MonoBehaviour
+    public sealed class ARCameraFovDisplay : MeshMarkerResource
     {
         [SerializeField] LineResource resource = null;
         [SerializeField] GameObject arCamera = null;
@@ -16,6 +16,8 @@ namespace Iviz.Displays
 
         void Start()
         {
+            Color = Color.yellow;
+            
             if (resource == null)
             {
                 resource = ResourcePool.RentDisplay<LineResource>(transform);
@@ -49,7 +51,6 @@ namespace Iviz.Displays
                 }
             }
 
-            //Debug.Log(arCamera.transform.rotation);
             transform.SetLocalPose( ARController.RelativePoseToWorld(arCamera.transform.AsPose()));
         }
 

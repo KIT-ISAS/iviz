@@ -56,14 +56,11 @@ namespace Iviz.App
             panel.OcclusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
             panel.OcclusionQuality.Index = (int) controller.OcclusionQuality;
 
-            //CheckInteractable();
-
             panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
-            
+
+            panel.AutoFocus.Value = controller.EnableAutoFocus;
             panel.DetectArucos.Value = controller.EnableArucoDetection;
             panel.DetectQrs.Value = controller.EnableQrDetection;
-            
-
 
             panel.OcclusionQuality.ValueChanged += (i, _) =>
                 controller.OcclusionQuality = (OcclusionQualityType) i;
@@ -82,6 +79,7 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
 
+            panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
             panel.DetectArucos.ValueChanged += f => controller.EnableArucoDetection = f;
             panel.DetectQrs.ValueChanged += f => controller.EnableQrDetection = f;
             
@@ -94,16 +92,6 @@ namespace Iviz.App
             panel.Description.Label = controller.Description;
         }
 
-        /*
-        void CheckInteractable()
-        {
-            panel.MarkerHorizontal.Interactable = controller.UseMarker;
-            panel.MarkerAngle.Interactable = controller.UseMarker;
-            panel.MarkerFrame.Interactable = controller.UseMarker;
-            panel.MarkerOffset.Interactable = controller.UseMarker && controller.MarkerFrame.Length != 0;
-        }
-        */
-
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<ARConfiguration>(configAsJson);
@@ -115,23 +103,6 @@ namespace Iviz.App
                     case nameof(ARConfiguration.Visible):
                         controller.Visible = config.Visible;
                         break;
-                    /*
-                    case nameof(ARConfiguration.SearchMarker):
-                        controller.Visible = config.Visible;
-                        break;
-                    case nameof(ARConfiguration.MarkerHorizontal):
-                        controller.Visible = config.Visible;
-                        break;
-                    case nameof(ARConfiguration.MarkerAngle):
-                        controller.Visible = config.Visible;
-                        break;
-                    case nameof(ARConfiguration.MarkerFrame):
-                        controller.Visible = config.Visible;
-                        break;
-                    case nameof(ARConfiguration.MarkerOffset):
-                        controller.Visible = config.Visible;
-                        break;
-                        */
                     default:
                         Core.Logger.Error($"{this}: Unknown field '{field}'");
                         break;

@@ -62,6 +62,12 @@ namespace Iviz.App
             Logger.LogExternal += HandleMessage;
         }
 
+        public override void FinalizePanel()
+        {
+            ConnectionManager.LogMessageArrived -= HandleMessage;
+            Logger.LogExternal -= HandleMessage;
+        }
+
         public override void SetupPanel()
         {
             dialog.Close.Clicked += Close;
