@@ -584,6 +584,7 @@ namespace Iviz.Controllers
             }
 
             lineResource.ElementScale = elementScale;
+            transform.localScale = Vector3.one;
 
             if (HasSameHash(msg))
             {
@@ -694,10 +695,7 @@ namespace Iviz.Controllers
             }
 
             Vector3 newScale = msg.Scale.Ros2Unity().Abs();
-            if (!Mathf.Approximately((newScale - currentScale).sqrMagnitude, 0))
-            {
-                transform.localScale = currentScale = newScale;
-            }
+            transform.localScale = currentScale = newScale;
         }
 
 

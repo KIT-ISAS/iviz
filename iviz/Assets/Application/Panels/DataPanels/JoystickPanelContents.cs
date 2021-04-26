@@ -36,7 +36,7 @@ namespace Iviz.App
 
             SendTwist = p.AddToggle("Publish Twist Message");
             MaxSpeed = p.AddVector3("Max Speed [X, Y, Angular]");
-            XIsFront = p.AddToggle("Joy Right is Robot Front");
+            XIsFront = p.AddToggle("Joystick Right is Robot Front");
 
             UseStamped = p.AddToggle("Use TwistStamped instead of Twist");
             TwistTopic = p.AddInputFieldWithHints("Twist Topic").SetPlaceholder("twist");

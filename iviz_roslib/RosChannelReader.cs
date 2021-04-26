@@ -532,6 +532,12 @@ namespace Iviz.Roslib
         {
             return new RosChannelReader(client, topic);
         }
+        
+        public static RosChannelReader<T> CreateReader<T>(this IRosClient client, string topic) 
+            where T : IMessage, IDeserializable<T>, new()
+        {
+            return new RosChannelReader<T>(client, topic);
+        }        
 
         public static async ValueTask<RosChannelReader<T>> CreateReaderAsync<T>(this IRosClient client, string topic,
             CancellationToken token = default)
