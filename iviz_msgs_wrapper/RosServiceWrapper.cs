@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using ISerializable = Iviz.Msgs.ISerializable;
@@ -7,9 +5,11 @@ using ISerializable = Iviz.Msgs.ISerializable;
 namespace Iviz.MsgsWrapper
 {
     /// <summary>
-    /// Creates a ROS message out of a C# class.
+    /// Creates a ROS service out of a C# class.
     /// </summary>
-    /// <typeparam name="T">The type around with to create the message.</typeparam>
+    /// <typeparam name="T">The type around with to create the service.</typeparam>
+    /// <typeparam name="TRequest">The request type associated to the service.</typeparam>
+    /// <typeparam name="TResponse">The response type associated to the service.</typeparam>
     public abstract class RosServiceWrapper<T, TRequest, TResponse> : IService
         where T : RosServiceWrapper<T, TRequest, TResponse>, IService, new()
         where TRequest : RosRequestWrapper<T, TRequest, TResponse> , new()
@@ -19,9 +19,8 @@ namespace Iviz.MsgsWrapper
 
         static RosServiceDefinition<T, TRequest, TResponse> ServiceDefinition =>
             serviceDefinition ??= new RosServiceDefinition<T, TRequest, TResponse>();
-
-
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        
+        /// <summary> MD5 hash of a compact representation of the service. </summary>
         [Preserve]
         public static string RosMd5Sum => ServiceDefinition.RosMessageMd5;
 
@@ -33,7 +32,7 @@ namespace Iviz.MsgsWrapper
         public static string RosDependencies => ServiceDefinition.RosDependencies;
 
         /// <summary>
-        /// Creates a ROS definition for this message (the contents of a .msg file).
+        /// Creates a ROS definition for this message (the contents of a .srv file).
         /// </summary>
         [IgnoreDataMember]
         public static string RosDefinition => ServiceDefinition.RosDefinition;
@@ -48,12 +47,14 @@ namespace Iviz.MsgsWrapper
 
         IService IService.Create() => new T();
 
+        [IgnoreDataMember]
         IRequest IService.Request
         {
             get => Request;
             set => Request = (TRequest) value;
         }
 
+        [IgnoreDataMember]
         IResponse IService.Response
         {
             get => Response;
@@ -65,47 +66,5 @@ namespace Iviz.MsgsWrapper
         /// </summary>
         [IgnoreDataMember]
         string IService.RosType => ServiceDefinition.RosType;
-    }
-
-    internal sealed class RosServiceDefinition<T, TRequest, TResponse>
-        where T : RosServiceWrapper<T, TRequest, TResponse>, IService, new()
-        where TRequest : RosRequestWrapper<T, TRequest, TResponse> , new()
-        where TResponse : RosResponseWrapper<T, TRequest, TResponse>, new()
-    {
-        public string RosType { get; }
-        public string RosDefinition { get; }
-        public string RosMessageMd5 { get; }
-        public string RosDependencies { get; }
-        public string RosDependenciesBase64 => RosWrapperBase.CompressDependencies(RosDependencies);
-
-        public RosServiceDefinition()
-        {
-            try
-            {
-                RosType = BuiltIns.GetServiceType<T>();
-            }
-            catch (RosInvalidMessageException)
-            {
-                throw new RosIncompleteWrapperException(
-                    $"Type '{typeof(T).Name}' must have a string constant named RosMessageType. " +
-                    "It should also be tagged with the attribute [MessageName].");
-            }
-            
-            const string serviceSeparator =
-                "===";
-
-            RosDefinition = RosRequestWrapper<T, TRequest, TResponse>.RosDefinition + "\n" +
-                            serviceSeparator +
-                            RosResponseWrapper<T, TRequest, TResponse>.RosDefinition + "\n";
-
-            RosMessageMd5 = RosWrapperBase.CreateMd5(
-                RosRequestWrapper<T, TRequest, TResponse>.RosInputForMd5 +
-                RosResponseWrapper<T, TRequest, TResponse>.RosInputForMd5);
-
-            var alreadyWritten = new HashSet<Type>();
-            RosDependencies = RosDefinition +
-                RosSerializableDefinition<TRequest>.CreatePartialDependencies(alreadyWritten) +
-                RosSerializableDefinition<TResponse>.CreatePartialDependencies(alreadyWritten);
-        }
     }
 }

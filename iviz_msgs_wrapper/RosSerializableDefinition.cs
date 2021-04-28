@@ -23,8 +23,8 @@ namespace Iviz.MsgsWrapper
         {
             try
             {
-                RosType = typeof(IMessage).IsAssignableFrom(typeof(T)) 
-                    ? BuiltIns.GetMessageType(typeof(T)) 
+                RosType = typeof(IMessage).IsAssignableFrom(typeof(T))
+                    ? BuiltIns.GetMessageType(typeof(T))
                     : "";
             }
             catch (RosInvalidMessageException)
@@ -48,10 +48,14 @@ namespace Iviz.MsgsWrapper
 
             foreach (var property in typeof(T).GetProperties())
             {
+                if (property.GetSetMethod() == null &&
+                    !(property.GetType().IsGenericType &&
+                     property.GetType().GetGenericTypeDefinition() != typeof(List<>)))
+                {
+                    continue;
+                }
+
                 if (property.GetGetMethod() == null
-                    || (property.GetType().IsGenericType 
-                        && property.GetType().GetGenericTypeDefinition() != typeof(List<>) 
-                        && property.GetSetMethod() == null)
                     || property.GetCustomAttribute<IgnoreDataMemberAttribute>() != null)
                 {
                     continue;
