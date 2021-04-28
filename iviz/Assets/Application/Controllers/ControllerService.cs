@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonMsgs;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -48,6 +49,8 @@ namespace Iviz.Controllers
             connection.AdvertiseService<StopCapture>("stop_capture", ServiceFunctions.StopCaptureAsync);
             connection.AdvertiseService<CaptureScreenshot>("capture_screenshot",
                 ServiceFunctions.CaptureScreenshotAsync);
+
+            connection.AdvertiseService<UpdateRobot>("update_robot", ServiceFunctions.UpdateRobotAsync);
         }
     }
 
@@ -666,6 +669,129 @@ namespace Iviz.Controllers
                     ss.Bytes.Array, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
                 return builder.Save();
             });
+        }
+
+        internal static Task UpdateRobotAsync([NotNull] UpdateRobot srv)
+        {
+            switch (srv.Request.Operation)
+            {
+                case OperationType.Remove:
+                    return RemoveRobotAsync(srv);
+                case OperationType.AddOrUpdate:
+                    return AddRobotAsync(srv);
+                default:
+                    srv.Response.Success = false;
+                    srv.Response.Message = "EE Unknown operation";
+                    return Task.CompletedTask;
+            }
+        }
+
+        static async Task RemoveRobotAsync([NotNull] UpdateRobot srv)
+        {
+            string id = srv.Request.Id;
+            if (id.Length == 0)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "EE Id field is empty";
+                return;
+            }
+
+            ModuleData moduleData;
+            if ((moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) != null
+                && moduleData.ModuleType != ModuleType.Robot)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message =
+                    $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+            }
+
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(() =>
+                {
+                    try
+                    {
+                        Logger.Info($"ControllerService: Removing robot");
+                        ModuleListPanel.Instance.RemoveModule(moduleData);
+                    }
+                    catch (Exception e)
+                    {
+                        srv.Response.Success = false;
+                        srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message = "EE Request timed out!";
+                    return;
+                }
+
+                srv.Response.Success = true;
+            }
+        }
+
+        static async Task AddRobotAsync([NotNull] UpdateRobot srv)
+        {
+            string id = srv.Request.Id;
+
+            ModuleData moduleData;
+            if (id.Length != 0 &&
+                (moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) != null)
+            {
+                if (moduleData.ModuleType != ModuleType.Robot)
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message =
+                        $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                }
+                else
+                {
+                    srv.Response.Success = true;
+                    srv.Response.Message = "** Module already exists";
+                }
+
+                return;
+            }
+
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(() =>
+                {
+                    try
+                    {
+                        Logger.Info($"ControllerService: Creating robot");
+                        var newModuleData = ModuleListPanel.Instance.CreateModule(
+                            ModuleType.Robot,
+                            requestedId: id.Length != 0 ? id : null);
+                        srv.Response.Success = true;
+                        ((SimpleRobotModuleData) newModuleData).UpdateConfiguration(
+                            srv.Request.Configuration,
+                            srv.Request.ValidFields);
+                    }
+                    catch (Exception e)
+                    {
+                        srv.Response.Success = false;
+                        srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    }
+                    finally
+                    {
+                        signal.Release();
+                    }
+                });
+                if (!await signal.WaitAsync(DefaultTimeoutInMs))
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message = "EE Request timed out!";
+                    return;
+                }
+
+                srv.Response.Success = true;
+            }
         }
     }
 }

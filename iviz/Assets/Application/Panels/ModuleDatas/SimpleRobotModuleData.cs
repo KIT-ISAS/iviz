@@ -196,7 +196,7 @@ namespace Iviz.App
             UpdateConfiguration(config, fields);
         }
 
-        void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
+        public void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
         {
             bool hasRobotName = false;
             bool hasSourceParameter = false;
