@@ -84,7 +84,7 @@ namespace Iviz.Controllers
                 {
                     if (dialogs.TryGetValue(msg.Id, out var dialog))
                     {
-                        dialog.Dialog.Shutdown();
+                        dialog.Dialog.Suspend();
                         ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
                         dialogs.Remove(msg.Id);
                     }
@@ -100,7 +100,7 @@ namespace Iviz.Controllers
                 {
                     if (dialogs.TryGetValue(msg.Id, out var oldDialog))
                     {
-                        oldDialog.Dialog.Shutdown();
+                        oldDialog.Dialog.Suspend();
                         ResourcePool.Return(oldDialog.Info, oldDialog.Dialog.gameObject);
                     }
 
@@ -149,6 +149,7 @@ namespace Iviz.Controllers
                     dialog.CaptionAlignment = msg.CaptionAlignment;
                     dialog.Title = msg.Title;
                     dialog.Scale = msg.Scale;
+                    dialog.BackgroundColor = msg.BackgroundColor.ToUnityColor();
                     dialog.PivotFrameId = msg.Header.FrameId;
                     dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
                     dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
@@ -181,7 +182,7 @@ namespace Iviz.Controllers
         {
             foreach (var dialog in dialogs.Values)
             {
-                dialog.Dialog.Shutdown();
+                dialog.Dialog.Suspend();
                 ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
             }
 
@@ -196,7 +197,7 @@ namespace Iviz.Controllers
             foreach (var pair in deadEntries)
             {
                 var dialog = pair.Value;
-                dialog.Dialog.Shutdown();
+                dialog.Dialog.Suspend();
                 ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
                 dialogs.Remove(pair.Key);
             }

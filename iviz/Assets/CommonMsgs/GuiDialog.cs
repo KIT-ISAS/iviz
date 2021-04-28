@@ -78,6 +78,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
 
         [DataMember] public DialogType Type { get; set; }
         [DataMember] public IconType Icon { get; set; }
+        [DataMember] public ColorRGBA BackgroundColor { get; set; }
 
         [DataMember, NotNull] public string Title { get; set; } = "";
         [DataMember, NotNull] public string Caption { get; set; } = "";

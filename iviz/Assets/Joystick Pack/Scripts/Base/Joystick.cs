@@ -57,6 +57,7 @@ namespace External
         [SerializeField] RectTransform handle = null;
         [SerializeField] float maxStretch = 1;
         RectTransform baseRect = null;
+        int? touchId;
 
         Canvas canvas;
         Camera cam;
@@ -83,12 +84,17 @@ namespace External
         public virtual void OnPointerDown(PointerEventData eventData)
         {
             GameThread.EveryFrame += OnDrag;
+            if (Settings.IsMobile)
+            {
+                touchId = eventData.pointerId;
+            }
+
             PointerDown?.Invoke();
         }
 
         void OnDrag()
         {
-            Vector2 dragPosition = Settings.IsMobile ? Input.GetTouch(0).position : (Vector2) Input.mousePosition;
+            Vector2 dragPosition = Settings.IsMobile ? Input.GetTouch(touchId.Value).position : (Vector2) Input.mousePosition;
             
             cam = null;
             if (canvas.renderMode == RenderMode.ScreenSpaceCamera)
@@ -163,14 +169,14 @@ namespace External
         {
             input = Vector2.zero;
             handle.anchoredPosition = Vector2.zero;
+            touchId = null;
             GameThread.EveryFrame -= OnDrag;
             PointerUp?.Invoke();
         }
 
         protected Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)
         {
-            Vector2 localPoint;
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(baseRect, screenPosition, cam, out localPoint))
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(baseRect, screenPosition, cam, out Vector2 localPoint))
             {
                 Vector2 pivotOffset = baseRect.pivot * baseRect.sizeDelta;
                 return localPoint - (background.anchorMax * baseRect.sizeDelta) + pivotOffset;

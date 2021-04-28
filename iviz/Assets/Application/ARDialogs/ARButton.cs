@@ -15,6 +15,9 @@ namespace Iviz.App.ARDialogs
         [SerializeField] Texture2D[] icons;
         [SerializeField] TextMesh text;
         [SerializeField] MeshRenderer iconMeshRenderer;
+        
+        [SerializeField] Color backgroundColor = new Color(0, 0.2f, 0.5f);
+        [SerializeField] MeshMarkerResource background = null;
 
         Material material;
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
@@ -27,6 +30,19 @@ namespace Iviz.App.ARDialogs
             Ok,
             Forward,
             Backward
+        }
+
+        public Color BackgroundColor
+        {
+            get => backgroundColor;
+            set
+            {
+                backgroundColor = value;
+                if (background != null)
+                {
+                    
+                }
+            }
         }
 
         public string Caption

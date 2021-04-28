@@ -17,27 +17,35 @@ namespace Iviz.App.ARDialogs
     {
         const float PopupDuration = 0.3f;
         
-        [SerializeField] TextMesh title;
-        [SerializeField] TMP_Text caption;
-        [SerializeField] ARButton button1;
-        [SerializeField] ARButton button2;
-        [SerializeField] ARButton button3;
-        [SerializeField] ARLineConnector connector;
-        [SerializeField] MeshRenderer iconMeshRenderer;
+        static readonly Color DefaultBackgroundColor = new Color(0, 0.2f, 0.5f);
 
-        [SerializeField] Texture2D[] icons;
+        [SerializeField] TextMesh title = null;
+        [SerializeField] TMP_Text caption = null;
+        [SerializeField] ARButton button1 = null;
+        [SerializeField] ARButton button2 = null;
+        [SerializeField] ARButton button3 = null;
+        [SerializeField] ARLineConnector connector = null;
+        [SerializeField] MeshRenderer iconMeshRenderer = null;
 
-        [SerializeField] ARButton[] menuButtons;
-        [SerializeField] ARButton upButton;
-        [SerializeField] ARButton downButton;
+        [SerializeField] Texture2D[] icons = null;
+
+        [SerializeField] ARButton[] menuButtons = null;
+        [SerializeField] ARButton upButton = null;
+        [SerializeField] ARButton downButton = null;
+
+        [SerializeField] Color backgroundColor = DefaultBackgroundColor;
+        [SerializeField] MeshMarkerResource background = null;
 
         [SerializeField] Vector3 socketPosition;
-        
-        public string Id { get; internal set; }
-        public GuiDialogListener Listener { get; internal set; }
 
-        Material material;
-        Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
+        [CanBeNull] public string Id { get; internal set; }
+        [CanBeNull] public GuiDialogListener Listener { get; internal set; }
+
+        Material iconMaterial;
+
+        [NotNull]
+        Material IconMaterial =>
+            iconMaterial != null ? iconMaterial : (iconMaterial = Instantiate(iconMeshRenderer.material));
 
         float? popupStartTime;
         float? currentAngle;
@@ -45,6 +53,42 @@ namespace Iviz.App.ARDialogs
 
         FrameNode node;
         float scale;
+
+        public Color BackgroundColor
+        {
+            get => backgroundColor;
+            set
+            {
+                backgroundColor = value;
+                if (backgroundColor == default)
+                {
+                    backgroundColor = DefaultBackgroundColor;
+                }
+                
+                if (background != null)
+                {
+                    background.Color = backgroundColor;
+                }
+
+                SetBackgroundColor(button1, backgroundColor);
+                SetBackgroundColor(button2, backgroundColor);
+                SetBackgroundColor(button3, backgroundColor);
+                SetBackgroundColor(upButton, backgroundColor);
+
+                foreach (var menuButton in menuButtons)
+                {
+                    SetBackgroundColor(menuButton, backgroundColor);
+                }
+            }
+        }
+
+        static void SetBackgroundColor(ARButton button, Color color)
+        {
+            if (button != null)
+            {
+                button.BackgroundColor = color;
+            }
+        }
 
         public string Caption
         {
@@ -173,7 +217,7 @@ namespace Iviz.App.ARDialogs
             set
             {
                 icon = value;
-                Material.mainTexture = icons[(int) value];
+                IconMaterial.mainTexture = icons[(int) value];
             }
         }
 
@@ -256,17 +300,32 @@ namespace Iviz.App.ARDialogs
             set
             {
                 scale = value;
-                transform.localScale = scale * Vector3.one;
+                if (popupStartTime != null)
+                {
+                    transform.localScale = scale * Vector3.one;
+                }
             }
         }
 
         void OnButtonClick(int index)
         {
+            if (Listener == null)
+            {
+                Debug.Log($"{this}: No listener set for click {index}");
+                return;
+            }
+
             Listener.OnDialogButtonClicked(this, index);
         }
 
         void OnMenuClick(int index)
         {
+            if (Listener == null)
+            {
+                Debug.Log($"{this}: No listener set for menu click {index}");
+                return;
+            }
+
             Listener.OnDialogMenuEntryClicked(this, index);
         }
 
@@ -285,9 +344,7 @@ namespace Iviz.App.ARDialogs
                 MenuPage++;
             }
         }
-
-
-        //static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
+        
         Vector3 BaseDisplacement => -socketPosition * Scale;
 
         protected override void Awake()
@@ -339,7 +396,7 @@ namespace Iviz.App.ARDialogs
 
             if (iconMeshRenderer != null)
             {
-                iconMeshRenderer.material = Material;
+                iconMeshRenderer.material = IconMaterial;
             }
         }
 
@@ -350,12 +407,12 @@ namespace Iviz.App.ARDialogs
                 float now = Time.time;
                 if (now - popupStartTime.Value < PopupDuration)
                 {
-                    float scale = (now - popupStartTime.Value) / PopupDuration;
-                    transform.localScale = (scale * 0.5f + 0.5f) * Vector3.one;
+                    float tempScale = (now - popupStartTime.Value) / PopupDuration;
+                    transform.localScale = (tempScale * 0.5f + 0.5f) * Scale * Vector3.one;
                 }
                 else
                 {
-                    transform.localScale = Vector3.one;
+                    transform.localScale = Scale * Vector3.one;
                     popupStartTime = null;
                 }
             }
@@ -445,11 +502,13 @@ namespace Iviz.App.ARDialogs
             popupStartTime = Time.time;
         }
 
-        public void Shutdown()
+        public override void Suspend()
         {
+            base.Suspend();
             connector.Visible = false;
             currentAngle = null;
             currentPosition = null;
+            popupStartTime = null;
         }
 
         public override string ToString()

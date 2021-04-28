@@ -82,11 +82,6 @@ namespace Iviz.Displays
             Visible = true;
         }
 
-        protected void IgnoreBoxCollider()
-        {
-            boxCollider = null;
-        }
-
         public bool TryRaycast(in Vector2 cameraPoint, out Vector3 hit)
         {
             var ray = Settings.MainCamera.ScreenPointToRay(cameraPoint);

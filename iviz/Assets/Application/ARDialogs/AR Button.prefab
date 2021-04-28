@@ -67,6 +67,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 5b83c5f95307e4b21b95115f20aa576b, type: 3}
   text: {fileID: 7364131420669954633}
   iconMeshRenderer: {fileID: 8210962771370321940}
+  backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
+  background: {fileID: 8996295282114078055}
 --- !u!1 &7364131420669954635
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,6 +675,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2849775447512226156}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8996295282114078055 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6581216246697966603, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+    type: 3}
+  m_PrefabInstance: {fileID: 2849775447512226156}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2849775448062956405
 PrefabInstance:
   m_ObjectHideFlags: 0

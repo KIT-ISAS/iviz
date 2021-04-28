@@ -12,7 +12,7 @@ namespace Iviz.App.ARDialogs
     public class ARLineConnector : MonoBehaviour
     {
         GameObject node;
-        MeshMarkerResource[] spheres;
+        readonly MeshMarkerResource[] spheres = new MeshMarkerResource[3];
         LineResource lines;
         int layer;
         Color32 color;
@@ -28,7 +28,6 @@ namespace Iviz.App.ARDialogs
             lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
-            spheres = new MeshMarkerResource[3];
             foreach (ref var sphere in spheres.Ref())
             {
                 sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
@@ -86,11 +85,12 @@ namespace Iviz.App.ARDialogs
 
         public void SplitForRecycle()
         {
+            lines.Suspend();
             ResourcePool.ReturnDisplay(lines);
 
             foreach (var sphere in spheres)
             {
-                sphere.EmissiveColor = Color.black;
+                sphere.Suspend();
                 ResourcePool.Return(Resource.Displays.Sphere, sphere.gameObject);
             }
         }

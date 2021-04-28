@@ -268,10 +268,6 @@ namespace Iviz.App
 
             Config = new SettingsConfiguration();
 
-            //CanvasScaler canvas = GameObject.Find("Canvas").GetComponent<CanvasScaler>();
-            //canvas.scaleFactor = 2;
-            //canvas.referenceResolution = new Vector2(800, 600);
-            
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
 
             mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
@@ -515,7 +511,7 @@ namespace Iviz.App
 
             Vector2 pointerAltDiff;
             float altDistanceDiff;
-            if (alreadyScaling)
+            if (alreadyScaling && !PointerOnGui)
             {
                 pointerAltDiff = PointerAltPosition - lastPointerAlt;
                 altDistanceDiff = PointerAltDistance - lastAltDistance;
