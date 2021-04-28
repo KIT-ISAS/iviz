@@ -6,6 +6,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.IvizCommonMsgs;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 using Material = UnityEngine.Material;
@@ -14,8 +15,10 @@ namespace Iviz.App.ARDialogs
 {
     public class ARDialog : MarkerResource, IRecyclable
     {
+        const float PopupDuration = 0.3f;
+        
         [SerializeField] TextMesh title;
-        [SerializeField] TextMesh caption;
+        [SerializeField] TMP_Text caption;
         [SerializeField] ARButton button1;
         [SerializeField] ARButton button2;
         [SerializeField] ARButton button3;
@@ -29,23 +32,33 @@ namespace Iviz.App.ARDialogs
         [SerializeField] ARButton downButton;
 
         [SerializeField] Vector3 socketPosition;
-
+        
         public string Id { get; internal set; }
         public GuiDialogListener Listener { get; internal set; }
-        
+
         Material material;
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
 
+        float? popupStartTime;
         float? currentAngle;
         Vector3? currentPosition;
 
         FrameNode node;
         float scale;
-        
+
         public string Caption
         {
             get => caption.text;
             set => caption.text = value;
+        }
+
+        public CaptionAlignmentType CaptionAlignment
+        {
+            get => (CaptionAlignmentType) caption.alignment;
+            set => caption.alignment =
+                value == CaptionAlignmentType.Default
+                    ? TextAlignmentOptions.Center
+                    : (TextAlignmentOptions) value;
         }
 
         public string Title
@@ -85,7 +98,6 @@ namespace Iviz.App.ARDialogs
         }
 
         public Vector3 DialogDisplacement { get; set; }
-
         public Vector3 PivotFrameOffset { get; set; }
         public Vector3 PivotDisplacement { get; set; }
 
@@ -277,7 +289,7 @@ namespace Iviz.App.ARDialogs
 
         //static readonly Vector3 BaseDisplacement = new Vector3(0, 0.6f, 0);
         Vector3 BaseDisplacement => -socketPosition * Scale;
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -286,7 +298,7 @@ namespace Iviz.App.ARDialogs
             connector.End = () =>
             {
                 Vector3 framePosition = node.Transform.position + PivotFrameOffset;
-                
+
                 return PivotDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
                     : framePosition + GetFlatCameraRotation(framePosition) * PivotDisplacement;
@@ -333,6 +345,21 @@ namespace Iviz.App.ARDialogs
 
         void Update()
         {
+            if (popupStartTime != null)
+            {
+                float now = Time.time;
+                if (now - popupStartTime.Value < PopupDuration)
+                {
+                    float scale = (now - popupStartTime.Value) / PopupDuration;
+                    transform.localScale = (scale * 0.5f + 0.5f) * Vector3.one;
+                }
+                else
+                {
+                    transform.localScale = Vector3.one;
+                    popupStartTime = null;
+                }
+            }
+
             UpdateRotation();
             UpdatePosition();
         }
@@ -415,6 +442,7 @@ namespace Iviz.App.ARDialogs
         public void Initialize()
         {
             connector.Visible = true;
+            popupStartTime = Time.time;
         }
 
         public void Shutdown()

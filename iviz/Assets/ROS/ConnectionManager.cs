@@ -102,9 +102,9 @@ namespace Iviz.Ros
             instance.frameBandwidthDown += size;
         }
 
-        public static (long, long) CollectBandwidthReport()
+        public static (long bandwidthDown, long bandwidthUp) CollectBandwidthReport()
         {
-            (long, long) result = (instance.frameBandwidthDown, instance.frameBandwidthUp);
+            var result = (instance.frameBandwidthDown, instance.frameBandwidthUp);
             instance.frameBandwidthDown = 0;
             instance.frameBandwidthUp = 0;
             return result;

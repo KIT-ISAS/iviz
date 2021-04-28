@@ -24,6 +24,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         ButtonForwardBackward,
 
         Short,
+        Notice,
         MenuMode,
     }
 
@@ -44,6 +45,23 @@ namespace Iviz.Msgs.IvizCommonMsgs
         BindToTf,
         BindToUser,
     }
+    
+    [Flags]
+    public enum CaptionAlignmentType
+    {
+        Default = 0x0,
+        
+        Left = 0x1,
+        Center = 0x2,
+        Right = 0x4,
+        Justified = 0x8,
+        Flush = 0x10,
+        GeometryCenter = 0x20,
+            
+        Top = 0x100,
+        Mid = 0x200,
+        Bottom = 0x400,
+    }    
 
     [DataContract]
     public sealed class GuiDialog : RosMessageWrapper<GuiDialog>
@@ -63,6 +81,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
 
         [DataMember, NotNull] public string Title { get; set; } = "";
         [DataMember, NotNull] public string Caption { get; set; } = "";
+        [DataMember] public CaptionAlignmentType CaptionAlignment { get; set; }
         [DataMember, NotNull] public string[] MenuEntries { get; set; } = Array.Empty<string>();
 
 

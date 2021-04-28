@@ -37,6 +37,7 @@ namespace Iviz.Displays
         public GameObject ARDialogMenu;
         public GameObject ARDialogShort;
         public GameObject ARTfFrame;
+        public GameObject ARDialogNotice;
         
         public Material LineConnectorMaterial;
         public Material TextMaterial;

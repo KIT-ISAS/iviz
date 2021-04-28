@@ -93,6 +93,8 @@ MonoBehaviour:
     type: 3}
   ARTfFrame: {fileID: 6567602141477134692, guid: 67af1adae208f4fe8949e532576d55ee,
     type: 3}
+  ARDialogNotice: {fileID: 9024825353754890543, guid: ffcf9df44385d4b86970093fa5a41022,
+    type: 3}
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
     type: 2}
   TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}

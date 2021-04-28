@@ -240,7 +240,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             if (SenderTwist != null)
             {
                 Vector2 leftDir = Joystick.Left;
@@ -264,7 +264,7 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    SenderTwist.Publish(twist);
+                    ((Sender<Twist>) SenderTwist).Publish(twist);
                 }
             }
 
