@@ -21,7 +21,7 @@ namespace Iviz.Ros
     public sealed class Sender<T> : ISender where T : IMessage
     {
         [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
-        
+
         int lastMsgBytes;
         int lastMsgCounter;
         int totalMsgCounter;
@@ -47,7 +47,7 @@ namespace Iviz.Ros
         public RosSenderStats Stats { get; private set; }
         public int NumSubscribers => Connection.GetNumSubscribers(Topic);
 
-        public void Publish(IMessage msg)
+        void ISender.Publish(IMessage msg)
         {
             Publish((T) msg);
         }
@@ -64,7 +64,7 @@ namespace Iviz.Ros
             Id = id;
         }
 
-        public void Publish([NotNull] T msg)
+        public void Publish([NotNull] in T msg)
         {
             if (msg == null)
             {

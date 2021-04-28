@@ -791,7 +791,7 @@ namespace Iviz.App
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
-            var (downB, upB) = ConnectionManager.CollectBandwidthReport();
+            (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
             long downKb = downB / 1000;
             long upKb = upB / 1000;
             bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";

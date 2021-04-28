@@ -129,6 +129,10 @@ namespace Iviz.Controllers
                             info = Resource.Displays.ARDialogShort;
                             dialog = ResourcePool.Rent<ARDialog>(info);
                             break;
+                        case DialogType.Notice:
+                            info = Resource.Displays.ARDialogNotice;
+                            dialog = ResourcePool.Rent<ARDialog>(info);
+                            break;
                         case DialogType.MenuMode:
                             info = Resource.Displays.ARDialogMenu;
                             dialog = ResourcePool.Rent<ARDialog>(info);
@@ -142,6 +146,7 @@ namespace Iviz.Controllers
                     dialog.Listener = this;
                     dialog.Active = true;
                     dialog.Caption = msg.Caption;
+                    dialog.CaptionAlignment = msg.CaptionAlignment;
                     dialog.Title = msg.Title;
                     dialog.Scale = msg.Scale;
                     dialog.PivotFrameId = msg.Header.FrameId;

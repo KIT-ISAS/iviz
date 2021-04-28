@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.RosgraphMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -60,44 +61,53 @@ namespace Iviz.Resources
         public Info<GameObject> ARDialogMenu { get; }
         public Info<GameObject> ARDialogShort { get; }
         public Info<GameObject> ARTfFrame { get; }
+        public Info<GameObject> ARDialogNotice { get; }
 
         public DisplaysType()
         {
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
             var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-            Cube = new Info<GameObject>(assetHolder.Cube);
-            Cylinder = new Info<GameObject>(assetHolder.Cylinder);
-            Sphere = new Info<GameObject>(assetHolder.Sphere);
-            Text = new Info<GameObject>(assetHolder.Text);
-            LineConnector = new Info<GameObject>(appAssetHolder.LineConnector);
-            BoundaryFrame = new Info<GameObject>(appAssetHolder.BoundaryFrame);
-            Arrow = new Info<GameObject>(appAssetHolder.Arrow);
-            MeshList = new Info<GameObject>(assetHolder.MeshList);
-            PointList = new Info<GameObject>(assetHolder.PointList);
-            MeshTriangles = new Info<GameObject>(assetHolder.MeshTriangles);
-            TfFrame = new Info<GameObject>(appAssetHolder.TFFrame);
-            Image = new Info<GameObject>(appAssetHolder.Image);
-            Square = new Info<GameObject>(assetHolder.Plane);
-            Line = new Info<GameObject>(assetHolder.Line);
-            Grid = new Info<GameObject>(appAssetHolder.Grid);
-            DepthImageResource = new Info<GameObject>(appAssetHolder.DepthImage);
-            OccupancyGridResource = new Info<GameObject>(appAssetHolder.OccupancyGrid);
-            RadialScanResource = new Info<GameObject>(appAssetHolder.RadialScan);
-            ARMarkerResource = new Info<GameObject>(appAssetHolder.ARMarkerResource);
-            AxisFrame = new Info<GameObject>(appAssetHolder.AxisFrame);
-            AngleAxis = new Info<GameObject>(appAssetHolder.AngleAxis);
-            Trail = new Info<GameObject>(appAssetHolder.Trail);
-            InteractiveControl = new Info<GameObject>(appAssetHolder.InteractiveControl);
-            GridMap = new Info<GameObject>(appAssetHolder.GridMap);
-            OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
-            
-            ARDialog = new Info<GameObject>(appAssetHolder.ARDialog);
-            ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
-            ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
-            ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
-            ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
+            try
+            {
+                Cube = new Info<GameObject>(assetHolder.Cube);
+                Cylinder = new Info<GameObject>(assetHolder.Cylinder);
+                Sphere = new Info<GameObject>(assetHolder.Sphere);
+                Text = new Info<GameObject>(assetHolder.Text);
+                LineConnector = new Info<GameObject>(appAssetHolder.LineConnector);
+                BoundaryFrame = new Info<GameObject>(appAssetHolder.BoundaryFrame);
+                Arrow = new Info<GameObject>(appAssetHolder.Arrow);
+                MeshList = new Info<GameObject>(assetHolder.MeshList);
+                PointList = new Info<GameObject>(assetHolder.PointList);
+                MeshTriangles = new Info<GameObject>(assetHolder.MeshTriangles);
+                TfFrame = new Info<GameObject>(appAssetHolder.TFFrame);
+                Image = new Info<GameObject>(appAssetHolder.Image);
+                Square = new Info<GameObject>(assetHolder.Plane);
+                Line = new Info<GameObject>(assetHolder.Line);
+                Grid = new Info<GameObject>(appAssetHolder.Grid);
+                DepthImageResource = new Info<GameObject>(appAssetHolder.DepthImage);
+                OccupancyGridResource = new Info<GameObject>(appAssetHolder.OccupancyGrid);
+                RadialScanResource = new Info<GameObject>(appAssetHolder.RadialScan);
+                ARMarkerResource = new Info<GameObject>(appAssetHolder.ARMarkerResource);
+                AxisFrame = new Info<GameObject>(appAssetHolder.AxisFrame);
+                AngleAxis = new Info<GameObject>(appAssetHolder.AngleAxis);
+                Trail = new Info<GameObject>(appAssetHolder.Trail);
+                InteractiveControl = new Info<GameObject>(appAssetHolder.InteractiveControl);
+                GridMap = new Info<GameObject>(appAssetHolder.GridMap);
+                OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
 
-            resourceByType = CreateTypeDictionary(this);
+                ARDialog = new Info<GameObject>(appAssetHolder.ARDialog);
+                ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
+                ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
+                ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
+                ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
+                ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice);
+                
+                resourceByType = CreateTypeDictionary(this);
+            }
+            catch (NullReferenceException)
+            {
+                Debug.LogError("DisplaysType: Missing at least one asset!");
+            }
         }
 
         [NotNull]

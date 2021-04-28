@@ -610,7 +610,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] T msg) where T : IMessage
+        internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] in T msg) where T : IMessage
         {
             if (advertiser == null)
             {
@@ -637,7 +637,7 @@ namespace Iviz.Ros
             }
         }
 
-        void PublishImpl<T>([NotNull] ISender advertiser, T msg) where T : IMessage
+        void PublishImpl<T>([NotNull] ISender advertiser, in T msg) where T : IMessage
         {
             if (advertiser.Id == -1)
             {
