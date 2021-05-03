@@ -528,11 +528,24 @@ namespace Iviz.Roslib
 
     public static class RosChannelReaderUtils
     {
+        /// <summary>
+        /// Creates a channel reader for the given topic. Returns whatever message type is published there.
+        /// </summary>
+        /// <param name="client">The ROS client</param>
+        /// <param name="topic">The topic name</param>
+        /// <returns>The channel reader</returns>
         public static RosChannelReader CreateReader(this IRosClient client, string topic)
         {
             return new RosChannelReader(client, topic);
         }
         
+        /// <summary>
+        /// Creates a channel reader for the given topic and message type. 
+        /// </summary>
+        /// <param name="client">The ROS client</param>
+        /// <param name="topic">The topic name</param>
+        /// <typeparam name="T">The message type</typeparam>
+        /// <returns>The channel reader</returns>
         public static RosChannelReader<T> CreateReader<T>(this IRosClient client, string topic) 
             where T : IMessage, IDeserializable<T>, new()
         {

@@ -370,7 +370,16 @@ namespace Iviz.Roslib.XmlRpc
         {
             using CancellationTokenSource ts = new(TimeoutInMs);
 
-            XmlRpcValue tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
+            XmlRpcValue tmp;
+            try
+            {
+                tmp = XmlRpcService.MethodCall(MasterUri, CallerUri, function, args, ts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException($"Call to '{function}' timed out");
+            }
+
             if (!tmp.TryGetArray(out XmlRpcValue[] result))
             {
                 throw new ParseException($"Rpc Response: Expected type object[], got {tmp}");

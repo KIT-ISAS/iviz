@@ -346,6 +346,28 @@ namespace Iviz.Roslib
 
             return client;
         }
+        
+        /// <summary>
+        /// Constructs and connects a ROS client. Same as calling new() directly.
+        /// </summary>
+        /// <param name="masterUri">
+        /// URI to the master node. Example: new Uri("http://localhost:11311").
+        /// </param>
+        /// <param name="callerId">
+        /// The ROS name of this node.
+        /// This is your identity in the network, and must be unique. Example: /my_new_node
+        /// Leave empty to generate one automatically.
+        /// </param>
+        /// <param name="callerUri">
+        /// URI of this node.
+        /// Other clients will use this address to connect to this node.
+        /// Leave empty to generate one automatically. </param>
+        /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+        /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
+        public static RosClient Create(Uri? masterUri = null, string? callerId = null,
+            Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
+            new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
+        
 
         /// <summary>
         /// Constructs and connects a ROS client.
