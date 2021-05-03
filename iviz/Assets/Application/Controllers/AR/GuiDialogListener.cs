@@ -4,25 +4,25 @@ using System.Linq;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.IvizCommonMsg;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
 using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
     public sealed class GuiDialogListener : ListenerController
     {
-        readonly struct DialogInfo
+        readonly struct Data<T> where T : MonoBehaviour, IDisplay
         {
-            public ARDialog Dialog { get; }
+            public T Object { get; }
             public Info<GameObject> Info { get; }
             public DateTime ExpirationTime { get; }
 
-            public DialogInfo(ARDialog dialog, Info<GameObject> info, DateTime expirationTime) =>
-                (Dialog, Info, ExpirationTime) = (dialog, info, expirationTime);
+            public Data(T obj, Info<GameObject> info, DateTime expirationTime) =>
+                (Object, Info, ExpirationTime) = (obj, info, expirationTime);
         }
 
 
@@ -31,7 +31,8 @@ namespace Iviz.Controllers
 
         readonly GuiDialogConfiguration config = new GuiDialogConfiguration();
 
-        readonly Dictionary<string, DialogInfo> dialogs = new Dictionary<string, DialogInfo>();
+        readonly Dictionary<string, Data<ARDialog>> dialogs = new Dictionary<string, Data<ARDialog>>();
+        readonly Dictionary<string, Data<ARWidget>> widgets = new Dictionary<string, Data<ARWidget>>();
 
         public ISender FeedbackSender { get; private set; }
 
@@ -49,15 +50,15 @@ namespace Iviz.Controllers
         {
             switch (config.Type)
             {
-                case GuiDialog.RosMessageType:
-                    Listener = new Listener<GuiDialog>(config.Topic, Handler);
+                case Dialog.RosMessageType:
+                    Listener = new Listener<Dialog>(config.Topic, Handler);
                     break;
-                case GuiDialogArray.RosMessageType:
-                    Listener = new Listener<GuiDialogArray>(config.Topic, Handler);
+                case GuiArray.RosMessageType:
+                    Listener = new Listener<GuiArray>(config.Topic, Handler);
                     break;
             }
 
-            FeedbackSender = new Sender<GuiDialogFeedback>(config.Topic + "/feedback");
+            FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }
 
         public GuiDialogListener([NotNull] IModuleData moduleData)
@@ -68,15 +69,20 @@ namespace Iviz.Controllers
             GameThread.EverySecond += CheckDeadDialogs;
         }
 
-        void Handler(GuiDialogArray msg)
+        void Handler(GuiArray msg)
         {
             foreach (var dialog in msg.Dialogs)
             {
                 Handler(dialog);
             }
+
+            foreach (var widget in msg.Widgets)
+            {
+                Handler(widget);
+            }
         }
 
-        void Handler(GuiDialog msg)
+        void Handler(Widget msg)
         {
             switch (msg.Action)
             {
@@ -84,8 +90,8 @@ namespace Iviz.Controllers
                 {
                     if (dialogs.TryGetValue(msg.Id, out var dialog))
                     {
-                        dialog.Dialog.Suspend();
-                        ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
+                        dialog.Object.Suspend();
+                        ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
                         dialogs.Remove(msg.Id);
                     }
 
@@ -93,15 +99,82 @@ namespace Iviz.Controllers
                 }
                 case ActionType.RemoveAll:
                 {
-                    DestroyAllDialogs();
+                    DestroyAll(widgets);
+                    break;
+                }
+                case ActionType.Add:
+                {
+                    if (widgets.TryGetValue(msg.Id, out var oldWidget))
+                    {
+                        oldWidget.Object.Suspend();
+                        ResourcePool.Return(oldWidget.Info, oldWidget.Object.gameObject);
+                    }
+
+                    Info<GameObject> info;
+                    ARWidget widget;
+                    switch (msg.Type)
+                    {
+                        case WidgetType.RotationDisc:
+                        {
+                            info = Resource.Displays.RotationDisc;
+                            var disc = ResourcePool.RentDisplay<RotationDisc>();
+                            disc.Moved += OnRotationDiscMoved;
+                            widget = disc;
+                            break;
+                        }
+                        case WidgetType.SpringDisc:
+                        {
+                            info = Resource.Displays.SpringDisc;
+                            var disc = ResourcePool.RentDisplay<SpringDisc>();
+                            disc.Moved += OnSpringDiscMoved;
+                            widget = disc;
+                            break;
+                        }
+                        default:
+                            return;
+                    }
+                    
+                    widget.Initialize();
+                    widget.Id = msg.Id;
+                    widget.AttachTo(msg.Header.FrameId);
+                    widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());
+                    widget.transform.localScale = (float)msg.Scale * Vector3.one;
+                    widgets[msg.Id] = new Data<ARWidget>(widget, info, DateTime.MaxValue);
+                    break;
+                }
+                default:
+                    Logger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
+                    break;                
+            }
+        }
+
+
+        void Handler(Dialog msg)
+        {
+            switch (msg.Action)
+            {
+                case ActionType.Remove:
+                {
+                    if (dialogs.TryGetValue(msg.Id, out var dialog))
+                    {
+                        dialog.Object.Suspend();
+                        ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
+                        dialogs.Remove(msg.Id);
+                    }
+
+                    break;
+                }
+                case ActionType.RemoveAll:
+                {
+                    DestroyAll(dialogs);
                     break;
                 }
                 case ActionType.Add:
                 {
                     if (dialogs.TryGetValue(msg.Id, out var oldDialog))
                     {
-                        oldDialog.Dialog.Suspend();
-                        ResourcePool.Return(oldDialog.Info, oldDialog.Dialog.gameObject);
+                        oldDialog.Object.Suspend();
+                        ResourcePool.Return(oldDialog.Info, oldDialog.Object.gameObject);
                     }
 
                     Info<GameObject> info;
@@ -109,16 +182,12 @@ namespace Iviz.Controllers
 
                     switch (msg.Type)
                     {
-                        case DialogType.ButtonOk:
-                        case DialogType.ButtonOkCancel:
-                        case DialogType.ButtonYesNo:
-                        case DialogType.ButtonForward:
-                        case DialogType.ButtonForwardBackward:
+                        case DialogType.Dialog:
                             info = msg.Icon == IconType.None
                                 ? Resource.Displays.ARDialog
                                 : Resource.Displays.ARDialogIcon;
                             dialog = ResourcePool.Rent<ARDialog>(info);
-                            dialog.SetButtonMode(msg.Type);
+                            dialog.SetButtonMode(msg.Buttons);
                             if (msg.Icon != IconType.None)
                             {
                                 dialog.SetIconMode(msg.Icon);
@@ -142,31 +211,35 @@ namespace Iviz.Controllers
                             return;
                     }
 
+                    dialog.Initialize();
                     dialog.Id = msg.Id;
-                    dialog.Listener = this;
+                    dialog.ButtonClicked += OnDialogButtonClicked;
+                    dialog.MenuEntryClicked += OnDialogMenuEntryClicked;
                     dialog.Active = true;
                     dialog.Caption = msg.Caption;
                     dialog.CaptionAlignment = msg.CaptionAlignment;
                     dialog.Title = msg.Title;
-                    dialog.Scale = msg.Scale;
+                    dialog.Scale = (float)msg.Scale;
                     dialog.BackgroundColor = msg.BackgroundColor.ToUnityColor();
                     dialog.PivotFrameId = msg.Header.FrameId;
                     dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
                     dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
                     dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
-                    dialog.Initialize();
 
                     DateTime expirationTime = msg.Lifetime == default
                         ? DateTime.MaxValue
                         : GameThread.Now + msg.Lifetime.ToTimeSpan();
 
-                    dialogs[msg.Id] = new DialogInfo(dialog, info, expirationTime);
+                    dialogs[msg.Id] = new Data<ARDialog>(dialog, info, expirationTime);
                     break;
                 }
+                default:
+                    Logger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
+                    break;
             }
         }
 
-        static Vector3 AdjustDisplacement(in Msgs.IvizMsgs.Vector3f displacement)
+        static Vector3 AdjustDisplacement(in Msgs.GeometryMsgs.Vector3 displacement)
         {
             (float x, float y, float z) = displacement.ToUnity();
             return new Vector3(x, y, -z);
@@ -175,20 +248,21 @@ namespace Iviz.Controllers
         public override void ResetController()
         {
             base.ResetController();
-            DestroyAllDialogs();
+            DestroyAll(dialogs);
+            DestroyAll(widgets);
         }
 
-        void DestroyAllDialogs()
+        static void DestroyAll<T>(Dictionary<string, Data<T>> dict) where T : MonoBehaviour, IDisplay
         {
-            foreach (var dialog in dialogs.Values)
+            foreach (var dialog in dict.Values)
             {
-                dialog.Dialog.Suspend();
-                ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
+                dialog.Object.Suspend();
+                ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
             }
 
-            dialogs.Clear();
+            dict.Clear();
         }
-
+        
         void CheckDeadDialogs()
         {
             var deadEntries = dialogs
@@ -197,39 +271,62 @@ namespace Iviz.Controllers
             foreach (var pair in deadEntries)
             {
                 var dialog = pair.Value;
-                dialog.Dialog.Suspend();
-                ResourcePool.Return(dialog.Info, dialog.Dialog.gameObject);
+                dialog.Object.Suspend();
+                ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
                 dialogs.Remove(pair.Key);
             }
         }
 
-        internal void OnDialogButtonClicked(ARDialog dialog, int button)
+        void OnDialogButtonClicked(ARDialog dialog, int button)
         {
-            FeedbackSender.Publish(new GuiDialogFeedback
+            FeedbackSender.Publish(new Feedback
             {
-                EngineId = ConnectionManager.MyId ?? "",
-                DialogId = dialog.Id,
+                VizId = ConnectionManager.MyId ?? "",
+                Id = dialog.Id,
                 FeedbackType = FeedbackType.ButtonClick,
                 EntryId = button,
             });
         }
 
-        internal void OnDialogMenuEntryClicked(ARDialog dialog, int entry)
+        void OnDialogMenuEntryClicked(ARDialog dialog, int entry)
         {
-            FeedbackSender.Publish(new GuiDialogFeedback
+            FeedbackSender.Publish(new Feedback
             {
-                EngineId = ConnectionManager.MyId ?? "",
-                DialogId = dialog.Id,
-                FeedbackType = FeedbackType.ButtonClick,
+                VizId = ConnectionManager.MyId ?? "",
+                Id = dialog.Id,
+                FeedbackType = FeedbackType.MenuEntryClick,
                 EntryId = entry,
             });
+        }
+
+        void OnRotationDiscMoved(ARWidget widget, float angleInDeg)
+        {
+            FeedbackSender.Publish(new Feedback
+            {
+                VizId = ConnectionManager.MyId ?? "",
+                Id = widget.Id,
+                FeedbackType = FeedbackType.AngleChanged,
+                Motion = (0, 0, angleInDeg * Mathf.Deg2Rad)
+            });            
+        }
+        
+        void OnSpringDiscMoved(ARWidget widget, Vector3 direction)
+        {
+            FeedbackSender.Publish(new Feedback
+            {
+                VizId = ConnectionManager.MyId ?? "",
+                Id = widget.Id,
+                FeedbackType = FeedbackType.PositionChanged,
+                Motion = direction.Unity2RosVector3()
+            });            
         }
 
         public override void StopController()
         {
             base.StopController();
-            GameThread.EverySecond += CheckDeadDialogs;
-            DestroyAllDialogs();
+            GameThread.EverySecond -= CheckDeadDialogs;
+            DestroyAll(dialogs);
+            DestroyAll(widgets);
         }
     }
 }

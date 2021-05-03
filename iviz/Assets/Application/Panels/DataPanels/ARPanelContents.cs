@@ -10,6 +10,7 @@ namespace Iviz.App
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        public TrashButtonWidget ResetButton { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget WorldScale { get; private set; }
         public DropdownWidget OcclusionQuality { get; private set; }
@@ -29,6 +30,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("AR");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
+            ResetButton = p.AddResetButton();
             Frame = p.AddFrame();
             Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
             WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);

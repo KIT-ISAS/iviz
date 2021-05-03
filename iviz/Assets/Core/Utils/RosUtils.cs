@@ -110,7 +110,7 @@ namespace Iviz.Core
         public static Vector3 Ros2Unity(this Msgs.IvizMsgs.Vector3f v) => v.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
+        public static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
         {
             return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
         }

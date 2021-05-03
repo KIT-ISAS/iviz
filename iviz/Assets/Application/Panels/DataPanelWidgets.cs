@@ -42,6 +42,16 @@ namespace Iviz.App
             return o.GetComponent<ToggleButtonWidget>();
         }
 
+        public TrashButtonWidget AddResetButton()
+        {
+            GameObject o = Resource.Widgets.ResetButton.Instantiate(nonstatics.transform);
+            RectTransform transform = (RectTransform)o.transform;
+            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            o.SetActive(true);
+            return o.GetComponent<TrashButtonWidget>();
+        }
+
+
         GameObject AddToBottom(GameObject o)
         {
             RectTransform transform = (RectTransform)o.transform;

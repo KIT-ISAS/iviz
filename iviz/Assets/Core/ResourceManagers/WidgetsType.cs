@@ -35,6 +35,7 @@ namespace Iviz.Resources
         public Info<GameObject> TrashButton { get; }
         public Info<GameObject> DataLabel { get; }
         public Info<GameObject> ToggleButton { get; }
+        public Info<GameObject> ResetButton { get; }
         public Info<GameObject> Vector3 { get; }
         public Info<GameObject> Sender { get; }
         public Info<GameObject> Listener { get; }
@@ -81,6 +82,7 @@ namespace Iviz.Resources
             TrashButton = new Info<GameObject>(assetHolder.TrashButton);
             DataLabel = new Info<GameObject>(assetHolder.DataLabel);
             ToggleButton = new Info<GameObject>(assetHolder.ToggleButton);
+            ResetButton = new Info<GameObject>(assetHolder.ResetButton);
             Vector3 = new Info<GameObject>(assetHolder.Vector3);
             Sender = new Info<GameObject>(assetHolder.Sender);
             Listener = new Info<GameObject>(assetHolder.Listener);
@@ -89,47 +91,7 @@ namespace Iviz.Resources
             InputWithHints = new Info<GameObject>(assetHolder.InputFieldWithHints);
             MarkerWidget = new Info<GameObject>(assetHolder.Markers);            
             
-            DataPanel = new Info<GameObject>(assetHolder.DataPanel);            
-
-            /*
-            DisplayButton = new Info<GameObject>("Widgets/Display Button");
-            ItemButton = new Info<GameObject>("Widgets/Item Button");
-            ItemListPanel = new Info<GameObject>("Widgets/Item List Panel");
-            ConnectionPanel = new Info<GameObject>("Widgets/Connection Panel");
-            ImagePanel = new Info<GameObject>("Widgets/Image Panel");
-            TfPanel = new Info<GameObject>("Widgets/TF Tree Panel");
-            SaveAsPanel = new Info<GameObject>("Widgets/Save As Panel");
-            AddTopicPanel = new Info<GameObject>("Widgets/Add Topic Panel");
-            MarkerPanel = new Info<GameObject>("Widgets/Markers Panel");
-            NetworkPanel = new Info<GameObject>("Widgets/Network Panel");
-            ConsolePanel = new Info<GameObject>("Widgets/Console Panel");
-            SettingsPanel = new Info<GameObject>("Widgets/Settings Panel");
-            EchoPanel = new Info<GameObject>("Widgets/Echo Panel");
-
-            MenuPanel = new Info<GameObject>("Widgets/Menu Panel");
-
-            HeadTitle = new Info<GameObject>("Widgets/Head Title");
-            SectionTitle = new Info<GameObject>("Widgets/Section Title");
-            Toggle = new Info<GameObject>("Widgets/Toggle");
-            Slider = new Info<GameObject>("Widgets/Slider");
-            Input = new Info<GameObject>("Widgets/Input Field");
-            ShortInput = new Info<GameObject>("Widgets/Short Input Field");
-            NumberInput = new Info<GameObject>("Widgets/Number Input Field");
-            ColorPicker = new Info<GameObject>("Widgets/ColorPicker");
-            ImagePreview = new Info<GameObject>("Widgets/Image Preview");
-            Dropdown = new Info<GameObject>("Widgets/Dropdown");
-            CloseButton = new Info<GameObject>("Widgets/Close Button");
-            TrashButton = new Info<GameObject>("Widgets/Trash Button");
-            DataLabel = new Info<GameObject>("Widgets/Data Label");
-            ToggleButton = new Info<GameObject>("Widgets/Toggle Button");
-            Vector3 = new Info<GameObject>("Widgets/Vector3");
-            Sender = new Info<GameObject>("Widgets/Sender");
-            Listener = new Info<GameObject>("Widgets/Listener");
-            Frame = new Info<GameObject>("Widgets/Frame");
-            Vector3Slider = new Info<GameObject>("Widgets/Vector3 Slider");
-            InputWithHints = new Info<GameObject>("Widgets/Input Field With Hints");
-            MarkerWidget = new Info<GameObject>("Widgets/Markers");
-            */
+            DataPanel = new Info<GameObject>(assetHolder.DataPanel);
         }
     }
 }

@@ -62,6 +62,8 @@ namespace Iviz.Resources
         public Info<GameObject> ARDialogShort { get; }
         public Info<GameObject> ARTfFrame { get; }
         public Info<GameObject> ARDialogNotice { get; }
+        public Info<GameObject> RotationDisc { get; }
+        public Info<GameObject> SpringDisc { get; }
 
         public DisplaysType()
         {
@@ -102,6 +104,9 @@ namespace Iviz.Resources
                 ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
                 ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice);
                 
+                RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc);
+                SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc);
+
                 resourceByType = CreateTypeDictionary(this);
             }
             catch (NullReferenceException)

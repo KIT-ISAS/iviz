@@ -29,6 +29,17 @@ namespace Iviz.Controllers
             }
         }
 
+        bool rightJoystickVisible;
+        public bool RightJoystickVisible
+        {
+            get => right.gameObject.activeSelf;
+            set
+            {
+                rightJoystickVisible = value;
+                right.gameObject.SetActive(value);
+            }
+        }        
+
         public Vector2 Left => left.Direction;
 
         public Vector2 Right => right.Direction;

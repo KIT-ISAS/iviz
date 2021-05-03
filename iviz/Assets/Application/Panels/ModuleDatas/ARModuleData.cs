@@ -78,6 +78,10 @@ namespace Iviz.App
                 panel.HideButton.State = controller.Visible;
                 UpdateModuleButton();
             };
+            panel.ResetButton.Clicked += () =>
+            {
+                controller.ResetSetupMode();
+            };
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
             panel.DetectArucos.ValueChanged += f => controller.EnableArucoDetection = f;

@@ -7,6 +7,7 @@
     {
         public ListenerWidget ListenerStatic { get; private set; }
         public ToggleButtonWidget HideButton { get; private set; }
+        public TrashButtonWidget ResetButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }
@@ -19,6 +20,7 @@
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("TF");
             HideButton = p.AddHideButton();
+            ResetButton = p.AddResetButton();
             Listener = p.AddListener();
             ListenerStatic = p.AddListener();
             Frame = p.AddFrame();

@@ -39,7 +39,9 @@ namespace Iviz.App.ARDialogs
         [SerializeField] Vector3 socketPosition;
 
         [CanBeNull] public string Id { get; internal set; }
-        [CanBeNull] public GuiDialogListener Listener { get; internal set; }
+
+        public event Action<ARDialog, int> ButtonClicked;
+        public event Action<ARDialog, int> MenuEntryClicked;
 
         Material iconMaterial;
 
@@ -145,7 +147,7 @@ namespace Iviz.App.ARDialogs
         public Vector3 PivotFrameOffset { get; set; }
         public Vector3 PivotDisplacement { get; set; }
 
-        public void SetButtonMode(DialogType value)
+        public void SetButtonMode(ButtonType value)
         {
             if (button1 == null || button2 == null || button3 == null)
             {
@@ -159,17 +161,17 @@ namespace Iviz.App.ARDialogs
 
             switch (value)
             {
-                case DialogType.ButtonOk:
+                case ButtonType.Ok:
                     button1.Active = true;
                     button1.Icon = ARButton.ButtonIcon.Ok;
                     button1.Caption = "Ok";
                     break;
-                case DialogType.ButtonForward:
+                case ButtonType.Forward:
                     button1.Active = true;
                     button1.Icon = ARButton.ButtonIcon.Forward;
                     button1.Caption = "Ok";
                     break;
-                case DialogType.ButtonYesNo:
+                case ButtonType.YesNo:
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Yes";
@@ -177,7 +179,7 @@ namespace Iviz.App.ARDialogs
                     button3.Icon = ARButton.ButtonIcon.Cross;
                     button3.Caption = "No";
                     break;
-                case DialogType.ButtonForwardBackward:
+                case ButtonType.ForwardBackward:
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Backward;
                     button2.Caption = "Back";
@@ -185,7 +187,7 @@ namespace Iviz.App.ARDialogs
                     button3.Icon = ARButton.ButtonIcon.Forward;
                     button3.Caption = "Forward";
                     break;
-                case DialogType.ButtonOkCancel:
+                case ButtonType.OkCancel:
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Ok";
@@ -309,6 +311,7 @@ namespace Iviz.App.ARDialogs
 
         void OnButtonClick(int index)
         {
+            /*
             if (Listener == null)
             {
                 Debug.Log($"{this}: No listener set for click {index}");
@@ -316,10 +319,13 @@ namespace Iviz.App.ARDialogs
             }
 
             Listener.OnDialogButtonClicked(this, index);
+            */
+            ButtonClicked?.Invoke(this, index);
         }
 
         void OnMenuClick(int index)
         {
+            /*
             if (Listener == null)
             {
                 Debug.Log($"{this}: No listener set for menu click {index}");
@@ -327,6 +333,8 @@ namespace Iviz.App.ARDialogs
             }
 
             Listener.OnDialogMenuEntryClicked(this, index);
+            */
+            MenuEntryClicked?.Invoke(this, index);
         }
 
         void OnScrollUpClick()
@@ -509,6 +517,8 @@ namespace Iviz.App.ARDialogs
             currentAngle = null;
             currentPosition = null;
             popupStartTime = null;
+            ButtonClicked = null;
+            MenuEntryClicked = null;
         }
 
         public override string ToString()

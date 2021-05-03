@@ -107,6 +107,8 @@ MonoBehaviour:
     type: 3}
   ToggleButton: {fileID: 8956375948674936311, guid: a528c13d8c7ab419591e517d2f44deae,
     type: 3}
+  ResetButton: {fileID: 8956375948674936311, guid: 9aa58135d7d4b4d5fa9d29168469ae03,
+    type: 3}
   Toggle: {fileID: 3835117570909620686, guid: ee3c7e16ede041b4887621df43318a22, type: 3}
   TrashButton: {fileID: 6524995043497632422, guid: d249c7241f2b5f54fbfc9489a73c5455,
     type: 3}

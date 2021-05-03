@@ -122,9 +122,14 @@ namespace Iviz.Displays
         {
             get => MainRenderer.shadowCastingMode == ShadowCastingMode.On;
             set => MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
-        }        
+        }
 
-        public Mesh Mesh => MeshFilter.sharedMesh;
+        [NotNull]
+        public Mesh Mesh
+        {
+            get => MeshFilter.sharedMesh;
+            set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException();
+        } 
 
         protected override void Awake()
         {

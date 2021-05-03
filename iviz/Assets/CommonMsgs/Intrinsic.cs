@@ -9,15 +9,15 @@ namespace Iviz.Msgs.IvizCommonMsgs
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/Intrinsic";
 
-        [DataMember] public float Fx { get; set; }
-        [DataMember] public float Cx { get; set; }
-        [DataMember] public float Fy { get; set; }
-        [DataMember] public float Cy { get; set; }
+        [DataMember] public double Fx { get; set; }
+        [DataMember] public double Cx { get; set; }
+        [DataMember] public double Fy { get; set; }
+        [DataMember] public double Cy { get; set; }
 
         public Intrinsic()
         {
         }
 
-        public Intrinsic(float fx, float cx, float fy, float cy) => (Fx, Cx, Fy, Cy) = (fx, cx, fy, cy);
+        public Intrinsic(double fx, double cx, double fy, double cy) => (Fx, Cx, Fy, Cy) = (fx, cx, fy, cy);
     }
 }

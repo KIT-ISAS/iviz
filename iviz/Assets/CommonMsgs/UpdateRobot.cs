@@ -5,7 +5,7 @@ using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.MsgsWrapper;
 using JetBrains.Annotations;
 
-namespace CommonMsgs
+namespace Iviz.Msgs.IvizCommonMsgs
 {
     public enum OperationType
     {

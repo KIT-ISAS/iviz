@@ -38,6 +38,9 @@ namespace Iviz.Displays
         public GameObject ARDialogShort;
         public GameObject ARTfFrame;
         public GameObject ARDialogNotice;
+
+        public GameObject RotationDisc;
+        public GameObject SpringDisc;
         
         public Material LineConnectorMaterial;
         public Material TextMaterial;

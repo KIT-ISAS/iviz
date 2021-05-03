@@ -121,7 +121,7 @@ namespace Iviz.Controllers
                 mainCamera.gameObject.SetActive(!value);
                 arCamera.enabled = value;
                 arLight.gameObject.SetActive(value);
-                ArSet.Visible = value;
+                ArSet.Visible = SetupModeEnabled;
                 Settings.MainCamera = value ? arCamera : mainCamera;
                 canvas.worldCamera = Settings.MainCamera;
 
@@ -152,7 +152,7 @@ namespace Iviz.Controllers
                 {
                     arCamera.cullingMask = 1 << LayerType.ARSetupMode;
                     ArSet.Visible = false;
-                    ArSet.State = true;
+                    //ArSet.State = true;
                     ArInfoPanel.SetActive(true);
                 }
                 else
@@ -241,7 +241,7 @@ namespace Iviz.Controllers
             setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
 
             ArSet.Clicked += ArSetOnClicked;
-            ArSet.State = true;
+            //ArSet.State = true;
             ArSet.Visible = false;
             ArInfoPanel.SetActive(true);
 
@@ -254,7 +254,12 @@ namespace Iviz.Controllers
 
         void ArSetOnClicked()
         {
-            SetupModeEnabled = !SetupModeEnabled;
+            SetupModeEnabled = false;
+        }
+
+        public void ResetSetupMode()
+        {
+            SetupModeEnabled = true;
         }
 
         bool IsSamePose(in Pose b)

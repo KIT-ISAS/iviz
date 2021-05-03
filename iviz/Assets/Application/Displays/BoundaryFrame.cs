@@ -82,19 +82,19 @@ namespace Iviz.Controllers
                 bounds = value ?? throw new NullReferenceException();
 
                 Vector3 center = bounds.center;
-                Vector3 size = bounds.size.Abs();
+                (float sizeX, float sizeY, float sizeZ) = bounds.size.Abs();
 
-                float minAxisLength = Mathf.Min(Mathf.Min(size.x, size.y), size.z);
-                float maxAxisLength = Mathf.Max(Mathf.Max(size.x, size.y), size.z);
-                FrameAxisLength = Mathf.Min(maxAxisLength * 0.1f, minAxisLength * 0.5f);
-                frames[0].transform.localPosition = center + new Vector3(size.x, -size.y, size.z) / 2;
-                frames[1].transform.localPosition = center + new Vector3(size.x, -size.y, -size.z) / 2;
-                frames[2].transform.localPosition = center + new Vector3(-size.x, -size.y, -size.z) / 2;
-                frames[3].transform.localPosition = center + new Vector3(-size.x, -size.y, size.z) / 2;
-                frames[4].transform.localPosition = center + new Vector3(size.x, size.y, size.z) / 2;
-                frames[5].transform.localPosition = center + new Vector3(size.x, size.y, -size.z) / 2;
-                frames[6].transform.localPosition = center + new Vector3(-size.x, size.y, -size.z) / 2;
-                frames[7].transform.localPosition = center + new Vector3(-size.x, size.y, size.z) / 2;
+                float minAxisLength = Mathf.Min(Mathf.Min(sizeX, sizeY), sizeZ);
+                float maxAxisLength = Mathf.Max(Mathf.Max(sizeX, sizeY), sizeZ);
+                FrameAxisLength = Mathf.Min(maxAxisLength * 0.2f, minAxisLength * 0.5f);
+                frames[0].transform.localPosition = center + new Vector3(sizeX, -sizeY, sizeZ) / 2;
+                frames[1].transform.localPosition = center + new Vector3(sizeX, -sizeY, -sizeZ) / 2;
+                frames[2].transform.localPosition = center + new Vector3(-sizeX, -sizeY, -sizeZ) / 2;
+                frames[3].transform.localPosition = center + new Vector3(-sizeX, -sizeY, sizeZ) / 2;
+                frames[4].transform.localPosition = center + new Vector3(sizeX, sizeY, sizeZ) / 2;
+                frames[5].transform.localPosition = center + new Vector3(sizeX, sizeY, -sizeZ) / 2;
+                frames[6].transform.localPosition = center + new Vector3(-sizeX, sizeY, -sizeZ) / 2;
+                frames[7].transform.localPosition = center + new Vector3(-sizeX, sizeY, sizeZ) / 2;
             }
         }
 

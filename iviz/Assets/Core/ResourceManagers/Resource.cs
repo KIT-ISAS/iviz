@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
@@ -14,8 +13,6 @@ using Iviz.Msgs.OctomapMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 using GameObjectInfo = Iviz.Resources.Info<UnityEngine.GameObject>;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
@@ -68,8 +65,8 @@ namespace Iviz.Resources
                     {GridMap.RosMessageType, ModuleType.GridMap},
                     {Octomap.RosMessageType, ModuleType.Octomap},
                     {OctomapWithPose.RosMessageType, ModuleType.Octomap},
-                    {GuiDialog.RosMessageType, ModuleType.GuiDialog},
-                    {GuiDialogArray.RosMessageType, ModuleType.GuiDialog},
+                    {Dialog.RosMessageType, ModuleType.GuiDialog},
+                    {GuiArray.RosMessageType, ModuleType.GuiDialog},
                 }
             );
 

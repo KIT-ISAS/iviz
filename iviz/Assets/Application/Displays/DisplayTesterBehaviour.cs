@@ -70,82 +70,92 @@ namespace Iviz.App
         {
             {
                 var resource = ResourcePool.RentDisplay<MeshListResource>();
-                NativeList<PointWithColor> points = new NativeList<PointWithColor>();
-                for (int i = 0; i < 40; i++)
+                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z), Color.green));
-                }
+                    for (int i = 0; i < 40; i++)
+                    {
+                        points.Add(new PointWithColor(new Vector3(i, 0, z), Color.green));
+                    }
 
-                resource.MeshResource = Resource.Displays.Cube;
-                resource.ElementScale = 0.5f;
-                resource.ElementScale3 = new Vector3(1, 2, 1);
-                resource.UseColormap = false;
-                resource.Colormap = ColormapId.hsv;
-                resource.Set(points);
+                    resource.MeshResource = Resource.Displays.Cube;
+                    resource.ElementScale = 0.5f;
+                    resource.ElementScale3 = new Vector3(1, 2, 1);
+                    resource.UseColormap = false;
+                    resource.Colormap = ColormapId.hsv;
+                    resource.Set(points);
+                }
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListResource>();
-                NativeList<PointWithColor> points = new NativeList<PointWithColor>();
-                for (int i = 0; i < 40; i++)
+                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), 0.025f * i));
-                }
+                    for (int i = 0; i < 40; i++)
+                    {
+                        points.Add(new PointWithColor(new Vector3(i, 0, z + 1), 0.025f * i));
+                    }
 
-                resource.MeshResource = Resource.Displays.Cube;
-                resource.ElementScale = 0.5f;
-                resource.ElementScale3 = new Vector3(1, 2, 1);
-                resource.UseColormap = true;
-                resource.Colormap = ColormapId.hsv;
-                resource.Set(points);
+                    resource.MeshResource = Resource.Displays.Cube;
+                    resource.ElementScale = 0.5f;
+                    resource.ElementScale3 = new Vector3(1, 2, 1);
+                    resource.UseColormap = true;
+                    resource.Colormap = ColormapId.hsv;
+                    resource.Set(points);
+                }
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListResource>();
-                NativeList<PointWithColor> points = new NativeList<PointWithColor>();
-                for (int i = 0; i < 40; i++)
+                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 2), 0.025f * i));
-                }
+                    for (int i = 0; i < 40; i++)
+                    {
+                        points.Add(new PointWithColor(new Vector3(i, 0, z + 2), 0.025f * i));
+                    }
 
-                resource.MeshResource = Resource.Displays.Sphere;
-                resource.ElementScale = 0.5f;
-                resource.ElementScale3 = new Vector3(1, 2, 1);
-                resource.UseIntensityForScaleY = true;
-                resource.Colormap = ColormapId.hsv;
-                resource.Set(points);
+                    resource.MeshResource = Resource.Displays.Sphere;
+                    resource.ElementScale = 0.5f;
+                    resource.ElementScale3 = new Vector3(1, 2, 1);
+                    resource.UseIntensityForScaleY = true;
+                    resource.Colormap = ColormapId.hsv;
+                    resource.Set(points);
+                }
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListResource>();
-                NativeList<PointWithColor> points = new NativeList<PointWithColor>();
-                for (int i = 0; i < 40; i++)
+                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 3), 0.025f * i));
-                }
+                    for (int i = 0; i < 40; i++)
+                    {
+                        points.Add(new PointWithColor(new Vector3(i, 0, z + 3), 0.025f * i));
+                    }
 
-                resource.MeshResource = Resource.Displays.Cylinder;
-                resource.ElementScale = 0.5f;
-                resource.ElementScale3 = new Vector3(1, 2, 1);
-                resource.Set(points);
-                resource.OcclusionOnly = true;
+                    resource.MeshResource = Resource.Displays.Cylinder;
+                    resource.ElementScale = 0.5f;
+                    resource.ElementScale3 = new Vector3(1, 2, 1);
+                    resource.Set(points);
+                    resource.OcclusionOnly = true;
+                }
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListResource>();
-                NativeList<PointWithColor> points = new NativeList<PointWithColor>();
-                for (int i = 0; i < 40; i++)
+                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
-                    points.Add(new PointWithColor(new Vector3(i, 0, z + 4), 0.025f * i));
-                }
+                    for (int i = 0; i < 40; i++)
+                    {
+                        points.Add(new PointWithColor(new Vector3(i, 0, z + 4), 0.025f * i));
+                    }
 
-                resource.MeshResource = Resource.Displays.Cube;
-                resource.ElementScale = 0.5f;
-                resource.ElementScale3 = new Vector3(1, 2, 1);
-                resource.UseIntensityForScaleY = true;
-                resource.Colormap = ColormapId.hsv;
-                resource.Set(points);
-                resource.OcclusionOnly = true;
+                    resource.MeshResource = Resource.Displays.Cube;
+                    resource.ElementScale = 0.5f;
+                    resource.ElementScale3 = new Vector3(1, 2, 1);
+                    resource.UseIntensityForScaleY = true;
+                    resource.Colormap = ColormapId.hsv;
+                    resource.Set(points);
+                    resource.OcclusionOnly = true;
+                }
             }
         }
 

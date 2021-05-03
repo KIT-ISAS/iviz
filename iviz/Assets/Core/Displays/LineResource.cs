@@ -39,8 +39,7 @@ namespace Iviz.Displays
         [CanBeNull] MeshRenderer meshRenderer;
 
         bool linesNeedAlpha;
-
-
+        
         [NotNull] Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
 
         [NotNull]
@@ -61,11 +60,12 @@ namespace Iviz.Displays
             }
         }
 
-
         int Size => lineBuffer.Length;
 
-        bool UseCapsuleLines => Size <= MaxSegmentsForMesh;
+        bool UseCapsuleLines => EnableCapsuleLines && Size <= MaxSegmentsForMesh;
 
+        public bool EnableCapsuleLines { get; set; } = true;
+        
         public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
                                                                  (t.A - t.B).MaxAbsCoeff() > MinLineWidth &&
                                                                  t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
@@ -217,7 +217,8 @@ namespace Iviz.Displays
             }
 
             UpdateTransform();
-            Properties.SetFloat(ScaleID, ElementScale * transform.lossyScale.x);
+            //Properties.SetFloat(ScaleID, ElementScale * transform.lossyScale.x);
+            Properties.SetFloat(ScaleID, ElementScale);
 
             Bounds worldBounds = BoxCollider.bounds;
 

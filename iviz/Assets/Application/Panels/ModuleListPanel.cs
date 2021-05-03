@@ -262,6 +262,12 @@ namespace Iviz.App
             showSettings.onClick.AddListener(settingsData.Show);
             showEcho.onClick.AddListener(echoData.Show);
 
+            ShowARJoystickButton.Clicked += () =>
+            {
+                // should be !Visible, but the new Visible hasn't been set yet
+                TwistJoystick.RightJoystickVisible = ARJoystick.Visible; 
+            };
+
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += () => connectionData.Show();
 

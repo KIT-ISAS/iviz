@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MsgsWrapper;
@@ -17,17 +18,21 @@ namespace Iviz.Msgs.IvizCommonMsgs
 
     public enum DialogType : byte
     {
-        ButtonOk,
-        ButtonYesNo,
-        ButtonOkCancel,
-        ButtonForward,
-        ButtonForwardBackward,
-
+        Dialog,
         Short,
         Notice,
         MenuMode,
     }
 
+    public enum ButtonType : byte
+    {
+        Ok,
+        YesNo,
+        OkCancel,
+        Forward,
+        ForwardBackward,
+    }
+    
     public enum IconType : byte
     {
         None,
@@ -41,7 +46,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
 
     public enum BindingType : byte
     {
-        BindNone,
         BindToTf,
         BindToUser,
     }
@@ -64,9 +68,9 @@ namespace Iviz.Msgs.IvizCommonMsgs
     }    
 
     [DataContract]
-    public sealed class GuiDialog : RosMessageWrapper<GuiDialog>
+    public sealed class Dialog : RosMessageWrapper<Dialog>
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/GuiDialog";
+        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/Dialog";
 
         [DataMember] public Header Header { get; set; }
 
@@ -74,9 +78,10 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember, NotNull] public string Id { get; set; } = "";
 
         [DataMember] public duration Lifetime { get; set; }
-        [DataMember] public float Scale { get; set; } = 1;
+        [DataMember] public double Scale { get; set; } = 1;
 
         [DataMember] public DialogType Type { get; set; }
+        [DataMember] public ButtonType Buttons { get; set; }
         [DataMember] public IconType Icon { get; set; }
         [DataMember] public ColorRGBA BackgroundColor { get; set; }
 
@@ -84,12 +89,11 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember, NotNull] public string Caption { get; set; } = "";
         [DataMember] public CaptionAlignmentType CaptionAlignment { get; set; }
         [DataMember, NotNull] public string[] MenuEntries { get; set; } = Array.Empty<string>();
-
-
+        
         [DataMember] public BindingType BindingType { get; set; }
 
-        [DataMember] public Vector3f TfOffset { get; set; }
-        [DataMember] public Vector3f DialogDisplacement { get; set; }
-        [DataMember] public Vector3f TfDisplacement { get; set; }
+        [DataMember] public Vector3 TfOffset { get; set; }
+        [DataMember] public Vector3 DialogDisplacement { get; set; }
+        [DataMember] public Vector3 TfDisplacement { get; set; }
     }
 }

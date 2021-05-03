@@ -12,6 +12,17 @@ namespace Iviz.Displays
     {
         [SerializeField] Vector3 normal = new Vector3(0, 0, 1);
 
+        public Vector3 Normal
+        {
+            get => normal;
+            set => normal = value;
+        }
+
+        [SerializeField] Transform sourceTransform;
+        
+        Transform mTransform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
         bool needsStart;
         Vector3 startIntersection;
 
@@ -20,6 +31,14 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
+
+        void Awake()
+        {
+            if (TargetTransform == null)
+            {
+                TargetTransform = Transform;
+            }
+        }
 
         public bool Visible
         {
@@ -73,8 +92,9 @@ namespace Iviz.Displays
 
         void OnPointerMove(in Ray pointerRay)
         {
-            Transform mTransform = transform;
-            Transform mParent = mTransform.parent;
+            Transform mParent = sourceTransform.SafeNull() 
+                                ?? Transform.parent.SafeNull() 
+                                ?? Transform;
             Transform mTarget = TargetTransform;
 
             //Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));/
@@ -96,7 +116,7 @@ namespace Iviz.Displays
             {
                 Vector3 deltaPosition = localIntersection - startIntersection;
                 float deltaDistance = deltaPosition.Magnitude();
-                if (deltaDistance > 0.5f) deltaPosition *= 0.5f / deltaDistance;
+                if (deltaDistance > 0.5f) deltaPosition *= 0.75f / deltaDistance;
 
                 Vector3 deltaPositionWorld = mParent.TransformVector(deltaPosition);
                 SetTargetPose(new Pose(mTarget.position + deltaPositionWorld, mTarget.rotation));

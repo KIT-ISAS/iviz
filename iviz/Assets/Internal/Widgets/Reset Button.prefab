@@ -64,7 +64,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ef6569526605d4acb95a4b1a6b7fe028, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8eda95cd8b6084cd18813e3781b0d956, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -86,9 +86,9 @@ GameObject:
   - component: {fileID: 8956375948674936307}
   - component: {fileID: 8956375948674936306}
   - component: {fileID: 8956375948674936305}
-  - component: {fileID: 5004086493774009431}
+  - component: {fileID: 3830415337998520452}
   m_Layer: 5
-  m_Name: Toggle Button
+  m_Name: Reset Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -67.6, y: -21.3993}
+  m_AnchoredPosition: {x: -111.02, y: -21.3993}
   m_SizeDelta: {x: 32, y: 32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8956375948674936307
@@ -194,7 +194,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 5004086493774009431}
+      - m_Target: {fileID: 0}
         m_MethodName: OnClicked
         m_Mode: 1
         m_Arguments:
@@ -205,7 +205,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &5004086493774009431
+--- !u!114 &3830415337998520452
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,13 +214,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 8956375948674936311}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90e864319194e46739b70d6470b59fd4, type: 3}
+  m_Script: {fileID: 11500000, guid: c2d948a05eda04e46bedb11eec1aa15e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 8956375948674936305}
   image: {fileID: 8956375948410008451}
-  activeSprite: {fileID: 21300000, guid: ef6569526605d4acb95a4b1a6b7fe028, type: 3}
-  inactiveSprite: {fileID: 21300000, guid: 80bc4c4b7996c47f09a51a45fd14cca1, type: 3}
-  activeText: 
-  inactiveText: 
-  text: {fileID: 0}

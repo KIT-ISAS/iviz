@@ -502,7 +502,7 @@ namespace Iviz.Displays
 
             var jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(unityPose);
-
+            
             return true;
         }
 

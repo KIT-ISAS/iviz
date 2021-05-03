@@ -141,7 +141,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             ExecutorOriginMarker originExecutor;
             try
             {
@@ -183,14 +183,14 @@ namespace Iviz.Controllers
                 originFrame.Caption = "[origin]";
                 frames[TfListener.OriginFrameName] = originFrame;
             }
-            
+
             Pose unityPose = TfListener.FixedFramePose.Multiply(rosMarkerPose.Ros2Unity());
-            originFrame.TargetPose = unityPose;            
+            originFrame.TargetPose = unityPose;
 
             Vector3 up = unityPose.up;
             if (Vector3.Dot(up, Vector3.up) > 1 - 0.05f)
             {
-                ARController.Instance.SetWorldPose(unityPose,ARController.RootMover.Executor);
+                ARController.Instance.SetWorldPose(unityPose, ARController.RootMover.Executor);
             }
         }
 
@@ -205,8 +205,10 @@ namespace Iviz.Controllers
                 (-size / 2, -size / 2, 0),
             };
 
-            var localPoseInRos = CvContext.SolvePnp(imageCorners, objectCorners, marker.Intrinsic.Fx,
-                marker.Intrinsic.Cx, marker.Intrinsic.Fy, marker.Intrinsic.Cy, SolvePnPMethod.IPPESquare);
+            var localPoseInRos = CvContext.SolvePnp(imageCorners, objectCorners, 
+                (float) marker.Intrinsic.Fx, (float) marker.Intrinsic.Cx, 
+                (float) marker.Intrinsic.Fy, (float) marker.Intrinsic.Cy,
+                SolvePnPMethod.IPPESquare);
 
             var absolutePoseInRos = (Msgs.GeometryMsgs.Transform) marker.CameraPose * localPoseInRos;
             return absolutePoseInRos;

@@ -1,8 +1,10 @@
 using System;
+using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.XmlRpc;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,17 +12,23 @@ using UnityEngine.UI;
 namespace Iviz.App.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class ARButton : MarkerResource, IPointerClickHandler
+    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] Texture2D[] icons;
         [SerializeField] TextMesh text;
         [SerializeField] MeshRenderer iconMeshRenderer;
-        
+
         [SerializeField] Color backgroundColor = new Color(0, 0.2f, 0.5f);
         [SerializeField] MeshMarkerResource background = null;
 
+        [SerializeField] BoxCollider colliderForFrame = null;
+
         Material material;
+
+        [NotNull]
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
+
+        [CanBeNull] BoundaryFrame frame;
 
         public event Action Clicked;
 
@@ -40,7 +48,6 @@ namespace Iviz.App.ARDialogs
                 backgroundColor = value;
                 if (background != null)
                 {
-                    
                 }
             }
         }
@@ -111,6 +118,19 @@ namespace Iviz.App.ARDialogs
         public void ClearSubscribers()
         {
             Clicked = null;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            frame = ResourcePool.RentDisplay<BoundaryFrame>(transform);
+            frame.Color = Color.white.WithAlpha(0.5f);
+            frame.Bounds = new Bounds(colliderForFrame.center, colliderForFrame.size);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            frame.ReturnToPool();
+            frame = null;
         }
     }
 }
