@@ -11,8 +11,9 @@ namespace Iviz.App.ARDialogs
         static Mesh baseMesh;
         [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(null, 0.9f, 1.1f));
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             Mesh = BaseMesh;
         }
 
