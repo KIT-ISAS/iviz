@@ -1,10 +1,13 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Mass
     {
-        public float Value { get; }
+        [DataMember] public float Value { get; }
 
         public Mass()
         {
@@ -15,5 +18,7 @@ namespace Iviz.Urdf
         {
             Value = Utils.ParseFloat(node.Attributes?["value"]);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

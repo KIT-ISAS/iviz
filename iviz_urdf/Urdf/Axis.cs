@@ -1,12 +1,16 @@
+using System;
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Axis
     {
         public static readonly Axis Right = new Axis();
 
-        public Vector3f Xyz { get; }
+        [DataMember] public Vector3f Xyz { get; }
 
         Axis()
         {
@@ -17,5 +21,7 @@ namespace Iviz.Urdf
         {
             Xyz = new Vector3f(node.Attributes?["xyz"]);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

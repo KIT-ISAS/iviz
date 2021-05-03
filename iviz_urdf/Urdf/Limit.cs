@@ -1,13 +1,16 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Limit
     {
         public static readonly Limit Empty = new Limit();
-        public float Lower { get; }
-        public float Upper { get; }
-        public float Velocity { get; }
+        [DataMember] public float Lower { get; }
+        [DataMember] public float Upper { get; }
+        [DataMember] public float Velocity { get; }
 
         Limit()
         {
@@ -26,5 +29,7 @@ namespace Iviz.Urdf
             Upper = Utils.ParseFloat(node.Attributes["upper"], 0);
             Velocity = Utils.ParseFloat(node.Attributes["velocity"], 0);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

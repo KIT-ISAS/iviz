@@ -1,12 +1,15 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Collision
     {
-        public string? Name { get; }
-        public Origin Origin { get; }
-        public Geometry? Geometry { get; }
+        [DataMember] public string? Name { get; }
+        [DataMember] public Origin Origin { get; }
+        [DataMember] public Geometry? Geometry { get; }
 
         internal Collision(XmlNode node)
         {
@@ -27,7 +30,8 @@ namespace Iviz.Urdf
             }
 
             Origin = origin ?? Origin.Identity;
-            
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

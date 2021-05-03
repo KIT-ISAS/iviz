@@ -1,15 +1,18 @@
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Rgba
     {
-        public float R { get; }
-        public float G { get; }
-        public float B { get; }
-        public float A { get; }
+        [DataMember] public float R { get; }
+        [DataMember] public float G { get; }
+        [DataMember] public float B { get; }
+        [DataMember] public float A { get; }
 
         public Rgba()
         {
@@ -42,9 +45,6 @@ namespace Iviz.Urdf
             A = a;
         }
         
-        public override string ToString()
-        {
-            return $"[{R} {G} {B} {A}]";
-        }
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

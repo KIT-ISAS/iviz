@@ -1,13 +1,16 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Geometry
     {
-        public Box? Box { get; }
-        public Cylinder? Cylinder { get; }
-        public Sphere? Sphere { get; }
-        public Mesh? Mesh { get; }
+        [DataMember] public Box? Box { get; }
+        [DataMember] public Cylinder? Cylinder { get; }
+        [DataMember] public Sphere? Sphere { get; }
+        [DataMember] public Mesh? Mesh { get; }
 
         internal Geometry(XmlNode node)
         {
@@ -30,5 +33,7 @@ namespace Iviz.Urdf
                 }
             }
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

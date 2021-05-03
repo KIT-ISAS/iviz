@@ -1,12 +1,15 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Material
     {
-        public string Name { get; }
-        public Color? Color { get; }
-        public Texture? Texture { get; }
+        [DataMember] public string Name { get; }
+        [DataMember] public Color? Color { get; }
+        [DataMember] public Texture? Texture { get; }
 
         internal Material(XmlNode node)
         {
@@ -24,5 +27,7 @@ namespace Iviz.Urdf
                 }
             }
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

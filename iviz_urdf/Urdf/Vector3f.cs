@@ -1,17 +1,20 @@
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Vector3f
     {
         public static readonly Vector3f Zero = new Vector3f(0, 0, 0);
         public static readonly Vector3f One = new Vector3f(1, 1, 1);
 
-        public float X { get; }
-        public float Y { get; }
-        public float Z { get; }
+        [DataMember] public float X { get; }
+        [DataMember] public float Y { get; }
+        [DataMember] public float Z { get; }
 
         public Vector3f(float x, float y, float z)
         {
@@ -23,7 +26,7 @@ namespace Iviz.Urdf
         internal Vector3f(XmlAttribute? attr)
         {
             string s = Utils.ParseString(attr);
-            string[] elems = s.Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = s.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 3)
             {
                 throw new MalformedUrdfException(attr);
@@ -35,7 +38,7 @@ namespace Iviz.Urdf
             {
                 throw new MalformedUrdfException(attr);
             }
-                
+
             X = x;
             Y = y;
             Z = z;
@@ -46,9 +49,6 @@ namespace Iviz.Urdf
             return attr is null ? @default : new Vector3f(attr);
         }
 
-        public override string ToString()
-        {
-            return $"[{X} {Y} {Z}]";
-        }
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

@@ -1,15 +1,18 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Inertia
     {
-        public float Ixx { get; }
-        public float Ixy { get; }
-        public float Ixz { get; }
-        public float Iyy { get; }
-        public float Iyz { get; }
-        public float Izz { get; }
+        [DataMember] public float Ixx { get; }
+        [DataMember] public float Ixy { get; }
+        [DataMember] public float Ixz { get; }
+        [DataMember] public float Iyy { get; }
+        [DataMember] public float Iyz { get; }
+        [DataMember] public float Izz { get; }
 
         public Inertia()
         {
@@ -29,5 +32,7 @@ namespace Iviz.Urdf
             Iyz = Utils.ParseFloat(node.Attributes["iyz"]);
             Izz = Utils.ParseFloat(node.Attributes["izz"]);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

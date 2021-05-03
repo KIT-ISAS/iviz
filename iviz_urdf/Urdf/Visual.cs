@@ -1,13 +1,16 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Visual
     {
-        public string? Name { get; }
-        public Origin Origin { get; }
-        public Geometry Geometry { get; }
-        public Material? Material { get; }
+        [DataMember] public string? Name { get; }
+        [DataMember] public Origin Origin { get; }
+        [DataMember] public Geometry Geometry { get; }
+        [DataMember] public Material? Material { get; }
 
         internal Visual(XmlNode node)
         {
@@ -35,5 +38,7 @@ namespace Iviz.Urdf
             Geometry = geometry ?? throw new MalformedUrdfException(node);
             Origin = origin ?? Origin.Identity;
         }
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

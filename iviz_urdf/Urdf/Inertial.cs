@@ -1,14 +1,17 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Inertial
     {
         public static readonly Inertial Empty = new Inertial();
 
-        public Mass Mass { get; }
-        public Origin Origin { get; }
-        public Inertia Inertia { get; }
+        [DataMember] public Mass Mass { get; }
+        [DataMember] public Origin Origin { get; }
+        [DataMember] public Inertia Inertia { get; }
 
         Inertial()
         {
@@ -43,5 +46,7 @@ namespace Iviz.Urdf
             Origin = origin ?? Origin.Identity;
             Inertia = inertia ?? throw new MalformedUrdfException(node);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

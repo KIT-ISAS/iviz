@@ -1,9 +1,14 @@
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Joint
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public enum JointType
         {
             Revolute,
@@ -14,13 +19,13 @@ namespace Iviz.Urdf
             Planar
         }
         
-        public string Name { get; }
-        public JointType Type { get; }
-        public Origin Origin { get; }
-        public Parent Parent { get; }
-        public Child Child { get; }
-        public Axis Axis { get; }
-        public Limit Limit { get; }
+        [DataMember] public string Name { get; }
+        [DataMember] public JointType Type { get; }
+        [DataMember] public Origin Origin { get; }
+        [DataMember] public Parent Parent { get; }
+        [DataMember] public Child Child { get; }
+        [DataMember] public Axis Axis { get; }
+        [DataMember] public Limit Limit { get; }
 
         internal Joint(XmlNode node)
         {
@@ -76,5 +81,7 @@ namespace Iviz.Urdf
                 default: throw new MalformedUrdfException(node);
             }
         }        
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Xml;
+using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    [DataContract]
     public sealed class Robot
     {
-        public string Name { get; }
-        public ReadOnlyCollection<Link> Links { get; }
-        public ReadOnlyCollection<Joint> Joints { get; }
-        public ReadOnlyCollection<Material> Materials { get; }
+        [DataMember] public string Name { get; }
+        [DataMember] public ReadOnlyCollection<Link> Links { get; }
+        [DataMember] public ReadOnlyCollection<Joint> Joints { get; }
+        [DataMember] public ReadOnlyCollection<Material> Materials { get; }
 
         Robot(XmlNode node)
         {
@@ -58,5 +61,7 @@ namespace Iviz.Urdf
 
             return new Robot(root);
         }
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }
