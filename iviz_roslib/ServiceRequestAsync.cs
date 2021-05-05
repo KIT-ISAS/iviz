@@ -19,6 +19,8 @@ namespace Iviz.Roslib
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
 
+        const int UserCallTimeoutInMs = 15000;
+
         readonly Func<TService, Task> callback;
         readonly Endpoint remoteEndPoint;
         readonly ServiceInfo<TService> serviceInfo;
@@ -244,7 +246,7 @@ namespace Iviz.Roslib
                     try
                     {
                         Task userTask = callback(serviceMsg);
-                        Task timeoutTask = Task.Delay(10000, runningTs.Token);
+                        Task timeoutTask = Task.Delay(UserCallTimeoutInMs, runningTs.Token);
                         Task resultTask = await (userTask, timeoutTask).WhenAny();
                         if (resultTask == timeoutTask)
                         {
