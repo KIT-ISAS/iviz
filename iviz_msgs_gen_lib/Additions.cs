@@ -50,7 +50,7 @@ namespace Iviz.MsgsGen
                 "public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);",
                 "public static readonly Quaternion Identity = (0, 0, 0, 1);",
                 "public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;",
-                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q.XYZ, q.W, v);",
+                "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);",
                 "public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;",
                 "public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;",
                 "public readonly Quaternion Normalized => Extensions.Normalize(this);",

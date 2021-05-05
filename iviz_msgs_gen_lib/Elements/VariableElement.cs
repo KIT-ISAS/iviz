@@ -62,7 +62,7 @@ namespace Iviz.MsgsGen
 
             RosFieldName = fieldName;
 
-            CsFieldName = MsgParser.CsIfiy(fieldName);
+            CsFieldName = MsgParser.CsIfy(fieldName);
             if (CsFieldName == parentClassName)
             {
                 CsFieldName += "_"; // C# forbids fields with the same name as the class
@@ -114,7 +114,7 @@ namespace Iviz.MsgsGen
             {
                 string packageName = RosClassName.Substring(0, slashIndex);
                 string classProper = RosClassName.Substring(slashIndex + 1);
-                CsClassName = $"{MsgParser.CsIfiy(packageName)}.{classProper}";
+                CsClassName = $"{MsgParser.CsIfy(packageName)}.{classProper}";
             }
             else
             {

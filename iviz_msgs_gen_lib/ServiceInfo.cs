@@ -40,7 +40,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing '{path}'");
 
             RosPackage = package;
-            CsPackage = MsgParser.CsIfiy(package);
+            CsPackage = MsgParser.CsIfy(package);
             Name = Path.GetFileNameWithoutExtension(path);
             string[] lines = File.ReadAllLines(path);
             File.ReadAllText(path);

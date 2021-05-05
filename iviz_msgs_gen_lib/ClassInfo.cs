@@ -189,7 +189,7 @@ namespace Iviz.MsgsGen
             }
 
             RosPackage = package!;
-            CsPackage = MsgParser.CsIfiy(package!);
+            CsPackage = MsgParser.CsIfy(package!);
             Name = messageName;
             fullMessageText = messageDefinition.Replace("\r\n", "\n");
 
@@ -246,7 +246,7 @@ namespace Iviz.MsgsGen
             Console.WriteLine($"-- Parsing synthetic '{package}/{messageName}'");
 
             RosPackage = package;
-            CsPackage = MsgParser.CsIfiy(package);
+            CsPackage = MsgParser.CsIfy(package);
             Name = messageName;
 
             elements = newElements.ToArray();
