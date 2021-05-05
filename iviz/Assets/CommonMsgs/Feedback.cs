@@ -11,6 +11,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         MenuEntryClick,
         PositionChanged,
         AngleChanged,
+        ScaleChanged,
     } 
     
     [DataContract]
@@ -22,6 +23,8 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public string Id { get; set; } = "";
         [DataMember] public FeedbackType FeedbackType { get; set; }
         [DataMember] public int EntryId { get; set; }
-        [DataMember] public Vector3 Motion { get; set; }
+        [DataMember] public Vector3 Position { get; set; }
+        [DataMember] public Quaternion Orientation { get; set; }
+        [DataMember] public double Scale { get; set; }
     }
 }

@@ -14,6 +14,20 @@ namespace Iviz.App.ARDialogs
 
         FrameNode node;
 
+        FrameNode Node
+        {
+            get
+            {
+                if (node == null)
+                {
+                    node = FrameNode.Instantiate("Widget Node");
+                    Transform.parent = node.Transform;
+                }
+
+                return node;
+            }
+        }
+
         Transform mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
@@ -21,21 +35,13 @@ namespace Iviz.App.ARDialogs
 
         public int Layer { get; set; }
 
-        protected virtual void Awake()
-        {
-            node = FrameNode.Instantiate("Widget Node");
-            Transform.parent = node.Transform;
-        }
-
         public void Initialize()
         {
-            Transform.parent = node.Transform;
-            Transform.SetLocalPose(Pose.identity);
         }
         
         public virtual void Suspend()
         {
-            node.Parent = null;
+            Node.Parent = null;
         }
 
         public bool Visible
@@ -50,12 +56,12 @@ namespace Iviz.App.ARDialogs
 
         protected virtual void OnDestroy()
         {
-            Destroy(node);
+            Destroy(Node);
         }
         
         public void AttachTo(string parentId)
         {
-            node.AttachTo(parentId);
+            Node.AttachTo(parentId);
         }        
         
     }

@@ -1,27 +1,28 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
+using Iviz.App.ARDialogs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
-using Buffer = System.Buffer;
+using Dialog = Iviz.Msgs.IvizCommonMsgs.Dialog;
+using Feedback = Iviz.Msgs.IvizCommonMsgs.Feedback;
+using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
-using Time = UnityEngine.Time;
+using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
 
 namespace Iviz.Controllers
 {
@@ -49,6 +50,7 @@ namespace Iviz.Controllers
                 ServiceFunctions.CaptureScreenshotAsync);
 
             connection.AdvertiseService<UpdateRobot>("update_robot", ServiceFunctions.UpdateRobotAsync);
+            connection.AdvertiseService<LaunchDialog>("launch_dialog", ServiceFunctions.LaunchDialogAsync);
         }
     }
 
@@ -789,6 +791,98 @@ namespace Iviz.Controllers
                 }
 
                 srv.Response.Success = true;
+            }
+        }
+
+        internal static async Task LaunchDialogAsync([NotNull] LaunchDialog srv)
+        {
+            if (string.IsNullOrEmpty(srv.Request.Dialog.Id))
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "Dialog Id is null or empty";
+                return;
+            }
+            
+            if (Math.Abs(srv.Request.Dialog.Scale) < 1e-8)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "Scale is 0";
+                return;
+            }
+
+            Feedback feedback = new Feedback();
+            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            {
+                GameThread.Post(() =>
+                {
+                    try
+                    {
+                        Logger.Info($"ControllerService: Creating dialog");
+
+                        var dialogTimeSpan = srv.Request.Dialog.Lifetime.ToTimeSpan();
+                        if (dialogTimeSpan.TotalSeconds < 10)
+                        {
+                            srv.Request.Dialog.Lifetime = TimeSpan.FromSeconds(10);
+                        }
+                            
+                        var dialog = GuiDialogListener.DefaultHandler.AddDialog(srv.Request.Dialog);
+                        dialog.ButtonClicked += TriggerButton; 
+                        dialog.MenuEntryClicked += TriggerMenu; 
+
+                        void TriggerButton(ARDialog mDialog, int buttonId)
+                        {
+                            mDialog.ButtonClicked -= TriggerButton;
+                            mDialog.MenuEntryClicked -= TriggerMenu;
+
+                            feedback.VizId = ConnectionManager.MyId ?? "";
+                            feedback.Id = mDialog.Id ?? "";
+                            feedback.FeedbackType = FeedbackType.ButtonClick;
+                            feedback.EntryId = buttonId;
+
+                            try
+                            {
+                                signal.Release();
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                            }
+                        }
+
+                        void TriggerMenu(ARDialog mDialog, int buttonId)
+                        {
+                            mDialog.ButtonClicked -= TriggerButton;
+                            mDialog.MenuEntryClicked -= TriggerMenu;
+                            
+                            feedback.VizId = ConnectionManager.MyId ?? "";
+                            feedback.Id = mDialog.Id ?? "";
+                            feedback.FeedbackType = FeedbackType.ButtonClick;
+                            feedback.EntryId = buttonId;
+                            
+                            try
+                            {
+                                signal.Release();
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        srv.Response.Success = false;
+                        srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                        signal.Release();
+                    }
+                });
+                if (!await signal.WaitAsync(10000))
+                {
+                    srv.Response.Success = false;
+                    srv.Response.Message = "EE Request timed out!";
+                    return;
+                }
+
+                srv.Response.Success = true;
+                srv.Response.Feedback = feedback;
             }
         }
     }

@@ -32,7 +32,7 @@ namespace Iviz.Displays
             Vector3 x = diff / scaleX;
 
             Vector3 notX = Vector3.forward;
-            if (Mathf.Approximately(x.Cross(notX).MagnitudeSq(), 0))
+            if (x.Cross(notX).MagnitudeSq() < 1e-6)
             {
                 notX = new Vector3(0, 1, 0);
             }

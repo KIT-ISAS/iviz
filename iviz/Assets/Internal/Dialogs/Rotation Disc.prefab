@@ -75,7 +75,7 @@ GameObject:
   - component: {fileID: 3400963749332971918}
   - component: {fileID: 3400963749332971919}
   - component: {fileID: 3400963749332971916}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: 3400963749383913440}
   - component: {fileID: 3400963749383913442}
   - component: {fileID: 3400963749383913443}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Rotation Disc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,6 +246,7 @@ MonoBehaviour:
   linkWidth: 0.05
   dragBackDistance: 0.5
   lines: {fileID: 0}
+  connector: {fileID: 0}
 --- !u!1 &3400963749592008819
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +354,7 @@ GameObject:
   - component: {fileID: 3400963749904695133}
   - component: {fileID: 3400963749904695130}
   - component: {fileID: 3400963749904695131}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Link
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -468,7 +469,7 @@ GameObject:
   - component: {fileID: 2214329663483533546}
   - component: {fileID: 1848437530482595669}
   - component: {fileID: 3499819529088538913}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Ring (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

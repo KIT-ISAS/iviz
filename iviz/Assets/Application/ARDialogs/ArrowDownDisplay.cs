@@ -12,6 +12,8 @@ namespace Iviz.App.ARDialogs
         static Mesh baseMesh;
         float? currentAngle;
 
+        [SerializeField] Vector3 startPosition;
+
         protected override void Awake()
         {
             base.Awake();
@@ -22,10 +24,10 @@ namespace Iviz.App.ARDialogs
             }
 
             Mesh = baseMesh;
-            Color = Color.cyan.WithAlpha(0.95f);
-            EmissiveColor = Color.cyan;
+            //Color = Color.cyan.WithAlpha(0.95f);
+            EmissiveColor = Color.WithAlpha(1);
             
-            Position = Vector3.zero;
+            Position = startPosition;
             Transform.localScale = new Vector3(0.25f, 0.25f, 0.5f);
         }
 

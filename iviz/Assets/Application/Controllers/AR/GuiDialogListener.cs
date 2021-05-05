@@ -25,6 +25,9 @@ namespace Iviz.Controllers
                 (Object, Info, ExpirationTime) = (obj, info, expirationTime);
         }
 
+        static GuiDialogListener defaultHandler;
+        public static GuiDialogListener DefaultHandler => defaultHandler ?? (defaultHandler = new GuiDialogListener());
+
 
         public override TfFrame Frame => TfListener.Instance.FixedFrame;
         public override IModuleData ModuleData { get; }
@@ -34,7 +37,7 @@ namespace Iviz.Controllers
         readonly Dictionary<string, Data<ARDialog>> dialogs = new Dictionary<string, Data<ARDialog>>();
         readonly Dictionary<string, Data<ARWidget>> widgets = new Dictionary<string, Data<ARWidget>>();
 
-        public ISender FeedbackSender { get; private set; }
+        [CanBeNull] public ISender FeedbackSender { get; private set; }
 
         public GuiDialogConfiguration Config
         {
@@ -69,6 +72,14 @@ namespace Iviz.Controllers
             GameThread.EverySecond += CheckDeadDialogs;
         }
 
+        GuiDialogListener()
+        {
+            ModuleData = null;
+            Config = new GuiDialogConfiguration();
+
+            GameThread.EverySecond += CheckDeadDialogs;
+        }
+
         void Handler(GuiArray msg)
         {
             foreach (var dialog in msg.Dialogs)
@@ -82,7 +93,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void Handler(Widget msg)
+        public void Handler(Widget msg)
         {
             switch (msg.Action)
             {
@@ -133,21 +144,29 @@ namespace Iviz.Controllers
                         default:
                             return;
                     }
-                    
-                    widget.Initialize();
+
                     widget.Id = msg.Id;
                     widget.AttachTo(msg.Header.FrameId);
                     widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());
-                    widget.transform.localScale = (float)msg.Scale * Vector3.one;
+                    widget.transform.localScale = (float) msg.Scale * Vector3.one;
                     widgets[msg.Id] = new Data<ARWidget>(widget, info, DateTime.MaxValue);
+                    widget.Initialize();
                     break;
                 }
                 default:
                     Logger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
-                    break;                
+                    break;
             }
         }
 
+
+        [CanBeNull] public ARDialog AddDialog(Dialog msg)
+        {
+            Handler(msg);
+            return msg.Action == ActionType.Add 
+                ? dialogs[msg.Id].Object 
+                : null;
+        }
 
         void Handler(Dialog msg)
         {
@@ -211,7 +230,6 @@ namespace Iviz.Controllers
                             return;
                     }
 
-                    dialog.Initialize();
                     dialog.Id = msg.Id;
                     dialog.ButtonClicked += OnDialogButtonClicked;
                     dialog.MenuEntryClicked += OnDialogMenuEntryClicked;
@@ -219,12 +237,13 @@ namespace Iviz.Controllers
                     dialog.Caption = msg.Caption;
                     dialog.CaptionAlignment = msg.CaptionAlignment;
                     dialog.Title = msg.Title;
-                    dialog.Scale = (float)msg.Scale;
+                    dialog.Scale = (float) msg.Scale;
                     dialog.BackgroundColor = msg.BackgroundColor.ToUnityColor();
                     dialog.PivotFrameId = msg.Header.FrameId;
                     dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
                     dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
                     dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
+                    dialog.Initialize();
 
                     DateTime expirationTime = msg.Lifetime == default
                         ? DateTime.MaxValue
@@ -262,7 +281,7 @@ namespace Iviz.Controllers
 
             dict.Clear();
         }
-        
+
         void CheckDeadDialogs()
         {
             var deadEntries = dialogs
@@ -277,48 +296,64 @@ namespace Iviz.Controllers
             }
         }
 
-        void OnDialogButtonClicked(ARDialog dialog, int button)
+        void OnDialogButtonClicked(ARDialog dialog, int buttonId)
         {
-            FeedbackSender.Publish(new Feedback
+            FeedbackSender?.Publish(new Feedback
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
                 FeedbackType = FeedbackType.ButtonClick,
-                EntryId = button,
+                EntryId = buttonId,
             });
+            
+            
+            if (dialogs.TryGetValue(dialog.Id, out var entry))
+            {
+                entry.Object.Suspend();
+                ResourcePool.Return(entry.Info, entry.Object.gameObject);
+                dialogs.Remove(dialog.Id);            
+            }            
         }
 
-        void OnDialogMenuEntryClicked(ARDialog dialog, int entry)
+        void OnDialogMenuEntryClicked(ARDialog dialog, int buttonId)
         {
-            FeedbackSender.Publish(new Feedback
+            FeedbackSender?.Publish(new Feedback
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
                 FeedbackType = FeedbackType.MenuEntryClick,
-                EntryId = entry,
+                EntryId = buttonId,
             });
+            
+            if (dialogs.TryGetValue(dialog.Id, out var entry))
+            {
+                entry.Object.Suspend();
+                ResourcePool.Return(entry.Info, entry.Object.gameObject);
+                dialogs.Remove(dialog.Id);            
+            }            
+            
         }
 
         void OnRotationDiscMoved(ARWidget widget, float angleInDeg)
         {
-            FeedbackSender.Publish(new Feedback
+            FeedbackSender?.Publish(new Feedback
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
                 FeedbackType = FeedbackType.AngleChanged,
-                Motion = (0, 0, angleInDeg * Mathf.Deg2Rad)
-            });            
+                Position = (0, 0, angleInDeg * Mathf.Deg2Rad)
+            });
         }
-        
+
         void OnSpringDiscMoved(ARWidget widget, Vector3 direction)
         {
-            FeedbackSender.Publish(new Feedback
+            FeedbackSender?.Publish(new Feedback
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
                 FeedbackType = FeedbackType.PositionChanged,
-                Motion = direction.Unity2RosVector3()
-            });            
+                Position = direction.Unity2RosVector3()
+            });
         }
 
         public override void StopController()

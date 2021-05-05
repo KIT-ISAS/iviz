@@ -132,5 +132,14 @@ namespace Iviz.App.ARDialogs
             frame.ReturnToPool();
             frame = null;
         }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            if (frame != null)
+            {
+                frame.ReturnToPool();
+            }
+        }
     }
 }

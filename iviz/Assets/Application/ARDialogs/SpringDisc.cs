@@ -15,10 +15,8 @@ namespace Iviz.App.ARDialogs
 
         public event Action<SpringDisc, Vector3> Moved; 
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
-            
             disc.PointerUp += () =>
             {
                 dragBack = true;

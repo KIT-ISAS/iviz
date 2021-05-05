@@ -15,7 +15,7 @@ namespace Iviz.App.ARDialogs
 {
     public class ARDialog : MarkerResource, IRecyclable
     {
-        const float PopupDuration = 0.3f;
+        const float PopupDuration = 0.1f;
         
         static readonly Color DefaultBackgroundColor = new Color(0, 0.2f, 0.5f);
 
@@ -508,6 +508,8 @@ namespace Iviz.App.ARDialogs
         {
             connector.Visible = true;
             popupStartTime = Time.time;
+
+            Update();
         }
 
         public override void Suspend()
