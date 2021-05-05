@@ -28,11 +28,10 @@ namespace Iviz.MsgsWrapper
                     "It should also be tagged with the attribute [MessageName].");
             }
             
-            const string serviceSeparator =
-                "===";
+            const string serviceSeparator = "---";
 
             RosDefinition = RosRequestWrapper<T, TRequest, TResponse>.RosDefinition + "\n" +
-                            serviceSeparator +
+                            serviceSeparator + "\n" +
                             RosResponseWrapper<T, TRequest, TResponse>.RosDefinition + "\n";
 
             RosMessageMd5 = RosWrapperBase.CreateMd5(

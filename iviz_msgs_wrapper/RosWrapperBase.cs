@@ -267,9 +267,37 @@ namespace Iviz.MsgsWrapper
 
         static string GetPropertyName(MemberInfo property)
         {
-            return property.GetCustomAttribute<RenameToAttribute>()?.Name
+            string csName = property.GetCustomAttribute<RenameToAttribute>()?.Name
                    ?? property.GetCustomAttribute<DataMemberAttribute>()?.Name
                    ?? property.Name;
+            return RosIfy(csName);
+        }
+
+        static string RosIfy(string csName)
+        {
+            var str = new StringBuilder(100);
+
+            bool isFirst = true;
+            foreach (char c in csName)
+            {
+                if (isFirst)
+                {
+                    str.Append(char.ToLower(c));
+                    isFirst = false;
+                    continue;
+                }
+
+                if (char.IsUpper(c))
+                {
+                    str.Append('_');
+                    str.Append(char.ToLower(c));
+                    continue;
+                }
+
+                str.Append(c);
+            }
+
+            return str.ToString();
         }
 
         static void InitializeProperty<TField>(PropertyInfo property, BuilderInfo bi) where TField : unmanaged
