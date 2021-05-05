@@ -1,0 +1,6 @@
+iviz_msgs/Dialog dialog
+---
+bool success
+string message
+iviz_msgs/Feedback feedback
+

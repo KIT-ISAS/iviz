@@ -1,0 +1,8 @@
+int32 operation
+string id
+iviz_msgs/RobotConfiguration configuration
+string[] valid_fields
+---
+bool success
+string message
+
