@@ -155,7 +155,7 @@ namespace Iviz.XmlRpc
                     throw new HttpConnectionException($"Request failed with header: {firstLine}");
                 }
             }
-            
+
             while (true)
             {
                 string? line = reader.ReadLine();
@@ -239,30 +239,26 @@ namespace Iviz.XmlRpc
 
         static string Decompress(in Rent<byte> content)
         {
-            const int maxPayloadSize = 65536;
-
-            using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
-
             try
             {
+                // use a rented matrix, this lets us keep reusing the same buffer for all requests
+                const int maxPayloadSize = 65536;
+                using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
                 using var outputBytes = new Rent<byte>(maxPayloadSize);
                 using var outputStream = new MemoryStream(outputBytes.Array);
-                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
-                {
-                    decompressionStream.CopyTo(outputStream);
-                }
+                using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
+                decompressionStream.CopyTo(outputStream);
                 return BuiltIns.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
             }
             catch (NotSupportedException)
             {
                 // bigger than maxPayloadSize! we create a new array instead of renting
+                using var inputStream = new MemoryStream(content.Array, 0, content.Length, false);
                 using var outputStream = new MemoryStream();
-                using (var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
-                {
-                    decompressionStream.CopyTo(outputStream);
-                }
+                using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
+                decompressionStream.CopyTo(outputStream);
                 return BuiltIns.UTF8.GetString(outputStream.GetBuffer(), 0, (int) outputStream.Position);
             }
         }

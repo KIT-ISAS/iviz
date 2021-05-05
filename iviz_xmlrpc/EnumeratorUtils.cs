@@ -15,14 +15,12 @@ namespace Iviz.XmlRpc
             {
                 readonly IReadOnlyList<TA> a;
                 readonly IReadOnlyList<TB> b;
-                int currentIndex;
+                int index;
 
-                internal ZipEnumerator(IReadOnlyList<TA> a, IReadOnlyList<TB> b) =>
-                    (this.a, this.b, currentIndex) = (a, b, -1);
-
-                public bool MoveNext() => ++currentIndex < Math.Min(a.Count, b.Count);
-                public void Reset() => currentIndex = -1;
-                public (TA, TB) Current => (a[currentIndex], b[currentIndex]);
+                internal ZipEnumerator(IReadOnlyList<TA> na, IReadOnlyList<TB> nb) => (a, b, index) = (na, nb, -1);
+                public bool MoveNext() => ++index < Math.Min(a.Count, b.Count);
+                public void Reset() => index = -1;
+                public (TA, TB) Current => (a[index], b[index]);
                 object IEnumerator.Current => Current;
 
                 public void Dispose()
@@ -83,14 +81,12 @@ namespace Iviz.XmlRpc
             {
                 readonly IReadOnlyList<TA> a;
                 readonly Func<TA, TB> f;
-                int currentIndex;
+                int index;
 
-                internal SelectEnumerator(IReadOnlyList<TA> a, Func<TA, TB> f) =>
-                    (this.a, this.f, currentIndex) = (a, f, -1);
-
-                public bool MoveNext() => ++currentIndex < a.Count;
-                public void Reset() => currentIndex = -1;
-                public TB Current => f(a[currentIndex]);
+                internal SelectEnumerator(IReadOnlyList<TA> na, Func<TA, TB> nf) => (a, f, index) = (na, nf, -1);
+                public bool MoveNext() => ++index < a.Count;
+                public void Reset() => index = -1;
+                public TB Current => f(a[index]);
                 object? IEnumerator.Current => Current;
 
                 public void Dispose()
@@ -168,10 +164,10 @@ namespace Iviz.XmlRpc
             public struct RefEnumerator
             {
                 readonly T[] a;
-                int currentIndex;
-                public RefEnumerator(T[] a) => (this.a, currentIndex) = (a, -1);
-                public bool MoveNext() => ++currentIndex < a.Length;
-                public ref T Current => ref a[currentIndex];
+                int index;
+                public RefEnumerator(T[] a) => (this.a, index) = (a, -1);
+                public bool MoveNext() => ++index < a.Length;
+                public ref T Current => ref a[index];
             }
 
             public RefEnumerable(T[] a) => this.a = a;
