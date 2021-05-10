@@ -200,9 +200,12 @@ namespace Iviz.RosMaster
                     writer.Write(await reader.ReadAsync(runningTs.Token));
                 }
             }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception e)
             {
-                Logger.Log("** Rosout stopped with exception: " + e);
+                Logger.LogDebugFormat("** Rosout stopped with exception: {0}", e);
             }
             finally
             {
