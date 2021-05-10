@@ -31,7 +31,7 @@ Dummy project that references all the others.
 If you make a change in a library and want to use it in **iviz**, build this
 and copy the DLLs from the _iviz_utils/Publish_ folder into _iviz/Assets/Dependencies_.
 
-(Note: Do not copy _Newtonsoft.Json.dll_, it will conflict with a Unity dependency. This is fixed in 2020.1+).
+(Note: Do not copy _Newtonsoft.Json.dll_, it will conflict with a Unity dependency.)
 
 ## iviz_utils_tests
 Unit tests for the different modules.
