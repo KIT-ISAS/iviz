@@ -62,6 +62,7 @@ namespace Iviz.Resources
         public Info<GameObject> ARDialogShort { get; }
         public Info<GameObject> ARTfFrame { get; }
         public Info<GameObject> ARDialogNotice { get; }
+        public Info<GameObject> ARButtonDialog { get; }
         public Info<GameObject> RotationDisc { get; }
         public Info<GameObject> SpringDisc { get; }
 
@@ -103,6 +104,7 @@ namespace Iviz.Resources
                 ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
                 ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
                 ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice);
+                ARButtonDialog = new Info<GameObject>(appAssetHolder.ARButtonDialog);
                 
                 RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc);
                 SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc);

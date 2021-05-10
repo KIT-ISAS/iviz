@@ -89,6 +89,7 @@ namespace Iviz.App
             panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
             panel.MinIntensity.ValueChanged += f => { listener.MinIntensity = f; };
             panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
+            panel.Description.Label = listener.Description;
         }
 
         public override void UpdatePanel()

@@ -204,7 +204,7 @@ namespace Iviz.App
                 MainCamera.backgroundColor = valueNoAlpha;
 
                 float maxRGB = Mathf.Max(Mathf.Max(value.r, value.g), value.b);
-                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB ;
+                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
                 RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
             }
         }
@@ -263,7 +263,8 @@ namespace Iviz.App
 
             if (!Settings.SupportsComputeBuffers)
             {
-                Core.Logger.Info("Platform does not support compute shaders. Point cloud rendering will probably not work.");
+                Core.Logger.Info(
+                    "Platform does not support compute shaders. Point cloud rendering will probably not work.");
             }
 
             Config = new SettingsConfiguration();
@@ -379,14 +380,20 @@ namespace Iviz.App
         {
             UpdateEvenIfInactive();
 
-            if (!(DraggedObject is null))
-            {
-                return;
-            }
 
             if (!(CameraViewOverride is null))
             {
                 Transform.SetPose(CameraViewOverride.UnityWorldPose);
+            }
+
+            if (!(DraggedObject is null))
+            {
+                if (!Settings.IsMobile && OrbitCenterOverride == null)
+                {
+                    ProcessFlying();
+                }
+
+                return;
             }
 
             if (Settings.IsMobile)

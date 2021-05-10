@@ -212,6 +212,11 @@ namespace Iviz.App
 
         void Start()
         {
+            Resource.ClearResources();
+
+            Debug.Log(Widget.RosDefinition);
+            Debug.Log(GuiArray.RosDefinition);
+            
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
@@ -536,7 +541,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                Logger.Debug($"{this}: Error loading simple configuration" + e);
+                Logger.Debug($"{this}: Error loading simple configuration", e);
                 File.Delete(path);
             }
         }
@@ -562,7 +567,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                Logger.Debug($"{this}: Error saving simple configuration" + e);
+                Logger.Debug($"{this}: Error saving simple configuration", e);
             }
         }
 
@@ -585,7 +590,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
             {
-                Logger.Debug("ModuleListPanel: Error updating simple configuration" + e);
+                Logger.Debug("ModuleListPanel: Error updating simple configuration", e);
             }
         }
 

@@ -48,6 +48,7 @@ namespace Iviz.App.ARDialogs
                 backgroundColor = value;
                 if (background != null)
                 {
+                    // TODO
                 }
             }
         }
@@ -97,7 +98,7 @@ namespace Iviz.App.ARDialogs
 
         protected override void Awake()
         {
-            Icon = ButtonIcon.Ok;
+            Icon = ButtonIcon.Cross;
             iconMeshRenderer.material = Material;
 
             if (Settings.IsHololens)
@@ -124,7 +125,8 @@ namespace Iviz.App.ARDialogs
         {
             frame = ResourcePool.RentDisplay<BoundaryFrame>(transform);
             frame.Color = Color.white.WithAlpha(0.5f);
-            frame.Bounds = new Bounds(colliderForFrame.center, colliderForFrame.size);
+            frame.Bounds = new Bounds(colliderForFrame.center, 
+                Vector3.Scale(colliderForFrame.size, colliderForFrame.transform.localScale));
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -133,12 +135,22 @@ namespace Iviz.App.ARDialogs
             frame = null;
         }
 
+        public void OnDialogSuspended()
+        {
+            if (frame != null)
+            {
+                frame.ReturnToPool();
+                frame = null;
+            }
+        }
+        
         public override void Suspend()
         {
             base.Suspend();
             if (frame != null)
             {
                 frame.ReturnToPool();
+                frame = null;
             }
         }
     }

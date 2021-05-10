@@ -27,6 +27,7 @@ namespace Iviz.App
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new List<PathConfiguration>();
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new List<GridMapConfiguration>();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new List<OctomapConfiguration>();
+        [DataMember] public List<GuiDialogConfiguration> Dialogs { get; set; } = new List<GuiDialogConfiguration>();
         [DataMember] public ARConfiguration AR { get; set; }
         [DataMember] public JoystickConfiguration Joystick { get; set; }
 
@@ -47,6 +48,7 @@ namespace Iviz.App
             Paths,
             GridMaps,
             Octomaps,
+            Dialogs,
             new[] { AR },
             new[] { Joystick },
         };

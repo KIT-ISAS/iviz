@@ -136,7 +136,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Failed to construct '{Name}'", e);
+                    Logger.Error($"{this}: Failed to construct '{Name}'" + e);
                     throw;
                 }
                 finally
@@ -275,7 +275,9 @@ namespace Iviz.Displays
                     catch (Exception e)
                     {
                         Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
-                        throw;
+                        NumErrors++;
+                        continue;
+                        //throw;
                     }
 
                     if (info == null)

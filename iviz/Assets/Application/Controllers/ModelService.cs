@@ -44,7 +44,7 @@ namespace Iviz.Controllers
             else if (modelServer.NumPackages == 0)
             {
                 Logger.Info(
-                    "Iviz.Model.Service started. However, no packages were found. Try creating a ros_package_path file.");
+                    "Iviz.Model.Service started. However, no packages were found. Try creating a ros_package_path file with a list of ROS root paths.");
                 return;
             }
             else
@@ -98,6 +98,7 @@ namespace Iviz.Controllers
             }
 
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
+            Logger.Info($"Iviz.ModelService: Searching for ROS package file in '{extrasPath}'");
             if (!File.Exists(extrasPath))
             {
                 return null;
@@ -109,8 +110,7 @@ namespace Iviz.Controllers
             }
             catch (IOException e)
             {
-                Logger.Warn(
-                    $"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read: {e.Message}");
+                Logger.Error($"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read", e);
                 return null;
             }
         }

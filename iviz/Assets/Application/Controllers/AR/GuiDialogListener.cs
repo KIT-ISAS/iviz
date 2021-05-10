@@ -30,7 +30,11 @@ namespace Iviz.Controllers
 
 
         public override TfFrame Frame => TfListener.Instance.FixedFrame;
-        public override IModuleData ModuleData { get; }
+
+        [CanBeNull] IModuleData moduleData;
+
+        public override IModuleData ModuleData =>
+            moduleData ?? throw new InvalidOperationException("Listener has no module data");
 
         readonly GuiDialogConfiguration config = new GuiDialogConfiguration();
 
@@ -54,10 +58,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Dialog.RosMessageType:
-                    Listener = new Listener<Dialog>(config.Topic, Handler);
+                    Listener = new Listener<Dialog>(config.Topic, Handler) {MaxQueueSize = 50};
                     break;
                 case GuiArray.RosMessageType:
-                    Listener = new Listener<GuiArray>(config.Topic, Handler);
+                    Listener = new Listener<GuiArray>(config.Topic, Handler) {MaxQueueSize = 50};
                     break;
             }
 
@@ -66,7 +70,7 @@ namespace Iviz.Controllers
 
         public GuiDialogListener([NotNull] IModuleData moduleData)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            this.moduleData = moduleData;
             Config = new GuiDialogConfiguration();
 
             GameThread.EverySecond += CheckDeadDialogs;
@@ -74,7 +78,7 @@ namespace Iviz.Controllers
 
         GuiDialogListener()
         {
-            ModuleData = null;
+            moduleData = null;
             Config = new GuiDialogConfiguration();
 
             GameThread.EverySecond += CheckDeadDialogs;
@@ -221,6 +225,11 @@ namespace Iviz.Controllers
                             info = Resource.Displays.ARDialogNotice;
                             dialog = ResourcePool.Rent<ARDialog>(info);
                             break;
+                        case DialogType.Button:
+                            info = Resource.Displays.ARButtonDialog;
+                            dialog = ResourcePool.Rent<ARDialog>(info);
+                            dialog.SetButtonMode(msg.Buttons);
+                            break;
                         case DialogType.MenuMode:
                             info = Resource.Displays.ARDialogMenu;
                             dialog = ResourcePool.Rent<ARDialog>(info);
@@ -293,6 +302,8 @@ namespace Iviz.Controllers
                 dialog.Object.Suspend();
                 ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
                 dialogs.Remove(pair.Key);
+                
+                OnDialogExpired(dialog.Object);
             }
         }
 
@@ -305,14 +316,16 @@ namespace Iviz.Controllers
                 FeedbackType = FeedbackType.ButtonClick,
                 EntryId = buttonId,
             });
-            
-            
-            if (dialogs.TryGetValue(dialog.Id, out var entry))
+
+
+            if (!dialogs.TryGetValue(dialog.Id, out var entry))
             {
-                entry.Object.Suspend();
-                ResourcePool.Return(entry.Info, entry.Object.gameObject);
-                dialogs.Remove(dialog.Id);            
-            }            
+                return;
+            }
+            
+            entry.Object.Suspend();
+            ResourcePool.Return(entry.Info, entry.Object.gameObject);
+            dialogs.Remove(dialog.Id);
         }
 
         void OnDialogMenuEntryClicked(ARDialog dialog, int buttonId)
@@ -324,15 +337,28 @@ namespace Iviz.Controllers
                 FeedbackType = FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
             });
-            
-            if (dialogs.TryGetValue(dialog.Id, out var entry))
+
+            if (!dialogs.TryGetValue(dialog.Id, out var entry))
             {
-                entry.Object.Suspend();
-                ResourcePool.Return(entry.Info, entry.Object.gameObject);
-                dialogs.Remove(dialog.Id);            
-            }            
+                return;
+            }
             
+            entry.Object.Suspend();
+            ResourcePool.Return(entry.Info, entry.Object.gameObject);
+            dialogs.Remove(dialog.Id);
+
         }
+
+        void OnDialogExpired(ARDialog dialog)
+        {
+            FeedbackSender?.Publish(new Feedback
+            {
+                VizId = ConnectionManager.MyId ?? "",
+                Id = dialog.Id,
+                FeedbackType = FeedbackType.Expired,
+            });
+        }
+
 
         void OnRotationDiscMoved(ARWidget widget, float angleInDeg)
         {

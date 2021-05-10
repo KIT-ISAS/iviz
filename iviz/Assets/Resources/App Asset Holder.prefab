@@ -95,6 +95,8 @@ MonoBehaviour:
     type: 3}
   ARDialogNotice: {fileID: 9024825353754890543, guid: ffcf9df44385d4b86970093fa5a41022,
     type: 3}
+  ARButtonDialog: {fileID: 9024825353754890543, guid: 95b4d773aaee24439bf45345ebf58509,
+    type: 3}
   RotationDisc: {fileID: 3400963749383913441, guid: 39ed52dc07cef4db08ddc7e159dc3afb,
     type: 3}
   SpringDisc: {fileID: 813713276496453762, guid: 2d48445f3f4c3481abdb17e9fb48a032,

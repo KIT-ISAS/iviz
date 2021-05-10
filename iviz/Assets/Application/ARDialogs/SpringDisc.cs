@@ -22,6 +22,11 @@ namespace Iviz.App.ARDialogs
                 dragBack = true;
                 Moved?.Invoke(this, Vector3.zero);
             };
+            
+            disc.PointerDown += () =>
+            {
+                dragBack = false;
+            };
 
             link.Color = Color.cyan.WithAlpha(0.8f);
         }

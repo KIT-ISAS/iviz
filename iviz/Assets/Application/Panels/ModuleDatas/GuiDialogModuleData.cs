@@ -51,6 +51,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
+            config.Dialogs.Add(dialogListener.Config);
         }
     }
 }

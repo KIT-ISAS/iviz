@@ -13,20 +13,7 @@ namespace Iviz.App.ARDialogs
         BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
 
         FrameNode node;
-
-        FrameNode Node
-        {
-            get
-            {
-                if (node == null)
-                {
-                    node = FrameNode.Instantiate("Widget Node");
-                    Transform.parent = node.Transform;
-                }
-
-                return node;
-            }
-        }
+        FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Widget Node");
 
         Transform mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -38,7 +25,7 @@ namespace Iviz.App.ARDialogs
         public void Initialize()
         {
         }
-        
+
         public virtual void Suspend()
         {
             Node.Parent = null;
@@ -58,11 +45,16 @@ namespace Iviz.App.ARDialogs
         {
             Destroy(Node);
         }
-        
+
         public void AttachTo(string parentId)
         {
+            if (Transform.parent != Node.Transform)
+            {
+                Transform.parent = Node.Transform;
+                Transform.SetLocalPose(Pose.identity);
+            }
+
             Node.AttachTo(parentId);
-        }        
-        
+        }
     }
 }

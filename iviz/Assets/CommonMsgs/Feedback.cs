@@ -7,6 +7,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
 {
     public enum FeedbackType
     {
+        Expired,
         ButtonClick,
         MenuEntryClick,
         PositionChanged,

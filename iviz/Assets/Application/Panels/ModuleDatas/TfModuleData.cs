@@ -79,6 +79,10 @@ namespace Iviz.App
             {
                 listener.KeepAllFrames = f;
             };
+            panel.ResetButton.Clicked += () =>
+            {
+                listener.ResetController();
+            };
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

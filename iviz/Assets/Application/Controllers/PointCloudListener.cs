@@ -332,7 +332,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error handling point cloud" + e);
+                Logger.Error($"{this}: Error handling point cloud", e);
                 IsProcessing = false;
             }
         }

@@ -16,7 +16,7 @@ namespace Iviz.App.ARDialogs
     public class ARDialog : MarkerResource, IRecyclable
     {
         const float PopupDuration = 0.1f;
-        
+
         static readonly Color DefaultBackgroundColor = new Color(0, 0.2f, 0.5f);
 
         [SerializeField] TextMesh title = null;
@@ -50,7 +50,8 @@ namespace Iviz.App.ARDialogs
             iconMaterial != null ? iconMaterial : (iconMaterial = Instantiate(iconMeshRenderer.material));
 
         float? popupStartTime;
-        float? currentAngle;
+        //float? currentAngle;
+        bool resetOrientation;
         Vector3? currentPosition;
 
         FrameNode node;
@@ -66,7 +67,7 @@ namespace Iviz.App.ARDialogs
                 {
                     backgroundColor = DefaultBackgroundColor;
                 }
-                
+
                 if (background != null)
                 {
                     background.Color = backgroundColor;
@@ -132,7 +133,7 @@ namespace Iviz.App.ARDialogs
                 {
                     node.AttachTo(pivotFrameId);
                     currentPosition = null;
-                    currentAngle = null;
+                    resetOrientation = true;
                 }
                 else
                 {
@@ -149,15 +150,22 @@ namespace Iviz.App.ARDialogs
 
         public void SetButtonMode(ButtonType value)
         {
-            if (button1 == null || button2 == null || button3 == null)
+            if (button1 == null)
             {
                 Logger.Error($"{this}: Tried to set buttons in an asset that does not support them");
                 return;
             }
 
             button1.Active = false;
-            button2.Active = false;
-            button3.Active = false;
+            if (button2 != null)
+            {
+                button2.Active = false;
+            }
+
+            if (button3 != null)
+            {
+                button3.Active = false;
+            }
 
             switch (value)
             {
@@ -171,7 +179,17 @@ namespace Iviz.App.ARDialogs
                     button1.Icon = ARButton.ButtonIcon.Forward;
                     button1.Caption = "Ok";
                     break;
+                case ButtonType.Backward:
+                    button1.Active = true;
+                    button1.Icon = ARButton.ButtonIcon.Backward;
+                    button1.Caption = "Back";
+                    break;
                 case ButtonType.YesNo:
+                    if (button2 == null || button3 == null)
+                    {
+                        break;
+                    }
+
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Yes";
@@ -180,6 +198,11 @@ namespace Iviz.App.ARDialogs
                     button3.Caption = "No";
                     break;
                 case ButtonType.ForwardBackward:
+                    if (button2 == null || button3 == null)
+                    {
+                        break;
+                    }
+
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Backward;
                     button2.Caption = "Back";
@@ -188,6 +211,11 @@ namespace Iviz.App.ARDialogs
                     button3.Caption = "Forward";
                     break;
                 case ButtonType.OkCancel:
+                    if (button2 == null || button3 == null)
+                    {
+                        break;
+                    }
+
                     button2.Active = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Ok";
@@ -352,7 +380,7 @@ namespace Iviz.App.ARDialogs
                 MenuPage++;
             }
         }
-        
+
         Vector3 BaseDisplacement => -socketPosition * Scale;
 
         protected override void Awake()
@@ -425,12 +453,25 @@ namespace Iviz.App.ARDialogs
                 }
             }
 
-            UpdateRotation();
             UpdatePosition();
+            UpdateRotation();
         }
 
         void UpdateRotation()
         {
+            Quaternion targetRotation =
+                Quaternion.LookRotation(Transform.position - Settings.MainCameraTransform.position);
+            if (resetOrientation)
+            {
+                Transform.rotation = targetRotation;
+                resetOrientation = false;
+                return;
+            }
+            
+            Quaternion currentRotation = Transform.rotation;
+            Transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, 0.05f);
+
+            /*
             (float x, _, float z) = Transform.position - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
 
@@ -464,6 +505,7 @@ namespace Iviz.App.ARDialogs
             }
 
             Transform.rotation = Quaternion.AngleAxis(currentAngle.Value, Vector3.up);
+            */
         }
 
         void UpdatePosition()
@@ -508,6 +550,7 @@ namespace Iviz.App.ARDialogs
         {
             connector.Visible = true;
             popupStartTime = Time.time;
+            resetOrientation = true;
 
             Update();
         }
@@ -516,11 +559,26 @@ namespace Iviz.App.ARDialogs
         {
             base.Suspend();
             connector.Visible = false;
-            currentAngle = null;
             currentPosition = null;
             popupStartTime = null;
             ButtonClicked = null;
             MenuEntryClicked = null;
+
+            SuspendButton(button1);
+            SuspendButton(button2);
+            SuspendButton(button3);
+            foreach (var menuButton in menuButtons)
+            {
+                SuspendButton(menuButton);
+            }
+        }
+
+        static void SuspendButton([CanBeNull] ARButton button)
+        {
+            if (button != null)
+            {
+                button.OnDialogSuspended();
+            }
         }
 
         public override string ToString()

@@ -41,6 +41,8 @@ namespace Iviz.Displays
         const string StrLocalResourceFailedWithError =
             "ExternalResourceManager: Loading local resource '{0}' failed with error {1}";
 
+        const int TimeoutInMs = 10000;
+
         [DataContract]
         public class ResourceFiles
         {
@@ -347,7 +349,19 @@ namespace Iviz.Displays
         [ContractAnnotation("=> false, resource:null; => true, resource:notnull")]
         bool TryGetModel([NotNull] string uriString, out Info<GameObject> resource)
         {
-            return loadedModels.TryGetValue(uriString, out resource);
+            if (!loadedModels.TryGetValue(uriString, out resource))
+            {
+                return false;
+            }
+            
+            if (resource != null)
+            {
+                return true;
+            }
+
+            resource = null;
+            loadedModels.Remove(uriString);
+            return false;
         }
 
         [ItemCanBeNull]
@@ -388,7 +402,7 @@ namespace Iviz.Displays
             var msg = new GetModelResource {Request = {Uri = uriString}};
             try
             {
-                bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, token);
+                bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
                 if (!hasClient)
                 {
                     Debug.LogWarning("ExternalResourceManager: Call service failed, no connection");
@@ -459,7 +473,7 @@ namespace Iviz.Displays
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
             var msg = new GetSdf {Request = {Uri = uriString}};
-            if (await provider.CallServiceAsync(SceneServiceName, msg, token) && msg.Response.Success)
+            if (await provider.CallServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
             }
@@ -527,7 +541,7 @@ namespace Iviz.Displays
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
             var msg = new GetModelTexture {Request = {Uri = uriString}};
-            if (await provider.CallServiceAsync(TextureServiceName, msg, token) && msg.Response.Success)
+            if (await provider.CallServiceAsync(TextureServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessTextureResponseAsync(uriString, msg.Response, token);
             }
@@ -561,7 +575,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length, 32);
+                    var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - 32, 32);
                     obj = await CreateModelObjectAsync(uriString, msg, provider, token);
                 }
             }
@@ -571,7 +585,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
+                Logger.Error($"{this}: Loading resource {uriString} failed with error" + e);
                 return null;
             }
 
@@ -630,7 +644,7 @@ namespace Iviz.Displays
                         return null;
                     }
 
-                    var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length, 32);
+                    var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length - 32, 32);
                     obj = await CreateSceneNodeAsync(msg, provider, token);
                 }
             }

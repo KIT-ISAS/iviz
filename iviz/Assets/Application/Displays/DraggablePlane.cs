@@ -52,16 +52,16 @@ namespace Iviz.Displays
             OnPointerMove(pointerRay);
         }
 
-        public void OnStartDragging()
+        void IDraggable.OnStartDragging()
         {
             needsStart = true;
         }
 
-        public void OnEndDragging()
+        void IDraggable.OnEndDragging()
         {
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
             if (TfListener.GuiInputModule != null)
             {
@@ -71,7 +71,7 @@ namespace Iviz.Displays
             PointerDown?.Invoke();
         }
 
-        public void OnPointerUp(PointerEventData eventData)
+        void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
             PointerUp?.Invoke();
         }

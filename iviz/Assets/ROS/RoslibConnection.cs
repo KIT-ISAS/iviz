@@ -571,7 +571,7 @@ namespace Iviz.Ros
             servicesByTopic.Add(serviceName, newAdvertisedService);
         }
 
-        public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, CancellationToken token)
+        public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
         {
             if (service == null)
             {
@@ -592,7 +592,7 @@ namespace Iviz.Ros
 
             using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
             {
-                tokenSource.CancelAfter(3000);
+                tokenSource.CancelAfter(timeoutInMs);
                 try
                 {
                     await client.CallServiceAsync(service, srv, true, tokenSource.Token).Caf();

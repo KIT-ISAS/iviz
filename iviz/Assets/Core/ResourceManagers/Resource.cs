@@ -32,7 +32,7 @@ namespace Iviz.Resources
         static TexturedMaterialsType texturedMaterials;
         static FontInfo fontInfo;
         static InternalResourceManager internals;
-        static ExternalResourceManager external;
+        static ExternalResourceManager externals;
 
         /// <summary>
         /// Dictionary that describes which module handles which ROS message type.
@@ -87,7 +87,7 @@ namespace Iviz.Resources
         public static InternalResourceManager Internal => internals ?? (internals = new InternalResourceManager());
 
         [NotNull]
-        public static ExternalResourceManager External => external ?? (external = new ExternalResourceManager());
+        public static ExternalResourceManager External => externals ?? (externals = new ExternalResourceManager());
 
         public static bool ContainsRobot([NotNull] string robotName)
         {
@@ -133,5 +133,13 @@ namespace Iviz.Resources
                 ? info
                 : await External.TryGetTextureAsync(uriString, provider, token);
         }
+
+        public static void ClearResources()
+        {
+            internals = null;
+            externals = null;
+        }
+        
+        
     }
 }

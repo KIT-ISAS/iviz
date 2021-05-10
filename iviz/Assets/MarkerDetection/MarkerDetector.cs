@@ -163,6 +163,9 @@ namespace Iviz.MarkerDetection
                     await signal.WaitAsync(Token);
                 }
             }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception e)
             {
                 Debug.LogError(e);

@@ -102,7 +102,15 @@ namespace Iviz.Resources
 
             if (repository.TryGetValue(uriString, out info))
             {
-                return true;
+                if (info != null)
+                {
+                    return true;
+                }
+                
+                repository.Remove(uriString);
+                info = null;
+                return false;
+
             }
 
             if (negRepository.Contains(uriString))

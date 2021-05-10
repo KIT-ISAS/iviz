@@ -22,6 +22,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         Short,
         Notice,
         MenuMode,
+        Button,
     }
 
     public enum ButtonType : byte
@@ -31,6 +32,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         OkCancel,
         Forward,
         ForwardBackward,
+        Backward,
     }
     
     public enum IconType : byte
@@ -51,7 +53,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
     }
     
     [Flags]
-    public enum CaptionAlignmentType
+    public enum CaptionAlignmentType : ushort
     {
         Default = 0x0,
         
