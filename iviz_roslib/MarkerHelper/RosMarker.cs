@@ -349,7 +349,7 @@ namespace Iviz.Roslib.MarkerHelper
         public static Marker CreateLineStrip(string ns = "", int id = 0, Point[]? lines = null,
             ColorRGBA[]? colors = null,
             ColorRGBA? color = null,
-            Pose? pose = null, double scale = 1, string frameId = "")
+            Pose? pose = null, double width = 1, string frameId = "")
         {
             if (colors != null && lines != null && colors.Length != lines.Length)
             {
@@ -364,7 +364,7 @@ namespace Iviz.Roslib.MarkerHelper
                 Type = Marker.LINE_STRIP,
                 Action = Marker.ADD,
                 Pose = pose ?? Pose.Identity,
-                Scale = scale * Vector3.One,
+                Scale = width * Vector3.One,
                 Color = color ?? ColorRGBA.White,
                 Points = lines ?? Array.Empty<Point>(),
                 Colors = colors ?? Array.Empty<ColorRGBA>(),

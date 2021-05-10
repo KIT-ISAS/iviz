@@ -208,7 +208,7 @@ namespace Iviz.Roslib
             if (!values.TryGetValue("topic", out string? receivedTopic) || receivedTopic != topicInfo.Topic)
             {
                 return
-                    $"error=Expected topic '{topicInfo.Topic}' but partner provided '{receivedTopic}', closing connection";
+                    $"error=Expected topic '{topicInfo.Topic}' but received '{receivedTopic}', closing connection";
             }
 
             if (!values.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
@@ -220,7 +220,7 @@ namespace Iviz.Roslib
                 else
                 {
                     return
-                        $"error=Expected type '{topicInfo.Type}' but partner provided '{receivedType}', closing connection";
+                        $"error=Expected type '{topicInfo.Type}' but received '{receivedType}', closing connection";
                 }
             }
 
@@ -229,7 +229,7 @@ namespace Iviz.Roslib
                 if (receivedMd5Sum != "*")
                 {
                     return
-                        $"error=Expected md5 '{topicInfo.Md5Sum}' but partner provided '{receivedMd5Sum}', closing connection";
+                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}', closing connection";
                 }
             }
 

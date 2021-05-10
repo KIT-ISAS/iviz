@@ -7,7 +7,7 @@ using Iviz.Msgs;
 namespace Iviz.Roslib
 {
     /// <summary>
-    /// Interface for all ROS subscribers.
+    /// InterfaceManager for all ROS subscribers.
     /// </summary>
     public interface IRosSubscriber : IDisposable
     {
