@@ -18,7 +18,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "background_color")] public StdMsgs.ColorRGBA BackgroundColor { get; set; }
         [DataMember (Name = "title")] public string Title { get; set; }
         [DataMember (Name = "caption")] public string Caption { get; set; }
-        [DataMember (Name = "caption_alignment")] public int CaptionAlignment { get; set; }
+        [DataMember (Name = "caption_alignment")] public ushort CaptionAlignment { get; set; }
         [DataMember (Name = "menu_entries")] public string[] MenuEntries { get; set; }
         [DataMember (Name = "binding_type")] public byte BindingType { get; set; }
         [DataMember (Name = "tf_offset")] public GeometryMsgs.Vector3 TfOffset { get; set; }
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Dialog(in StdMsgs.Header Header, byte Action, string Id, duration Lifetime, double Scale, byte Type, byte Buttons, byte Icon, in StdMsgs.ColorRGBA BackgroundColor, string Title, string Caption, int CaptionAlignment, string[] MenuEntries, byte BindingType, in GeometryMsgs.Vector3 TfOffset, in GeometryMsgs.Vector3 DialogDisplacement, in GeometryMsgs.Vector3 TfDisplacement)
+        public Dialog(in StdMsgs.Header Header, byte Action, string Id, duration Lifetime, double Scale, byte Type, byte Buttons, byte Icon, in StdMsgs.ColorRGBA BackgroundColor, string Title, string Caption, ushort CaptionAlignment, string[] MenuEntries, byte BindingType, in GeometryMsgs.Vector3 TfOffset, in GeometryMsgs.Vector3 DialogDisplacement, in GeometryMsgs.Vector3 TfDisplacement)
         {
             this.Header = Header;
             this.Action = Action;
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
             BackgroundColor = new StdMsgs.ColorRGBA(ref b);
             Title = b.DeserializeString();
             Caption = b.DeserializeString();
-            CaptionAlignment = b.Deserialize<int>();
+            CaptionAlignment = b.Deserialize<ushort>();
             MenuEntries = b.DeserializeStringArray();
             BindingType = b.Deserialize<byte>();
             TfOffset = new GeometryMsgs.Vector3(ref b);
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.IvizMsgs
         public int RosMessageLength
         {
             get {
-                int size = 129;
+                int size = 127;
                 size += Header.RosMessageLength;
                 size += BuiltIns.UTF8.GetByteCount(Id);
                 size += BuiltIns.UTF8.GetByteCount(Title);
@@ -148,23 +148,23 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Dialog";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "686c721c087828d6bf310fa5d5f78f19";
+        [Preserve] public const string RosMd5Sum = "55f9895157fe16b721a27e4c5483f8ef";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VVwW7cNhC96ysG8CF2YG+BpMjBQA9pg6Y+BDBio5egEEbkSCJCkSo5sq1+fR+pXaUG" +
-                "GiCHZCFAJDXvzXDezGxW2055yD/9IWwl0VhfTbeqEBt1MTRZkwsDOdvYJXE5Iu96UTdJ0/vI+uZnyoa9" +
-                "bChd5+OqW1RjyNvGmUp19PZb9DF9fP/rW+rYfB5SXIJtTTk8uVOnYDxuDM81FBf09avTrmXvhjBJ0KPZ" +
-                "p78Iu6XFSXJy9Nu5YPGtrWENEifRtG5B/ClGY3pN2rex77PoV75bxz4OrXV59mykevwq0zOrpvnlO/+a" +
-                "D3fvryk/V605ozvlYDlZZEDZsjL1EWq6YZR05eVBPEA8zWKpfi3pyAcA70eXCc8gQRJ7v9KSYaSRTJym" +
-                "JTjDRVSI/QwPpAvENHNSZxbPCfYxIdXFvE88SWHHk+XvRYIRunl3DZuQxSzqENAKBpOEc1H45h01yyYv" +
-                "AM3Z/WO8wlYG1OTunHRkLcHK05wklzg5X8PHy+1yB3AjOQIvNtN5PWuxzRcEJwhB5mhGOkfkt6uOKGQd" +
-                "hR44Oe68FGKUsQfriwJ6cfEf5lCpA4d4ot8Yv/j4Ftqw85Y7XY3QzJfb52VAAmE4p/jgLEy7tZIY71BH" +
-                "6LcucVqbgtpcNme/lxzDCKiqCN6cczQOAlh6dDqeuqeq0aJ/f3Q17l29zQVomfbVsK+6fcU/KqL/7c5T" +
-                "sScpxYO0ImH0UL+VWu6TILczWvdQyvamFloMKNNJGBqgI3YkgNYlqfPxAFZJgnaTS3JKNkqmEBUcE38G" +
-                "pUD1guZ5BhlaL3HIfhukOAbkXA7D4ZIeRwmbVVGt9ljtSmcoucHZDQlH0w5mOl7uErPnFVT3fot5c4YS" +
-                "AkmKWgEXB7rpaY0LPZYLYZGOwyBSJ3tctWg1xssyCY4UzxN6G9GaSEvOPKC+Q1aMoUOz/xs87at1X/3T" +
-                "/AvkRo3wawYAAA==";
+                "H4sIAAAAAAAAE7VVTY/UOBC951eUNAdm0EwjPsRhJA67ixbmsBJaEBeEoopdSSwcO9iVGbK/fp+d7sBI" +
+                "IHGAVqTYTr1X5XpV1VltO+UhP3otbCXRWF9Nt6oQG3UxNFmTCwM529glcTki73pRN0nT+8j6/Bllw142" +
+                "lK7zcdUtqjHkbeNMpTp6+yv6mP599ecf1LH5NKS4BNuacnhyp07BeNwYnmsoiwv6+Plp27J3Q5gk6NHu" +
+                "w0fCbmlxkpwcHXcuWHxra1yDxEk0rVsU78VoTE9J+zb2fRb9wXfr2MehtS7Pno1Ujz9kumfVNC9+8a/5" +
+                "5+2ra8r3ZWvO6K1ysJwsMqBsWZn6CDndMEq68nIrHiCeZrFUv5Z05AOA70aXCc8gQRJ7v9KSYaSRTJym" +
+                "JTjDRVWofQ8PpAvENHNSZxbPCfYxIdXFvE88SWHHk+XzIsEI3by8hk3IYhZ1CGgFg0nCuUh885KqvE+f" +
+                "FEBz9u4uXmErA4pyd046spZg5cucJJc4OV/Dx8PtcgdwIzkCLzbTeT1rsc0XBCcIQeZoRjpH5G9WHVHJ" +
+                "OgrdcnLceSnEqGMP1gcF9ODiG+ZQqQOHeKLfGL/6+BnasPOWO12N0MyX2+dlQAJhOKd46yxMu7WSGO9Q" +
+                "R2i4LnFam4LaXDZnf5ccwwioqgjenHM0DgJYunM6ntqnqtGigX93Ne5tvQ0GaJn21bCvun3Fvyui73bn" +
+                "qdiTlOJBWpEwuq3fSi33SZDbGa17KGV7UwstBpTpJAwN0BE7EkDrktQBeQCrJEG7ySU5JRslU4gKjok/" +
+                "gVKgekHzPIMMrZc4ZL9NUhwDci6H4XBJd6OEzaqoVnusdqUzlNzg7IaEo2kHMx0vd4nZ8wSqe7/FvDlD" +
+                "CYEkRa2AiwPd9LTGhe7KhbBIx2EQqZM9rlq0GuNlmQRHivsJfRPRmkhLzjygvkNWjKFDs/8dfNlX6776" +
+                "r/kfZ+WsWGwGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

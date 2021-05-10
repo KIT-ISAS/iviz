@@ -13,7 +13,7 @@ namespace Iviz.Roslib
     }
     
     /// <summary>
-    /// InterfaceManager for all ROS publishers.
+    /// Interface for all ROS publishers.
     /// </summary>
     public interface IRosPublisher : IDisposable
     {
