@@ -44,7 +44,7 @@ namespace iviz_app_test
 
                 if (!publishers.TryGetValue(message.Topic, out var publisher))
                 {
-                    publisher = RosChannelWriter.CreateFor(innerMessage);
+                    publisher = await client.CreateWriterForMessageAsync(innerMessage, message.Topic);
                     await (innerMessage is DynamicMessage dynamicMessage
                         ? publisher.StartAsync(client, message.Topic, dynamicMessage)
                         : publisher.StartAsync(client, message.Topic));
