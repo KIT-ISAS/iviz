@@ -14,6 +14,9 @@ ROS client library in C#.
 ## [iviz_model_service](iviz_model_service)
 Service to upload 3D models from a PC to a mobile device using iviz.
 
+## iviz_model_service
+Backend library for **iviz_model_service**.
+
 ## iviz_msgs
 A small set of pre-generated ROS messages as C# files.
 
@@ -22,6 +25,9 @@ Parser that reads .msg files and generates C# files.
 
 ## iviz_msgs_gen_lib
 Library to read .msg files dynamically. Used by **iviz_msgs_gen**. 
+
+## iviz_msgs_wrapper
+Library to convert C# classes into messages or services. Used by **iviz** for message prototyping.
 
 ## iviz_urdf
 Parser for URDF and SDF resources.
@@ -35,3 +41,6 @@ and copy the DLLs from the _iviz_utils/Publish_ folder into _iviz/Assets/Depende
 
 ## iviz_utils_tests
 Unit tests for the different modules.
+
+## iviz_xmlrpc
+Small library that partially implements HTTP requests and XML-RPC calls. Used by **iviz_roslib**. 
