@@ -104,6 +104,13 @@ namespace Iviz.XmlRpc
             return task.Status == TaskStatus.RanToCompletion;
         }
 
+#if !NETSTANDARD2_0
+        public static bool RanToCompletion(this ValueTask task)
+        {
+            return task.IsCompletedSuccessfully;
+        }
+#endif
+
         /// <summary>
         /// Set ConfigureAwait(false) for a task.
         /// </summary>
@@ -310,6 +317,28 @@ namespace Iviz.XmlRpc
             return default;
         }
 
+#if !NETSTANDARD2_0
+        public static async Task AwaitNoThrow(this ValueTask t, object caller)
+        {
+            if (t == null || t.RanToCompletion())
+            {
+                return;
+            }
+
+            try
+            {
+                await t;
+            }
+            catch (Exception e)
+            {
+                if (e is not OperationCanceledException)
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+            }
+        }
+#endif
+
         public static void ThrowIfCanceled(this CancellationToken t, Task task)
         {
             if (t.IsCancellationRequested)
@@ -509,8 +538,8 @@ namespace Iviz.XmlRpc
             }
 #endif
         }
-        
+
         public static bool CheckIfAlive(this Socket socket) =>
-            !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;        
+            !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;
     }
 }
