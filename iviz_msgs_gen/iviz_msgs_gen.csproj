@@ -19,6 +19,7 @@
     <None Remove="Properties\PublishProfiles\FolderProfile 1.pubxml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
   </ItemGroup>
   <ItemGroup>
