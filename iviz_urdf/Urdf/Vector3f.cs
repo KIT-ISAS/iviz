@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs.GeometryMsgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -50,5 +51,8 @@ namespace Iviz.Urdf
         }
 
         public override string ToString() => JsonConvert.SerializeObject(this);
+
+        public static implicit operator Vector3(Vector3f v) => (v.X, v.Y, v.Z);
+        public static implicit operator Msgs.IvizMsgs.Vector3f(Vector3f v) => (v.X, v.Y, v.Z);
     }
 }

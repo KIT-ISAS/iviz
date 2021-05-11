@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs.StdMsgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -46,5 +47,7 @@ namespace Iviz.Urdf
         }
         
         public override string ToString() => JsonConvert.SerializeObject(this);
+        
+        public static implicit operator ColorRGBA(Rgba v) => (v.R, v.G, v.B, v.A);
     }
 }
