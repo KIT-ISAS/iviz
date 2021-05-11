@@ -103,7 +103,7 @@ namespace Iviz.XmlRpc
 
         public static async Task WriteHeaderAsync(this NetworkStream stream, string[] contents, CancellationToken token)
         {
-            int totalLength = 4 * contents.Length + contents.Sum(entry => entry.Length);
+            int totalLength = 4 * contents.Length + contents.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
 
             using var array = new Rent<byte>(totalLength + 4);
             using var writer = new BinaryWriter(new MemoryStream(array.Array));
@@ -111,8 +111,9 @@ namespace Iviz.XmlRpc
             writer.Write(totalLength);
             foreach (string t in contents)
             {
-                writer.Write(t.Length);
-                writer.Write(BuiltIns.UTF8.GetBytes(t));
+                byte[] bytes = BuiltIns.UTF8.GetBytes(t);
+                writer.Write(bytes.Length);
+                writer.Write(bytes);
             }
 
             await stream.WriteChunkAsync(array.Array, array.Length, token);
