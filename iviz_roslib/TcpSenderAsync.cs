@@ -166,8 +166,8 @@ namespace Iviz.Roslib
                     $"md5sum={topicInfo.Md5Sum}",
                     $"type={topicInfo.Type}",
                     $"callerid={topicInfo.CallerId}",
+                    latching ? "latching=1" : "latching=0",
                     $"message_definition={topicInfo.MessageDependencies}",
-                    latching ? "latching=1" : "latching=0"
                 };
 
                 TcpHeader = contents.AsReadOnly();
@@ -250,7 +250,7 @@ namespace Iviz.Roslib
             }
 
             string? errorMessage = ProcessRemoteHeader(fields);
-
+            
             await SendHeader(stream, latching, errorMessage);
 
             if (errorMessage != null)

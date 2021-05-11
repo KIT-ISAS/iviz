@@ -292,7 +292,7 @@ namespace Iviz.Roslib
         public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic, bool latchingEnabled = false)
             where T : IMessage
         {
-            var writer = new RosChannelWriter<T>() {LatchingEnabled = latchingEnabled};
+            var writer = new RosChannelWriter<T> {LatchingEnabled = latchingEnabled};
             await writer.StartAsync(client, topic);
             return writer;
         }
