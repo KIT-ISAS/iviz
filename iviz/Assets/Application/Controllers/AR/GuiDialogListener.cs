@@ -10,6 +10,7 @@ using Iviz.Ros;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
+using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
 
 namespace Iviz.Controllers
 {
@@ -164,11 +165,12 @@ namespace Iviz.Controllers
         }
 
 
-        [CanBeNull] public ARDialog AddDialog(Dialog msg)
+        [CanBeNull]
+        public ARDialog AddDialog(Dialog msg)
         {
             Handler(msg);
-            return msg.Action == ActionType.Add 
-                ? dialogs[msg.Id].Object 
+            return msg.Action == ActionType.Add
+                ? dialogs[msg.Id].Object
                 : null;
         }
 
@@ -224,6 +226,7 @@ namespace Iviz.Controllers
                         case DialogType.Notice:
                             info = Resource.Displays.ARDialogNotice;
                             dialog = ResourcePool.Rent<ARDialog>(info);
+                            dialog.SetIconMode(msg.Icon);
                             break;
                         case DialogType.Button:
                             info = Resource.Displays.ARButtonDialog;
@@ -302,7 +305,7 @@ namespace Iviz.Controllers
                 dialog.Object.Suspend();
                 ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
                 dialogs.Remove(pair.Key);
-                
+
                 OnDialogExpired(dialog.Object);
             }
         }
@@ -322,7 +325,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             entry.Object.Suspend();
             ResourcePool.Return(entry.Info, entry.Object.gameObject);
             dialogs.Remove(dialog.Id);
@@ -342,11 +345,10 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             entry.Object.Suspend();
             ResourcePool.Return(entry.Info, entry.Object.gameObject);
             dialogs.Remove(dialog.Id);
-
         }
 
         void OnDialogExpired(ARDialog dialog)
@@ -367,7 +369,7 @@ namespace Iviz.Controllers
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
                 FeedbackType = FeedbackType.AngleChanged,
-                Position = (0, 0, angleInDeg * Mathf.Deg2Rad)
+                Orientation = Quaternion.AngleAxis(angleInDeg * Mathf.Deg2Rad, Msgs.GeometryMsgs.Vector3.UnitZ)
             });
         }
 

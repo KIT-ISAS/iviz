@@ -268,7 +268,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5407188587744659705}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
@@ -417,7 +417,7 @@ Transform:
   m_GameObject: {fileID: 8214205372093170329}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.6, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 1}
   m_Children:
   - {fileID: 205409857698953685}
   - {fileID: 205409856505778579}
@@ -670,8 +670,14 @@ MonoBehaviour:
   button2: {fileID: 0}
   button3: {fileID: 0}
   connector: {fileID: 586438443107256636}
-  iconMeshRenderer: {fileID: 0}
-  icons: []
+  iconMeshRenderer: {fileID: 6358069038644550909}
+  icons:
+  - {fileID: 2800000, guid: e643106c904436a43b35141a0ace3d3e, type: 3}
+  - {fileID: 2800000, guid: 69b835ff43eea41efb5b9b5ed8330ae7, type: 3}
+  - {fileID: 2800000, guid: 598abc36ef46c4a5fa733169835d08ce, type: 3}
+  - {fileID: 2800000, guid: a0c751427a203774493ae3ee1a91bee6, type: 3}
+  - {fileID: 2800000, guid: a845f89bb5a7b43bab201c02881c5ebf, type: 3}
+  - {fileID: 2800000, guid: 1d854d40bed339c40bfea37c2b5c3e61, type: 3}
   menuButtons: []
   upButton: {fileID: 0}
   downButton: {fileID: 0}
@@ -685,6 +691,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6258707198505295089}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name
@@ -775,6 +786,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6258707198505295089}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name
@@ -865,6 +881,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6258707198505295089}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name
@@ -982,6 +1003,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6258707198505295089}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name
@@ -1077,6 +1103,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6258707198505295089}
     m_Modifications:
+    - target: {fileID: 791139870075898096, guid: c3b1afd1b19444c57b708ecc2b861ad8,
+        type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 791139870075898099, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_Name

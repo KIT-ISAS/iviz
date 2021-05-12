@@ -20,6 +20,9 @@ namespace Iviz.App.ARDialogs
 
         public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
 
+        public virtual Color MainColor { get; set; }
+        public virtual Color SecondaryColor { get; set; }
+        
         public int Layer { get; set; }
 
         public void Initialize()
