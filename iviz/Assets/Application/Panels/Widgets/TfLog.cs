@@ -245,7 +245,7 @@ namespace Iviz.App
         {
             if (SelectedFrame != null)
             {
-                TfListener.GuiInputModule.LookAt(SelectedFrame.UnityWorldPose.position);
+                ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.UnityWorldPose.position);
             }
 
             Close?.Invoke();
@@ -273,8 +273,8 @@ namespace Iviz.App
 
         public void OnLockPivotClicked()
         {
-            TfListener.GuiInputModule.OrbitCenterOverride =
-                TfListener.GuiInputModule.OrbitCenterOverride == SelectedFrame
+            ModuleListPanel.GuiInputModule.OrbitCenterOverride =
+                ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
                     ? null
                     : SelectedFrame;
 
@@ -293,7 +293,7 @@ namespace Iviz.App
             {
                 trailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
 
-                lockPivotText.text = TfListener.GuiInputModule.OrbitCenterOverride == SelectedFrame
+                lockPivotText.text = ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
                     ? "Lock Pivot\n<b>On</b>"
                     : "Lock Pivot\nOff";
             }
@@ -301,8 +301,8 @@ namespace Iviz.App
 
         public void OnLock1PVClicked()
         {
-            TfListener.GuiInputModule.CameraViewOverride =
-                TfListener.GuiInputModule.CameraViewOverride == SelectedFrame
+            ModuleListPanel.GuiInputModule.CameraViewOverride =
+                ModuleListPanel.GuiInputModule.CameraViewOverride == SelectedFrame
                     ? null
                     : SelectedFrame;
 

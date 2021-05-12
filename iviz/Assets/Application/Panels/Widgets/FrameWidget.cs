@@ -75,9 +75,9 @@ namespace Iviz.App
 
         public void OnGotoClick()
         {
-            if (Frame != null && TfListener.GuiInputModule != null)
+            if (Frame != null && ModuleListPanel.GuiInputModule != null)
             {
-                TfListener.GuiInputModule.LookAt(Frame.WorldPose.position);
+                ModuleListPanel.GuiInputModule.LookAt(Frame.WorldPose.position);
             }
         }
 

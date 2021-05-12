@@ -124,12 +124,7 @@ namespace Iviz.Controllers
         [NotNull] public Sender<TFMessage> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
 
-        [NotNull]
-        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.SafeNull() ??
-                                                       throw new InvalidOperationException(
-                                                           "GuiInputModule has not been started!");
-
-        [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
+       [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
         [NotNull] public static TfFrame RootFrame => Instance.rootFrame;
         [NotNull] public static TfFrame OriginFrame => Instance.originFrame;
         [NotNull] public static TfFrame UnityFrame => Instance.unityFrame;

@@ -17,7 +17,7 @@ namespace Iviz.App.ARDialogs
 
         void Awake()
         {
-            disc.PointerUp += () =>
+            disc.EndDragging += () =>
             {
                 dragBack = true;
                 Moved?.Invoke(this, Vector3.zero);

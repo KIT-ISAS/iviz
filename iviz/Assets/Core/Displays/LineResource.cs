@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -77,6 +78,38 @@ namespace Iviz.Displays
         /// <param name="lines">The line list.</param>
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
         public void Set([NotNull] NativeList<LineWithColor> lines, bool? overrideNeedsAlpha = null)
+        {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            lineBuffer.EnsureCapacity(lines.Length);
+
+            lineBuffer.Clear();
+            foreach (ref LineWithColor t in lines.Ref())
+            {
+                if (!IsElementValid(t))
+                {
+                    continue;
+                }
+
+                lineBuffer.Add(t.f);
+            }
+
+            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
+
+            if (UseCapsuleLines)
+            {
+                UpdateLineMesh();
+            }
+            else
+            {
+                UpdateLineBuffer();
+            }
+        }
+        
+        public void Set([NotNull] LineWithColor[] lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {

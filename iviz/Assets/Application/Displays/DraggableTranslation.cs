@@ -43,9 +43,9 @@ namespace Iviz.Displays
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (TfListener.GuiInputModule != null)
+            if (ModuleListPanel.GuiInputModule != null)
             {
-                TfListener.GuiInputModule.DraggedObject = this;
+                ModuleListPanel.GuiInputModule.DraggedObject = this;
             }
 
             PointerDown?.Invoke();
@@ -74,7 +74,12 @@ namespace Iviz.Displays
 
             return (t.x, t.z);
         }
-
+        
+        void IDraggable.OnPointerMove(in Ray pointerRay)
+        {
+            OnPointerMove(pointerRay);
+        }
+        
         void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = transform;

@@ -31,6 +31,7 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
+        public event Action EndDragging;
 
         void Awake()
         {
@@ -54,25 +55,30 @@ namespace Iviz.Displays
 
         void IDraggable.OnStartDragging()
         {
+            Debug.Log("Start dragging");
             needsStart = true;
         }
 
         void IDraggable.OnEndDragging()
         {
+            Debug.Log("End dragging");
+            EndDragging?.Invoke();
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
-            if (TfListener.GuiInputModule != null)
+            if (ModuleListPanel.GuiInputModule != null)
             {
-                TfListener.GuiInputModule.DraggedObject = this;
+                ModuleListPanel.GuiInputModule.DraggedObject = this;
             }
-
+            
+            Debug.Log("Pointer Down");
             PointerDown?.Invoke();
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
+            Debug.Log("Pointer Up");
             PointerUp?.Invoke();
         }
 
@@ -88,6 +94,11 @@ namespace Iviz.Displays
             Vector3 p = other.origin + t * other.direction;
 
             return (p, t);
+        }
+
+        void IDraggable.OnPointerMove(in Ray pointerRay)
+        {
+            OnPointerMove(pointerRay);
         }
 
         void OnPointerMove(in Ray pointerRay)

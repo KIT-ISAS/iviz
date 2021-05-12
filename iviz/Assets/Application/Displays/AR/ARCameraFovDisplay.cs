@@ -17,7 +17,7 @@ namespace Iviz.Displays
         void Start()
         {
             Color = Color.yellow;
-            
+
             if (resource == null)
             {
                 resource = ResourcePool.RentDisplay<LineResource>(transform);
@@ -51,7 +51,7 @@ namespace Iviz.Displays
                 }
             }
 
-            transform.SetLocalPose( ARController.RelativePoseToWorld(arCamera.transform.AsPose()));
+            transform.SetLocalPose(ARController.RelativePoseToWorld(arCamera.transform.AsPose()));
         }
 
         void ConstructCameraFrame(in XRCameraIntrinsics intrinsics)
@@ -69,7 +69,7 @@ namespace Iviz.Displays
             Vector3 d = new Vector3(minX, maxY, farClip);
             Vector3 o = Vector3.zero;
 
-            using (var lines = new NativeList<LineWithColor>
+            var lines = new[]
             {
                 new LineWithColor(o, a),
                 new LineWithColor(o, b),
@@ -79,12 +79,10 @@ namespace Iviz.Displays
                 new LineWithColor(b, c),
                 new LineWithColor(c, d),
                 new LineWithColor(d, a),
-            })
-            {
-                resource.Set(lines);
-                resource.Tint = Color.yellow;
-                resource.ElementScale = 0.005f;
-            }
+            };
+            resource.Set(lines);
+            resource.Tint = Color.yellow;
+            resource.ElementScale = 0.005f;
         }
 
         void OnDestroy()

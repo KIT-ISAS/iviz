@@ -8,8 +8,9 @@ namespace Iviz.Displays
     {
         [SerializeField] LineResource resource = null;
         protected override IDisplay Display => resource;
-        
+
         [SerializeField] float scale;
+
         public float Scale
         {
             get => scale;
@@ -21,6 +22,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] int angle;
+
         public int Angle
         {
             get => angle;
@@ -38,10 +40,12 @@ namespace Iviz.Displays
             {
                 rotation *= Quaternion.AngleAxis(90, Vector3.forward);
             }
+
             transform.localRotation = rotation;
         }
 
         [SerializeField] bool horizontal;
+
         public bool Horizontal
         {
             get => horizontal;
@@ -53,6 +57,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] Vector3 offset;
+
         public Vector3 Offset
         {
             get => offset;
@@ -75,16 +80,14 @@ namespace Iviz.Displays
             Vector3 c = new Vector3(-1, 0, -1) / 2;
             Vector3 d = new Vector3(1, 0, -1) / 2;
 
-            using (var list = new NativeList<LineWithColor>
+            var list = new[]
             {
                 new LineWithColor(a, b, Color.green),
                 new LineWithColor(b, c, Color.green),
                 new LineWithColor(c, d, Color.green),
                 new LineWithColor(d, a, Color.green),
-            })
-            {
-                resource.Set(list);
-            }
+            };
+            resource.Set(list);
         }
     }
 }
