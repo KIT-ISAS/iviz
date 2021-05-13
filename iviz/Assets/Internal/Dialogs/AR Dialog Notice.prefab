@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.315, y: -0.0021}
-  m_SizeDelta: {x: 42.18593, y: 17.597065}
+  m_AnchoredPosition: {x: -0.2701, y: -0.0021}
+  m_SizeDelta: {x: 36.27777, y: 20.034641}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!23 &6298192817679098082
 MeshRenderer:

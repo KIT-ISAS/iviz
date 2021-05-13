@@ -69,7 +69,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1237688265730554377}
   m_LocalRotation: {x: -0.0061706007, y: -0.7070799, z: 0.7070799, w: 0.0061706007}
-  m_LocalPosition: {x: -0.278, y: 0.058, z: -0.06}
+  m_LocalPosition: {x: -0.249, y: 0.057, z: -0.06}
   m_LocalScale: {x: 0.02, y: 0.008000001, z: 0.02}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -147,7 +147,7 @@ Transform:
   m_GameObject: {fileID: 4612992846181102573}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.85, y: 0.7, z: 1}
+  m_LocalScale: {x: 0.85, y: 0.8, z: 1}
   m_Children:
   - {fileID: 205409857698953685}
   - {fileID: 205409856505778579}
@@ -192,8 +192,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.14, y: 0.254}
-  m_SizeDelta: {x: 39.90632, y: 26.877365}
+  m_AnchoredPosition: {x: -0.098, y: 0.254}
+  m_SizeDelta: {x: 32.434067, y: 26.877365}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!23 &5088024186062030450
 MeshRenderer:
@@ -361,7 +361,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6742387053026600778}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.4, z: 0}
+  m_LocalPosition: {x: 0, y: -0.456, z: 0}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -686,7 +686,7 @@ MonoBehaviour:
   downButton: {fileID: 0}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   background: {fileID: 6014099797948075304}
-  socketPosition: {x: 0, y: -0.4, z: 0}
+  socketPosition: {x: 0, y: -0.45, z: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0

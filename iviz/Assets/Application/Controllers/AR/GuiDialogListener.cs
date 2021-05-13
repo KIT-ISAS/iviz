@@ -74,7 +74,7 @@ namespace Iviz.Controllers
             this.moduleData = moduleData;
             Config = new GuiDialogConfiguration();
 
-            GameThread.EverySecond += CheckDeadDialogs;
+            GameThread.EveryFrame += CheckDeadDialogs;
         }
 
         GuiDialogListener()
@@ -82,7 +82,7 @@ namespace Iviz.Controllers
             moduleData = null;
             Config = new GuiDialogConfiguration();
 
-            GameThread.EverySecond += CheckDeadDialogs;
+            GameThread.EveryFrame += CheckDeadDialogs;
         }
 
         void Handler(GuiArray msg)
@@ -319,16 +319,8 @@ namespace Iviz.Controllers
                 FeedbackType = FeedbackType.ButtonClick,
                 EntryId = buttonId,
             });
-
-
-            if (!dialogs.TryGetValue(dialog.Id, out var entry))
-            {
-                return;
-            }
-
-            entry.Object.Suspend();
-            ResourcePool.Return(entry.Info, entry.Object.gameObject);
-            dialogs.Remove(dialog.Id);
+            
+            MakeExpired(dialog.Id);
         }
 
         void OnDialogMenuEntryClicked(ARDialog dialog, int buttonId)
@@ -340,15 +332,16 @@ namespace Iviz.Controllers
                 FeedbackType = FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
             });
+            
+            MakeExpired(dialog.Id);
+        }
 
-            if (!dialogs.TryGetValue(dialog.Id, out var entry))
+        void MakeExpired(string dialogId)
+        {
+            if (dialogs.TryGetValue(dialogId, out var entry))
             {
-                return;
+                dialogs[dialogId] = new Data<ARDialog>(entry.Object, entry.Info, DateTime.MinValue);
             }
-
-            entry.Object.Suspend();
-            ResourcePool.Return(entry.Info, entry.Object.gameObject);
-            dialogs.Remove(dialog.Id);
         }
 
         void OnDialogExpired(ARDialog dialog)
@@ -387,9 +380,14 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-            GameThread.EverySecond -= CheckDeadDialogs;
+            GameThread.EveryFrame -= CheckDeadDialogs;
             DestroyAll(dialogs);
             DestroyAll(widgets);
+        }
+
+        public static void ClearResources()
+        {
+            defaultHandler = null;
         }
     }
 }

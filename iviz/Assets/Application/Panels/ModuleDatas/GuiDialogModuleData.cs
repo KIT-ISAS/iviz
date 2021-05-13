@@ -43,6 +43,11 @@ namespace Iviz.App
             dialogPanel.Frame.Owner = dialogListener;
             dialogPanel.Listener.Listener = dialogListener.Listener;
             dialogPanel.FeedbackSender.Set(dialogListener.FeedbackSender);
+            dialogPanel.CloseButton.Clicked += () =>
+            {
+                DataPanelManager.HideSelectedPanel();
+                ModuleListPanel.RemoveModule(this);
+            };
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

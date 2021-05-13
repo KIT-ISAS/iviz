@@ -38,10 +38,11 @@ namespace Iviz.App.ARDialogs
 
         [SerializeField] Vector3 socketPosition;
 
-        [CanBeNull] public string Id { get; internal set; }
+        [NotNull] public string Id { get; internal set; } = "";
 
         public event Action<ARDialog, int> ButtonClicked;
         public event Action<ARDialog, int> MenuEntryClicked;
+        public event Action<ARDialog> Expired;
 
         Material iconMaterial;
 
@@ -571,6 +572,9 @@ namespace Iviz.App.ARDialogs
             {
                 SuspendButton(menuButton);
             }
+            
+            Expired?.Invoke(this);
+            Expired = null;
         }
 
         static void SuspendButton([CanBeNull] ARButton button)

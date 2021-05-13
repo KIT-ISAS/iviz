@@ -78,8 +78,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.4, y: 0.2188}
-  m_SizeDelta: {x: 52.943047, y: 23.531937}
+  m_AnchoredPosition: {x: -0.4445, y: 0.2188}
+  m_SizeDelta: {x: 59.502907, y: 23.531937}
   m_Pivot: {x: 0.000000011175871, y: 1}
 --- !u!23 &68087673846926302
 MeshRenderer:
@@ -245,7 +245,7 @@ Transform:
   m_GameObject: {fileID: 4564037378393581946}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 0.8, z: 1}
+  m_LocalScale: {x: 1, y: 0.9, z: 1}
   m_Children:
   - {fileID: 205409857698953685}
   - {fileID: 205409856505778579}
@@ -282,7 +282,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5207782795852313499}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.46, z: 0}
+  m_LocalPosition: {x: 0, y: -0.5, z: 0}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_Children: []
   m_Father: {fileID: 9024825353754890542}
@@ -600,7 +600,7 @@ MonoBehaviour:
   downButton: {fileID: 0}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   background: {fileID: 6014099797948075304}
-  socketPosition: {x: 0, y: -0.46, z: 0}
+  socketPosition: {x: 0, y: -0.5, z: 0}
 --- !u!1001 &586438442386524082
 PrefabInstance:
   m_ObjectHideFlags: 0

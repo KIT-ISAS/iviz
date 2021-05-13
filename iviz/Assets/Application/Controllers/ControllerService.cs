@@ -241,7 +241,7 @@ namespace Iviz.Controllers
 
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out ModuleType resource))
             {
-                result.message = $"EE Type '{type}' is unsupported";
+                return ("", false, $"EE Type '{type}' is unsupported");
             }
 
             using (SemaphoreSlim signal = new SemaphoreSlim(0))
@@ -731,7 +731,10 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                srv.Response.Success = true;
+                if (string.IsNullOrEmpty(srv.Response.Message))
+                {
+                    srv.Response.Success = true;
+                }
             }
         }
 
@@ -740,22 +743,20 @@ namespace Iviz.Controllers
             string id = srv.Request.Id;
 
             ModuleData moduleData;
-            if (id.Length != 0 &&
-                (moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) != null)
+            if (id.Length != 0)
             {
-                if (moduleData.ModuleType != ModuleType.Robot)
+                moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
+                if (moduleData != null && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
                     srv.Response.Message =
                         $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                    return;
                 }
-                else
-                {
-                    srv.Response.Success = true;
-                    srv.Response.Message = "** Module already exists";
-                }
-
-                return;
+            }
+            else
+            {
+                moduleData = null;
             }
 
             using (SemaphoreSlim signal = new SemaphoreSlim(0))
@@ -764,10 +765,9 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        Logger.Info($"ControllerService: Creating robot");
-                        var newModuleData = ModuleListPanel.Instance.CreateModule(
-                            ModuleType.Robot,
-                            requestedId: id.Length != 0 ? id : null);
+                        //Logger.Info($"ControllerService: Creating robot");
+                        var newModuleData = moduleData ?? ModuleListPanel.Instance.CreateModule(
+                            ModuleType.Robot, requestedId: id.Length != 0 ? id : null);
                         srv.Response.Success = true;
                         ((SimpleRobotModuleData) newModuleData).UpdateConfiguration(
                             srv.Request.Configuration,
@@ -790,7 +790,10 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                srv.Response.Success = true;
+                if (string.IsNullOrEmpty(srv.Response.Message))
+                {
+                    srv.Response.Success = true;
+                }
             }
         }
 
@@ -802,7 +805,7 @@ namespace Iviz.Controllers
                 srv.Response.Message = "Dialog Id is null or empty";
                 return;
             }
-            
+
             if (Math.Abs(srv.Request.Dialog.Scale) < 1e-8)
             {
                 srv.Response.Success = false;
@@ -811,6 +814,7 @@ namespace Iviz.Controllers
             }
 
             Feedback feedback = new Feedback();
+            bool overrideExpired = false;
             using (SemaphoreSlim signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
@@ -820,51 +824,72 @@ namespace Iviz.Controllers
                         Logger.Info($"ControllerService: Creating dialog");
 
                         var dialogTimeSpan = srv.Request.Dialog.Lifetime.ToTimeSpan();
-                        if (dialogTimeSpan.TotalSeconds < 10)
+                        if (srv.Request.Dialog.Lifetime == default || dialogTimeSpan.TotalSeconds > 10)
                         {
                             srv.Request.Dialog.Lifetime = TimeSpan.FromSeconds(10);
                         }
-                            
+
                         var dialog = GuiDialogListener.DefaultHandler.AddDialog(srv.Request.Dialog);
-                        dialog.ButtonClicked += TriggerButton; 
-                        dialog.MenuEntryClicked += TriggerMenu; 
+                        if (dialog == null)
+                        {
+                            TryRelease(signal);
+                            return;
+                        }
+
+                        dialog.ButtonClicked += TriggerButton;
+                        dialog.MenuEntryClicked += TriggerMenu;
+                        dialog.Expired += Expired;
 
                         void TriggerButton(ARDialog mDialog, int buttonId)
                         {
                             mDialog.ButtonClicked -= TriggerButton;
                             mDialog.MenuEntryClicked -= TriggerMenu;
+                            mDialog.Expired -= Expired;
 
                             feedback.VizId = ConnectionManager.MyId ?? "";
                             feedback.Id = mDialog.Id ?? "";
                             feedback.FeedbackType = FeedbackType.ButtonClick;
                             feedback.EntryId = buttonId;
+                            overrideExpired = true;
+                            Debug.Log("Button " + buttonId);
 
-                            try
-                            {
-                                signal.Release();
-                            }
-                            catch (ObjectDisposedException)
-                            {
-                            }
+                            TryRelease(signal);
                         }
 
                         void TriggerMenu(ARDialog mDialog, int buttonId)
                         {
                             mDialog.ButtonClicked -= TriggerButton;
                             mDialog.MenuEntryClicked -= TriggerMenu;
-                            
+                            mDialog.Expired -= Expired;
+
                             feedback.VizId = ConnectionManager.MyId ?? "";
                             feedback.Id = mDialog.Id ?? "";
-                            feedback.FeedbackType = FeedbackType.ButtonClick;
+                            feedback.FeedbackType = FeedbackType.MenuEntryClick;
                             feedback.EntryId = buttonId;
-                            
-                            try
+                            overrideExpired = true;
+
+                            TryRelease(signal);
+                        }
+
+                        void Expired(ARDialog mDialog)
+                        {
+                            if (overrideExpired)
                             {
-                                signal.Release();
+                                return;
                             }
-                            catch (ObjectDisposedException)
-                            {
-                            }
+
+                            Debug.Log("Expired!");
+
+                            mDialog.ButtonClicked -= TriggerButton;
+                            mDialog.MenuEntryClicked -= TriggerMenu;
+                            mDialog.Expired -= Expired;
+
+                            feedback.VizId = ConnectionManager.MyId ?? "";
+                            feedback.Id = mDialog.Id ?? "";
+                            feedback.FeedbackType = FeedbackType.Expired;
+                            feedback.EntryId = 0;
+
+                            TryRelease(signal);
                         }
                     }
                     catch (Exception e)
@@ -881,8 +906,22 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                srv.Response.Success = true;
-                srv.Response.Feedback = feedback;
+                if (string.IsNullOrEmpty(srv.Response.Message))
+                {
+                    srv.Response.Success = true;
+                    srv.Response.Feedback = feedback;
+                }
+            }
+        }
+
+        static void TryRelease(SemaphoreSlim signal)
+        {
+            try
+            {
+                signal.Release();
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
     }

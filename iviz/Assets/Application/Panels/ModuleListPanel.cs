@@ -213,10 +213,8 @@ namespace Iviz.App
         void Start()
         {
             Resource.ClearResources();
+            GuiDialogListener.ClearResources();
 
-            Debug.Log(Widget.RosDefinition);
-            Debug.Log(GuiArray.RosDefinition);
-            
             parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
