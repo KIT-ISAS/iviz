@@ -111,6 +111,12 @@ namespace Iviz.App
             set => menuDialog = value;
         }
 
+        [NotNull]
+        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.SafeNull() ??
+                                                       throw new InvalidOperationException(
+                                                           "GuiInputModule has not been started!");
+
+        
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();

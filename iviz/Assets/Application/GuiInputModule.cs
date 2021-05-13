@@ -333,7 +333,7 @@ namespace Iviz.App
                     }
                 }
             }
-            else
+            else if (!Settings.IsVR)
             {
                 PointerDown = Input.GetMouseButton(1);
 
@@ -360,12 +360,15 @@ namespace Iviz.App
                 }
             }
 
-            if (!PointerDown)
+            if (!Settings.IsVR)
             {
-                DraggedObject = null;
-            }
+                if (!PointerDown)
+                {
+                    DraggedObject = null;
+                }
 
-            DraggedObject?.OnPointerMove(PointerPosition);
+                DraggedObject?.OnPointerMove(PointerPosition);
+            }
         }
 
         static bool IsPointerOnGui(Vector2 pointerPosition)

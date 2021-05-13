@@ -11,6 +11,7 @@ namespace Iviz.App
         event MovedAction Moved;
         bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
+        void OnPointerMove(in Ray ray);
         void OnStartDragging();
         void OnEndDragging();
         Transform TargetTransform { get; set; }

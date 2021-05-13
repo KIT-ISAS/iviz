@@ -111,6 +111,10 @@ namespace Iviz.Core
 #else
             false;
 #endif
+
+        public static bool IsVR { get; set; }
+        
+        
         static string persistentDataPath;
         static string savedFolder;
         static string simpleConfigurationPath;

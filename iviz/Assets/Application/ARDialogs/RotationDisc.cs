@@ -28,13 +28,19 @@ namespace Iviz.App.ARDialogs
 
         void Awake()
         {
-            disc.PointerUp += () =>
+            disc.EndDragging += () =>
             {
                 dragBack = true;
                 Moved?.Invoke(this, 0);
                 lines.Reset();
                 currentAngle = null;
             };
+            
+            disc.PointerDown += () =>
+            {
+                dragBack = false;
+            };
+            
 
             link.Color = Color.cyan.WithAlpha(0.8f);
             link.EmissiveColor = Color.cyan;

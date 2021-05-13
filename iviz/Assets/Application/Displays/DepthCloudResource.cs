@@ -132,6 +132,9 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
+            ColorImage = null;
+            DepthImage = null;
+        
             if (material != null)
             {
                 Destroy(material);
