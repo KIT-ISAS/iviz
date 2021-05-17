@@ -194,7 +194,7 @@ namespace Iviz.Roslib
 
             if (errorMessage != null)
             {
-                throw new RosRpcException($"Failed handshake: {errorMessage}");
+                throw new RosHandshakeException($"Failed handshake: {errorMessage}");
             }
         }
 

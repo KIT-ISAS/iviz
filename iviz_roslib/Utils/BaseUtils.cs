@@ -127,12 +127,18 @@ namespace Iviz.Roslib.Utils
 
         internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
         {
+            const int maxEntrySize = 1024 * 1024;
             int numRead = 0;
 
             List<string> contents = new();
             while (numRead < toRead)
             {
                 int length = BitConverter.ToInt32(readBuffer, numRead);
+                if (length is < 0 or > maxEntrySize)
+                {
+                    throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
+                }
+
                 numRead += 4;
                 string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
                 numRead += length;
@@ -195,8 +201,8 @@ namespace Iviz.Roslib.Utils
             return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort.ToString()}/");
         }
     }
-    
-    public sealed class ConcurrentSet<T> : IEnumerable<T> where T : notnull 
+
+    public sealed class ConcurrentSet<T> : IEnumerable<T> where T : notnull
     {
         readonly ConcurrentDictionary<T, object?> backend = new();
         public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
@@ -205,5 +211,5 @@ namespace Iviz.Roslib.Utils
         public bool Remove(T s) => backend.TryRemove(s, out _);
         public int Count => backend.Count;
         public void Clear() => backend.Clear();
-    }    
+    }
 }

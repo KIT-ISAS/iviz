@@ -80,8 +80,9 @@ namespace Iviz.Roslib
                 throw new RosHandshakeException(
                     "Partner sent error message: [" +
                     (index != -1
-                    ? responses[0].Substring(index + 1)
-                    : responses[0]) + "]");
+                        ? responses[0].Substring(index + 1)
+                        : responses[0])
+                    + "]");
             }
         }
 
