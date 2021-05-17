@@ -37,7 +37,7 @@ namespace Iviz.Displays
         [SerializeField] InteractionModeType interactionMode;
 
         DraggableTranslation draggableTranslation;
-        DraggableRotation draggableRotation;
+        DraggableRotation draggableRotation = null;
         DraggablePlane draggablePlane;
 
 

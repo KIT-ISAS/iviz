@@ -157,10 +157,7 @@ namespace Iviz.Core
             return p.ToUnity().Ros2Unity();
         }
 
-        public static Color ToUnityColor(this ColorRGBA p)
-        {
-            return new Color(p.R, p.G, p.B, p.A);
-        }
+        public static Color ToUnityColor(this ColorRGBA p) => new Color(p.R, p.G, p.B, p.A);
 
         public static ColorRGBA Sanitize(this ColorRGBA p)
         {
@@ -173,10 +170,7 @@ namespace Iviz.Core
             );
         }
 
-        static float SanitizeColor(float f)
-        {
-            return float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
-        }
+        static float SanitizeColor(float f) => float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ToUnityColor32(this ColorRGBA p)

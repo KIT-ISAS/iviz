@@ -14,9 +14,9 @@ namespace Iviz.App.ARDialogs
     [RequireComponent(typeof(BoxCollider))]
     public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] Texture2D[] icons;
-        [SerializeField] TextMesh text;
-        [SerializeField] MeshRenderer iconMeshRenderer;
+        [SerializeField] Texture2D[] icons = null;
+        [SerializeField] TextMesh text = null;
+        [SerializeField] MeshRenderer iconMeshRenderer = null;
 
         [SerializeField] Color backgroundColor = new Color(0, 0.2f, 0.5f);
         [SerializeField] MeshMarkerResource background = null;
@@ -111,7 +111,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             Clicked?.Invoke();
         }
@@ -121,7 +121,7 @@ namespace Iviz.App.ARDialogs
             Clicked = null;
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             frame = ResourcePool.RentDisplay<BoundaryFrame>(transform);
             frame.Color = Color.white.WithAlpha(0.5f);
@@ -129,13 +129,13 @@ namespace Iviz.App.ARDialogs
                 Vector3.Scale(colliderForFrame.size, colliderForFrame.transform.localScale));
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
         {
             frame.ReturnToPool();
             frame = null;
         }
 
-        public void OnDialogSuspended()
+        public void OnDialogDisabled()
         {
             if (frame != null)
             {

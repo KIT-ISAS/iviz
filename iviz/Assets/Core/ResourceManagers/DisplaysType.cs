@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.RosgraphMsgs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -65,6 +63,10 @@ namespace Iviz.Resources
         public Info<GameObject> ARButtonDialog { get; }
         public Info<GameObject> RotationDisc { get; }
         public Info<GameObject> SpringDisc { get; }
+        public Info<GameObject> SpringDisc3D { get; }
+        public Info<GameObject> TrajectoryDisc { get; }
+        public Info<GameObject> Tooltip { get; }
+        public Info<GameObject> TargetArea { get; }
 
         public DisplaysType()
         {
@@ -108,6 +110,10 @@ namespace Iviz.Resources
                 
                 RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc);
                 SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc);
+                SpringDisc3D = new Info<GameObject>(appAssetHolder.SpringDisc3D);
+                TrajectoryDisc = new Info<GameObject>(appAssetHolder.TrajectoryDisc);
+                Tooltip = new Info<GameObject>(appAssetHolder.Tooltip);
+                TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
 
                 resourceByType = CreateTypeDictionary(this);
             }

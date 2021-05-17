@@ -12,7 +12,7 @@ namespace Iviz.App.ARDialogs
         static Mesh baseMesh;
         float? currentAngle;
 
-        [SerializeField] Vector3 startPosition;
+        [SerializeField] Vector3 startPosition = Vector3.zero;
 
         protected override void Awake()
         {
@@ -79,7 +79,8 @@ namespace Iviz.App.ARDialogs
                                  * Quaternion.AngleAxis(-90, Vector3.left);
         }
 
-        static Mesh CreateMesh(Mesh sourceMesh)
+        [NotNull]
+        static Mesh CreateMesh([NotNull] Mesh sourceMesh)
         {
             var vertices = sourceMesh.vertices;
             var normals = sourceMesh.normals;

@@ -16,7 +16,7 @@ namespace Iviz.Displays
         protected bool HasBoxCollider => boxCollider != null;
 
         Transform mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         [NotNull]
         protected BoxCollider BoxCollider

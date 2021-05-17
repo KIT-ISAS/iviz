@@ -26,8 +26,9 @@ namespace Iviz.App.ARDialogs
         
         public event Action<RotationDisc, float> Moved;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             disc.EndDragging += () =>
             {
                 dragBack = true;
@@ -50,11 +51,13 @@ namespace Iviz.App.ARDialogs
             ringDown.EmissiveColor = Color.cyan;
             lines = ResourcePool.RentDisplay<LineResource>(transform);
             lines.ElementScale = 0.02f;
-            lines.EnableCapsuleLines = false;
+            lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
         }
 
-        void LateUpdate()
+        protected override void Update()
         {
+            base.Update();;
+
             var discPosition = disc.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
             if (Vector3.Distance(discPosition, DiscRestPosition) < 0.005f)
@@ -120,9 +123,9 @@ namespace Iviz.App.ARDialogs
             Moved?.Invoke(this, openingAngle);
         }
 
-        public void SplitForRecycle()
+        void IRecyclable.SplitForRecycle()
         {
-            ResourcePool.ReturnDisplay(lines);
+            lines.ReturnToPool();
         }
 
         public override void Suspend()

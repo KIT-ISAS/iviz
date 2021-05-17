@@ -1,53 +1,138 @@
+using System;
+using System.Collections.Generic;
+using Iviz.App.ARDialogs;
+using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Application.ARDialogs
 {
-    public class TrajectoryDisc : ARWidget
+    public class TrajectoryDisc : ARWidget, IRecyclable
     {
-        [SerializeField] DraggablePlane disc = null;
-        float? distanceConstraint;
+        [SerializeField] ARButton button = null;
+        [SerializeField] float period = 0.1f;
 
-        void Awake()
+        BillboardDiscDisplay disc;
+
+        float? startTime;
+        readonly List<Vector3> positions = new List<Vector3>();
+        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+
+        [CanBeNull] LineResource lines;
+        [NotNull] LineResource Lines => (lines != null) ? lines : lines = ResourcePool.RentDisplay<LineResource>();
+
+        public event Action<TrajectoryDisc, Vector3[], float> Moved;
+
+        protected override void Awake()
         {
-            disc.PointerUp += OnPointerUp;
-            disc.PointerDown += OnPointerDown;
+            base.Awake();
+            disc = GetComponent<BillboardDiscDisplay>();
+            disc.PointerDown += StartWriting;
+            disc.EndDragging += StopWriting;
+
+            button.Clicked += SendTrajectory;
+
+            Lines.ElementScale = 0.02f;
+            Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
+
+            button.Icon = ARButton.ButtonIcon.Ok;
+            button.Caption = "Send!";
+            button.Visible = false;
+            button.Transform.parent = Transform.parent;
         }
 
-        void OnPointerDown()
+        void StartWriting()
         {
-            distanceConstraint = Settings.MainCameraTransform.InverseTransformPoint(Transform.position).z; 
-        }
-        
-        void OnPointerUp()
-        {
-            distanceConstraint = null;
+            startTime = Time.time;
+            positions.Clear();
+            Lines.Reset();
+            button.Visible = false;
+            button.OnDialogDisabled();
         }
 
-
-        void Update()
+        void StopWriting()
         {
-            var localOrientation = Vector3.up;
-            (float upX, _, float upZ) = -Settings.MainCameraTransform.forward;
-            Vector3 up = new Vector3(upX, 0, upZ).normalized;
-            
-            Vector3 right = Vector3.Cross(up, Vector3.right);
-            if (right.sqrMagnitude < 1e-6)
+            startTime = null;
+            if (positions.Count > 2)
             {
-                right = Vector3.Cross(up, Vector3.forward);
+                button.Visible = true;
+                button.Transform.SetLocalPose(Transform.AsLocalPose().Multiply(BaseButtonPose));
+            }
+        }
+
+        void SendTrajectory()
+        {
+            Debug.Log($"{this}: Sending trajectory");
+            Moved?.Invoke(this, positions.ToArray(), period);
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            Lines.Transform.parent = Transform.parent;
+            button.Transform.parent = Transform.parent;
+        }
+
+        static readonly Pose BaseButtonPose = new Pose(
+            new Vector3(-0.5f, 0, -0.5f),
+            Quaternion.AngleAxis(-90, Vector3.right) * Quaternion.AngleAxis(180, Vector3.up)
+        );
+
+        protected override void Update()
+        {
+            base.Update();;
+            if (button.Visible)
+            {
+                button.Transform.SetLocalPose(Transform.AsLocalPose().Multiply(BaseButtonPose));
             }
 
-            if (distanceConstraint != null)
+            if (startTime == null)
             {
-                var discPosInCamera = Settings.MainCameraTransform.InverseTransformPoint(disc.Transform.position);
-                discPosInCamera.z = distanceConstraint.Value;
-                disc.Transform.position = Settings.MainCameraTransform.TransformPoint(discPosInCamera);
+                return;
             }
 
-            disc.Transform.rotation = Quaternion.LookRotation(right.normalized, up);
-            disc.Normal = localOrientation;
+            float time = Time.time;
+            float expectedTime = startTime.Value + positions.Count * period;
+            Vector3 currentPosition = Transform.localPosition;
+            if (time < expectedTime && (positions.Count != 0 &&
+                                        Vector3.Distance(positions[positions.Count - 1], currentPosition) < 0.1f))
+            {
+                return;
+            }
+
+            positions.Add(currentPosition);
+            lineBuffer.Clear();
+            for (int i = 0; i < positions.Count - 1; i++)
+            {
+                lineBuffer.Add(new LineWithColor(positions[i], positions[i + 1]));
+            }
+
+            Lines.Set(lineBuffer);
         }
-        
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            Moved = null;
+            Lines.Reset();
+            lineBuffer.Clear();
+            startTime = null;
+            button.OnDialogDisabled();
+            button.Transform.parent = Transform;
+            Lines.Transform.parent = Transform;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            lineBuffer.Dispose();
+        }
+
+        void IRecyclable.SplitForRecycle()
+        {
+            lines.ReturnToPool();
+        }
     }
 }

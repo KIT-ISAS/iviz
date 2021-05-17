@@ -9,7 +9,7 @@ namespace Iviz.App.ARDialogs
     public sealed class RingDisplay : MeshMarkerResource
     {
         static Mesh baseMesh;
-        [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(null, 0.9f, 1.1f));
+        [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.9f, 1.1f));
 
         protected override void Awake()
         {
@@ -17,9 +17,10 @@ namespace Iviz.App.ARDialogs
             Mesh = BaseMesh;
         }
 
-        static Mesh CreateMesh([CanBeNull] Mesh inputMesh, float r0, float r1)
+        [NotNull]
+        static Mesh CreateMesh(float r0, float r1)
         {
-            Mesh mesh = inputMesh != null ? inputMesh : new Mesh();
+            Mesh mesh = new Mesh();
             List<Vector3> vertices = new List<Vector3>();
             List<int> indices = new List<int>();
             List<Color> colors = new List<Color>();

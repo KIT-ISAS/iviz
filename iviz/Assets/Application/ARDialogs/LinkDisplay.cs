@@ -17,6 +17,7 @@ namespace Iviz.App.ARDialogs
             Mesh = BaseLinkMesh;            
         }
 
+        [NotNull]
         static Mesh CreateMesh()
         {
             Color[] colors = new Color[24];

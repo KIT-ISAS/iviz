@@ -65,6 +65,8 @@ Shader "iviz/MultiplyMesh"
 #ifdef USING_STEREO_MATRICES
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 #endif
+
+        	v.normal = normalize(mul(v.normal, (float3x3)_WorldToLocal));
         	
 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
             v.vertex *= _LocalScale;
@@ -91,6 +93,8 @@ Shader "iviz/MultiplyMesh"
             v.vertex.xyz += _Points[instanceID].pos;
             v.vertex = mul(_LocalToWorld, v.vertex);
             v.vertex -= _BoundaryCenter;
+
+        	
 
 	#if USE_TEXTURE || USE_TEXTURE_SCALE || USE_TEXTURE_SCALE_ALL
 			o.color = tex2Dlod(_MainTex, float4(intensity * _IntensityCoeff + _IntensityAdd, _AtlasRow, 0, 0));

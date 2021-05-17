@@ -42,6 +42,10 @@ namespace Iviz.Displays
 
         public GameObject RotationDisc;
         public GameObject SpringDisc;
+        public GameObject SpringDisc3D;
+        public GameObject TrajectoryDisc;
+        public GameObject Tooltip;
+        public GameObject TargetArea;
         
         public Material LineConnectorMaterial;
         public Material TextMaterial;

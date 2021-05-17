@@ -851,7 +851,6 @@ namespace Iviz.Controllers
                             feedback.FeedbackType = FeedbackType.ButtonClick;
                             feedback.EntryId = buttonId;
                             overrideExpired = true;
-                            Debug.Log("Button " + buttonId);
 
                             TryRelease(signal);
                         }
@@ -877,8 +876,6 @@ namespace Iviz.Controllers
                             {
                                 return;
                             }
-
-                            Debug.Log("Expired!");
 
                             mDialog.ButtonClicked -= TriggerButton;
                             mDialog.MenuEntryClicked -= TriggerMenu;

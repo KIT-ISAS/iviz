@@ -2,6 +2,7 @@ using System;
 using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -18,10 +19,10 @@ namespace Iviz.Displays
             set => normal = value;
         }
 
-        [SerializeField] Transform sourceTransform;
+        [SerializeField] Transform sourceTransform = null;
         
         Transform mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         bool needsStart;
         Vector3 startIntersection;
@@ -55,13 +56,11 @@ namespace Iviz.Displays
 
         void IDraggable.OnStartDragging()
         {
-            Debug.Log("Start dragging");
             needsStart = true;
         }
 
         void IDraggable.OnEndDragging()
         {
-            Debug.Log("End dragging");
             EndDragging?.Invoke();
         }
 
@@ -72,13 +71,11 @@ namespace Iviz.Displays
                 ModuleListPanel.GuiInputModule.DraggedObject = this;
             }
             
-            Debug.Log("Pointer Down");
             PointerDown?.Invoke();
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
-            Debug.Log("Pointer Up");
             PointerUp?.Invoke();
         }
 

@@ -49,7 +49,8 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        public static T Rent<T>([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null, bool enable = true)
+        public static T Rent<T>([NotNull] Info<GameObject> resource, [CanBeNull] Transform parent = null,
+            bool enable = true)
             where T : MonoBehaviour
         {
             if (resource == null)
@@ -59,7 +60,7 @@ namespace Iviz.Displays
 
             return Rent(resource, parent, enable).GetComponent<T>();
         }
-        
+
         [NotNull]
         public static T RentDisplay<T>([CanBeNull] Transform parent = null) where T : MonoBehaviour, IDisplay
         {
@@ -146,8 +147,12 @@ namespace Iviz.Displays
 
             foreach (var deadObject in objectsToDestroy)
             {
-                var recyclable = deadObject.GetComponent<IRecyclable>();
-                recyclable?.SplitForRecycle();
+                var recyclables = deadObject.GetComponents<IRecyclable>();
+                foreach (var recyclable in recyclables)
+                {
+                    recyclable.SplitForRecycle();
+                }
+
                 Destroy(deadObject);
             }
         }

@@ -1,5 +1,6 @@
 using System;
 using Iviz.Displays;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,21 +8,21 @@ namespace Iviz.App
 {
     public class ItemButton : MonoBehaviour
     {
-        [SerializeField] Button button;
-        [SerializeField] Text text;
-        RectTransform ButtonTransform => (RectTransform) transform;
-        
+        [SerializeField] Button button = null;
+        [SerializeField] Text text = null;
+        [NotNull] RectTransform ButtonTransform => (RectTransform) transform;
+
         public event Action<int> Clicked;
 
         public void RaiseClicked(int subIndex)
         {
             Clicked?.Invoke(subIndex);
         }
-        
-       public Vector2 AnchoredPosition
+
+        public Vector2 AnchoredPosition
         {
             get => ButtonTransform.anchoredPosition;
-            set => ButtonTransform.anchoredPosition = value; 
+            set => ButtonTransform.anchoredPosition = value;
         }
 
         public bool Active
@@ -29,13 +30,13 @@ namespace Iviz.App
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
-        
+
         public string Text
         {
             get => text.text;
             set => text.text = value;
-        }        
-        
+        }
+
         public bool Interactable
         {
             get => button.interactable;
@@ -53,7 +54,7 @@ namespace Iviz.App
             get => ButtonTransform.sizeDelta.y;
             set => ButtonTransform.sizeDelta = new Vector2(ButtonTransform.sizeDelta.x, value);
         }
-        
+
         public void Suspend()
         {
             Clicked = null;

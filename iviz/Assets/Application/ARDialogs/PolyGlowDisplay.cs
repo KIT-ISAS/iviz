@@ -30,6 +30,7 @@ namespace Iviz.App.ARDialogs
             Mesh = CircleMesh;
         }
 
+        [NotNull]
         static Mesh CreateMesh(int numVertices)
         {
             List<Vector3> vertices = new List<Vector3>();

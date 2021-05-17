@@ -9,8 +9,8 @@ namespace Iviz.App.ARDialogs
     public class ARTfFrame : MarkerResource
     {
         [SerializeField] Transform pivotTransform;
-        [SerializeField] TMP_Text text;
-        [SerializeField] AxisFrameResource axisFrame;
+        [SerializeField] TMP_Text text = null;
+        [SerializeField] AxisFrameResource axisFrame = null;
 
         public string Caption
         {

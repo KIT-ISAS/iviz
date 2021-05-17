@@ -12,7 +12,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="PointCloudPanelContents"/> 
     /// </summary>
-
     public sealed class PointCloudModuleData : ListenerModuleData
     {
         [NotNull] readonly PointCloudListener listener;
@@ -26,7 +25,7 @@ namespace Iviz.App
 
 
         public PointCloudModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+            base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(ModuleType.PointCloud);
             listener = new PointCloudListener(this);
@@ -36,8 +35,9 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (PointCloudConfiguration)constructor.Configuration;
+                listener.Config = (PointCloudConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -49,7 +49,7 @@ namespace Iviz.App
 
             panel.NumPoints.Label = BuildDescriptionString();
 
-            panel.Colormap.Index = (int)listener.Colormap;
+            panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.IntensityChannel.Options = listener.FieldNames;
             try
@@ -69,19 +69,11 @@ namespace Iviz.App
             panel.MinIntensity.Interactable = listener.OverrideMinMax;
             panel.MaxIntensity.Interactable = listener.OverrideMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
+            panel.PointCloudType.Index = (int) listener.PointCloudType;
 
-            panel.PointSize.ValueChanged += f =>
-            {
-                listener.PointSize = f;
-            };
-            panel.IntensityChannel.ValueChanged += (_, s) =>
-            {
-                listener.IntensityChannel = s;
-            };
-            panel.Colormap.ValueChanged += (i, _) =>
-            {
-                listener.Colormap = (ColormapId)i;
-            };
+            panel.PointSize.ValueChanged += f => listener.PointSize = f;
+            panel.IntensityChannel.ValueChanged += (_, s) => listener.IntensityChannel = s;
+            panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -99,17 +91,12 @@ namespace Iviz.App
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
-            panel.FlipMinMax.ValueChanged += f =>
+            panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f;
+            panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
+            panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
+            panel.PointCloudType.ValueChanged += (f, _) =>
             {
-                listener.FlipMinMax = f;
-            };
-            panel.MinIntensity.ValueChanged += f =>
-            {
-                listener.MinIntensity = f;
-            };
-            panel.MaxIntensity.ValueChanged += f =>
-            {
-                listener.MaxIntensity = f;
+                listener.PointCloudType = (PointCloudType) f;
             };
         }
 
@@ -127,20 +114,20 @@ namespace Iviz.App
         {
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            return 
+            return
                 $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
                 (listener.Size == 0 ? "Empty" :
                     listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
                     "Color");
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<PointCloudConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(PointCloudConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -168,12 +155,12 @@ namespace Iviz.App
                         break;
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
+
             ResetPanel();
-        }        
+        }
 
         public override void AddToState(StateConfiguration config)
         {

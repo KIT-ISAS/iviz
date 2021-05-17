@@ -85,13 +85,11 @@ namespace Iviz.App.ARDialogs
 
         public void SplitForRecycle()
         {
-            lines.Suspend();
-            ResourcePool.ReturnDisplay(lines);
+            lines.ReturnToPool();
 
             foreach (var sphere in spheres)
             {
-                sphere.Suspend();
-                ResourcePool.Return(Resource.Displays.Sphere, sphere.gameObject);
+                sphere.ReturnToPool(Resource.Displays.Sphere);
             }
         }
 

@@ -11,7 +11,7 @@ namespace Iviz.Displays
         [CanBeNull] protected abstract IDisplay Display { get; }
 
         Transform mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         
         public string Name
         {

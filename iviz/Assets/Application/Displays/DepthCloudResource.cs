@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -20,6 +21,15 @@ namespace Iviz.Displays
         static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         static readonly int PScale = Shader.PropertyToID("_Scale");
+
+        static readonly Vector2[] BaseQuad =
+        {
+            new Vector2(0.5f, 0.5f),
+            new Vector2(0.5f, -0.5f),
+            new Vector2(-0.5f, -0.5f),
+            new Vector2(-0.5f, 0.5f)
+        };
+
         
         [SerializeField] Material material;
         [SerializeField] float elementScale = 1;
@@ -32,7 +42,7 @@ namespace Iviz.Displays
         ComputeBuffer pointComputeBuffer;
         ComputeBuffer quadComputeBuffer;
 
-        Vector2[] uvs = new Vector2[0];
+        Vector2[] uvs = Array.Empty<Vector2>();
 
         /// <summary>
         /// Size multiplier for points
@@ -130,20 +140,6 @@ namespace Iviz.Displays
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
         }
 
-        void OnDestroy()
-        {
-            ColorImage = null;
-            DepthImage = null;
-        
-            if (material != null)
-            {
-                Destroy(material);
-            }
-
-            pointComputeBuffer?.Release();
-            quadComputeBuffer?.Release();
-        }
-
         void OnApplicationFocus(bool hasFocus)
         {
             if (!hasFocus)
@@ -175,23 +171,16 @@ namespace Iviz.Displays
 
         void UpdateQuadComputeBuffer()
         {
-            Vector2[] quad =
-            {
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, -0.5f),
-                new Vector2(-0.5f, -0.5f),
-                new Vector2(-0.5f, 0.5f)
-            };
             if (quadComputeBuffer == null)
             {
                 quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
                 material.SetBuffer(PQuad, quadComputeBuffer);
             }
 
-            quadComputeBuffer.SetData(quad, 0, 0, 4);
+            quadComputeBuffer.SetData(BaseQuad, 0, 0, 4);
         }
 
-        void UpdateColorTexture(Texture2D texture)
+        void UpdateColorTexture([CanBeNull] Texture2D texture)
         {
             material.SetTexture(PColor, texture);
 
@@ -205,7 +194,7 @@ namespace Iviz.Displays
             }
         }
 
-        void UpdateDepthTexture(Texture2D texture)
+        void UpdateDepthTexture([CanBeNull] Texture2D texture)
         {
             material.SetTexture(PDepth, texture);
 
@@ -213,16 +202,16 @@ namespace Iviz.Displays
             UpdatePosValues(texture);
         }
 
-        void UpdatePointComputeBuffers(Texture2D sourceTexture)
+        void UpdatePointComputeBuffers([CanBeNull] Texture2D sourceTexture)
         {
-            if (sourceTexture is null || sourceTexture.width == width && sourceTexture.height == height)
+            if (sourceTexture == null || sourceTexture.width == width && sourceTexture.height == height)
             {
                 return;
             }
 
             width = sourceTexture.width;
             height = sourceTexture.height;
-            uvs = new Vector2[width * height];
+            uvs = new Vector2[width * height]; // mostly > 1 MB, not worth renting
             float invWidth = 1.0f / width;
             float invHeight = 1.0f / height;
             int off = 0;
@@ -240,7 +229,7 @@ namespace Iviz.Displays
             material.SetBuffer(PPoints, pointComputeBuffer);
         }
 
-        void UpdateColormap(Texture2D texture)
+        void UpdateColormap([CanBeNull] Texture2D texture)
         {
             material.SetTexture(PIntensity, texture);
         }
@@ -251,7 +240,7 @@ namespace Iviz.Displays
             material.SetFloat(PIntensityAdd, intensityAdd);
         }
 
-        void UpdatePosValues(Texture2D texture)
+        void UpdatePosValues([CanBeNull] Texture2D texture)
         {
             if (texture is null)
             {
@@ -279,34 +268,35 @@ namespace Iviz.Displays
         {
             base.Suspend();
 
-            if (colorImage != null)
-            {
-                colorImage.TextureChanged -= UpdateColorTexture;
-                colorImage = null;
-            }
+            ColorImage = null;
+            DepthImage = null;
 
-            if (depthImage != null)
-            {
-                depthImage.TextureChanged -= UpdateDepthTexture;
-                depthImage.ColormapChanged -= UpdateColormap;
-                depthImage = null;
-            }
+            pointComputeBuffer?.Release();
+            pointComputeBuffer = null;
 
-            if (pointComputeBuffer != null)
-            {
-                pointComputeBuffer.Release();
-                pointComputeBuffer = null;
-            }
-
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-                quadComputeBuffer = null;
-            }
+            quadComputeBuffer?.Release();
+            quadComputeBuffer = null;
+            
+            material.SetTexture(PColor, null);
+            material.SetTexture(PDepth, null);
 
             width = 0;
             height = 0;
             uvs = Array.Empty<Vector2>();
+        }
+        
+        void OnDestroy()
+        {
+            ColorImage = null;
+            DepthImage = null;
+
+            pointComputeBuffer?.Release();
+            quadComputeBuffer?.Release();
+
+            if (material != null)
+            {
+                Destroy(material);
+            }
         }
     }
 }

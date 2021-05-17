@@ -6,26 +6,27 @@ using UnityEngine;
 namespace Iviz.App.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc3D : ARWidget
+    public sealed class SpringDisc3D : ARWidget, IRecyclable
     {
-        [SerializeField] LineResource line = null;
         [SerializeField] DraggablePlane disc = null;
         [SerializeField] float linkWidth = 0.2f;
+        LineResource line;
         bool dragBack;
         
         readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
 
         public event Action<SpringDisc3D, Vector3> Moved;
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             disc.PointerUp += () =>
             {
                 dragBack = true;
                 Moved?.Invoke(this, Vector3.zero);
             };
 
-            disc.PointerDown += () => { dragBack = false; };
+            disc.PointerDown += () => dragBack = false;
 
             line = ResourcePool.RentDisplay<LineResource>(transform);
             line.Tint = Color.cyan.WithAlpha(0.8f);
@@ -34,8 +35,10 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
         }
 
-        void LateUpdate()
+        protected override void Update()
         {
+            base.Update();;
+
             var discPosition = disc.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
             if (discDistance < 0.005f)
@@ -76,6 +79,11 @@ namespace Iviz.App.ARDialogs
         {
             base.OnDestroy();
             lineBuffer.Dispose();
+        }
+        
+        void IRecyclable.SplitForRecycle()
+        {
+            line.ReturnToPool();
         }
     }
 }

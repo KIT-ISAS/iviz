@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using UnityEditorInternal;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
@@ -28,6 +29,7 @@ namespace Iviz.Controllers
         readonly List<string> fieldNames = new List<string> {"x", "y", "z"};
         readonly FrameNode node;
         readonly PointListResource pointCloud;
+        readonly MeshListResource meshCloud;
         readonly NativeList<float4> pointBuffer = new NativeList<float4>();
 
         bool disposed;
@@ -50,6 +52,8 @@ namespace Iviz.Controllers
             FieldNames = new ReadOnlyCollection<string>(fieldNames);
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
+            meshCloud.CastShadows = false;
             Config = new PointCloudConfiguration();
         }
 
@@ -75,6 +79,7 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
+                PointCloudType = value.PointCloudType;
             }
         }
 
@@ -85,6 +90,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 pointCloud.Visible = value;
+                meshCloud.Visible = value;
             }
         }
 
@@ -101,6 +107,7 @@ namespace Iviz.Controllers
             {
                 config.PointSize = value;
                 pointCloud.ElementScale = value;
+                meshCloud.ElementScale = value;
             }
         }
 
@@ -111,6 +118,7 @@ namespace Iviz.Controllers
             {
                 config.Colormap = value;
                 pointCloud.Colormap = value;
+                meshCloud.Colormap = value;
             }
         }
 
@@ -124,6 +132,10 @@ namespace Iviz.Controllers
                 pointCloud.IntensityBounds = value
                     ? new Vector2(MinIntensity, MaxIntensity)
                     : MeasuredIntensityBounds;
+                meshCloud.OverrideIntensityBounds = value;
+                meshCloud.IntensityBounds = value
+                    ? new Vector2(MinIntensity, MaxIntensity)
+                    : MeasuredIntensityBounds;
             }
         }
 
@@ -134,6 +146,7 @@ namespace Iviz.Controllers
             {
                 config.FlipMinMax = value;
                 pointCloud.FlipMinMax = value;
+                meshCloud.FlipMinMax = value;
             }
         }
 
@@ -147,6 +160,7 @@ namespace Iviz.Controllers
                 if (config.OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    meshCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
                 }
             }
         }
@@ -160,6 +174,33 @@ namespace Iviz.Controllers
                 if (config.OverrideMinMax)
                 {
                     pointCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    meshCloud.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
+            }
+        }
+
+        public PointCloudType PointCloudType
+        {
+            get => config.PointCloudType;
+            set
+            {
+                if (config.PointCloudType == value)
+                {
+                    return;
+                }
+
+                config.PointCloudType = value;
+                pointCloud.Reset();
+                meshCloud.Reset();
+
+                switch (value)
+                {
+                    case PointCloudType.Cubes:
+                        meshCloud.MeshResource = Resource.Displays.Cube;
+                        break;
+                    case PointCloudType.Spheres:
+                        meshCloud.MeshResource = Resource.Displays.Sphere;
+                        break;
                 }
             }
         }
@@ -321,8 +362,19 @@ namespace Iviz.Controllers
                         node.AttachTo(header);
 
                         Size = numPoints;
-                        pointCloud.UseColormap = !rgbaHint;
-                        pointCloud.SetDirect(pointBuffer.AsArray());
+
+                        if (PointCloudType == PointCloudType.Points)
+                        {
+                            pointCloud.UseColormap = !rgbaHint;
+                            pointCloud.SetDirect(pointBuffer.AsArray());
+                            meshCloud.Reset();
+                        }
+                        else
+                        {
+                            meshCloud.UseColormap = !rgbaHint;
+                            meshCloud.SetDirect(pointBuffer.AsArray());
+                            pointCloud.Reset();
+                        }
                     }
                     finally
                     {
@@ -607,10 +659,8 @@ namespace Iviz.Controllers
             base.StopController();
             disposed = true;
 
-            if (pointCloud != null)
-            {
-                pointCloud.ReturnToPool();
-            }
+            pointCloud.ReturnToPool();
+            meshCloud.ReturnToPool();
 
             node.Stop();
             Object.Destroy(node.gameObject);

@@ -24,6 +24,7 @@ namespace Iviz.App
         public NumberInputFieldWidget MinIntensity { get; private set; }
         public NumberInputFieldWidget MaxIntensity { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
+        public DropdownWidget PointCloudType { get; private set; }
 
 
         void Awake()
@@ -45,6 +46,8 @@ namespace Iviz.App
             MinIntensity = p.AddNumberInputField("Colormap Min");
             MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
+            PointCloudType = p.AddDropdown("Show as").SetOptions(new[] {"Points", "Cubes", "Spheres"});
+            
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

@@ -21,6 +21,13 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class LineResource : MarkerResourceWithColormap
     {
+        public enum LineRenderType
+        {
+            Auto,
+            AlwaysCapsule,
+            AlwaysBillboard,
+        }
+
         static int helperForMaxSegmentsForMesh = -1;
 
         static int MaxSegmentsForMesh => helperForMaxSegmentsForMesh != -1
@@ -32,15 +39,15 @@ namespace Iviz.Displays
 
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
-        
+
         readonly NativeList<float4x2> lineBuffer = new NativeList<float4x2>();
-        
+
         [CanBeNull] ComputeBuffer lineComputeBuffer;
         [CanBeNull] Mesh mesh;
         [CanBeNull] MeshRenderer meshRenderer;
 
         bool linesNeedAlpha;
-        
+
         [NotNull] Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
 
         [NotNull]
@@ -63,10 +70,11 @@ namespace Iviz.Displays
 
         int Size => lineBuffer.Length;
 
-        bool UseCapsuleLines => EnableCapsuleLines && Size <= MaxSegmentsForMesh;
+        bool UseCapsuleLines => (RenderType == LineRenderType.Auto && Size <= MaxSegmentsForMesh) ||
+                                (RenderType == LineRenderType.AlwaysCapsule);
 
-        public bool EnableCapsuleLines { get; set; } = true;
-        
+        public LineRenderType RenderType { get; set; }
+
         public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
                                                                  (t.A - t.B).MaxAbsCoeff() > MinLineWidth &&
                                                                  t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
@@ -108,7 +116,7 @@ namespace Iviz.Displays
                 UpdateLineBuffer();
             }
         }
-        
+
         public void Set([NotNull] LineWithColor[] lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
@@ -325,7 +333,7 @@ namespace Iviz.Displays
                 MeshRenderer.enabled = false;
                 return;
             }
-            
+
             CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, Mesh);
 
             CalculateBounds();
@@ -362,7 +370,7 @@ namespace Iviz.Displays
             MinMaxJob.CalculateBounds(lineBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
-            
+
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
             {

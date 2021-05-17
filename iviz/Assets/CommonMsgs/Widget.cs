@@ -10,6 +10,10 @@ namespace Iviz.Msgs.IvizCommonMsgs
     {
         RotationDisc,
         SpringDisc,
+        SpringDisc3D,
+        TrajectoryDisc,
+        Tooltip,
+        TargetArea,
     }
     
     public sealed class Widget : RosMessageWrapper<Widget>
@@ -26,5 +30,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public ColorRGBA SecondaryColor { get; set; } = ColorRGBA.Blue;
         [DataMember] public double Scale { get; set; } = 1;
         [DataMember] public Pose Pose { get; set; } = Pose.Identity;
+        [DataMember] public string Caption { get; set; } = "";
     }
 }

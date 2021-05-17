@@ -101,6 +101,13 @@ MonoBehaviour:
     type: 3}
   SpringDisc: {fileID: 813713276496453762, guid: 2d48445f3f4c3481abdb17e9fb48a032,
     type: 3}
+  SpringDisc3D: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
+    type: 3}
+  TrajectoryDisc: {fileID: 6036581522244349746, guid: c287762600d084ed6be063bf0f5a2ec8,
+    type: 3}
+  Tooltip: {fileID: 2498166935032724989, guid: 6303af998896f4ad29bf3fbf96bd0cdd, type: 3}
+  TargetArea: {fileID: 5887126199942291436, guid: 409cbf21c450241b79b9e4327b57da61,
+    type: 3}
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
     type: 2}
   TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}

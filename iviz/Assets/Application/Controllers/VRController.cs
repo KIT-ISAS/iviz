@@ -17,11 +17,11 @@ namespace Iviz.Controllers
     public class VRController : MonoBehaviour
     {
         //[SerializeField] Camera mainCamera;
-        [SerializeField] EventSystem eventSystem;
+        [SerializeField] EventSystem eventSystem = null;
         IVRButton button;
 
         Transform mTransform;
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         LineResource resource;
         MeshMarkerResource target;
@@ -104,9 +104,10 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                var ptr = new PointerEventData(eventSystem);
                 foreach (var handler in CurrentHit.GetComponentsInParent<IPointerDownHandler>())
                 {
-                    handler.OnPointerDown(new PointerEventData(eventSystem));
+                    handler.OnPointerDown(ptr);
                 }
             }
             else if (button.PointerUp())
@@ -118,11 +119,17 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                var ptr = new PointerEventData(eventSystem);
                 foreach (var handler in CurrentHit.GetComponentsInParent<IPointerUpHandler>())
                 {
-                    handler.OnPointerUp(new PointerEventData(eventSystem));
+                    handler.OnPointerUp(ptr);
                 }
 
+                foreach (var handler in CurrentHit.GetComponentsInParent<IPointerClickHandler>())
+                {
+                    handler.OnPointerClick(ptr);
+                }
+                
             }
             else
             {

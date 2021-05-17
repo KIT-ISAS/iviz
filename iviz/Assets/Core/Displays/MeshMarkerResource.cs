@@ -128,7 +128,7 @@ namespace Iviz.Displays
         public Mesh Mesh
         {
             get => MeshFilter.sharedMesh;
-            set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException();
+            set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException("Mesh is null");
         } 
 
         protected override void Awake()

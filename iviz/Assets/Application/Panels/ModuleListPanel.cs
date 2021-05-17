@@ -196,6 +196,10 @@ namespace Iviz.App
         void Awake()
         {
             instance = this;
+            
+            Debug.Log(Feedback.RosDefinition);
+            Debug.Log(Widget.RosDefinition);
+            Debug.Log(Trajectory.RosDefinition);
         }
 
         void OnDestroy()
@@ -213,8 +217,9 @@ namespace Iviz.App
             }
         }
 
-        static string MasterUriToString(Uri uri) =>
-            uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
+        [NotNull]
+        static string MasterUriToString([CanBeNull] Uri uri) =>
+            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
 
         void Start()
         {
@@ -575,7 +580,7 @@ namespace Iviz.App
             }
         }
 
-        static async void UpdateSimpleConfigurationSettings(CancellationToken token = default)
+        static void UpdateSimpleConfigurationSettings()
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -585,11 +590,11 @@ namespace Iviz.App
 
             try
             {
-                string inText = await FileUtils.ReadAllTextAsync(path, token);
+                string inText = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
-                await FileUtils.WriteAllTextAsync(path, outText, token);
+                File.WriteAllText(path, outText);
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -785,6 +790,7 @@ namespace Iviz.App
             markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
 
+        /*
         void ShowFrame([NotNull] TfFrame frame)
         {
             if (frame == null)
@@ -794,6 +800,7 @@ namespace Iviz.App
 
             tfTreeData.Show(frame);
         }
+        */
 
         void UpdateFpsStats()
         {
@@ -801,9 +808,8 @@ namespace Iviz.App
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
             bottomTime.text = $"M: {memBytesKb.ToString()}M";
 
-            //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
-
-            bottomFps.text = $"{frameCounter.ToString()} FPS";
+            bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            //bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();

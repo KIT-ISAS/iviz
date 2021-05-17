@@ -1,10 +1,11 @@
 ﻿using System;
 using UnityEngine;
-using Valve.VR;
 
 namespace Iviz.Controllers
 {
     /*
+    using Valve.VR;
+
     public class SteamVRButton : MonoBehaviour, IVRButton
     {
         [SerializeField] SteamVR_Behaviour_Pose pose;

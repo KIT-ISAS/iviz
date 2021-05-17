@@ -36,7 +36,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] Color backgroundColor = DefaultBackgroundColor;
         [SerializeField] MeshMarkerResource background = null;
 
-        [SerializeField] Vector3 socketPosition;
+        [SerializeField] Vector3 socketPosition = Vector3.zero;
 
         [NotNull] public string Id { get; internal set; } = "";
 
@@ -54,9 +54,11 @@ namespace Iviz.App.ARDialogs
         //float? currentAngle;
         bool resetOrientation;
         Vector3? currentPosition;
+        float scale;
 
         FrameNode node;
-        float scale;
+        [NotNull] FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Dialog Node");
+        [NotNull] public TfFrame ParentFrame => Node.Parent.SafeNull() ?? TfListener.MapFrame;
 
         public Color BackgroundColor
         {
@@ -132,7 +134,7 @@ namespace Iviz.App.ARDialogs
                 pivotFrameId = value;
                 if (pivotFrameId != null)
                 {
-                    node.AttachTo(pivotFrameId);
+                    Node.AttachTo(pivotFrameId);
                     currentPosition = null;
                     resetOrientation = true;
                 }
@@ -391,14 +393,12 @@ namespace Iviz.App.ARDialogs
             connector.Start = () => Transform.position - BaseDisplacement;
             connector.End = () =>
             {
-                Vector3 framePosition = node.Transform.position + PivotFrameOffset;
+                Vector3 framePosition = Node.Transform.position + PivotFrameOffset;
 
                 return PivotDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
                     : framePosition + GetFlatCameraRotation(framePosition) * PivotDisplacement;
             };
-
-            node = FrameNode.Instantiate("ARDialog Node");
 
             if (button1 != null)
             {
@@ -516,7 +516,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            Vector3 framePosition = node.Transform.position + PivotFrameOffset;
+            Vector3 framePosition = Node.Transform.position + PivotFrameOffset;
             Quaternion cameraRotation = GetFlatCameraRotation(framePosition);
 
             Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement + BaseDisplacement;
@@ -540,7 +540,7 @@ namespace Iviz.App.ARDialogs
             Transform.position = currentPosition.Value;
         }
 
-        Quaternion GetFlatCameraRotation(in Vector3 framePosition)
+        static Quaternion GetFlatCameraRotation(in Vector3 framePosition)
         {
             (float x, _, float z) = framePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
@@ -550,9 +550,9 @@ namespace Iviz.App.ARDialogs
         public void Initialize()
         {
             connector.Visible = true;
-            popupStartTime = Time.time;
             resetOrientation = true;
 
+            popupStartTime = Time.time;
             Update();
         }
 
@@ -581,10 +581,11 @@ namespace Iviz.App.ARDialogs
         {
             if (button != null)
             {
-                button.OnDialogSuspended();
+                button.OnDialogDisabled();
             }
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[Dialog Id='{Id}']";
@@ -593,6 +594,14 @@ namespace Iviz.App.ARDialogs
         public void SplitForRecycle()
         {
             connector.SplitForRecycle();
+        }
+
+        public void OnDestroy()
+        {
+            if (node != null)
+            {
+                Destroy(node);
+            }
         }
     }
 }

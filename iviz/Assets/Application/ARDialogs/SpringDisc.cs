@@ -15,8 +15,9 @@ namespace Iviz.App.ARDialogs
 
         public event Action<SpringDisc, Vector3> Moved; 
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             disc.EndDragging += () =>
             {
                 dragBack = true;
@@ -31,8 +32,10 @@ namespace Iviz.App.ARDialogs
             link.Color = Color.cyan.WithAlpha(0.8f);
         }
 
-        void LateUpdate()
+        protected override void Update()
         {
+            base.Update();;
+
             var discPosition = disc.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
             if (discDistance < 0.005f)

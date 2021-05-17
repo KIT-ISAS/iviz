@@ -14,6 +14,8 @@ namespace Iviz.Resources
     {
         [CanBeNull] readonly string resourceName;
         [CanBeNull] T baseObject;
+        int id;
+
 
         /// <summary>
         /// Returns or loads a resource of this type.  
@@ -37,8 +39,6 @@ namespace Iviz.Resources
                 return baseObject;
             }
         }
-
-        int id;
 
         /// <summary>
         /// Returns the instance id of the resource.
@@ -93,7 +93,7 @@ namespace Iviz.Resources
 
         public bool Equals(Info<T> other) => other != null && Id == other.Id;
 
-        public override bool Equals(object obj) => obj != null && obj is Info<T> info && Id == info.Id;
+        public override bool Equals(object obj) => obj is Info<T> info && Id == info.Id;
 
         public static bool operator ==([CanBeNull] Info<T> a, [CanBeNull] Info<T> b) =>
             ReferenceEquals(a, b) || (!(a is null) && a.Equals(b));

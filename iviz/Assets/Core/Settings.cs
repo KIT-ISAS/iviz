@@ -124,7 +124,7 @@ namespace Iviz.Core
 
 
         [NotNull]
-        public static string PersistentDataPath =>
+        static string PersistentDataPath =>
             persistentDataPath ?? (persistentDataPath = Application.persistentDataPath);
 
         [NotNull] public static string SavedFolder => savedFolder ?? (savedFolder = PersistentDataPath + "/saved");
