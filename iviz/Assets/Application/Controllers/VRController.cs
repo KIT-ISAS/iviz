@@ -112,7 +112,7 @@ namespace Iviz.Controllers
             }
             else if (button.PointerUp())
             {
-                ModuleListPanel.GuiInputModule.DraggedObject = null;
+                ModuleListPanel.GuiInputModule.ResetDraggedObject();
 
                 if (CurrentHit == null)
                 {

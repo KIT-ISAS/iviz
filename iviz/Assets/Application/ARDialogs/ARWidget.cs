@@ -84,10 +84,13 @@ namespace Iviz.App.ARDialogs
 
         protected virtual void OnDestroy()
         {
-            if (node != null)
+            if (node == null)
             {
-                Destroy(node);
+                return;
             }
+
+            node.Stop();
+            Destroy(node);
         }
 
         public void AttachTo(string parentId)
@@ -107,7 +110,7 @@ namespace Iviz.App.ARDialogs
             {
                 return;
             }
-            
+
             float now = Time.time;
             if (now - popupStartTime.Value < PopupDuration)
             {

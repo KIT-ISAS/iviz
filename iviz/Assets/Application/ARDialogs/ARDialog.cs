@@ -51,13 +51,29 @@ namespace Iviz.App.ARDialogs
             iconMaterial != null ? iconMaterial : (iconMaterial = Instantiate(iconMeshRenderer.material));
 
         float? popupStartTime;
+
         //float? currentAngle;
         bool resetOrientation;
         Vector3? currentPosition;
         float scale;
 
         FrameNode node;
-        [NotNull] FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Dialog Node");
+
+        [NotNull]
+        FrameNode Node
+        {
+            get
+            {
+                if (this == null)
+                {
+                    Debug.Log($"{this}: Accessing dead dialog!");
+                    throw new ObjectDisposedException(ToString());
+                }
+
+                return (node != null) ? node : node = FrameNode.Instantiate("Dialog Node");
+            }
+        }
+
         [NotNull] public TfFrame ParentFrame => Node.Parent.SafeNull() ?? TfListener.MapFrame;
 
         public Color BackgroundColor
@@ -468,7 +484,7 @@ namespace Iviz.App.ARDialogs
                 resetOrientation = false;
                 return;
             }
-            
+
             Quaternion currentRotation = Transform.rotation;
             Transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, 0.05f);
 
@@ -572,7 +588,7 @@ namespace Iviz.App.ARDialogs
             {
                 SuspendButton(menuButton);
             }
-            
+
             Expired?.Invoke(this);
             Expired = null;
         }
@@ -598,10 +614,13 @@ namespace Iviz.App.ARDialogs
 
         public void OnDestroy()
         {
-            if (node != null)
+            if (node == null)
             {
-                Destroy(node);
+                return;
             }
+
+            node.Stop();
+            Destroy(node);
         }
     }
 }

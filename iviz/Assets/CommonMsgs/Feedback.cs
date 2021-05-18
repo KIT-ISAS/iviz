@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -22,8 +23,8 @@ namespace Iviz.Msgs.IvizCommonMsgs
     {
         [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/Trajectory";
 
-        [DataMember] public Pose[] Poses { get; set; }
-        [DataMember] public time[] Timestamps { get; set; }
+        [DataMember, NotNull] public Pose[] Poses { get; set; } = Array.Empty<Pose>();
+        [DataMember, NotNull] public time[] Timestamps { get; set; } = Array.Empty<time>();
     }
 
 

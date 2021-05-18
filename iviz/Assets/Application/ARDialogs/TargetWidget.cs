@@ -88,7 +88,7 @@ namespace Application.ARDialogs
             TargetScale = Vector2.one;
             Mode = ModeType.Square;
 
-            corner.PointerDown += () => scaling = true;
+            corner.StartDragging += () => scaling = true;
             corner.EndDragging += () => scaling = false;
 
             okButton.Caption = "Send";

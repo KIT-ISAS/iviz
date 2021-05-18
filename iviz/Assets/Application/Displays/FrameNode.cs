@@ -41,6 +41,11 @@ namespace Iviz.Controllers
 
         void SetParent(TfFrame newParent, bool attach)
         {
+            if (gameObject == null)
+            {
+                return; // destroying!
+            }
+            
             if (newParent == parent)
             {
                 return;

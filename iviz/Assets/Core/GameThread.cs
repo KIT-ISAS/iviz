@@ -49,7 +49,14 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error during EveryFrame", e);
+                if (!Settings.IsMobile)
+                {
+                    Logger.Error($"{this}: Error during EveryFrame" + e);
+                }
+                else
+                {
+                    Logger.Error($"{this}: Error during EveryFrame", e);
+                }
             }
 
             Now = DateTime.Now;
@@ -72,7 +79,14 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during LateEverySecond", e);
+                    if (!Settings.IsMobile)
+                    {
+                        Logger.Error($"{this}: Error during LateEverySecond" + e);
+                    }
+                    else
+                    {
+                        Logger.Error($"{this}: Error during LateEverySecond", e);
+                    }
                 }
 
                 lastRunTime = GameTime;

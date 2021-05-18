@@ -13,7 +13,7 @@ namespace Iviz.Displays
 
         bool needsStart;
         Vector3 startOffset;
-        
+
         public Transform TargetTransform { get; set; }
 
         public event MovedAction Moved;
@@ -43,11 +43,7 @@ namespace Iviz.Displays
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.DraggedObject = this;
-            }
-
+            ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
             PointerDown?.Invoke();
         }
 
@@ -74,12 +70,12 @@ namespace Iviz.Displays
 
             return (t.x, t.z);
         }
-        
+
         void IDraggable.OnPointerMove(in Ray pointerRay)
         {
             OnPointerMove(pointerRay);
         }
-        
+
         void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = transform;

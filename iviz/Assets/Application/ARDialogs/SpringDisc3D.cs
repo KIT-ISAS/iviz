@@ -9,6 +9,7 @@ namespace Iviz.App.ARDialogs
     public sealed class SpringDisc3D : ARWidget, IRecyclable
     {
         [SerializeField] DraggablePlane disc = null;
+        [SerializeField] Transform anchor = null;
         [SerializeField] float linkWidth = 0.2f;
         LineResource line;
         bool dragBack;
@@ -20,17 +21,22 @@ namespace Iviz.App.ARDialogs
         protected override void Awake()
         {
             base.Awake();
-            disc.PointerUp += () =>
+            disc.EndDragging += () =>
             {
                 dragBack = true;
                 Moved?.Invoke(this, Vector3.zero);
             };
 
-            disc.PointerDown += () => dragBack = false;
+            disc.StartDragging += () =>
+            {
+                line.Visible = true;
+                dragBack = false;
+            };
 
             line = ResourcePool.RentDisplay<LineResource>(transform);
             line.Tint = Color.cyan.WithAlpha(0.8f);
             line.ElementScale = linkWidth / 2;
+            line.Visible = false;
             
             lineBuffer.Add(new LineWithColor());
         }
@@ -38,7 +44,9 @@ namespace Iviz.App.ARDialogs
         protected override void Update()
         {
             base.Update();;
-
+            
+            anchor.transform.localRotation = disc.Transform.localRotation; // copy billboard
+            
             var discPosition = disc.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
             if (discDistance < 0.005f)
@@ -47,6 +55,7 @@ namespace Iviz.App.ARDialogs
                 {
                     disc.Transform.localPosition = Vector3.zero;
                     dragBack = false;
+                    line.Visible = false;
                 }
 
                 return;

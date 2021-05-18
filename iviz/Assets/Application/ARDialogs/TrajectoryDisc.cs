@@ -29,7 +29,7 @@ namespace Application.ARDialogs
         {
             base.Awake();
             disc = GetComponent<BillboardDiscDisplay>();
-            disc.PointerDown += StartWriting;
+            disc.StartDragging += StartWriting;
             disc.EndDragging += StopWriting;
 
             button.Clicked += SendTrajectory;

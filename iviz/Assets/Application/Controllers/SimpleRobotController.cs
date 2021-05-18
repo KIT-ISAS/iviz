@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -31,7 +32,7 @@ namespace Iviz.Controllers
             Config = new RobotConfiguration();
         }
 
-        RobotModel robot;
+        [CanBeNull] RobotModel robot;
 
         [CanBeNull]
         public RobotModel Robot
@@ -74,7 +75,7 @@ namespace Iviz.Controllers
 
         public string SourceParameter => config.SourceParameter;
 
-        public string SavedRobotName => config.SavedRobotName;
+        string SavedRobotName => config.SavedRobotName;
 
         public string FramePrefix
         {
@@ -412,73 +413,94 @@ namespace Iviz.Controllers
                 return false;
             }
 
+            Robot = null;
+            RobotModel newRobot;
             try
             {
-                Robot = new RobotModel(description);
+                newRobot = new RobotModel(description);
             }
             catch (Exception e)
             {
                 Core.Logger.Debug($"{this}: Error parsing description'", e);
                 HelpText = "[Failed to Parse Specification]";
-                Robot = null;
                 return false;
             }
 
-            robotLoadingTask = Robot.StartAsync(ConnectionManager.ServiceProvider);
+            Robot = newRobot;
+            async Task LoadRobotAsync()
+            {
+                await newRobot.StartAsync(ConnectionManager.ServiceProvider);
+                CheckRobotStartTask(true);
+            }
+
+            robotLoadingTask = LoadRobotAsync();
             HelpText = "[Loading Robot...]";
             CheckRobotStartTask();
             return true;
         }
 
-        public void CheckRobotStartTask()
+        public void CheckRobotStartTask(bool forceCompletion = false)
         {
             if (robotLoadingTask == null)
             {
                 return;
             }
 
-            switch (robotLoadingTask.Status)
+            try
             {
-                case TaskStatus.Faulted:
-                    HelpText = "[Error Loading Robot. See Log.]";
-                    Robot = null;
-                    robotLoadingTask = null;
-                    return;
-                case TaskStatus.Canceled:
-                    HelpText = "[Robot Task canceled.]";
-                    robotLoadingTask = null;
-                    return;
-                case TaskStatus.RanToCompletion:
-                    node.name = "SimpleRobotNode:" + Name;
-                    if (Robot == null)
-                    {
-                        HelpText = "[Invalid Robot]";
-                    }
-                    else if (!string.IsNullOrEmpty(Robot.Name))
-                    {
-                        HelpText = $"<b>- {Name} -</b>";
-                    }
-                    else if (Robot.LinkObjects.Count == 0)
-                    {
-                        HelpText = "[Robot is Empty]";
-                    }
-                    else if (Robot.Name == null)
-                    {
-                        HelpText = "[No Name]";
-                    }
-                    else
-                    {
-                        HelpText = "[Empty Name]";
-                    }
+                var status = forceCompletion 
+                    ? TaskStatus.RanToCompletion 
+                    : robotLoadingTask.Status;
+                switch (status)
+                {
+                    case TaskStatus.Faulted:
+                        HelpText = "[Error Loading Robot. See Log.]";
+                        Robot = null;
+                        robotLoadingTask = null;
+                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        return;
+                    case TaskStatus.Canceled:
+                        HelpText = "[Robot Task canceled.]";
+                        robotLoadingTask = null;
+                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        return;
+                    case TaskStatus.RanToCompletion:
+                        node.name = "SimpleRobotNode:" + Name;
+                        if (Robot == null)
+                        {
+                            HelpText = "[Invalid Robot]";
+                        }
+                        else if (!string.IsNullOrEmpty(Robot.Name))
+                        {
+                            HelpText = $"<b>- {Name} -</b>";
+                        }
+                        else if (Robot.LinkObjects.Count == 0)
+                        {
+                            HelpText = "[Robot is Empty]";
+                        }
+                        else if (Robot.Name == null)
+                        {
+                            HelpText = "[No Name]";
+                        }
+                        else
+                        {
+                            HelpText = "[Empty Name]";
+                        }
 
-                    AttachedToTf = AttachedToTf;
-                    Visible = Visible;
-                    RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-                    Tint = Tint;
-                    Smoothness = Smoothness;
-                    Metallic = Metallic;
-                    robotLoadingTask = null;
-                    break;
+                        AttachedToTf = AttachedToTf;
+                        Visible = Visible;
+                        RenderAsOcclusionOnly = RenderAsOcclusionOnly;
+                        Tint = Tint;
+                        Smoothness = Smoothness;
+                        Metallic = Metallic;
+                        robotLoadingTask = null;
+                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error($"{this}: Error in CheckRobotStartTask", e);
             }
         }
 
@@ -490,12 +512,12 @@ namespace Iviz.Controllers
 
         void DetachFromTf()
         {
-            if (robot == null)
+            if (Robot == null)
             {
                 return;
             }
 
-            foreach (var entry in robot.LinkParents)
+            foreach (var entry in Robot.LinkParents)
             {
                 if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
                 {
@@ -509,22 +531,22 @@ namespace Iviz.Controllers
             }
 
             node.Parent = null;
-            robot.ResetLinkParents();
-            robot.ApplyAnyValidConfiguration();
+            Robot.ResetLinkParents();
+            Robot.ApplyAnyValidConfiguration();
 
-            node.AttachTo(Decorate(robot.BaseLink));
-            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(Robot.BaseLink));
+            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
 
         void AttachToTf()
         {
-            if (robot == null || RobotObject == null)
+            if (Robot == null || RobotObject == null)
             {
                 return;
             }
 
             RobotObject.transform.SetParentLocal(TfListener.MapFrame.transform);
-            foreach (var entry in robot.LinkObjects)
+            foreach (var entry in Robot.LinkObjects)
             {
                 string link = entry.Key;
                 GameObject linkObject = entry.Value;
@@ -534,7 +556,7 @@ namespace Iviz.Controllers
             }
 
             // fill in missing frame parents, but only if it hasn't been provided already
-            foreach (var entry in robot.LinkParents)
+            foreach (var entry in Robot.LinkParents)
             {
                 TfFrame frame = TfListener.GetOrCreateFrame(Decorate(entry.Key), node);
                 if (frame.Parent == TfListener.OriginFrame)
@@ -544,8 +566,8 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.AttachTo(Decorate(robot.BaseLink));
-            robot.BaseLinkObject.transform.SetParentLocal(node.transform);
+            node.AttachTo(Decorate(Robot.BaseLink));
+            Robot.BaseLinkObject.transform.SetParentLocal(node.transform);
         }
     }
 }

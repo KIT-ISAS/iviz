@@ -193,7 +193,9 @@ namespace Iviz.Controllers
                         case WidgetType.Tooltip:
                         {
                             info = Resource.Displays.Tooltip;
-                            widget = ResourcePool.RentDisplay<Tooltip>();
+                            var tooltip = ResourcePool.RentDisplay<Tooltip>();
+                            tooltip.Caption = msg.Caption;
+                            widget = tooltip;
                             break;
                         }
                         case WidgetType.TargetArea:
@@ -209,6 +211,7 @@ namespace Iviz.Controllers
                             return;
                     }
 
+                    Debug.Log("Adding " + msg.Id);
                     widget.Id = msg.Id;
                     widget.AttachTo(msg.Header.FrameId);
                     widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());

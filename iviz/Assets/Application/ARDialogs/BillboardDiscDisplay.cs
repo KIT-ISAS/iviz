@@ -17,6 +17,7 @@ namespace Iviz.App.ARDialogs
         public event Action PointerDown;
         public event Action PointerUp;
         public event Action EndDragging;
+        public event Action StartDragging;
 
         public Transform TargetTransform
         {
@@ -26,23 +27,19 @@ namespace Iviz.App.ARDialogs
 
         void Awake()
         {
-            disc.PointerUp += OnPointerUp;
-            disc.PointerDown += OnPointerDown;
-            disc.EndDragging += () => EndDragging?.Invoke();
+            disc.PointerUp += () => PointerUp?.Invoke();
+            disc.PointerDown += () => PointerDown?.Invoke();;
+            disc.EndDragging += () =>
+            {
+                distanceConstraint = null;
+                EndDragging?.Invoke();
+            };
+            disc.StartDragging += () =>
+            {
+                distanceConstraint = Settings.MainCameraTransform.InverseTransformPoint(Transform.position).z; 
+                StartDragging?.Invoke();
+            };
         }
-
-        void OnPointerDown()
-        {
-            PointerDown?.Invoke();
-            distanceConstraint = Settings.MainCameraTransform.InverseTransformPoint(Transform.position).z; 
-        }
-        
-        void OnPointerUp()
-        {
-            PointerUp?.Invoke();
-            distanceConstraint = null;
-        }
-
 
         void Update()
         {

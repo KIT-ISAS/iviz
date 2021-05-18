@@ -170,7 +170,7 @@ namespace Iviz.App
         public IDraggable DraggedObject
         {
             get => draggedObject;
-            set
+            private set
             {
                 if (draggedObject == value)
                 {
@@ -181,6 +181,26 @@ namespace Iviz.App
                 draggedObject = value;
                 draggedObject?.OnStartDragging();
             }
+        }
+
+        public void ResetDraggedObject()
+        {
+            DraggedObject = null;
+        }
+
+        static bool IsDraggingAllowed => Settings.IsMobile 
+            ? Input.touchCount == 1
+            : Input.GetMouseButton(1);
+        
+        public void TrySetDraggedObject(IDraggable draggable)
+        {
+            if (!IsDraggingAllowed)
+            {
+                // reject!
+                return;
+            }
+
+            DraggedObject = draggable;
         }
 
         public int TargetFps
@@ -384,12 +404,12 @@ namespace Iviz.App
             UpdateEvenIfInactive();
 
 
-            if (!(CameraViewOverride is null))
+            if (CameraViewOverride != null)
             {
                 Transform.SetPose(CameraViewOverride.UnityWorldPose);
             }
 
-            if (!(DraggedObject is null))
+            if (DraggedObject != null)
             {
                 if (!Settings.IsMobile && OrbitCenterOverride == null)
                 {

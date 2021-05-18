@@ -20,7 +20,7 @@ namespace Iviz.Displays
         }
 
         [SerializeField] Transform sourceTransform = null;
-        
+
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
@@ -32,6 +32,7 @@ namespace Iviz.Displays
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
+        public event Action StartDragging;
         public event Action EndDragging;
 
         void Awake()
@@ -57,6 +58,7 @@ namespace Iviz.Displays
         void IDraggable.OnStartDragging()
         {
             needsStart = true;
+            StartDragging?.Invoke();
         }
 
         void IDraggable.OnEndDragging()
@@ -66,11 +68,7 @@ namespace Iviz.Displays
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.DraggedObject = this;
-            }
-            
+            ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
             PointerDown?.Invoke();
         }
 
@@ -100,8 +98,8 @@ namespace Iviz.Displays
 
         void OnPointerMove(in Ray pointerRay)
         {
-            Transform mParent = sourceTransform.SafeNull() 
-                                ?? Transform.parent.SafeNull() 
+            Transform mParent = sourceTransform.SafeNull()
+                                ?? Transform.parent.SafeNull()
                                 ?? Transform;
             Transform mTarget = TargetTransform;
 

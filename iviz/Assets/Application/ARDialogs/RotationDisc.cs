@@ -37,7 +37,7 @@ namespace Iviz.App.ARDialogs
                 currentAngle = null;
             };
             
-            disc.PointerDown += () =>
+            disc.StartDragging += () =>
             {
                 dragBack = false;
             };

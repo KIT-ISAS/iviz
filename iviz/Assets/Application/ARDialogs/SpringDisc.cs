@@ -24,7 +24,7 @@ namespace Iviz.App.ARDialogs
                 Moved?.Invoke(this, Vector3.zero);
             };
             
-            disc.PointerDown += () =>
+            disc.StartDragging += () =>
             {
                 dragBack = false;
             };

@@ -234,10 +234,11 @@ namespace Iviz.Ros
             recentMsgs = 0;
         }
 
+        
         [NotNull]
         public override string ToString()
         {
-            return $"[Listener Topic='{Topic}' Type={Type}]";
+            return $"[Listener {Topic} [{Type}]]";
         }
     }
 }

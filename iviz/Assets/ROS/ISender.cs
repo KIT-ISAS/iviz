@@ -55,7 +55,7 @@ namespace Iviz.Ros
         public void Stop()
         {
             GameThread.EverySecond -= UpdateStats;
-            Logger.Info($"Unadvertising {Topic}.");
+            //Logger.Info($"{this}: Unadvertising");
             Connection.Unadvertise(this);
         }
 
@@ -66,6 +66,17 @@ namespace Iviz.Ros
 
         public void Publish([NotNull] in T msg)
         {
+            try
+            {
+                msg.RosValidate();
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"{this}: Rejecting invalid message: " + e.Message);
+                return;
+            }
+
+
             if (msg == null)
             {
                 throw new ArgumentNullException(nameof(msg));
@@ -100,9 +111,15 @@ namespace Iviz.Ros
             lastMsgCounter = 0;
         }
 
-        public bool TryGetResolvedTopicName(out string topicName)
+        public bool TryGetResolvedTopicName([NotNull] out string topicName)
         {
             return ConnectionManager.Connection.TryGetResolvedTopicName(this, out topicName);
+        }
+
+        [NotNull]
+        public override string ToString()
+        {
+            return $"[Sender {Topic} [{Type}]]";
         }
     }
 }

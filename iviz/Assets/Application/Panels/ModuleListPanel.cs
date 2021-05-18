@@ -196,10 +196,6 @@ namespace Iviz.App
         void Awake()
         {
             instance = this;
-            
-            Debug.Log(Feedback.RosDefinition);
-            Debug.Log(Widget.RosDefinition);
-            Debug.Log(Trajectory.RosDefinition);
         }
 
         void OnDestroy()

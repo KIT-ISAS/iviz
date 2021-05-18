@@ -158,6 +158,9 @@ namespace Iviz.App
                     Resource.External.RemoveRobotResource(Robot.Robot.Name);
                 }
             };
+            
+            Robot.CheckRobotStartTask();
+            UpdateModuleButton();
         }
 
         public override void UpdatePanel()
@@ -188,6 +191,11 @@ namespace Iviz.App
         {
             ButtonText =
                 $"{Resource.Font.Split(Robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
+        }
+
+        public void OnRobotFinishedLoading()
+        {
+            UpdateModuleButton();
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
