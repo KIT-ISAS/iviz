@@ -19,7 +19,7 @@ namespace Iviz.Roslib
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
 
-        const int UserCallTimeoutInMs = 15000;
+        const int UserCallTimeoutInMs = -1;
 
         readonly Func<TService, Task> callback;
         readonly Endpoint remoteEndPoint;
@@ -245,16 +245,24 @@ namespace Iviz.Roslib
 
                     try
                     {
-                        Task userTask = callback(serviceMsg);
-                        Task timeoutTask = Task.Delay(UserCallTimeoutInMs, runningTs.Token);
-                        Task resultTask = await (userTask, timeoutTask).WhenAny();
-                        if (resultTask == timeoutTask)
+                        if (UserCallTimeoutInMs > 0)
                         {
-                            runningTs.Token.ThrowIfCanceled(timeoutTask);
-                            throw new RosServiceRequestTimeout("User callback took too long!");
+                            Task userTask = callback(serviceMsg);
+                            Task timeoutTask = Task.Delay(UserCallTimeoutInMs, runningTs.Token);
+                            Task resultTask = await (userTask, timeoutTask).WhenAny();
+                            if (resultTask == timeoutTask)
+                            {
+                                runningTs.Token.ThrowIfCanceled(timeoutTask);
+                                throw new RosServiceRequestTimeout("User callback took too long!");
+                            }
+
+                            await userTask;
+                        }
+                        else
+                        {
+                            await callback(serviceMsg);
                         }
 
-                        await userTask;
                         serviceMsg.Response.RosValidate();
                         errorInResponse = false;
                     }
