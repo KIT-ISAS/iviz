@@ -5,6 +5,7 @@ using System.Linq;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -12,13 +13,16 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Sdf;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
+using Color = UnityEngine.Color;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using String = System.String;
+using Time = UnityEngine.Time;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -51,11 +55,23 @@ namespace Iviz.Controllers
 
         [NotNull] public TfFrame FixedFrame { get; private set; }
 
+        const float HighlightDuration = 3.0f;
+        float? highlightFrameStart;
+        readonly FrameNode highlightFrameNode;
+        readonly AxisFrameResource highlightFrame;
+
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Instance = this;
+            
+            highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
+            highlightFrame.Visible = false;
+            highlightFrame.CastsShadows = false;
 
+            highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
+            highlightFrame.Transform.parent = highlightFrameNode.Transform;
+            
             unityFrame = Add(CreateFrameObject("TF", null, null));
             unityFrame.ForceInvisible = true;
             unityFrame.Visible = false;
@@ -124,7 +140,7 @@ namespace Iviz.Controllers
         [NotNull] public Sender<TFMessage> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
 
-       [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
+        [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
         [NotNull] public static TfFrame RootFrame => Instance.rootFrame;
         [NotNull] public static TfFrame OriginFrame => Instance.originFrame;
         [NotNull] public static TfFrame UnityFrame => Instance.unityFrame;
@@ -188,6 +204,8 @@ namespace Iviz.Controllers
                 {
                     frame.FrameSize = value;
                 }
+
+                highlightFrame.AxisLength = value * 3;
             }
         }
 
@@ -434,6 +452,21 @@ namespace Iviz.Controllers
             {
                 OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
             }
+
+            if (highlightFrameStart == null)
+            {
+                return;
+            }
+            
+            float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
+            if (alpha < 0)
+            {
+                highlightFrameStart = null;
+                highlightFrame.Visible = false;
+                return;
+            }
+
+            highlightFrame.Tint = Color.white.WithAlpha(alpha);
         }
 
         public override void StopController()
@@ -443,6 +476,19 @@ namespace Iviz.Controllers
             Publisher.Stop();
             GameThread.LateEveryFrame -= LateUpdate;
             Instance = null;
+        }
+
+        public void HighlightFrame([NotNull] string frameId)
+        {
+            if (!TryGetFrame(frameId, out TfFrame frame))
+            {
+                return;
+            }
+
+            highlightFrameNode.AttachTo(frameId);
+            highlightFrameStart = Time.time;
+            highlightFrame.Tint = Color.white;
+            highlightFrame.Visible = true;
         }
 
         static void Publish([NotNull] TFMessage msg)

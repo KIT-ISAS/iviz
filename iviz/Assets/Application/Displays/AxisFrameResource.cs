@@ -78,6 +78,17 @@ namespace Iviz.Displays
             }
         }
 
+        public bool CastsShadows
+        {
+            get => axisObjects[0].CastsShadows;
+            set
+            {
+                axisObjects[0].CastsShadows = value;
+                axisObjects[1].CastsShadows = value;
+                axisObjects[2].CastsShadows = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -126,6 +137,7 @@ namespace Iviz.Displays
             ColorY = Color.green;
             ColorZ = Color.blue;
             OcclusionOnly = false;
+            Tint = Color.white;
         }
     }
 }

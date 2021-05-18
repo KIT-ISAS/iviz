@@ -76,7 +76,8 @@ namespace Iviz.Displays
         /// of replacing them with the provided colors.
         /// </param>
         /// <param name="token">An optional cancellation token.</param>
-        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider = null, bool keepMeshMaterials = true,
+        public async Task StartAsync([CanBeNull] IExternalServiceProvider provider = null,
+            bool keepMeshMaterials = true,
             CancellationToken token = default)
         {
             IsStarting = true;
@@ -161,6 +162,7 @@ namespace Iviz.Displays
             get => BaseLinkObject.name;
             set => BaseLinkObject.name = value;
         }
+
         public string Description { get; }
 
         public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
@@ -241,131 +243,233 @@ namespace Iviz.Displays
             [CanBeNull] IExternalServiceProvider provider,
             CancellationToken token)
         {
-            var linkObject = new GameObject("Link:" + link.Name);
+            GameObject linkObject = new GameObject("Link:" + link.Name);
             linkObject.transform.parent = BaseLinkObject.transform;
 
             linkObjects[link.Name ?? ""] = linkObject;
 
+            foreach (var collision in link.Collisions)
+            {
+                await ProcessCollisionAsync(collision, linkObject, provider, token);
+            }
+
             foreach (var visual in link.Visuals)
             {
-                var geometry = visual.Geometry;
+                await ProcessVisualAsync(keepMeshMaterials, visual, linkObject, rootMaterials, provider, token);
+            }
+        }
 
-                var visualObject = new GameObject
-                (
-                    visual.Name != null ? $"[Visual:{visual.Name}]" : "[Visual]"
-                );
-                visualObject.transform.SetParent(linkObject.transform, false);
-                visualObject.transform.SetLocalPose(visual.Origin.ToPose());
+        async Task ProcessCollisionAsync(
+            [NotNull] Urdf.Collision collision,
+            [NotNull] GameObject linkObject,
+            [CanBeNull] IExternalServiceProvider provider,
+            CancellationToken token)
+        {
+            var geometry = collision.Geometry;
+            if (geometry == null)
+            {
+                return;
+            }
 
+            var collisionObject = new GameObject
+            (
+                collision.Name != null ? $"[Collision:{collision.Name}]" : "[Collision]"
+            );
+            collisionObject.transform.SetParent(linkObject.transform, false);
+            collisionObject.transform.SetLocalPose(collision.Origin.ToPose());
+            collisionObject.layer = LayerType.Collider;
 
-                GameObject resourceObject = null;
-                bool isSynthetic = false;
-                if (geometry.Mesh != null)
+            if (geometry.Mesh != null)
+            {
+                string uri = geometry.Mesh.Filename;
+                Info<GameObject> info;
+                try
                 {
-                    string uri = geometry.Mesh.Filename;
-                    Info<GameObject> info;
-                    try
+                    info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    NumErrors++;
+                    return;
+                }
+
+                if (info == null)
+                {
+                    Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                    NumErrors++;
+                    return;
+                }
+
+
+                var resourceObject = info.Object;
+                foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
+                {
+                    GameObject child = new GameObject();
+                    child.transform.parent = collisionObject.transform;
+                    child.transform.SetLocalPose(meshFilter.transform.AsPose());
+                    child.transform.localScale = meshFilter.transform.lossyScale;
+                    child.layer = 1 << LayerType.Collider;
+
+                    var collider = child.AddComponent<MeshCollider>();
+                    collider.sharedMesh = meshFilter.sharedMesh;
+                    collider.convex = true;
+                }
+
+                collisionObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
+            }
+            else if (geometry.Cylinder != null)
+            {
+                var resourceObject = Resource.Displays.Cylinder.Object;
+                var collider = collisionObject.AddComponent<MeshCollider>();
+                collider.sharedMesh = resourceObject.GetComponent<MeshFilter>().sharedMesh;
+                collider.convex = true;
+
+                collisionObject.transform.localScale = new Vector3(
+                    geometry.Cylinder.Radius * 2,
+                    geometry.Cylinder.Length,
+                    geometry.Cylinder.Radius * 2);
+                collisionObject.layer = 1 << LayerType.Collider;
+            }
+            else if (geometry.Box != null)
+            {
+                var collider = collisionObject.AddComponent<BoxCollider>();
+                collider.size = geometry.Box.Size.ToVector3().Abs();
+            }
+            else if (geometry.Sphere != null)
+            {
+                var collider = collisionObject.AddComponent<SphereCollider>();
+                collider.radius = geometry.Sphere.Radius;
+            }
+        }
+
+        async Task ProcessVisualAsync(bool keepMeshMaterials,
+            [NotNull] Visual visual,
+            [NotNull] GameObject linkObject,
+            [NotNull] IReadOnlyDictionary<string, Material> rootMaterials,
+            [CanBeNull] IExternalServiceProvider provider,
+            CancellationToken token)
+        {
+            var geometry = visual.Geometry;
+
+            var visualObject = new GameObject
+            (
+                visual.Name != null ? $"[Visual:{visual.Name}]" : "[Visual]"
+            );
+            visualObject.transform.SetParent(linkObject.transform, false);
+            visualObject.transform.SetLocalPose(visual.Origin.ToPose());
+
+
+            GameObject resourceObject = null;
+            bool isSynthetic = false;
+            if (geometry.Mesh != null)
+            {
+                string uri = geometry.Mesh.Filename;
+                Info<GameObject> info;
+                try
+                {
+                    info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    NumErrors++;
+                    return;
+                }
+
+                if (info == null)
+                {
+                    Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                    NumErrors++;
+                    return;
+                }
+
+                resourceObject = ResourcePool.Rent(info);
+                objectResources.Add((resourceObject, info));
+                resourceObject.transform.SetParent(visualObject.transform, false);
+                visualObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
+                isSynthetic = true;
+            }
+            else if (geometry.Cylinder != null)
+            {
+                resourceObject = ResourcePool.Rent(Resource.Displays.Cylinder);
+                objectResources.Add((resourceObject, Resource.Displays.Cylinder));
+                resourceObject.transform.SetParent(visualObject.transform, false);
+                visualObject.transform.localScale = new Vector3(
+                    geometry.Cylinder.Radius * 2,
+                    geometry.Cylinder.Length,
+                    geometry.Cylinder.Radius * 2);
+            }
+            else if (geometry.Box != null)
+            {
+                resourceObject = ResourcePool.Rent(Resource.Displays.Cube);
+                objectResources.Add((resourceObject, Resource.Displays.Cube));
+                resourceObject.transform.SetParent(visualObject.transform, false);
+                visualObject.transform.localScale = geometry.Box.Size.ToVector3().Abs();
+            }
+            else if (geometry.Sphere != null)
+            {
+                resourceObject = ResourcePool.Rent(Resource.Displays.Sphere);
+                objectResources.Add((resourceObject, Resource.Displays.Sphere));
+                resourceObject.transform.SetParent(visualObject.transform, false);
+                visualObject.transform.localScale = geometry.Sphere.Radius * Vector3.one;
+            }
+
+            if (resourceObject == null)
+            {
+                return; //?
+            }
+
+            if (!isSynthetic)
+            {
+                var resource = resourceObject.AddComponent<MeshMarkerResource>();
+                displays.Add(resource);
+
+                var material = GetMaterialForVisual(visual, rootMaterials);
+                if (material == null)
+                {
+                    return;
+                }
+
+                if (material.Color != null)
+                {
+                    resource.Color = material.Color.ToColor();
+                }
+
+                if (material.Texture != null)
+                {
+                    // TODO!!
+                }
+            }
+            else
+            {
+                var material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
+                var color = material?.Color?.ToColor() ?? Color.white;
+
+                var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
+                var resources = new List<MeshMarkerResource>();
+
+                foreach (var renderer in renderers)
+                {
+                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
+                    if (meshResource == null)
                     {
-                        info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        throw;
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
-                        NumErrors++;
                         continue;
-                        //throw;
                     }
 
-                    if (info == null)
-                    {
-                        Logger.Error($"{this}: Failed to retrieve '{uri}'");
-                        NumErrors++;
-                        continue;
-                    }
-
-                    resourceObject = ResourcePool.Rent(info);
-                    objectResources.Add((resourceObject, info));
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
-                    isSynthetic = true;
-                }
-                else if (geometry.Cylinder != null)
-                {
-                    resourceObject = ResourcePool.Rent(Resource.Displays.Cylinder);
-                    objectResources.Add((resourceObject, Resource.Displays.Cylinder));
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = new Vector3(
-                        geometry.Cylinder.Radius * 2,
-                        geometry.Cylinder.Length,
-                        geometry.Cylinder.Radius * 2);
-                }
-                else if (geometry.Box != null)
-                {
-                    resourceObject = ResourcePool.Rent(Resource.Displays.Cube);
-                    objectResources.Add((resourceObject, Resource.Displays.Cube));
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Box.Size.ToVector3().Abs();
-                }
-                else if (geometry.Sphere != null)
-                {
-                    resourceObject = ResourcePool.Rent(Resource.Displays.Sphere);
-                    objectResources.Add((resourceObject, Resource.Displays.Sphere));
-                    resourceObject.transform.SetParent(visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Sphere.Radius * Vector3.one;
+                    meshResource.Color *= color;
+                    resources.Add(meshResource);
                 }
 
-                if (resourceObject == null)
-                {
-                    continue; //?
-                }
-
-                if (!isSynthetic)
-                {
-                    var resource = resourceObject.AddComponent<MeshMarkerResource>();
-                    displays.Add(resource);
-
-                    var material = GetMaterialForVisual(visual, rootMaterials);
-                    if (material == null)
-                    {
-                        continue;
-                    }
-
-                    if (material.Color != null)
-                    {
-                        resource.Color = material.Color.ToColor();
-                    }
-
-                    if (material.Texture != null)
-                    {
-                        // TODO!!
-                    }
-                }
-                else
-                {
-                    var material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
-                    var color = material?.Color?.ToColor() ?? Color.white;
-
-                    var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                    var resources = new List<MeshMarkerResource>();
-
-                    foreach (var renderer in renderers)
-                    {
-                        var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
-                        if (meshResource == null)
-                        {
-                            continue;
-                        }
-
-                        meshResource.Color *= color;
-                        resources.Add(meshResource);
-                    }
-
-                    displays.AddRange(resources);
-                }
+                displays.AddRange(resources);
             }
         }
 
@@ -504,7 +608,7 @@ namespace Iviz.Displays
 
             var jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(unityPose);
-            
+
             return true;
         }
 

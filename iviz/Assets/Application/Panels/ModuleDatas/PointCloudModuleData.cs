@@ -51,6 +51,7 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
+            panel.SizeMultiplier.Value = listener.SizeMultiplierPow10;
             panel.IntensityChannel.Options = listener.FieldNames;
             try
             {
@@ -94,10 +95,8 @@ namespace Iviz.App
             panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f;
             panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
             panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
-            panel.PointCloudType.ValueChanged += (f, _) =>
-            {
-                listener.PointCloudType = (PointCloudType) f;
-            };
+            panel.PointCloudType.ValueChanged += (f, _) => listener.PointCloudType = (PointCloudType) f;
+            panel.SizeMultiplier.ValueChanged += f => listener.SizeMultiplierPow10 = (int) f;
         }
 
         public override void UpdatePanel()

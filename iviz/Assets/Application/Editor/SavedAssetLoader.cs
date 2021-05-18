@@ -16,10 +16,10 @@ namespace Iviz.Editor
 {
     public class SavedAssetLoader : UnityEditor.Editor
     {
-#if false
         [MenuItem("Iviz/Import Saved Assets To Unity")]
         public static async void CreateAllAssets()
         {
+            Resource.ClearResources();
             ExternalResourceManager manager = Resource.External;
             IReadOnlyList<string> resourceUris = manager.GetListOfModels();
 
@@ -40,6 +40,8 @@ namespace Iviz.Editor
             {
                 DestroyImmediate(managerNode);
             }
+
+            Resource.ClearResources();
         }
 
         /*
@@ -85,7 +87,7 @@ namespace Iviz.Editor
         }
 
 
-        static async Task CreateAssetAsync(Uri assetUri, ExternalResourceManager manager)
+        static async Task CreateAssetAsync([NotNull] Uri assetUri, ExternalResourceManager manager)
         {
             const string basePath = "Assets/Resources/Package/";
             string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
@@ -132,7 +134,7 @@ namespace Iviz.Editor
                     continue;
                 }
 
-                if (filter.sharedMesh.vertexCount != 0)
+                if (filter.sharedMesh.GetIndexCount(0) != 0)
                 {
                     Unwrapping.GenerateSecondaryUVSet(filter.sharedMesh);
                 }
@@ -193,7 +195,7 @@ namespace Iviz.Editor
                 MeshRenderer renderer = resource.GetComponent<MeshRenderer>();
                 Color color = resource.Color;
                 Color emissive = resource.EmissiveColor;
-                Texture2D texture = resource.Texture;
+                Texture2D texture = resource.DiffuseTexture;
 
                 if (writtenColors.TryGetValue((color, emissive, texture), out Material material))
                 {
@@ -282,34 +284,29 @@ namespace Iviz.Editor
                         break;
                     case LightType.Spot:
                         light.type = UnityEngine.LightType.Spot;
-                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        light.transform.LookAt(light.transform.position + source.Direction.Ros2Unity());
                         light.spotAngle = (float) source.Spot.OuterAngle * Mathf.Rad2Deg;
                         light.innerSpotAngle = (float) source.Spot.InnerAngle * Mathf.Rad2Deg;
                         break;
                     case LightType.Directional:
                         light.type = UnityEngine.LightType.Directional;
-                        light.transform.LookAt(light.transform.position + source.Direction.ToVector3());
+                        light.transform.LookAt(light.transform.position + source.Direction.Ros2Unity());
                         break;
                 }
             }
         }
 
-        static GameObject CreateModel(Sdf.Model model)
+        [NotNull]
+        static GameObject CreateModel([NotNull] Sdf.Model model)
         {
             GameObject modelObject = new GameObject("Model:" + model.Name);
             Pose pose = model.Pose?.ToPose() ?? UnityEngine.Pose.identity;
             Pose includePose = model.IncludePose?.ToPose() ?? UnityEngine.Pose.identity;
             modelObject.transform.SetLocalPose(includePose.Multiply(pose));
-
-            if (model.Models == null || model.Links == null)
-            {
-                // invalid
-                return modelObject;
-            }
-
+            
             foreach (Sdf.Model innerModel in model.Models)
             {
-                CreateModel(innerModel)?.transform.SetParent(modelObject.transform, false);
+                CreateModel(innerModel).transform.SetParent(modelObject.transform, false);
             }
 
             foreach (Sdf.Link link in model.Links)
@@ -320,7 +317,8 @@ namespace Iviz.Editor
             return modelObject;
         }
 
-        static GameObject CreateLink(Sdf.Link link)
+        [NotNull]
+        static GameObject CreateLink([NotNull] Sdf.Link link)
         {
             GameObject linkObject = new GameObject("Link:" + link.Name);
             linkObject.transform.SetLocalPose(link.Pose?.ToPose() ?? UnityEngine.Pose.identity);
@@ -353,7 +351,7 @@ namespace Iviz.Editor
                     }
 
                     resourceObject = Instantiate(assetObject, visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Mesh.Scale?.ToVector3().Abs() ?? Vector3.one;
+                    visualObject.transform.localScale = geometry.Mesh.Scale.Ros2Unity().Abs();
                     //isSynthetic = true;
                 }
                 else if (geometry.Cylinder != null)
@@ -367,7 +365,7 @@ namespace Iviz.Editor
                 else if (geometry.Box != null)
                 {
                     resourceObject = Instantiate(Resource.Displays.Cube.Object, visualObject.transform, false);
-                    visualObject.transform.localScale = geometry.Box.Scale?.ToVector3().Abs() ?? Vector3.one;
+                    visualObject.transform.localScale = geometry.Box.Scale.Ros2Unity().Abs();
                 }
                 else if (geometry.Sphere != null)
                 {
@@ -383,6 +381,5 @@ namespace Iviz.Editor
 
             return linkObject;
         }
-#endif
     }
 }

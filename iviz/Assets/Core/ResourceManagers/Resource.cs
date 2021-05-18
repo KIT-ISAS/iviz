@@ -101,7 +101,6 @@ namespace Iviz.Resources
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
-        [NotNull]
         public static async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
             CancellationToken token = default)
         {
@@ -116,7 +115,7 @@ namespace Iviz.Resources
             return Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         public static async ValueTask<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
@@ -125,7 +124,7 @@ namespace Iviz.Resources
                 : await External.TryGetGameObjectAsync(uriString, provider, token);
         }
 
-        [NotNull, ItemCanBeNull]
+        [ItemCanBeNull]
         internal static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
             [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {

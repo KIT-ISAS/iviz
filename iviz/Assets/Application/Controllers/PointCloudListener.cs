@@ -106,9 +106,26 @@ namespace Iviz.Controllers
             set
             {
                 config.PointSize = value;
-                pointCloud.ElementScale = value;
-                meshCloud.ElementScale = value;
+                UpdateSize();
             }
+        }
+
+        public int SizeMultiplierPow10
+        {
+            get => config.SizeMultiplier;
+            set
+            {
+                config.SizeMultiplier = value;
+                UpdateSize();
+            }
+        }
+
+        void UpdateSize()
+        {
+            float value = PointSize * Mathf.Pow(10, SizeMultiplierPow10);
+            pointCloud.ElementScale = value;
+            meshCloud.ElementScale = value;
+            
         }
 
         public ColormapId Colormap

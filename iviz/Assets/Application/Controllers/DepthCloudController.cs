@@ -28,7 +28,7 @@ namespace Iviz.Controllers
     {
         readonly DepthCloudConfiguration config = new DepthCloudConfiguration();
         readonly FrameNode node;
-        readonly DepthCloudResource resource;
+        readonly DepthCloudResource projector;
 
         ImageListener colorImage;
         ImageListener depthImage;
@@ -37,7 +37,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = FrameNode.Instantiate("DepthCloud");
-            resource = ResourcePool.RentDisplay<DepthCloudResource>(node.transform);
+            projector = ResourcePool.RentDisplay<DepthCloudResource>(node.transform);
             Config = new DepthCloudConfiguration();
         }
 
@@ -61,7 +61,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                resource.Visible = value;
+                projector.Visible = value;
             }
         }
 
@@ -84,7 +84,7 @@ namespace Iviz.Controllers
             set
             {
                 config.PointSize = value;
-                resource.ElementScale = value;
+                projector.ElementScale = value;
             }
         }
 
@@ -94,7 +94,7 @@ namespace Iviz.Controllers
             set
             {
                 config.FovAngle = value;
-                resource.FovAngle = value;
+                projector.FovAngle = value;
             }
         }
 
@@ -105,7 +105,7 @@ namespace Iviz.Controllers
             set
             {
                 colorImage = value;
-                resource.ColorImage = value?.ImageTexture;
+                projector.ColorImage = value?.ImageTexture;
             }
         }
 
@@ -126,7 +126,7 @@ namespace Iviz.Controllers
                     node.transform.SetParentLocal(depthImage.Node.transform);
                 }
 
-                resource.DepthImage = value?.ImageTexture;
+                projector.DepthImage = value?.ImageTexture;
             }
         }
 
@@ -135,7 +135,7 @@ namespace Iviz.Controllers
         public void StopController()
         {
             node.Stop();
-            resource.ReturnToPool();
+            projector.ReturnToPool();
             Object.Destroy(node.gameObject);
         }
 

@@ -1,5 +1,6 @@
 ﻿using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -75,10 +76,13 @@ namespace Iviz.App
 
         public void OnGotoClick()
         {
-            if (Frame != null && ModuleListPanel.GuiInputModule != null)
+            if (Frame == null)
             {
-                ModuleListPanel.GuiInputModule.LookAt(Frame.WorldPose.position);
+                return;
             }
+            
+            ModuleListPanel.GuiInputModule.LookAt(Frame.WorldPose.position);
+            TfListener.Instance.HighlightFrame(Frame.Id);
         }
 
         public void OnTrailClick()

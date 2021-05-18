@@ -22,6 +22,8 @@ namespace Iviz.Resources
         public const int Clickable = 8;
         
         public const int ARSetupMode = 14;
+        
+        public const int Collider = 15;
     }
 
     public sealed class DisplaysType

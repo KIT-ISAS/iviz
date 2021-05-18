@@ -171,7 +171,7 @@ namespace Iviz.Displays
         }
 
         [NotNull]
-        static string SanitizeForFilename([NotNull] string input)
+        public static string SanitizeForFilename([NotNull] string input)
         {
             if (input == null)
             {
