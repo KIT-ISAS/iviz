@@ -98,7 +98,7 @@ namespace Iviz.Roslib
             RemoteEndpoint = new Endpoint((IPEndPoint) tcpClient.Client.RemoteEndPoint!);
             task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
         }
-        
+
         public async Task DisposeAsync(CancellationToken token)
         {
             if (disposed)
@@ -250,7 +250,7 @@ namespace Iviz.Roslib
             }
 
             string? errorMessage = ProcessRemoteHeader(fields);
-            
+
             await SendHeader(stream, latching, errorMessage);
 
             if (errorMessage != null)
