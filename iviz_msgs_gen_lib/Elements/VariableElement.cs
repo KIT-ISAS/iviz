@@ -151,6 +151,7 @@ namespace Iviz.MsgsGen
                             ? $"public string? {CsFieldName};"
                             : $"public string {CsFieldName} {{ get; set; }}";
                     }
+
                     break;
                 case NotAnArray:
                     result = isInStruct
@@ -207,6 +208,7 @@ namespace Iviz.MsgsGen
                             ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
                             : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
                     }
+
                     break;
                 }
             }
@@ -269,12 +271,13 @@ namespace Iviz.MsgsGen
                 RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
 
             // is it in the assembly?
-            
+
             Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
             if (guessType == null)
             {
                 // nope? we bail out
-                throw new MessageDependencyException($"Cannot find md5 for message '{RosClassName}' or '{fullRosClassName}'.");
+                throw new MessageDependencyException(
+                    $"Cannot find md5 for message '{RosClassName}' or '{fullRosClassName}'.");
             }
 
             string md5Sum = BuiltIns.GetMd5Sum(guessType);
@@ -287,10 +290,11 @@ namespace Iviz.MsgsGen
     {
         public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
         {
+            // caller assembly should reference Iviz.Msgs!
             string guessName = $"Iviz.Msgs.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
-            return System.Type.GetType(guessName);
+            return Type.GetType(guessName);
         }
-        
+
         public static string GetMd5Sum(Type type)
         {
             if (type == null)
@@ -300,7 +304,7 @@ namespace Iviz.MsgsGen
 
             return GetClassStringConstant(type, "RosMd5Sum");
         }
-        
+
         static string GetClassStringConstant(Type type, string name)
         {
             string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
@@ -312,7 +316,7 @@ namespace Iviz.MsgsGen
 
             return constant;
         }
-        
+
         public static string RosNameToCs(string name)
         {
             if (name == null)

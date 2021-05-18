@@ -15,15 +15,17 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "secondary_color")] public StdMsgs.ColorRGBA SecondaryColor { get; set; }
         [DataMember (Name = "scale")] public double Scale { get; set; }
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "caption")] public string Caption { get; set; }
     
         /// <summary> Constructor for empty message. </summary>
         public Widget()
         {
             Id = string.Empty;
+            Caption = string.Empty;
         }
         
         /// <summary> Explicit constructor. </summary>
-        public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in StdMsgs.ColorRGBA MainColor, in StdMsgs.ColorRGBA SecondaryColor, double Scale, in GeometryMsgs.Pose Pose)
+        public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in StdMsgs.ColorRGBA MainColor, in StdMsgs.ColorRGBA SecondaryColor, double Scale, in GeometryMsgs.Pose Pose, string Caption)
         {
             this.Header = Header;
             this.Action = Action;
@@ -33,6 +35,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.SecondaryColor = SecondaryColor;
             this.Scale = Scale;
             this.Pose = Pose;
+            this.Caption = Caption;
         }
         
         /// <summary> Constructor with buffer. </summary>
@@ -46,6 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
             SecondaryColor = new StdMsgs.ColorRGBA(ref b);
             Scale = b.Deserialize<double>();
             Pose = new GeometryMsgs.Pose(ref b);
+            Caption = b.DeserializeString();
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -68,6 +72,7 @@ namespace Iviz.Msgs.IvizMsgs
             SecondaryColor.RosSerialize(ref b);
             b.Serialize(Scale);
             Pose.RosSerialize(ref b);
+            b.Serialize(Caption);
         }
         
         public void Dispose()
@@ -77,14 +82,16 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosValidate()
         {
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (Caption is null) throw new System.NullReferenceException(nameof(Caption));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 102;
+                int size = 106;
                 size += Header.RosMessageLength;
                 size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.UTF8.GetByteCount(Caption);
                 return size;
             }
         }
@@ -95,20 +102,20 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Widget";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "f58c2d09f3854ccb6a8bd72548889531";
+        [Preserve] public const string RosMd5Sum = "3b0c5b861de617f50925ad80644446b3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTW/bMAy961cQ6KHtsGTANuwQYIduxboeBmRr7wEjM7YAWXIlOan36/ekxE6DDdgO" +
-                "aw3D1gf59PhIKqZq1cY6vvkqXEmgpvzUekhCrJPxTsUUjKvJVPvVNHSCtYPbZ299+HHz6YpaNm6l8/RP" +
-                "u1G0dxWH4WCysZ7Th/cUNVtRtfhWEjaL19JHoQ4fpdTH//yob3c3C4qnUaszukuc6VUEHlxxYtp4qGHq" +
-                "RsLMylYsnLjtpKKym1WIczjeNyYS3lqcBLZ2oD7CKHnSvm17ZzRn0UwrJ/7wNI6YOg7J6N5ygL0PlXHZ" +
-                "fBO4lYyON8pDL04L3V4vYOOgZJ8MCA1A0EE45uzcXpPqjUvv3mYHdXa/8zNMpUZOp8MpNZwyWXnsgsTM" +
-                "k+MCZ7zaBzcH9uKQqkgXZW2FabwkHAIK0nnd0AWYL4fUeAdAoS0Hw2srGRjZtEA9z07nl0+QXYF27PwI" +
-                "v0c8nvEvsG7CzTHNGuTM5uhjX0NAGHbBb00F0/VQQLQ14hJZsw6oPZW99keqsy9ZYxjBq2QEf47Ra4ME" +
-                "VLQzqRkrv2Rjhfp/7mqc2mXfHshlmEb1NFpPI34uRr/3IyS/oiC5bCAo54uB/KZ0aS7kTRAI27GW17nu" +
-                "83J12DfFFpkiH8zoOye19KjPyUB976F7cAX3aPdSAYLK2MuozoSrLJb6mfgjFjRroXwS7nSRPU6jYRr9" +
-                "fBn6R+nGGKZEoaZP9Dwln2cPR91x47Vz9ZeIxtFOqV/yhEvMPAYAAA==";
+                "H4sIAAAAAAAAE71UwW7bMAy96ysI9NB2WDJgG3YIsEO3Yl0PA7K194CRGVuALLmSnNT7+j0psdNgA7bD" +
+                "2sCIKYl8enwkHVO1amMd33wVriRQU15qPSQh1sl4p2IKxtVkqv1uGjrB3iHss7c+/Lj5dEUtG7fSefmn" +
+                "0yjau4rDcHDZWM/pw3uKmq2oWnwrCYclaumjUIe/8WrNXWGi1Mf//FPf7m4WFE9FUGd0lzizrQi0uOLE" +
+                "tPEQx9SNhJmVrVgEcdtJReU0ixLnCLxvTCQ8tTgJbO1AfYRT8qR92/bOaM4amlZO4hFpHDF1HJLRveUA" +
+                "fx8q47L7JnArGR1PlIdenBa6vV7Ax0HYPhkQGoCgg3DMit1ek+qNS+/e5gB1dr/zMyylRomnyyk1nDJZ" +
+                "eeyCxMyT4wJ3vNonNwf24lC5SBdlb4VlvCRcAgrSed3QBZgvh9R4B0ChLQfDaysZGMW1QD3PQeeXT5Bd" +
+                "gXbs/Ai/Rzze8S+wbsLNOc0a1Mzm7GNfQ0A4dsFvTQXX9VBAtDXiElmzDmhFlaP2V6qzL1ljOCGqVARv" +
+                "jtFrgwJUtDOpGbuxVGOFcXjubpymZz8tqGWYrHqy1pPFz8Xo9/GE5FcUJLcNBOU8neQ3ZWhzI2+CQNiO" +
+                "tbzOfZ+3q8O5Kb6oFPlgxtg5qaVHf04O6nsP3YMruEe/l0oQVMZZRncmfNli6Z+JP3LBsBbKJ+lO37XH" +
+                "yRom6+fL0D9KN+YwFQo9faLnKfm8ejjqji9eO1d/yWi0dkr9AjyVAORLBgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

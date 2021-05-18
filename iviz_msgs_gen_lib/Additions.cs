@@ -21,6 +21,11 @@ namespace Iviz.MsgsGen
                 "public static Point operator /(in Point v, double f) => new Point(v.X / f, v.Y / f, v.Z / f);",
                 "public static Point operator -(in Point v) => new Point(-v.X, -v.Y, -v.Z);",
                 "public static implicit operator Point(in (double X, double Y, double Z) p) => new Point(p.X, p.Y, p.Z);",
+                "public readonly double Dot(in Point v) => X * v.X + Y * v.Y + Z * v.Z;",
+                "public readonly double SquaredNorm => Dot(this);",
+                "public readonly double Norm => System.Math.Sqrt(SquaredNorm);",
+                "public readonly Vector3 Normalized => this / Norm;",
+                "public readonly Vector3 Cross(in Point v) => new Point(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);",
             },
 
             ["geometry_msgs/Vector3"] = new[]
