@@ -823,11 +823,13 @@ namespace Iviz.Controllers
                     {
                         Logger.Info($"ControllerService: Creating dialog");
 
+                        /*
                         var dialogTimeSpan = srv.Request.Dialog.Lifetime.ToTimeSpan();
                         if (srv.Request.Dialog.Lifetime == default || dialogTimeSpan.TotalSeconds > 10)
                         {
                             srv.Request.Dialog.Lifetime = TimeSpan.FromSeconds(10);
                         }
+                        */
 
                         var dialog = GuiDialogListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                         if (dialog == null)
@@ -896,12 +898,15 @@ namespace Iviz.Controllers
                         signal.Release();
                     }
                 });
+                /*
                 if (!await signal.WaitAsync(10000))
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = "EE Request timed out!";
                     return;
                 }
+                */
+                await signal.WaitAsync();
 
                 if (string.IsNullOrEmpty(srv.Response.Message))
                 {

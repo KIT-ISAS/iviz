@@ -652,7 +652,7 @@ namespace Iviz.App
             }
         }
 
-        public void ResetAllModules()
+        void ResetAllModules()
         {
             foreach (ModuleData m in moduleDatas)
             {
@@ -691,6 +691,10 @@ namespace Iviz.App
             if (requestedId != null)
             {
                 moduleData.Configuration.Id = requestedId;
+            }
+            else if (configuration != null)
+            {
+                moduleData.Configuration.Id = configuration.Id;
             }
 
             moduleDatas.Add(moduleData);

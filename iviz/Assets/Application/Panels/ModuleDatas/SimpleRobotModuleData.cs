@@ -9,6 +9,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEditor;
 
 namespace Iviz.App
 {
@@ -204,7 +205,7 @@ namespace Iviz.App
             UpdateConfiguration(config, fields);
         }
 
-        public void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
+        public void UpdateConfiguration(RobotConfiguration config, [NotNull, ItemNotNull] IEnumerable<string> fields)
         {
             bool hasRobotName = false;
             bool hasSourceParameter = false;

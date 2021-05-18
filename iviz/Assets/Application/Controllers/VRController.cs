@@ -16,9 +16,9 @@ namespace Iviz.Controllers
 
     public class VRController : MonoBehaviour
     {
-        //[SerializeField] Camera mainCamera;
+        [SerializeField] Camera mainCamera;
         [SerializeField] EventSystem eventSystem = null;
-        IVRButton button;
+        [CanBeNull] IVRButton button;
 
         Transform mTransform;
         [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -63,6 +63,7 @@ namespace Iviz.Controllers
         void Awake()
         {
             Settings.IsVR = true;
+            Settings.MainCamera = mainCamera;
             
             resource = ResourcePool.RentDisplay<LineResource>(transform);
             resource.Set(new[]
@@ -76,6 +77,10 @@ namespace Iviz.Controllers
             target.GetComponent<BoxCollider>().enabled = false;
 
             button = GetComponent<IVRButton>();
+            if (button == null)
+            {
+                Debug.LogError("VRController: Button is not set!");
+            }
         }
 
         void Update()
@@ -95,6 +100,11 @@ namespace Iviz.Controllers
                 target.Visible = true;
                 target.Transform.position = hit.point;
                 target.Transform.rotation = Quaternion.LookRotation(hit.normal) * Quaternion.AngleAxis(90, Vector3.left);
+            }
+
+            if (button == null)
+            {
+                return;
             }
 
             if (button.PointerDown())
