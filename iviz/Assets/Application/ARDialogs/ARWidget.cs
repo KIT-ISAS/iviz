@@ -97,7 +97,7 @@ namespace Iviz.App.ARDialogs
         {
             if (Transform.parent != Node.Transform)
             {
-                Transform.parent = Node.Transform;
+                Transform.SetParentLocal(Node.Transform);
                 Transform.SetLocalPose(Pose.identity);
             }
 

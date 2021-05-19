@@ -406,10 +406,10 @@ namespace Iviz.App.ARDialogs
         {
             base.Awake();
 
-            connector.Start = () => Transform.position - BaseDisplacement;
+            connector.Start = () => Transform.localPosition - BaseDisplacement;
             connector.End = () =>
             {
-                Vector3 framePosition = Node.Transform.position + PivotFrameOffset;
+                Vector3 framePosition = TfListener.RelativePositionToOrigin(Node.Transform.position) + PivotFrameOffset;
 
                 return PivotDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
@@ -487,42 +487,6 @@ namespace Iviz.App.ARDialogs
 
             Quaternion currentRotation = Transform.rotation;
             Transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, 0.05f);
-
-            /*
-            (float x, _, float z) = Transform.position - Settings.MainCameraTransform.position;
-            float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
-
-            if (currentAngle == null)
-            {
-                currentAngle = targetAngle;
-            }
-            else
-            {
-                float alternativeAngle = targetAngle - 360;
-                float closestAngle = Mathf.Abs(alternativeAngle - currentAngle.Value) <
-                                     Mathf.Abs(targetAngle - currentAngle.Value)
-                    ? alternativeAngle
-                    : targetAngle;
-
-                float deltaAngle = closestAngle - currentAngle.Value;
-                if (Mathf.Abs(deltaAngle) < 1)
-                {
-                    return;
-                }
-
-                currentAngle = currentAngle.Value + deltaAngle * 0.05f;
-                if (currentAngle > 180)
-                {
-                    currentAngle -= 360;
-                }
-                else if (currentAngle < -180)
-                {
-                    currentAngle += 360;
-                }
-            }
-
-            Transform.rotation = Quaternion.AngleAxis(currentAngle.Value, Vector3.up);
-            */
         }
 
         void UpdatePosition()
@@ -532,18 +496,18 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            Vector3 framePosition = Node.Transform.position + PivotFrameOffset;
-            Quaternion cameraRotation = GetFlatCameraRotation(framePosition);
+            Vector3 frameLocalPosition = TfListener.RelativePositionToOrigin(Node.Transform.position) + PivotFrameOffset;
+            Quaternion cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
-            Vector3 targetPosition = framePosition + cameraRotation * DialogDisplacement + BaseDisplacement;
-
+            Vector3 targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
+            Vector3 targetAbsolutePosition = TfListener.OriginFrame.Transform.TransformPoint(targetLocalPosition);
             if (currentPosition == null)
             {
-                currentPosition = targetPosition;
+                currentPosition = targetAbsolutePosition;
             }
             else
             {
-                Vector3 deltaPosition = targetPosition - Transform.position;
+                Vector3 deltaPosition = targetAbsolutePosition - Transform.position;
                 if (deltaPosition.MaxAbsCoeff() < 0.001f)
                 {
                     return;
@@ -556,15 +520,20 @@ namespace Iviz.App.ARDialogs
             Transform.position = currentPosition.Value;
         }
 
-        static Quaternion GetFlatCameraRotation(in Vector3 framePosition)
+        static Quaternion GetFlatCameraRotation(in Vector3 localPosition)
         {
-            (float x, _, float z) = framePosition - Settings.MainCameraTransform.position;
+            Vector3 absolutePosition = TfListener.OriginFrame.Transform.TransformPoint(localPosition);
+            (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
-            return Quaternion.AngleAxis(targetAngle, Vector3.up);
+            Quaternion absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
+
+            return Quaternion.Inverse(TfListener.OriginFrame.Transform.rotation) * absoluteRotation;
         }
 
         public void Initialize()
         {
+            Transform.SetParentLocal(TfListener.OriginFrame.Transform);
+
             connector.Visible = true;
             resetOrientation = true;
 

@@ -25,6 +25,7 @@ namespace Iviz.App.ARDialogs
         void Awake()
         {
             node = new GameObject("AR LineConnector Node");
+            node.transform.SetParentLocal(TfListener.OriginFrame.transform);
             lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
@@ -104,9 +105,9 @@ namespace Iviz.App.ARDialogs
             Vector3 b = End();
             Vector3 mid = new Vector3((a.x + b.x) / 2, b.y, (a.z + b.z) / 2);
 
-            spheres[0].Transform.position = a;
-            spheres[1].Transform.position = mid;
-            spheres[2].Transform.position = b;
+            spheres[0].Transform.localPosition = a;
+            spheres[1].Transform.localPosition = mid;
+            spheres[2].Transform.localPosition = b;
 
             Color32 colorMid = color.WithAlpha(130);
             Color32 colorB = color.WithAlpha(10);

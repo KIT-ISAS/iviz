@@ -90,7 +90,7 @@ namespace Iviz.Controllers
             rootFrame.ForceInvisible = true;
             rootFrame.Visible = false;
             rootFrame.AddListener(defaultListener);
-
+            
             originFrame = Add(CreateFrameObject(OriginFrameName, RootFrame.Transform, RootFrame));
             originFrame.Parent = RootFrame;
             originFrame.ForceInvisible = true;
@@ -102,6 +102,8 @@ namespace Iviz.Controllers
             mapFrame.Parent = OriginFrame;
             mapFrame.AddListener(defaultListener);
             mapFrame.ParentCanChange = false;
+
+            //rootFrame.Transform.localScale = 0.5f * Vector3.one;
 
             FixedFrame = MapFrame;
 

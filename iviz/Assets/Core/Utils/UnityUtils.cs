@@ -108,6 +108,11 @@ namespace Iviz.Core
             return p.rotation * v + p.position;
         }
 
+        public static Vector3 MultiplyDirection(this Pose p, in Vector3 v)
+        {
+            return p.rotation * v;
+        }
+
         public static Pose Multiply(this Pose p, in Pose o)
         {
             return new Pose

@@ -206,6 +206,7 @@ namespace Iviz.Controllers
                             widget = area;
                             break;
                         }
+                        /*
                         case WidgetType.PositionDisc3D:
                         {
                             info = Resource.Displays.TargetArea;
@@ -213,7 +214,8 @@ namespace Iviz.Controllers
                             disc.Moved += OnDiscMoved;
                             widget = disc;
                             break;
-                        }                        
+                        } 
+                        */                       
                         default:
                             Logger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int) msg.Type).ToString()}");
                             return;

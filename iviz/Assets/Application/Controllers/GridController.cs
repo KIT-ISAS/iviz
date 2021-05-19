@@ -95,14 +95,14 @@ namespace Iviz.Controllers
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.parent = TfListener.MapFrame.transform;
+                    reflectionProbe.transform.SetParentLocal(TfListener.MapFrame.transform);
                     grid.Visible = false;
                     //node.Selected = false;
                 }
                 else
                 {
                     grid.Visible = true;
-                    reflectionProbe.transform.parent = grid.transform;
+                    reflectionProbe.transform.SetParentLocal(grid.transform);
                 }
 
                 reflectionProbe.RenderProbe();
@@ -229,6 +229,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         public string TapTopic
         {
             get => config.TapTopic;
@@ -243,6 +244,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         public string LastTapPositionString =>
             lastTapPosition == null
                 ? "<b>Last Tap Position:</b>\n<i>None</i>"
@@ -256,13 +258,13 @@ namespace Iviz.Controllers
             grid.name = "Grid";
 
             node = FrameNode.Instantiate("GridNode");
-            grid.transform.parent = node.transform;
+            grid.transform.SetParentLocal(node.transform);
 
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
-            reflectionProbe.transform.parent = grid.transform;
+            reflectionProbe.transform.SetParentLocal(grid.transform);
             reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
@@ -285,7 +287,7 @@ namespace Iviz.Controllers
         {
             if (SenderPoint != null && grid.TryRaycast(cameraPoint, out Vector3 hit))
             {
-                lastTapPosition = TfListener.RelativePositionToFixedFrame(hit).Unity2RosPoint();
+                lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
                 SenderPoint.Publish(new PointStamped
                 {
                     Header = (clickedSeq++, TfListener.FixedFrameId),

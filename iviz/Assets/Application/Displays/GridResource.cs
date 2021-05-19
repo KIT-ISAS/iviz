@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
@@ -184,7 +185,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Vector3 cameraPos = Settings.MainCameraTransform.position;
+            Vector3 cameraPos = TfListener.RelativePositionToOrigin(Settings.MainCameraTransform.position);
             switch (Orientation)
             {
                 case GridOrientation.XY:
