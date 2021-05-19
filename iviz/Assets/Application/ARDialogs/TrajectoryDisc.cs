@@ -7,7 +7,7 @@ using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Application.ARDialogs
+namespace Iviz.App.ARDialogs
 {
     public class TrajectoryDisc : ARWidget, IRecyclable
     {

@@ -4,7 +4,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using UnityEngine;
 
-namespace Application.ARDialogs
+namespace Iviz.App.ARDialogs
 {
     public sealed class TargetWidget : ARWidget, IRecyclable
     {

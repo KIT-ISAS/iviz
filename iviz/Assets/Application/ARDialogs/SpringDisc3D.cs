@@ -43,7 +43,7 @@ namespace Iviz.App.ARDialogs
 
         protected override void Update()
         {
-            base.Update();;
+            base.Update();
             
             anchor.transform.localRotation = disc.Transform.localRotation; // copy billboard
             

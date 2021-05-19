@@ -14,6 +14,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         TrajectoryDisc,
         Tooltip,
         TargetArea,
+        PositionDisc3D,
     }
     
     public sealed class Widget : RosMessageWrapper<Widget>

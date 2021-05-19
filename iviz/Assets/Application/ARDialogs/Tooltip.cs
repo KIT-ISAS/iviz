@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
-namespace Application.ARDialogs
+namespace Iviz.App.ARDialogs
 {
     public sealed class Tooltip : ARWidget, IRecyclable
     {
