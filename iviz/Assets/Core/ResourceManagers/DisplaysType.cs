@@ -69,6 +69,7 @@ namespace Iviz.Resources
         public Info<GameObject> TrajectoryDisc { get; }
         public Info<GameObject> Tooltip { get; }
         public Info<GameObject> TargetArea { get; }
+        public Info<GameObject> PositionDisc3D { get; }
 
         public DisplaysType()
         {
@@ -116,6 +117,7 @@ namespace Iviz.Resources
                 TrajectoryDisc = new Info<GameObject>(appAssetHolder.TrajectoryDisc);
                 Tooltip = new Info<GameObject>(appAssetHolder.Tooltip);
                 TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
+                PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
 
                 resourceByType = CreateTypeDictionary(this);
             }
@@ -138,6 +140,11 @@ namespace Iviz.Resources
                 }
 
                 Info<GameObject> info = (Info<GameObject>) property.GetValue(o);
+                if (info == null)
+                {
+                    Debug.LogError("DisplaysType: Property " + property.Name + " has not been set!");
+                    continue;
+                }
                 IDisplay display = info.Object.GetComponent<IDisplay>();
                 Type type = display?.GetType();
                 string name = type?.FullName;

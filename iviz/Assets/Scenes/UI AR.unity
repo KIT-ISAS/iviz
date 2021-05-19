@@ -21,7 +21,7 @@ RenderSettings:
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.9506319, g: 1.0834408, b: 1.3350785, a: 1}
-  m_AmbientEquatorColor: {r: 0.13163047, g: 0.538859, b: 0.5471698, a: 1}
+  m_AmbientEquatorColor: {r: 0.3220995, g: 0.5400534, b: 0.54628074, a: 1}
   m_AmbientGroundColor: {r: 1.0418848, g: 1.0837696, b: 1.3350785, a: 1}
   m_AmbientIntensity: 0
   m_AmbientMode: 1
@@ -3927,8 +3927,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1441077224}
   m_HandleRect: {fileID: 1441077223}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 0.6072746
+  m_Value: 1
+  m_Size: 1
   m_NumberOfSteps: 4
   m_OnValueChanged:
     m_PersistentCalls:
@@ -6496,7 +6496,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00008010864, y: -0.000015258789}
+  m_AnchoredPosition: {x: -0.00008010864, y: -0.000045776367}
   m_SizeDelta: {x: 0.000076293945, y: 150.00363}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1269956516
@@ -12297,80 +12297,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cde59eccc2edfbb43b6022d8c3de81a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &2140909696
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_Name
-      value: Spring Disc 3D
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 68518ad40aa4f4b588e6061d42800afe, type: 3}
 --- !u!4 &2143043449 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4694768697783269931, guid: 1dd964befeabf466689ae7034b5f36be,

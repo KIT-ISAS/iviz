@@ -313,7 +313,7 @@ namespace Iviz.Displays
                     child.transform.parent = collisionObject.transform;
                     child.transform.SetLocalPose(meshFilter.transform.AsPose());
                     child.transform.localScale = meshFilter.transform.lossyScale;
-                    child.layer = 1 << LayerType.Collider;
+                    child.layer = LayerType.Collider;
 
                     var collider = child.AddComponent<MeshCollider>();
                     collider.sharedMesh = meshFilter.sharedMesh;
@@ -333,7 +333,6 @@ namespace Iviz.Displays
                     geometry.Cylinder.Radius * 2,
                     geometry.Cylinder.Length,
                     geometry.Cylinder.Radius * 2);
-                collisionObject.layer = 1 << LayerType.Collider;
             }
             else if (geometry.Box != null)
             {

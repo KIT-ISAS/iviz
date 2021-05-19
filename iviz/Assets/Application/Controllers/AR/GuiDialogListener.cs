@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Application.ARDialogs;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -162,7 +161,7 @@ namespace Iviz.Controllers
                         {
                             info = Resource.Displays.RotationDisc;
                             var disc = ResourcePool.RentDisplay<RotationDisc>();
-                            disc.Moved += OnRotationDiscMoved;
+                            disc.Moved += OnDiscRotated;
                             widget = disc;
                             break;
                         }
@@ -170,7 +169,7 @@ namespace Iviz.Controllers
                         {
                             info = Resource.Displays.SpringDisc;
                             var disc = ResourcePool.RentDisplay<SpringDisc>();
-                            disc.Moved += OnSpringDiscMoved;
+                            disc.Moved += OnDiscMoved;
                             widget = disc;
                             break;
                         }
@@ -178,7 +177,7 @@ namespace Iviz.Controllers
                         {
                             info = Resource.Displays.SpringDisc3D;
                             var disc = ResourcePool.RentDisplay<SpringDisc3D>();
-                            disc.Moved += OnSpringDiscMoved;
+                            disc.Moved += OnDiscMoved;
                             widget = disc;
                             break;
                         }
@@ -207,6 +206,14 @@ namespace Iviz.Controllers
                             widget = area;
                             break;
                         }
+                        case WidgetType.PositionDisc3D:
+                        {
+                            info = Resource.Displays.TargetArea;
+                            var disc = ResourcePool.RentDisplay<PositionDisc3D>();
+                            disc.Moved += OnDiscMoved;
+                            widget = disc;
+                            break;
+                        }                        
                         default:
                             return;
                     }
@@ -423,7 +430,7 @@ namespace Iviz.Controllers
         }
 
 
-        void OnRotationDiscMoved([NotNull] ARWidget widget, float angleInDeg)
+        void OnDiscRotated([NotNull] ARWidget widget, float angleInDeg)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -435,7 +442,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void OnSpringDiscMoved(ARWidget widget, Vector3 direction)
+        void OnDiscMoved(ARWidget widget, Vector3 direction)
         {
             FeedbackSender?.Publish(new Feedback
             {
