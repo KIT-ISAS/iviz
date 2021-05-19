@@ -208,10 +208,10 @@ namespace Iviz.Controllers
                             break;
                         }
                         default:
+                            Logger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int) msg.Type).ToString()}");
                             return;
                     }
 
-                    Debug.Log("Adding " + msg.Id);
                     widget.Id = msg.Id;
                     widget.AttachTo(msg.Header.FrameId);
                     widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());
@@ -226,7 +226,7 @@ namespace Iviz.Controllers
                     break;
                 }
                 default:
-                    Logger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
+                    Logger.Error($"{this}: Widget '{msg.Id}' requested unknown action {((int) msg.Action).ToString()}");
                     break;
             }
         }
@@ -466,7 +466,7 @@ namespace Iviz.Controllers
                 }
             });
         }
-        
+
         void OnTargetAreaMoved(TargetWidget widget, Vector2 scale, Vector3 position)
         {
             FeedbackSender?.Publish(new Feedback
@@ -479,7 +479,7 @@ namespace Iviz.Controllers
                 Position = position.Unity2RosPoint()
             });
         }
-        
+
         void OnTargetAreaCanceled([NotNull] TargetWidget widget)
         {
             FeedbackSender?.Publish(new Feedback
@@ -489,7 +489,7 @@ namespace Iviz.Controllers
                 FeedbackType = FeedbackType.ButtonClick,
                 EntryId = -1,
             });
-        }        
+        }
 
         static time SecsToTime(float time)
         {
