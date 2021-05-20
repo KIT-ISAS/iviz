@@ -34,7 +34,7 @@ namespace Iviz.App.ARDialogs
             button.Icon = ARButton.ButtonIcon.Ok;
             button.Caption = "Send!";
             button.Visible = false;
-            button.Transform.parent = Transform.parent;
+            button.Transform.SetParentLocal(Transform);
 
             disc.StartDragging += () =>
             {
