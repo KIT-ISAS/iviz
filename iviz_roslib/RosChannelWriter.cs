@@ -15,7 +15,7 @@ namespace Iviz.Roslib
         string? publisherId;
         bool disposed;
         bool latchingEnabled;
-        bool forceTcpNoDelay;
+        bool forceTcpNoDelay = true;
 
         public bool Started => publisher != null;
 

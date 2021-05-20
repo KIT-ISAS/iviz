@@ -378,7 +378,8 @@ namespace Iviz.Roslib.MarkerHelper
             Sphere = 7,
         }
 
-        public int CreateMeshList(Point[] positions, MeshType meshType, ColorRGBA? color = null, Pose? pose = null,
+        public int CreateMeshList(Point[] positions, MeshType meshType, ColorRGBA[]? colors = null,
+            ColorRGBA? color = null, Pose? pose = null,
             Vector3? scale = null, string frameId = "", int replaceId = -1)
         {
             if (positions == null)
@@ -387,7 +388,7 @@ namespace Iviz.Roslib.MarkerHelper
             }
 
             int id = replaceId != -1 ? replaceId : GetFreeId();
-            markers[id] = CreateMeshList(ns, id, positions, null, color, meshType, pose, scale, frameId);
+            markers[id] = CreateMeshList(ns, id, positions, colors, color, meshType, pose, scale, frameId);
             return id;
         }
 
@@ -449,7 +450,7 @@ namespace Iviz.Roslib.MarkerHelper
                 Ns = ns ?? "",
                 Id = id,
                 Action = Marker.DELETE,
-            };            
+            };
         }
 
         public void Erase(int id)
@@ -699,7 +700,7 @@ namespace Iviz.Roslib.MarkerHelper
             var erase = new InteractiveMarkerUpdate
             {
                 Type = InteractiveMarkerUpdate.UPDATE,
-                Erases = args 
+                Erases = args
             };
             return erase;
         }

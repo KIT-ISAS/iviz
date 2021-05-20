@@ -320,7 +320,7 @@ namespace Iviz.XmlRpc
 #if !NETSTANDARD2_0
         public static async Task AwaitNoThrow(this ValueTask t, object caller)
         {
-            if (t == null || t.RanToCompletion())
+            if (t.RanToCompletion())
             {
                 return;
             }

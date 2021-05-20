@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Roslib.Actionlib
 {
@@ -281,6 +282,7 @@ namespace Iviz.Roslib.Actionlib
 
             TAGoal actionGoal = new()
             {
+                Header = new Header(0, time.Now(), ""),
                 GoalId = goalId
             };
 
@@ -518,6 +520,24 @@ namespace Iviz.Roslib.Actionlib
             where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
         {
             return new();
+        }
+
+        public static async ValueTask<RosActionClient<TActionGoal, TActionFeedback, TActionResult>> 
+            CreateClientAsync<TActionGoal, TActionFeedback, TActionResult>(
+                this IRosClient client, string actionName, CancellationToken token = default)
+            where TActionGoal : class, IActionGoal, new()
+            where TActionFeedback : class, IActionFeedback, IDeserializable<TActionFeedback>, new()
+            where TActionResult : class, IActionResult, IDeserializable<TActionResult>, new()
+        {
+            var actionClient = new RosActionClient<TActionGoal, TActionFeedback, TActionResult>();
+            await actionClient.StartAsync(client, actionName, token);
+            return actionClient;
+        }
+
+        public static RosGoalStatus GetStatus<TActionResult>(this TActionResult result)
+            where TActionResult : class, IActionResult
+        {
+            return (RosGoalStatus) result.Status.Status;
         }
     }
 }
