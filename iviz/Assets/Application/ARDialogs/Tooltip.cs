@@ -36,7 +36,7 @@ namespace Iviz.App.ARDialogs
             set
             {
                 text.text = value;
-                cube.Transform.localScale = new Vector3(text.preferredWidth * 1.5f, text.preferredHeight * 1.5f, 0.01f);
+                cube.Transform.localScale = new Vector3(text.preferredWidth + 0.1f, text.preferredHeight + 0.05f, 0.01f);
                 BoxCollider.size = cube.Transform.localScale;
             }
         }
@@ -52,8 +52,9 @@ namespace Iviz.App.ARDialogs
             cube.ReturnToPool(Resource.Displays.Cube);
         }
 
-        void Update()
+        protected override void Update()
         {
+            base.Update();
             Transform.LookAt(2 * Transform.position - Settings.MainCameraTransform.position, Vector3.up);
         }
     }

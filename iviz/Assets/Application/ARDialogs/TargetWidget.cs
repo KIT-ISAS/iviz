@@ -145,6 +145,7 @@ namespace Iviz.App.ARDialogs
         {
             base.Suspend();
             TargetScale = Vector2.one;
+            corner.Transform.localPosition = new Vector3(0.5f, 0, 0.5f);
             Moved = null;
             Cancelled = null;
             scaling = false;

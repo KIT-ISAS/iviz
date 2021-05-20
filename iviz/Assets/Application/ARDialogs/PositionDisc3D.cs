@@ -51,7 +51,7 @@ namespace Iviz.App.ARDialogs
             {
                 dragBack = true;
                 button.Visible = false;
-                Moved?.Invoke(this, Transform.localPosition);
+                Moved?.Invoke(this, disc.Transform.localPosition);
             };
         }
 

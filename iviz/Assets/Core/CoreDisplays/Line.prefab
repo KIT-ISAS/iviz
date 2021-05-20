@@ -46,12 +46,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feb11f9849bf040b588ef72bcff3d0c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boxCollider: {fileID: 0}
   colormap: 0
   intensityBounds: {x: 0, y: 0}
   flipMinMax: 0
   tint: {r: 0, g: 0, b: 0, a: 0}
-  elementSize: 1
-  size: 0
+  elementScale: 1
 --- !u!65 &6975508339416741862
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -63,7 +63,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 0.01, y: 0.01, z: 0.01}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &5921332118629342377
 MeshFilter:

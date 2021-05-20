@@ -148,11 +148,12 @@ namespace Iviz.Controllers
             set
             {
                 setupModeEnabled = value;
+                ArSet.Visible = value;
+                ArSet.State = value;
+                
                 if (value)
                 {
                     arCamera.cullingMask = 1 << LayerType.ARSetupMode;
-                    ArSet.Visible = false;
-                    ArSet.State = true;
                     ArInfoPanel.SetActive(true);
                 }
                 else
