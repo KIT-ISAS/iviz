@@ -26,7 +26,26 @@ namespace Iviz.Msgs
 
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis)
         {
-            return (System.Math.Sin(angleInRad / 2) * axis, System.Math.Cos(angleInRad / 2));
+            double halfAngleInRad = angleInRad / 2;
+            return (System.Math.Sin(halfAngleInRad) * axis, System.Math.Cos(halfAngleInRad));
+        }
+
+        public static Quaternion AngleAxis(double angleInRad, VectorUnitX _)
+        {
+            double halfAngleInRad = angleInRad / 2;
+            return new Quaternion(System.Math.Sin(halfAngleInRad), 0, 0, System.Math.Cos(halfAngleInRad));
+        }
+
+        public static Quaternion AngleAxis(double angleInRad, VectorUnitY _)
+        {
+            double halfAngleInRad = angleInRad / 2;
+            return new Quaternion(0, System.Math.Sin(halfAngleInRad), 0, System.Math.Cos(halfAngleInRad));
+        }
+
+        public static Quaternion AngleAxis(double angleInRad, VectorUnitZ _)
+        {
+            double halfAngleInRad = angleInRad / 2;
+            return new Quaternion(0, 0, System.Math.Sin(halfAngleInRad), System.Math.Cos(halfAngleInRad));
         }
 
         public static Quaternion Rodrigues(in Vector3 rod)
@@ -44,6 +63,9 @@ namespace Iviz.Msgs
         }
 
         public static Pose WithPosition(this Pose pose, in Point position) => new(position, pose.Orientation);
+
+        public static Pose WithPosition(this Pose pose, double x, double y, double z) =>
+            new(new Point(x, y, z), pose.Orientation);
 
         public static Pose WithOrientation(this Pose pose, in Quaternion orientation) =>
             new(pose.Position, orientation);
@@ -77,6 +99,9 @@ namespace Iviz.Msgs
         public static ColorRGBA WithBlue(this ColorRGBA c, float blue) => new(c.R, c.G, blue, c.A);
         public static ColorRGBA WithAlpha(this ColorRGBA c, float alpha) => new(c.R, c.G, c.B, alpha);
 
+        public static ColorRGBA Interpolate(this ColorRGBA c, in ColorRGBA v, float f) =>
+            new ColorRGBA(c.R + f * (v.R - c.R), c.G + f * (v.G - c.G), c.B + f * (v.B - c.B), c.A + f * (v.A - c.A));
+
         public static void Deconstruct(this ColorRGBA v, out float R, out float G, out float B, out float A) =>
             (R, G, B, A) = (v.R, v.G, v.B, v.A);
 
@@ -91,14 +116,17 @@ namespace Iviz.Msgs
         public static Vector3 WithY(this Vector3 p, double y) => new(p.X, y, p.Z);
         public static Vector3 WithZ(this Vector3 p, double z) => new(p.X, p.Y, z);
 
+        public static Point32 AsPoint32(this Vector3 p) => new((float) p.X, (float) p.Y, (float) p.Z);
+        public static Point32 AsPoint32(this Point p) => new((float) p.X, (float) p.Y, (float) p.Z);
+
         public static void Deconstruct(this Vector3 v, out double X, out double Y, out double Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
 
         public static void Deconstruct(this Vector3f v, out float X, out float Y, out float Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
-        
+
         public static void Deconstruct(this Vector2f v, out float X, out float Y) => (X, Y) = (v.X, v.Y);
-        
+
         public static Quaternion WithX(this Quaternion p, double x) => new(x, p.Y, p.Z, p.W);
         public static Quaternion WithY(this Quaternion p, double y) => new(p.X, y, p.Z, p.W);
         public static Quaternion WithZ(this Quaternion p, double z) => new(p.X, p.Y, z, p.W);
@@ -133,7 +161,7 @@ namespace Iviz.Msgs
         public static TransformStamped WithChildFrameId(this TransformStamped ts, string? s) =>
             new(ts.Header, s ?? "", ts.Transform);
 
-        public static void Deconstruct(this TransformStamped t, out StdMsgs.Header Header, out string ChildFrameId,
+        public static void Deconstruct(this TransformStamped t, out Header Header, out string ChildFrameId,
             out Transform Transform)
         {
             Header = t.Header;
@@ -143,13 +171,13 @@ namespace Iviz.Msgs
 
         public static string ToString(in Point p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
-        
+
         public static string ToString(in Vector3 p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
-        
+
         public static string ToString(in Vector3f p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
-        
+
         public static string ToString(in Quaternion p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, " +
             $"\"z\": {p.Z.ToString(BuiltIns.Culture)}, \"w\": {p.W.ToString(BuiltIns.Culture)}}}";
@@ -157,5 +185,53 @@ namespace Iviz.Msgs
         public static string ToString(in ISerializable t) => JsonConvert.SerializeObject(t);
 
         public static string ToString(IService t) => JsonConvert.SerializeObject(t);
+    }
+
+
+    public readonly struct VectorUnitX
+    {
+        public static implicit operator Vector3(VectorUnitX _) => new Vector3(1, 0, 0);
+        public static Vector3 operator *(double f, VectorUnitX _) => new Vector3(f, 0, 0);
+        public static Vector3 operator *(VectorUnitX _, double f) => new Vector3(f, 0, 0);
+        public static Vector3 operator -(VectorUnitX _) => new Vector3(-1, 0, 0);
+        public static Vector3 operator /(VectorUnitX _, double f) => new Vector3(1 / f, 0, 0);
+        public static string ToString(in Vector3 _) => $"{{\"x\": 1, \"y\": 0, \"z\": 0}}";
+    }
+
+    public readonly struct VectorUnitY
+    {
+        public static implicit operator Vector3(VectorUnitY _) => new Vector3(0, 1, 0);
+        public static Vector3 operator *(double f, VectorUnitY _) => new Vector3(0, f, 0);
+        public static Vector3 operator *(VectorUnitY _, double f) => new Vector3(0, f, 0);
+        public static Vector3 operator -(VectorUnitY _) => new Vector3(0, -1, 0);
+        public static Vector3 operator /(VectorUnitY _, double f) => new Vector3(0, 1 / f, 0);
+        public static string ToString(in Vector3 _) => $"{{\"x\": 0, \"y\": 1, \"z\": 0}}";
+    }
+
+    public readonly struct VectorUnitZ
+    {
+        public static implicit operator Vector3(VectorUnitZ _) => new Vector3(0, 0, 1);
+        public static Vector3 operator *(double f, VectorUnitZ _) => new Vector3(0, 0, f);
+        public static Vector3 operator *(VectorUnitZ _, double f) => new Vector3(0, 0, f);
+        public static Vector3 operator -(VectorUnitZ _) => new Vector3(0, 0, -1);
+        public static Vector3 operator /(VectorUnitZ _, double f) => new Vector3(0, 0, 1 / f);
+        public Vector3 Cross(in Vector3 v) => new Vector3(-v.Y, v.X, 0);
+        public static string ToString(in Vector3 _) => $"{{\"x\": 0, \"y\": 0, \"z\": 1}}";
+    }
+
+    public readonly struct VectorOne
+    {
+        public static implicit operator Vector3(VectorOne _) => new Vector3(1, 1, 1);
+        public static Vector3 operator *(double f, VectorOne _) => new Vector3(f, f, f);
+        public static Vector3 operator *(VectorOne _, double f) => new Vector3(f, f, f);
+        public static Vector3 operator -(VectorOne _) => new Vector3(-1, -1, -1);
+
+        public static Vector3 operator /(VectorOne _, double f)
+        {
+            double iF = 1 / f;
+            return new Vector3(iF, iF, iF);
+        }
+
+        public static string ToString(in VectorOne _) => $"{{\"x\": 1, \"y\": 1, \"z\": 1}}";
     }
 }

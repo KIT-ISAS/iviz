@@ -43,7 +43,7 @@ namespace Iviz.MsgsGen
             CsPackage = MsgParser.CsIfy(package);
             Name = Path.GetFileNameWithoutExtension(path);
             string[] lines = File.ReadAllLines(path);
-            File.ReadAllText(path);
+            //File.ReadAllText(path);
 
             List<IElement> elements = MsgParser.ParseFile(lines, Name);
             int serviceSeparator = elements.FindIndex(x => x.Type == ElementType.ServiceSeparator);
