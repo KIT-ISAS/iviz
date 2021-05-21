@@ -82,6 +82,16 @@ namespace Iviz.Msgs
             return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
         }
 
+        public static bool operator >=(time left, time right)
+        {
+            return !(left < right);
+        }
+        
+        public static bool operator <=(time left, time right)
+        {
+            return !(left > right);
+        }
+
         public time WithSecs(uint secs)
         {
             return new(secs, Nsecs);

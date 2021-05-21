@@ -71,10 +71,20 @@ namespace Iviz.Msgs
         {
             return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
         }
+
+        public static bool operator >=(duration left, duration right)
+        {
+            return !(left < right);
+        }
         
+        public static bool operator <=(duration left, duration right)
+        {
+            return !(left > right);
+        }
+
         public override string ToString()
         {
-            return $"{{\"secs\":{Secs},\"nsecs\":{Nsecs}}}";
+            return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
         }
     }
 }
