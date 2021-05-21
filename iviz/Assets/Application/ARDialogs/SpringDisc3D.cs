@@ -11,12 +11,23 @@ namespace Iviz.App.ARDialogs
         [SerializeField] DraggablePlane disc = null;
         [SerializeField] Transform anchor = null;
         [SerializeField] float linkWidth = 0.2f;
+        [SerializeField] MeshMarkerResource outerDisc = null;
         LineResource line;
         bool dragBack;
         
         readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
 
         public event Action<SpringDisc3D, Vector3> Moved;
+        
+        public override Color MainColor
+        {
+            get => base.MainColor;
+            set
+            {
+                base.MainColor = value;
+                outerDisc.Color = value;
+            }
+        }
 
         protected override void Awake()
         {

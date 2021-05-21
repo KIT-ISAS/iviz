@@ -108,6 +108,8 @@ MonoBehaviour:
   Tooltip: {fileID: 2498166935032724989, guid: 6303af998896f4ad29bf3fbf96bd0cdd, type: 3}
   TargetArea: {fileID: 5887126199942291436, guid: 409cbf21c450241b79b9e4327b57da61,
     type: 3}
+  PositionDisc: {fileID: 327149289443996903, guid: fce2f5c41831445c09eb0349955089a1,
+    type: 3}
   PositionDisc3D: {fileID: 5853665389834264231, guid: 50044df9508cc436a9ac5f9574c3df21,
     type: 3}
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,

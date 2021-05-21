@@ -10,10 +10,21 @@ namespace Iviz.App.ARDialogs
     {
         [SerializeField] LinkDisplay link = null;
         [SerializeField] DraggablePlane disc = null;
+        [SerializeField] MeshMarkerResource outerDisc = null;
         [SerializeField] float linkWidth = 0.2f;
         bool dragBack;
 
-        public event Action<SpringDisc, Vector3> Moved; 
+        public event Action<SpringDisc, Vector3> Moved;
+
+        public override Color MainColor
+        {
+            get => base.MainColor;
+            set
+            {
+                base.MainColor = value;
+                outerDisc.Color = value;
+            }
+        }
 
         protected override void Awake()
         {

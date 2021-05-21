@@ -70,6 +70,7 @@ namespace Iviz.Resources
         public Info<GameObject> Tooltip { get; }
         public Info<GameObject> TargetArea { get; }
         public Info<GameObject> PositionDisc3D { get; }
+        public Info<GameObject> PositionDisc { get; }
 
         public DisplaysType()
         {
@@ -118,6 +119,7 @@ namespace Iviz.Resources
                 Tooltip = new Info<GameObject>(appAssetHolder.Tooltip);
                 TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
                 PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
+                PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc);
 
                 resourceByType = CreateTypeDictionary(this);
             }

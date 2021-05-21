@@ -186,6 +186,11 @@ namespace Iviz.Controllers
                             info = Resource.Displays.TrajectoryDisc;
                             var disc = ResourcePool.RentDisplay<TrajectoryDisc>();
                             disc.Moved += OnTrajectoryDiscMoved;
+                            if (!string.IsNullOrEmpty(msg.Caption))
+                            {
+                                disc.MainButtonCaption = msg.Caption;
+                            }
+
                             widget = disc;
                             break;
                         }
@@ -203,17 +208,40 @@ namespace Iviz.Controllers
                             var area = ResourcePool.RentDisplay<TargetWidget>();
                             area.Moved += OnTargetAreaMoved;
                             area.Cancelled += OnTargetAreaCanceled;
+                            if (!string.IsNullOrEmpty(msg.Caption))
+                            {
+                                area.MainButtonCaption = msg.Caption;
+                            }
+
                             widget = area;
                             break;
                         }
                         case WidgetType.PositionDisc3D:
                         {
-                            info = Resource.Displays.TargetArea;
+                            info = Resource.Displays.PositionDisc3D;
                             var disc = ResourcePool.RentDisplay<PositionDisc3D>();
                             disc.Moved += OnDiscMoved;
+                            if (!string.IsNullOrEmpty(msg.Caption))
+                            {
+                                disc.MainButtonCaption = msg.Caption;
+                            }
+
                             widget = disc;
                             break;
-                        } 
+                        }
+                        case WidgetType.PositionDisc:
+                        {
+                            info = Resource.Displays.PositionDisc;
+                            var disc = ResourcePool.RentDisplay<PositionDisc>();
+                            disc.Moved += OnDiscMoved;
+                            if (!string.IsNullOrEmpty(msg.Caption))
+                            {
+                                disc.MainButtonCaption = msg.Caption;
+                            }
+
+                            widget = disc;
+                            break;
+                        }
                         default:
                             Logger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int) msg.Type).ToString()}");
                             return;

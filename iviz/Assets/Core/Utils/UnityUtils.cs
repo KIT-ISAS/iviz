@@ -490,6 +490,7 @@ namespace Iviz.Core
         public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
         public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
         public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
+        public static Vector3 WithY(this Vector3 c, float y) => new Vector3(c.x, y, c.z);
 
         public static bool IsUsable(this Pose pose)
         {

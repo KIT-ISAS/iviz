@@ -7,19 +7,22 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class PositionDisc3D : ARWidget, IRecyclable
+    public class PositionDisc : ARWidget, IRecyclable
     {
         [SerializeField] ARButton button = null;
         [SerializeField] DraggablePlane disc = null;
         [SerializeField] Transform anchor = null;
         [SerializeField] float linkWidth = 0.02f;
         LineResource line;
+        Tooltip tooltipX;
+        Tooltip tooltipY;
+        
         bool dragBack;
 
         readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
 
-        public event Action<PositionDisc3D, Vector3> Moved;
-
+        public event Action<PositionDisc, Vector3> Moved;
+        
         string mainButtonCaption = "Send!";
         public string MainButtonCaption
         {
@@ -34,42 +37,49 @@ namespace Iviz.App.ARDialogs
         protected override void Awake()
         {
             base.Awake();
-            line = ResourcePool.RentDisplay<LineResource>(transform);
+            line = ResourcePool.RentDisplay<LineResource>(Transform);
             line.ElementScale = linkWidth;
             line.Visible = false;
 
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
-            lineBuffer.Add(new LineWithColor());
 
             button.Icon = ARButton.ButtonIcon.Ok;
+            button.Caption = "Send!";
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);
             MainButtonCaption = mainButtonCaption;
+
+            tooltipX = ResourcePool.RentDisplay<Tooltip>(Transform);
+            tooltipY = ResourcePool.RentDisplay<Tooltip>(Transform);
+            tooltipX.MainColor = Color.red.WithAlpha(0.5f);
+            tooltipY.MainColor = Color.green.WithAlpha(0.5f);
+            tooltipX.Visible = false;
+            tooltipY.Visible = false;
+
 
             disc.StartDragging += () =>
             {
                 button.Visible = false;
                 dragBack = false;
                 line.Visible = true;
+                tooltipX.Visible = true;
+                tooltipY.Visible = true;
             };
             disc.EndDragging += () =>
             {
-                button.Transform.SetLocalPose(disc.Transform.AsLocalPose().Multiply(BaseButtonPose));
+                button.Transform.localPosition = disc.Transform.localPosition + Vector3.up;
                 button.Visible = true;
             };            
             button.Clicked += () =>
             {
                 dragBack = true;
                 button.Visible = false;
+                tooltipX.Visible = false;
+                tooltipY.Visible = false;
                 Moved?.Invoke(this, disc.Transform.localPosition);
             };
         }
-
-        static readonly Pose BaseButtonPose = new Pose(
-            new Vector3(-0.8f, 0, 0),
-            Quaternion.AngleAxis(-90, Vector3.right) * Quaternion.AngleAxis(180, Vector3.up)
-        );
 
         protected override void Update()
         {
@@ -78,28 +88,29 @@ namespace Iviz.App.ARDialogs
             anchor.transform.localRotation = disc.Transform.localRotation; // copy billboard
             if (button.Visible)
             {
-                button.Transform.SetLocalPose(disc.Transform.AsLocalPose().Multiply(BaseButtonPose));
+                var camPosition = Settings.MainCameraTransform.position;
+                button.Transform.LookAt(2 * button.Transform.position - camPosition, Vector3.up);
             }
 
             var discPosition = disc.Transform.localPosition;
-
             if (line.Visible)
             {
-                Pose localToFixed = TfListener.FixedFramePose.Inverse().Multiply(Transform.AsPose());
-                Pose fixedToLocal = localToFixed.Inverse();
-                
-                Vector3 start = localToFixed.Multiply(Vector3.zero);
-                Vector3 end = localToFixed.Multiply(discPosition);
-                Vector3 diff = end - start;
+                Vector3 start = Transform.position;
+                Vector3 diff = discPosition - start;
                 
                 Vector3 p0 = Vector3.zero;
-                Vector3 p1 = fixedToLocal.Multiply(start + new Vector3(0, diff.y, 0));
-                Vector3 p2 = fixedToLocal.Multiply(start + new Vector3(0, diff.y, diff.z));
-                Vector3 p3 = discPosition;
+                Vector3 p1 = start + new Vector3(0, 0, diff.z);
+                Vector3 p2 = discPosition;
 
-                lineBuffer[0] = new LineWithColor(p0, p1, Color.blue.WithAlpha(0.5f));
-                lineBuffer[1] = new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f));
-                lineBuffer[2] = new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f));
+                lineBuffer[0] = new LineWithColor(p0, p1, Color.red.WithAlpha(0.5f));
+                lineBuffer[1] = new LineWithColor(p1, p2, Color.green.WithAlpha(0.5f));
+                
+                tooltipX.Transform.localPosition = ((p1 + p0) / 2).WithY(0.5f);
+                tooltipY.Transform.localPosition = ((p2 + p1) / 2).WithY(0.5f);
+                
+                tooltipX.Caption = "X: " + ((p1 - p0) / Scale).WithY(0).magnitude.ToString("0.###") + " m";
+                tooltipY.Caption = "Y: " + ((p2 - p1) / Scale).WithY(0).magnitude.ToString("0.###") + " m";
+                
                 line.Set(lineBuffer);
             }
 
@@ -111,6 +122,8 @@ namespace Iviz.App.ARDialogs
                     disc.Transform.localPosition = Vector3.zero;
                     dragBack = false;
                     line.Visible = false;
+                    tooltipX.Visible = false;
+                    tooltipY.Visible = false;
                 }
 
                 return;

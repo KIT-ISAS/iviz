@@ -34,7 +34,7 @@ namespace Iviz.App.ARDialogs
 
         public int Layer { get; set; }
 
-        float scale;
+        float scale = 1;
 
         public float Scale
         {

@@ -25,6 +25,17 @@ namespace Iviz.App.ARDialogs
 
         public event Action<TrajectoryDisc, Vector3[], float> Moved;
 
+        string mainButtonCaption = "Send!";
+        public string MainButtonCaption
+        {
+            get => mainButtonCaption;
+            set
+            {
+                mainButtonCaption = value;
+                button.Caption = value;
+            }
+        }
+        
         protected override void Awake()
         {
             base.Awake();
@@ -38,9 +49,9 @@ namespace Iviz.App.ARDialogs
             Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
 
             button.Icon = ARButton.ButtonIcon.Ok;
-            button.Caption = "Send!";
             button.Visible = false;
             button.Transform.parent = Transform.parent;
+            MainButtonCaption = mainButtonCaption;
         }
 
         void StartWriting()
@@ -49,7 +60,6 @@ namespace Iviz.App.ARDialogs
             positions.Clear();
             Lines.Reset();
             button.Visible = false;
-            button.OnDialogDisabled();
         }
 
         void StopWriting()

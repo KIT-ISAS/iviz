@@ -75,6 +75,17 @@ namespace Iviz.App.ARDialogs
                 TargetScale = TargetScale;
             }
         }
+        
+        string mainButtonCaption = "Send!";
+        public string MainButtonCaption
+        {
+            get => mainButtonCaption;
+            set
+            {
+                mainButtonCaption = value;
+                okButton.Caption = value;
+            }
+        }        
 
 
         protected override void Awake()
@@ -91,8 +102,8 @@ namespace Iviz.App.ARDialogs
             corner.StartDragging += () => scaling = true;
             corner.EndDragging += () => scaling = false;
 
-            okButton.Caption = "Send";
             okButton.Icon = ARButton.ButtonIcon.Ok;
+            MainButtonCaption = MainButtonCaption;
 
             cancelButton.Caption = "Cancel";
             cancelButton.Icon = ARButton.ButtonIcon.Cross;
@@ -100,7 +111,7 @@ namespace Iviz.App.ARDialogs
             okButton.Clicked += () =>
             {
                 Debug.Log($"{this}: Sending scale");
-                Moved?.Invoke(this, TargetScale, Transform.localPosition);
+                Moved?.Invoke(this, TargetScale / Scale, Transform.localPosition);
             };
             cancelButton.Clicked += () => Cancelled?.Invoke(this);
         }

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 namespace Iviz.App.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IRecyclable
     {
         [SerializeField] Texture2D[] icons = null;
         [SerializeField] TextMesh text = null;
@@ -29,6 +29,22 @@ namespace Iviz.App.ARDialogs
         Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
 
         [CanBeNull] BoundaryFrame frame;
+
+        [NotNull]
+        BoundaryFrame Frame
+        {
+            get
+            {
+                if (frame != null)
+                {
+                    return frame;
+                }
+
+                frame = ResourcePool.RentDisplay<BoundaryFrame>(Transform);
+                frame.Color = Color.white.WithAlpha(0.5f);
+                return frame;
+            }
+        }
 
         public event Action Clicked;
 
@@ -123,34 +139,33 @@ namespace Iviz.App.ARDialogs
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
-            frame = ResourcePool.RentDisplay<BoundaryFrame>(transform);
-            frame.Color = Color.white.WithAlpha(0.5f);
-            frame.Bounds = new Bounds(colliderForFrame.center, 
+            Frame.Bounds = new Bounds(colliderForFrame.center,
                 Vector3.Scale(colliderForFrame.size, colliderForFrame.transform.localScale));
+            Frame.Visible = true;
         }
 
         void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
         {
-            frame.ReturnToPool();
-            frame = null;
+            Frame.Visible = false;
+        }
+
+        void OnDisable()
+        {
+            if (frame != null)
+            {
+                frame.Visible = false;
+            }
         }
 
         public void OnDialogDisabled()
         {
-            if (frame != null)
-            {
-                frame.ReturnToPool();
-                frame = null;
-            }
         }
-        
-        public override void Suspend()
+
+        public void SplitForRecycle()
         {
-            base.Suspend();
             if (frame != null)
             {
                 frame.ReturnToPool();
-                frame = null;
             }
         }
     }

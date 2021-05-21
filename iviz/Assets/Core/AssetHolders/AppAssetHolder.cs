@@ -47,6 +47,7 @@ namespace Iviz.Displays
         public GameObject Tooltip;
         public GameObject TargetArea;
         
+        public GameObject PositionDisc;
         public GameObject PositionDisc3D;
         
         public Material LineConnectorMaterial;
