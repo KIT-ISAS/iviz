@@ -68,6 +68,7 @@ namespace Iviz.Controllers
             highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
             highlightFrame.Visible = false;
             highlightFrame.CastsShadows = false;
+            highlightFrame.Emissive = 1;
 
             highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
             highlightFrame.Transform.parent = highlightFrameNode.Transform;
@@ -482,7 +483,7 @@ namespace Iviz.Controllers
 
         public void HighlightFrame([NotNull] string frameId)
         {
-            if (!TryGetFrame(frameId, out TfFrame frame))
+            if (!frames.ContainsKey(frameId))
             {
                 return;
             }

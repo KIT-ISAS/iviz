@@ -62,6 +62,7 @@ namespace Iviz.App.ARDialogs
             {
                 dragBack = true;
                 button.Visible = false;
+                Debug.Log("click");
                 Moved?.Invoke(this, disc.Transform.localPosition);
             };
         }
@@ -127,6 +128,10 @@ namespace Iviz.App.ARDialogs
             base.Suspend();
             button.OnDialogDisabled();
             button.Transform.parent = Transform;
+            disc.Transform.localPosition = Vector3.zero;
+            dragBack = false;
+            line.Visible = false;
+            Moved = null;
         }
 
         protected override void OnDestroy()

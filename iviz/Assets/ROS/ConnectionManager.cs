@@ -85,9 +85,9 @@ namespace Iviz.Ros
                 Level: (byte) msg.Level,
                 Name: Connection.MyId ?? "/iviz",
                 Msg: msg.Message,
-                File: Path.GetFileName(msg.File),
+                File: "",
                 Function: "",
-                Line: (uint) msg.Line,
+                Line: 0,
                 Topics: Array.Empty<string>()
             ));
         }

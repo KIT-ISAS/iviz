@@ -55,7 +55,7 @@ namespace Iviz.App
             }
 
             var masterApi = client.RosMasterClient;
-            builder.Append("<b>-- Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
+            builder.Append("<b>== Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
                 .Append(" reqs | Ping ")
                 .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
                 .AppendLine();

@@ -16,10 +16,13 @@ namespace Iviz.Displays
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
+        static readonly int PropTint = Shader.PropertyToID("_Tint");
 
         //[SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
-        [SerializeField] Material material;
+
+        [SerializeField] Material opaqueMaterial;
+        [SerializeField] Material transparentMaterial;
 
         Mesh mesh;
         int cellsX;
@@ -32,15 +35,56 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            material = Resource.Materials.GridMap.Instantiate();
+            opaqueMaterial = Resource.Materials.GridMap.Instantiate();
             mesh = new Mesh {name = "GridMap Mesh"};
 
             base.Awake();
 
-            MeshRenderer.material = material;
+            MeshRenderer.material = opaqueMaterial;
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             Colormap = ColormapId.gray;
+        }
+
+        public override Color Tint
+        {
+            get => base.Tint;
+            set
+            {
+                if (value.a <= 254f / 255)
+                {
+                    if (transparentMaterial == null)
+                    {
+                        transparentMaterial = Resource.Materials.TransparentGridMap.Instantiate();
+                    }
+
+                    if (MeshRenderer.material != transparentMaterial)
+                    {
+                        transparentMaterial.SetTexture(PropInputTexture, inputTexture);
+                        transparentMaterial.SetVector(PropSquareCoeff,
+                            new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+                        UpdateProperties();
+                    }
+ 
+                    MeshRenderer.material = transparentMaterial;
+                    transparentMaterial.SetColor(PropTint, value);
+                }
+                else
+                {
+                    if (MeshRenderer.material != opaqueMaterial)
+                    {
+                        opaqueMaterial.SetTexture(PropInputTexture, inputTexture);
+                        opaqueMaterial.SetVector(PropSquareCoeff,
+                            new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+                        UpdateProperties();
+                    }
+
+                    MeshRenderer.material = opaqueMaterial;
+                    opaqueMaterial.SetColor(PropTint, value);
+                }
+
+                base.Tint = value;
+            }
         }
 
         protected override void Rebuild()
@@ -148,8 +192,14 @@ namespace Iviz.Displays
             }
 
             inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
-            material.SetTexture(PropInputTexture, inputTexture);
-            material.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+            opaqueMaterial.SetTexture(PropInputTexture, inputTexture);
+            opaqueMaterial.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+
+            if (transparentMaterial != null)
+            {
+                transparentMaterial.SetTexture(PropInputTexture, inputTexture);
+                transparentMaterial.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+            }
         }
 
         void OnDestroy()
@@ -159,9 +209,14 @@ namespace Iviz.Displays
                 Destroy(inputTexture);
             }
 
-            if (material != null)
+            if (opaqueMaterial != null)
             {
-                Destroy(material);
+                Destroy(opaqueMaterial);
+            }
+
+            if (transparentMaterial != null)
+            {
+                Destroy(transparentMaterial);
             }
 
             Destroy(mesh);
@@ -170,6 +225,12 @@ namespace Iviz.Displays
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
+        }
+        
+        public override void Suspend()
+        {
+            base.Suspend();
+            Tint = Color.white;
         }
 
         [NotNull]

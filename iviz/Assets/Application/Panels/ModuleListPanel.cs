@@ -808,8 +808,8 @@ namespace Iviz.App
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
             bottomTime.text = $"M: {memBytesKb.ToString()}M";
 
-            bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
-            //bottomFps.text = $"{frameCounter.ToString()} FPS";
+            //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();

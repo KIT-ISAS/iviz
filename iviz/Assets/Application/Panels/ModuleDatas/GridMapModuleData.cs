@@ -5,6 +5,8 @@ using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -66,6 +68,7 @@ namespace Iviz.App
             panel.MinIntensity.Interactable = listener.ForceMinMax;
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
+            panel.Alpha.Value = listener.Tint.a;
 
             panel.IntensityChannel.ValueChanged += (_, s) => { listener.IntensityChannel = s; };
             panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
@@ -86,9 +89,10 @@ namespace Iviz.App
                 panel.MinIntensity.Interactable = f;
                 panel.MaxIntensity.Interactable = f;
             };
-            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
-            panel.MinIntensity.ValueChanged += f => { listener.MinIntensity = f; };
-            panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
+            panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f;
+            panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
+            panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
+            panel.Alpha.ValueChanged += f => listener.Tint = Color.white.WithAlpha(f);
             panel.Description.Label = listener.Description;
         }
 

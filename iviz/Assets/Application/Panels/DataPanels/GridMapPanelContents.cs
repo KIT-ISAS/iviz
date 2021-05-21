@@ -20,6 +20,7 @@ namespace Iviz.App
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }
         public NumberInputFieldWidget MaxIntensity { get; private set; }
+        public SliderWidget Alpha { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
 
 
@@ -39,6 +40,8 @@ namespace Iviz.App
             MinIntensity = p.AddNumberInputField("Colormap Min");
             MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
+
+            Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

@@ -95,10 +95,10 @@ namespace Iviz.App.ARDialogs
             var discPosition = disc.Transform.localPosition;
             if (line.Visible)
             {
-                Vector3 start = Transform.position;
-                Vector3 diff = discPosition - start;
+                Vector3 start = Vector3.zero;
+                Vector3 diff = discPosition;
                 
-                Vector3 p0 = Vector3.zero;
+                Vector3 p0 = start;
                 Vector3 p1 = start + new Vector3(0, 0, diff.z);
                 Vector3 p2 = discPosition;
 
@@ -140,6 +140,10 @@ namespace Iviz.App.ARDialogs
             base.Suspend();
             button.OnDialogDisabled();
             button.Transform.parent = Transform;
+            disc.Transform.localPosition = Vector3.zero;
+            dragBack = false;
+            line.Visible = false;
+            Moved = null;
         }
 
         protected override void OnDestroy()

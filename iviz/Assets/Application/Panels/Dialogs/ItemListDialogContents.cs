@@ -132,6 +132,12 @@ namespace Iviz.App
                 get => button.Interactable;
                 set => button.Interactable = value;
             }
+            
+            public Color Color
+            {
+                get => button.Color;
+                set => button.Color = value;
+            }            
 
             public void Dispose()
             {
