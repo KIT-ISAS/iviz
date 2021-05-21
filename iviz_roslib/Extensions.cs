@@ -98,9 +98,13 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(publisher));
             }
 
-            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
+            if (publisher.NumSubscribers != 0)
+            {
+                return;
+            }
 
-            while (publisher.GetState().Senders.Count == 0)
+            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
+            while (publisher.NumSubscribers == 0)
             {
                 await Task.Delay(200, linkedSource.Token);
             }
@@ -137,9 +141,13 @@ namespace Iviz.Roslib
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
+            if (subscriber.NumActivePublishers != 0)
+            {
+                return;
+            }
+            
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
-
-            while (subscriber.GetState().Receivers.Count == 0)
+            while (subscriber.NumActivePublishers == 0)
             {
                 await Task.Delay(200, linkedSource.Token);
             }

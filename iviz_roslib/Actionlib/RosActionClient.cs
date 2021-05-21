@@ -16,19 +16,6 @@ namespace Iviz.Roslib.Actionlib
         }
     }
 
-    public class RosActionFailedException : Exception
-    {
-        public RosGoalStatus Status { get; }
-        public string Text { get; }
-
-        public RosActionFailedException(RosGoalStatus status, string text) :
-            base($"Action ended with status {status}; Message: {text}")
-        {
-            Status = status;
-            Text = text;
-        }
-    }
-
     public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
 #if !NETSTANDARD2_0
         , IAsyncDisposable
@@ -39,7 +26,7 @@ namespace Iviz.Roslib.Actionlib
     {
         readonly CancellationTokenSource runningTs = new();
 
-        string? actionName;
+        string actionName = "";
         string? callerId;
         bool disposed;
 
@@ -47,10 +34,20 @@ namespace Iviz.Roslib.Actionlib
         RosChannelReader<TAResult>? resultSubscriber;
         RosChannelWriter<GoalID>? cancelPublisher;
         RosChannelWriter<TAGoal>? goalPublisher;
-
+        MergedChannelReader? mergedReader;
         RosActionClientState state = RosActionClientState.Done;
-        MergedChannelReader? channelReader;
         GoalID? goalId;
+
+        RosChannelWriter<TAGoal> GoalPublisher =>
+            goalPublisher ?? throw new InvalidOperationException("Start has not been called!");
+
+        RosChannelWriter<GoalID> CancelPublisher =>
+            cancelPublisher ?? throw new InvalidOperationException("Start has not been called!");
+        
+        MergedChannelReader ChannelReader =>
+            mergedReader ?? throw new InvalidOperationException("Start has not been called!");
+
+        
 
         public RosActionClient()
         {
@@ -138,56 +135,42 @@ namespace Iviz.Roslib.Actionlib
                 throw new ArgumentNullException(nameof(client));
             }
 
-            if (!RosClient.IsValidResourceName(newActionName))
-            {
-                throw new ArgumentException($"Action name '{newActionName}' is not a valid resource name");
-            }
-
             if (actionName != null)
             {
                 throw new InvalidOperationException("Action client has already been started!");
             }
 
-            actionName = newActionName;
+            string validatedActionName = (newActionName[0] == '/')
+                ? newActionName.Substring(1)
+                : newActionName;
+
+            if (!RosClient.IsValidResourceName(validatedActionName))
+            {
+                throw new ArgumentException($"Action name '{validatedActionName}' is not a valid resource name");
+            }
+
+            actionName = validatedActionName;
             callerId = client.CallerId;
         }
 
         public void Start(RosClient client, string newActionName)
         {
             ValidateStart(client, newActionName);
-            if (newActionName[0] == '/')
-            {
-                newActionName = newActionName.Substring(1);
-            }
-
-            goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{newActionName}/goal") {LatchingEnabled = true};
-            cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{newActionName}/cancel") {LatchingEnabled = true};
-            feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{newActionName}/feedback");
-            resultSubscriber = new RosChannelReader<TAResult>(client, $"/{newActionName}/result");
-            channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
+            goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{actionName}/goal") {LatchingEnabled = true};
+            cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{actionName}/cancel") {LatchingEnabled = true};
+            feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{actionName}/feedback");
+            resultSubscriber = new RosChannelReader<TAResult>(client, $"/{actionName}/result");
+            mergedReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
         public async Task StartAsync(IRosClient client, string newActionName, CancellationToken token = default)
         {
             ValidateStart(client, newActionName);
-            if (newActionName[0] == '/')
-            {
-                newActionName = newActionName.Substring(1);
-            }
-
-            goalPublisher = new RosChannelWriter<TAGoal> {LatchingEnabled = true};
-            await goalPublisher.StartAsync(client, $"/{newActionName}/goal", token);
-
-            cancelPublisher = new RosChannelWriter<GoalID> {LatchingEnabled = true};
-            await cancelPublisher.StartAsync(client, $"/{newActionName}/cancel", token);
-
-            feedbackSubscriber = new RosChannelReader<TAFeedback>();
-            resultSubscriber = new RosChannelReader<TAResult>();
-
-            await feedbackSubscriber.StartAsync(client, $"/{newActionName}/feedback", token);
-            await resultSubscriber.StartAsync(client, $"/{newActionName}/result", token);
-
-            channelReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
+            goalPublisher = await client.CreateWriterAsync<TAGoal>($"/{actionName}/goal", true, token);
+            cancelPublisher = await client.CreateWriterAsync<GoalID>($"/{actionName}/cancel", true, token);
+            feedbackSubscriber = await client.CreateReaderAsync<TAFeedback>($"/{actionName}/feedback", token);
+            resultSubscriber = await client.CreateReaderAsync<TAResult>($"/{actionName}/result", token);
+            mergedReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
         // ---------------------------------------------------------------------------
@@ -263,11 +246,6 @@ namespace Iviz.Roslib.Actionlib
 
         public void SetGoal<TGoal>(TGoal goal) where TGoal : IGoal<TAGoal>
         {
-            if (goalPublisher == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
             if (goal == null)
             {
                 throw new ArgumentNullException(nameof(goal));
@@ -289,7 +267,7 @@ namespace Iviz.Roslib.Actionlib
             IActionGoal<TGoal> actionTGoal = (IActionGoal<TGoal>) actionGoal;
             actionTGoal.Goal = goal;
 
-            goalPublisher.Write(actionGoal);
+            GoalPublisher.Write(actionGoal);
 
             State = RosActionClientState.WaitingForGoalAck;
         }
@@ -302,11 +280,6 @@ namespace Iviz.Roslib.Actionlib
 
         public void Cancel()
         {
-            if (cancelPublisher == null)
-            {
-                throw new InvalidOperationException("Start has not been called!!");
-            }
-
             if (goalId == null)
             {
                 throw new InvalidOperationException("Goal has not been set!");
@@ -319,7 +292,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidRosActionState($"Cannot cancel from state {State}");
             }
 
-            cancelPublisher.Write(goalId);
+            CancelPublisher.Write(goalId);
             State = RosActionClientState.WaitingForCancelAck;
         }
 
@@ -333,16 +306,11 @@ namespace Iviz.Roslib.Actionlib
 
         public void WaitForServer(int timeoutInMs)
         {
-            if (goalPublisher == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
             try
             {
                 using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
                 linkedSource.CancelAfter(timeoutInMs);
-                goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
+                GoalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
             }
             catch (OperationCanceledException e)
             {
@@ -357,42 +325,37 @@ namespace Iviz.Roslib.Actionlib
 
         public void WaitForServer(CancellationToken token = default)
         {
-            if (goalPublisher == null)
+            if (GoalPublisher.Publisher.NumSubscribers != 0)
             {
-                throw new InvalidOperationException("Start has not been called!");
+                return;
             }
-
+            
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            goalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
+            GoalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
         public async Task WaitForServerAsync(CancellationToken token = default)
         {
-            if (goalPublisher == null)
+            if (GoalPublisher.Publisher.NumSubscribers != 0)
             {
-                throw new InvalidOperationException("Start has not been called!");
+                return;
             }
 
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            await goalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
+            await GoalPublisher.Publisher.WaitForAnySubscriberAsync(linkedSource.Token);
         }
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAll(CancellationToken token = default)
         {
-            if (channelReader == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
             return token == default
-                ? ReadAllImpl(channelReader.ReadAll(runningTs.Token))
+                ? ReadAllImpl(ChannelReader.ReadAll(runningTs.Token))
                 : ReadAllWithToken(token);
         }
 
         IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllWithToken(CancellationToken token)
         {
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
-            var source = channelReader!.ReadAll(linkedSource.Token);
+            var source = ChannelReader.ReadAll(linkedSource.Token);
             foreach (var msg in ReadAllImpl(source))
             {
                 yield return msg;
@@ -401,12 +364,7 @@ namespace Iviz.Roslib.Actionlib
 
         public IEnumerable<(TAFeedback? Feedback, TAResult? Result)> TryReadAll()
         {
-            if (channelReader == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
-            return ReadAllImpl(channelReader.TryReadAll());
+            return ReadAllImpl(ChannelReader.TryReadAll());
         }
 
         IEnumerable<(TAFeedback? Feedback, TAResult? Result)> ReadAllImpl(IEnumerable<IMessage> source)
@@ -455,14 +413,9 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Goal has not been set!");
             }
 
-            if (channelReader == null)
-            {
-                throw new InvalidOperationException("Start has not been called!");
-            }
-
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
 
-            await foreach (IMessage msg in channelReader.ReadAllAsync(linkedSource.Token))
+            await foreach (IMessage msg in ChannelReader.ReadAllAsync(linkedSource.Token))
             {
                 switch (msg)
                 {
@@ -522,7 +475,7 @@ namespace Iviz.Roslib.Actionlib
             return new();
         }
 
-        public static async ValueTask<RosActionClient<TActionGoal, TActionFeedback, TActionResult>> 
+        public static async ValueTask<RosActionClient<TActionGoal, TActionFeedback, TActionResult>>
             CreateClientAsync<TActionGoal, TActionFeedback, TActionResult>(
                 this IRosClient client, string actionName, CancellationToken token = default)
             where TActionGoal : class, IActionGoal, new()
