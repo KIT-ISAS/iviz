@@ -23,6 +23,7 @@ namespace Iviz.Resources
         public Info<Material> DepthCloud { get; }
         public Info<Material> GridInterior { get; }
         public Info<Material> GridMap { get; }
+        public Info<Material> TransparentGridMap { get; }
         public Info<Material> OccupancyGridTexture { get; }
 
         public Info<Material> Line { get; }
@@ -68,6 +69,7 @@ namespace Iviz.Resources
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             GridInterior = new Info<Material>("Materials/Grid Interior");
             GridMap = new Info<Material>("Materials/GridMap");
+            TransparentGridMap = new Info<Material>("Materials/Transparent GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");
             OccupancyGridTexture = (Settings.IsMobile || Settings.IsHololens)
                 ? new Info<Material>("Materials/OccupancyGrid") 

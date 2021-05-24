@@ -42,6 +42,17 @@ namespace Iviz.App
             get => button.interactable;
             set => button.interactable = value;
         }
+        
+        public Color Color
+        {
+            get => button.colors.normalColor;
+            set
+            {
+                var block = button.colors;
+                block.normalColor = value;
+                button.colors = block;
+            }
+        }
 
         public int FontSize
         {
@@ -59,6 +70,7 @@ namespace Iviz.App
         {
             Clicked = null;
             Interactable = true;
+            Color = Color.white;
         }
     }
 }

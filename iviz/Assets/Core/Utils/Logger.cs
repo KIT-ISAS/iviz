@@ -16,17 +16,13 @@ namespace Iviz.Core
         [DataMember] public DateTime Stamp { get; }
         [DataMember] public LogLevel Level { get; }
         [NotNull, DataMember] public string Message { get; }
-        [NotNull, DataMember] public string File { get; }
-        [DataMember] public int Line { get; }
 
-        public LogMessage(LogLevel level, [NotNull] string message, [NotNull] string file, int line)
+        public LogMessage(LogLevel level, [NotNull] string message)
         {
             SourceId = null;
             Stamp = GameThread.Now;
             Level = level;
             Message = message;
-            File = file;
-            Line = line;
         }
 
         public LogMessage(in Log msg)
@@ -35,8 +31,6 @@ namespace Iviz.Core
             Stamp = msg.Header.Stamp.ToDateTime();
             Level = (LogLevel) msg.Level;
             Message = msg.Msg ?? "";
-            File = "";
-            Line = 0;
         }
     }
 
@@ -148,7 +142,7 @@ namespace Iviz.Core
         static void ExternalImpl([CanBeNull] string msg, LogLevel level,
             [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
         {
-            LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage, file, line));
+            LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
             switch (level)
             {
                 case LogLevel.Debug:
@@ -205,7 +199,7 @@ namespace Iviz.Core
             }
 
             string message = str.ToString();
-            LogExternal?.Invoke(new LogMessage(level, message, file, line));
+            LogExternal?.Invoke(new LogMessage(level, message));
             UnityEngine.Debug.LogWarning(message);
         }
     }

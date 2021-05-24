@@ -135,7 +135,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new ArgumentNullException(nameof(client));
             }
 
-            if (actionName != null)
+            if (!string.IsNullOrEmpty(actionName))
             {
                 throw new InvalidOperationException("Action client has already been started!");
             }

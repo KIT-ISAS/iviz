@@ -31,6 +31,7 @@ namespace Iviz.Controllers
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
+        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 
     public sealed class GridMapListener : ListenerController
@@ -66,6 +67,7 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
+                Tint = value.Tint;
             }
         }
 
@@ -117,6 +119,15 @@ namespace Iviz.Controllers
             }
         }
 
+        public Color Tint
+        {
+            get => config.Tint;
+            set
+            {
+                config.Tint = value;
+                resource.Tint = value;
+            }
+        }
 
         public float MinIntensity
         {

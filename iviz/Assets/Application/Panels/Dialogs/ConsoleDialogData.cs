@@ -24,9 +24,10 @@ namespace Iviz.App
 
         const int MaxMessageLength = 300;
 
-        // TMP does not have a limit of 65000 but it's a nice threshold anyway
-        const int MaxMessages = 65000 / 4 / MaxMessageLength;
+        const int MaxMessagesToPrint = 64;
+        const int MaxMessages = 50000;
 
+        
         const string AllString = "[All]";
         const string NoneString = "[None]";
         const string MeString = "[Me]";
@@ -257,10 +258,15 @@ namespace Iviz.App
             }
 
             using (var messages = new UniqueRef<LogMessage>(messageQueue.Count, true))
+            using (var indices = new Rent<int>(MaxMessagesToPrint))
             {
+                int indexStart = 0;
+                int numIndices = 0;
+
                 messageQueue.CopyTo(messages.Array, 0);
-                foreach (var message in messages)
+                for (int i = 0; i < messages.Length; i++)
                 {
+                    var message = messages[i];
                     var messageLevel = message.Level;
                     if (messageLevel < minLogLevel)
                     {
@@ -273,6 +279,24 @@ namespace Iviz.App
                         continue;
                     }
 
+                    if (numIndices != MaxMessagesToPrint)
+                    {
+                        indices[numIndices] = i;
+                        numIndices++;
+                    }
+                    else
+                    {
+                        indices[indexStart] = i;
+                        indexStart = (indexStart + 1) % MaxMessagesToPrint;
+                    }
+                }
+
+                for (int i = 0; i < numIndices; i++)
+                {
+                    int index = indices[(indexStart + i) % MaxMessagesToPrint];
+                    var message = messages[index];
+                    var messageLevel = message.Level;
+                    
                     if (message.Stamp == default)
                     {
                         description.Append("<b>[] ");
@@ -282,8 +306,8 @@ namespace Iviz.App
                         string dateAsStr = message.SourceId == null
                             ? GameThread.NowFormatted
                             : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
-                                ? "HH:mm:ss"
-                                : "yy-MM-dd HH:mm:ss");
+                                ? "HH:mm:ss.fff"
+                                : "yy-MM-dd HH:mm:ss.fff");
 
                         description.Append("<b>[").Append(dateAsStr).Append("] ");
                     }

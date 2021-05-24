@@ -1,4 +1,4 @@
-﻿Shader "iviz/GridMap"
+﻿Shader "iviz/TransparentGridMap"
 {
     Properties
     {
@@ -8,8 +8,10 @@
 
     SubShader
     {
+        Tags { "Queue"="Transparent" "RenderType"="Transparent"}
+        
         CGPROGRAM
-        #pragma surface surf Standard vertex:vert addshadow fullforwardshadows
+        #pragma surface surf Standard vertex:vert addshadow fullforwardshadows alpha:fade
 
         float _AtlasRow;
         sampler2D _SquareTex;
@@ -47,6 +49,7 @@
                 tex2D(_IntensityTex, IN.intensityUV) *
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
+            o.Alpha = _Tint.a;
             o.Emission = o.Albedo;
         }
         ENDCG

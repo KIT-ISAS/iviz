@@ -77,6 +77,7 @@ namespace Iviz.App
                 else
                 {
                     tfName.text = "[ ⮑" + value.Id + "]";
+                    TfListener.Instance.HighlightFrame(value.Id);
                 }
 
                 Flush();

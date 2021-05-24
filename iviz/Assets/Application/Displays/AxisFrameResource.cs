@@ -88,6 +88,16 @@ namespace Iviz.Displays
                 axisObjects[2].CastsShadows = value;
             }
         }
+        
+        public float Emissive
+        {
+            set
+            {
+                axisObjects[0].EmissiveColor = value * axisObjects[0].EmissiveColor;
+                axisObjects[1].EmissiveColor = value * axisObjects[1].EmissiveColor;
+                axisObjects[2].EmissiveColor =  value * axisObjects[2].EmissiveColor;
+            }
+        }        
 
         protected override void Awake()
         {
@@ -138,6 +148,7 @@ namespace Iviz.Displays
             ColorZ = Color.blue;
             OcclusionOnly = false;
             Tint = Color.white;
+            Emissive = 0;
         }
     }
 }
