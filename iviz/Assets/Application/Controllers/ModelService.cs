@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
-#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
 using Iviz.ModelService;
 #endif
 using Iviz.Msgs.IvizMsgs;
@@ -14,7 +14,7 @@ namespace Iviz.Controllers
 {
     public sealed class ModelService : IDisposable
     {
-#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
         public bool IsEnabled => modelServer != null;
         public int NumPackages => modelServer?.NumPackages ?? 0;
         public bool IsFileSchemaEnabled => modelServer?.IsFileSchemaEnabled ?? false;
@@ -30,7 +30,7 @@ namespace Iviz.Controllers
 
         public async Task Restart(bool enableFileSchema, CancellationToken token = default)
         {
-#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
             string rosPackagePathExtras = await GetPathExtras(token);
 
             modelServer?.Dispose();
@@ -117,7 +117,7 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
             modelServer?.Dispose();
             modelServer = null;
 #endif
