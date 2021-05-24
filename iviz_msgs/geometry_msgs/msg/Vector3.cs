@@ -90,10 +90,10 @@ namespace Iviz.Msgs.GeometryMsgs
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
         public static readonly Vector3 Zero = new Vector3(0, 0, 0);
-        public static readonly VectorOne One;
-        public static readonly VectorUnitX UnitX;
-        public static readonly VectorUnitY UnitY;
-        public static readonly VectorUnitZ UnitZ;
+        public static readonly Vector3 One = new Vector3(1, 1, 1);
+        public static readonly Vector3 UnitX = new Vector3(1, 0, 0);
+        public static readonly Vector3 UnitY = new Vector3(0, 1, 0);
+        public static readonly Vector3 UnitZ = new Vector3(0, 0, 1);
         public static implicit operator Point(in Vector3 p) => new Point(p.X, p.Y, p.Z);
         public static Vector3 operator +(in Vector3 v, in Vector3 w) => new Vector3(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
         public static Vector3 operator -(in Vector3 v, in Vector3 w) => new Vector3(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
@@ -108,5 +108,4 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly Vector3 Cross(in Vector3 v) => new Vector3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
         public static implicit operator Vector3(in (double X, double Y, double Z) p) => new Vector3(p.X, p.Y, p.Z);
     }
-
 }

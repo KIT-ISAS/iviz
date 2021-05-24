@@ -97,6 +97,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly double Dot(in Point v) => X * v.X + Y * v.Y + Z * v.Z;
         public readonly double SquaredNorm => Dot(this);
         public readonly double Norm => System.Math.Sqrt(SquaredNorm);
-        public readonly Point Normalized => this / Norm;
+        public readonly Vector3 Normalized => this / Norm;
+        public readonly Vector3 Cross(in Point v) => new Point(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
     }
 }

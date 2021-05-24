@@ -94,9 +94,6 @@ namespace Iviz.Msgs.GeometryMsgs
         public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
         public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);
-        public static Quaternion AngleAxis(double angleInRad, VectorUnitX _) => Extensions.AngleAxis(angleInRad, _);
-        public static Quaternion AngleAxis(double angleInRad, VectorUnitY _) => Extensions.AngleAxis(angleInRad, _);
-        public static Quaternion AngleAxis(double angleInRad, VectorUnitZ _) => Extensions.AngleAxis(angleInRad, _);
         public static Quaternion Rodrigues(in Vector3 rod) => Extensions.Rodrigues(rod);
     }
 }
