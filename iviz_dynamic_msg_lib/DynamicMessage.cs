@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
+using Newtonsoft.Json;
 using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
@@ -46,7 +49,7 @@ namespace Iviz.MsgsGen.Dynamic
             Fields = new ReadOnlyCollection<Property>(fields);
         }
 
-        public DynamicMessage(ClassInfo classInfo, bool allowAssemblyLookup = true) : this(classInfo,
+        DynamicMessage(ClassInfo classInfo, bool allowAssemblyLookup = true) : this(classInfo,
             new Dictionary<string, DynamicMessage>(), allowAssemblyLookup)
         {
         }
@@ -249,6 +252,7 @@ namespace Iviz.MsgsGen.Dynamic
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 = "";
 
+        public override string ToString() => JsonConvert.SerializeObject(this);
 
         static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
         {
@@ -305,5 +309,44 @@ namespace Iviz.MsgsGen.Dynamic
                 }
             }
         }
+        
+        [Preserve] public static IField[][] AotFields => new[]
+        {
+            CreateAotFields<Vector3>(),
+            CreateAotFields<Point>(),
+            CreateAotFields<Point32>(),
+            CreateAotFields<Quaternion>(),
+            CreateAotFields<Pose>(),
+            CreateAotFields<Transform>(),
+            CreateAotFields<Twist>(),
+            CreateAotFields<ColorRGBA>(),
+            CreateAotFields<Msgs.IvizMsgs.Color32>(),
+            CreateAotFields<Msgs.IvizMsgs.Vector3f>(),
+            CreateAotFields<Msgs.IvizMsgs.Vector2f>(),
+            CreateAotFields<Msgs.IvizMsgs.Triangle>(),
+            CreateAotFields<Header>(),
+            CreateAotFields<TransformStamped>(),
+            CreateAotFields<Msgs.RosgraphMsgs.Log>(),
+
+            CreateAotStructFields<bool>(),
+            CreateAotStructFields<sbyte>(),
+            CreateAotStructFields<byte>(),
+            CreateAotStructFields<short>(),
+            CreateAotStructFields<ushort>(),
+            CreateAotStructFields<int>(),
+            CreateAotStructFields<uint>(),
+            CreateAotStructFields<long>(),
+            CreateAotStructFields<ulong>(),
+            CreateAotStructFields<float>(),
+            CreateAotStructFields<double>(),
+            CreateAotStructFields<time>(),
+            CreateAotStructFields<duration>(),
+        };
+
+        static IField[] CreateAotFields<T>() where T : struct, IMessage, IDeserializable<T> => new IField[]
+            {new MessageField<T>(), new MessageArrayField<T>(), new MessageFixedArrayField<T>(0)};
+
+        static IField[] CreateAotStructFields<T>() where T : unmanaged => new IField[]
+            {new StructField<T>(), new StructArrayField<T>(), new StructFixedArrayField<T>(0)};
     }
 }
