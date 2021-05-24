@@ -86,7 +86,7 @@ namespace Iviz.XmlRpc
 
             if (result != task)
             {
-                Logger.LogErrorFormat("{0}: Task wait timed out");
+                Logger.LogErrorFormat<object>("{0}: Task wait timed out", caller);
                 return;
             }
 
@@ -99,10 +99,7 @@ namespace Iviz.XmlRpc
         /// </summary>
         /// <param name="task">The task to be checked</param>
         /// <returns>Whether the task ran to completion</returns>
-        public static bool RanToCompletion(this Task task)
-        {
-            return task.Status == TaskStatus.RanToCompletion;
-        }
+        public static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
 
 #if !NETSTANDARD2_0
         public static bool RanToCompletion(this ValueTask task)
@@ -110,38 +107,6 @@ namespace Iviz.XmlRpc
             return task.IsCompletedSuccessfully;
         }
 #endif
-
-        /// <summary>
-        /// Set ConfigureAwait(false) for a task.
-        /// </summary>
-        /// <param name="task">Task to be caffed</param>
-        /// <returns>The caffed task</returns>
-        public static ConfiguredTaskAwaitable Caf(this Task task)
-        {
-            return task.ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Sets ConfigureAwait(false) for a task.
-        /// </summary>
-        /// <param name="task">Task to be caffed</param>
-        /// <returns>The caffed task</returns>        
-        public static ConfiguredTaskAwaitable<T> Caf<T>(this Task<T> task)
-        {
-            return task.ConfigureAwait(false);
-        }
-
-#if !NETSTANDARD2_0
-        public static ConfiguredValueTaskAwaitable Caf(this ValueTask task)
-        {
-            return task.ConfigureAwait(false);
-        }
-#endif
-
-        public static ConfiguredValueTaskAwaitable<T> Caf<T>(this ValueTask<T> task)
-        {
-            return task.ConfigureAwait(false);
-        }
 
         public static void WaitNoThrow(this Task? t, object caller)
         {
@@ -156,7 +121,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                if (!(e is OperationCanceledException))
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -176,7 +141,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                if (!(e is OperationCanceledException))
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -204,7 +169,7 @@ namespace Iviz.XmlRpc
                     return;
                 }
 
-                if (!(e is OperationCanceledException))
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -271,7 +236,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                if (!(e is OperationCanceledException))
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -291,7 +256,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                if (!(e is OperationCanceledException))
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -308,7 +273,7 @@ namespace Iviz.XmlRpc
             }
             catch (Exception e)
             {
-                if (!(e is OperationCanceledException))
+                if (e is OperationCanceledException)
                 {
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
@@ -402,20 +367,12 @@ namespace Iviz.XmlRpc
         public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
         {
             var (t1, t2) = ts;
-            if (t1.IsCompleted)
-            {
-                return new ValueTask<Task>(t1);
-            }
-
-            if (t2.IsCompleted)
-            {
-                return new ValueTask<Task>(t2);
-            }
-
-            return new(Task.WhenAny(t1, t2));
+            return t1.IsCompleted
+                ? new ValueTask<Task>(t1)
+                : t2.IsCompleted
+                    ? new ValueTask<Task>(t2)
+                    : new ValueTask<Task>(Task.WhenAny(t1, t2));
         }
-
-        const int MaxTokenWait = 5000;
 
         public static async Task AwaitWithToken(this Task task, CancellationToken token)
         {
@@ -439,7 +396,8 @@ namespace Iviz.XmlRpc
                 throw new TimeoutException("Operation timed out");
             }
             */
-            var timeoutTask = Task.Delay(MaxTokenWait, token);
+            const int maxTokenWait = 5000;
+            var timeoutTask = Task.Delay(maxTokenWait, token);
             await await (task, timeoutTask).WhenAny();
             if (!task.IsCompleted)
             {
@@ -469,15 +427,17 @@ namespace Iviz.XmlRpc
                 throw new TimeoutException("Operation timed out");
             }
             */
-            var timeoutTask = Task.Delay(MaxTokenWait, token);
+
+            const int maxTokenWait = 5000;
+            var timeoutTask = Task.Delay(maxTokenWait, token);
             await (task, timeoutTask).WhenAny();
-            if (!task.IsCompleted)
+            if (task.IsCompleted)
             {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException("Operation timed out");
+                return await task;
             }
 
-            return await task;
+            token.ThrowIfCancellationRequested();
+            throw new TimeoutException("Operation timed out");
         }
     }
 
@@ -525,16 +485,12 @@ namespace Iviz.XmlRpc
             }
             else
             {
-                //Logger.LogDebug("entering connectasync");
                 Task connectionTask = client.ConnectAsync(hostname, port);
                 if (!await connectionTask.AwaitFor(timeoutInMs, token))
                 {
-                    //Logger.LogDebug("leaving connectasync xx");
                     token.ThrowIfCancellationRequested();
                     throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
                 }
-
-                //Logger.LogDebug("leaving connectasync");
             }
 #endif
         }
