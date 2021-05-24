@@ -13,17 +13,7 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
-    public interface IRosTcpReceiver
-    {
-        string Topic { get; }
-        Uri RemoteUri { get; }
-        Endpoint? RemoteEndpoint { get; }
-        Endpoint? Endpoint { get; }
-        IReadOnlyList<string>? TcpHeader { get; }
-        SubscriberReceiverState State { get; }
-    }
-
-    internal sealed class TcpReceiverAsync<T> : IRosTcpReceiver where T : IMessage
+    internal sealed class TcpReceiverAsync<T> where T : IMessage
     {
         const int MaxConnectionRetries = 120;
         const int DisposeTimeoutInMs = 2000;
@@ -45,7 +35,7 @@ namespace Iviz.Roslib
 
         public Endpoint? RemoteEndpoint { get; private set; }
         public Endpoint? Endpoint { get; private set; }
-        public IReadOnlyList<string>? TcpHeader { get; private set; }
+        public string[]? TcpHeader { get; private set; }
         bool KeepRunning => !runningTs.IsCancellationRequested;
         public bool IsConnected => tcpClient != null && tcpClient.Connected;
         public Uri RemoteUri { get; }
@@ -254,7 +244,7 @@ namespace Iviz.Roslib
                 throw new RosHandshakeException($"Partner sent error message: [{description}]");
             }
 
-            TcpHeader = responses.AsReadOnly();
+            TcpHeader = responses.ToArray();
 
             if (DynamicMessage.IsDynamic<T>() || DynamicMessage.IsGenericMessage<T>())
             {
@@ -386,6 +376,15 @@ namespace Iviz.Roslib
             int fixedSizeWithHeader = 4 + fixedSize;
             using var readBuffer = new Rent<byte>(fixedSizeWithHeader);
 
+            RosTcpReceiver connectionInfo = new()
+            {
+                RemoteUri = RemoteUri,
+                RemoteEndpoint = RemoteEndpoint!.Value,
+                Endpoint = Endpoint!.Value,
+                Topic = Topic,
+                TcpHeader = TcpHeader!
+            };
+
             while (KeepRunning)
             {
                 bool success = await stream.ReadChunkAsync(readBuffer.Array, fixedSizeWithHeader, runningTs.Token);
@@ -408,7 +407,7 @@ namespace Iviz.Roslib
                 if (!IsPaused)
                 {
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, fixedSizeWithHeader, 4);
-                    manager.MessageCallback(message, this);
+                    manager.MessageCallback(message, connectionInfo);
                 }
 
                 await Task.Yield();
@@ -417,11 +416,20 @@ namespace Iviz.Roslib
 
         async Task ProcessLoopVariable(NetworkStream stream)
         {
+            RosTcpReceiver connectionInfo = new()
+            {
+                RemoteUri = RemoteUri,
+                RemoteEndpoint = RemoteEndpoint ?? default,
+                Endpoint = Endpoint ?? default,
+                Topic = Topic,
+                TcpHeader = TcpHeader ?? Array.Empty<string>()
+            };
+            
             using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
             {
                 bool isPaused = IsPaused;
-                
+
                 int rcvLength = isPaused
                     ? await ReceiveAndIgnore(stream, readBuffer.Array)
                     : await ReceivePacket(stream, readBuffer);
@@ -438,7 +446,7 @@ namespace Iviz.Roslib
                 if (!isPaused)
                 {
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
-                    manager.MessageCallback(message, this);
+                    manager.MessageCallback(message, connectionInfo);
                 }
 
                 await Task.Yield();
@@ -449,6 +457,15 @@ namespace Iviz.Roslib
         {
             return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
                    $"PartnerSocket={RemoteEndpoint?.Hostname ?? "(none)"}:{RemoteEndpoint?.Port ?? -1}]";
+        }
+        
+        class RosTcpReceiver : IRosTcpReceiver
+        {
+            public Uri? RemoteUri { get; set; }
+            public Endpoint RemoteEndpoint { get; set; }
+            public Endpoint Endpoint { get; set; }
+            public string Topic { get; set; } = "";
+            public string[] TcpHeader { get; set; } = Array.Empty<string>();
         }
     }
 }

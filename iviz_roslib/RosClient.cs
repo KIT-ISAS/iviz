@@ -220,13 +220,8 @@ namespace Iviz.Roslib
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
                 RosMasterClient.GetUri();
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
-                if (e is OperationCanceledException)
-                {
-                    throw;
-                }
-
                 throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
             }
 
@@ -622,13 +617,8 @@ namespace Iviz.Roslib
             {
                 await tasks.WhenAll();
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
-                if (e is OperationCanceledException)
-                {
-                    throw;
-                }
-
                 throw new RosConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
             }
         }

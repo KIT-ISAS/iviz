@@ -143,13 +143,13 @@ namespace Iviz.Roslib
                 return;
             }
             
-            var toDelete = senders.Where(sender => !sender.IsAlive).ToArray();
-            if (toDelete.Length == 0)
+            var sendersToDelete = senders.Where(sender => !sender.IsAlive).ToArray();
+            if (sendersToDelete.Length == 0)
             {
                 return;
             }
 
-            var tasks = toDelete.Select(async sender =>
+            var tasks = sendersToDelete.Select(async sender =>
             {
                 await sender.DisposeAsync(token).AwaitNoThrow(this);
                 if (senders.Remove(sender))
@@ -169,9 +169,9 @@ namespace Iviz.Roslib
                 latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            foreach (var pair in senders)
+            foreach (var sender in senders)
             {
-                pair.Publish(msg);
+                sender.Publish(msg);
             }
         }
 
@@ -187,7 +187,7 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            await senders.Select(pair => pair.PublishAndWaitAsync(msg, token)).WhenAll();
+            await senders.Select(sender => sender.PublishAndWaitAsync(msg, token)).WhenAll();
             return true;
         }
 
