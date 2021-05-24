@@ -3,24 +3,29 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using Iviz.Msgs;
+using Newtonsoft.Json;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
+    [DataContract]
     public readonly struct Record
     {
         readonly Stream reader;
+
+        [DataMember] public OpCode OpCode { get; }
+
         readonly long headerStart;
         readonly long dataStart;
         readonly long nextStart;
         readonly long end;
 
-        public OpCode OpCode { get; }
 
         /// <summary>
         /// Gets all the headers of the record.
         /// </summary>
-        public HeaderEntryEnumerable Headers => new(new HeaderEntry(reader, headerStart, dataStart));
+        public HeaderEntryEnumerable RecordHeaders => new(new RecordHeaderEntry(reader, headerStart, dataStart - 4));
 
         /// <summary>
         /// If this is a Chunk record, generates an object containing the corresponding fields.
@@ -44,14 +49,14 @@ namespace Iviz.Rosbag
             : throw new InvalidOperationException("Operation only allowed in Connection types");
 
         bool IsCompressed => TryGetHeaderEntry("compression", out var entry) && entry.ValueEquals("bz2");
-        
+
         internal int ConnectionId => TryGetHeaderEntry("conn", out var entry) ? entry.ValueAsInt : -1;
-        
+
         time Time => TryGetHeaderEntry("time", out var entry) ? entry.ValueAsTime : default;
 
         string? Topic => TryGetHeaderEntry("topic", out var entry) ? entry.ValueAsString : null;
-        
-        internal Record(Stream reader) : this(reader, RosbagFile.RosbagMagic.Length, reader.Length)
+
+        internal Record(Stream reader) : this(reader, RosbagFileReader.RosbagMagicLength, reader.Length)
         {
         }
 
@@ -69,21 +74,32 @@ namespace Iviz.Rosbag
         {
             this.reader = reader;
 
+            Console.WriteLine("** start " + start);
+
             using var intBytes = new Rent<byte>(4);
             reader.Seek(start, SeekOrigin.Begin);
             reader.Read(intBytes.Array, 0, 4);
 
+            //Console.WriteLine("** Start " + start);
+
             headerStart = start + 4;
             int headerLength = intBytes.ToInt();
 
+            Console.WriteLine("** header_len " + headerLength);
+
             reader.Seek(headerStart + headerLength, SeekOrigin.Begin);
+            Console.WriteLine("** data_len pos " + reader.Position);
+
             reader.Read(intBytes.Array, 0, 4);
             int dataLength = intBytes.ToInt();
+
+            Console.WriteLine("** data_len " + dataLength);
 
             dataStart = headerStart + headerLength + 4;
             nextStart = dataStart + dataLength;
 
             this.end = end;
+            Console.WriteLine("** end " + end);
 
             OpCode = OpCode.Unknown;
             OpCode = TryGetHeaderEntry("op", out var entry)
@@ -103,9 +119,9 @@ namespace Iviz.Rosbag
             return false;
         }
 
-        bool TryGetHeaderEntry(string name, out HeaderEntry result)
+        bool TryGetHeaderEntry(string name, out RecordHeaderEntry result)
         {
-            foreach (var entry in Headers)
+            foreach (var entry in RecordHeaders)
             {
                 if (entry.NameEquals(name))
                 {
@@ -117,6 +133,8 @@ namespace Iviz.Rosbag
             result = default;
             return false;
         }
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 
     public struct RecordEnumerator : IEnumerator<Record>

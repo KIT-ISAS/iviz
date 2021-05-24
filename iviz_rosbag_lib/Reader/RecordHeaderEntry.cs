@@ -5,9 +5,9 @@ using System.IO;
 using System.Text;
 using Iviz.Msgs;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
-    public readonly struct HeaderEntry
+    public readonly struct RecordHeaderEntry
     {
         readonly Stream reader;
         readonly long nameStart;
@@ -86,7 +86,7 @@ namespace Iviz.Rosbag
             }
         }
 
-        internal HeaderEntry(Stream reader, long start, long end)
+        internal RecordHeaderEntry(Stream reader, long start, long end)
         {
             this.reader = reader;
             nameStart = 0;
@@ -95,7 +95,7 @@ namespace Iviz.Rosbag
             this.end = end;
         }
 
-        HeaderEntry(long start, long end, Stream reader)
+        RecordHeaderEntry(long start, long end, Stream reader)
         {
             this.reader = reader;
             this.end = end;
@@ -111,27 +111,29 @@ namespace Iviz.Rosbag
 
             nameStart = start + 4;
             nextStart = nameStart + entrySize;
-
+            
             long equalsPosition = nameStart;
             while (equalsPosition < nextStart)
             {
                 if (reader.ReadByte() == '=')
                 {
                     valueStart = equalsPosition + 1;
+                    //Console.WriteLine("  ** Start " + start + " valueSize " + (nextStart - valueStart) +  " next " + nextStart);
                     return;
                 }
 
                 equalsPosition++;
             }
 
+            // if no '=' found
             valueStart = nextStart;
         }
 
-        internal bool TryMoveNext(out HeaderEntry next)
+        internal bool TryMoveNext(out RecordHeaderEntry next)
         {
             if (nextStart < end)
             {
-                next = new HeaderEntry(nextStart, end, reader);
+                next = new RecordHeaderEntry(nextStart, end, reader);
                 return true;
             }
 
@@ -178,19 +180,19 @@ namespace Iviz.Rosbag
         }        
     }
 
-    public struct HeaderEntryEnumerator : IEnumerator<HeaderEntry>
+    public struct HeaderEntryEnumerator : IEnumerator<RecordHeaderEntry>
     {
-        HeaderEntry current;
+        RecordHeaderEntry current;
 
-        internal HeaderEntryEnumerator(HeaderEntry start) => current = start;
+        internal HeaderEntryEnumerator(RecordHeaderEntry start) => current = start;
 
         public bool MoveNext() => current.TryMoveNext(out current);
 
         void IEnumerator.Reset() => throw new NotSupportedException();
 
-        public HeaderEntry Current => current;
+        public RecordHeaderEntry Current => current;
 
-        HeaderEntry IEnumerator<HeaderEntry>.Current => current;
+        RecordHeaderEntry IEnumerator<RecordHeaderEntry>.Current => current;
 
         object IEnumerator.Current => current;
 
@@ -199,15 +201,15 @@ namespace Iviz.Rosbag
         }
     }
 
-    public readonly struct HeaderEntryEnumerable : IEnumerable<HeaderEntry>
+    public readonly struct HeaderEntryEnumerable : IEnumerable<RecordHeaderEntry>
     {
-        readonly HeaderEntry start;
+        readonly RecordHeaderEntry start;
 
-        internal HeaderEntryEnumerable(HeaderEntry start) => this.start = start;
+        internal HeaderEntryEnumerable(RecordHeaderEntry start) => this.start = start;
 
         public HeaderEntryEnumerator GetEnumerator() => new(start);
 
-        IEnumerator<HeaderEntry> IEnumerable<HeaderEntry>.GetEnumerator() => GetEnumerator();
+        IEnumerator<RecordHeaderEntry> IEnumerable<RecordHeaderEntry>.GetEnumerator() => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

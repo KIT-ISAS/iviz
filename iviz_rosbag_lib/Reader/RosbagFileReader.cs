@@ -5,11 +5,13 @@ using System.IO;
 using System.Text;
 using Iviz.Msgs;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
-    public sealed class RosbagFile : IDisposable
+    public sealed class RosbagFileReader : IDisposable, IEnumerable<MessageData>
     {
-        internal const string RosbagMagic = "#ROSBAG V2.0\n";
+        const string RosbagMagic = "#ROSBAG V2.0\n";
+        
+        internal const int RosbagMagicLength = 13;
 
         readonly Stream reader;
         readonly bool leaveOpen;
@@ -21,7 +23,7 @@ namespace Iviz.Rosbag
         /// <param name="leaveOpen">Whether to leave the stream open when this object is disposed.</param>
         /// <exception cref="ArgumentException">Thrown if the stream does not allow reading and seeking.</exception>
         /// <exception cref="InvalidDataException">Thrown if the data is not a rosbag file.</exception>
-        public RosbagFile(Stream stream, bool leaveOpen = false)
+        public RosbagFileReader(Stream stream, bool leaveOpen = false)
         {
             reader = stream ?? throw new ArgumentNullException(nameof(stream));
             this.leaveOpen = leaveOpen;
@@ -39,7 +41,11 @@ namespace Iviz.Rosbag
         /// </summary>
         /// <param name="path">The file to open.</param>
         /// <exception cref="InvalidDataException">Thrown if the data is not a rosbag file.</exception>
-        public RosbagFile(string path) : this(File.Open(path, FileMode.Open, FileAccess.Read))
+        public RosbagFileReader(string path) : this(
+            File.Exists(path)
+                ? File.Open(path, FileMode.Open, FileAccess.Read)
+                : throw new FileNotFoundException("Failed to initialize reader: Source path not found", path)
+        )
         {
         }
 
@@ -57,9 +63,8 @@ namespace Iviz.Rosbag
             }
         }
 
-
         /// <summary>
-        /// Closes the underlying stream.
+        /// Disposes the reader, and closes the underlying stream if requested.
         /// </summary>
         public void Dispose()
         {
@@ -70,16 +75,15 @@ namespace Iviz.Rosbag
         }
 
         /// <summary>
-        /// Gets all records in the file.
+        /// Returns an enumerable that iterates through all records
         /// </summary>
-        /// <returns>An enumerable that iterates through the records.</returns>
         public RecordEnumerable Records => new(new Record(reader));
 
         /// <summary>
         /// Gets all records in the file, while unwrapping the inner records of a Chunk record.
         /// </summary>
         /// <returns>An enumerable that iterates through the records.</returns>
-        public IEnumerable<Record> GetAllRecords()
+        public IEnumerable<Record> ReadAllRecords()
         {
             foreach (var record in Records)
             {
@@ -101,11 +105,11 @@ namespace Iviz.Rosbag
         /// Get all messages in the file, and associates them with their originating connection.
         /// </summary>
         /// <returns>An enumerable that iterates through the messages.</returns>
-        public IEnumerable<MessageData> GetAllMessages()
+        public IEnumerable<MessageData> ReadAllMessages()
         {
             var connections = new Dictionary<int, Connection>();
 
-            foreach (var record in GetAllRecords())
+            foreach (var record in ReadAllRecords())
             {
                 switch (record.OpCode)
                 {
@@ -128,21 +132,21 @@ namespace Iviz.Rosbag
 
         /// <summary>
         /// Get all messages in the file whose originating connection fulfills the given condition.
-        /// Pretty much the same as using a LINQ Where() on <see cref="GetAllMessages"/>,
+        /// Pretty much the same as using a LINQ Where() on <see cref="ReadAllMessages"/>,
         /// except it doesn't create a MessageData object if not needed, so it generates a little less garbage.
         /// </summary>
         /// <param name="predicate">The condition that the message connection must fulfill</param>
         /// <returns>An enumerable that iterates through the messages</returns>
-        public IEnumerable<MessageData> GetAllMessagesWhere(Predicate<Connection> predicate)
+        public IEnumerable<MessageData> ReadAllMessagesWhere(Predicate<Connection> predicate)
         {
             if (predicate == null)
             {
                 throw new ArgumentNullException(nameof(predicate));
             }
-            
+
             var connections = new Dictionary<int, Connection>();
 
-            foreach (var record in GetAllRecords())
+            foreach (var record in ReadAllRecords())
             {
                 switch (record.OpCode)
                 {
@@ -166,5 +170,9 @@ namespace Iviz.Rosbag
                 }
             }
         }
+
+        public IEnumerator<MessageData> GetEnumerator() => ReadAllMessages().GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

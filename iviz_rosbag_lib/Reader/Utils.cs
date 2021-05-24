@@ -1,3 +1,6 @@
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Text;
 using Iviz.Msgs;
 
 namespace Iviz.Rosbag
@@ -10,5 +13,13 @@ namespace Iviz.Rosbag
         }
 
         public static int ToInt(this Rent<byte> intBytes) => intBytes.Array.ToInt();
+
+        public static void WriteInt(this byte[] array, int value)
+        {
+            array[3] = (byte) (value >> 24);
+            array[0] = (byte) value;
+            array[1] = (byte) (value >> 8);
+            array[2] = (byte) (value >> 16);
+        }
     }
 }

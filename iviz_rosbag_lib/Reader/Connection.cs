@@ -1,15 +1,17 @@
 using System.IO;
+using System.Runtime.Serialization;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
+    [DataContract]
     public sealed class Connection
     {
         internal int ConnectionId { get; }
-        public string? Topic { get; }
-        public string? MessageType { get; }
+        [DataMember] public string? Topic { get; }
+        [DataMember] public string? MessageType { get; }
         public string? Md5Sum { get; }
         public string? MessageDefinition { get; }
-        public string? CallerId { get; }
+        [DataMember] public string? CallerId { get; }
 
         readonly HeaderEntryEnumerable headerEntries;
         
@@ -18,7 +20,7 @@ namespace Iviz.Rosbag
             ConnectionId = connectionId;
             Topic = topic;
 
-            headerEntries = new HeaderEntryEnumerable(new HeaderEntry(reader, dataStart, dataEnd));
+            headerEntries = new HeaderEntryEnumerable(new RecordHeaderEntry(reader, dataStart, dataEnd));
 
             foreach (var entry in headerEntries)
             {

@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
     public readonly struct Chunk
     {

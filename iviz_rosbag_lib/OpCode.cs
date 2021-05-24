@@ -1,5 +1,9 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
 namespace Iviz.Rosbag
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum OpCode
     {
         Unknown = 0x00,

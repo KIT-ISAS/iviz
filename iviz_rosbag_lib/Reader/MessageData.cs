@@ -2,25 +2,28 @@ using System;
 using System.IO;
 using Iviz.Msgs;
 using System.Collections.Concurrent;
+using System.Runtime.Serialization;
 using Iviz.MsgsGen;
 using Iviz.MsgsGen.Dynamic;
+using Newtonsoft.Json;
 using Buffer = Iviz.Msgs.Buffer;
 
-namespace Iviz.Rosbag
+namespace Iviz.Rosbag.Reader
 {
+    [DataContract]
     public sealed class MessageData
     {
         static readonly ConcurrentDictionary<string, IMessage> Generators = new();
 
         readonly Stream reader;
-        readonly long dataStart;
-        readonly long dataEnd;
+        [DataMember] readonly long dataStart;
+        [DataMember] readonly long dataEnd;
         IMessage? message;
 
         internal int ConnectionId { get; }
 
-        public time Time { get; }
-        public Connection? Connection { get; internal set; }
+        [DataMember] public time Time { get; }
+        [DataMember] public Connection? Connection { get; internal set; }
         public string? Topic => Connection?.Topic;
         public string? Type => Connection?.MessageType;
 
@@ -62,7 +65,7 @@ namespace Iviz.Rosbag
                     }
                     else if (MessageDefinition != null)
                     {
-                        generator = new DynamicMessage(new ClassInfo(null, type, MessageDefinition));
+                        generator = DynamicMessage.CreateFromDependencyString(type, MessageDefinition);
                     }
                     else
                     {
@@ -92,5 +95,7 @@ namespace Iviz.Rosbag
         }
 
         public T GetMessage<T>() where T : IMessage => (T) Message;
+        
+        public override string ToString() => JsonConvert.SerializeObject(this);        
     }
 }
