@@ -3098,6 +3098,9 @@ MonoBehaviour:
   showConsole: {fileID: 15707298}
   showSettings: {fileID: 2091855873}
   showEcho: {fileID: 1352131243}
+  recordBag: {fileID: 832075066}
+  recordBagText: {fileID: 2076347074}
+  recordBagImage: {fileID: 4786509}
   connectedSprite: {fileID: 21300000, guid: e00c9b214c898d94cad1403ffa17927b, type: 3}
   connectingSprite: {fileID: 21300000, guid: d2dd953ad526fd64e892fcf0393f8e18, type: 3}
   disconnectedSprite: {fileID: 21300000, guid: e643106c904436a43b35141a0ace3d3e, type: 3}
