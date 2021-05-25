@@ -13,7 +13,7 @@ namespace Iviz.Rosbag.Writer
 
         readonly Stream writer;
         readonly bool leaveOpen;
-        readonly Dictionary<IRosbagConnection, int> connections = new();
+        readonly Dictionary<IRosConnection, int> connections = new();
         readonly Dictionary<int, List<(time time, long offset)>> chunkIndices = new();
         readonly List<ChunkInfoRecord> chunkInfos = new();
 
@@ -22,6 +22,8 @@ namespace Iviz.Rosbag.Writer
         time chunkStartTime;
         time chunkEndTime;
 
+        public long Length => writer.Length;
+        
         public RosbagFileWriter(Stream stream, bool leaveOpen = false)
         {
             writer = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -336,7 +338,7 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
-        public void Write(IMessage message, IRosbagConnection connection, in time timestamp)
+        public void Write(IMessage message, IRosConnection connection, in time timestamp)
         {
             TryOpenChunk(timestamp);
 
@@ -363,7 +365,7 @@ namespace Iviz.Rosbag.Writer
             chunkEndTime = timestamp;
         }
 
-        public async Task WriteAsync(IMessage message, IRosbagConnection connection, time timestamp)
+        public async Task WriteAsync(IMessage message, IRosConnection connection, time timestamp)
         {
             await TryOpenChunkAsync(timestamp);
 
