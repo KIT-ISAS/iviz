@@ -117,6 +117,7 @@ namespace Iviz.Core
         
         static string persistentDataPath;
         static string savedFolder;
+        static string bagsFolder;
         static string simpleConfigurationPath;
         static string resourcesPath;
         static string savedRobotsPath;
@@ -128,6 +129,8 @@ namespace Iviz.Core
             persistentDataPath ?? (persistentDataPath = Application.persistentDataPath);
 
         [NotNull] public static string SavedFolder => savedFolder ?? (savedFolder = PersistentDataPath + "/saved");
+
+        [NotNull] public static string BagsFolder => bagsFolder ?? (bagsFolder = PersistentDataPath + "/bags");
 
         [NotNull]
         public static string SimpleConfigurationPath =>

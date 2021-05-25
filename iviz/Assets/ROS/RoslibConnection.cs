@@ -37,6 +37,7 @@ namespace Iviz.Ros
         [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
         [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
         [CanBeNull] RosClient client;
+        [CanBeNull] BagListener bagListener;
 
         [NotNull] CancellationTokenSource connectionTs = new CancellationTokenSource();
 
@@ -79,6 +80,33 @@ namespace Iviz.Ros
             {
                 myUri = value;
                 Disconnect();
+            }
+        }
+
+        [CanBeNull]
+        public BagListener BagListener
+        {
+            get => bagListener;
+            set
+            {
+                AddTask(async () =>
+                {
+                    if (bagListener == value)
+                    {
+                        return;
+                    }
+                    
+                    if (bagListener != null)
+                    {
+                        await bagListener.StopAsync();
+                    }
+                    
+                    bagListener = value;
+                    foreach (var subscriber in subscribersByTopic.Values)
+                    {
+                        subscriber.BagListener = value;
+                    }
+                });
             }
         }
 
@@ -1121,12 +1149,18 @@ namespace Iviz.Ros
 
             Task UnsubscribeAsync([NotNull] RosClient client, CancellationToken token);
             void Invalidate();
+
+            BagListener BagListener { set; }
         }
 
         sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
         {
             readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
             [NotNull] readonly string topic;
+            [CanBeNull] string clientId;
+
+            [CanBeNull] BagListener bagListener;
+            [CanBeNull] string bagId;
 
             public SubscribedTopic([NotNull] string topic)
             {
@@ -1145,7 +1179,8 @@ namespace Iviz.Ros
                 listeners.Remove((Listener<T>) subscriber);
             }
 
-            public async Task SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
+            public async Task SubscribeAsync(RosClient client, IListener listener,
+                CancellationToken token)
             {
                 token.ThrowIfCancellationRequested();
                 string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
@@ -1157,7 +1192,11 @@ namespace Iviz.Ros
 
                 if (client != null)
                 {
-                    (_, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback, token: token);
+                    (clientId, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback, token: token);
+                    if (bagListener != null)
+                    {
+                        bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
+                    }
                 }
                 else
                 {
@@ -1170,11 +1209,48 @@ namespace Iviz.Ros
             public async Task UnsubscribeAsync(RosClient client, CancellationToken token)
             {
                 token.ThrowIfCancellationRequested();
-                string fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
 
-                if (Subscriber != null)
+                if (Subscriber == null)
                 {
-                    await Subscriber.UnsubscribeAsync(fullTopic, token);
+                    return;
+                }
+
+                BagListener = null;
+
+                if (clientId != null)
+                {
+                    await Subscriber.UnsubscribeAsync(clientId, token);
+                    clientId = null;
+                }
+
+                Subscriber = null;
+            }
+
+            [CanBeNull]
+            public BagListener BagListener
+            {
+                set
+                {
+                    bagListener = value;
+                    if (Subscriber == null)
+                    {
+                        return;
+                    }
+
+                    if (bagListener != null)
+                    {
+                        if (bagId != null)
+                        {
+                            Subscriber.Unsubscribe(bagId);
+                        }
+
+                        bagId = Subscriber.Subscribe(bagListener.EnqueueMessage);
+                    }
+                    else if (bagId != null)
+                    {
+                        Subscriber.Unsubscribe(bagId);
+                        bagId = null;
+                    }
                 }
             }
 

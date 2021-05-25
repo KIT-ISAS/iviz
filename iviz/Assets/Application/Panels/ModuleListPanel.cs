@@ -57,6 +57,10 @@ namespace Iviz.App
         [SerializeField] Button showConsole = null;
         [SerializeField] Button showSettings = null;
         [SerializeField] Button showEcho = null;
+        
+        [SerializeField] Button recordBag = null;
+        [SerializeField] Text recordBagText = null;
+        [SerializeField] Image recordBagImage = null;
 
         [SerializeField] Sprite connectedSprite = null;
         [SerializeField] Sprite connectingSprite = null;
@@ -271,6 +275,23 @@ namespace Iviz.App
             showConsole.onClick.AddListener(consoleData.Show);
             showSettings.onClick.AddListener(settingsData.Show);
             showEcho.onClick.AddListener(echoData.Show);
+            recordBag.onClick.AddListener(() =>
+            {
+                if (ConnectionManager.Connection.BagListener != null)
+                {
+                    ConnectionManager.Connection.BagListener = null;
+                    recordBagImage.color = Color.black;
+                    recordBagText.text = "Rec Bag";
+                }
+                else
+                {
+                    string filename = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+                    Directory.CreateDirectory(Settings.BagsFolder);
+                    ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
+                    recordBagImage.color = Color.red;
+                    recordBagText.text = "0 MB";
+                }
+            });
 
             ShowARJoystickButton.Clicked += () =>
             {
@@ -817,6 +838,12 @@ namespace Iviz.App
             long upKb = upB / 1000;
             bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
 
+            if (ConnectionManager.Connection.BagListener != null)
+            {
+                long bagSizeMb = ConnectionManager.Connection.BagListener.Length / (1024 * 1024);
+                recordBagText.text = $"{bagSizeMb.ToString()} MB";
+            }
+            
             var state = SystemInfo.batteryStatus;
             switch (SystemInfo.batteryLevel)
             {
