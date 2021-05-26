@@ -59,6 +59,12 @@ namespace Iviz.Controllers
         float? highlightFrameStart;
         readonly FrameNode highlightFrameNode;
         readonly AxisFrameResource highlightFrame;
+        
+        public static float RootScale
+        {
+            get => RootFrame.transform.localScale.x;
+            set => RootFrame.transform.localScale = value * Vector3.one;
+        }        
 
         public TfListener([NotNull] IModuleData moduleData)
         {

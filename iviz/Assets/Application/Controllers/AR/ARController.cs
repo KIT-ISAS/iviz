@@ -170,7 +170,7 @@ namespace Iviz.Controllers
 
         static float TfRootScale
         {
-            set => TfListener.RootFrame.transform.localScale = value * Vector3.one;
+            set => TfListener.RootScale = value;
         }
 
         protected virtual bool PinRootMarker
