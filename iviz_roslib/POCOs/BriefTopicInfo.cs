@@ -19,6 +19,9 @@ namespace Iviz.Roslib
 
         internal BriefTopicInfo(string topic, string type) => (Topic, Type) = (topic, type);
 
+        public void Deconstruct(out string topic, out string type) =>
+            (topic, type) = (Topic, Type);
+
         public override string ToString() => $"[Topic='{Topic}' Type='{Type}']";
     }
 }
