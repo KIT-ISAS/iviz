@@ -63,7 +63,7 @@ namespace Iviz.Controllers
                     labelObjectText.Name = "[Label]";
                     labelObjectText.Text = Id;
                     labelObjectText.transform.localScale = 0.5f * LabelSize * FrameSize * Vector3.one;
-                    labelObjectText.Visible = !ForceInvisible && LabelVisible && (ForceVisible || Visible);
+                    labelObjectText.Visible = !ForceInvisible && LabelVisible && Visible;
                     labelObjectText.BillboardOffset = 1.5f * FrameSize * Vector3.up;
                     labelObjectText.Layer = LayerType.IgnoreRaycast;
                 }
@@ -120,18 +120,6 @@ namespace Iviz.Controllers
             }
         }
 
-        bool ForceVisible
-        {
-            get => forceVisible;
-            set
-            {
-                forceVisible = value;
-                Visible = Visible;
-                TrailVisible = TrailVisible;
-                LabelVisible = LabelVisible;
-            }
-        }
-
         public bool ForceInvisible
         {
             get => forceInvisible;
@@ -150,7 +138,7 @@ namespace Iviz.Controllers
             set
             {
                 visible = value;
-                axis.Visible = (value || ForceVisible) && !ForceInvisible;
+                axis.Visible = value && !ForceInvisible;
                 LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;
             }
@@ -167,7 +155,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                LabelObjectText.Visible = !ForceInvisible && (ForceVisible || Visible) && value;
+                LabelObjectText.Visible = !ForceInvisible && Visible && value;
             }
         }
 
@@ -194,7 +182,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                ParentConnector.Visible = !ForceInvisible && (ForceVisible || Visible) && value;
+                ParentConnector.Visible = !ForceInvisible && Visible && value;
             }
         }
 
@@ -229,7 +217,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                Trail.Visible = value && (Visible || ForceVisible);
+                Trail.Visible = value && Visible;
                 if (value)
                 {
                     Trail.DataSource = () => Transform.position;

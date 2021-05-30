@@ -179,6 +179,8 @@ namespace Iviz.Ros
                     Core.Logger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
+                    //ConnectionUtils.GlobalResolver["cpr-nextr17"] = "192.168.131.1";
+                    //ConnectionUtils.GlobalResolver["ids-robdekon-1"] = "192.168.1.11";
                     (bool success, XmlRpcValue hosts) =
                         await client.Parameters.GetParameterAsync("/iviz/hosts", token);
                     if (success)

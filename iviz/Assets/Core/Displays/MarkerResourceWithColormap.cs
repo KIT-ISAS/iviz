@@ -14,8 +14,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
-        protected static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
-        protected static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
+        static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
         static readonly int LocalToWorldId = Shader.PropertyToID("_LocalToWorld");
         static readonly int WorldToLocalId = Shader.PropertyToID("_WorldToLocal");
         static readonly int TintId = Shader.PropertyToID("_Tint");

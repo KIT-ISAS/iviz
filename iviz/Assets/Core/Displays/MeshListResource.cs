@@ -182,6 +182,7 @@ namespace Iviz.Displays
                 0, Properties, CastShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
         }
 
+        [NotNull]
         Material FindMaterial()
         {
             if (OcclusionOnly && UseIntensityForScaleY)

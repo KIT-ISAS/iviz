@@ -2,26 +2,18 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Sdf;
 using JetBrains.Annotations;
-using Nito.AsyncEx;
-using UnityEngine;
 using Color = UnityEngine.Color;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
-using String = System.String;
 using Time = UnityEngine.Time;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
@@ -31,7 +23,7 @@ namespace Iviz.Controllers
     public sealed class TfListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
-        public const string OriginFrameName = "/_origin_";
+        public const string OriginFrameName = "_origin_";
 
         const string DefaultTopicStatic = "/tf_static";
         const string BaseFrameId = "map";
@@ -77,7 +69,7 @@ namespace Iviz.Controllers
             unityFrame.ForceInvisible = true;
             unityFrame.Visible = false;
 
-            FrameNode defaultListener = FrameNode.Instantiate("[.]");
+            var defaultListener = FrameNode.Instantiate("[.]");
             UnityFrame.AddListener(defaultListener);
 
             keepAllListener = FrameNode.Instantiate("[TFNode]");
@@ -104,10 +96,7 @@ namespace Iviz.Controllers
             mapFrame.AddListener(defaultListener);
             mapFrame.ParentCanChange = false;
 
-            //rootFrame.Transform.localScale = 0.5f * Vector3.one;
-
             FixedFrame = MapFrame;
-
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
             FixedFrameId = "";
@@ -379,10 +368,10 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(frameId));
             }
 
-            //string frameId = reqId.Length != 0 && reqId[0] == '/' ? reqId.Substring(1) : reqId;
-            TfFrame frame = Instance.GetOrCreateFrameImpl(frameId);
+            string validatedFrameId = frameId.Length != 0 && frameId[0] == '/' ? frameId.Substring(1) : frameId;
+            TfFrame frame = Instance.GetOrCreateFrameImpl(validatedFrameId);
 
-            if (!(listener is null))
+            if (listener != null)
             {
                 frame.AddListener(listener);
             }
