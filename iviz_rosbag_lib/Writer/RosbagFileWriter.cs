@@ -7,7 +7,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Rosbag.Writer
 {
-    public class RosbagFileWriter : IDisposable
+    public sealed class RosbagFileWriter : IDisposable
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
@@ -124,7 +124,7 @@ namespace Iviz.Rosbag.Writer
             await writer.WriteValueAsync(padding);
         }
 
-        void WriteConnectionRecord(int connectionId, string topicName, string[] headerData)
+        void WriteConnectionRecord(int connectionId, string topicName, IReadOnlyCollection<string> headerData)
         {
             var op = new OpCodeHeaderEntry(OpCode.Connection);
             var conn = new IntHeaderEntry("conn", connectionId);
@@ -137,7 +137,7 @@ namespace Iviz.Rosbag.Writer
                 .WriteValue(conn)
                 .WriteValue(topic);
 
-            int dataLength = 4 * headerData.Length + headerData.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
+            int dataLength = 4 * headerData.Count + headerData.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
 
             writer.WriteValue(dataLength);
             foreach (var entry in headerData)
@@ -147,7 +147,7 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
-        async Task WriteConnectionRecordAsync(int connectionId, string topicName, string[] headerData)
+        async Task WriteConnectionRecordAsync(int connectionId, string topicName, IReadOnlyCollection<string> headerData)
         {
             var op = new OpCodeHeaderEntry(OpCode.Connection);
             var conn = new IntHeaderEntry("conn", connectionId);
@@ -160,7 +160,7 @@ namespace Iviz.Rosbag.Writer
             await writer.WriteValueAsync(conn);
             await writer.WriteValueAsync(topic);
 
-            int dataLength = 4 * headerData.Length + headerData.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
+            int dataLength = 4 * headerData.Count + headerData.Sum(entry => BuiltIns.UTF8.GetByteCount(entry));
             await writer.WriteValueAsync(dataLength);
             foreach (var entry in headerData)
             {
