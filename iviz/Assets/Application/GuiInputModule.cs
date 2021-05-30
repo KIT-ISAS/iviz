@@ -188,10 +188,13 @@ namespace Iviz.App
             DraggedObject = null;
         }
 
-        static bool IsDraggingAllowed => Settings.IsMobile 
-            ? Input.touchCount == 1
-            : Input.GetMouseButton(1);
-        
+        static bool IsDraggingAllowed =>
+            Settings.IsMobile
+                ? Input.touchCount == 1
+                : Settings.IsVR
+                    ? Settings.IsVRButtonDown
+                    : Input.GetMouseButton(1);
+
         public void TrySetDraggedObject(IDraggable draggable)
         {
             if (!IsDraggingAllowed)

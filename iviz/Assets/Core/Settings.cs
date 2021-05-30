@@ -113,6 +113,7 @@ namespace Iviz.Core
 #endif
 
         public static bool IsVR { get; set; }
+        public static bool IsVRButtonDown { get; set; }
         
         
         static string persistentDataPath;

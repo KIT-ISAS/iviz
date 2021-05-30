@@ -12,6 +12,7 @@ namespace Iviz.Controllers
     {
         bool PointerDown();
         bool PointerUp();
+        bool State();
     }
 
     public class VRController : MonoBehaviour
@@ -25,6 +26,8 @@ namespace Iviz.Controllers
 
         LineResource resource;
         MeshMarkerResource target;
+
+        [SerializeField] float scale = 1;
 
         [CanBeNull] Transform currentHit;
 
@@ -83,6 +86,11 @@ namespace Iviz.Controllers
             }
         }
 
+        void Start()
+        {
+            TfListener.RootScale = scale;            
+        }
+
         void Update()
         {
             Ray raycast = new Ray(Transform.position, Transform.forward);
@@ -107,6 +115,7 @@ namespace Iviz.Controllers
                 return;
             }
 
+            Settings.IsVRButtonDown = button.State();
             if (button.PointerDown())
             {
                 if (CurrentHit == null)
