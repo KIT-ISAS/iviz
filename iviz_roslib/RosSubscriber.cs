@@ -168,20 +168,11 @@ namespace Iviz.Roslib
             return type == typeof(T);
         }
 
-        string IRosSubscriber.Subscribe(Action<IMessage> callback)
-        {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+        string IRosSubscriber.Subscribe(Action<IMessage> callback) => Subscribe(msg => callback(msg));
 
-            AssertIsAlive();
-
-            string id = GenerateId();
-            callbacksById.Add(id, (t, _) => callback(t));
-            callbacks = callbacksById.Values.ToArray();
-            return id;
-        }
+        string IRosSubscriber.Subscribe(Action<IMessage, IRosTcpReceiver> callback) =>
+            Subscribe((msg, receiver) => callback(msg, receiver));
+        
 
         /// <summary>
         /// Generates a new subscriber id with the given callback function.
@@ -218,7 +209,7 @@ namespace Iviz.Roslib
             callbacksById.Add(id, callback);
             callbacks = callbacksById.Values.ToArray();
             return id;
-        }        
+        }
 
         public bool ContainsId(string id)
         {

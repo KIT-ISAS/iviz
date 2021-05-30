@@ -33,14 +33,14 @@ namespace Iviz.Roslib
 
         string? errorDescription;
 
-        public Endpoint? RemoteEndpoint { get; private set; }
-        public Endpoint? Endpoint { get; private set; }
-        public string[]? TcpHeader { get; private set; }
+        Endpoint? RemoteEndpoint { get; set; }
+        Endpoint? Endpoint { get; set; }
+        string[]? TcpHeader { get; set; }
         bool KeepRunning => !runningTs.IsCancellationRequested;
-        public bool IsConnected => tcpClient != null && tcpClient.Connected;
         public Uri RemoteUri { get; }
-        public string Topic => topicInfo.Topic;
+        string Topic => topicInfo.Topic;
         public bool IsAlive => !task.IsCompleted;
+        public bool IsConnected => tcpClient is {Connected: true};
         public bool IsPaused { get; set; }
 
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
@@ -376,14 +376,7 @@ namespace Iviz.Roslib
             int fixedSizeWithHeader = 4 + fixedSize;
             using var readBuffer = new Rent<byte>(fixedSizeWithHeader);
 
-            RosTcpReceiver connectionInfo = new()
-            {
-                RemoteUri = RemoteUri,
-                RemoteEndpoint = RemoteEndpoint!.Value,
-                Endpoint = Endpoint!.Value,
-                Topic = Topic,
-                TcpHeader = TcpHeader!
-            };
+            var connectionInfo = CreateConnectionInfo();
 
             while (KeepRunning)
             {
@@ -416,15 +409,8 @@ namespace Iviz.Roslib
 
         async Task ProcessLoopVariable(NetworkStream stream)
         {
-            RosTcpReceiver connectionInfo = new()
-            {
-                RemoteUri = RemoteUri,
-                RemoteEndpoint = RemoteEndpoint ?? default,
-                Endpoint = Endpoint ?? default,
-                Topic = Topic,
-                TcpHeader = TcpHeader ?? Array.Empty<string>()
-            };
-            
+            var connectionInfo = CreateConnectionInfo();
+
             using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
             {
@@ -452,20 +438,41 @@ namespace Iviz.Roslib
                 await Task.Yield();
             }
         }
+        
+        RosTcpReceiver CreateConnectionInfo() => new(
+            RemoteUri,
+            RemoteEndpoint ?? default,
+            Endpoint ?? default,
+            Topic,
+            topicInfo.Type,
+            TcpHeader ?? Array.Empty<string>() // none of these are null by creation time
+        );
 
         public override string ToString()
         {
             return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
                    $"PartnerSocket={RemoteEndpoint?.Hostname ?? "(none)"}:{RemoteEndpoint?.Port ?? -1}]";
         }
-        
-        class RosTcpReceiver : IRosTcpReceiver
+    }
+
+    internal class RosTcpReceiver : IRosTcpReceiver
+    {
+        public Uri? RemoteUri { get; }
+        public Endpoint RemoteEndpoint { get; }
+        public Endpoint Endpoint { get; }
+        public string Topic { get; }
+        public string Type { get; }
+        public string[] TcpHeader { get; }
+
+        public RosTcpReceiver(Uri? remoteUri, Endpoint remoteEndpoint, Endpoint endpoint, string topic, string type,
+            string[] tcpHeader)
         {
-            public Uri? RemoteUri { get; set; }
-            public Endpoint RemoteEndpoint { get; set; }
-            public Endpoint Endpoint { get; set; }
-            public string Topic { get; set; } = "";
-            public string[] TcpHeader { get; set; } = Array.Empty<string>();
+            RemoteUri = remoteUri;
+            RemoteEndpoint = remoteEndpoint;
+            Endpoint = endpoint;
+            Topic = topic;
+            Type = type;
+            TcpHeader = tcpHeader;
         }
     }
 }

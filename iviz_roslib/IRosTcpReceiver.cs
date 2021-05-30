@@ -1,13 +1,12 @@
 using System;
-using System.Collections.Generic;
-using Iviz.Rosbag.Writer;
+using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
     /// <summary>
     /// Encapsulates information about the connection from which a message originates 
     /// </summary>
-    public interface IRosTcpReceiver : IRosbagConnection
+    public interface IRosTcpReceiver : IRosConnection
     {
         /// <summary>
         /// The ROS uri of the publisher

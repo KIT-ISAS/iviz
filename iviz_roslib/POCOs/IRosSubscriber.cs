@@ -71,6 +71,8 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
         public string Subscribe(Action<IMessage> callback);
 
+        public string Subscribe(Action<IMessage, IRosTcpReceiver> callback);
+
         /// <summary>
         /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
         /// </summary>
@@ -94,5 +96,6 @@ namespace Iviz.Roslib
     public interface IRosSubscriber<out T> : IRosSubscriber where T : IMessage
     {
         string Subscribe(Action<T> callback);
+        string Subscribe(Action<T, IRosTcpReceiver> callback);
     }    
 }
