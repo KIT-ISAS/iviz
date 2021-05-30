@@ -30,7 +30,7 @@ namespace Iviz.App
         [SerializeField] Text lockPivotText = null;
 
         //[SerializeField] Text lock1PVText = null;
-        [SerializeField] TFLink tfLink = null;
+        [SerializeField] LinkResolver tfLink = null;
 
         readonly StringBuilder str = new StringBuilder(65536);
         FrameNode placeHolder;
@@ -100,7 +100,7 @@ namespace Iviz.App
             isInitialized = true;
             Instance = this;
 
-            tfLink.LinkClicked += OnTfLinkClicked;
+            tfLink.LinkClicked += OnLinkClicked;
             SelectedFrame = null;
 
             placeHolder = FrameNode.Instantiate("TFLog Placeholder");
@@ -115,7 +115,7 @@ namespace Iviz.App
             UpdateFrameTexts();
         }
 
-        void OnTfLinkClicked([CanBeNull] string frameId)
+        void OnLinkClicked([CanBeNull] string frameId)
         {
             SelectedFrame =
                 frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame)

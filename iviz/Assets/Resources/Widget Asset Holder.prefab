@@ -115,3 +115,5 @@ MonoBehaviour:
   Vector3Slider: {fileID: 3925610196380257193, guid: 45e6e631e5e6246babb891d545866c74,
     type: 3}
   Vector3: {fileID: 3925610196380257193, guid: 6446f7c93f7c54d9ebe0f8fc3b1765ff, type: 3}
+  SystemInfo: {fileID: 1273616110607400797, guid: 8f626f809b939485da186fa56eee2b25,
+    type: 3}

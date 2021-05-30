@@ -507,7 +507,7 @@ namespace Iviz.Controllers
                             for (int u = width; u > 0; u--, dataOff += pointStep)
                             {
                                 float4 data = *(float4*) dataOff;
-                                if (data.HasNaN() || data.xyz.MaxAbsCoeff() > maxPositionMagnitude)
+                                if (data.HasNaN() || data.MaxAbsCoeff3() > maxPositionMagnitude)
                                 {
                                     continue;
                                 }

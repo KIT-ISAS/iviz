@@ -21,6 +21,7 @@ namespace Iviz.App
         Console,
         Settings,
         Echo,
+        System
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -57,6 +58,7 @@ namespace Iviz.App
                 (DialogPanelType.Console, CreatePanel<ConsoleDialogContents>(Resource.Widgets.ConsolePanel)),
                 (DialogPanelType.Settings, CreatePanel<SettingsDialogContents>(Resource.Widgets.SettingsPanel)),
                 (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
+                (DialogPanelType.System, CreatePanel<SystemDialogContents>(Resource.Widgets.SystemPanel)),
             };
 
             foreach (var (type, panel) in panels)
@@ -72,9 +74,21 @@ namespace Iviz.App
             GameThread.EverySecond += UpdateSelected;
         }
 
+        [NotNull]
         T CreatePanel<T>([NotNull] Info<GameObject> source) where T : IDialogPanelContents
         {
-            return source.Instantiate(transform).GetComponent<T>();
+            if (source == null)
+            {
+                throw new NullReferenceException("Requested a panel from source null!");
+            }
+
+            var panel = source.Instantiate(transform).GetComponent<T>();
+            if (panel == null)
+            {
+                throw new NullReferenceException($"Panel '{source}' does not have a module of type {typeof(T)}");
+            }
+
+            return panel;
         }
 
 
@@ -93,7 +107,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during UpdatePanel", e);
+                Core.Logger.Error($"{this}: Exception during UpdatePanel" + e);
             }
         }
 
@@ -105,8 +119,8 @@ namespace Iviz.App
                 throw new InvalidOperationException("There is no panel for this type!");
             }
 
-            return cm is T contents 
-                ? contents 
+            return cm is T contents
+                ? contents
                 : throw new InvalidOperationException("Panel type does not match!");
         }
 

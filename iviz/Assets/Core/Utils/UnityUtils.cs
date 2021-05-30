@@ -34,6 +34,11 @@ namespace Iviz.Core
             return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
         }
 
+        public static float MaxAbsCoeff3(this float4 p)
+        {
+            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
+        }
+
         public static float MaxAbsCoeff(this Vector3 p)
         {
             return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));

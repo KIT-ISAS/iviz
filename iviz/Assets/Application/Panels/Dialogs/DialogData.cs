@@ -7,7 +7,7 @@ namespace Iviz.App
         [NotNull]
         protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
 
-        protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
+        [NotNull] protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
         [NotNull] public abstract IDialogPanelContents Panel { get; }
 
         /// <summary>

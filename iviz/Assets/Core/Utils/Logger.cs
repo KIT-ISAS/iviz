@@ -140,7 +140,7 @@ namespace Iviz.Core
 
 
         static void ExternalImpl([CanBeNull] string msg, LogLevel level,
-            [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
+            [CallerFilePath] string _ = "", [CallerLineNumber] int __ = 0)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
             switch (level)
@@ -172,7 +172,7 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string file, int line,
+        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string _, int __,
             [NotNull] StringBuilder str)
         {
             str.Length = 0;

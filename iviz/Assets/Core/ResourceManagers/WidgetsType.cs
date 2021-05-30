@@ -20,6 +20,7 @@ namespace Iviz.Resources
         public Info<GameObject> MenuPanel { get; }
         public Info<GameObject> SettingsPanel { get; }
         public Info<GameObject> EchoPanel { get; }
+        public Info<GameObject> SystemPanel { get; }
 
         public Info<GameObject> HeadTitle { get; }
         public Info<GameObject> SectionTitle { get; }
@@ -65,6 +66,7 @@ namespace Iviz.Resources
             ConsolePanel = new Info<GameObject>(assetHolder.ConsoleLog);
             SettingsPanel = new Info<GameObject>(assetHolder.SettingsPanel);
             EchoPanel = new Info<GameObject>(assetHolder.EchoPanel);
+            SystemPanel = new Info<GameObject>(assetHolder.SystemInfo);
             
             MenuPanel = new Info<GameObject>(assetHolder.MenuPanel);
             

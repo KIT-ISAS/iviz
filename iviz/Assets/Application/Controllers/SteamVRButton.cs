@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
+    /*
     using Valve.VR;
 
     public class SteamVRButton : MonoBehaviour, IVRButton
@@ -14,4 +15,5 @@ namespace Iviz.Controllers
         public bool PointerUp() => interactWithUI.GetStateUp(pose.inputSource);
         public bool State() => interactWithUI.GetState(pose.inputSource);
     }
+    */
 }

@@ -35,14 +35,11 @@ namespace Iviz.App
             panel.ShowAll.Value = false;
         }
 
-        public static IEnumerable<TopicWithResource> GetTopicCandidates()
+        static IEnumerable<TopicWithResource> GetTopicCandidates()
         {
-            var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
-            foreach (var entry in newTopics)
+            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+            foreach ((string topic, string msgType) in newTopics)
             {
-                string topic = entry.Topic;
-                string msgType = entry.Type;
-
                 if (ModuleListPanel.Instance.DisplayedTopics.Contains(topic))
                 {
                     continue;
@@ -131,7 +128,7 @@ namespace Iviz.App
             moduleData.ShowPanel();
         }
         
-        public readonly struct TopicWithResource
+        readonly struct TopicWithResource
         {
             public string Topic { get; }
             public string Type { get; }

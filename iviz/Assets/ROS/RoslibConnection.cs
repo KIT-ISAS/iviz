@@ -35,7 +35,9 @@ namespace Iviz.Ros
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new Dictionary<string, ISubscribedTopic>();
 
         [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
+        [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
         [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
+        [CanBeNull] SystemState cachedSystemState;
         [CanBeNull] RosClient client;
         [CanBeNull] BagListener bagListener;
 
@@ -46,7 +48,7 @@ namespace Iviz.Ros
         string myId;
         Uri myUri;
 
-        public bool Connected => client != null;
+        bool Connected => client != null;
 
         [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
@@ -95,12 +97,12 @@ namespace Iviz.Ros
                     {
                         return;
                     }
-                    
+
                     if (bagListener != null)
                     {
                         await bagListener.StopAsync();
                     }
-                    
+
                     bagListener = value;
                     foreach (var subscriber in subscribersByTopic.Values)
                     {
@@ -112,14 +114,14 @@ namespace Iviz.Ros
 
         async Task DisposeClient()
         {
-            if (client == null)
+            if (!Connected)
             {
                 return;
             }
 
             connectionTs.Cancel();
             connectionTs = new CancellationTokenSource();
-            await client.CloseAsync(connectionTs.Token).AwaitNoThrow(this);
+            await Client.CloseAsync(connectionTs.Token).AwaitNoThrow(this);
             client = null;
         }
 
@@ -145,7 +147,7 @@ namespace Iviz.Ros
                 return false;
             }
 
-            if (client != null)
+            if (Connected)
             {
                 Debug.LogWarning("Warning: New client requested, but old client still running?!");
                 await DisposeClient();
@@ -170,9 +172,9 @@ namespace Iviz.Ros
                 RosClient newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                 client = newClient;
 
-                await client.CheckOwnUriAsync(token);
+                await Client.CheckOwnUriAsync(token);
 
-                client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
+                Client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
 
                 AddTask(async () =>
                 {
@@ -180,7 +182,7 @@ namespace Iviz.Ros
                     token.ThrowIfCancellationRequested();
 
                     (bool success, XmlRpcValue hosts) =
-                        await client.Parameters.GetParameterAsync("/iviz/hosts", token);
+                        await Client.Parameters.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
                         ParseHostsParam(hosts);
@@ -209,12 +211,15 @@ namespace Iviz.Ros
 
                     LogInternalIfHololens("--- Requesting topics...");
                     token.ThrowIfCancellationRequested();
-                    cachedTopics = await client.GetSystemPublishedTopicsAsync(token);
+                    cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(token);
                     LogInternalIfHololens("+++ Done requesting topics");
+
+                    cachedSystemState = null;
+                    cachedTopics = EmptyTopics;
 
                     Core.Logger.Internal("Finished resubscribing and readvertising!");
 
-                    watchdogTask = WatchdogAsync(client.RosMasterClient, token);
+                    watchdogTask = WatchdogAsync(Client.RosMasterClient, token);
                 });
 
                 Core.Logger.Debug("*** Connected!");
@@ -261,47 +266,41 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void ParseHostsParam([CanBeNull] XmlRpcValue hostsObj)
+        static void ParseHostsParam(XmlRpcValue hostsObj)
         {
-            try
+            if (hostsObj.IsEmpty)
             {
-                if (hostsObj.IsEmpty)
-                {
-                    return;
-                }
-
-                if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
-                {
-                    Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
-                    return;
-                }
-
-                Dictionary<string, string> hosts = new Dictionary<string, string>();
-                foreach (XmlRpcValue entry in array)
-                {
-                    if (!entry.TryGetArray(out XmlRpcValue[] pair) ||
-                        pair.Length != 2 ||
-                        !pair[0].TryGetString(out string hostname) ||
-                        !pair[1].TryGetString(out string address))
-                    {
-                        Core.Logger.Error(
-                            "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
-                        return;
-                    }
-
-                    hosts[hostname] = address;
-                }
-
-                ConnectionUtils.GlobalResolver.Clear();
-                foreach (var pair in hosts)
-                {
-                    Core.Logger.Info($"Adding custom host {pair.Key} -> {pair.Value}");
-                    ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
-                }
+                return;
             }
-            catch (Exception e)
+
+            if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
             {
-                Core.Logger.Error("Unexpected exception in ParseHostParams", e);
+                Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
+                return;
+            }
+
+            Dictionary<string, string> hosts = new Dictionary<string, string>();
+
+            foreach (XmlRpcValue entry in array)
+            {
+                if (!entry.TryGetArray(out XmlRpcValue[] pair) ||
+                    pair.Length != 2 ||
+                    !pair[0].TryGetString(out string hostname) ||
+                    !pair[1].TryGetString(out string address))
+                {
+                    Core.Logger.Error(
+                        "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
+                    return;
+                }
+
+                hosts[hostname] = address;
+            }
+
+            ConnectionUtils.GlobalResolver.Clear();
+            foreach (var pair in hosts)
+            {
+                Core.Logger.Info($"Adding custom host {pair.Key} -> {pair.Value}");
+                ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
             }
         }
 
@@ -335,53 +334,23 @@ namespace Iviz.Ros
             CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
+            const int delayBetweenPingsInMs = 5000;
             DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
             Uri lastRosOutUri = null;
-            var instance = ConnectionManager.Connection;
+            var connection = ConnectionManager.Connection;
 
-            instance.SetConnectionWarningState(false);
+
+            connection.SetConnectionWarningState(false);
             try
             {
-                while (!token.IsCancellationRequested)
+                for (; !token.IsCancellationRequested; await Task.Delay(delayBetweenPingsInMs, token))
                 {
                     DateTime now = GameThread.Now;
+                    LookupNodeResponse response;
                     try
                     {
-                        LookupNodeResponse response = await masterApi.LookupNodeAsync("/rosout", token);
-
-                        TimeSpan timeSinceLastAccess = now - lastMasterAccess;
-                        lastMasterAccess = now;
-                        if (warningSet)
-                        {
-                            Core.Logger.Internal("The master is visible again, but we may be out of sync. Restarting!");
-                            instance.Disconnect();
-                            break;
-                        }
-
-                        if (timeSinceLastAccess.TotalMilliseconds > maxTimeMasterUnseenInMs)
-                        {
-                            // we haven't seen the master in a while, but no error has been thrown
-                            // by the routine that checks every 5 seconds. maybe the app was suspended?
-                            Core.Logger.Internal(
-                                "Haven't seen the master in a while. We may be out of sync. Restarting!");
-                            instance.Disconnect();
-                            break;
-                        }
-
-                        if (response.IsValid)
-                        {
-                            if (lastRosOutUri == null)
-                            {
-                                lastRosOutUri = response.Uri;
-                            }
-                            else if (lastRosOutUri != response.Uri)
-                            {
-                                Core.Logger.Internal("<b>Warning:</b> The master appears to have changed. Restarting!");
-                                instance.Disconnect();
-                                break;
-                            }
-                        }
+                        response = await masterApi.LookupNodeAsync("/rosout", token);
                     }
                     catch (Exception)
                     {
@@ -389,19 +358,54 @@ namespace Iviz.Ros
                         {
                             Core.Logger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
                                                  $" [{lastMasterAccess:HH:mm:ss}].");
-                            instance.SetConnectionWarningState(true);
+                            connection.SetConnectionWarningState(true);
                             warningSet = true;
                         }
+
+                        continue;
                     }
 
-                    await Task.Delay(5000, token);
+                    TimeSpan timeSinceLastAccess = now - lastMasterAccess;
+                    lastMasterAccess = now;
+                    if (warningSet)
+                    {
+                        Core.Logger.Internal("The master is visible again, but we may be out of sync. Restarting!");
+                        connection.Disconnect();
+                        break;
+                    }
+
+                    if (timeSinceLastAccess.TotalMilliseconds > maxTimeMasterUnseenInMs)
+                    {
+                        // we haven't seen the master in a while, but no error has been thrown
+                        // by the routine that checks every 5 seconds. maybe the app was suspended?
+                        Core.Logger.Internal(
+                            "Haven't seen the master in a while. We may be out of sync. Restarting!");
+                        connection.Disconnect();
+                        break;
+                    }
+
+                    if (!response.IsValid)
+                    {
+                        continue;
+                    }
+
+                    if (lastRosOutUri == null)
+                    {
+                        lastRosOutUri = response.Uri;
+                    }
+                    else if (lastRosOutUri != response.Uri)
+                    {
+                        Core.Logger.Internal("<b>Warning:</b> The master appears to have changed. Restarting!");
+                        connection.Disconnect();
+                        break;
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
             }
 
-            instance.SetConnectionWarningState(false);
+            connection.SetConnectionWarningState(false);
         }
 
         static readonly Random Random = new Random();
@@ -414,7 +418,7 @@ namespace Iviz.Ros
         async Task ReAdvertise([NotNull] IAdvertisedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
-            await topic.AdvertiseAsync(client, token);
+            await topic.AdvertiseAsync(Connected ? Client : null, token);
             topic.Id = publishers.Count;
             publishers[topic.Id] = topic.Publisher;
         }
@@ -423,21 +427,21 @@ namespace Iviz.Ros
         {
             await DelayByPlatform(token);
             //Logger.LogDebug("Resubscribing " + topic.Subscriber?.Topic);
-            await topic.SubscribeAsync(client, token: token);
+            await topic.SubscribeAsync(Connected ? Client : null, token: token);
             //Logger.LogDebug("Finished resubscribing " + topic.Subscriber?.Topic);
         }
 
         async Task ReAdvertiseService([NotNull] IAdvertisedService service, CancellationToken token)
         {
             await DelayByPlatform(token);
-            await service.AdvertiseAsync(client, token);
+            await service.AdvertiseAsync(Connected ? Client : null, token);
         }
 
         public override void Disconnect()
         {
             connectionTs.Cancel();
 
-            if (client == null)
+            if (!Connected)
             {
                 Signal();
                 return;
@@ -506,9 +510,9 @@ namespace Iviz.Ros
             var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
             int id;
-            if (client != null)
+            if (Connected)
             {
-                await newAdvertisedTopic.AdvertiseAsync(client, token);
+                await newAdvertisedTopic.AdvertiseAsync(Client, token);
 
                 var publisher = newAdvertisedTopic.Publisher;
                 id = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
@@ -516,7 +520,7 @@ namespace Iviz.Ros
                     : publishers.Count;
 
                 publishers[id] = publisher;
-                PublishedTopics = client.PublishedTopics;
+                PublishedTopics = Client.PublishedTopics;
             }
 
             else
@@ -592,9 +596,9 @@ namespace Iviz.Ros
                 $"Advertising service <b>{serviceName}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
-            if (client != null)
+            if (Connected)
             {
-                await newAdvertisedService.AdvertiseAsync(client, token);
+                await newAdvertisedService.AdvertiseAsync(Client, token);
             }
 
             servicesByTopic.Add(serviceName, newAdvertisedService);
@@ -613,7 +617,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(srv));
             }
 
-            if (client == null || connectionTs.IsCancellationRequested)
+            if (!Connected || connectionTs.IsCancellationRequested)
             {
                 return false;
             }
@@ -625,17 +629,13 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 try
                 {
-                    await client.CallServiceAsync(service, srv, true, tokenSource.Token);
+                    await Client.CallServiceAsync(service, srv, true, tokenSource.Token);
                     return true;
                 }
-                catch (OperationCanceledException) when (token.IsCancellationRequested ||
-                                                         connectionTs.IsCancellationRequested)
+                catch (OperationCanceledException e) when (!token.IsCancellationRequested &&
+                                                           !connectionTs.IsCancellationRequested)
                 {
-                    throw;
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"Service call to '{service}' timed out");
+                    throw new TimeoutException($"Service call to '{service}' timed out", e);
                 }
             }
         }
@@ -724,7 +724,7 @@ namespace Iviz.Ros
             }
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
-            await newSubscribedTopic.SubscribeAsync(client, listener, token);
+            await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
         }
 
@@ -787,10 +787,10 @@ namespace Iviz.Ros
                 publishers[advertiser.Id] = null;
             }
 
-            if (client != null)
+            if (Connected)
             {
-                await advertisedTopic.UnadvertiseAsync(client, token);
-                PublishedTopics = client.PublishedTopics;
+                await advertisedTopic.UnadvertiseAsync(Client, token);
+                PublishedTopics = Client.PublishedTopics;
             }
         }
 
@@ -826,10 +826,53 @@ namespace Iviz.Ros
             if (subscribedTopic.Count == 0)
             {
                 subscribersByTopic.Remove(subscriber.Topic);
-                if (client != null)
+                if (Connected)
                 {
-                    await subscribedTopic.UnsubscribeAsync(client, token);
+                    await subscribedTopic.UnsubscribeAsync(token);
                 }
+            }
+        }
+
+        [NotNull]
+        public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopicTypes(
+            RequestType type = RequestType.CachedButRequestInBackground)
+        {
+            if (type == RequestType.CachedButRequestInBackground)
+            {
+                Task.Run(async () => await GetSystemPublishedTopicTypesAsync(), connectionTs.Token);
+            }
+
+            return cachedPublishedTopics;
+        }
+
+        [ItemNotNull]
+        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(
+            int timeoutInMs = 2000,
+            CancellationToken token = default)
+        {
+            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            {
+                return EmptyTopics;
+            }
+
+            try
+            {
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+                {
+                    tokenSource.CancelAfter(timeoutInMs);
+                    return cachedPublishedTopics = Connected
+                        ? (await Client.GetSystemPublishedTopicsAsync(tokenSource.Token))
+                        : EmptyTopics;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return EmptyTopics;
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync()", e);
+                return EmptyTopics;
             }
         }
 
@@ -837,67 +880,45 @@ namespace Iviz.Ros
         public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
-            if (type == RequestType.CachedOnly)
+            if (type == RequestType.CachedButRequestInBackground)
             {
-                return cachedTopics;
+                Task.Run(async () => await GetSystemTopicTypesAsync(), connectionTs.Token);
             }
 
-            CancellationToken token = connectionTs.Token;
-            TaskUtils.StartLongTask(async () =>
-            {
-                if (token.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                try
-                {
-                    cachedTopics = client == null
-                        ? EmptyTopics
-                        : await client.GetSystemPublishedTopicsAsync(token);
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
-                {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes()", e);
-                }
-            }, token);
             return cachedTopics;
         }
 
-        [ItemCanBeNull]
-        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(int timeoutInMs,
+        [ItemNotNull]
+        async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
+            int timeoutInMs = 2000,
             CancellationToken token = default)
         {
-            if (token.IsCancellationRequested)
+            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
             {
-                return null;
+                return EmptyTopics;
             }
 
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            try
             {
-                tokenSource.CancelAfter(timeoutInMs);
-
-                try
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
                 {
-                    cachedTopics = client == null
-                        ? EmptyTopics
-                        : await client.GetSystemPublishedTopicsAsync(tokenSource.Token);
-                    return cachedTopics;
+                    tokenSource.CancelAfter(timeoutInMs);
+                    return cachedTopics = Connected
+                        ? await Client.GetSystemTopicTypesAsync(tokenSource.Token)
+                        : EmptyTopics;
                 }
-                catch (OperationCanceledException)
-                {
-                    return null;
-                }
-                catch (Exception e)
-                {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypes()", e);
-                    return null;
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                return EmptyTopics;
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync()", e);
+                return EmptyTopics;
             }
         }
+
 
         [NotNull, ItemNotNull]
         public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
@@ -905,22 +926,17 @@ namespace Iviz.Ros
             CancellationToken internalToken = connectionTs.Token;
             Task.Run(async () =>
             {
-                if (token.IsCancellationRequested)
+                if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
                 {
+                    cachedParameters = EmptyParameters;
                     return;
                 }
 
                 try
                 {
-                    if (client?.Parameters is null)
-                    {
-                        cachedParameters = EmptyParameters;
-                        return;
-                    }
-
                     using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken))
                     {
-                        cachedParameters = await client.Parameters.GetParameterNamesAsync(tokenSource.Token);
+                        cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
                     }
                 }
                 catch (OperationCanceledException)
@@ -931,6 +947,7 @@ namespace Iviz.Ros
                     Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList()", e);
                 }
             }, internalToken);
+
             return cachedParameters;
         }
 
@@ -942,24 +959,23 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            if (token.IsCancellationRequested)
+            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
             {
                 return (default, "Cancellation requested");
             }
 
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            if (!Connected)
             {
-                tokenSource.CancelAfter(timeoutInMs);
+                return (default, "Not connected");
+            }
 
-                try
+            try
+            {
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
                 {
-                    if (client?.Parameters == null)
-                    {
-                        return (default, "Not connected");
-                    }
-
+                    tokenSource.CancelAfter(timeoutInMs);
                     (bool success, XmlRpcValue param) =
-                        await client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
+                        await Client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
                     if (!success)
                     {
                         return (default, $"'{parameter}' not found");
@@ -967,49 +983,59 @@ namespace Iviz.Ros
 
                     return (param, null);
                 }
-                catch (OperationCanceledException)
-                {
-                    return (default, "Operation timed out");
-                }
-                catch (XmlRpcException)
-                {
-                    return (default, "Failed to read parameter");
-                }
-                catch (Exception e)
-                {
-                    Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
-                    return (default, "Unknown error");
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                return (default, "Operation timed out");
+            }
+            catch (XmlRpcException)
+            {
+                return (default, "Failed to read parameter");
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
+                return (default, "Unknown error");
             }
         }
 
+        [CanBeNull]
+        public SystemState GetSystemState(RequestType type = RequestType.CachedButRequestInBackground)
+        {
+            if (type == RequestType.CachedButRequestInBackground)
+            {
+                Task.Run(async () => await GetSystemStateAsync(), connectionTs.Token);
+            }
+
+            return cachedSystemState;
+        }
+
         [ItemCanBeNull]
-        public async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000,
-            CancellationToken token = default)
+        async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (token.IsCancellationRequested)
             {
                 return null;
             }
 
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            try
             {
-                tokenSource.CancelAfter(timeoutInMs);
-
-                try
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
                 {
-                    if (client?.Parameters == null)
-                    {
-                        return null;
-                    }
-
-                    return await client.GetSystemStateAsync(tokenSource.Token);
+                    tokenSource.CancelAfter(timeoutInMs);
+                    return cachedSystemState = Connected
+                        ? await Client.GetSystemStateAsync(tokenSource.Token)
+                        : null;
                 }
-                catch (Exception e)
-                {
-                    Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
-                    return null;
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                return null;
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemState()", e);
+                return null;
             }
         }
 
@@ -1117,7 +1143,7 @@ namespace Iviz.Ros
                 }
 
                 token.ThrowIfCancellationRequested();
-                var fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
+                string fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
                 if (Publisher != null)
                 {
                     await Publisher.UnadvertiseAsync(fullTopic, token);
@@ -1147,7 +1173,7 @@ namespace Iviz.Ros
             Task SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null,
                 CancellationToken token = default);
 
-            Task UnsubscribeAsync([NotNull] RosClient client, CancellationToken token);
+            Task UnsubscribeAsync(CancellationToken token);
             void Invalidate();
 
             BagListener BagListener { set; }
@@ -1206,7 +1232,7 @@ namespace Iviz.Ros
                 Subscriber = subscriber;
             }
 
-            public async Task UnsubscribeAsync(RosClient client, CancellationToken token)
+            public async Task UnsubscribeAsync(CancellationToken token)
             {
                 token.ThrowIfCancellationRequested();
 

@@ -113,16 +113,13 @@ namespace Iviz.App
 
         void CreateTopicList()
         {
-            var newTopics = ConnectionManager.Connection.GetSystemTopicTypes();
+            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
             entries.Clear();
 
             entries.Add(TopicEntry.Empty);
 
-            foreach (var entry in newTopics)
+            foreach ((string topic, string msgType) in newTopics)
             {
-                string topic = entry.Topic;
-                string msgType = entry.Type;
-
                 Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }

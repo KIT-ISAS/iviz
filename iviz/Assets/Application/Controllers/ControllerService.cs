@@ -220,12 +220,12 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemTopicTypes(RequestType.CachedOnly);
+            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
 
             string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             if (type == null)
             {
-                topics = await Connection.GetSystemTopicTypesAsync(DefaultTimeoutInMs);
+                topics = await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs);
                 if (topics == null)
                 {
                     return ("", false, "EE Failed to retrieve updated list of topics due to timeout");

@@ -136,7 +136,7 @@ namespace Iviz.App
                  GridController.SenderPoint.TryGetResolvedTopicName(out string topicName))
                     ? topicName
                     : OwnPublishedTopicName[0];
-            return ConnectionManager.Connection.GetSystemTopicTypes()
+            return ConnectionManager.Connection.GetSystemPublishedTopicTypes()
                 .Where(tuple => tuple.Type == PointStamped.RosMessageType && tuple.Topic != ownResolvedTopic)
                 .Select(tuple => tuple.Topic)
                 .Concat(OwnPublishedTopicName);

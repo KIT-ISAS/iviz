@@ -57,6 +57,7 @@ namespace Iviz.App
         [SerializeField] Button showConsole = null;
         [SerializeField] Button showSettings = null;
         [SerializeField] Button showEcho = null;
+        [SerializeField] Button showSystem = null;
         
         [SerializeField] Button recordBag = null;
         [SerializeField] Text recordBagText = null;
@@ -98,6 +99,7 @@ namespace Iviz.App
         ConsoleDialogData consoleData;
         SettingsDialogData settingsData;
         EchoDialogData echoData;
+        SystemDialogData systemData;
 
         public Controllers.ModelService ModelService { get; private set; }
         Controllers.ControllerService controllerService;
@@ -241,7 +243,9 @@ namespace Iviz.App
                 connectionData = new ConnectionDialogData(),
                 consoleData = new ConsoleDialogData(),
                 settingsData = new SettingsDialogData(),
-                echoData = new EchoDialogData()
+                echoData = new EchoDialogData(),
+                systemData = new SystemDialogData(),
+                
             };
 
             Directory.CreateDirectory(Settings.SavedFolder);
@@ -292,6 +296,7 @@ namespace Iviz.App
                     recordBagText.text = "0 MB";
                 }
             });
+            showSystem.onClick.AddListener(systemData.Show);
 
             ShowARJoystickButton.Clicked += () =>
             {

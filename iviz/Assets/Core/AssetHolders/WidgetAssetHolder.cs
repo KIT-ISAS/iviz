@@ -45,5 +45,7 @@ namespace Iviz.Displays
         public GameObject TrashButton = null;
         public GameObject Vector3Slider = null;
         public GameObject Vector3 = null;
+        
+        public GameObject SystemInfo = null;
     }
 }
