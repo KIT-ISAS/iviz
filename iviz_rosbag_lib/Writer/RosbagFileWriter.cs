@@ -21,9 +21,10 @@ namespace Iviz.Rosbag.Writer
         long chunkDataStart;
         time chunkStartTime;
         time chunkEndTime;
+        bool disposed;
 
         public long Length => writer.Length;
-        
+
         public RosbagFileWriter(Stream stream, bool leaveOpen = false)
         {
             writer = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -281,6 +282,12 @@ namespace Iviz.Rosbag.Writer
 
         void TryOpenChunk(in time timestamp)
         {
+            if (disposed)
+            {
+                throw new ObjectDisposedException("RosbagFileWriter",
+                    "Cannot write in a rosbag file that has already been disposed.");
+            }
+
             if (chunkStart != null)
             {
                 return;
@@ -394,6 +401,12 @@ namespace Iviz.Rosbag.Writer
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             TryCloseChunk();
 
             if (connections.Count != 0 && chunkInfos.Count != 0)
@@ -415,10 +428,6 @@ namespace Iviz.Rosbag.Writer
                 Console.WriteLine("** Updating header");
                 writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
                 WriteHeaderRecord(connections.Count, chunkInfos.Count, connectionStart);
-
-                //Console.WriteLine("**  Closing rosbag with " + connections.Count + " connections and " +
-                //                  chunkInfos.Count +
-                //                  " chunks and " + connectionStart + " first index ");
             }
 
             if (!leaveOpen)
