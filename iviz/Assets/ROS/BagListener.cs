@@ -33,7 +33,7 @@ namespace Iviz.Ros
         {
             messageQueue.CompleteAdding();
             await task.AwaitNoThrow(this);
-            writer.Dispose();
+            await writer.DisposeAsync();
             Logger.LogFormat("{0}: Closing rosbag on path {1}", this, path);
         }
 

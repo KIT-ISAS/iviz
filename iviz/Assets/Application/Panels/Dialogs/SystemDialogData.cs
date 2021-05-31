@@ -2,22 +2,23 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
-using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using UnityEngine;
 
 namespace Iviz.App
 {
     public sealed class SystemDialogData : DialogData
     {
+        const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
+
+        static readonly XmlRpcValue.JsonConverter JsonConverter = new XmlRpcValue.JsonConverter();
 
         [NotNull] readonly SystemDialogContents panel;
         public override IDialogPanelContents Panel => panel;
@@ -30,6 +31,8 @@ namespace Iviz.App
         [CanBeNull] string providerAddress;
         XmlRpcValue paramValue;
 
+        [NotNull] public HostAlias[] HostAliases { get; set; } = Array.Empty<HostAlias>();
+
         public SystemDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<SystemDialogContents>(DialogPanelType.System);
@@ -39,6 +42,8 @@ namespace Iviz.App
         {
             panel.Close.Clicked += Close;
             panel.LinkClicked += LinkClicked;
+            panel.HostnameEndEdit += (i, _) => UpdateAliasesLink(i);
+            panel.AddressEndEdit += (i, _) => UpdateAliasesLink(i);
             panel.ModeChanged += _ =>
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -63,6 +68,9 @@ namespace Iviz.App
                 case SystemDialogContents.ModeType.Nodes:
                     UpdateNodes();
                     break;
+                case SystemDialogContents.ModeType.Aliases:
+                    UpdateAliases();
+                    break;
             }
         }
 
@@ -71,7 +79,7 @@ namespace Iviz.App
             var systemState = ConnectionManager.Connection.GetSystemState();
             if (systemState == null)
             {
-                panel.TextTop.text = "<b>State: </b> Disconnected. Nothing to show!";
+                panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
@@ -111,7 +119,7 @@ namespace Iviz.App
                     .AppendLine("]</i>");
             }
 
-            panel.TextTop.text = description.ToString();
+            panel.TextTop.SetText(description);
         }
 
         void UpdateServices()
@@ -119,7 +127,7 @@ namespace Iviz.App
             var systemState = ConnectionManager.Connection.GetSystemState();
             if (systemState == null)
             {
-                panel.TextTop.text = "<b>State:</b> Disconnected. Nothing to show!";
+                panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
@@ -133,14 +141,14 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
-            panel.TextTop.text = description.ToString();
+            panel.TextTop.SetText(description);
         }
 
         void UpdateParameters()
         {
             if (!ConnectionManager.IsConnected)
             {
-                panel.TextTop.text = "<b>State:</b> Disconnected. Nothing to show!";
+                panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
@@ -154,7 +162,7 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
-            panel.TextTop.text = description.ToString();
+            panel.TextTop.SetText(description);
         }
 
         void UpdateNodes()
@@ -162,7 +170,7 @@ namespace Iviz.App
             var systemState = ConnectionManager.Connection.GetSystemState();
             if (systemState == null)
             {
-                panel.TextTop.text = "<b>State:</b> Disconnected. Nothing to show!";
+                panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
@@ -181,7 +189,7 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
-            panel.TextTop.text = description.ToString();
+            panel.TextTop.SetText(description);
         }
 
         void LinkClicked([NotNull] string link)
@@ -327,9 +335,9 @@ namespace Iviz.App
             if (!paramValue.IsEmpty)
             {
                 description.AppendLine("<font=Bold>Value:</font>");
-                
+
                 string value = JsonConvert
-                    .SerializeObject(paramValue, Formatting.Indented, new XmlRpcValueJsonConverter())
+                    .SerializeObject(paramValue, Formatting.Indented, JsonConverter)
                     .Replace("<", "<noparse><</noparse>");
                 description.Append(value);
             }
@@ -384,7 +392,7 @@ namespace Iviz.App
                 GetNodeInfo(link, tokenSource.Token);
             }
 
-            description.Append("<color=#800000ff><font=Bold>Publishes:</font></color>").AppendLine();
+            description.Append("<color=#800000ff><font=Bold>Advertises:</font></color>").AppendLine();
             var published = systemState.Publishers.Where(tuple => tuple.Members.Contains(link)).ToArray();
             if (published.Length != 0)
             {
@@ -453,5 +461,73 @@ namespace Iviz.App
                 }
             }
         }
+
+        void UpdateAliases()
+        {
+            if (HostAliases.Length != panel.Addresses.Count)
+            {
+                var hostAliases = HostAliases;
+                Array.Resize(ref hostAliases, panel.Addresses.Count);
+                HostAliases = hostAliases;
+            }
+
+            for (int i = 0; i < HostAliases.Length; i++)
+            {
+                (string hostname, string address) = HostAliases[i];
+                if (hostname == null || address == null)
+                {
+                    return;
+                }
+                
+                panel.HostNames[i].Value = hostname;
+                panel.Addresses[i].Value = address;
+                ConnectionUtils.GlobalResolver[hostname] = address;
+            }
+        }
+
+        void UpdateAliasesLink(int index)
+        {
+            string hostname = panel.HostNames[index].Value;
+            string address = panel.Addresses[index].Value;
+            if (!string.IsNullOrWhiteSpace(hostname) && !string.IsNullOrWhiteSpace(address))
+            {
+                var newHostAlias = new HostAlias(hostname, address);
+                if (HostAliases[index] == newHostAlias)
+                {
+                    return;
+                }
+
+                HostAliases[index] = newHostAlias;
+                Logger.Info($"{this}: Adding pair {hostname} -> {address} to resolver list.");
+                ConnectionUtils.GlobalResolver[hostname] = address;
+                ModuleListPanel.UpdateAddresses();
+            }
+            else if (HostAliases[index] != default)
+            {
+                ConnectionUtils.GlobalResolver.Remove(HostAliases[index].Hostname);
+                Logger.Info($"{this}: Removing {HostAliases[index].Hostname} from resolver list.");
+                HostAliases[index] = default;
+                ModuleListPanel.UpdateAddresses();
+            }
+        }
+    }
+
+    [DataContract]
+    public readonly struct HostAlias
+    {
+        [DataMember] public string Hostname { get; }
+        [DataMember] public string Address { get; }
+
+        public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
+        public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
+        public static bool operator !=(HostAlias a, HostAlias b) => !(a == b);
+
+        public static bool operator ==(HostAlias a, HostAlias b) =>
+            (a.Hostname == b.Hostname && a.Address == b.Address);
+
+        public override bool Equals(object obj) =>
+            obj is HostAlias other && Hostname == other.Hostname && Address == other.Address;
+
+        public override int GetHashCode() => (Hostname, Address).GetHashCode();
     }
 }

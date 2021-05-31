@@ -14,5 +14,6 @@ namespace Iviz.App
         [NotNull, DataMember] public string MyId { get; set; } = "";
         [NotNull, DataMember] public List<Uri> LastMasterUris { get; set; } = new List<Uri>();
         [NotNull, DataMember] public SettingsConfiguration Settings { get; set; } = new SettingsConfiguration();
+        [NotNull, DataMember] public HostAlias[] HostAliases { get; set; } = Array.Empty<HostAlias>();
     }
 }

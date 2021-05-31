@@ -279,23 +279,7 @@ namespace Iviz.App
             showConsole.onClick.AddListener(consoleData.Show);
             showSettings.onClick.AddListener(settingsData.Show);
             showEcho.onClick.AddListener(echoData.Show);
-            recordBag.onClick.AddListener(() =>
-            {
-                if (ConnectionManager.Connection.BagListener != null)
-                {
-                    ConnectionManager.Connection.BagListener = null;
-                    recordBagImage.color = Color.black;
-                    recordBagText.text = "Rec Bag";
-                }
-                else
-                {
-                    string filename = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.bag";
-                    Directory.CreateDirectory(Settings.BagsFolder);
-                    ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
-                    recordBagImage.color = Color.red;
-                    recordBagText.text = "0 MB";
-                }
-            });
+            recordBag.onClick.AddListener(OnStartRecordBag);
             showSystem.onClick.AddListener(systemData.Show);
 
             ShowARJoystickButton.Clicked += () =>
@@ -395,6 +379,24 @@ namespace Iviz.App
 
             InitFinished?.Invoke();
             InitFinished = null;
+        }
+
+        void OnStartRecordBag()
+        {
+            if (ConnectionManager.Connection.BagListener != null)
+            {
+                ConnectionManager.Connection.BagListener = null;
+                recordBagImage.color = Color.black;
+                recordBagText.text = "Rec Bag";
+            }
+            else
+            {
+                string filename = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+                Directory.CreateDirectory(Settings.BagsFolder);
+                ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
+                recordBagImage.color = Color.red;
+                recordBagText.text = "0 MB";
+            }
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -568,6 +570,8 @@ namespace Iviz.App
                 {
                     Settings.SettingsManager.Config = config.Settings;
                 }
+
+                systemData.HostAliases = config.HostAliases;
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -589,7 +593,8 @@ namespace Iviz.App
                     MyUri = connectionData.MyUri?.ToString() ?? "",
                     MyId = connectionData.MyId ?? "",
                     LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
-                    Settings = Settings.SettingsManager?.Config ?? new SettingsConfiguration()
+                    Settings = Settings.SettingsManager?.Config ?? new SettingsConfiguration(),
+                    HostAliases = systemData.HostAliases,
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -602,7 +607,7 @@ namespace Iviz.App
             }
         }
 
-        static void UpdateSimpleConfigurationSettings()
+        void UpdateSimpleConfigurationSettings()
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -615,6 +620,7 @@ namespace Iviz.App
                 string inText = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
+                config.HostAliases = systemData.HostAliases;
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(path, outText);
             }
@@ -632,6 +638,11 @@ namespace Iviz.App
             {
                 gridModuleData.GridController.OnSettingsChanged();
             }
+        }
+
+        public void UpdateAddresses()
+        {
+            UpdateSimpleConfigurationSettings();
         }
 
         public int NumMastersInCache => connectionData.LastMasterUris.Count;
