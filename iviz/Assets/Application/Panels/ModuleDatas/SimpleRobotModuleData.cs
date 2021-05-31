@@ -190,8 +190,9 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            ButtonText =
+            string text =
                 $"{Resource.Font.Split(Robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
+            ButtonText = Robot.Visible ? text : $"<color=grey>{text}</color>";
         }
 
         public void OnRobotFinishedLoading()

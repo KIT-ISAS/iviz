@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -53,6 +57,9 @@ namespace Iviz.App
 
             panel.JoyTopic.Value = controller.JoyTopic;
             panel.TwistTopic.Value = controller.TwistTopic;
+
+            UpdateHints();
+
             panel.UseStamped.Value = controller.UseTwistStamped;
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
@@ -123,7 +130,28 @@ namespace Iviz.App
                 UpdateModuleButton();
             };
         }
-        
+
+        public override void UpdatePanel()
+        {
+            base.UpdatePanel();
+            UpdateHints();
+            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
+        }
+
+        void UpdateHints()
+        {
+            var topicTypes = ConnectionManager.Connection.GetSystemTopicTypes();
+            panel.JoyTopic.Hints = topicTypes
+                .Where(info => info.Type == Joy.RosMessageType)
+                .Select(info => info.Topic);            
+            string expectedType = controller.UseTwistStamped
+                ? TwistStamped.RosMessageType
+                : Twist.RosMessageType;
+            panel.TwistTopic.Hints = topicTypes
+                .Where(info => info.Type == expectedType)
+                .Select(info => info.Topic);            
+        }
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<JoystickConfiguration>(configAsJson);

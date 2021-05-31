@@ -74,9 +74,11 @@ namespace Iviz.App
             }
 
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            CachedStr.Append(" | ").Append(MessagesPerSecond).Append(" Hz | ")
-                .Append(kbPerSecond).Append(" kB/s | ")
-                .Append(Dropped).Append(" dr</b>");
+            CachedStr.Append(" | ")
+                .Append(MessagesPerSecond)
+                .Append(" Hz | ")
+                .Append(kbPerSecond)
+                .Append(" kB/s</b>");
 
             text.text = CachedStr.ToString();
 

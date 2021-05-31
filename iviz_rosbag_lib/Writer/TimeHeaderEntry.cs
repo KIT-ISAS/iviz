@@ -12,16 +12,24 @@ namespace Iviz.Rosbag.Writer
         public TimeHeaderEntry(string name, time value) => (this.name, this.value) = (name, value);
         public int Length => 8 + 1 + name.Length;
 
-        public Stream Write(Stream stream) =>
-            stream.WriteValue(Length).WriteValue(name).WriteValue('=').WriteValue(value.Secs).WriteValue(value.Nsecs);
+        public Stream Write(Stream stream)
+        {
+            using var rent = new RentStream(Length + 4);
+            rent.Write(Length);
+            rent.Write(name);
+            rent.Write('=');
+            rent.Write(value);
+            return rent.WriteTo(stream);
+        }        
         
         public async Task WriteAsync(Stream stream)
         {
-            await stream.WriteValueAsync(Length);
-            await stream.WriteValueAsync(name);
-            await stream.WriteValueAsync('=');
-            await stream.WriteValueAsync(value.Secs);
-            await stream.WriteValueAsync(value.Nsecs);
+            using var rent = new RentStream(Length + 4);
+            rent.Write(Length);
+            rent.Write(name);
+            rent.Write('=');
+            rent.Write(value);
+            await rent.WriteToAsync(stream);
         }        
     }
 }

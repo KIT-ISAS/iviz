@@ -58,61 +58,6 @@ namespace Iviz.Rosbag.Writer
 
         public static Task WriteValueAsync(this Stream stream, uint value) => stream.WriteValueAsync((int) value);
 
-        public static Stream WriteValue(this Stream stream, long value)
-        {
-            using var bytes = new Rent<byte>(8);
-            byte[] array = bytes.Array;
-            array[7] = (byte) (value >> 56);
-            array[0] = (byte) value;
-            array[1] = (byte) (value >> 8);
-            array[2] = (byte) (value >> 16);
-            array[3] = (byte) (value >> 24);
-            array[4] = (byte) (value >> 32);
-            array[5] = (byte) (value >> 40);
-            array[6] = (byte) (value >> 48);
-            stream.Write(array, 0, 8);
-            return stream;
-        }
-
-        public static async Task WriteValueAsync(this Stream stream, long value)
-        {
-            using var bytes = new Rent<byte>(8);
-            byte[] array = bytes.Array;
-            array[7] = (byte) (value >> 56);
-            array[0] = (byte) value;
-            array[1] = (byte) (value >> 8);
-            array[2] = (byte) (value >> 16);
-            array[3] = (byte) (value >> 24);
-            array[4] = (byte) (value >> 32);
-            array[5] = (byte) (value >> 40);
-            array[6] = (byte) (value >> 48);
-            await stream.WriteAsync(array, 0, 8);
-        }
-
-        public static Stream WriteValue(this Stream stream, char value)
-        {
-            stream.WriteByte((byte) value);
-            return stream;
-        }
-
-        public static Stream WriteValue(this Stream stream, byte value)
-        {
-            stream.WriteByte(value);
-            return stream;
-        }
-
-        public static Task WriteValueAsync(this Stream stream, char value)
-        {
-            stream.WriteByte((byte) value);
-            return Task.CompletedTask;
-        }
-
-        public static Task WriteValueAsync(this Stream stream, byte value)
-        {
-            stream.WriteByte(value);
-            return Task.CompletedTask;
-        }
-
         public static Stream WriteValue(this Stream stream, string value)
         {
             using var bytes = new Rent<byte>(value.Length);

@@ -6,11 +6,12 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARTfFrame : MarkerResource
+    public class ARTfFrame : MarkerResource, ISupportsTint
     {
         [SerializeField] Transform pivotTransform;
         [SerializeField] TMP_Text text = null;
         [SerializeField] AxisFrameResource axisFrame = null;
+        [SerializeField] MeshMarkerResource cylinder = null;
 
         public string Caption
         {
@@ -35,12 +36,47 @@ namespace Iviz.App.ARDialogs
             }
         }
 
+        Color tint = Color.white;
+
+        public Color Tint
+        {
+            get => tint;
+            set
+            {
+                tint = value;
+                cylinder.Tint = tint;
+                axisFrame.Tint = tint;
+                text.color = tint;
+            }
+        }
+
         Pose? currentPose;
         public Pose TargetPose { get; set; }
 
         void Update()
         {
             FrameVisible = !TfListener.Instance.FramesVisible;
+
+            const float maxDistance = 0.5f;
+            const float minDistance = 0.3f;
+            
+            float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
+            Debug.Log(distance);
+            float alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
+            if (alpha == 0)
+            {
+                axisFrame.Visible = false;
+                cylinder.Visible = false;
+                text.gameObject.SetActive(false);
+            }
+            else
+            {
+                axisFrame.Visible = true;
+                cylinder.Visible = true;
+                text.gameObject.SetActive(true);
+                Tint = Color.white.WithAlpha(alpha);
+            }
+            
             if (currentPose == null)
             {
                 currentPose = TargetPose;

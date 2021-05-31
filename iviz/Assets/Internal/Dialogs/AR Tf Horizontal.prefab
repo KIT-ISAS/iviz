@@ -258,7 +258,8 @@ MonoBehaviour:
   boxCollider: {fileID: 0}
   pivotTransform: {fileID: 6567602140741212447}
   text: {fileID: 6567602140232931346}
-  axisFrame: {fileID: 0}
+  axisFrame: {fileID: 4812922935305998553}
+  cylinder: {fileID: 3946630306623842030}
 --- !u!65 &3386099211009435338
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -377,6 +378,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6567602140082216425}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3946630306623842030 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7917873515698125575, guid: 29f1782d45b2944d2814d57956eae4f3,
+    type: 3}
+  m_PrefabInstance: {fileID: 6567602140082216425}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6567602141423872783
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -427,7 +440,7 @@ PrefabInstance:
     - target: {fileID: 3679770859693412506, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3679770859693412506, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
         type: 3}
@@ -472,3 +485,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6567602141423872783}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4812922935305998553 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1868466840986237910, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
+    type: 3}
+  m_PrefabInstance: {fileID: 6567602141423872783}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 680be6d64574b4c50814fba749f68b56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

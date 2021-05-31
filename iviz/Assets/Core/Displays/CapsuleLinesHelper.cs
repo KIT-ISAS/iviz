@@ -1,11 +1,11 @@
 using System;
-using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Msgs;
 using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Displays
 {
@@ -72,29 +72,44 @@ namespace Iviz.Displays
                 int uvOff = 0;
                 int iOff = 0;
 
+                const float minMagnitude = 1e-8f;
+                
                 foreach (ref float4x2 line in lineBuffer.Ref())
                 {
                     Vector3 a = line.c0.xyz;
                     Vector3 b = line.c1.xyz;
-                    var dirx = b - a;
-                    dirx /= dirx.Magnitude();
+                    
+                    Vector3 dirX = b - a;
+                    Vector3 dirY, dirZ;
 
-                    //Vector3 diry = Vector3.forward.Cross(dirx);
-                    Vector3 diry = new Vector3(-dirx.y, dirx.x, 0);
-                    if (Mathf.Approximately(diry.MaxAbsCoeff(), 0))
+                    float dirXMagnitude = dirX.Magnitude();
+                    if (dirXMagnitude < minMagnitude)
                     {
-                        diry = Vector3.up.Cross(dirx);
+                        dirX = Vector3.zero;
+                        dirY = Vector3.zero;
+                        dirZ = Vector3.zero;
                     }
+                    else
+                    {
+                        dirX /= dirX.Magnitude();
 
-                    dirx *= scale;
-                    diry *= scale / diry.Magnitude();
+                        dirY = new Vector3(-dirX.y, dirX.x, 0);
+                        if (Mathf.Abs(dirY.MaxAbsCoeff()) < minMagnitude)
+                        {
+                            dirY = Vector3.up.Cross(dirX);
+                        }
 
-                    Vector3 dirz = dirx.Cross(diry);
-                    dirz *= scale / dirz.Magnitude();
+                        dirX *= scale;
+                        dirY *= scale / dirY.Magnitude();
 
-                    Vector3 halfDirX = 0.5f * dirx;
-                    Vector3 halfSumYz = 0.5f * (diry + dirz);
-                    Vector3 halfDiffYz = 0.5f * (diry - dirz);
+                        dirZ = dirX.Cross(dirY);
+                        dirZ *= scale / dirZ.Magnitude();
+                    }
+                    
+
+                    Vector3 halfDirX = 0.5f * dirX;
+                    Vector3 halfSumYz = 0.5f * (dirY + dirZ);
+                    Vector3 halfDiffYz = 0.5f * (dirY - dirZ);
 
                     points.Array[pOff++] = a - halfDirX;
                     points.Array[pOff++] = a + halfSumYz;

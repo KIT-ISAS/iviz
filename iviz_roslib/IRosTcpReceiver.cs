@@ -11,7 +11,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// The ROS uri of the publisher
         /// </summary>
-        Uri? RemoteUri { get; }
+        Uri RemoteUri { get; }
         /// <summary>
         /// The IP address of the publisher.
         /// </summary>

@@ -471,7 +471,7 @@ namespace Iviz.XmlRpc
             catch (OperationCanceledException)
             {
                 token.ThrowIfCancellationRequested();
-                throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
+                throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
             }
 #else
             if (timeoutInMs == -1)
@@ -489,7 +489,7 @@ namespace Iviz.XmlRpc
                 if (!await connectionTask.AwaitFor(timeoutInMs, token))
                 {
                     token.ThrowIfCancellationRequested();
-                    throw new TimeoutException($"Connection to '{hostname}:{port} timed out");
+                    throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
                 }
             }
 #endif

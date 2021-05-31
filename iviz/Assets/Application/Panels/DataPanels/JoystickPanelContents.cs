@@ -10,7 +10,7 @@ namespace Iviz.App
         public ToggleButtonWidget HideButton { get; private set; }
 
         public ToggleWidget SendJoy { get; private set; }
-        public InputFieldWidget JoyTopic { get; private set; }
+        public InputFieldWithHintsWidget JoyTopic { get; private set; }
         public SenderWidget JoySender { get; private set; }
 
         public ToggleWidget SendTwist { get; private set; }
@@ -31,7 +31,7 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
 
             SendJoy = p.AddToggle("Publish Joy Message");
-            JoyTopic = p.AddInputField("Joy Topic").SetPlaceholder("joy");
+            JoyTopic = p.AddInputFieldWithHints("Joy Topic").SetPlaceholder("joy");
             JoySender = p.AddSender();
 
             SendTwist = p.AddToggle("Publish Twist Message");

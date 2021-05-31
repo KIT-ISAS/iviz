@@ -34,7 +34,7 @@ namespace Iviz.Displays
             ? helperForMaxSegmentsForMesh
             : (helperForMaxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue);
 
-        const float MinLineWidth = 1E-03f;
+        const float MinLineLength = 1E-06f;
         const float MaxPositionMagnitude = 1e3f;
 
         static readonly int LinesID = Shader.PropertyToID("_Lines");
@@ -76,7 +76,7 @@ namespace Iviz.Displays
         public LineRenderType RenderType { get; set; }
 
         public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                                 (t.A - t.B).MaxAbsCoeff() > MinLineWidth &&
+                                                                 (t.A - t.B).MaxAbsCoeff() > MinLineLength &&
                                                                  t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
                                                                  t.B.MaxAbsCoeff() < MaxPositionMagnitude;
 

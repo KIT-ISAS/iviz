@@ -13,33 +13,20 @@ namespace Iviz.Rosbag.Writer
 
         public Stream Write(Stream stream)
         {
-            using var bytes = new Rent<byte>(4 + Length);
-            byte[] array = bytes.Array;
-            array[0] = Length;
-            array[1] = 0;
-            array[2] = 0;
-            array[3] = 0;
-            array[4] = (byte) 'o';
-            array[5] = (byte) 'p';
-            array[6] = (byte) '=';
-            array[7] = (byte) value;
-            stream.Write(array, 0, 4 + Length);
-            return stream;
-        }
+            using var rent = new RentStream(Length + 4);
+            rent.Write(Length);
+            rent.Write("op=");
+            rent.Write(value);
+            return rent.WriteTo(stream);
+        }        
         
         public async Task WriteAsync(Stream stream)
         {
-            using var bytes = new Rent<byte>(4 + Length);
-            byte[] array = bytes.Array;
-            array[0] = Length;
-            array[1] = 0;
-            array[2] = 0;
-            array[3] = 0;
-            array[4] = (byte) 'o';
-            array[5] = (byte) 'p';
-            array[6] = (byte) '=';
-            array[7] = (byte) value;
-            await stream.WriteAsync(array, 0, 4 + Length);
-        }        
+            using var rent = new RentStream(Length + 4);
+            rent.Write(Length);
+            rent.Write("op=");
+            rent.Write(value);
+            await rent.WriteToAsync(stream);
+        }
     }
 }

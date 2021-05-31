@@ -20,6 +20,8 @@ namespace Iviz.Controllers
     /// </summary>
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
+        const int parameterTimeoutInMs = 3000;
+
         readonly RobotConfiguration config = new RobotConfiguration();
         readonly FrameNode node;
         Task robotLoadingTask;
@@ -342,12 +344,13 @@ namespace Iviz.Controllers
             string errorMsg;
             try
             {
-                const int timeoutInMs = 800;
-                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, timeoutInMs);
+                HelpText = "- Requesting parameter -";
+                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, parameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
                 HelpText = "<b>Error:</b> Task cancelled";
+                Core.Logger.Debug($"{this}: Error while loading parameter '{value}': Task cancelled or timed out");
                 return;
             }
             catch (Exception e)
@@ -360,6 +363,7 @@ namespace Iviz.Controllers
             if (errorMsg != null)
             {
                 HelpText = $"<b>Error:</b> {errorMsg}";
+                Core.Logger.Debug($"{this}: Error while loading parameter '{value}': {errorMsg}");
                 return;
             }
 
@@ -409,7 +413,7 @@ namespace Iviz.Controllers
             if (string.IsNullOrEmpty(description))
             {
                 Core.Logger.Debug($"{this}: Empty parameter '{description}'");
-                HelpText = "[Robot Specification is Empty]";
+                HelpText = "[Robot Description is Empty]";
                 return false;
             }
 
@@ -422,7 +426,7 @@ namespace Iviz.Controllers
             catch (Exception e)
             {
                 Core.Logger.Debug($"{this}: Error parsing description'", e);
-                HelpText = "[Failed to Parse Specification]";
+                HelpText = "[Failed to Parse Description]";
                 return false;
             }
 

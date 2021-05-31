@@ -83,7 +83,7 @@ namespace Iviz.Controllers
             {
                 config.Orientation = value;
                 grid.Orientation = value;
-                reflectionProbe.transform.position = new Vector3(0, 2.0f, 0);
+                //reflectionProbe.transform.localPosition = new Vector3(0, 0, -2);
             }
         }
 
@@ -95,14 +95,15 @@ namespace Iviz.Controllers
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.SetParentLocal(TfListener.MapFrame.transform);
+                    reflectionProbe.transform.parent = TfListener.MapFrame.transform;
                     grid.Visible = false;
                     //node.Selected = false;
                 }
                 else
                 {
                     grid.Visible = true;
-                    reflectionProbe.transform.SetParentLocal(grid.transform);
+                    reflectionProbe.transform.parent = grid.Transform;
+                    reflectionProbe.transform.localPosition = new Vector3(0, 0, -2);
                 }
 
                 reflectionProbe.RenderProbe();
@@ -303,7 +304,7 @@ namespace Iviz.Controllers
             const float gridCellSize = 1;
             
             float totalSize = numberOfGridCells * gridCellSize;
-            reflectionProbe.size = new Vector3(totalSize * 2, 4.05f, totalSize * 2);
+            reflectionProbe.size = new Vector3(totalSize * 2, 20f, totalSize * 2);
             reflectionProbe.RenderProbe();
         }
 

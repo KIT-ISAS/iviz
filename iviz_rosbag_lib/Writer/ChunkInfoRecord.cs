@@ -2,7 +2,7 @@ using Iviz.Msgs;
 
 namespace Iviz.Rosbag.Writer
 {
-    internal readonly struct ChunkInfoRecord
+    internal sealed class ChunkInfoRecord
     {
         public long ChunkPos { get; }
         public time StartTime { get; }
@@ -10,7 +10,7 @@ namespace Iviz.Rosbag.Writer
         public (int conn, int count)[] MessagesByConnection { get; }
 
         public ChunkInfoRecord(long chunkPos, time startTime, time endTime, (int, int)[] messagesByConnection) =>
-            (this.ChunkPos, this.StartTime, this.EndTime, this.MessagesByConnection) =
+            (ChunkPos, StartTime, EndTime, MessagesByConnection) =
             (chunkPos, startTime, endTime, messagesByConnection);
     }
 }

@@ -450,8 +450,8 @@ namespace Iviz.Controllers
                 : new[] {(configuration.Value.width, configuration.Value.height)};
         }
 
-        Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
-        Task IScreenshotManager.StopAsync() => Task.CompletedTask;
+        [NotNull] Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
+        [NotNull] Task IScreenshotManager.StopAsync() => Task.CompletedTask;
 
         public Task<Screenshot> TakeScreenshotColorAsync()
         {

@@ -252,7 +252,8 @@ namespace Iviz.Controllers
             }
             else
             {
-                Vector3 cameraPosition = Settings.MainCameraTransform.position;
+                Vector3 forward = Settings.MainCameraTransform.forward;
+                Vector3 cameraPosition = Settings.MainCameraTransform.position + forward;
                 var q1 = Pose.identity.WithPosition(cameraPosition);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-cameraPosition);
@@ -283,8 +284,10 @@ namespace Iviz.Controllers
             }
             else
             {
-                Quaternion cameraRotation = Settings.MainCameraTransform.rotation;
-                deltaWorldPosition = cameraRotation * joyVelocityPos.Value;
+                float rotY = Settings.MainCameraTransform.rotation.eulerAngles.y;
+                Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
+                (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
+                deltaWorldPosition = cameraRotation * new Vector3(joyY, joyZ, joyX);
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
@@ -312,7 +315,7 @@ namespace Iviz.Controllers
             set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
         }
 
-        public TfFrame Frame => TfListener.Instance.FixedFrame;
+        [NotNull] public TfFrame Frame => TfListener.Instance.FixedFrame;
 
         public static event Action<bool> ARModeChanged;
 

@@ -457,15 +457,15 @@ namespace Iviz.Roslib
 
     internal class RosTcpReceiver : IRosTcpReceiver
     {
-        public Uri? RemoteUri { get; }
+        public Uri RemoteUri { get; }
         public Endpoint RemoteEndpoint { get; }
         public Endpoint Endpoint { get; }
         public string Topic { get; }
         public string Type { get; }
-        public string[] TcpHeader { get; }
+        public IReadOnlyCollection<string> TcpHeader { get; }
 
-        public RosTcpReceiver(Uri? remoteUri, Endpoint remoteEndpoint, Endpoint endpoint, string topic, string type,
-            string[] tcpHeader)
+        public RosTcpReceiver(Uri remoteUri, Endpoint remoteEndpoint, Endpoint endpoint, string topic, string type,
+            IReadOnlyCollection<string> tcpHeader)
         {
             RemoteUri = remoteUri;
             RemoteEndpoint = remoteEndpoint;

@@ -8,6 +8,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib.Utils;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.XR.ARSubsystems;
@@ -48,7 +49,7 @@ namespace Iviz.Controllers
             [DataMember] public float Size { get; set; }
         }
 
-        public void Execute(DetectedARMarker marker)
+        public void Execute([NotNull] DetectedARMarker marker)
         {
             ExecutorBaseMarker baseMarker;
 
@@ -76,7 +77,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void ExecuteTfMarker(DetectedARMarker marker)
+        void ExecuteTfMarker([NotNull] DetectedARMarker marker)
         {
             ExecutorTfMarker tfExecutor;
             try
@@ -194,7 +195,7 @@ namespace Iviz.Controllers
             }
         }
 
-        static Msgs.GeometryMsgs.Transform SolvePnp(DetectedARMarker marker, float size)
+        static Msgs.GeometryMsgs.Transform SolvePnp([NotNull] DetectedARMarker marker, float size)
         {
             var imageCorners = marker.Corners;
             var objectCorners = new Vector3f[]
@@ -214,6 +215,6 @@ namespace Iviz.Controllers
             return absolutePoseInRos;
         }
 
-        public override string ToString() => "[ARMarkerExecutor]";
+        [NotNull] public override string ToString() => "[ARMarkerExecutor]";
     }
 }
