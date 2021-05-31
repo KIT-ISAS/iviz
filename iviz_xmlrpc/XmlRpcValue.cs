@@ -2,6 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Iviz.XmlRpc
 {
@@ -199,7 +201,7 @@ namespace Iviz.XmlRpc
 
         public override string ToString() => type switch
         {
-            Type.Integer => $"[int:{((int)l).ToString()}]",
+            Type.Integer => $"[int:{((int) l).ToString()}]",
             Type.Empty => "[empty]",
             Type.Double => $"[double:{DoubleLongReinterpret.ToDouble(l).ToString(BuiltIns.Culture)}]",
             Type.Boolean => l != 0 ? "[bool:true]" : "[bool:false]",
@@ -222,6 +224,74 @@ namespace Iviz.XmlRpc
 
             public static double ToDouble(long l) => new DoubleLongReinterpret(l).d;
             public static long ToLong(double d) => new DoubleLongReinterpret(d).l;
+        }
+
+        public class JsonConverter : JsonConverter<XmlRpcValue>
+        {
+            public int MaxStringLength { get; set; } = 10000;
+
+            public override void WriteJson(JsonWriter writer, XmlRpcValue value, JsonSerializer serializer)
+            {
+                switch (value.ValueType)
+                {
+                    case Type.String:
+                        value.TryGetString(out string str);
+                        if (str.Length <= MaxStringLength)
+                        {
+                            writer.WriteValue(str);
+                        }
+                        else
+                        {
+                            writer.WriteValue(str.Substring(0, MaxStringLength));
+                            writer.WriteComment("... + " + (str.Length - MaxStringLength) + " chars");
+                        }
+                        break;
+                    case Type.Integer:
+                        value.TryGetInteger(out int i);
+                        writer.WriteValue(i);
+                        break;
+                    case Type.Double:
+                        value.TryGetDouble(out double d);
+                        writer.WriteValue(d);
+                        break;
+                    case Type.Boolean:
+                        value.TryGetBoolean(out bool b);
+                        writer.WriteValue(b);
+                        break;
+                    case Type.DateTime:
+                        value.TryGetDateTime(out DateTime dt);
+                        writer.WriteValue(dt.ToString("yyyy-MM-dd HH-mm-ss"));
+                        break;
+                    case Type.Array:
+                        value.TryGetArray(out XmlRpcValue[] array);
+                        var a = new JArray();
+                        foreach (var innerValue in array)
+                        {
+                            a.Add(JToken.FromObject(innerValue, serializer));
+                        }
+
+                        a.WriteTo(writer);
+                        break;
+                    case Type.Struct:
+                        value.TryGetStruct(out (string Key, XmlRpcValue Value)[] dict);
+                        var o = new JObject();
+                        foreach ((string key, XmlRpcValue innerValue) in dict)
+                        {
+                            o.Add(new JProperty(key, JToken.FromObject(innerValue, serializer)));
+                        }
+
+                        o.WriteTo(writer);
+                        break;
+                }
+            }
+
+            public override XmlRpcValue ReadJson(JsonReader reader, System.Type objectType, XmlRpcValue existingValue,
+                bool hasExistingValue, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override bool CanRead => false;
         }
     }
 }

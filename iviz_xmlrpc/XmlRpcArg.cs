@@ -225,42 +225,5 @@ namespace Iviz.XmlRpc
         public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg, XmlRpcArg) f) => new(f);
 
         public static implicit operator XmlRpcArg((int, string, XmlRpcArg) f) => new(f);
-
-        /*
-        public static XmlRpcArg Create(object o)
-        {
-            return o switch
-            {
-                bool i => new XmlRpcArg(i),
-                double i => new XmlRpcArg(i),
-                int i => new XmlRpcArg(i),
-                string i => new XmlRpcArg(i),
-                object[] i => new XmlRpcArg(i.Select(Create).ToArray()),
-                byte[] i => new XmlRpcArg(i),
-                DateTime i => new XmlRpcArg(i),
-                (string, object)[] i => new XmlRpcArg(i),
-                _ => throw new InvalidOperationException("Type is not supported")
-            };
-        }
-        */
-
-        /*
-        public static Arg Create(in ObjectWrapper o)
-        {
-            return o.Type switch
-            {
-                ObjectType.Integer => o.TryGetInteger(out var value) ? value : throw new InvalidCastException(),
-                ObjectType.Double => o.TryGetDouble(out var value) ? value : throw new InvalidCastException(),
-                double i => new Arg(i),
-                int i => new Arg(i),
-                string i => new Arg(i),
-                object[] i => new Arg(i.Select(Create).ToArray()),
-                byte[] i => new Arg(i),
-                DateTime i => new Arg(i),
-                List<(string, object)> i => new Arg(i),
-                _ => throw new InvalidOperationException("Type is not supported")
-            };
-        }
-        */
     }
 }
