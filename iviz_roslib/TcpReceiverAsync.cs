@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -455,24 +456,25 @@ namespace Iviz.Roslib
         }
     }
 
-    internal class RosTcpReceiver : IRosTcpReceiver
+    [DataContract]
+    internal sealed class RosTcpReceiver : IRosTcpReceiver
     {
-        public Uri RemoteUri { get; }
-        public Endpoint RemoteEndpoint { get; }
-        public Endpoint Endpoint { get; }
-        public string Topic { get; }
-        public string Type { get; }
-        public IReadOnlyCollection<string> TcpHeader { get; }
+        [DataMember] public Uri RemoteUri { get; }
+        [DataMember] public Endpoint RemoteEndpoint { get; }
+        [DataMember] public Endpoint Endpoint { get; }
+        [DataMember] public string Topic { get; }
+        [DataMember] public string Type { get; }
+        [DataMember] public IReadOnlyCollection<string> TcpHeader { get; }
 
         public RosTcpReceiver(Uri remoteUri, Endpoint remoteEndpoint, Endpoint endpoint, string topic, string type,
-            IReadOnlyCollection<string> tcpHeader)
+            IList<string> tcpHeader)
         {
             RemoteUri = remoteUri;
             RemoteEndpoint = remoteEndpoint;
             Endpoint = endpoint;
             Topic = topic;
             Type = type;
-            TcpHeader = tcpHeader;
+            TcpHeader = tcpHeader.AsReadOnly();
         }
     }
 }

@@ -1,40 +1,48 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
 {
+    [DataContract]
     public sealed class PublisherSenderState : JsonToString
     {
-        public bool IsAlive { get; internal set; }
-        public SenderStatus Status { get; internal set; }
-        public Endpoint? Endpoint { get; internal set; }
-        public string RemoteId { get; internal set; } = "";
-        public Endpoint? RemoteEndpoint { get; internal set; }
-        public int CurrentQueueSize { get; internal set; }
-        public int MaxQueueSize { get; internal set; }
-        public long NumSent { get; internal set; }
-        public long BytesSent { get; internal set; }
-        public long NumDropped { get; internal set; }
-        public long BytesDropped { get; internal set; }
+        [DataMember] public bool IsAlive { get; internal set; }
+        [DataMember] public SenderStatus Status { get; internal set; }
+        [DataMember] public Endpoint? Endpoint { get; internal set; }
+        [DataMember] public string RemoteId { get; internal set; } = "";
+        [DataMember] public Endpoint? RemoteEndpoint { get; internal set; }
+        [DataMember] public int CurrentQueueSize { get; internal set; }
+        [DataMember] public int MaxQueueSize { get; internal set; }
+        [DataMember] public long NumSent { get; internal set; }
+        [DataMember] public long BytesSent { get; internal set; }
+        [DataMember] public long NumDropped { get; internal set; }
+        [DataMember] public long BytesDropped { get; internal set; }
     }
 
+    [DataContract]
     public sealed class PublisherTopicState : JsonToString
     {
-        public string Topic { get; }
-        public string Type { get; }
-        public ReadOnlyCollection<string> TopicIds { get; }
-        public ReadOnlyCollection<PublisherSenderState> Senders { get; }
+        [DataMember] public string Topic { get; }
+        [DataMember] public string Type { get; }
+        [DataMember] public ReadOnlyCollection<string> AdvertiserIds { get; }
+        [DataMember] public ReadOnlyCollection<PublisherSenderState> Senders { get; }
 
         internal PublisherTopicState(string topic, string type,
-            IList<string> topicIds,
+            IList<string> advertiserIds,
             IList<PublisherSenderState> senders) =>
-            (Topic, Type, TopicIds, Senders) = (topic, type, topicIds.AsReadOnly(), senders.AsReadOnly());
+            (Topic, Type, AdvertiserIds, Senders) = (topic, type, advertiserIds.AsReadOnly(), senders.AsReadOnly());
+
+        public void Deconstruct(out string topic, out string type, out ReadOnlyCollection<string> advertiserIds,
+            out ReadOnlyCollection<PublisherSenderState> senders)
+            => (topic, type, advertiserIds, senders) = (Topic, Type, AdvertiserIds, Senders);
     }
 
+    [DataContract]
     public sealed class PublisherState : JsonToString
     {
-        public ReadOnlyCollection<PublisherTopicState> Topics { get; }
+        [DataMember] public ReadOnlyCollection<PublisherTopicState> Topics { get; }
 
         internal PublisherState(IList<PublisherTopicState> topics) => Topics = topics.AsReadOnly();
     }

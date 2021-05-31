@@ -118,7 +118,7 @@ namespace Iviz.Roslib
             return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
         }
 
-        Task IRosSubscriber.PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        Task IRosSubscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             return PublisherUpdateRcpAsync(publisherUris, token);
         }

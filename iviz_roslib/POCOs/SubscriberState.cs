@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
 {
+    [DataContract]
     public sealed class SubscriberReceiverState : JsonToString
     {
-        public bool IsAlive { get; internal set; }
-        public bool IsConnected { get; internal set;}
-        public bool RequestNoDelay { get; internal set;}
-        public Endpoint? EndPoint { get; internal set;}
-        public Uri RemoteUri { get; }
-        public Endpoint? RemoteEndpoint { get; internal set;}
-        public long NumReceived { get; internal set;}
-        public long BytesReceived { get; internal set;}
-        public string? ErrorDescription { get; internal set;}
+        [DataMember] public bool IsAlive { get; internal set; }
+        [DataMember] public bool IsConnected { get; internal set; }
+        [DataMember] public bool RequestNoDelay { get; internal set; }
+        [DataMember] public Endpoint? EndPoint { get; internal set; }
+        [DataMember] public Uri RemoteUri { get; }
+        [DataMember] public Endpoint? RemoteEndpoint { get; internal set; }
+        [DataMember] public long NumReceived { get; internal set; }
+        [DataMember] public long BytesReceived { get; internal set; }
+        [DataMember] public string? ErrorDescription { get; internal set; }
 
         internal SubscriberReceiverState(Uri remoteUri)
         {
@@ -23,25 +25,32 @@ namespace Iviz.Roslib
         }
     }
 
+    [DataContract]
     public sealed class SubscriberTopicState : JsonToString
     {
-        public string Topic { get; }
-        public string Type { get; }
-        public ReadOnlyCollection<string> TopicIds { get; }
-        public ReadOnlyCollection<SubscriberReceiverState> Receivers { get; }
+        [DataMember] public string Topic { get; }
+        [DataMember] public string Type { get; }
+        [DataMember] public ReadOnlyCollection<string> SubscriberIds { get; }
+        [DataMember] public ReadOnlyCollection<SubscriberReceiverState> Receivers { get; }
 
-        internal SubscriberTopicState(string topic, string type, IList<string> topicIds, IList<SubscriberReceiverState> receivers)
+        internal SubscriberTopicState(string topic, string type, IList<string> topicIds,
+            IList<SubscriberReceiverState> receivers)
         {
             Topic = topic;
             Type = type;
-            TopicIds = topicIds.AsReadOnly();
+            SubscriberIds = topicIds.AsReadOnly();
             Receivers = receivers.AsReadOnly();
         }
+
+        public void Deconstruct(out string topic, out string type, out ReadOnlyCollection<string> subscriberIds,
+            out ReadOnlyCollection<SubscriberReceiverState> receivers)
+            => (topic, type, subscriberIds, receivers) = (Topic, Type, SubscriberIds, Receivers);
     }
 
+    [DataContract]
     public sealed class SubscriberState
     {
-        public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
+        [DataMember] public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
 
         internal SubscriberState(IList<SubscriberTopicState> topics)
         {

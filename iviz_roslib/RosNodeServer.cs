@@ -145,7 +145,7 @@ namespace Iviz.Roslib.XmlRpc
 
         XmlRpcArg GetBusInfo(XmlRpcValue[] _)
         {
-            var busInfo = client.GetBusInfoRcp();
+            var busInfo = client.GetBusInfoRpc();
             XmlRpcArg[][] response = busInfo.Select(BusInfoToArg).ToArray();
             return OkResponse(response);
         }
@@ -204,13 +204,13 @@ namespace Iviz.Roslib.XmlRpc
 
         XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
         {
-            var subscriptions = client.GetSubscriptionsRcp();
+            var subscriptions = client.GetSubscriptionsRpc();
             return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type))));
         }
 
         XmlRpcArg GetPublications(XmlRpcValue[] _)
         {
-            var publications = client.GetPublicationsRcp();
+            var publications = client.GetPublicationsRpc();
             return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type))));
         }
 
@@ -265,7 +265,7 @@ namespace Iviz.Roslib.XmlRpc
 
             try
             {
-                await client.PublisherUpdateRcpAsync(topic, publisherUris, token);
+                await client.PublisherUpdateRpcAsync(topic, publisherUris, token);
             }
             catch (OperationCanceledException)
             {

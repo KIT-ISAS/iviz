@@ -453,6 +453,9 @@ namespace Iviz.Roslib.XmlRpc
             Members = members.AsReadOnly();
         }
 
+        public void Deconstruct(out string topic, out ReadOnlyCollection<string> members) =>
+            (topic, members) = (Topic, Members);
+
         public override string ToString()
         {
             return $"[{Topic} [{string.Join(", ", Members)}]]";

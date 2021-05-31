@@ -17,8 +17,8 @@ namespace Iviz.Roslib
         readonly List<string> ids = new();
         readonly TcpSenderManager<T> manager;
         readonly CancellationTokenSource runningTs = new();
-        bool disposed;
         int totalPublishers;
+        bool disposed;
 
         internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {

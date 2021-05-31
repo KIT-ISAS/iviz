@@ -88,7 +88,7 @@ namespace Iviz.Roslib
         /// <returns>Whether the id belonged to the subscriber.</returns>        
         public ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default);
 
-        internal Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
+        internal Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
 
         public Task DisposeAsync(CancellationToken token);
     }

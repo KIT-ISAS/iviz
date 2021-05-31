@@ -241,7 +241,7 @@ namespace Iviz.Roslib
             if (CallerUri.Port == AnyPort || CallerUri.IsDefaultPort)
             {
                 string absolutePath = Uri.UnescapeDataString(CallerUri.AbsolutePath);
-                CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort}{absolutePath}");
+                CallerUri = new Uri($"http://{CallerUri.Host}:{listener.ListenerPort.ToString()}{absolutePath}");
 
                 // caller uri has changed;
                 RosMasterClient = new RosMasterClient(MasterUri, CallerId, CallerUri, 3);
@@ -1465,7 +1465,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics => GetSubscriptionsRcp().AsReadOnly();
+        public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics => GetSubscriptionsRpc().AsReadOnly();
 
         /// <summary>
         /// Asks the master for the nodes and topics in the system.
@@ -1502,23 +1502,23 @@ namespace Iviz.Roslib
         /// <summary>
         /// Gets the topics published by this node.
         /// </summary>
-        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics => GetPublicationsRcp().AsReadOnly();
+        public ReadOnlyCollection<BriefTopicInfo> PublishedTopics => GetPublicationsRpc().AsReadOnly();
 
-        internal BriefTopicInfo[] GetSubscriptionsRcp()
+        internal BriefTopicInfo[] GetSubscriptionsRpc()
         {
             return subscribersByTopic.Values
                 .Select(subscriber => new BriefTopicInfo(subscriber.Topic, subscriber.TopicType))
                 .ToArray();
         }
 
-        internal BriefTopicInfo[] GetPublicationsRcp()
+        internal BriefTopicInfo[] GetPublicationsRpc()
         {
             return publishersByTopic.Values
                 .Select(publisher => new BriefTopicInfo(publisher.Topic, publisher.TopicType))
                 .ToArray();
         }
 
-        internal async Task PublisherUpdateRcpAsync(string topic, IEnumerable<Uri> publishers, CancellationToken token)
+        internal async Task PublisherUpdateRpcAsync(string topic, IEnumerable<Uri> publishers, CancellationToken token)
         {
             if (!TryGetSubscriber(topic, out IRosSubscriber subscriber))
             {
@@ -1528,13 +1528,9 @@ namespace Iviz.Roslib
 
             try
             {
-                await subscriber.PublisherUpdateRcpAsync(publishers, token);
+                await subscriber.PublisherUpdateRpcAsync(publishers, token);
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 Logger.LogErrorFormat("EE {0}: PublisherUpdateRcp failed: {1}", this, e);
             }
@@ -1635,7 +1631,7 @@ namespace Iviz.Roslib
             return new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
         }
 
-        internal List<BusInfo> GetBusInfoRcp()
+        internal List<BusInfo> GetBusInfoRpc()
         {
             List<BusInfo> busInfos = new();
 
