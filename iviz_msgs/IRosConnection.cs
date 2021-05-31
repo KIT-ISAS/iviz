@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Iviz.Msgs
 {
@@ -41,11 +42,12 @@ namespace Iviz.Msgs
                 });
         }
 
-        class RosConnectionImpl : IRosConnection
+        [DataContract]
+        sealed class RosConnectionImpl : IRosConnection
         {
-            public string Topic { get; }
-            public string Type { get; }
-            public IReadOnlyCollection<string> TcpHeader { get; }
+            [DataMember] public string Topic { get; }
+            [DataMember] public string Type { get; }
+            [DataMember] public IReadOnlyCollection<string> TcpHeader { get; }
 
             public RosConnectionImpl(string topic, string type, IReadOnlyCollection<string> tcpHeader) =>
                 (Topic, Type, TcpHeader) = (topic, type, tcpHeader);
