@@ -152,7 +152,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during SetupPanel", e);
+                Core.Logger.Error($"{this}: Exception during SetupPanel" + e);
             }
 
             selectedDialogData.Panel.Active = true;

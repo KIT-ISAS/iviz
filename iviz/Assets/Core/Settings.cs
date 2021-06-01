@@ -59,11 +59,6 @@ namespace Iviz.Core
     {
         public const int DefaultFps = -1;
 
-        static Settings()
-        {
-            AotHelper.EnsureType<StringEnumConverter>();
-        }
-
         /// <summary>
         /// Is this being run on an Android, IOS, or Hololens device?
         /// </summary>
@@ -190,6 +185,10 @@ namespace Iviz.Core
         public static bool SupportsRGB24 => supportsRGB24 ??
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
                                             .Value;
+        static Settings()
+        {
+            AotHelper.EnsureType<StringEnumConverter>();
+        }
     }
     
     public interface IScreenshotManager
