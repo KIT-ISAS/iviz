@@ -443,7 +443,7 @@ namespace Iviz.XmlRpc
 
     public static class ConnectionUtils
     {
-        public static Dictionary<string, string> GlobalResolver { get; } = new();
+        public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
             CancellationToken token, int timeoutInMs = -1)
