@@ -142,7 +142,8 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                Logger.LogFormat("{0}: Changed endpoint from {1} to {2}", this, RemoteEndpoint, newEndpoint);
+                Logger.LogDebugFormat("{0}: Changed endpoint from {1} to {2}", this, 
+                    RemoteEndpoint?.ToString() ?? "(none)", newEndpoint);
                 RemoteEndpoint = newEndpoint;
             }
 

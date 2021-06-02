@@ -6,10 +6,13 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Ros;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Utilities;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -47,7 +50,14 @@ namespace Iviz.App
             panel.ModeChanged += _ =>
             {
                 panel.TextBottom.text = EmptyBottomText;
-                UpdatePanel();
+                if (panel.Mode == SystemDialogContents.ModeType.Aliases)
+                {
+                    UpdateAliases();
+                }
+                else
+                {
+                    UpdatePanel();
+                }
             };
             UpdatePanel();
         }
@@ -69,7 +79,6 @@ namespace Iviz.App
                     UpdateNodes();
                     break;
                 case SystemDialogContents.ModeType.Aliases:
-                    UpdateAliases();
                     break;
             }
         }
@@ -478,7 +487,7 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 panel.HostNames[i].Value = hostname;
                 panel.Addresses[i].Value = address;
                 ConnectionUtils.GlobalResolver[hostname] = address;
@@ -510,13 +519,19 @@ namespace Iviz.App
                 ModuleListPanel.UpdateAddresses();
             }
         }
+
+        [NotNull, Preserve]
+        public static object[] AotHelper => new object[]
+        {
+            new List<HostAlias>()
+        };
     }
 
     [DataContract]
-    public readonly struct HostAlias
+    public struct HostAlias
     {
-        [DataMember] public string Hostname { get; }
-        [DataMember] public string Address { get; }
+        [DataMember] public string Hostname { get; set; }
+        [DataMember] public string Address { get; set; }
 
         public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
