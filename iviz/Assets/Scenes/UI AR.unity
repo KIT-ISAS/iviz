@@ -3562,6 +3562,9 @@ MonoBehaviour:
   bottomBandwidth: {fileID: 1448435862}
   twistJoystick: {fileID: 653476309}
   arJoystick: {fileID: 112340565}
+  contentCanvas: {fileID: 913012244}
+  moduleListCanvas: {fileID: 385866351}
+  dataPanelCanvas: {fileID: 1847078093}
   menuObject: {fileID: 5450026899849084303}
 --- !u!1001 &523751372
 PrefabInstance:
@@ -9236,7 +9239,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659761}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.9999996
+  m_Size: 0.99999964
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -19146,6 +19149,7 @@ MonoBehaviour:
   close: {fileID: 269405153}
   tfLog: {fileID: 0}
   showOnlyUsed: {fileID: 730018304}
+  mover: {fileID: 0}
 --- !u!1001 &8999660996171815324
 PrefabInstance:
   m_ObjectHideFlags: 0

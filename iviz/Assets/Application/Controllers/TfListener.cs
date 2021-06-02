@@ -47,7 +47,7 @@ namespace Iviz.Controllers
 
         [NotNull] public TfFrame FixedFrame { get; private set; }
 
-        const float HighlightDuration = 3.0f;
+        const float HighlightDuration = 2.0f;
         float? highlightFrameStart;
         readonly FrameNode highlightFrameNode;
         readonly AxisFrameResource highlightFrame;
@@ -129,7 +129,7 @@ namespace Iviz.Controllers
                 {
                     Instance.FixedFrame = frame;
                     Instance.FixedFrame.AddListener(Instance.fixedFrameListener);
-                    OriginFrame.Transform.SetLocalPose(frame.WorldPose.Inverse());
+                    OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
                 }
             }
         }
@@ -445,7 +445,7 @@ namespace Iviz.Controllers
         {
             ProcessMessages();
 
-            Pose worldPose = FixedFrame.WorldPose;
+            Pose worldPose = FixedFrame.OriginWorldPose;
             if (!worldPose.IsApproxIdentity())
             {
                 OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
@@ -465,6 +465,7 @@ namespace Iviz.Controllers
             }
 
             highlightFrame.Tint = Color.white.WithAlpha(alpha);
+            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
         }
 
         public override void StopController()

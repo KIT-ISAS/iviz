@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class InputFieldWidget : MonoBehaviour, IWidget
+    public sealed class InputFieldWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
         [SerializeField] InputField text = null;

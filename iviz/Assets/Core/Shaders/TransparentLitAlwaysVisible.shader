@@ -1,4 +1,4 @@
-﻿Shader "iviz/TransparentLit"
+﻿Shader "iviz/TransparentLitAlwaysVisible"
 {
     Properties
     {
@@ -7,12 +7,14 @@
     {
         Tags
         {
-            "Queue"="Transparent" "RenderType"="Transparent"
+            "Queue"="Transparent+1" "RenderType"="Transparent"
         }
-        LOD 200
+        ZWrite On
+        ZTest Always
 
         CGPROGRAM
-        #pragma surface surf Standard addshadow fullforwardshadows alpha:fade
+        #pragma surface surf Standard alpha:fade
+        #pragma target 3.0
 
         struct Input
         {
@@ -26,7 +28,6 @@
         UNITY_DEFINE_INSTANCED_PROP(half, _Smoothness)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-
         void surf(Input IN, inout SurfaceOutputStandard o)
         {
             const fixed4 color = UNITY_ACCESS_INSTANCED_PROP(Props, _Color) * IN.color;
@@ -37,6 +38,6 @@
             o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;
         }
         ENDCG
+
     }
-    FallBack "Standard"
 }

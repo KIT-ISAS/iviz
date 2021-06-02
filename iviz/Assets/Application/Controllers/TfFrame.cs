@@ -246,12 +246,12 @@ namespace Iviz.Controllers
         /// <summary>
         /// Pose in relation to the ROS origin in Unity coordinates
         /// </summary>
-        public Pose WorldPose => TfListener.RelativePoseToOrigin(UnityWorldPose);
+        public Pose OriginWorldPose => TfListener.RelativePoseToOrigin(AbsoluteUnityPose);
 
         /// <summary>
         /// Pose in relation to the Unity origin in Unity coordinates
         /// </summary>
-        public Pose UnityWorldPose => Transform.AsPose();
+        public Pose AbsoluteUnityPose => Transform.AsPose();
 
         bool HasNoListeners => listeners.Count == 0;
 

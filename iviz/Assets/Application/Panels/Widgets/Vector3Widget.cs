@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class Vector3Widget : MonoBehaviour, IWidget
+    public sealed class Vector3Widget : MonoBehaviour, IWidget
     {
         [SerializeField] InputFieldWidget inputX = null;
         [SerializeField] InputFieldWidget inputY = null;

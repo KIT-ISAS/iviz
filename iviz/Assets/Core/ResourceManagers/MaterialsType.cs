@@ -13,6 +13,7 @@ namespace Iviz.Resources
         public Info<Material> TexturedLit { get; }
         public Info<Material> TransparentLit { get; }
         public Info<Material> TransparentTexturedLit { get; }
+        public Info<Material> TransparentLitAlwaysVisible { get; }
         public Info<Material> BumpLit { get; }
         public Info<Material> TransparentBumpLit { get; }
         public Info<Material> ImagePreview { get; }
@@ -64,6 +65,7 @@ namespace Iviz.Resources
             TransparentTexturedLit = Settings.IsHololens
                 ? new Info<Material>("Hololens Materials/Holo Transparent Textured Lit")
                 : new Info<Material>(assetHolder.TransparentTexturedLit);
+            TransparentLitAlwaysVisible = new Info<Material>(assetHolder.TransparentLitAlwaysVisible);
             BumpLit = new Info<Material>(assetHolder.BumpLit);
             TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
             ImagePreview = new Info<Material>("Materials/ImagePreview");

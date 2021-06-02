@@ -7,10 +7,12 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TfLog tfLog = null;
         [SerializeField] ToggleWidget showOnlyUsed = null;
+        [SerializeField] MoverWidget mover = null;
 
         public TrashButtonWidget Close => close;
         public TfLog TfLog => tfLog;
         public ToggleWidget ShowOnlyUsed => showOnlyUsed;
+        public MoverWidget Mover => mover;
 
         public bool Active
         {

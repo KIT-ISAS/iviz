@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class InputFieldWithHintsWidget : MonoBehaviour, IWidget
+    public sealed class InputFieldWithHintsWidget : MonoBehaviour, IWidget
     {
         [SerializeField] InputFieldWidget input = null;
         [SerializeField] Dropdown dropdown = null;

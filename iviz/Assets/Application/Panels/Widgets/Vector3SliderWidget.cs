@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class Vector3SliderWidget : MonoBehaviour, IWidget
+    public sealed class Vector3SliderWidget : MonoBehaviour, IWidget
     {
         [SerializeField] SliderWidget inputX = null;
         [SerializeField] SliderWidget inputY = null;

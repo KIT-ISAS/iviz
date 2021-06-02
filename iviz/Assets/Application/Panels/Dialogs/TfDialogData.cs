@@ -16,6 +16,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            ResetPanelPosition();
+            
             panel.Close.Clicked += Close;
             panel.TfLog.Close += Close;
             panel.TfLog.Flush();

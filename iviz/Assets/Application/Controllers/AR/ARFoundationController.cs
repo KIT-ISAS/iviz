@@ -303,11 +303,11 @@ namespace Iviz.Controllers
             if (SetupModeEnabled)
             {
                 Transform cameraTransform = arCamera.transform;
-                setupModeFrame.transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
+                setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
                 Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
                 if (TryGetClosestPlane(ray, out ARRaycastHit hit))
                 {
-                    setupModeFrame.transform.position = hit.pose.position;
+                    setupModeFrame.Transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
                     //hasSetupModePose = true;
                     ArSet.Visible = true;
@@ -315,7 +315,7 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    setupModeFrame.transform.localPosition = new Vector3(0, 0, 0.5f);
+                    setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
                     setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
                     //hasSetupModePose = false;
                     ArSet.Visible = false;

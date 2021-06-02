@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class SliderWidget : MonoBehaviour, IWidget
+    public sealed class SliderWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Slider slider = null;
         [SerializeField] Text label = null;

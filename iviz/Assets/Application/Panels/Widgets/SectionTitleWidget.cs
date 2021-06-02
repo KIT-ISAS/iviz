@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class SectionTitleWidget : MonoBehaviour, IWidget
+    public sealed class SectionTitleWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
 

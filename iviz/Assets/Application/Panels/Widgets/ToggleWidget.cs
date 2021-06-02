@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ToggleWidget : MonoBehaviour, IWidget
+    public sealed class ToggleWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Toggle toggle = null;
         [SerializeField] Text label = null;

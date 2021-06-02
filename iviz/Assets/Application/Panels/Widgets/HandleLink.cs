@@ -1,18 +1,15 @@
 using System;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
-    public class HandleLink : MonoBehaviour, IPointerClickHandler, IPointerUpHandler
+    public sealed class HandleLink : MonoBehaviour, IPointerUpHandler
     {
         public event Action Clicked;
-        
-        public void OnPointerClick(PointerEventData eventData)
-        {
-        }
 
-        public void OnPointerUp(PointerEventData eventData)
+        void IPointerUpHandler.OnPointerUp(PointerEventData _)
         {
             Clicked?.Invoke();
         }

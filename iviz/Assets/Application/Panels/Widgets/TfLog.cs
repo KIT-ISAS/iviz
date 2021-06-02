@@ -76,7 +76,9 @@ namespace Iviz.App
                 }
                 else
                 {
-                    tfName.text = "[ ⮑" + value.Id + "]";
+                    tfName.text = value.Id == TfListener.FixedFrameId
+                        ? $"[ ⮑{value.Id}] <i>[Fixed]</i>"
+                        : $"[ ⮑{value.Id}]";
                     TfListener.Instance.HighlightFrame(value.Id);
                 }
 
@@ -134,7 +136,7 @@ namespace Iviz.App
             public TfNode([NotNull] TfFrame frame)
             {
                 name = frame.Id;
-                pose = frame.WorldPose;
+                pose = frame.OriginWorldPose;
                 hasTrail = frame.TrailVisible;
                 selected = (frame == Instance.SelectedFrame);
                 children = new TfNode[frame.Children.Count];
@@ -246,7 +248,8 @@ namespace Iviz.App
         {
             if (SelectedFrame != null)
             {
-                ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.UnityWorldPose.position);
+                TfListener.Instance.HighlightFrame(SelectedFrame.Id);
+                ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.AbsoluteUnityPose.position);
             }
 
             Close?.Invoke();
@@ -266,6 +269,7 @@ namespace Iviz.App
         {
             if (SelectedFrame != null)
             {
+                TfListener.Instance.HighlightFrame(SelectedFrame.Id);
                 TfListener.FixedFrameId = SelectedFrame.Id;
             }
 

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
@@ -18,8 +19,8 @@ namespace Iviz.App
         public TrashButtonWidget AddCloseButton()
         {
             GameObject o = Resource.Widgets.CloseButton.Instantiate(nonstatics.transform);
-            RectTransform ttransform = (RectTransform)o.transform;
-            ttransform.anchoredPosition = new Vector2(ttransform.anchoredPosition.x, yCloseButton);
+            RectTransform oTransform = (RectTransform)o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
@@ -27,8 +28,8 @@ namespace Iviz.App
         public TrashButtonWidget AddTrashButton()
         {
             GameObject o = Resource.Widgets.TrashButton.Instantiate(nonstatics.transform);
-            RectTransform transform = (RectTransform)o.transform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            RectTransform oTransform = (RectTransform)o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
@@ -36,8 +37,8 @@ namespace Iviz.App
         public ToggleButtonWidget AddHideButton()
         {
             GameObject o = Resource.Widgets.ToggleButton.Instantiate(nonstatics.transform);
-            RectTransform transform = (RectTransform)o.transform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            RectTransform oTransform = (RectTransform)o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<ToggleButtonWidget>();
         }
@@ -45,106 +46,120 @@ namespace Iviz.App
         public TrashButtonWidget AddResetButton()
         {
             GameObject o = Resource.Widgets.ResetButton.Instantiate(nonstatics.transform);
-            RectTransform transform = (RectTransform)o.transform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, yCloseButton);
+            RectTransform oTransform = (RectTransform)o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
 
 
-        GameObject AddToBottom(GameObject o)
+        GameObject AddToBottom([NotNull] GameObject o)
         {
-            RectTransform transform = (RectTransform)o.transform;
-            transform.anchoredPosition = new Vector2(transform.anchoredPosition.x, -y);
-            y += transform.rect.height + yOffset;
+            RectTransform oTransform = (RectTransform)o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, -y);
+            y += oTransform.rect.height + yOffset;
             o.SetActive(true);
             return o;
         }
 
-        public HeadTitleWidget AddHeadTitleWidget(string label)
+        [NotNull]
+        public HeadTitleWidget AddHeadTitleWidget([NotNull] string label)
         {
             GameObject o = Resource.Widgets.HeadTitle.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<HeadTitleWidget>().SetLabel(label);
         }
 
-        public SectionTitleWidget AddSectionTitleWidget(string label)
+        [NotNull]
+        public SectionTitleWidget AddSectionTitleWidget([NotNull] string label)
         {
             GameObject o = Resource.Widgets.SectionTitle.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<SectionTitleWidget>().SetLabel(label);
         }
 
-        public ToggleWidget AddToggle(string label)
+        [NotNull]
+        public ToggleWidget AddToggle([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Toggle.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ToggleWidget>().SetLabel(label);
         }
 
-        public SliderWidget AddSlider(string label)
+        [NotNull]
+        public SliderWidget AddSlider([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Slider.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<SliderWidget>().SetLabel(label);
         }
 
-        public InputFieldWidget AddInputField(string label)
+        [NotNull]
+        public InputFieldWidget AddInputField([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Input.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
         
-        public InputFieldWithHintsWidget AddInputFieldWithHints(string label)
+        [NotNull]
+        public InputFieldWithHintsWidget AddInputFieldWithHints([NotNull] string label)
         {
             GameObject o = Resource.Widgets.InputWithHints.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWithHintsWidget>().SetLabel(label);
         }
 
-        public InputFieldWidget AddShortInputField(string label)
+        [NotNull]
+        public InputFieldWidget AddShortInputField([NotNull] string label)
         {
             GameObject o = Resource.Widgets.ShortInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
 
-        public NumberInputFieldWidget AddNumberInputField(string label)
+        [NotNull]
+        public NumberInputFieldWidget AddNumberInputField([NotNull] string label)
         {
             GameObject o = Resource.Widgets.NumberInput.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<NumberInputFieldWidget>().SetLabel(label);
         }
 
-        public Vector3Widget AddVector3(string label)
+        [NotNull]
+        public Vector3Widget AddVector3([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Vector3.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<Vector3Widget>().SetLabel(label);
         }
 
-        public Vector3SliderWidget AddVector3Slider(string label)
+        [NotNull]
+        public Vector3SliderWidget AddVector3Slider([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Vector3Slider.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<Vector3SliderWidget>().SetLabel(label);
         }
 
-        public DropdownWidget AddDropdown(string label)
+        [NotNull]
+        public DropdownWidget AddDropdown([NotNull] string label)
         {
             GameObject o = Resource.Widgets.Dropdown.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<DropdownWidget>().SetLabel(label);
         }
 
-        public ColorPickerWidget AddColorPicker(string label)
+        [NotNull]
+        public ColorPickerWidget AddColorPicker([NotNull] string label)
         {
             GameObject o = Resource.Widgets.ColorPicker.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ColorPickerWidget>().SetLabel(label);
         }
 
-        public ImagePreviewWidget AddImagePreviewWidget(string label)
+        [NotNull]
+        public ImagePreviewWidget AddImagePreviewWidget([NotNull] string label)
         {
             GameObject o = Resource.Widgets.ImagePreview.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ImagePreviewWidget>().SetLabel(label);
         }
 
-        public DataLabelWidget AddDataLabel(string label)
+        [NotNull]
+        public DataLabelWidget AddDataLabel([NotNull] string label)
         {
             GameObject o = Resource.Widgets.DataLabel.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<DataLabelWidget>().SetLabel(label);
         }
-
+        
         public SenderWidget AddSender()
         {
             GameObject o = Resource.Widgets.Sender.Instantiate(nonstatics.transform);
@@ -173,14 +188,14 @@ namespace Iviz.App
         {
             content.GetComponent<RectTransform>().sizeDelta = new Vector2(0, y);
             content.transform.GetComponentsInChildren<Transform>().
-                Where(x => x.name[0] == '_').
-                ForEach(x =>
+                Where(t => t.name[0] == '_').
+                ForEach(t =>
                 {
-                    x.gameObject.SetActive(false);
-                    Vector3 absolutePosition = x.transform.position;
-                    x.transform.SetParentLocal(statics.transform);
-                    x.transform.position = absolutePosition;
-                    x.gameObject.SetActive(true);
+                    t.gameObject.SetActive(false);
+                    Vector3 absolutePosition = t.transform.position;
+                    t.SetParentLocal(statics.transform);
+                    t.position = absolutePosition;
+                    t.gameObject.SetActive(true);
                 });
         }
     }

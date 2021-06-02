@@ -241,6 +241,13 @@ namespace Iviz.Displays
             MainRenderer.SetPropertyColor(effectiveColor);
         }
 
+        public void OverrideMaterial(Material material)
+        {
+            MainRenderer.sharedMaterial = material;
+            var effectiveColor = Color * Tint;
+            MainRenderer.SetPropertyColor(effectiveColor);
+        }
+
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {

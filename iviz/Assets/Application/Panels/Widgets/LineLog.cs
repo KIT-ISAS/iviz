@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class LineLog : MonoBehaviour, IWidget
+    public sealed class LineLog : MonoBehaviour, IWidget
     {
         [SerializeField] Text text = null;
         [SerializeField] GameObject content = null;

@@ -353,7 +353,7 @@ namespace Iviz.Displays
             {
                 return false;
             }
-            
+
             if (resource != null)
             {
                 return true;
@@ -405,7 +405,7 @@ namespace Iviz.Displays
                 bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
                 if (!hasClient)
                 {
-                    Debug.LogWarning("ExternalResourceManager: Call service failed, no connection");
+                    Debug.LogWarning("ExternalResourceManager: Call to model service failed. Reason: Not connected.");
                     return null;
                 }
 
@@ -585,7 +585,7 @@ namespace Iviz.Displays
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Loading resource {uriString} failed with error" + e);
+                Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
@@ -599,20 +599,17 @@ namespace Iviz.Displays
         async ValueTask<Info<Texture2D>> LoadLocalTextureAsync([NotNull] string uriString, [NotNull] string localPath,
             CancellationToken token)
         {
-            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGB24, true);
+            Texture2D texture;
 
             try
             {
                 using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
                 {
+                    texture = new Texture2D(1, 1, TextureFormat.RGB24, true);
                     texture.LoadImage(buffer.Array);
                 }
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
@@ -648,11 +645,7 @@ namespace Iviz.Displays
                     obj = await CreateSceneNodeAsync(msg, provider, token);
                 }
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
@@ -694,11 +687,7 @@ namespace Iviz.Displays
 
                 return info;
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Error processing model response: ", e);
                 return null;
@@ -729,11 +718,7 @@ namespace Iviz.Displays
 
                 return info;
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Error processing texture response: ", e);
                 return null;
@@ -769,11 +754,7 @@ namespace Iviz.Displays
 
                 return info;
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Error processing scene response: ", e);
                 return null;
@@ -811,8 +792,6 @@ namespace Iviz.Displays
                 node.transform.SetParent(Node.transform, false);
             }
 
-            //Logger.Debug(scene.ToJsonString());
-
             foreach (Include include in scene.Includes)
             {
                 token.ThrowIfCancellationRequested();
@@ -834,7 +813,7 @@ namespace Iviz.Displays
                     await Resource.GetGameObjectResourceAsync(include.Uri, provider, token);
                 if (includeResource == null)
                 {
-                    Logger.Debug("ExternalResourceManager: Failed to retrieve model '" + include.Uri + "'");
+                    Logger.Debug($"ExternalResourceManager: Failed to retrieve model '{include.Uri}'");
                     continue;
                 }
 

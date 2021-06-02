@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -31,6 +32,13 @@ namespace Iviz.App
 
         public virtual void FinalizePanel()
         {
+        }
+
+        protected void ResetPanelPosition()
+        {
+            var gameObject = ((MonoBehaviour) Panel).gameObject;
+            var transform = (RectTransform) gameObject.transform;
+            transform.anchoredPosition = new Vector2(0, 5);
         }
 
         public void Show()

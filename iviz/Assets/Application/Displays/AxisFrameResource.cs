@@ -131,6 +131,13 @@ namespace Iviz.Displays
             BoxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
+        public void OverrideMaterial(Material material)
+        {
+            axisObjects[0].OverrideMaterial(material);
+            axisObjects[1].OverrideMaterial(material);
+            axisObjects[2].OverrideMaterial(material);
+        }        
+        
         public void SplitForRecycle()
         {
             axisObjects[0].ReturnToPool(Resource.Displays.Cube);

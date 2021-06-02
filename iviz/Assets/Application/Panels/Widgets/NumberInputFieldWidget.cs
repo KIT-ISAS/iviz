@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class NumberInputFieldWidget : MonoBehaviour, IWidget
+    public sealed class NumberInputFieldWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
         [SerializeField] InputField text = null;

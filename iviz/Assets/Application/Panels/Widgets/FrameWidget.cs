@@ -48,7 +48,9 @@ namespace Iviz.App
                 frame = value;
                 if (frame != null)
                 {
-                    text.text = "<b>➤" + frame.Id + "</b>";
+                    text.text = TfListener.FixedFrameId == frame.Id
+                        ? $"<b>➤{frame.Id}</b> <i>[Fixed]</i>"
+                        : $"<b>➤{frame.Id}</b>";
                     UpdateStats();
                 }
                 else
@@ -81,7 +83,7 @@ namespace Iviz.App
                 return;
             }
             
-            ModuleListPanel.GuiInputModule.LookAt(Frame.WorldPose.position);
+            ModuleListPanel.GuiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
             TfListener.Instance.HighlightFrame(Frame.Id);
         }
 

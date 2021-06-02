@@ -16,7 +16,7 @@ namespace Iviz.Core
         readonly ConcurrentQueue<Action> actionsQueue = new ConcurrentQueue<Action>();
         readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
         float lastRunTime;
-        Thread gameThread;
+        Thread gameThread; // only used for id
         int counter;
 
         static int networkFrameSkip = Settings.IsHololens ? 2 : 1;
@@ -33,7 +33,7 @@ namespace Iviz.Core
         public static DateTime Now { get; private set; } = DateTime.Now;
 
         [CanBeNull] static string nowFormatted;
-        [NotNull] public static string NowFormatted => nowFormatted ?? (nowFormatted = Now.ToString("HH:mm:ss"));
+        [NotNull] public static string NowFormatted => nowFormatted ?? (nowFormatted = Now.ToString("HH:mm:ss.fff"));
 
         void Awake()
         {
@@ -219,7 +219,7 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance is null)
+            if (Instance == null)
             {
                 return;
             }
@@ -234,7 +234,7 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance is null)
+            if (Instance == null)
             {
                 return;
             }
@@ -261,7 +261,7 @@ namespace Iviz.Core
                 return;
             }
 
-            if (Instance is null)
+            if (Instance == null)
             {
                 return;
             }

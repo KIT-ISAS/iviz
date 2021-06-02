@@ -44,6 +44,7 @@ namespace Iviz.Resources
         public Info<GameObject> Vector3Slider { get; }
         public Info<GameObject> InputWithHints { get; }
         public Info<GameObject> MarkerWidget { get; }
+        public Info<GameObject> Mover { get; }
 
         public Info<GameObject> DataPanel { get; }
 

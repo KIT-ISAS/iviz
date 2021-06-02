@@ -36,7 +36,7 @@ namespace Iviz.Controllers
         public string Name
         {
             get => gameObject.name;
-            set => gameObject.name = value;
+            protected set => gameObject.name = value;
         }
 
         void SetParent(TfFrame newParent, bool attach)

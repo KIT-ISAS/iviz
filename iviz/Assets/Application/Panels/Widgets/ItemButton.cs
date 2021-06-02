@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ItemButton : MonoBehaviour
+    public sealed class ItemButton : MonoBehaviour
     {
         [SerializeField] Button button = null;
         [SerializeField] Text text = null;

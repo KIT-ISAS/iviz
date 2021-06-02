@@ -21,6 +21,7 @@ namespace Iviz.Displays
         public Material TexturedLit;
         public Material TransparentLit;
         public Material TransparentTexturedLit;
+        public Material TransparentLitAlwaysVisible;
         public Material BumpLit;
         public Material TransparentBumpLit;
         public Material PointCloud;

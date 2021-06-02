@@ -179,7 +179,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose topPoseInv = node.Parent.WorldPose.Inverse();
+            Pose topPoseInv = node.Parent.OriginWorldPose.Inverse();
 
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.PoseStamped ps in msg.Poses)
@@ -195,13 +195,13 @@ namespace Iviz.Controllers
 
                 if (topHeader == header)
                 {
-                    Pose newPose = node.Parent.WorldPose;
+                    Pose newPose = node.Parent.OriginWorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
                 else if (TfListener.TryGetFrame(header, out TfFrame frame))
                 {
-                    Pose newPose = frame.WorldPose;
+                    Pose newPose = frame.OriginWorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }

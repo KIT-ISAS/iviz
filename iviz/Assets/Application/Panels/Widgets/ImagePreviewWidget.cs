@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ImagePreviewWidget : MonoBehaviour, IWidget
+    public sealed class ImagePreviewWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Text label = null;
         [SerializeField] RawImage image = null;

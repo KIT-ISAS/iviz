@@ -58,7 +58,7 @@ namespace Iviz.App
         [SerializeField] Button showSettings = null;
         [SerializeField] Button showEcho = null;
         [SerializeField] Button showSystem = null;
-        
+
         [SerializeField] Button recordBag = null;
         [SerializeField] Text recordBagText = null;
         [SerializeField] Image recordBagImage = null;
@@ -77,14 +77,16 @@ namespace Iviz.App
         TwistJoystick twistJoystick = null;
 
         [SerializeField] ARJoystick arJoystick = null;
+        
+        [SerializeField] Canvas contentCanvas;
+        [SerializeField] GameObject moduleListCanvas;
+        [SerializeField] GameObject dataPanelCanvas;
 
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
 
         int frameCounter;
         bool allGuiVisible = true;
-
-        Canvas parentCanvas;
 
         DialogData[] dialogDatas;
         DialogData availableModules;
@@ -102,7 +104,7 @@ namespace Iviz.App
         SystemDialogData systemData;
 
         public Controllers.ModelService ModelService { get; private set; }
-        Controllers.ControllerService controllerService;
+        ControllerService controllerService;
         ModuleListButtons buttons;
 
         [SerializeField] GameObject menuObject = null;
@@ -122,7 +124,7 @@ namespace Iviz.App
                                                        throw new InvalidOperationException(
                                                            "GuiInputModule has not been started!");
 
-        
+
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -134,14 +136,8 @@ namespace Iviz.App
             set
             {
                 allGuiVisible = value;
-                if (parentCanvas == null)
-                {
-                    // not initialized yet
-                    return;
-                }
-
                 HideGuiButton.State = value;
-                parentCanvas.gameObject.SetActive(value);
+                contentCanvas.gameObject.SetActive(value);
             }
         }
 
@@ -228,7 +224,7 @@ namespace Iviz.App
             Resource.ClearResources();
             GuiDialogListener.ClearResources();
 
-            parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
+            //parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
 
@@ -245,7 +241,6 @@ namespace Iviz.App
                 settingsData = new SettingsDialogData(),
                 echoData = new EchoDialogData(),
                 systemData = new SystemDialogData(),
-                
             };
 
             Directory.CreateDirectory(Settings.SavedFolder);
@@ -285,7 +280,7 @@ namespace Iviz.App
             ShowARJoystickButton.Clicked += () =>
             {
                 // should be !Visible, but the new Visible hasn't been set yet
-                TwistJoystick.RightJoystickVisible = ARJoystick.Visible; 
+                TwistJoystick.RightJoystickVisible = ARJoystick.Visible;
             };
 
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
@@ -328,7 +323,7 @@ namespace Iviz.App
 
                 ConnectionManager.Connection.MyId = id;
                 KeepReconnecting = false;
-                Logger.Internal($"Changing caller id to '{id}'");
+                Logger.Internal($"Changing my ROS id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
             {
@@ -841,11 +836,12 @@ namespace Iviz.App
 
         void UpdateFpsStats()
         {
-            //Debug.Log(GC.GetTotalMemory(false) / (1024 * 1024);
+#if UNITY_EDITOR
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
             bottomTime.text = $"M: {memBytesKb.ToString()}M";
-
-            //bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+#else
+            bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+#endif
             bottomFps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
@@ -859,7 +855,7 @@ namespace Iviz.App
                 long bagSizeMb = ConnectionManager.Connection.BagListener.Length / (1024 * 1024);
                 recordBagText.text = $"{bagSizeMb.ToString()} MB";
             }
-            
+
             var state = SystemInfo.batteryStatus;
             switch (SystemInfo.batteryLevel)
             {
