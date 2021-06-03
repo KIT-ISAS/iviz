@@ -91,19 +91,19 @@ namespace Iviz.Displays
                     case MeshTopology.Triangles:
                         for (int i = 0; i < indices.Count; i += 3)
                         {
-                            Write(ref lineBuffer[i], vertices[i], vertices[i + 1]);
-                            Write(ref lineBuffer[i + 1], vertices[i + 1], vertices[i + 2]);
-                            Write(ref lineBuffer[i + 2], vertices[i + 2], vertices[i]);
+                            Write(ref lineBuffer[i], vertices[indices[i]], vertices[indices[i + 1]]);
+                            Write(ref lineBuffer[i + 1], vertices[indices[i + 1]], vertices[indices[i + 2]]);
+                            Write(ref lineBuffer[i + 2], vertices[indices[i + 2]], vertices[indices[i]]);
                         }
 
                         break;
                     case MeshTopology.Quads:
                         for (int i = 0; i < indices.Count; i += 4)
                         {
-                            Write(ref lineBuffer[i], vertices[i], vertices[i + 1]);
-                            Write(ref lineBuffer[i + 1], vertices[i + 1], vertices[i + 2]);
-                            Write(ref lineBuffer[i + 2], vertices[i + 2], vertices[i + 3]);
-                            Write(ref lineBuffer[i + 3], vertices[i + 3], vertices[i]);
+                            Write(ref lineBuffer[i], vertices[indices[i]], vertices[indices[i + 1]]);
+                            Write(ref lineBuffer[i + 1], vertices[indices[i + 1]], vertices[indices[i + 2]]);
+                            Write(ref lineBuffer[i + 2], vertices[indices[i + 2]], vertices[indices[i + 3]]);
+                            Write(ref lineBuffer[i + 3], vertices[indices[i + 3]], vertices[indices[i]]);
                         }
 
                         break;

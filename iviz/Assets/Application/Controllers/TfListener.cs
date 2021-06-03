@@ -539,7 +539,14 @@ namespace Iviz.Controllers
                 }
             );
 
-            Publish(msg);
+            if (ConnectionManager.IsConnected)
+            {
+                Publish(msg);
+            }
+            else
+            {
+                Instance.HandlerNonStatic(msg);
+            }
         }
     }
 }
