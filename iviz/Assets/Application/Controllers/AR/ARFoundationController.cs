@@ -159,11 +159,11 @@ namespace Iviz.Controllers
                 else
                 {
                     arCamera.cullingMask = defaultCullingMask;
-                    Pose sourcePose = setupModeFrame.transform.AsPose();
+                    var (sourcePosition, sourceRotation) = setupModeFrame.transform.AsPose();
                     Pose pose = new Pose
                     {
-                        position = sourcePose.position,
-                        rotation = Quaternion.Euler(0, sourcePose.rotation.eulerAngles.y - 90, 0)
+                        position = sourcePosition,
+                        rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0)
                     };
 
                     //Debug.Log(sourcePose);
@@ -183,10 +183,8 @@ namespace Iviz.Controllers
             get => base.PinRootMarker;
             set
             {
-                //Debug.Log("pin changed");
                 if (value && !base.PinRootMarker)
                 {
-                    //Debug.Log("pin changed to true!");
                     ResetAnchor(true);
                 }
 
@@ -209,6 +207,8 @@ namespace Iviz.Controllers
                 arCamera = GameObject.Find("AR Camera").GetComponent<Camera>();
             }
 
+            Settings.ARCamera = arCamera;
+
             if (arSessionOrigin == null)
             {
                 arSessionOrigin = GameObject.Find("AR Session Origin").GetComponent<ARSessionOrigin>();
@@ -227,9 +227,6 @@ namespace Iviz.Controllers
 
             cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
 
-            //resource = ResourcePool.Rent<ARMarkerResource>(Resource.Displays.ARMarkerResource);
-            //resource.Parent = node.transform;
-
             Config = new ARConfiguration();
 
             if (setupModeFrame == null)
@@ -242,7 +239,6 @@ namespace Iviz.Controllers
             setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
 
             ArSet.Clicked += ArSetOnClicked;
-            //ArSet.State = true;
             ArSet.Visible = false;
             ArInfoPanel.SetActive(true);
 
@@ -430,6 +426,7 @@ namespace Iviz.Controllers
 
         bool IScreenshotManager.Started => true;
 
+        [NotNull]
         IEnumerable<(int width, int height)> IScreenshotManager.GetResolutions()
         {
             /*
@@ -530,7 +527,8 @@ namespace Iviz.Controllers
 
             ArSet.Visible = false;
             ArInfoPanel.SetActive(false);
-            
+
+            Settings.ARCamera = null;
             Settings.ScreenshotManager = null;
         }
     }

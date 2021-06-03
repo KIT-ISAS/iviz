@@ -82,7 +82,7 @@ namespace Iviz.Controllers
                     parentConnector = ResourcePool.RentDisplay<LineConnector>(Transform);
                     parentConnector.A = Transform;
 
-                    parentConnector.B = Transform.parent.SafeNull() ?? TfListener.RootFrame.Transform;
+                    parentConnector.B = Transform.parent.CheckedNull() ?? TfListener.RootFrame.Transform;
 
                     parentConnector.name = "[Connector]";
                     parentConnector.LineWidth = FrameSize / 20;
@@ -369,7 +369,7 @@ namespace Iviz.Controllers
 
             if (HasParentConnector)
             {
-                ParentConnector.B = Transform.parent.SafeNull() ?? TfListener.OriginFrame.Transform;
+                ParentConnector.B = Transform.parent.CheckedNull() ?? TfListener.OriginFrame.Transform;
             }
 
             return true;

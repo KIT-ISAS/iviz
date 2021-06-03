@@ -118,6 +118,11 @@ namespace Iviz.Controllers
         public void Dispose()
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
+            ConnectionManager.Connection.UnadvertiseService(ModelServer.ModelServiceName);
+            ConnectionManager.Connection.UnadvertiseService(ModelServer.TextureServiceName);
+            ConnectionManager.Connection.UnadvertiseService(ModelServer.FileServiceName);
+            ConnectionManager.Connection.UnadvertiseService(ModelServer.SdfServiceName);
+
             modelServer?.Dispose();
             modelServer = null;
 #endif

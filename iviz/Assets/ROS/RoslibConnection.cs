@@ -25,6 +25,8 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection
     {
+        internal const int InvalidId = -1;
+
         static readonly Action<string> LogInternalIfHololens =
             Settings.IsHololens ? (Action<string>) Core.Logger.Internal : Logger.LogDebug;
 
@@ -505,7 +507,7 @@ namespace Iviz.Ros
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
                 advertisedTopic.Add(advertiser);
-                advertiser.SetId(advertisedTopic.Id);
+                advertiser.Id = advertisedTopic.Id;
                 return;
             }
 
@@ -527,13 +529,13 @@ namespace Iviz.Ros
 
             else
             {
-                id = -1;
+                id = InvalidId;
             }
 
             newAdvertisedTopic.Id = id;
             publishersByTopic.Add(advertiser.Topic, newAdvertisedTopic);
             newAdvertisedTopic.Add(advertiser);
-            advertiser.SetId(newAdvertisedTopic.Id);
+            advertiser.Id = newAdvertisedTopic.Id;
         }
 
         public void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
@@ -644,14 +646,9 @@ namespace Iviz.Ros
 
         internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] in T msg) where T : IMessage
         {
-            if (advertiser == null)
+            if (advertiser.Id == InvalidId)
             {
-                throw new ArgumentNullException(nameof(advertiser));
-            }
-
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
+                return;
             }
 
             if (connectionTs.IsCancellationRequested)
@@ -659,9 +656,29 @@ namespace Iviz.Ros
                 return;
             }
 
+            if (msg == null)
+            {
+                throw new ArgumentNullException(nameof(msg));
+            }
+
             try
             {
-                PublishImpl(advertiser, msg);
+                msg.RosValidate();
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error($"{this}: Rejecting invalid message: ", e);
+                return;
+            }
+
+            try
+            {
+                if (publishers.TryGetValue(advertiser.Id, out var basePublisher) &&
+                    basePublisher.NumSubscribers > 0 &&
+                    basePublisher is IRosPublisher<T> publisher)
+                {
+                    publisher.Publish(msg);
+                }
             }
             catch (Exception e)
             {
@@ -669,23 +686,9 @@ namespace Iviz.Ros
             }
         }
 
-        void PublishImpl<T>([NotNull] ISender advertiser, in T msg) where T : IMessage
-        {
-            if (advertiser.Id == -1)
-            {
-                return;
-            }
-
-            if (publishers.TryGetValue(advertiser.Id, out var basePublisher) &&
-                basePublisher is IRosPublisher<T> publisher)
-            {
-                publisher.Publish(msg);
-            }
-        }
-
         internal bool TryGetResolvedTopicName([NotNull] ISender advertiser, [CanBeNull] out string topicName)
         {
-            if (advertiser.Id == -1 || !publishers.TryGetValue(advertiser.Id, out var basePublisher))
+            if (advertiser.Id == InvalidId || !publishers.TryGetValue(advertiser.Id, out var basePublisher))
             {
                 topicName = default;
                 return false;
@@ -763,6 +766,9 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseImpl(advertiser, token);
                 }
+                catch (OperationCanceledException)
+                {
+                }
                 catch (Exception e)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unadvertise()", e);
@@ -784,7 +790,7 @@ namespace Iviz.Ros
             }
 
             publishersByTopic.Remove(advertiser.Topic);
-            if (advertiser.Id != -1)
+            if (advertiser.Id != InvalidId)
             {
                 publishers[advertiser.Id] = null;
             }
@@ -810,6 +816,9 @@ namespace Iviz.Ros
                 {
                     await UnsubscribeImpl(subscriber, token);
                 }
+                catch (OperationCanceledException)
+                {
+                }
                 catch (Exception e)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unsubscribe()", e);
@@ -833,6 +842,47 @@ namespace Iviz.Ros
                     await subscribedTopic.UnsubscribeAsync(token);
                 }
             }
+        }
+
+        public void UnadvertiseService([NotNull] string service)
+        {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
+            CancellationToken token = connectionTs.Token;
+            AddTask(async () =>
+            {
+                try
+                {
+                    await UnadvertiseServiceImpl(service, token);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
+                }
+            });
+        }
+
+        async Task UnadvertiseServiceImpl([NotNull] string serviceName, CancellationToken token)
+        {
+            if (!servicesByTopic.TryGetValue(serviceName, out var baseService))
+            {
+                return;
+            }
+
+            Core.Logger.Info($"Unadvertising service <b>{serviceName}</b>.");
+
+            if (Connected)
+            {
+                await baseService.UnadvertiseAsync(Client, token);
+            }
+
+            servicesByTopic.Remove(serviceName);
         }
 
         [NotNull]
@@ -1053,15 +1103,11 @@ namespace Iviz.Ros
             return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : default;
         }
 
-        public int GetNumSubscribers([NotNull] string topic)
+        internal int GetNumSubscribers([NotNull] ISender sender)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            publishersByTopic.TryGetValue(topic, out var advertisedTopic);
-            return advertisedTopic?.Publisher?.NumSubscribers ?? 0;
+            return sender.Id != InvalidId && publishers.TryGetValue(sender.Id, out var basePublisher)
+                ? basePublisher.NumSubscribers
+                : 0;
         }
 
         internal override void Stop()
@@ -1103,7 +1149,7 @@ namespace Iviz.Ros
                     id = value;
                     foreach (var sender in senders)
                     {
-                        sender.SetId(value);
+                        sender.Id = value;
                     }
                 }
             }
@@ -1154,7 +1200,7 @@ namespace Iviz.Ros
 
             public void Invalidate()
             {
-                Id = -1;
+                Id = InvalidId;
                 Publisher = null;
             }
 
@@ -1314,6 +1360,7 @@ namespace Iviz.Ros
         interface IAdvertisedService
         {
             Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
+            Task UnadvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
         }
 
         sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
@@ -1335,10 +1382,20 @@ namespace Iviz.Ros
             public async Task AdvertiseAsync(RosClient client, CancellationToken token)
             {
                 token.ThrowIfCancellationRequested();
-                var fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
+                string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
                 if (client != null)
                 {
                     await client.AdvertiseServiceAsync<T>(fullService, CallbackImpl, token);
+                }
+            }
+
+            public async Task UnadvertiseAsync(RosClient client, CancellationToken token)
+            {
+                token.ThrowIfCancellationRequested();
+                string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
+                if (client != null)
+                {
+                    await client.UnadvertiseServiceAsync(fullService, token);
                 }
             }
 

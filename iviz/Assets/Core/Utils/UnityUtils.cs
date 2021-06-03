@@ -490,7 +490,7 @@ namespace Iviz.Core
         }
 
         [CanBeNull]
-        public static T SafeNull<T>(this T o) where T : UnityEngine.Object => o != null ? o : null;
+        public static T CheckedNull<T>([CanBeNull] this T o) where T : UnityEngine.Object => o != null ? o : null;
         public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
         public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
         public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);

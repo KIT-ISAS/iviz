@@ -55,6 +55,8 @@ namespace Iviz.Controllers
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
+        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
+        
         public enum RootMover
         {
             Anchor,
@@ -65,7 +67,6 @@ namespace Iviz.Controllers
 
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
 
-        //static ARSessionInfo savedSessionInfo;
         static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
         static AnchorToggleButton ShowARJoystickButton => ModuleListPanel.Instance.ShowARJoystickButton;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
@@ -83,10 +84,11 @@ namespace Iviz.Controllers
 
         public Sender<PoseStamped> HeadSender { get; private set; }
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
-
-
+        
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
+        
+        [NotNull] public string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
 
         public ARConfiguration Config
         {
@@ -252,8 +254,9 @@ namespace Iviz.Controllers
             }
             else
             {
-                Vector3 forward = Settings.MainCameraTransform.forward;
-                Vector3 cameraPosition = Settings.MainCameraTransform.position + forward;
+                var arCameraTransform = ARCamera.transform;
+                Vector3 forward = arCameraTransform.forward;
+                Vector3 cameraPosition = arCameraTransform.position + forward;
                 var q1 = Pose.identity.WithPosition(cameraPosition);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-cameraPosition);
@@ -284,7 +287,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                float rotY = Settings.MainCameraTransform.rotation.eulerAngles.y;
+                float rotY = ARCamera.transform.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
                 (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
                 deltaWorldPosition = cameraRotation * new Vector3(joyX, joyZ, joyY);
@@ -315,7 +318,7 @@ namespace Iviz.Controllers
             set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
         }
 
-        [NotNull] public TfFrame Frame => TfListener.Instance.FixedFrame;
+        [NotNull] public TfFrame Frame => TfListener.GetOrCreateFrame(CameraFrameId);
 
         public static event Action<bool> ARModeChanged;
 
@@ -373,22 +376,28 @@ namespace Iviz.Controllers
 
         public virtual void Update()
         {
-            HeadSender.Publish(new PoseStamped(
-                new Header(headSeq++, time.Now(), TfListener.FixedFrameId ?? ""),
-                TfListener.RelativePoseToFixedFrame(Settings.MainCameraTransform.AsPose()).Unity2RosPose()
-                    .ToCameraFrame()
-            ));
+            if (!ConnectionManager.IsConnected)
+            {
+                return;
+            }
+            
+            var unityCameraPose = ARCamera.transform.AsPose();
+            var relativePose = TfListener.RelativePoseToFixedFrame(unityCameraPose).Unity2RosPose();
+            var poseStamped = new PoseStamped((headSeq++, TfListener.FixedFrameId), relativePose.ToCameraFrame());
+            HeadSender.Publish(poseStamped);
+            
+            TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
         }
 
 
         uint markerSeq;
 
-        void OnMarkerDetected(Screenshot screenshot, IEnumerable<IMarkerCorners> markers)
+        void OnMarkerDetected(Screenshot screenshot, [NotNull] IEnumerable<IMarkerCorners> markers)
         {
             var array = markers.Select(marker => new DetectedARMarker
             {
                 MarkerType = marker is ArucoMarkerCorners ? ARMarkerType.Aruco : ARMarkerType.QrCode,
-                Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId ?? ""),
+                Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
                 ArucoId = marker is ArucoMarkerCorners aruco ? (uint) aruco.Id : 0,
                 QrCode = marker is QrMarkerCorners qr ? qr.Code : "",
                 CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose).Unity2RosPose()
@@ -398,7 +407,7 @@ namespace Iviz.Controllers
             }).ToArray();
 
             MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
-            
+
             foreach (var marker in array)
             {
                 if (marker.MarkerType == ARMarkerType.QrCode && marker.QrCode.HasPrefix(ARMarkerExecutor.Prefix))

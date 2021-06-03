@@ -98,8 +98,8 @@ namespace Iviz.Displays
 
         void OnPointerMove(in Ray pointerRay)
         {
-            Transform mParent = sourceTransform.SafeNull()
-                                ?? Transform.parent.SafeNull()
+            Transform mParent = sourceTransform.CheckedNull()
+                                ?? Transform.parent.CheckedNull()
                                 ?? Transform;
             Transform mTarget = TargetTransform;
 

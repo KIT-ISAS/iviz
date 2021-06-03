@@ -120,7 +120,7 @@ namespace Iviz.App
         }
 
         [NotNull]
-        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.SafeNull() ??
+        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.CheckedNull() ??
                                                        throw new InvalidOperationException(
                                                            "GuiInputModule has not been started!");
 
@@ -157,7 +157,7 @@ namespace Iviz.App
 
         [NotNull]
         public static ModuleListPanel Instance =>
-            instance.SafeNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
+            instance.CheckedNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
 
         public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;

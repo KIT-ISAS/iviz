@@ -43,9 +43,9 @@ namespace Iviz.Ros
 
         public string Topic { get; }
         public string Type { get; }
-        public int Id { get; private set; }
+        public int Id { get; internal set; }
         public RosSenderStats Stats { get; private set; }
-        public int NumSubscribers => Connection.GetNumSubscribers(Topic);
+        public int NumSubscribers { get; private set; }
 
         void ISender.Publish(IMessage msg)
         {
@@ -55,38 +55,17 @@ namespace Iviz.Ros
         public void Stop()
         {
             GameThread.EverySecond -= UpdateStats;
-            //Logger.Info($"{this}: Unadvertising");
             Connection.Unadvertise(this);
-        }
-
-        public void SetId(int id)
-        {
-            Id = id;
         }
 
         public void Publish([NotNull] in T msg)
         {
-            try
-            {
-                msg.RosValidate();
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"{this}: Rejecting invalid message: " + e.Message);
-                return;
-            }
-
-
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
+            Connection.Publish(this, msg);
 
             totalMsgCounter++;
             lastMsgCounter++;
             lastMsgBytes += msg.RosMessageLength;
 
-            Connection.Publish(this, msg);
         }
 
         public void Reset()
@@ -109,6 +88,8 @@ namespace Iviz.Ros
 
             lastMsgBytes = 0;
             lastMsgCounter = 0;
+
+            NumSubscribers = Connection.GetNumSubscribers(this);
         }
 
         public bool TryGetResolvedTopicName([NotNull] out string topicName)

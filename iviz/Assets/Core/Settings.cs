@@ -155,15 +155,18 @@ namespace Iviz.Core
         {
             get => mainCamera != null
                 ? mainCamera
-                : mainCamera = (GameObject.FindWithTag("MainCamera") ?? GameObject.Find("MainCamera"))
+                : mainCamera = (GameObject.FindWithTag("MainCamera").CheckedNull() 
+                                ?? GameObject.Find("MainCamera").CheckedNull()
+                                ?? throw new NullReferenceException("Failed to find camera!"))
                     .GetComponent<Camera>();
             set
             {
-                mainCamera = value != null ? value : throw new NullReferenceException("Camera cannot be null!");
+                mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");
                 mainCameraTransform = value.transform;
             }
         }
-
+        
+        [CanBeNull] public static Camera ARCamera { get; set; }
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
         [CanBeNull] public static IScreenshotManager ScreenshotManager { get; set; }
 

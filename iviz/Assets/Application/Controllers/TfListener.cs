@@ -105,11 +105,10 @@ namespace Iviz.Controllers
             FixedFrame = MapFrame;
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
-            FixedFrameId = "";
             GameThread.LateEveryFrame += LateUpdate;
         }
 
-        [CanBeNull]
+        [NotNull]
         public static string FixedFrameId
         {
             get => Instance.FixedFrame.Id;
@@ -536,7 +535,7 @@ namespace Iviz.Controllers
             (
                 new[]
                 {
-                    new TransformStamped((tfSeq++, parentFrame), childFrame ?? "", rosTransform)
+                    new TransformStamped((tfSeq++, parentFrame), childFrame ?? FixedFrameId, rosTransform)
                 }
             );
 

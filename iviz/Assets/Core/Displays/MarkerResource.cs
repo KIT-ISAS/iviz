@@ -10,13 +10,15 @@ namespace Iviz.Displays
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
         [SerializeField, CanBeNull] BoxCollider boxCollider;
-
         bool colliderEnabled = true;
+        Transform mTransform;
+        
+        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         protected bool HasBoxCollider => boxCollider != null || TryGetBoxCollider(out boxCollider);
 
-        Transform mTransform;
-        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [ContractAnnotation("=> false, bc:null; => true, bc:notnull")]
+        bool TryGetBoxCollider(out BoxCollider bc) => (bc = GetComponent<BoxCollider>()) != null;
 
         [NotNull]
         protected BoxCollider BoxCollider
@@ -24,16 +26,8 @@ namespace Iviz.Displays
             get => boxCollider != null || TryGetBoxCollider(out boxCollider)
                 ? boxCollider
                 : throw new NullReferenceException("This asset has no box collider!");
-            set => boxCollider = value != null
-                ? value
-                : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
-        }
-
-        [ContractAnnotation("=> false, bc:null; => true, bc:notnull")]
-        bool TryGetBoxCollider(out BoxCollider bc)
-        {
-            bc = GetComponent<BoxCollider>();
-            return bc != null;
+            set => boxCollider = value.CheckedNull()
+                                 ?? throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
         }
 
         protected Bounds WorldBounds => BoxCollider.bounds;
@@ -53,12 +47,9 @@ namespace Iviz.Displays
 
         protected virtual void Awake()
         {
-            ColliderEnabled = ColliderEnabled;
         }
 
-        public Bounds? Bounds => HasBoxCollider
-            ? new Bounds(BoxCollider.center, BoxCollider.size)
-            : (Bounds?) null;
+        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : (Bounds?) null;
 
         public bool ColliderEnabled
         {
@@ -92,6 +83,12 @@ namespace Iviz.Displays
 
         public bool TryRaycast(in Vector2 cameraPoint, out Vector3 hit)
         {
+            if (!HasBoxCollider)
+            {
+                hit = default;
+                return false;
+            }
+
             var ray = Settings.MainCamera.ScreenPointToRay(cameraPoint);
             if (BoxCollider.Raycast(ray, out var hitInfo, 1000f))
             {

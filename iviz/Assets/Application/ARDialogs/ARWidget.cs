@@ -20,7 +20,7 @@ namespace Iviz.App.ARDialogs
 
         FrameNode node;
         [NotNull] FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Widget Node");
-        [NotNull] public TfFrame ParentFrame => Node.Parent.SafeNull() ?? TfListener.MapFrame;
+        [NotNull] public TfFrame ParentFrame => Node.Parent.CheckedNull() ?? TfListener.MapFrame;
 
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
