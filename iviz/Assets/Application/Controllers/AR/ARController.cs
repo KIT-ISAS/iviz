@@ -55,7 +55,7 @@ namespace Iviz.Controllers
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
-        [NotNull] static Camera ARCamera => Settings.ARCamera;
+        [NotNull] static Camera ARCamera =>  Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
 
         public enum RootMover
         {
@@ -254,9 +254,9 @@ namespace Iviz.Controllers
             }
             else
             {
-                var arCameraTransform = ARCamera.transform;
-                Vector3 forward = arCameraTransform.forward;
-                Vector3 cameraPosition = arCameraTransform.position + forward;
+                var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+                Vector3 forward = arCameraPose.Multiply(Vector3.forward);
+                Vector3 cameraPosition = arCameraPose.position + forward;
                 var q1 = Pose.identity.WithPosition(cameraPosition);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-cameraPosition);
@@ -287,7 +287,8 @@ namespace Iviz.Controllers
             }
             else
             {
-                float rotY = ARCamera.transform.rotation.eulerAngles.y;
+                var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+                float rotY = arCameraPose.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
                 (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
                 deltaWorldPosition = cameraRotation * new Vector3(joyX, joyZ, joyY);
@@ -381,9 +382,8 @@ namespace Iviz.Controllers
 
         public virtual void Update()
         {
-            var unityCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
-            //Debug.Log("unity camera pose " + unityCameraPose);
-            var relativePose = TfListener.RelativePoseToFixedFrame(unityCameraPose).Unity2RosPose();
+            var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+            var relativePose = TfListener.RelativePoseToFixedFrame(arCameraPose).Unity2RosPose();
             TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
 
             if (!ConnectionManager.IsConnected)
