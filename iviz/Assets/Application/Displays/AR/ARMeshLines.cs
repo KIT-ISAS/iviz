@@ -17,6 +17,10 @@ namespace Iviz.Displays
         readonly List<Vector3> vertices = new List<Vector3>();
         static readonly float White = PointWithColor.FloatFromColorBits(Color.white);
 
+        Transform mTransform;
+        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
+
         [CanBeNull] MeshFilter meshFilter;
         [NotNull] MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
 
@@ -41,8 +45,9 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.RentDisplay<LineResource>(transform);
-            resource.ElementScale = 0.01f;
+            resource = ResourcePool.RentDisplay<LineResource>(TfListener.RootFrame.Transform);
+            resource.ElementScale = 0.001f;
+            resource.Visible = ARController.Instance != null && !ARController.Instance.Visible;
 
             MeshFilter.sharedMesh = new Mesh {name = "AR Mesh"};
 
@@ -55,6 +60,8 @@ namespace Iviz.Displays
             {
                 Logger.Warn("ARMeshLines: No mesh manager found!");
             }
+
+            ARController.ARModeChanged += OnARModeChanged;
         }
 
         void Start()
@@ -62,11 +69,25 @@ namespace Iviz.Displays
             WriteMeshLines();
         }
 
+        void OnARModeChanged(bool value)
+        {
+            resource.Visible = !value;
+        }
+
         void OnManagerChanged(ARMeshesChangedEventArgs args)
         {
             if (args.added.Contains(MeshFilter) || args.updated.Contains(MeshFilter))
             {
                 WriteMeshLines();
+            }
+        }
+
+        void Update()
+        {
+            if (resource.Visible)
+            {
+                var unityPose = ARController.RelativePoseToWorld(Transform.AsPose());
+                resource.Transform.SetPose(unityPose);
             }
         }
 
@@ -122,6 +143,9 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
+            resource.ReturnToPool();
+            ARController.ARModeChanged -= OnARModeChanged;
+
             if (Settings.ARCamera == null)
             {
                 return;
@@ -129,7 +153,6 @@ namespace Iviz.Displays
 
             var manager = Settings.ARCamera.GetComponent<ARMeshManager>();
             manager.meshesChanged -= OnManagerChanged;
-            resource.ReturnToPool();
         }
 
         static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)

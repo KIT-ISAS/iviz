@@ -55,8 +55,8 @@ namespace Iviz.Controllers
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
-        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
-        
+        [NotNull] static Camera ARCamera => Settings.ARCamera;
+
         public enum RootMover
         {
             Anchor,
@@ -84,10 +84,10 @@ namespace Iviz.Controllers
 
         public Sender<PoseStamped> HeadSender { get; private set; }
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
-        
+
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
-        
+
         [NotNull] static string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
 
         public ARConfiguration Config
@@ -369,24 +369,30 @@ namespace Iviz.Controllers
 
         public static Pose RelativePoseToWorld(in Pose unityPose)
         {
-            return Instance == null ? unityPose : Instance.WorldPose.Inverse().Multiply(unityPose);
+            if (Instance == null || Instance.Visible)
+            {
+                return unityPose;
+            }
+
+            return Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
         uint headSeq;
 
         public virtual void Update()
         {
+            var unityCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+            //Debug.Log("unity camera pose " + unityCameraPose);
+            var relativePose = TfListener.RelativePoseToFixedFrame(unityCameraPose).Unity2RosPose();
+            TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
+
             if (!ConnectionManager.IsConnected)
             {
                 return;
             }
-            
-            var unityCameraPose = ARCamera.transform.AsPose();
-            var relativePose = TfListener.RelativePoseToFixedFrame(unityCameraPose).Unity2RosPose();
+
             var poseStamped = new PoseStamped((headSeq++, TfListener.FixedFrameId), relativePose.ToCameraFrame());
             HeadSender.Publish(poseStamped);
-            
-            TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
         }
 
 

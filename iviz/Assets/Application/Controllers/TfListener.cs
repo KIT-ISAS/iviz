@@ -10,6 +10,7 @@ using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
+using UnityEngine;
 using Color = UnityEngine.Color;
 using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
@@ -545,6 +546,7 @@ namespace Iviz.Controllers
             }
             else
             {
+                //Debug.Log("ros " + rosTransform);
                 Instance.HandlerNonStatic(msg);
             }
         }
