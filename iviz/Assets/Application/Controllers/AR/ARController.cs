@@ -287,7 +287,7 @@ namespace Iviz.Controllers
                 float rotY = Settings.MainCameraTransform.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
                 (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
-                deltaWorldPosition = cameraRotation * new Vector3(joyY, joyZ, joyX);
+                deltaWorldPosition = cameraRotation * new Vector3(joyX, joyZ, joyY);
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);

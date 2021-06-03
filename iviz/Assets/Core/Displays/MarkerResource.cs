@@ -13,7 +13,7 @@ namespace Iviz.Displays
 
         bool colliderEnabled = true;
 
-        protected bool HasBoxCollider => boxCollider != null;
+        protected bool HasBoxCollider => boxCollider != null || TryGetBoxCollider(out boxCollider);
 
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -21,13 +21,19 @@ namespace Iviz.Displays
         [NotNull]
         protected BoxCollider BoxCollider
         {
-            get => boxCollider != null
+            get => boxCollider != null || TryGetBoxCollider(out boxCollider)
                 ? boxCollider
-                : (boxCollider = GetComponent<BoxCollider>() ??
-                                 throw new NullReferenceException("This asset has no box collider!"));
+                : throw new NullReferenceException("This asset has no box collider!");
             set => boxCollider = value != null
                 ? value
                 : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
+        }
+
+        [ContractAnnotation("=> false, bc:null; => true, bc:notnull")]
+        bool TryGetBoxCollider(out BoxCollider bc)
+        {
+            bc = GetComponent<BoxCollider>();
+            return bc != null;
         }
 
         protected Bounds WorldBounds => BoxCollider.bounds;
@@ -50,7 +56,9 @@ namespace Iviz.Displays
             ColliderEnabled = ColliderEnabled;
         }
 
-        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : (Bounds?) null;
+        public Bounds? Bounds => HasBoxCollider
+            ? new Bounds(BoxCollider.center, BoxCollider.size)
+            : (Bounds?) null;
 
         public bool ColliderEnabled
         {

@@ -88,7 +88,7 @@ namespace Iviz.Controllers
             numWarnings = 0;
 
             description.Clear();
-            description.Append("<color=#000080ff><b>** Control '").Append(msg.Name).Append("'</b></color>").AppendLine();
+            description.Append("<color=#000080ff><font=Bold>* Control '").Append(msg.Name).Append("'</font></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")

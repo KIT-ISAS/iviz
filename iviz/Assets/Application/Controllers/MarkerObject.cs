@@ -208,9 +208,9 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<color=#800000ff><b>* ").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/")
+            description.Append("<color=#800000ff><font=Bold>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/")
                 .Append(id.Id)
-                .Append("</b></color>").AppendLine();
+                .Append("</font></color>").AppendLine();
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
             if (msg.Type() == MarkerType.MeshResource)

@@ -229,9 +229,9 @@ namespace Iviz.App
             Initialize();
 
             str.Length = 0;
-            
+
             new TfNode(TfListener.OriginFrame).Write(str);
-            
+
             str.AppendLine().AppendLine();
 
             tfText.SetText(str);
@@ -246,13 +246,13 @@ namespace Iviz.App
 
         public void OnGotoClicked()
         {
-            if (SelectedFrame != null)
+            if (SelectedFrame == null)
             {
-                TfListener.Instance.HighlightFrame(SelectedFrame.Id);
-                ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.AbsoluteUnityPose.position);
+                return;
             }
 
-            Close?.Invoke();
+            TfListener.Instance.HighlightFrame(SelectedFrame.Id);
+            ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.AbsoluteUnityPose.position);
         }
 
         public void OnTrailClicked()

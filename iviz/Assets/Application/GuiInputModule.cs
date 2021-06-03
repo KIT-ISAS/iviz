@@ -65,7 +65,7 @@ namespace Iviz.App
 
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
-        
+
         public static GuiInputModule Instance { get; private set; }
 
         [NotNull] static Camera MainCamera => Settings.MainCamera;
@@ -375,6 +375,7 @@ namespace Iviz.App
 
             QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
 
+
             if (lookAtAnimationStart != null)
             {
                 const float animationTime = 0.3f;
@@ -392,6 +393,7 @@ namespace Iviz.App
                     return;
                 }
             }
+
 
             //Debug.Log(QualitySettings.shadowDistance);
 
@@ -417,7 +419,7 @@ namespace Iviz.App
                     if (!prevPointerDown)
                     {
                         pointerIsOnGui = IsPointerOnGui(pointerPosition) ||
-                                       altPointerIsDown && IsPointerOnGui(altPointerPosition);
+                                         altPointerIsDown && IsPointerOnGui(altPointerPosition);
                         pointerDownTime = Time.time;
                         pointerDownStart = Input.GetTouch(0).position;
                     }
@@ -432,8 +434,7 @@ namespace Iviz.App
                     }
                 }
             }
-
-            if (!Settings.IsVR)
+            else if (!Settings.IsVR)
             {
                 pointerIsDown = Input.GetMouseButton(1);
 
@@ -460,7 +461,7 @@ namespace Iviz.App
                 }
             }
 
-            if (!Settings.IsVR)
+            if (!Settings.IsVR) // VR manages its own dragging
             {
                 if (!pointerIsDown)
                 {

@@ -27,6 +27,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            ResetPanelPosition();
+            
             if (Listener == null)
             {
                 throw new InvalidOperationException("Cannot setup panel without a listener!");

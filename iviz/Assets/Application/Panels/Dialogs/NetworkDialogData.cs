@@ -19,6 +19,7 @@ namespace Iviz.App
         
         public override void SetupPanel()
         {
+            ResetPanelPosition();
             panel.Close.Clicked += Close;
             UpdatePanel();
         }
@@ -56,7 +57,7 @@ namespace Iviz.App
 
             var masterApi = client.RosMasterClient;
             builder.Append("<font=Bold>== Master</font> (").Append(masterApi.TotalRequests.ToString("N0"))
-                .Append(" reqs | Ping ")
+                .Append(" queries | Ping ")
                 .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
                 .AppendLine();
 

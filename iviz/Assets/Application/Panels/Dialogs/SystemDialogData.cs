@@ -43,6 +43,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            ResetPanelPosition();
+            
             panel.Close.Clicked += Close;
             panel.LinkClicked += LinkClicked;
             panel.HostnameEndEdit += (i, _) => UpdateAliasesLink(i);

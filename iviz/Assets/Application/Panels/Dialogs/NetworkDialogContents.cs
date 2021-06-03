@@ -7,7 +7,6 @@ namespace Iviz.App
     public sealed class NetworkDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
-        //[SerializeField] Text text = null;
         [SerializeField] TMP_Text text = null;
 
         public TrashButtonWidget Close => close;

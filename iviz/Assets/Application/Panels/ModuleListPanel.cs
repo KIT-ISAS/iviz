@@ -77,7 +77,7 @@ namespace Iviz.App
         TwistJoystick twistJoystick = null;
 
         [SerializeField] ARJoystick arJoystick = null;
-        
+
         [SerializeField] Canvas contentCanvas;
         [SerializeField] GameObject moduleListCanvas;
         [SerializeField] GameObject dataPanelCanvas;
@@ -124,6 +124,18 @@ namespace Iviz.App
                                                        throw new InvalidOperationException(
                                                            "GuiInputModule has not been started!");
 
+        bool dialogIsDragged;
+
+        public bool DialogIsDragged
+        {
+            get => dialogIsDragged;
+            set
+            {
+                dialogIsDragged = value;
+                moduleListCanvas.gameObject.SetActive(!value);
+                dataPanelCanvas.gameObject.SetActive(!value);
+            }
+        }
 
         public ModuleListPanel()
         {

@@ -26,6 +26,7 @@ namespace Iviz.App
             {
                 StartedDragging?.Invoke();
                 isDragging = true;
+                ModuleListPanel.Instance.DialogIsDragged = true;
             }
 
             if (targetTransform != null)

@@ -128,7 +128,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Clear();
-            description.Append("<color=blue><b>**** InteractiveMarker '").Append(msg.Name).Append("'</b></color>")
+            description.Append("<color=blue><font=Bold>** InteractiveMarker '").Append(msg.Name).Append("'</font></color>")
                 .AppendLine();
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")

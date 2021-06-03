@@ -171,6 +171,7 @@ namespace Iviz.App
             selectedDialogData.Panel.ClearSubscribers();
             selectedDialogData = null;
             Active = false;
+            ModuleListPanel.Instance.DialogIsDragged = false;
         }
 
 

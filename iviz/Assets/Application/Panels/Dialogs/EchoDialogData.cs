@@ -142,6 +142,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            ResetPanelPosition();
+
             dialog.Close.Clicked += Close;
             dialog.Topics.ValueChanged += (i, _) =>
             {
