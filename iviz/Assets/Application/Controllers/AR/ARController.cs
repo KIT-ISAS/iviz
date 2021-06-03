@@ -88,7 +88,7 @@ namespace Iviz.Controllers
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
         
-        [NotNull] public string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
+        [NotNull] static string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
 
         public ARConfiguration Config
         {

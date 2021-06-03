@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Iviz.Core;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -67,7 +68,8 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)]        
         public bool HasNaN() => f.HasNaN();
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [NotNull]
         public override string ToString()
         {
             return $"[x={f.x} y={f.y} z={f.z} i={Intensity} c={Color}]";

@@ -464,7 +464,7 @@ namespace Iviz.Controllers
                 outputFormat = TextureFormat.RGB24,
             };
 
-            TaskCompletionSource<Screenshot> task = new TaskCompletionSource<Screenshot>();
+            var task = new TaskCompletionSource<Screenshot>();
 
             int width = image.width;
             int height = image.height;
@@ -489,9 +489,6 @@ namespace Iviz.Controllers
                         float fx, fy, cx, cy;
                         if (cameraManager.TryGetIntrinsics(out var intrinsics))
                         {
-                            //Logger.Debug("> " + intrinsics.resolution.x + " " + intrinsics.resolution.y); 
-                            //Logger.Debug("< " + width + " " + height); 
-                            //Logger.Debug("- " + intrinsics.principalPoint.x + " " + intrinsics.principalPoint.y); 
                             (fx, fy, cx, cy) =
                                 (intrinsics.focalLength.x, intrinsics.focalLength.y,
                                     intrinsics.principalPoint.x, intrinsics.principalPoint.y);

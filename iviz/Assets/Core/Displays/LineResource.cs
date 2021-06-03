@@ -161,7 +161,7 @@ namespace Iviz.Displays
         /// and returns true if alpha is needed, false if not, or null to request a manual check.
         /// </summary>
         /// <param name="lineBuffer">The line list to be set</param>
-        public delegate bool? DirectLineSetter(NativeList<float4x2> lineBuffer);
+        public delegate bool? DirectLineSetter([NotNull] NativeList<float4x2> lineBuffer);
 
         /// <summary>
         /// Exposes the line list directly for manual setting.

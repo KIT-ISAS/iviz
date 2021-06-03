@@ -697,12 +697,19 @@ namespace Iviz.Controllers
             }
 
             ModuleData moduleData;
-            if ((moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) != null
-                && moduleData.ModuleType != ModuleType.Robot)
+            if ((moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) == null)
+            {
+                srv.Response.Success = true;
+                srv.Response.Message = $"WW There is no node with name '{id}'";
+                return;
+            }            
+            
+            if (moduleData.ModuleType != ModuleType.Robot)
             {
                 srv.Response.Success = false;
                 srv.Response.Message =
                     $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                return;
             }
 
             using (SemaphoreSlim signal = new SemaphoreSlim(0))
@@ -759,7 +766,7 @@ namespace Iviz.Controllers
                 moduleData = null;
             }
 
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
@@ -809,13 +816,13 @@ namespace Iviz.Controllers
             if (Math.Abs(srv.Request.Dialog.Scale) < 1e-8)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "Scale is 0";
+                srv.Response.Message = "Cannot launch dialog with scale 0";
                 return;
             }
 
             Feedback feedback = new Feedback();
             bool overrideExpired = false;
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
