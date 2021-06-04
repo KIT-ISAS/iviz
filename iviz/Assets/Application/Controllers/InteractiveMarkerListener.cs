@@ -21,7 +21,7 @@ namespace Iviz.Controllers
     {
         const string FeedbackFormatStr = "{0}/feedback";
         const string UpdateFullFormatStr = "{0}/update_full";
-        
+
         readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
 
         readonly Dictionary<string, InteractiveMarkerObject> interactiveMarkers =
@@ -84,7 +84,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public bool Interactable
         {
             get => interactable;
@@ -253,7 +253,11 @@ namespace Iviz.Controllers
 
         void HandlerUpdateFull([NotNull] InteractiveMarkerInit msg)
         {
-            msg.Markers.ForEach(CreateInteractiveMarker);
+            foreach (var marker in msg.Markers)
+            {
+                CreateInteractiveMarker(marker);
+            }
+
             FullListener.Suspend();
         }
 

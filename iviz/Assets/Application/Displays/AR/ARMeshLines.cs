@@ -102,29 +102,33 @@ namespace Iviz.Displays
             mesh.GetVertices(vertices);
 
             var topology = mesh.GetTopology(0);
+            int[] mIndices = indices.ExtractArray();
+            Vector3[] mVertices = vertices.ExtractArray();
+
             resource.SetDirect(DirectLineSetter);
 
             bool? DirectLineSetter(NativeList<float4x2> lineBuffer)
             {
-                lineBuffer.Resize(indices.Count);
+                int count = indices.Count;
+                lineBuffer.Resize(count);
                 switch (topology)
                 {
                     case MeshTopology.Triangles:
-                        for (int i = 0; i < indices.Count; i += 3)
+                        for (int i = 0; i < count; i += 3)
                         {
-                            Write(ref lineBuffer[i], vertices[indices[i]], vertices[indices[i + 1]]);
-                            Write(ref lineBuffer[i + 1], vertices[indices[i + 1]], vertices[indices[i + 2]]);
-                            Write(ref lineBuffer[i + 2], vertices[indices[i + 2]], vertices[indices[i]]);
+                            Write(ref lineBuffer[i], mVertices[mIndices[i]], mVertices[mIndices[i + 1]]);
+                            Write(ref lineBuffer[i + 1], mVertices[mIndices[i + 1]], mVertices[mIndices[i + 2]]);
+                            Write(ref lineBuffer[i + 2], mVertices[mIndices[i + 2]], mVertices[mIndices[i]]);
                         }
 
                         break;
                     case MeshTopology.Quads:
-                        for (int i = 0; i < indices.Count; i += 4)
+                        for (int i = 0; i < count; i += 4)
                         {
-                            Write(ref lineBuffer[i], vertices[indices[i]], vertices[indices[i + 1]]);
-                            Write(ref lineBuffer[i + 1], vertices[indices[i + 1]], vertices[indices[i + 2]]);
-                            Write(ref lineBuffer[i + 2], vertices[indices[i + 2]], vertices[indices[i + 3]]);
-                            Write(ref lineBuffer[i + 3], vertices[indices[i + 3]], vertices[indices[i]]);
+                            Write(ref lineBuffer[i], mVertices[mIndices[i]], mVertices[mIndices[i + 1]]);
+                            Write(ref lineBuffer[i + 1], mVertices[mIndices[i + 1]], mVertices[mIndices[i + 2]]);
+                            Write(ref lineBuffer[i + 2], mVertices[mIndices[i + 2]], mVertices[mIndices[i + 3]]);
+                            Write(ref lineBuffer[i + 3], mVertices[mIndices[i + 3]], mVertices[mIndices[i]]);
                         }
 
                         break;

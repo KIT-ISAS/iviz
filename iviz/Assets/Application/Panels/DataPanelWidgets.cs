@@ -19,7 +19,7 @@ namespace Iviz.App
         public TrashButtonWidget AddCloseButton()
         {
             GameObject o = Resource.Widgets.CloseButton.Instantiate(nonstatics.transform);
-            RectTransform oTransform = (RectTransform)o.transform;
+            RectTransform oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
@@ -28,7 +28,7 @@ namespace Iviz.App
         public TrashButtonWidget AddTrashButton()
         {
             GameObject o = Resource.Widgets.TrashButton.Instantiate(nonstatics.transform);
-            RectTransform oTransform = (RectTransform)o.transform;
+            RectTransform oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
@@ -37,7 +37,7 @@ namespace Iviz.App
         public ToggleButtonWidget AddHideButton()
         {
             GameObject o = Resource.Widgets.ToggleButton.Instantiate(nonstatics.transform);
-            RectTransform oTransform = (RectTransform)o.transform;
+            RectTransform oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<ToggleButtonWidget>();
@@ -46,16 +46,17 @@ namespace Iviz.App
         public TrashButtonWidget AddResetButton()
         {
             GameObject o = Resource.Widgets.ResetButton.Instantiate(nonstatics.transform);
-            RectTransform oTransform = (RectTransform)o.transform;
+            RectTransform oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
 
 
+        [NotNull]
         GameObject AddToBottom([NotNull] GameObject o)
         {
-            RectTransform oTransform = (RectTransform)o.transform;
+            RectTransform oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, -y);
             y += oTransform.rect.height + yOffset;
             o.SetActive(true);
@@ -96,7 +97,7 @@ namespace Iviz.App
             GameObject o = Resource.Widgets.Input.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<InputFieldWidget>().SetLabel(label);
         }
-        
+
         [NotNull]
         public InputFieldWithHintsWidget AddInputFieldWithHints([NotNull] string label)
         {
@@ -159,7 +160,7 @@ namespace Iviz.App
             GameObject o = Resource.Widgets.DataLabel.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<DataLabelWidget>().SetLabel(label);
         }
-        
+
         public SenderWidget AddSender()
         {
             GameObject o = Resource.Widgets.Sender.Instantiate(nonstatics.transform);
@@ -171,7 +172,7 @@ namespace Iviz.App
             GameObject o = Resource.Widgets.Listener.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<ListenerWidget>();
         }
-        
+
         public MarkerWidget AddMarker()
         {
             GameObject o = Resource.Widgets.MarkerWidget.Instantiate(nonstatics.transform);
@@ -187,17 +188,15 @@ namespace Iviz.App
         public void UpdateSize()
         {
             content.GetComponent<RectTransform>().sizeDelta = new Vector2(0, y);
-            content.transform.GetComponentsInChildren<Transform>().
-                Where(t => t.name[0] == '_').
-                ForEach(t =>
-                {
-                    t.gameObject.SetActive(false);
-                    Vector3 absolutePosition = t.transform.position;
-                    t.SetParentLocal(statics.transform);
-                    t.position = absolutePosition;
-                    t.gameObject.SetActive(true);
-                });
+            var staticTransforms = content.transform.GetComponentsInChildren<Transform>().Where(t => t.name[0] == '_');
+            foreach (var t in staticTransforms)
+            {
+                t.gameObject.SetActive(false);
+                Vector3 absolutePosition = t.transform.position;
+                t.SetParentLocal(statics.transform);
+                t.position = absolutePosition;
+                t.gameObject.SetActive(true);
+            }
         }
     }
-
 }

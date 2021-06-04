@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Color32 = UnityEngine.Color32;
 using Mesh = UnityEngine.Mesh;
 
@@ -64,7 +66,7 @@ namespace Iviz.Core
         public static Vector3 Cross(this Vector3 lhs, in Vector3 rhs)
         {
             return new Vector3(
-                lhs.y * rhs.z - lhs.z * rhs.y, 
+                lhs.y * rhs.z - lhs.z * rhs.y,
                 lhs.z * rhs.x - lhs.x * rhs.z,
                 lhs.x * rhs.y - lhs.y * rhs.x);
         }
@@ -191,7 +193,7 @@ namespace Iviz.Core
                     throw new IndexOutOfRangeException("Invalid column index!");
             }
         }
-        
+
         public static Pose Lerp(this Pose p, in Pose o, float t)
         {
             return new Pose(
@@ -216,35 +218,6 @@ namespace Iviz.Core
             );
         }
 
-        public static void ForEach<T>([NotNull] this IEnumerable<T> col, Action<T> action)
-        {
-            foreach (var item in col)
-            {
-                action(item);
-            }
-        }
-
-        public static void ForEach<T>([NotNull] this T[] col, Action<T> action)
-        {
-            foreach (var t in col)
-            {
-                action(t);
-            }
-        }
-
-        public static bool Any<T>([NotNull] this List<T> ts, Predicate<T> predicate)
-        {
-            foreach (var t in ts)
-            {
-                if (predicate(t))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)
         {
             return new ArraySegment<T>(ts);
@@ -255,51 +228,76 @@ namespace Iviz.Core
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }
 
-        public static void SetVertices([NotNull] this Mesh mesh, Rent<Vector3> ps)
+        static readonly Plane[] PlaneCache = new Plane[6];
+
+        public static bool IsVisibleFromMainCamera(this Bounds bounds)
         {
-            mesh.SetVertices(ps.Array, 0, ps.Length);
+            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
+            return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
-        public static void SetNormals([NotNull] this Mesh mesh, Rent<Vector3> ps)
+        [CanBeNull]
+        public static T CheckedNull<T>([CanBeNull] this T o) where T : UnityEngine.Object => o != null ? o : null;
+
+        public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
+        public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
+        public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
+        public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
+        public static Vector3 WithY(this Vector3 c, float y) => new Vector3(c.x, y, c.z);
+
+        public static bool IsUsable(this Pose pose)
         {
-            mesh.SetNormals(ps.Array, 0, ps.Length);
+            const int maxPoseMagnitude = 100000;
+            return pose.position.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
-        public static void SetTangents([NotNull] this Mesh mesh, Rent<Vector4> ps)
+        [ContractAnnotation("=> false, t:null; => true, t:notnull")]
+        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, [CanBeNull] out T t)
         {
-            mesh.SetTangents(ps.Array, 0, ps.Length);
+            using (var enumerator = enumerable.GetEnumerator())
+            {
+                if (enumerator.MoveNext())
+                {
+                    t = enumerator.Current;
+                    return true;
+                }
+
+                t = default;
+                return false;
+            }
         }
 
-        public static void SetIndices([NotNull] this Mesh mesh, Rent<int> ps, MeshTopology topology, int subMesh)
+        static Func<object, Array> extractArrayFromListTypeFn;
+
+        static Func<object, Array> ExtractArrayFromList
         {
-            mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
+            get
+            {
+                if (extractArrayFromListTypeFn != null)
+                {
+                    return extractArrayFromListTypeFn;
+                }
+
+                var ass = Assembly.GetAssembly(typeof(Mesh));
+                var type = ass.GetType("UnityEngine.NoAllocHelpers");
+                var methodInfo = type.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
+                if (methodInfo == null)
+                {
+                    throw new InvalidOperationException("Failed to retrieve function ExtractArrayFromList");
+                }
+
+                extractArrayFromListTypeFn =
+                    (Func<object, Array>) methodInfo.CreateDelegate(typeof(Func<object, Array>));
+
+                return extractArrayFromListTypeFn;
+            }
         }
 
-        public static void SetColors([NotNull] this Mesh mesh, Rent<Color> ps)
-        {
-            mesh.SetColors(ps.Array, 0, ps.Length);
-        }
+        public static T[] ExtractArray<T>(this List<T> list) => (T[]) ExtractArrayFromList(list);
+    }
 
-        public static void SetColors([NotNull] this Mesh mesh, Rent<Color32> ps)
-        {
-            mesh.SetColors(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector2> ps)
-        {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
-        }
-
-        public static void SetUVs([NotNull] this Mesh mesh, int channel, Rent<Vector3> ps)
-        {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
-        }
-
-        public static void SetTriangles([NotNull] this Mesh mesh, Rent<int> ps, int subMesh = 0)
-        {
-            mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
-        }
-
+    public static class ResourceUtils
+    {
         public static void ReturnToPool<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {
             if (resource != null)
@@ -317,7 +315,10 @@ namespace Iviz.Core
                 ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
             }
         }
+    }
 
+    public static class BoundsUtils
+    {
         [ContractAnnotation("null => null; notnull => notnull")]
         [CanBeNull]
         public static Transform GetTransform([CanBeNull] this IDisplay resource)
@@ -480,43 +481,53 @@ namespace Iviz.Core
 
             return result;
         }
+    }
 
-        static readonly Plane[] PlaneCache = new Plane[6];
-
-        public static bool IsVisibleFromMainCamera(this Bounds bounds)
+    public static class MeshUtils
+    {
+        public static void SetVertices([NotNull] this Mesh mesh, in Rent<Vector3> ps)
         {
-            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
-            return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
+            mesh.SetVertices(ps.Array, 0, ps.Length);
         }
 
-        [CanBeNull]
-        public static T CheckedNull<T>([CanBeNull] this T o) where T : UnityEngine.Object => o != null ? o : null;
-        public static Color WithAlpha(this Color c, float alpha) => new Color(c.r, c.g, c.b, alpha);
-        public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
-        public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
-        public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
-        public static Vector3 WithY(this Vector3 c, float y) => new Vector3(c.x, y, c.z);
-
-        public static bool IsUsable(this Pose pose)
+        public static void SetNormals([NotNull] this Mesh mesh, in Rent<Vector3> ps)
         {
-            const int maxPoseMagnitude = 10000;
-            return pose.position.MaxAbsCoeff() < maxPoseMagnitude;
+            mesh.SetNormals(ps.Array, 0, ps.Length);
         }
 
-        [ContractAnnotation("=> false, t:null; => true, t:notnull")]
-        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, [CanBeNull] out T t)
+        public static void SetTangents([NotNull] this Mesh mesh, in Rent<Vector4> ps)
         {
-            using (var enumerator = enumerable.GetEnumerator())
-            {
-                if (enumerator.MoveNext())
-                {
-                    t = enumerator.Current;
-                    return true;
-                }
+            mesh.SetTangents(ps.Array, 0, ps.Length);
+        }
 
-                t = default;
-                return false;
-            }
+        public static void SetIndices([NotNull] this Mesh mesh, in Rent<int> ps, MeshTopology topology, int subMesh)
+        {
+            mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
+        }
+
+        public static void SetColors([NotNull] this Mesh mesh, in Rent<Color> ps)
+        {
+            mesh.SetColors(ps.Array, 0, ps.Length);
+        }
+
+        public static void SetColors([NotNull] this Mesh mesh, in Rent<Color32> ps)
+        {
+            mesh.SetColors(ps.Array, 0, ps.Length);
+        }
+
+        public static void SetUVs([NotNull] this Mesh mesh, int channel, in Rent<Vector2> ps)
+        {
+            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
+        }
+
+        public static void SetUVs([NotNull] this Mesh mesh, int channel, in Rent<Vector3> ps)
+        {
+            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
+        }
+
+        public static void SetTriangles([NotNull] this Mesh mesh, in Rent<int> ps, int subMesh = 0)
+        {
+            mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
         }
     }
 
@@ -601,7 +612,8 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, in Color color, int id = 0)
+        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, in Color color,
+            int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -664,8 +676,8 @@ namespace Iviz.Core
 
         public static void Deconstruct(this Pose p, out Vector3 position, out Quaternion rotation) =>
             (position, rotation) = (p.position, p.rotation);
-        
-        public static void Deconstruct(this Msgs.GeometryMsgs.TransformStamped p, 
+
+        public static void Deconstruct(this Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
     }

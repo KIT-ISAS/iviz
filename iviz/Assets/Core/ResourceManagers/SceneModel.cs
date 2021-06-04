@@ -213,9 +213,9 @@ namespace Iviz.Displays
 
             BoxCollider ammCollider = root.AddComponent<BoxCollider>();
 
-            Bounds? ammBounds =
-                UnityUtils.CombineBounds(amm.Children.Select(resource =>
-                    TransformBoundsUntil(resource.LocalBounds, resource.transform, root.transform)));
+            Bounds? ammBounds = amm.Children
+                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.transform, root.transform))
+                .CombineBounds();
             if (ammBounds != null)
             {
                 ammCollider.center = ammBounds.Value.center;
@@ -236,7 +236,7 @@ namespace Iviz.Displays
             {
                 directoryName = directoryName.Replace('\\', '/'); // windows!
             }
-            
+
             string textureUri = $"{uri.Scheme}://{uri.Host}{directoryName}/{localPath}";
             return Resource.GetTextureResourceAsync(textureUri, provider, token);
         }
