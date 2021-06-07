@@ -546,7 +546,6 @@ namespace Iviz.Controllers
             }
             else
             {
-                //Debug.Log("ros " + rosTransform);
                 Instance.HandlerNonStatic(msg);
             }
         }
