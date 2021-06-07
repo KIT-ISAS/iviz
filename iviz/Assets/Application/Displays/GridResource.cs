@@ -24,10 +24,10 @@ namespace Iviz.Displays
 
         //Mesh mesh;
         MeshRenderer meshRenderer;
-        
+
         [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();        
-        
+        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
+
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
         readonly List<MeshMarkerResource> horizontals = new List<MeshMarkerResource>();
@@ -157,10 +157,18 @@ namespace Iviz.Displays
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             interiorObject.layer = LayerType.IgnoreRaycast;
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
-            interiorRenderer.sharedMaterial = Resource.Materials.GridInterior.Object;
+            interiorRenderer.sharedMaterial =
+                Settings.SettingsManager == null
+                || Settings.SettingsManager.QualityInView == QualityType.VeryLow
+                    ? Resource.Materials.GridInteriorSimple.Object
+                    : Resource.Materials.GridInterior.Object;
+
+            Settings.QualityTypeChanged += OnQualityChanged;
+
             interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             interiorRenderer.receiveShadows = true;
-            
+
+
             // the grid "jumps" every meter to center itself under the camera
             // this breaks motion blur, so we tell the camera to ignore the motion of the grid
             interiorRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.Camera; // camera only
@@ -176,6 +184,14 @@ namespace Iviz.Displays
             UpdateMesh();
         }
 
+        void OnQualityChanged(QualityType newType)
+        {
+            interiorRenderer.sharedMaterial =
+                newType == QualityType.VeryLow
+                    ? Resource.Materials.GridInteriorSimple.Object
+                    : Resource.Materials.GridInterior.Object;
+        }
+
         int lastX = 0, lastZ = 0;
 
         void Update()
@@ -185,12 +201,12 @@ namespace Iviz.Displays
                 return;
             }
 
-            Vector3 cameraPos = TfListener.RelativePositionToOrigin(Settings.MainCameraTransform.position);
+            (float camX, _, float camZ) = TfListener.RelativePositionToOrigin(Settings.MainCameraTransform.position);
             switch (Orientation)
             {
                 case GridOrientation.XY:
-                    int x = (int) (cameraPos.x + 0.5f);
-                    int z = (int) (cameraPos.z + 0.5f);
+                    int x = (int) (camX + 0.5f);
+                    int z = (int) (camZ + 0.5f);
                     float offsetY = transform.localPosition.y;
                     if (x != lastX || z != lastZ)
                     {
@@ -226,58 +242,6 @@ namespace Iviz.Displays
 
         void UpdateMesh()
         {
-            /*
-            Mesh squareMesh = Resource.Displays.Square.Object.GetComponent<MeshFilter>().sharedMesh;
-            IEnumerable<int> squareIndices = squareMesh.GetIndices(0);
-
-            float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
-            int gridVertSize;
-
-            List<Vector3> vertices = new List<Vector3>();
-            List<Vector3> normals = new List<Vector3>();
-            List<int> indices = new List<int>();
-
-            List<Vector3> squareVertices =
-                squareMesh.vertices.Select(x => new Vector3(x.x, x.z, -x.y) * 0.1f + new Vector3(0.5f, 0.5f, -0.5f))
-                    .ToList();
-            List<Vector3> squareNormals =
-                squareMesh.normals.Select(x => new Vector3(x.x, x.z, -x.y)).ToList();
-
-            float offsetX = -totalSize / 2;
-            float offsetY = -totalSize / 2;
-
-            Vector3 scaleHorizontal = new Vector3(GridLineWidth, totalSize, GridLineWidth / 8);
-            List<Vector3> verticesHorizontal = squareVertices.Select(x => x.CwiseProduct(scaleHorizontal)).ToList();
-
-            for (int i = 0; i <= NumberOfGridCells; i++)
-            {
-                gridVertSize = vertices.Count();
-                Vector3 offset = new Vector3(offsetX + i * GridCellSize, offsetY, 0);
-                indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                Utils.AddRange(vertices, verticesHorizontal.Select(x => x + offset));
-                normals.AddRange(squareNormals);
-            }
-
-
-            Vector3 scaleVertical = new Vector3(totalSize, GridLineWidth, GridLineWidth / 8);
-            List<Vector3> verticesVertical = squareVertices.Select(x => x.CwiseProduct(scaleVertical)).ToList();
-
-            for (int i = 0; i <= NumberOfGridCells; i++)
-            {
-                gridVertSize = vertices.Count();
-                Vector3 offset = new Vector3(offsetX, offsetY + i * GridCellSize, 0);
-                indices.AddRange(squareIndices.Select(x => x + gridVertSize));
-                Utils.AddRange(vertices, verticesVertical.Select(x => x + offset));
-                normals.AddRange(squareNormals);
-            }
-
-            mesh.Clear();
-            mesh.SetVertices(vertices);
-            mesh.SetNormals(normals);
-            mesh.SetIndices(indices.ToArray(), squareMesh.GetTopology(0), 0);
-            mesh.Optimize();
-            */
-
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
 
             const float interiorHeight = 1 / 512f;
@@ -286,7 +250,6 @@ namespace Iviz.Displays
 
             BoxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
             BoxCollider.center = new Vector3(0, 0, interiorHeight / 2);
-
 
             int size = NumberOfGridCells / 10;
             if (horizontals.Count > size)
@@ -342,6 +305,11 @@ namespace Iviz.Displays
             {
                 plane.ReturnToPool(Resource.Displays.Square);
             }
+        }
+
+        void OnDestroy()
+        {
+            Settings.QualityTypeChanged -= OnQualityChanged;
         }
     }
 }

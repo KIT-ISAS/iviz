@@ -149,6 +149,7 @@ namespace Iviz.Displays
         {
             resource.ReturnToPool();
             ARController.ARModeChanged -= OnARModeChanged;
+            Destroy(MeshFilter.sharedMesh);
 
             if (Settings.ARCamera == null)
             {

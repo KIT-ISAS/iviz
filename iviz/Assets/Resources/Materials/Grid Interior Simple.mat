@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Grid Interior
-  m_Shader: {fileID: 4800000, guid: dbfd112782b19ff48b225b184b2b3ee2, type: 3}
+  m_Name: Grid Interior Simple
+  m_Shader: {fileID: 4800000, guid: 4dd036f417f7b4bc9818b575cf44a7ec, type: 3}
   m_ShaderKeywords: _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1

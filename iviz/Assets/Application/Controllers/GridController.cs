@@ -22,7 +22,9 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = GridController.DefaultColor * 0.25f;
+
         [DataMember] public SerializableColor InteriorColor { get; set; } = GridController.DefaultColor;
+
         //[DataMember] public float GridLineWidth { get; set; } = 0.025f;
         //[DataMember] public float GridCellSize { get; set; } = 1;
         //[DataMember] public int NumberOfGridCells { get; set; } = 90;
@@ -37,8 +39,8 @@ namespace Iviz.Controllers
     public sealed class GridController : IController
     {
         //public static readonly Color DefaultColor = new Color(0.12f, 0.14f, 0.19f); 
-        public static readonly Color DefaultColor = (0.6f * Color.white).WithAlpha(1); 
-        
+        public static readonly Color DefaultColor = (0.6f * Color.white).WithAlpha(1);
+
         const int ProbeRefreshTimeInSec = 5;
 
         readonly FrameNode node;
@@ -273,10 +275,18 @@ namespace Iviz.Controllers
             reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
 
             reflectionProbe.mode = ReflectionProbeMode.Realtime;
-            reflectionProbe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
-            //reflectionProbe.refreshMode = ReflectionProbeRefreshMode.ViaScripting;
-            reflectionProbe.refreshMode = ReflectionProbeRefreshMode.EveryFrame;
-            reflectionProbe.clearFlags = ReflectionProbeClearFlags.SolidColor;
+
+            if (Settings.IsMobile)
+            {
+                reflectionProbe.enabled = false;
+            }
+            else
+            {
+                reflectionProbe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
+                reflectionProbe.refreshMode = ReflectionProbeRefreshMode.EveryFrame;
+                reflectionProbe.clearFlags = ReflectionProbeClearFlags.SolidColor;
+            }
+
             UpdateMesh();
 
             //GameThread.EverySecond += CheckProbeUpdate;
@@ -302,7 +312,7 @@ namespace Iviz.Controllers
         {
             const int numberOfGridCells = 90;
             const float gridCellSize = 1;
-            
+
             float totalSize = numberOfGridCells * gridCellSize;
             reflectionProbe.size = new Vector3(totalSize * 2, 20f, totalSize * 2);
             reflectionProbe.RenderProbe();
@@ -356,6 +366,5 @@ namespace Iviz.Controllers
             }
         }
                  */
-
     }
 }

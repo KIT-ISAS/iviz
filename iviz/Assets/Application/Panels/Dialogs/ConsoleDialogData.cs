@@ -71,6 +71,8 @@ namespace Iviz.App
 
         public override void SetupPanel()
         {
+            ResetPanelPosition();
+            
             dialog.Close.Clicked += Close;
             ProcessLog();
             dialog.FromField.Value = id;

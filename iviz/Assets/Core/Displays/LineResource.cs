@@ -105,29 +105,20 @@ namespace Iviz.Displays
                 lineBuffer.Add(t.f);
             }
 
-            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
-
-            if (UseCapsuleLines)
-            {
-                UpdateLineMesh();
-            }
-            else
-            {
-                UpdateLineBuffer();
-            }
+            UpdateLines(overrideNeedsAlpha);
         }
 
-        public void Set([NotNull] LineWithColor[] lines, bool? overrideNeedsAlpha = null)
+        public void Set([NotNull] IReadOnlyCollection<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            lineBuffer.EnsureCapacity(lines.Length);
+            lineBuffer.EnsureCapacity(lines.Count);
 
             lineBuffer.Clear();
-            foreach (ref LineWithColor t in lines.Ref())
+            foreach (var t in lines)
             {
                 if (!IsElementValid(t))
                 {
@@ -137,16 +128,7 @@ namespace Iviz.Displays
                 lineBuffer.Add(t.f);
             }
 
-            linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
-
-            if (UseCapsuleLines)
-            {
-                UpdateLineMesh();
-            }
-            else
-            {
-                UpdateLineBuffer();
-            }
+            UpdateLines(overrideNeedsAlpha);
         }
 
         public void Reset()
@@ -185,7 +167,11 @@ namespace Iviz.Displays
 
             lineBuffer.Clear();
             bool? overrideNeedsAlpha = callback(lineBuffer);
+            UpdateLines(overrideNeedsAlpha);
+        }
 
+        void UpdateLines(bool? overrideNeedsAlpha)
+        {
             linesNeedAlpha = !UseColormap && (overrideNeedsAlpha ?? CheckIfAlphaNeeded());
 
             if (UseCapsuleLines)
@@ -203,8 +189,13 @@ namespace Iviz.Displays
             foreach (ref float4x2 t in lineBuffer.Ref())
             {
                 Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
+                if (cA.a < 255)
+                {
+                    return true;
+                }
+
                 Color32 cB = PointWithColor.ColorFromFloatBits(t.c1.w);
-                if (cA.a < 255 || cB.a < 255)
+                if (cB.a < 255)
                 {
                     return true;
                 }
