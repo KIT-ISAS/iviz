@@ -8,11 +8,26 @@ namespace Iviz.Core
 {
     public sealed class NativeList<T> : IReadOnlyList<T>, IDisposable where T : unmanaged
     {
+        static NativeArray<T> emptyArray;
+
+        static NativeArray<T> EmptyArray => emptyArray.IsCreated
+            ? emptyArray
+            : (emptyArray = new NativeArray<T>(0, Allocator.Persistent));
+
         NativeArray<T> array;
         int length;
         bool disposed;
 
         public int Capacity => array.Length;
+
+        public NativeList()
+        {
+        }
+
+        public NativeList(int capacity)
+        {
+            EnsureCapacity(capacity);
+        }
 
         public void EnsureCapacity(int value)
         {
@@ -47,6 +62,11 @@ namespace Iviz.Core
 
         public void AddRange(in NativeArray<T> otherArray)
         {
+            if (otherArray.Length == 0)
+            {
+                return;
+            }
+            
             EnsureCapacity(length + otherArray.Length);
             NativeArray<T>.Copy(otherArray, 0, array, length, otherArray.Length);
             length += otherArray.Length;
@@ -54,7 +74,7 @@ namespace Iviz.Core
 
         public NativeArray<T>.Enumerator GetEnumerator() => AsArray().GetEnumerator();
 
-        public NativeArray<T> AsArray() => array.GetSubArray(0, length);
+        public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length);
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
