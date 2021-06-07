@@ -278,9 +278,9 @@ namespace Iviz.Core
                     return extractArrayFromListTypeFn;
                 }
 
-                var ass = Assembly.GetAssembly(typeof(Mesh));
-                var type = ass.GetType("UnityEngine.NoAllocHelpers");
-                var methodInfo = type.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
+                var assembly = Assembly.GetAssembly(typeof(Mesh));
+                var type = assembly?.GetType("UnityEngine.NoAllocHelpers");
+                var methodInfo = type?.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
                 if (methodInfo == null)
                 {
                     throw new InvalidOperationException("Failed to retrieve function ExtractArrayFromList");

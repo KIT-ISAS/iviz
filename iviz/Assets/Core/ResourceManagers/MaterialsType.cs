@@ -23,6 +23,7 @@ namespace Iviz.Resources
         public Info<Material> PointCloudDirectWithColormap { get; }
         public Info<Material> DepthCloud { get; }
         public Info<Material> GridInterior { get; }
+        public Info<Material> GridInteriorSimple { get; }
         public Info<Material> GridMap { get; }
         public Info<Material> TransparentGridMap { get; }
         public Info<Material> OccupancyGridTexture { get; }
@@ -70,6 +71,7 @@ namespace Iviz.Resources
             TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
             ImagePreview = new Info<Material>("Materials/ImagePreview");
             GridInterior = new Info<Material>("Materials/Grid Interior");
+            GridInteriorSimple = new Info<Material>("Materials/Grid Interior Simple");
             GridMap = new Info<Material>("Materials/GridMap");
             TransparentGridMap = new Info<Material>("Materials/Transparent GridMap");
             DepthCloud = new Info<Material>("Materials/DepthCloud");

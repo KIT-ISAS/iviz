@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
@@ -12,6 +13,7 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Utilities;
+using UnityEngine.PlayerLoop;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -54,7 +56,7 @@ namespace Iviz.App
                 panel.TextBottom.text = EmptyBottomText;
                 if (panel.Mode == SystemDialogContents.ModeType.Aliases)
                 {
-                    UpdateAliases();
+                    SetupAliases();
                 }
                 else
                 {
@@ -81,6 +83,7 @@ namespace Iviz.App
                     UpdateNodes();
                     break;
                 case SystemDialogContents.ModeType.Aliases:
+                    UpdateAliases();
                     break;
             }
         }
@@ -473,7 +476,7 @@ namespace Iviz.App
             }
         }
 
-        void UpdateAliases()
+        void SetupAliases()
         {
             if (HostAliases.Length != panel.Addresses.Count)
             {
@@ -493,6 +496,31 @@ namespace Iviz.App
                 panel.HostNames[i].Value = hostname;
                 panel.Addresses[i].Value = address;
                 ConnectionUtils.GlobalResolver[hostname] = address;
+            }
+        }
+
+        void UpdateAliases()
+        {
+            if (!ConnectionManager.IsConnected)
+            {
+                return;
+            }
+
+            var state = ConnectionManager.Connection.Client.GetSubscriberStatistics();
+            string[] hosts = state.Topics
+                .SelectMany(topic => topic.Receivers)
+                .Select(receiver => receiver.RemoteUri.Host)
+                .Where(host => !IPAddress.TryParse(host, out _))
+                .ToArray();
+
+            if (hosts.Length == 0)
+            {
+                return;
+            }
+
+            foreach (var widget in panel.HostNames)
+            {
+                widget.Hints = hosts;
             }
         }
 

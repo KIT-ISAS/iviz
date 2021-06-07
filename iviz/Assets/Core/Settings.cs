@@ -167,6 +167,13 @@ namespace Iviz.Core
         }
         
         [CanBeNull] public static Camera ARCamera { get; set; }
+        public static event Action<QualityType> QualityTypeChanged;
+
+        public static void RaiseQualityTypeChanged(QualityType newQualityType)
+        {
+            QualityTypeChanged?.Invoke(newQualityType);
+        }
+        
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
         [CanBeNull] public static IScreenshotManager ScreenshotManager { get; set; }
 

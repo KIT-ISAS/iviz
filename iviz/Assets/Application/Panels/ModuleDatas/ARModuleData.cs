@@ -61,6 +61,7 @@ namespace Iviz.App
             panel.AutoFocus.Value = controller.EnableAutoFocus;
             panel.DetectArucos.Value = controller.EnableArucoDetection;
             panel.DetectQrs.Value = controller.EnableQrDetection;
+            panel.EnableMeshing.Value = controller.EnableMeshing;
 
             panel.OcclusionQuality.ValueChanged += (i, _) =>
                 controller.OcclusionQuality = (OcclusionQualityType) i;
@@ -86,8 +87,8 @@ namespace Iviz.App
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
             panel.DetectArucos.ValueChanged += f => controller.EnableArucoDetection = f;
             panel.DetectQrs.ValueChanged += f => controller.EnableQrDetection = f;
+            panel.EnableMeshing.ValueChanged += f => controller.EnableMeshing = f;
             
-            panel.HeadSender.Set(controller.HeadSender);
             panel.MarkerSender.Set(controller.MarkerSender);
         }
 

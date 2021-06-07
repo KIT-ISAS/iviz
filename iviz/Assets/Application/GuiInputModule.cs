@@ -250,6 +250,7 @@ namespace Iviz.App
                 if (ARController.HasARController)
                 {
                     QualitySettings.SetQualityLevel((int) value, true);
+                    Settings.RaiseQualityTypeChanged(value);
                 }
             }
         }
@@ -268,6 +269,7 @@ namespace Iviz.App
                 if (value == QualityType.Mega)
                 {
                     QualitySettings.SetQualityLevel((int) QualityType.Ultra, true);
+                    Settings.RaiseQualityTypeChanged(value);
                     MainCamera.renderingPath = RenderingPath.DeferredShading;
                     GetComponent<PostProcessLayer>().enabled = true;
                     return;
@@ -276,6 +278,7 @@ namespace Iviz.App
                 GetComponent<PostProcessLayer>().enabled = false;
                 MainCamera.renderingPath = RenderingPath.Forward;
                 QualitySettings.SetQualityLevel((int) value, true);
+                Settings.RaiseQualityTypeChanged(value);
             }
         }
 

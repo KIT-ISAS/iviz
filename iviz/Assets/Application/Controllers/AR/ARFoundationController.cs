@@ -28,6 +28,7 @@ namespace Iviz.Controllers
         [SerializeField] Light arLight = null;
         [SerializeField] ARCameraFovDisplay fovDisplay = null;
         [SerializeField] AxisFrameResource setupModeFrame = null;
+        [SerializeField] MeshFilter meshPrefab = null;
 
         Camera mainCamera;
         ARCameraManager cameraManager;
@@ -177,6 +178,32 @@ namespace Iviz.Controllers
             get => cameraManager.autoFocusRequested;
             set => cameraManager.autoFocusRequested = value;
         }
+        
+        public override bool EnableMeshing
+        {
+            get => base.EnableMeshing;
+            set
+            {
+                if (base.EnableMeshing == value)
+                {
+                    return;
+                }
+
+                base.EnableMeshing = value;
+                if (value)
+                {
+                    var meshManager = arCamera.gameObject.AddComponent<ARMeshManager>();
+                    meshManager.meshPrefab = meshPrefab;
+                    meshManager.normals = false;
+                }
+                else
+                {
+                    var meshManager = arCamera.gameObject.GetComponent<ARMeshManager>();
+                    meshManager.DestroyAllMeshes();
+                    Destroy(meshManager);
+                }
+            }
+        }            
 
         protected override bool PinRootMarker
         {

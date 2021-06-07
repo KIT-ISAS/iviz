@@ -41,6 +41,7 @@ namespace Iviz.Controllers
 
         [DataMember] public bool EnableQrDetection { get; set; }
         [DataMember] public bool EnableArucoDetection { get; set; }
+        [DataMember] public bool EnableMeshing { get; set; }
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
@@ -156,6 +157,12 @@ namespace Iviz.Controllers
                 }
             }
         }
+        
+        public virtual bool EnableMeshing
+        {
+            get => config.EnableMeshing;
+            set => config.EnableMeshing = value;
+        }        
 
         public bool EnableArucoDetection
         {

@@ -205,7 +205,8 @@ namespace Iviz.App
             };
         }
 
-        string UpdateModelServiceLabel()
+        [NotNull]
+        static string UpdateModelServiceLabel()
         {
             if (Settings.IsMobile)
             {

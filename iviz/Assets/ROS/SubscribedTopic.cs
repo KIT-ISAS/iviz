@@ -1,0 +1,158 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Iviz.Msgs;
+using Iviz.Roslib;
+using JetBrains.Annotations;
+
+namespace Iviz.Ros
+{
+    internal interface ISubscribedTopic
+    {
+        [CanBeNull] IRosSubscriber Subscriber { get; }
+        int Count { get; }
+        void Add([NotNull] IListener subscriber);
+        void Remove([NotNull] IListener subscriber);
+
+        [NotNull]
+        Task SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null,
+            CancellationToken token = default);
+
+        [NotNull]
+        Task UnsubscribeAsync(CancellationToken token);
+
+        void Invalidate();
+
+        [CanBeNull] BagListener BagListener { set; }
+    }
+
+    internal sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
+    {
+        readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
+        [NotNull] readonly string topic;
+        [CanBeNull] string clientId;
+
+        [CanBeNull] BagListener bagListener;
+        [CanBeNull] string bagId;
+
+        public SubscribedTopic([NotNull] string topic)
+        {
+            this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+        }
+
+        public IRosSubscriber Subscriber { get; private set; }
+
+        public void Add(IListener subscriber)
+        {
+            listeners.Add((Listener<T>) subscriber);
+        }
+
+        public void Remove(IListener subscriber)
+        {
+            listeners.Remove((Listener<T>) subscriber);
+        }
+
+        public async Task SubscribeAsync(RosClient client, IListener listener,
+            CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+            string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
+            IRosSubscriber subscriber;
+            if (listener != null)
+            {
+                listeners.Add((Listener<T>) listener);
+            }
+
+            if (client != null)
+            {
+                (clientId, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback, token: token);
+                if (bagListener != null)
+                {
+                    bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
+                }
+            }
+            else
+            {
+                subscriber = null;
+            }
+
+            Subscriber = subscriber;
+        }
+
+        public async Task UnsubscribeAsync(CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (Subscriber == null)
+            {
+                return;
+            }
+
+            BagListener = null;
+
+            if (clientId != null)
+            {
+                await Subscriber.UnsubscribeAsync(clientId, token);
+                clientId = null;
+            }
+
+            Subscriber = null;
+        }
+
+        public BagListener BagListener
+        {
+            set
+            {
+                bagListener = value;
+                if (Subscriber == null)
+                {
+                    return;
+                }
+
+                if (bagListener != null)
+                {
+                    if (bagId != null)
+                    {
+                        Subscriber.Unsubscribe(bagId);
+                    }
+
+                    bagId = Subscriber.Subscribe(bagListener.EnqueueMessage);
+                }
+                else if (bagId != null)
+                {
+                    Subscriber.Unsubscribe(bagId);
+                    bagId = null;
+                }
+            }
+        }
+
+        public int Count => listeners.Count;
+
+        public void Invalidate()
+        {
+            Subscriber = null;
+        }
+
+        void Callback(T msg)
+        {
+            foreach (var listener in listeners)
+            {
+                try
+                {
+                    listener.EnqueueMessage(msg);
+                }
+                catch (Exception e)
+                {
+                    Core.Logger.Error($"{this}: Error in callback", e);
+                }
+            }
+        }
+
+        [NotNull]
+        public override string ToString()
+        {
+            return $"[SubscribedTopic '{topic}']";
+        }
+    }
+}

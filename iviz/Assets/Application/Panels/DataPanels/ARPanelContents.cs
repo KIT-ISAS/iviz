@@ -20,8 +20,8 @@ namespace Iviz.App
 
         public ToggleWidget DetectArucos { get; private set; }
         public ToggleWidget DetectQrs { get; private set; }
+        public ToggleWidget EnableMeshing { get; private set; }
         public SenderWidget MarkerSender { get; private set; }
-        public SenderWidget HeadSender { get; private set; }
         
 
         void Awake()
@@ -40,9 +40,9 @@ namespace Iviz.App
             AutoFocus = p.AddToggle("Enable AutoFocus");
             DetectArucos = p.AddToggle("Detect Arucos");
             DetectQrs = p.AddToggle("Detect QRs");
+            EnableMeshing= p.AddToggle("Enable Meshing (if available)");
 
             MarkerSender = p.AddSender();
-            HeadSender = p.AddSender();
 
             p.UpdateSize();
             gameObject.SetActive(false);
