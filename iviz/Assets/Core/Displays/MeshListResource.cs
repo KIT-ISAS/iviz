@@ -275,6 +275,11 @@ namespace Iviz.Displays
         public void SetDirect(in NativeArray<float4> points)
         {
             pointBuffer.Clear();
+            if (points.Length == 0)
+            {
+                return;
+            }
+            
             pointBuffer.AddRange(points);
             UpdateBuffer();
         }

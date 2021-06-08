@@ -32,7 +32,9 @@ namespace Iviz.Displays
         readonly NativeList<float4> pointBuffer = new NativeList<float4>();
 
         bool isDirty;
+
         Mesh mesh;
+
         //bool processing;
         [CanBeNull] MeshRenderer meshRenderer;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
@@ -254,17 +256,14 @@ namespace Iviz.Displays
         /// <param name="points">A native array with the points.</param>
         public void SetDirect(in NativeArray<float4> points)
         {
-            /*
-            if (processing)
+            pointBuffer.Clear();
+
+            if (points.Length == 0)
             {
-                Logger.Debug($"{this}: Missed a SetDirect!");
                 return;
             }
-            */
 
-            pointBuffer.Clear();
             pointBuffer.AddRange(points);
-            //processing = false;
             isDirty = true;
         }
 
@@ -281,15 +280,6 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            /*
-            if (processing)
-            {
-                Logger.Debug($"{this}: Missed a SetDirect!");
-                return;
-            }
-            */
-
-            //processing = true;
             if (reserve != 0)
             {
                 pointBuffer.EnsureCapacity(reserve);
@@ -298,7 +288,6 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             callback(pointBuffer);
             isDirty = true;
-            //processing = false;
         }
 
         void UpdateBuffer()

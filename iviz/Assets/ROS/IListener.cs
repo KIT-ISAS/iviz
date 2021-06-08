@@ -124,11 +124,11 @@ namespace Iviz.Ros
             Connection.Subscribe(this);
             Subscribed = true;
         }
-        
+
         public void SetPause(bool value)
         {
             Connection.SetPause(this, value);
-        }        
+        }
 
         public void Reset()
         {
@@ -172,14 +172,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    if (!Settings.IsMobile)
-                    {
-                        Logger.Error($"{this} Error during callback: {e}");
-                    }
-                    else
-                    {
-                        Logger.Error($"{this} Error during callback: ", e);
-                    }
+                    Logger.Error($"{this} Error during callback: ", e);
                 }
             }
 
@@ -234,7 +227,7 @@ namespace Iviz.Ros
             recentMsgs = 0;
         }
 
-        
+
         [NotNull]
         public override string ToString()
         {

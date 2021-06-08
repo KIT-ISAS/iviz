@@ -53,13 +53,20 @@ namespace Iviz.Core
 
         public static void Error([CanBeNull] object t)
         {
-            ExternalImpl(t?.ToString(), LogLevel.Error);
+            ExternalImpl((string) t, LogLevel.Error);
         }
 
-        public static void Error([CanBeNull] object t, Exception e, [CallerFilePath] string file = "",
+        public static void Error([CanBeNull] object t, [CanBeNull] Exception e, [CallerFilePath] string file = "",
             [CallerLineNumber] int line = 0)
         {
-            ExternalImpl(t, LogLevel.Error, e, file, line);
+            if (!Settings.IsMobile)
+            {
+                Error((string) t + e);
+            }
+            else
+            {
+                ExternalImpl(t, LogLevel.Error, e, file, line);
+            }
         }
 
         public static void Error(Exception e)

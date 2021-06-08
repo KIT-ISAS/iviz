@@ -37,7 +37,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener.SetPause(value);
+                Listener?.SetPause(value);
             }
         }
 
@@ -121,7 +121,6 @@ namespace Iviz.Controllers
             float value = PointSize * Mathf.Pow(10, SizeMultiplierPow10);
             pointCloud.ElementScale = value;
             meshCloud.ElementScale = value;
-            
         }
 
         public ColormapId Colormap
@@ -376,7 +375,12 @@ namespace Iviz.Controllers
 
                         Size = numPoints;
 
-                        if (PointCloudType == PointCloudType.Points)
+                        if (pointBuffer.Length == 0)
+                        {
+                            pointCloud.Reset();
+                            meshCloud.Reset();
+                        }
+                        else if (PointCloudType == PointCloudType.Points)
                         {
                             pointCloud.UseColormap = !rgbaHint;
                             pointCloud.SetDirect(pointBuffer.AsArray());
