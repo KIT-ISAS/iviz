@@ -58,44 +58,43 @@ namespace Iviz.Controllers
         static Crc32Calculator Crc32 => Crc32Calculator.Instance;
 
         readonly StringBuilder description = new StringBuilder(250);
-
-        Pose currentPose;
-        Vector3 currentScale;
-
-        (string Ns, int Id) id;
-
-        MarkerLineHelper lineHelper;
-
-        float metallic;
-
-        int numErrors;
-        int numWarnings;
-
-        bool occlusionOnly;
-        MarkerPointHelper pointHelper;
-
-        uint? previousHash;
-
+        
         [CanBeNull] IDisplay resource;
         [CanBeNull] Info<GameObject> resourceInfo;
         [CanBeNull] CancellationTokenSource runningTs;
 
-        float smoothness;
+        [CanBeNull] MarkerLineHelper lineHelper;
+        [CanBeNull] MarkerPointHelper pointHelper;
+        
+        [NotNull] MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
+        [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
+        
+        Pose currentPose;
+        Vector3 currentScale;
 
+        (string Ns, int Id) id;
+        
+        int numErrors;
+        int numWarnings;
+
+        bool occlusionOnly;
+
+        uint? previousHash;
+
+        float metallic;
+        float smoothness;
         Color tint;
 
         bool triangleListFlipWinding;
 
+        public event Action BoundsChanged;
         
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
 
-        [NotNull] MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
-        [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
-
         public Bounds? Bounds =>
             resource == null ? null : resource.Bounds.TransformBound(resource.GetTransform());
-
+        
         public bool OcclusionOnly
         {
             get => occlusionOnly;
@@ -183,11 +182,6 @@ namespace Iviz.Controllers
                     r.FlipWinding = value;
                 }
             }
-        }
-
-        void OnDestroy()
-        {
-            StopLoadResourceTask();
         }
 
         public async Task SetAsync([NotNull] Marker msg)
@@ -803,6 +797,7 @@ namespace Iviz.Controllers
             {
                 Layer = LayerType.IgnoreRaycast;
                 resource.Name = gameObject.name;
+                BoundsChanged?.Invoke();                
                 return; // all OK
             }
 
@@ -815,6 +810,7 @@ namespace Iviz.Controllers
             AssetWrapperResource wrapper = resourceGameObject.AddComponent<AssetWrapperResource>();
             wrapper.Layer = LayerType.IgnoreRaycast;
             resource = wrapper;
+            BoundsChanged?.Invoke();                
         }
 
         void UpdateTransform([NotNull] Marker msg)
@@ -973,6 +969,31 @@ namespace Iviz.Controllers
             totalWarnings = numWarnings;
         }
 
+        bool HasSameHash([NotNull] Marker msg, bool useScale = false)
+        {
+            uint currentHash = CalculateMarkerHash(msg, useScale);
+            if (previousHash == currentHash)
+            {
+                return true;
+            }
+
+            previousHash = currentHash;
+            return false;
+        }
+
+        static uint CalculateMarkerHash([NotNull] Marker msg, bool useSize)
+        {
+            uint hash = Crc32.Compute(msg.Type);
+            hash = Crc32.Compute(msg.Color, hash);
+            hash = Crc32.Compute(msg.Points, hash);
+            hash = Crc32.Compute(msg.Colors, hash);
+            if (useSize)
+            {
+                hash = Crc32.Compute(msg.Scale, hash);
+            }
+
+            return hash;
+        }
 
         public override void Stop()
         {
@@ -991,36 +1012,15 @@ namespace Iviz.Controllers
             previousHash = null;
         }
 
-        static uint CalculateMarkerHash([NotNull] Marker msg, bool useSize)
-        {
-            uint hash = Crc32.Compute(msg.Type);
-            hash = Crc32.Compute(msg.Color, hash);
-            hash = Crc32.Compute(msg.Points, hash);
-            hash = Crc32.Compute(msg.Colors, hash);
-            if (useSize)
-            {
-                hash = Crc32.Compute(msg.Scale, hash);
-            }
-
-            return hash;
-        }
-
-        bool HasSameHash([NotNull] Marker msg, bool useScale = false)
-        {
-            uint currentHash = CalculateMarkerHash(msg, useScale);
-            if (previousHash == currentHash)
-            {
-                return true;
-            }
-
-            previousHash = currentHash;
-            return false;
-        }
-
         [NotNull]
         public override string ToString()
         {
             return $"[MarkerObject {name}]";
+        }
+        
+        void OnDestroy()
+        {
+            StopLoadResourceTask();
         }
     }
 

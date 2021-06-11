@@ -36,7 +36,7 @@ namespace Iviz.Controllers
         }
 
         public override IModuleData ModuleData { get; }
-        [NotNull] public override TfFrame Frame => TfListener.MapFrame;
+        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
 
         public MarkerConfiguration Config
         {

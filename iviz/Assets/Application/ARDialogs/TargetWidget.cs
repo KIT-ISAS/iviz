@@ -165,8 +165,6 @@ namespace Iviz.App.ARDialogs
             Moved = null;
             Cancelled = null;
             scaling = false;
-            cancelButton.OnDialogDisabled();
-            okButton.OnDialogDisabled();
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        [NotNull] public TfFrame ParentFrame => Node.Parent.CheckedNull() ?? TfListener.MapFrame;
+        [NotNull] public TfFrame ParentFrame => Node.Parent.CheckedNull() ?? TfListener.DefaultFrame;
 
         public Color BackgroundColor
         {

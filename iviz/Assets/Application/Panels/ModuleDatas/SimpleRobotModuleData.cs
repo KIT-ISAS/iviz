@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Iviz.Msgs.IvizCommonMsgs;
@@ -24,10 +25,10 @@ namespace Iviz.App
 
         public override DataPanelContents Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
-        public override IConfiguration Configuration => Robot.Config;
-        public override IController Controller => Robot;
+        public override IConfiguration Configuration => RobotController.Config;
+        public override IController Controller => RobotController;
 
-        [NotNull] public SimpleRobotController Robot { get; }
+        [NotNull] public SimpleRobotController RobotController { get; }
 
         [CanBeNull] CancellationTokenSource tokenSource;
 
@@ -36,10 +37,10 @@ namespace Iviz.App
         public SimpleRobotModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
-            Robot = new SimpleRobotController(this);
+            RobotController = new SimpleRobotController(this);
             if (constructor.Configuration != null)
             {
-                Robot.Config = (RobotConfiguration) constructor.Configuration;
+                RobotController.Config = (RobotConfiguration) constructor.Configuration;
             }
 
             panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(ModuleType.Robot);
@@ -55,81 +56,90 @@ namespace Iviz.App
                 return;
             }
 
-            if (!string.IsNullOrEmpty(Robot.SourceParameter))
+            if (!string.IsNullOrEmpty(RobotController.SourceParameter))
             {
-                Robot.TryLoadFromSourceParameter(Robot.SourceParameter);
+                RobotController.TryLoadFromSourceParameter(RobotController.SourceParameter);
             }
 
-            panel.HelpText.Label = Robot.HelpText;
+            panel.HelpText.Label = RobotController.HelpText;
             UpdateModuleButton();
         }
 
         public override void Stop()
         {
             base.Stop();
-            Robot.StopController();
+            RobotController.StopController();
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
 
         public override void SetupPanel()
         {
-            panel.Frame.Owner = Robot;
-            panel.SourceParameter.Value = Robot.SourceParameter;
-            panel.HelpText.Label = Robot.HelpText;
+            panel.Frame.Owner = RobotController;
+            panel.SourceParameter.Value = RobotController.SourceParameter;
+            panel.HelpText.Label = RobotController.HelpText;
 
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
 
             panel.SavedRobotName.Options = GetSavedRobots();
+            if (string.IsNullOrEmpty(RobotController.SavedRobotName) ||
+                !GetSavedRobots().Contains(RobotController.SavedRobotName))
+            {
+                panel.SavedRobotName.Index = 0;
+            }
+            else
+            {
+                panel.SavedRobotName.Value = RobotController.SavedRobotName;
+            }
 
             //panel.FramePrefix.Value = Robot.FramePrefix;
             //panel.FrameSuffix.Value = Robot.FrameSuffix;
-            panel.AttachToTf.Value = Robot.AttachedToTf;
-            panel.HideButton.State = Robot.Visible;
+            panel.AttachToTf.Value = RobotController.AttachedToTf;
+            panel.HideButton.State = RobotController.Visible;
 
-            panel.OcclusionOnlyMode.Value = Robot.RenderAsOcclusionOnly;
-            panel.Tint.Value = Robot.Tint;
-            panel.Alpha.Value = Robot.Tint.a;
-            panel.Metallic.Value = Robot.Metallic;
-            panel.Smoothness.Value = Robot.Smoothness;
+            panel.OcclusionOnlyMode.Value = RobotController.RenderAsOcclusionOnly;
+            panel.Tint.Value = RobotController.Tint;
+            panel.Alpha.Value = RobotController.Tint.a;
+            panel.Metallic.Value = RobotController.Metallic;
+            panel.Smoothness.Value = RobotController.Smoothness;
 
             panel.Save.Value = IsRobotSaved;
-            panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
+            panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
-                Robot.Tint = f.WithAlpha(panel.Alpha.Value);
+                RobotController.Tint = f.WithAlpha(panel.Alpha.Value);
             panel.Alpha.ValueChanged += f =>
-                Robot.Tint = panel.Tint.Value.WithAlpha(f);
-            panel.Metallic.ValueChanged += f => Robot.Metallic = f;
-            panel.Smoothness.ValueChanged += f => Robot.Smoothness = f;
-            panel.OcclusionOnlyMode.ValueChanged += f => Robot.RenderAsOcclusionOnly = f;
+                RobotController.Tint = panel.Tint.Value.WithAlpha(f);
+            panel.Metallic.ValueChanged += f => RobotController.Metallic = f;
+            panel.Smoothness.ValueChanged += f => RobotController.Smoothness = f;
+            panel.OcclusionOnlyMode.ValueChanged += f => RobotController.RenderAsOcclusionOnly = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
-                Robot.TryLoadSavedRobot(i == 0 ? null : name);
+                RobotController.TryLoadSavedRobot(i == 0 ? null : name);
                 panel.SourceParameter.Value = "";
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = Robot.HelpText;
+                panel.HelpText.Label = RobotController.HelpText;
                 UpdateModuleButton();
 
                 panel.Save.Interactable =
-                    !string.IsNullOrEmpty(Robot.Robot?.Name) &&
+                    !string.IsNullOrEmpty(RobotController.Robot?.Name) &&
                     !Resource.Internal.ContainsRobot(name);
             };
             panel.SourceParameter.EndEdit += f =>
             {
-                Robot.TryLoadFromSourceParameter(f);
+                RobotController.TryLoadFromSourceParameter(f);
                 panel.SavedRobotName.Index = 0;
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = Robot.HelpText;
+                panel.HelpText.Label = RobotController.HelpText;
                 UpdateModuleButton();
 
-                panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
+                panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
             };
             panel.AttachToTf.ValueChanged += f =>
-                Robot.AttachedToTf = f;
+                RobotController.AttachedToTf = f;
             panel.CloseButton.Clicked += () =>
             {
                 DataPanelManager.HideSelectedPanel();
@@ -139,28 +149,32 @@ namespace Iviz.App
             //panel.FrameSuffix.EndEdit += f => Robot.FrameSuffix = f;
             panel.HideButton.Clicked += () =>
             {
-                Robot.Visible = !Robot.Visible;
-                panel.HideButton.State = Robot.Visible;
+                RobotController.Visible = !RobotController.Visible;
+                panel.HideButton.State = RobotController.Visible;
                 UpdateModuleButton();
             };
             panel.Save.ValueChanged += f =>
             {
-                if (string.IsNullOrEmpty(Robot.Robot?.Name) || string.IsNullOrEmpty(Robot.Robot.Description))
+                if (string.IsNullOrEmpty(RobotController.Robot?.Name) ||
+                    string.IsNullOrEmpty(RobotController.Robot.Description))
                 {
                     return;
                 }
 
                 if (f)
                 {
-                    Resource.External.AddRobotResourceAsync(Robot.Robot.Name, Robot.Robot.Description);
+                    Resource.External.AddRobotResourceAsync(RobotController.Robot.Name,
+                        RobotController.Robot.Description);
                 }
                 else
                 {
-                    Resource.External.RemoveRobotResource(Robot.Robot.Name);
+                    Resource.External.RemoveRobotResource(RobotController.Robot.Name);
                 }
             };
 
-            Robot.CheckRobotStartTask();
+            RobotController.CheckRobotStartTask();
+
+            RobotController.CheckRobotStartTask();
             UpdateModuleButton();
         }
 
@@ -170,10 +184,10 @@ namespace Iviz.App
             tokenSource = new CancellationTokenSource();
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
 
-            panel.HelpText.Label = Robot.HelpText;
-            Robot.CheckRobotStartTask();
+            panel.HelpText.Label = RobotController.HelpText;
+            RobotController.CheckRobotStartTask();
             UpdateModuleButton();
-            panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
+            panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
         }
 
         [NotNull, ItemNotNull]
@@ -193,13 +207,13 @@ namespace Iviz.App
         [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterHints(CancellationToken token) => GetParameterCandidates(token);
 
-        bool IsRobotSaved => Robot.Robot?.Name != null && Resource.ContainsRobot(Robot.Robot.Name);
+        bool IsRobotSaved => RobotController.Robot?.Name != null && Resource.IsRobotSaved(RobotController.Robot.Name);
 
         protected override void UpdateModuleButton()
         {
             string text =
-                $"{Resource.Font.Split(Robot.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
-            ButtonText = Robot.Visible ? text : $"<color=grey>{text}</color>";
+                $"{Resource.Font.Split(RobotController.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
+            ButtonText = RobotController.Visible ? text : $"<color=grey>{text}</color>";
         }
 
         public void OnRobotFinishedLoading()
@@ -223,40 +237,40 @@ namespace Iviz.App
                 switch (field)
                 {
                     case nameof(RobotConfiguration.Visible):
-                        Robot.Visible = config.Visible;
+                        RobotController.Visible = config.Visible;
                         break;
                     case nameof(RobotConfiguration.SourceParameter)
-                        when config.SourceParameter != Robot.Config.SourceParameter:
+                        when config.SourceParameter != RobotController.Config.SourceParameter:
                         hasSourceParameter = true;
                         break;
                     case nameof(RobotConfiguration.SourceParameter):
                         break;
                     case nameof(RobotConfiguration.SavedRobotName)
-                        when config.SavedRobotName != Robot.Config.SavedRobotName:
+                        when config.SavedRobotName != RobotController.Config.SavedRobotName:
                         hasRobotName = true;
                         break;
                     case nameof(RobotConfiguration.SavedRobotName):
                         break;
                     case nameof(RobotConfiguration.FramePrefix):
-                        Robot.FramePrefix = config.FramePrefix;
+                        RobotController.FramePrefix = config.FramePrefix;
                         break;
                     case nameof(RobotConfiguration.FrameSuffix):
-                        Robot.FrameSuffix = config.FrameSuffix;
+                        RobotController.FrameSuffix = config.FrameSuffix;
                         break;
                     case nameof(RobotConfiguration.AttachedToTf):
-                        Robot.AttachedToTf = config.AttachedToTf;
+                        RobotController.AttachedToTf = config.AttachedToTf;
                         break;
                     case nameof(RobotConfiguration.RenderAsOcclusionOnly):
-                        Robot.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
+                        RobotController.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(RobotConfiguration.Tint):
-                        Robot.Tint = config.Tint.ToUnityColor();
+                        RobotController.Tint = config.Tint.ToUnityColor();
                         break;
                     case nameof(RobotConfiguration.Metallic):
-                        Robot.Metallic = config.Metallic;
+                        RobotController.Metallic = config.Metallic;
                         break;
                     case nameof(RobotConfiguration.Smoothness):
-                        Robot.Smoothness = config.Smoothness;
+                        RobotController.Smoothness = config.Smoothness;
                         break;
                     default:
                         Logger.Warn($"{this}: Unknown field '{field}'");
@@ -276,11 +290,11 @@ namespace Iviz.App
                     config.SourceParameter = "";
                 }
 
-                Robot.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
+                RobotController.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
 
                 if (IsSelected)
                 {
-                    panel.HelpText.Label = Robot.HelpText;
+                    panel.HelpText.Label = RobotController.HelpText;
                 }
 
                 UpdateModuleButton();
@@ -291,7 +305,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            config.SimpleRobots.Add(Robot.Config);
+            config.SimpleRobots.Add(RobotController.Config);
         }
     }
 }

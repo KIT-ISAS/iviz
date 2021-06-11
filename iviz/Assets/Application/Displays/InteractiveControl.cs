@@ -475,7 +475,7 @@ namespace Iviz.Displays
             RaisePointerUp();
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             if (interactionMode != InteractionModeType.ClickOnly ||
                 (eventData.pointerCurrentRaycast.gameObject != holderCollider.gameObject &&
@@ -487,7 +487,7 @@ namespace Iviz.Displays
             frame.Color = FrameActiveColor;
         }
 
-        public void OnPointerExit(PointerEventData _)
+        void IPointerExitHandler.OnPointerExit(PointerEventData _)
         {
             if (interactionMode != InteractionModeType.ClickOnly)
             {

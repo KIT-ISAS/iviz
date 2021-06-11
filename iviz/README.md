@@ -126,8 +126,7 @@ Notes:
 ## 6. Working with Transform Frames
 
 The TF module automatically subscribes itself to /tf and /tf_static when the client is connected, and will by default display every transformation frame.
-iviz does not enforce a unique fixed frame, and all frames without parents are assumed to be on the 'origin' (that is, all frames without a parent will have the identity as their relative transformations).
-iviz will also assume that a frame named 'map' exists on the origin.
+iviz does not enforce a unique root frame, and all frames without parents are assumed to be on the 'origin'.
 Furthermore, on panels that deal with transform frames, there is a green panel showing the latest frame referenced by a message header.
 You can click on it to move the camera to that frame.
 
@@ -289,6 +288,7 @@ Once the AR module is active, the usual birds-eye-view visualization is replaced
 * First, you need to let your device find a plane on which the AR view will be displayed. 
   This is achieved by moving the device laterally (_not_ by rotating it).
   Only by translating your device can the AR system find the 3D location of its point features and estimate a plane from them.
+  (Newer devices with depth cameras will find a plane almost instantly) 
 * Once a plane is found, the transparent frame becomes opaque, and the _Start_ button becomes available.
 * When you find an appropriate origin, click on _Start_.
   Your scene should now become visible.
@@ -318,7 +318,8 @@ Click it again to go back to the AR view.
 * **Frame Widget**: Shows the fixed TF frame used for the AR origin.
 * **Info Label**: Shows diagnostic data about the AR system.
 * **World Scale**: This allows you to make the world smaller. Useful when visualizing large robots such as cars on a small table.
-* **Occlusion Quality**: This enables the Depth APIs present in some devices that can hide a virtual object if it is located behind a real-world object.
+* **Occlusion Quality**: This enables the Depth API present in newer devices that can hide a virtual object if it is located behind a real-world object.
+Increases CPU usage when enabled.
     
 
 ## 12. Credits

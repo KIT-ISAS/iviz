@@ -156,7 +156,7 @@ namespace Iviz.Controllers
                     FramesVisible = false;
                     break;
                 case Msgs.GeometryMsgs.Polygon.RosMessageType:
-                    node.Parent = TfListener.MapFrame;
+                    node.Parent = TfListener.DefaultFrame;
                     Listener = new Listener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
                     FramesVisible = false;
                     break;

@@ -458,12 +458,5 @@ namespace Iviz.Controllers
         void IController.ResetController()
         {
         }
-
-        /*
-        void OnDestroy()
-        {
-            Debug.Log("AR Controller Destroyed!");
-        }
-        */
     }
 }

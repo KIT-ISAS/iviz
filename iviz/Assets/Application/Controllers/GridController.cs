@@ -97,7 +97,7 @@ namespace Iviz.Controllers
                 config.Visible = value;
                 if (!value)
                 {
-                    reflectionProbe.transform.parent = TfListener.MapFrame.transform;
+                    reflectionProbe.transform.parent = TfListener.DefaultFrame.Transform;
                     grid.Visible = false;
                     //node.Selected = false;
                 }

@@ -52,18 +52,18 @@ namespace Iviz.Controllers
         float? highlightFrameStart;
         readonly FrameNode highlightFrameNode;
         readonly AxisFrameResource highlightFrame;
-        
+
         public static float RootScale
         {
             get => RootFrame.transform.localScale.x;
             set => RootFrame.transform.localScale = value * Vector3.one;
-        }        
+        }
 
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Instance = this;
-            
+
             highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
             highlightFrame.Visible = false;
             highlightFrame.CastsShadows = false;
@@ -71,7 +71,7 @@ namespace Iviz.Controllers
 
             highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
             highlightFrame.Transform.parent = highlightFrameNode.Transform;
-            
+
             unityFrame = Add(CreateFrameObject("TF", null, null));
             unityFrame.ForceInvisible = true;
             unityFrame.Visible = false;
@@ -84,13 +84,11 @@ namespace Iviz.Controllers
             fixedFrameListener = FrameNode.Instantiate("[TFFixedFrame]");
             defaultListener.transform.parent = UnityFrame.Transform;
 
-            Config = new TfConfiguration();
-
             rootFrame = Add(CreateFrameObject("/", UnityFrame.Transform, UnityFrame));
             rootFrame.ForceInvisible = true;
             rootFrame.Visible = false;
             rootFrame.AddListener(defaultListener);
-            
+
             originFrame = Add(CreateFrameObject(OriginFrameName, RootFrame.Transform, RootFrame));
             originFrame.Parent = RootFrame;
             originFrame.ForceInvisible = true;
@@ -101,9 +99,9 @@ namespace Iviz.Controllers
             mapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.Transform, OriginFrame));
             mapFrame.Parent = OriginFrame;
             mapFrame.AddListener(defaultListener);
-            mapFrame.ParentCanChange = false;
 
-            FixedFrame = MapFrame;
+            Config = new TfConfiguration();
+
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
             GameThread.LateEveryFrame += LateUpdate;
@@ -120,17 +118,18 @@ namespace Iviz.Controllers
                     Instance.FixedFrame.RemoveListener(Instance.fixedFrameListener);
                 }
 
-                if (string.IsNullOrEmpty(value) || !TryGetFrame(value, out TfFrame frame))
+                if (string.IsNullOrEmpty(value))
                 {
-                    Instance.FixedFrame = MapFrame;
+                    Instance.FixedFrame = Instance.mapFrame;
                     OriginFrame.Transform.SetLocalPose(Pose.identity);
+                    Instance.Config.FixedFrameId = "";
+                    return;
                 }
-                else
-                {
-                    Instance.FixedFrame = frame;
-                    Instance.FixedFrame.AddListener(Instance.fixedFrameListener);
-                    OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
-                }
+
+                Instance.Config.FixedFrameId = value;
+                TfFrame frame = GetOrCreateFrame(value, Instance.fixedFrameListener);
+                Instance.FixedFrame = frame;
+                OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
             }
         }
 
@@ -138,12 +137,13 @@ namespace Iviz.Controllers
         [NotNull] public Sender<TFMessage> Publisher { get; }
         public IListener ListenerStatic { get; private set; }
 
-        [NotNull] public static TfFrame MapFrame => Instance.mapFrame;
+        //[NotNull] public static TfFrame MapFrame => Instance.mapFrame;
         [NotNull] public static TfFrame RootFrame => Instance.rootFrame;
         [NotNull] public static TfFrame OriginFrame => Instance.originFrame;
         [NotNull] public static TfFrame UnityFrame => Instance.unityFrame;
         [NotNull] public static TfFrame ListenersFrame => OriginFrame;
-        [NotNull] public override TfFrame Frame => MapFrame;
+        [NotNull] public override TfFrame Frame => FixedFrame;
+        [NotNull] public static TfFrame DefaultFrame => OriginFrame;
 
         [NotNull]
         public static IEnumerable<string> FramesUsableAsHints =>
@@ -163,6 +163,7 @@ namespace Iviz.Controllers
                 FrameLabelsVisible = value.FrameLabelsVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
                 KeepAllFrames = value.KeepAllFrames;
+                FixedFrameId = value.FixedFrameId;
             }
         }
 
@@ -304,7 +305,7 @@ namespace Iviz.Controllers
 
                     if (parentFrameId.Length == 0)
                     {
-                        child.SetParent(OriginFrame);
+                        child.SetParent(DefaultFrame);
                         child.SetPose(transform.Ros2Unity());
                         continue;
                     }
@@ -390,7 +391,7 @@ namespace Iviz.Controllers
         {
             return TryGetFrameImpl(id, out TfFrame frame)
                 ? frame
-                : Add(CreateFrameObject(id, OriginFrame.Transform, OriginFrame));
+                : Add(CreateFrameObject(id, DefaultFrame.Transform, DefaultFrame));
         }
 
         [NotNull]
@@ -455,7 +456,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
             if (alpha < 0)
             {

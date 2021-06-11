@@ -40,7 +40,7 @@ namespace Iviz.Controllers
 
         public Listener<InteractiveMarkerInit> FullListener { get; private set; }
         public Sender<InteractiveMarkerFeedback> Publisher { get; private set; }
-        [NotNull] public override TfFrame Frame => TfListener.MapFrame;
+        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
         public override IModuleData ModuleData { get; }
 
         public InteractiveMarkerConfiguration Config

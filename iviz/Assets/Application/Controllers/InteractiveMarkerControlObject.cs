@@ -103,7 +103,7 @@ namespace Iviz.Controllers
             description.Append("OrientationMode: ").Append(EnumToString(orientationMode)).AppendLine();
 
             UpdateMarkers(msg.Markers);
-            Bounds = RecalculateBounds();
+            RecalculateBounds();
 
             UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
 
@@ -303,7 +303,6 @@ namespace Iviz.Controllers
                         else
                         {
                             markerObject = CreateMarkerObject();
-                            markerObject.Visible = visible;
                             markers[markerId] = markerObject;
                         }
 
@@ -326,7 +325,7 @@ namespace Iviz.Controllers
 
                 if (numUnnamed > 1)
                 {
-                    description.Append(WarnStr).Append(numUnnamed).Append(" imarkers have empty ids").AppendLine();
+                    description.Append(WarnStr).Append(numUnnamed).Append(" interactive markers have empty ids").AppendLine();
                     numWarnings++;
                 }
             }
@@ -341,21 +340,23 @@ namespace Iviz.Controllers
 
             markers.Clear();
 
-            if (Control != null)
+            if (Control == null)
             {
-                Control.Suspend();
-                GameObject controlObject = ((MonoBehaviour) Control).gameObject;
-                if (Settings.IsHololens)
-                {
-                    HololensManager.ResourcePool.Dispose(controlObject);
-                }
-                else
-                {
-                    ResourcePool.Return(Resource.Displays.InteractiveControl, controlObject);
-                }
-
-                Control = null;
+                return;
             }
+            
+            Control.Suspend();
+            GameObject controlObject = ((MonoBehaviour) Control).gameObject;
+            if (Settings.IsHololens)
+            {
+                HololensManager.ResourcePool.Dispose(controlObject);
+            }
+            else
+            {
+                ResourcePool.Return(Resource.Displays.InteractiveControl, controlObject);
+            }
+
+            Control = null;
         }
 
         public void GenerateLog([NotNull] StringBuilder baseDescription)
@@ -380,16 +381,20 @@ namespace Iviz.Controllers
             }
         }
 
-        static void DeleteMarkerObject([NotNull] MarkerObject marker)
+        void DeleteMarkerObject([NotNull] MarkerObject marker)
         {
             marker.Stop();
+            marker.BoundsChanged -= RecalculateBounds;
             Destroy(marker.gameObject);
         }
 
-        static MarkerObject CreateMarkerObject()
-        {
-            GameObject gameObject = new GameObject("MarkerObject");
-            return gameObject.AddComponent<MarkerObject>();
+        [NotNull]
+        MarkerObject CreateMarkerObject()
+        { 
+            var markerObject = new GameObject("MarkerObject").AddComponent<MarkerObject>();
+            markerObject.Visible = visible;
+            markerObject.BoundsChanged += RecalculateBounds;
+            return markerObject;
         }
 
         [NotNull]
@@ -438,8 +443,7 @@ namespace Iviz.Controllers
             }
         }
 
-        [CanBeNull]
-        Bounds? RecalculateBounds()
+        void RecalculateBounds()
         {
             IEnumerable<(Bounds? Bounds, Transform Transform)> innerBounds = markers.Values
                 .Select(marker => (marker.Bounds, marker.Transform));
@@ -447,7 +451,7 @@ namespace Iviz.Controllers
             Bounds? totalBounds =
                 innerBounds.Select(tuple => tuple.Bounds.TransformBound(tuple.Transform)).CombineBounds();
 
-            return totalBounds;
+            Bounds = totalBounds;
         }
 
         public void UpdateControlBounds(Bounds? bounds)

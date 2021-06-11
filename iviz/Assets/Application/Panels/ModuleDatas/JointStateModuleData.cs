@@ -130,7 +130,7 @@ namespace Iviz.App
                 throw new InvalidOperationException($"Module with id '{robotId}' is not a robot");
             }
 
-            return ((SimpleRobotModuleData) robotData).Robot;
+            return ((SimpleRobotModuleData) robotData).RobotController;
         }
 
         public override void AddToState(StateConfiguration config)
