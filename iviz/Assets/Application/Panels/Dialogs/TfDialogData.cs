@@ -21,7 +21,7 @@ namespace Iviz.App
             panel.Close.Clicked += Close;
             panel.TfLog.Close += Close;
             panel.TfLog.Flush();
-            panel.TfLog.UpdateFrameTexts();
+            panel.TfLog.UpdateFrameButtons();
 
             panel.ShowOnlyUsed.Value = !TfListener.Instance.KeepAllFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>

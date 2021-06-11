@@ -14,8 +14,6 @@ namespace Iviz.App
 {
     public sealed class TfLog : MonoBehaviour, IWidget
     {
-        static TfLog Instance;
-
         [SerializeField] TMP_Text tfText = null;
         [SerializeField] TMP_Text tfName = null;
         [SerializeField] GameObject content = null;
@@ -32,8 +30,24 @@ namespace Iviz.App
         //[SerializeField] Text lock1PVText = null;
         [SerializeField] LinkResolver tfLink = null;
 
+        [SerializeField] DropdownWidget showAs = null;
+        [SerializeField] DropdownWidget poseAs = null;
+
+        bool showAsTree = true;
+
+        enum PoseDisplayType
+        {
+            ToRoot,
+            ToParent,
+            ToFixed
+        }
+
+        PoseDisplayType poseDisplay;
+
         readonly StringBuilder description = new StringBuilder(65536);
         uint? descriptionHash;
+
+        readonly List<TfNode> nodes = new List<TfNode>();
 
         FrameNode placeHolder;
         bool isInitialized;
@@ -49,6 +63,11 @@ namespace Iviz.App
             {
                 if (value == selectedFrame)
                 {
+                    if (value != null)
+                    {
+                        TfListener.Instance.HighlightFrame(value.Id);
+                    }
+
                     return;
                 }
 
@@ -72,32 +91,43 @@ namespace Iviz.App
                 fixedFrame.interactable = interactable;
                 //lock1PV.interactable = interactable;
 
-                if (value == null)
+                Flush();
+                if (value != null)
                 {
-                    tfName.text = "<color=grey>[none]</color>";
-                }
-                else
-                {
-                    string nameText = value.Id == TfListener.FixedFrameId
-                        ? $"<font=Bold>[{value.Id}]</font>  <i>[Fixed]</i>"
-                        : $"<font=Bold>[{value.Id}]</font>";
-                    string parentId =
-                        value.Parent == null || value.Parent == TfListener.OriginFrame
-                            ? "[none]"
-                            : value.Parent.Id;
-
-                    tfName.text = $"{nameText}\n{parentId}";
                     TfListener.Instance.HighlightFrame(value.Id);
                 }
 
-                Flush();
-                UpdateFrameTexts();
+                UpdateFrameButtons();
             }
         }
 
         void Awake()
         {
             Initialize();
+
+            showAs.Options = new[]
+            {
+                "Show as Tree",
+                "Show as List",
+            };
+            poseAs.Options = new[]
+            {
+                "Pose to Root",
+                "Relative to Parent",
+                "Relative to Fixed"
+            };
+
+            showAs.ValueChanged += (i, _) =>
+            {
+                showAsTree = i == 0;
+                Flush();
+            };
+
+            poseAs.ValueChanged += (i, _) =>
+            {
+                poseDisplay = (PoseDisplayType) i;
+                UpdateFrameText();
+            };
         }
 
         void Initialize()
@@ -108,7 +138,6 @@ namespace Iviz.App
             }
 
             isInitialized = true;
-            Instance = this;
 
             tfLink.LinkClicked += OnLinkClicked;
             SelectedFrame = null;
@@ -120,9 +149,9 @@ namespace Iviz.App
             lockPivot.interactable = false;
             fixedFrame.interactable = false;
             //lock1PV.interactable = false;
-            tfName.text = "<color=grey>[none]</color>";
+            SelectedFrame = TfListener.GetOrCreateFrame("map");
 
-            UpdateFrameTexts();
+            UpdateFrameButtons();
         }
 
         void OnLinkClicked([CanBeNull] string frameId)
@@ -133,117 +162,26 @@ namespace Iviz.App
                     : frame;
         }
 
-        readonly struct TfNode : IComparable<TfNode>
-        {
-            readonly string name;
-            readonly TfNode[] children;
-            readonly Pose pose;
-            readonly bool hasTrail;
-            readonly bool selected;
-
-            public TfNode([NotNull] TfFrame frame)
-            {
-                name = frame.Id;
-                pose = frame.OriginWorldPose;
-                hasTrail = frame.TrailVisible;
-                selected = (frame == Instance.SelectedFrame);
-                children = new TfNode[frame.Children.Count];
-
-                int i = 0;
-                foreach (var childFrame in frame.Children)
-                {
-                    children[i++] = new TfNode(childFrame);
-                }
-
-                Array.Sort(children);
-            }
-
-            void Write([NotNull] StringBuilder str, int level)
-            {
-                str.Append(' ', level * 4);
-                str.Append("<link=").Append(name).Append("><u><font=Bold>");
-
-                /*
-                Vector3 position = pose.position.Unity2Ros();
-                string x = position.x.ToString("#,0.###", UnityUtils.Culture);
-                string y = position.y.ToString("#,0.###", UnityUtils.Culture);
-                string z = position.z.ToString("#,0.###", UnityUtils.Culture);
-                */
-
-                if (selected)
-                {
-                    str.Append("<color=blue>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append(name);
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append("</color>");
-                }
-                else if (name == TfListener.FixedFrameId)
-                {
-                    str.Append("<color=green>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append(name);
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append("</color>");
-                }
-                else
-                {
-                    str.Append(name);
-                }
-
-                str.AppendLine("</font></u></link>");
-                /*
-                str.Append("</font></u> [")
-                    .Append(x).Append(", ")
-                    .Append(y).Append(", ")
-                    .Append(z)
-                    .Append("]</link>")
-                    .AppendLine();
-                    */
-
-                foreach (TfNode node in children)
-                {
-                    node.Write(str, level + 1);
-                }
-            }
-
-            public void Write([NotNull] StringBuilder str)
-            {
-                foreach (TfNode node in children)
-                {
-                    node.Write(str, 0);
-                }
-            }
-
-            public int CompareTo(TfNode other)
-            {
-                return string.CompareOrdinal(name, other.name);
-            }
-        }
-
         public void Flush()
         {
             Initialize();
 
-            description.Clear();
+            if (showAsTree)
+            {
+                UpdateFrameListAsTree();
+            }
+            else
+            {
+                UpdateFrameListAsList();
+            }
 
-            new TfNode(TfListener.OriginFrame).Write(description);
+            UpdateFrameText();
+        }
+
+        void UpdateFrameListAsTree()
+        {
+            description.Clear();
+            new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
 
             description.AppendLine().AppendLine();
             uint newHash = Crc32Calculator.Instance.Compute(description);
@@ -258,8 +196,98 @@ namespace Iviz.App
             cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }
 
-        public void ClearSubscribers()
+        void UpdateFrameListAsList()
         {
+            nodes.Clear();
+            new TfNode(TfListener.OriginFrame, SelectedFrame).AddTo(nodes);
+
+            description.Clear();
+            nodes.Sort();
+            foreach (var node in nodes)
+            {
+                node.WriteSingle(description);
+            }
+
+            description.AppendLine().AppendLine();
+            uint newHash = Crc32Calculator.Instance.Compute(description);
+            if (newHash == descriptionHash)
+            {
+                return;
+            }
+
+            descriptionHash = newHash;
+            tfText.SetText(description);
+
+            RectTransform cTransform = (RectTransform) content.transform;
+            cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+        }
+
+        void UpdateFrameText()
+        {
+            if (SelectedFrame == null)
+            {
+                tfName.text = "<color=grey>[none]</color>";
+            }
+            else
+            {
+                string id = SelectedFrame.Id;
+                string nameText = id == TfListener.FixedFrameId
+                    ? $"<font=Bold>[{id}]</font>  <i>[Fixed]</i>"
+                    : $"<font=Bold>[{id}]</font>";
+                string parentId =
+                    SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
+                        ? "[no parent]"
+                        : SelectedFrame.Parent.Id;
+
+
+                Pose pose;
+                switch (poseDisplay)
+                {
+                    case PoseDisplayType.ToRoot:
+                        pose = SelectedFrame.OriginWorldPose;
+                        break;
+                    case PoseDisplayType.ToFixed:
+                        pose = TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose);
+                        break;
+                    case PoseDisplayType.ToParent:
+                        pose = SelectedFrame.Transform.AsLocalPose();
+                        break;
+                    default:
+                        pose = Pose.identity; // shouldn't happen
+                        break;
+                }
+
+                var ((pX, pY, pZ), (rX, rY, rZ, rW)) = pose.Unity2RosPose();
+                string px = pX.ToString("#,0.###", UnityUtils.Culture);
+                string py = pY.ToString("#,0.###", UnityUtils.Culture);
+                string pz = pZ.ToString("#,0.###", UnityUtils.Culture);
+
+                string rx = rX.ToString("#,0.###", UnityUtils.Culture);
+                string ry = rY.ToString("#,0.###", UnityUtils.Culture);
+                string rz = rZ.ToString("#,0.###", UnityUtils.Culture);
+                string rw = rW.ToString("#,0.###", UnityUtils.Culture);
+
+                string poseStr = $"t:[{px}, {py}, {pz}]  r:[{rx}, {ry}, {rz}, {rw}]";
+
+                tfName.text = $"{nameText}\n{parentId}\n{poseStr}";
+            }
+        }
+
+        public void UpdateFrameButtons()
+        {
+            if (SelectedFrame == null)
+            {
+                trailText.text = "Trail:\nOff";
+                lockPivotText.text = "Lock Pivot\nOff";
+            }
+            else
+            {
+                trailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
+
+                lockPivotText.text = ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
+                    ? "Lock Pivot\n<b>On</b>"
+                    : "Lock Pivot\nOff";
+            }
         }
 
         public void OnGotoClicked()
@@ -280,7 +308,7 @@ namespace Iviz.App
                 SelectedFrame.TrailVisible = !SelectedFrame.TrailVisible;
             }
 
-            UpdateFrameTexts();
+            UpdateFrameButtons();
         }
 
         public void OnFixedFrameClicked()
@@ -291,7 +319,7 @@ namespace Iviz.App
                 TfListener.FixedFrameId = SelectedFrame.Id;
             }
 
-            UpdateFrameTexts();
+            UpdateFrameButtons();
         }
 
         public void OnLockPivotClicked()
@@ -301,26 +329,10 @@ namespace Iviz.App
                     ? null
                     : SelectedFrame;
 
-            UpdateFrameTexts();
+            UpdateFrameButtons();
             Close?.Invoke();
         }
 
-        public void UpdateFrameTexts()
-        {
-            if (SelectedFrame == null)
-            {
-                trailText.text = "Trail:\nOff";
-                lockPivotText.text = "Lock Pivot\nOff";
-            }
-            else
-            {
-                trailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
-
-                lockPivotText.text = ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
-                    ? "Lock Pivot\n<b>On</b>"
-                    : "Lock Pivot\nOff";
-            }
-        }
 
         public void OnLock1PVClicked()
         {
@@ -329,8 +341,121 @@ namespace Iviz.App
                     ? null
                     : SelectedFrame;
 
-            UpdateFrameTexts();
+            UpdateFrameButtons();
             Close?.Invoke();
+        }
+
+        public void ClearSubscribers()
+        {
+        }
+    }
+
+    internal readonly struct TfNode : IComparable<TfNode>
+    {
+        readonly string name;
+        readonly TfNode[] children;
+        readonly bool hasTrail;
+        readonly bool selected;
+
+        public TfNode([NotNull] TfFrame frame, [CanBeNull] TfFrame selectedFrame)
+        {
+            name = frame.Id;
+            hasTrail = frame.TrailVisible;
+            selected = (frame == selectedFrame);
+            children = new TfNode[frame.Children.Count];
+
+            int i = 0;
+            foreach (var childFrame in frame.Children)
+            {
+                children[i++] = new TfNode(childFrame, selectedFrame);
+            }
+
+            Array.Sort(children);
+        }
+
+        void Write([NotNull] StringBuilder str, int level, bool withChildren)
+        {
+            if (level != 0)
+            {
+                str.Append(' ', level * 4);
+            }
+
+            str.Append("<link=").Append(name).Append("><font=Bold>");
+
+            if (selected)
+            {
+                str.Append("<color=blue>");
+                if (hasTrail)
+                {
+                    str.Append("~");
+                }
+
+                str.Append("<u>").Append(name).Append("</u>");
+                if (hasTrail)
+                {
+                    str.Append("~");
+                }
+
+                str.Append("</color>");
+            }
+            else if (name == TfListener.FixedFrameId)
+            {
+                str.Append("<color=#008800>");
+                if (hasTrail)
+                {
+                    str.Append("~");
+                }
+
+                str.Append("<u>").Append(name).Append("</u>");
+                if (hasTrail)
+                {
+                    str.Append("~");
+                }
+
+                str.Append("</color>");
+            }
+            else
+            {
+                str.Append("<u>").Append(name).Append("</u>");
+            }
+
+            str.AppendLine("</font></link>");
+
+            if (withChildren)
+            {
+                foreach (TfNode node in children)
+                {
+                    node.Write(str, level + 1, true);
+                }
+            }
+        }
+
+        public void Write([NotNull] StringBuilder str)
+        {
+            foreach (TfNode node in children)
+            {
+                node.Write(str, 0, true);
+            }
+        }
+
+        public void WriteSingle([NotNull] StringBuilder str)
+        {
+            Write(str, 0, false);
+        }
+
+
+        public int CompareTo(TfNode other)
+        {
+            return string.CompareOrdinal(name, other.name);
+        }
+
+        public void AddTo([NotNull] List<TfNode> nodes)
+        {
+            foreach (TfNode node in children)
+            {
+                nodes.Add(node);
+                node.AddTo(nodes);
+            }
         }
     }
 }

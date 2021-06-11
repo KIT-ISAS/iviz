@@ -49,7 +49,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             ResetPanelPosition();
-            
+
             panel.Close.Clicked += Close;
             panel.LinkClicked += LinkClicked;
             panel.HostnameEndEdit += (i, _) => UpdateAliasesLink(i);
@@ -57,7 +57,7 @@ namespace Iviz.App
             panel.ModeChanged += _ =>
             {
                 descriptionHash = null;
-                
+
                 panel.TextBottom.text = EmptyBottomText;
                 if (panel.Mode == SystemDialogContents.ModeType.Aliases)
                 {
@@ -218,7 +218,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             descriptionHash = newHash;
             panel.TextTop.SetText(description);
         }
@@ -368,9 +368,19 @@ namespace Iviz.App
                 description.AppendLine("<font=Bold>Value:</font>");
 
                 string value = JsonConvert
-                    .SerializeObject(paramValue, Formatting.Indented, JsonConverter)
-                    .Replace("<", "<noparse><</noparse>");
-                description.Append(value);
+                    .SerializeObject(paramValue, Formatting.Indented, JsonConverter);
+                if (paramValue.ValueType != XmlRpcValue.Type.String)
+                {
+                    description.Append(value);
+                }
+                else
+                {
+                    description.Append(value
+                        .Replace("<", "<noparse><</noparse>")
+                        .Replace("\\n", "\n")
+                        .Replace("\\\"", "\"")
+                    );
+                }
             }
             else
             {
@@ -380,6 +390,7 @@ namespace Iviz.App
             }
 
             panel.TextBottom.SetText(description);
+            panel.TextBottom.UpdateVertexData();
 
             async void GetParamValue(string param, CancellationToken token)
             {
