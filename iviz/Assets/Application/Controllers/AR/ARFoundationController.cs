@@ -456,18 +456,6 @@ namespace Iviz.Controllers
         [NotNull]
         IEnumerable<(int width, int height)> IScreenshotManager.GetResolutions()
         {
-            /*
-            using (var configurations = cameraManager.GetConfigurations(Allocator.Temp))
-            {
-                var resolutions = new (int width, int height)[configurations.Length];
-                for (int i = 0; i < configurations.Length; i++)
-                {
-                    resolutions[i] = (configurations[i].width, configurations[i].height);
-                }
-
-                return resolutions;
-            }
-            */
             var configuration = cameraManager.subsystem.currentConfiguration;
             return configuration == null
                 ? Array.Empty<(int width, int height)>()

@@ -194,21 +194,10 @@ namespace Iviz.Core
             }
         }
 
-        public static Pose Lerp(this Pose p, in Pose o, float t)
-        {
-            return new Pose(
-                Vector3.Lerp(p.position, o.position, t),
-                Quaternion.Lerp(p.rotation, o.rotation, t)
-            );
-        }
-
-        public static Pose Lerp([NotNull] this Transform p, in Pose o, float t)
-        {
-            return new Pose(
-                Vector3.Lerp(p.position, o.position, t),
-                Quaternion.Lerp(p.rotation, o.rotation, t)
-            );
-        }
+        public static Pose Lerp(this Pose p, in Pose o, float t) => new Pose(
+            Vector3.Lerp(p.position, o.position, t),
+            Quaternion.Lerp(p.rotation, o.rotation, t)
+        );
 
         public static Pose LocalLerp([NotNull] this Transform p, in Pose o, float t)
         {

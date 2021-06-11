@@ -89,7 +89,7 @@ namespace Iviz.Resources
         [NotNull]
         public static ExternalResourceManager External => externals ?? (externals = new ExternalResourceManager());
 
-        public static bool ContainsRobot([NotNull] string robotName)
+        public static bool IsRobotSaved([NotNull] string robotName)
         {
             return Internal.ContainsRobot(robotName) ||
                    External.ContainsRobot(robotName);

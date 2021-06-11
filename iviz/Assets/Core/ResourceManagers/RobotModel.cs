@@ -38,6 +38,8 @@ namespace Iviz.Displays
         readonly List<(GameObject, Info<GameObject>)> objectResources =
             new List<(GameObject, Info<GameObject>)>();
 
+        readonly Dictionary<MeshMarkerResource, Color> originalColors = new Dictionary<MeshMarkerResource, Color>();
+
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new CancellationTokenSource();
 
@@ -287,11 +289,7 @@ namespace Iviz.Displays
                 {
                     info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception e)
+                catch (Exception e) when (!(e is OperationCanceledException))
                 {
                     Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
                     NumErrors++;
@@ -364,7 +362,7 @@ namespace Iviz.Displays
 
 
             GameObject resourceObject = null;
-            bool isSynthetic = false;
+            bool isResource = false;
             if (geometry.Mesh != null)
             {
                 string uri = geometry.Mesh.Filename;
@@ -395,7 +393,7 @@ namespace Iviz.Displays
                 objectResources.Add((resourceObject, info));
                 resourceObject.transform.SetParent(visualObject.transform, false);
                 visualObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
-                isSynthetic = true;
+                isResource = true;
             }
             else if (geometry.Cylinder != null)
             {
@@ -427,7 +425,30 @@ namespace Iviz.Displays
                 return; //?
             }
 
-            if (!isSynthetic)
+            if (isResource)
+            {
+                var material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
+                var color = material?.Color?.ToColor() ?? Color.white;
+
+                var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
+                var resources = new List<MeshMarkerResource>();
+
+                foreach (var renderer in renderers)
+                {
+                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
+                    if (meshResource == null)
+                    {
+                        continue;
+                    }
+
+                    originalColors[meshResource] = meshResource.Color;
+                    meshResource.Color *= color;
+                    resources.Add(meshResource);
+                }
+
+                displays.AddRange(resources);
+            }
+            else
             {
                 var resource = resourceObject.AddComponent<MeshMarkerResource>();
                 displays.Add(resource);
@@ -447,28 +468,6 @@ namespace Iviz.Displays
                 {
                     // TODO!!
                 }
-            }
-            else
-            {
-                var material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
-                var color = material?.Color?.ToColor() ?? Color.white;
-
-                var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                var resources = new List<MeshMarkerResource>();
-
-                foreach (var renderer in renderers)
-                {
-                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
-                    if (meshResource == null)
-                    {
-                        continue;
-                    }
-
-                    meshResource.Color *= color;
-                    resources.Add(meshResource);
-                }
-
-                displays.AddRange(resources);
             }
         }
 
@@ -552,6 +551,15 @@ namespace Iviz.Displays
             CancelTasks();
 
             ResetLinkParents();
+
+            Visible = true;
+            Tint = Color.white;
+            OcclusionOnly = false;
+
+            foreach (var pair in originalColors)
+            {
+                pair.Key.Color = pair.Value;
+            }
 
             foreach (var (gameObject, info) in objectResources)
             {

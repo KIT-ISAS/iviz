@@ -9,13 +9,17 @@ namespace Application.Displays
         AxisFrameResource resource;
         [SerializeField] Camera parentCamera;
         [SerializeField] Camera grandparentCamera;
+        
+        static readonly Color ColorX = new Color(0.9f, 0.4f, 0, 1);
+        static readonly Color ColorY = new Color(0, 0.9f, 0.6f, 1);
+        static readonly Color ColorZ = new Color(0.6f, 0, 0.9f, 1);
 
         void Start()
         {
             resource = GetComponent<AxisFrameResource>();
-            resource.ColorX = new Color(0.9f, 0.4f, 0, 1);
-            resource.ColorY = new Color(0, 0.9f, 0.6f, 1);
-            resource.ColorZ = new Color(0.6f, 0, 0.9f, 1);
+            resource.ColorX = ColorX;
+            resource.ColorY = ColorY;
+            resource.ColorZ = ColorZ;
 
             resource.AxisLength = 0.001f;
             resource.Layer = gameObject.layer;

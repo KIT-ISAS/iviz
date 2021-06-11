@@ -81,7 +81,7 @@ namespace Iviz.App.ARDialogs
             set => gameObject.SetActive(value);
         }
 
-        ButtonIcon icon;
+        ButtonIcon icon = ButtonIcon.Cross;
 
         public ButtonIcon Icon
         {
@@ -114,7 +114,7 @@ namespace Iviz.App.ARDialogs
 
         protected override void Awake()
         {
-            Icon = ButtonIcon.Cross;
+            Icon = Icon;
             iconMeshRenderer.material = Material;
 
             if (Settings.IsHololens)

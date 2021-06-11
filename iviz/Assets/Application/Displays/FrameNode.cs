@@ -87,7 +87,7 @@ namespace Iviz.Controllers
 
             if (Parent == null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId) ? TfListener.MapFrame : TfListener.GetOrCreateFrame(parentId);
+                Parent = string.IsNullOrEmpty(parentId) ? TfListener.DefaultFrame : TfListener.GetOrCreateFrame(parentId);
             }
         }
 
@@ -110,9 +110,9 @@ namespace Iviz.Controllers
 
             GameObject obj = new GameObject(name);
             SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
-            if (TfListener.Instance != null && TfListener.MapFrame != null)
+            if (TfListener.Instance != null && TfListener.DefaultFrame != null)
             {
-                node.Parent = TfListener.MapFrame;
+                node.Parent = TfListener.DefaultFrame;
             }
 
             node.owner = owner;

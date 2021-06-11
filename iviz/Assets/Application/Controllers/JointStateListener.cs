@@ -38,7 +38,7 @@ namespace Iviz.Controllers
     {
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => TfListener.MapFrame;
+        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
 

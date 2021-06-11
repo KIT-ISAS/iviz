@@ -21,5 +21,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public ModuleType ModuleType => ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember, NotNull] public HashSet<string> BlacklistedFrames { get; set; } = new HashSet<string>();
+        [DataMember, NotNull] public string FixedFrameId { get; set; } = "";
     }
 }
