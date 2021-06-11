@@ -123,14 +123,14 @@ namespace Iviz.Roslib
         public string ErrorMessage { get; }
 
         public RosServiceNotFoundException(string service, string message)
-            : base($"Failed to call service {service}: {message}")
+            : base($"Failed to call service {service}. Reason: {message}")
         {
             ServiceName = service;
             ErrorMessage = message;
         }
 
         public RosServiceNotFoundException(string service, string message, Exception innerException)
-            : base($"Failed to call service {service}: {message}", innerException)
+            : base($"Failed to call service {service}. Reason: {message}", innerException)
         {
             ServiceName = service;
             ErrorMessage = message;
@@ -143,7 +143,7 @@ namespace Iviz.Roslib
         public string ServerMessage { get; }
 
         public RosServiceCallFailed(string service, string message) : base(
-            $"Service call to '{service}' failed: {message}")
+            $"Service call to '{service}' failed. Reason: {message}")
         {
             ServiceName = service;
             ServerMessage = message;
