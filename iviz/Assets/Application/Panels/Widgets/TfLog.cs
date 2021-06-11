@@ -17,7 +17,7 @@ namespace Iviz.App
         static TfLog Instance;
 
         [SerializeField] TMP_Text tfText = null;
-        [SerializeField] Text tfName = null;
+        [SerializeField] TMP_Text tfName = null;
         [SerializeField] GameObject content = null;
         [SerializeField] Button gotoButton = null;
         [SerializeField] Button trail = null;
@@ -32,7 +32,9 @@ namespace Iviz.App
         //[SerializeField] Text lock1PVText = null;
         [SerializeField] LinkResolver tfLink = null;
 
-        readonly StringBuilder str = new StringBuilder(65536);
+        readonly StringBuilder description = new StringBuilder(65536);
+        uint? descriptionHash;
+
         FrameNode placeHolder;
         bool isInitialized;
         [CanBeNull] TfFrame selectedFrame;
@@ -72,13 +74,19 @@ namespace Iviz.App
 
                 if (value == null)
                 {
-                    tfName.text = "<color=grey>[ ⮑none ]</color>";
+                    tfName.text = "<color=grey>[none]</color>";
                 }
                 else
                 {
-                    tfName.text = value.Id == TfListener.FixedFrameId
-                        ? $"[ ⮑{value.Id}] <i>[Fixed]</i>"
-                        : $"[ ⮑{value.Id}]";
+                    string nameText = value.Id == TfListener.FixedFrameId
+                        ? $"<font=Bold>[{value.Id}]</font>  <i>[Fixed]</i>"
+                        : $"<font=Bold>[{value.Id}]</font>";
+                    string parentId =
+                        value.Parent == null || value.Parent == TfListener.OriginFrame
+                            ? "[none]"
+                            : value.Parent.Id;
+
+                    tfName.text = $"{nameText}\n{parentId}";
                     TfListener.Instance.HighlightFrame(value.Id);
                 }
 
@@ -112,7 +120,7 @@ namespace Iviz.App
             lockPivot.interactable = false;
             fixedFrame.interactable = false;
             //lock1PV.interactable = false;
-            tfName.text = "<color=grey>[ ⮑none ]</color>";
+            tfName.text = "<color=grey>[none]</color>";
 
             UpdateFrameTexts();
         }
@@ -155,10 +163,12 @@ namespace Iviz.App
                 str.Append(' ', level * 4);
                 str.Append("<link=").Append(name).Append("><u><font=Bold>");
 
+                /*
                 Vector3 position = pose.position.Unity2Ros();
                 string x = position.x.ToString("#,0.###", UnityUtils.Culture);
                 string y = position.y.ToString("#,0.###", UnityUtils.Culture);
                 string z = position.z.ToString("#,0.###", UnityUtils.Culture);
+                */
 
                 if (selected)
                 {
@@ -197,12 +207,15 @@ namespace Iviz.App
                     str.Append(name);
                 }
 
+                str.AppendLine("</font></u></link>");
+                /*
                 str.Append("</font></u> [")
                     .Append(x).Append(", ")
                     .Append(y).Append(", ")
                     .Append(z)
                     .Append("]</link>")
                     .AppendLine();
+                    */
 
                 foreach (TfNode node in children)
                 {
@@ -228,14 +241,19 @@ namespace Iviz.App
         {
             Initialize();
 
-            str.Length = 0;
+            description.Clear();
 
-            new TfNode(TfListener.OriginFrame).Write(str);
+            new TfNode(TfListener.OriginFrame).Write(description);
 
-            str.AppendLine().AppendLine();
+            description.AppendLine().AppendLine();
+            uint newHash = Crc32Calculator.Instance.Compute(description);
+            if (newHash == descriptionHash)
+            {
+                return;
+            }
 
-            tfText.SetText(str);
-
+            descriptionHash = newHash;
+            tfText.SetText(description);
             RectTransform cTransform = (RectTransform) content.transform;
             cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }

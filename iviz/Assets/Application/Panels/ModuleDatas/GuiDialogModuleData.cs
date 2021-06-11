@@ -3,6 +3,7 @@ using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
@@ -52,6 +53,21 @@ namespace Iviz.App
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
+            var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
+            
+            foreach (string field in fields)
+            {
+                switch (field) 
+                {
+                    case nameof(GuiDialogConfiguration.Visible):
+                        break;
+                    default:
+                        Core.Logger.Error($"{this}: Unknown field '{field}'");
+                        break;                    
+                }
+            }
+            
+            ResetPanel();
         }
 
         public override void AddToState(StateConfiguration config)

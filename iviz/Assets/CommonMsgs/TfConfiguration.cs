@@ -17,7 +17,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public bool FrameLabelsVisible { get; set; }
         [DataMember] public bool ParentConnectorVisible { get; set; }
         [DataMember] public bool KeepAllFrames { get; set; } = true;
-        [DataMember, NotNull] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember, NotNull] public string Id { get; set; } = "tf";
         [DataMember] public ModuleType ModuleType => ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember, NotNull] public HashSet<string> BlacklistedFrames { get; set; } = new HashSet<string>();

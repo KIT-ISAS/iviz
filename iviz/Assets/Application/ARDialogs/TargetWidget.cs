@@ -91,6 +91,9 @@ namespace Iviz.App.ARDialogs
         protected override void Awake()
         {
             base.Awake();
+
+            //Scale = 10;
+            
             lines = ResourcePool.RentDisplay<LineResource>(pivotTransform);
             poly.EmissiveColor = poly.Color.WithAlpha(1);
             lines.ElementScale = 0.05f;
@@ -111,7 +114,9 @@ namespace Iviz.App.ARDialogs
             okButton.Clicked += () =>
             {
                 Debug.Log($"{this}: Sending scale");
-                Moved?.Invoke(this, TargetScale / Scale, Transform.localPosition);
+                //float totalScale = transform.parent.lossyScale.x;
+                //Debug.Log(TargetScale / Scale / totalScale);
+                Moved?.Invoke(this, TargetScale * Scale, Transform.localPosition);
             };
             cancelButton.Clicked += () => Cancelled?.Invoke(this);
         }

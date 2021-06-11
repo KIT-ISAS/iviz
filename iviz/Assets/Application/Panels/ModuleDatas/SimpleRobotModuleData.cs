@@ -80,7 +80,7 @@ namespace Iviz.App
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
-            
+
             panel.SavedRobotName.Options = GetSavedRobots();
 
             //panel.FramePrefix.Value = Robot.FramePrefix;
@@ -128,7 +128,7 @@ namespace Iviz.App
 
                 panel.Save.Interactable = !string.IsNullOrEmpty(Robot.Robot?.Name);
             };
-            panel.AttachToTf.ValueChanged += f => 
+            panel.AttachToTf.ValueChanged += f =>
                 Robot.AttachedToTf = f;
             panel.CloseButton.Clicked += () =>
             {
@@ -159,7 +159,7 @@ namespace Iviz.App
                     Resource.External.RemoveRobotResource(Robot.Robot.Name);
                 }
             };
-            
+
             Robot.CheckRobotStartTask();
             UpdateModuleButton();
         }
@@ -177,8 +177,15 @@ namespace Iviz.App
         }
 
         [NotNull, ItemNotNull]
-        static IEnumerable<string> GetParameterCandidates(CancellationToken token) =>
-            ConnectionManager.Connection.GetSystemParameterList(token).Where(x => x.Contains(ParamSubstring));
+        static IEnumerable<string> GetParameterCandidates(CancellationToken token)
+        {
+            var list = ConnectionManager.Connection.GetSystemParameterList(token)
+                .Where(x => x.Contains(ParamSubstring))
+                .ToList();
+            list.Sort();
+            return list;
+        }
+
 
         [NotNull, ItemNotNull]
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
@@ -218,12 +225,14 @@ namespace Iviz.App
                     case nameof(RobotConfiguration.Visible):
                         Robot.Visible = config.Visible;
                         break;
-                    case nameof(RobotConfiguration.SourceParameter) when config.SourceParameter != Robot.Config.SourceParameter:
+                    case nameof(RobotConfiguration.SourceParameter)
+                        when config.SourceParameter != Robot.Config.SourceParameter:
                         hasSourceParameter = true;
                         break;
                     case nameof(RobotConfiguration.SourceParameter):
                         break;
-                    case nameof(RobotConfiguration.SavedRobotName) when config.SavedRobotName != Robot.Config.SavedRobotName:
+                    case nameof(RobotConfiguration.SavedRobotName)
+                        when config.SavedRobotName != Robot.Config.SavedRobotName:
                         hasRobotName = true;
                         break;
                     case nameof(RobotConfiguration.SavedRobotName):

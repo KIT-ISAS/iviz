@@ -70,7 +70,7 @@ namespace Iviz.Controllers
 
         static readonly string[] LogLevelNames = {"debug", "info", "warn", "error", "fatal"};
 
-        internal static void GetLoggers(GetLoggers srv)
+        internal static void GetLoggers([NotNull] GetLoggers srv)
         {
             srv.Response.Loggers = new[]
             {
@@ -79,7 +79,7 @@ namespace Iviz.Controllers
             };
         }
 
-        internal static void SetLoggerLevel(SetLoggerLevel srv)
+        internal static void SetLoggerLevel([NotNull] SetLoggerLevel srv)
         {
             if (srv.Request.Logger != "ros.iviz")
             {
@@ -644,6 +644,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         static Task<byte[]> CompressAsync([NotNull] Screenshot ss)
         {
             return Task.Run(() =>
@@ -671,6 +672,7 @@ namespace Iviz.Controllers
             });
         }
 
+        [NotNull]
         internal static Task UpdateRobotAsync([NotNull] UpdateRobot srv)
         {
             switch (srv.Request.Operation)

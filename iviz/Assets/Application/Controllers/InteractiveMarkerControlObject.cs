@@ -161,7 +161,7 @@ namespace Iviz.Controllers
                 }
 
                 var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-                AudioSource.PlayClipAtPoint(assetHolder.Click, Settings.MainCamera.transform.position);
+                AudioSource.PlayClipAtPoint(assetHolder.Click, transform.position);
             };
 
             Control.MenuClicked += unityPositionHint => { parent.ShowMenu(unityPositionHint); };

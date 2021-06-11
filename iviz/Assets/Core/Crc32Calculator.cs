@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text;
 using Iviz.Msgs;
 using JetBrains.Annotations;
 
@@ -18,6 +19,7 @@ namespace Iviz.Core
             table = InitializeTable();
         }
 
+        [NotNull]
         static uint[] InitializeTable()
         {
             var createTable = new uint[256];
@@ -59,11 +61,31 @@ namespace Iviz.Core
             return CalculateHash(startHash, (byte*) ptr, sizeof(T));
         }
 
+        public uint Compute([NotNull] StringBuilder value, uint startHash = DefaultSeed)
+        {
+            uint hash = startHash;
+            for (int i = 0; i < value.Length; i++)
+            {
+                uint val = value[i];
+                hash = (hash >> 8) ^ table[val ^ hash & 0xff];
+            }
+
+            return hash;
+        }
+
         public unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
+            }
+        }
+
+        public unsafe uint Compute([NotNull] string array, uint startHash = DefaultSeed)
+        {
+            fixed (char* ptr = array)
+            {
+                return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(char));
             }
         }
 

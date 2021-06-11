@@ -55,7 +55,7 @@ namespace Iviz.Controllers
             }
 
             ConnectionManager.Connection.AdvertiseService<GetModelResource>(
-                ModelServer.ModelServiceName, modelServer.ModelCallback);
+                ModelServer.ModelServiceName, ModelCallback);
 
             ConnectionManager.Connection.AdvertiseService<GetModelTexture>(
                 ModelServer.TextureServiceName, modelServer.TextureCallback);
@@ -112,6 +112,22 @@ namespace Iviz.Controllers
             {
                 Logger.Error($"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read", e);
                 return null;
+            }
+        }
+
+        async Task ModelCallback([NotNull] GetModelResource msg)
+        {
+            modelServer.ModelCallback(msg);
+            if (msg.Response.Success)
+            {
+                return;
+            }
+
+            var model = await Resources.Resource.External.TryGetModelResourceAsync(msg.Request.Uri);
+            if (model != null)
+            {
+                msg.Response.Success = true;
+                msg.Response.Model = model;
             }
         }
 

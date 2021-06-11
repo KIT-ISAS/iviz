@@ -13,6 +13,7 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Utilities;
+using UnityEngine;
 using UnityEngine.PlayerLoop;
 using Logger = Iviz.Core.Logger;
 
@@ -29,6 +30,8 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => panel;
 
         readonly StringBuilder description = new StringBuilder(65536);
+
+        uint? descriptionHash;
 
         [CanBeNull] CancellationTokenSource tokenSource;
 
@@ -53,6 +56,8 @@ namespace Iviz.App
             panel.AddressEndEdit += (i, _) => UpdateAliasesLink(i);
             panel.ModeChanged += _ =>
             {
+                descriptionHash = null;
+                
                 panel.TextBottom.text = EmptyBottomText;
                 if (panel.Mode == SystemDialogContents.ModeType.Aliases)
                 {
@@ -133,7 +138,7 @@ namespace Iviz.App
                     .AppendLine("]</i>");
             }
 
-            panel.TextTop.SetText(description);
+            UpdateTop();
         }
 
         void UpdateServices()
@@ -155,7 +160,7 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
-            panel.TextTop.SetText(description);
+            UpdateTop();
         }
 
         void UpdateParameters()
@@ -176,7 +181,7 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
-            panel.TextTop.SetText(description);
+            UpdateTop();
         }
 
         void UpdateNodes()
@@ -203,6 +208,18 @@ namespace Iviz.App
                     .AppendLine("</link></u></font>");
             }
 
+            UpdateTop();
+        }
+
+        void UpdateTop()
+        {
+            uint newHash = Crc32Calculator.Instance.Compute(description);
+            if (descriptionHash == newHash)
+            {
+                return;
+            }
+            
+            descriptionHash = newHash;
             panel.TextTop.SetText(description);
         }
 

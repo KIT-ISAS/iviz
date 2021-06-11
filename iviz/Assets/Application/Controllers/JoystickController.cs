@@ -8,6 +8,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Roslib.Utils;
+using JetBrains.Annotations;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
@@ -38,7 +39,7 @@ namespace Iviz.Controllers
 
         TwistJoystick joystick;
 
-        public JoystickController(IModuleData moduleData)
+        public JoystickController([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData;
             Config = new JoystickConfiguration();

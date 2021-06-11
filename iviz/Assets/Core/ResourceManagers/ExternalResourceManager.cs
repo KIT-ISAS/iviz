@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Nito.AsyncEx;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
+using Texture = Iviz.Msgs.IvizMsgs.Texture;
 
 namespace Iviz.Displays
 {
@@ -559,6 +560,33 @@ namespace Iviz.Displays
             return null;
         }
 
+        [ItemCanBeNull]
+        public async ValueTask<Model> TryGetModelResourceAsync([NotNull] string uriString,
+            CancellationToken token = default)
+        {
+            if (!resourceFiles.Models.TryGetValue(uriString, out string localPath)
+                || !File.Exists($"{Settings.ResourcesPath}/{localPath}"))
+            {
+                return null;
+            }
+
+            return await ReadModelFromFileAsync(uriString, localPath, token);
+        }
+
+        [ItemCanBeNull]
+        async ValueTask<Model> ReadModelFromFileAsync(string uriString, string localPath, CancellationToken token)
+        {
+            using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
+            {
+                if (buffer.Length < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Model.RosMd5Sum)
+                {
+                    Logger.Warn($"{this}: Resource {uriString} is out of date");
+                    return null;
+                }
+
+                return Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - 32, 32);
+            }
+        }
 
         [ItemCanBeNull]
         async ValueTask<Info<GameObject>> LoadLocalModelAsync([NotNull] string uriString, [NotNull] string localPath,
@@ -567,17 +595,13 @@ namespace Iviz.Displays
             GameObject obj;
             try
             {
-                using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
+                var msg = await ReadModelFromFileAsync(uriString, localPath, token);
+                if (msg == null)
                 {
-                    if (buffer.Length < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Model.RosMd5Sum)
-                    {
-                        Logger.Warn($"{this}: Resource {uriString} is out of date");
-                        return null;
-                    }
-
-                    var msg = Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - 32, 32);
-                    obj = await CreateModelObjectAsync(uriString, msg, provider, token);
+                    return null;
                 }
+
+                obj = await CreateModelObjectAsync(uriString, msg, provider, token);
             }
             catch (OperationCanceledException)
             {

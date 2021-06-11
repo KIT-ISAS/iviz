@@ -13,7 +13,7 @@ namespace Iviz.Displays
         IPointerEnterHandler, IPointerExitHandler
     {
         static readonly Color FrameActiveColor = Color.white.WithAlpha(0.3f);
-        static readonly Color FrameInactiveColor = Color.green.WithAlpha(0.3f);
+        static readonly Color FrameInactiveColor = Color.green.WithAlpha(0f);
 
         GameObject[] allResources;
         [SerializeField] GameObject arrowMx = null;

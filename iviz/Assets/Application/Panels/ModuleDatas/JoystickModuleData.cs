@@ -53,6 +53,7 @@ namespace Iviz.App
             panel.JoySender.Set(controller.SenderJoy);
             panel.TwistSender.Set(controller.SenderTwist);
             panel.SendJoy.Value = controller.PublishJoy;
+
             panel.SendTwist.Value = controller.PublishTwist;
 
             panel.JoyTopic.Value = controller.JoyTopic;
@@ -67,6 +68,7 @@ namespace Iviz.App
             panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
             panel.XIsFront.Value = controller.XIsFront;
 
+            panel.JoyTopic.Interactable = controller.PublishJoy;
             panel.MaxSpeed.Interactable = controller.PublishTwist;
             panel.AttachToFrame.Interactable = controller.PublishTwist;
             panel.TwistTopic.Interactable = controller.PublishTwist;

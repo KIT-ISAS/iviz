@@ -130,6 +130,9 @@ namespace Iviz.App.ARDialogs
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             Clicked?.Invoke();
+
+            var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+            AudioSource.PlayClipAtPoint(assetHolder.Click, Transform.position);
         }
 
         public void ClearSubscribers()

@@ -329,7 +329,7 @@ namespace Iviz.Ros
             {
                 Core.Logger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
                                      "Maybe /rosout hasn't seen us yet. " +
-                                     "But it also may be that a firewall is limiting incoming connections.");
+                                     "But it also may be that outside nodes cannot connect to us, for example due to a firewall.");
             }
         }
 
