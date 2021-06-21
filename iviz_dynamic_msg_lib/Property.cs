@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.MsgsGen.Dynamic
 {
     [DataContract]
-    public class Property
+    public sealed class Property
     {
         public Property(string name, IField value)
         {
