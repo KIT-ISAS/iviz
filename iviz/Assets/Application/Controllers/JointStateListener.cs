@@ -61,7 +61,7 @@ namespace Iviz.Controllers
             set => config.RobotName = value;
         }
 
-        public bool Visible
+        public override bool Visible
         {
             get => config.Visible;
             set => config.Visible = value;

@@ -66,17 +66,8 @@ namespace Iviz.App
             panel.UseIntensity.ValueChanged += f => { listener.UseIntensity = f; };
             panel.PointSize.ValueChanged += f => { listener.PointSize = f; };
             panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
             panel.ForceMinMax.ValueChanged += f =>
             {
                 listener.ForceMinMax = f;
@@ -88,6 +79,8 @@ namespace Iviz.App
             panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
             panel.UseLines.ValueChanged += f => { listener.UseLines = f; };
         }
+        
+        
 
         public override void UpdatePanel()
         {

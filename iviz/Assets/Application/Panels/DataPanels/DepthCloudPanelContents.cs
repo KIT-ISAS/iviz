@@ -8,7 +8,6 @@
         public SliderWidget FOV { get; private set; }
         public SliderWidget PointSize { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         void Awake()
         {

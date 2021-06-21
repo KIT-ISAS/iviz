@@ -10,7 +10,6 @@ namespace Iviz.App
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
         public SenderWidget FeedbackSender { get; private set; }
 
         //public ToggleWidget PublishHead { get; private set; }

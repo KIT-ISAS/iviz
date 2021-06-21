@@ -10,7 +10,6 @@ namespace Iviz.App
     public sealed class OccupancyGridPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         public FrameWidget Frame { get; private set; }
         public DropdownWidget Colormap { get; private set; }

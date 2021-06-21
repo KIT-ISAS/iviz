@@ -120,17 +120,8 @@ namespace Iviz.App
                 panel.AttachToFrame.Interactable = f && controller.PublishTwist;
             };
 
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                controller.Visible = !controller.Visible;
-                panel.HideButton.State = controller.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void UpdatePanel()

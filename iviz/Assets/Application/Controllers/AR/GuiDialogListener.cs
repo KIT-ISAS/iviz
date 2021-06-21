@@ -61,6 +61,8 @@ namespace Iviz.Controllers
                 config.Type = value.Type;
             }
         }
+        
+        public bool Interactable { get; set; }
 
         public override void StartListening()
         {
@@ -385,12 +387,18 @@ namespace Iviz.Controllers
             DestroyAll(widgets);
         }
 
+        public override bool Visible
+        {
+            get => false;
+            set { }
+        }
+
         static void DestroyAll<T>([NotNull] Dictionary<string, Data<T>> dict) where T : MonoBehaviour, IDisplay
         {
-            foreach (var dialog in dict.Values)
+            foreach (var (display, info, _) in dict.Values)
             {
-                dialog.Object.Suspend();
-                ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
+                display.Suspend();
+                ResourcePool.Return(info, display.gameObject);
             }
 
             dict.Clear();
@@ -403,12 +411,12 @@ namespace Iviz.Controllers
                 .ToArray();
             foreach (var pair in deadEntries)
             {
-                var dialog = pair.Value;
-                dialog.Object.Suspend();
-                ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
+                var (arDialog, info, _) = pair.Value;
+                arDialog.Suspend();
+                ResourcePool.Return(info, arDialog.gameObject);
                 dialogs.Remove(pair.Key);
 
-                OnDialogExpired(dialog.Object);
+                OnDialogExpired(arDialog);
             }
         }
 

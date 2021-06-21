@@ -34,6 +34,8 @@ namespace Iviz.Controllers
             Listener?.Reset();
         }
 
+        public abstract bool Visible { get; set; }
+
         [NotNull]
         public override string ToString()
         {

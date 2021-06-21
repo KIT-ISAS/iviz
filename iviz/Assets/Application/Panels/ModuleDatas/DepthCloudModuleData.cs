@@ -101,19 +101,11 @@ namespace Iviz.App
                 controller.ColorName = s;
             };
             panel.FOV.ValueChanged += f => { controller.FovAngle = f; };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                controller.Visible = !controller.Visible;
-                panel.HideButton.State = controller.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
-
+        
+        [CanBeNull]
         ImageListener GetImageWithName(string name)
         {
             return ModuleListPanel.ModuleDatas

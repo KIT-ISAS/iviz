@@ -24,10 +24,10 @@ namespace Iviz.Controllers
     public sealed class TfListener : ListenerController
     {
         public const string DefaultTopic = "/tf";
-        public const string OriginFrameName = "_origin_";
+        public const string OriginFrameId = "_origin_";
+        public const string MapFrameId = "map";
 
         const string DefaultTopicStatic = "/tf_static";
-        const string BaseFrameId = "map";
 
         static uint tfSeq;
 
@@ -89,14 +89,14 @@ namespace Iviz.Controllers
             rootFrame.Visible = false;
             rootFrame.AddListener(defaultListener);
 
-            originFrame = Add(CreateFrameObject(OriginFrameName, RootFrame.Transform, RootFrame));
+            originFrame = Add(CreateFrameObject(OriginFrameId, RootFrame.Transform, RootFrame));
             originFrame.Parent = RootFrame;
             originFrame.ForceInvisible = true;
             originFrame.Visible = false;
             originFrame.AddListener(defaultListener);
             originFrame.ParentCanChange = false;
 
-            mapFrame = Add(CreateFrameObject(BaseFrameId, OriginFrame.Transform, OriginFrame));
+            mapFrame = Add(CreateFrameObject(MapFrameId, OriginFrame.Transform, OriginFrame));
             mapFrame.Parent = OriginFrame;
             mapFrame.AddListener(defaultListener);
 
@@ -178,6 +178,12 @@ namespace Iviz.Controllers
                     frame.Visible = value;
                 }
             }
+        }
+
+        public override bool Visible
+        {
+            get => FramesVisible;
+            set => FramesVisible = value;
         }
 
         public bool FrameLabelsVisible

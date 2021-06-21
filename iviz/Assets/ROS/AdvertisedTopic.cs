@@ -8,7 +8,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    
     internal interface IAdvertisedTopic
     {
         [CanBeNull] IRosPublisher Publisher { get; }
@@ -16,15 +15,24 @@ namespace Iviz.Ros
         int Count { get; }
         void Add([NotNull] ISender subscriber);
         void Remove([NotNull] ISender subscriber);
-        [NotNull] Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
-        [NotNull] Task UnadvertiseAsync([NotNull] RosClient client, CancellationToken token);
+
+        [NotNull]
+        Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
+
+        [NotNull]
+        Task UnadvertiseAsync([NotNull] RosClient client, CancellationToken token);
+
         void Invalidate();
     }
-    
+
     internal sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
     {
+        const int NumRetries = 3;
+        const int WaitBetweenRetriesInMs = 500;
+
         readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
         [NotNull] readonly string topic;
+        [CanBeNull] string publisherId;
         int id;
 
         public AdvertisedTopic([NotNull] string topic)
@@ -62,18 +70,27 @@ namespace Iviz.Ros
         public async Task AdvertiseAsync(RosClient client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
-            IRosPublisher publisher;
             if (client != null)
             {
-                (_, publisher) = await client.AdvertiseAsync<T>(fullTopic, token);
-            }
-            else
-            {
-                publisher = null;
+                for (int t = 0; t < NumRetries; t++)
+                {
+                    try
+                    {
+                        IRosPublisher publisher;
+                        (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
+                        Publisher = publisher;
+                        return;
+                    }
+                    catch (RoslibException e)
+                    {
+                        Core.Logger.Error($"Failed to advertise service (try {t}): ", e);
+                        await Task.Delay(WaitBetweenRetriesInMs, token);
+                    }
+                }
             }
 
-            Publisher = publisher;
+            publisherId = null;
+            Publisher = null;
         }
 
         public async Task UnadvertiseAsync(RosClient client, CancellationToken token)
@@ -84,10 +101,9 @@ namespace Iviz.Ros
             }
 
             token.ThrowIfCancellationRequested();
-            string fullTopic = topic[0] == '/' ? topic : $"{client.CallerId}/{topic}";
-            if (Publisher != null)
+            if (Publisher != null && publisherId != null)
             {
-                await Publisher.UnadvertiseAsync(fullTopic, token);
+                await Publisher.UnadvertiseAsync(publisherId, token);
             }
         }
 
@@ -95,6 +111,7 @@ namespace Iviz.Ros
         {
             Id = RoslibConnection.InvalidId;
             Publisher = null;
+            publisherId = null;
         }
 
         [NotNull]

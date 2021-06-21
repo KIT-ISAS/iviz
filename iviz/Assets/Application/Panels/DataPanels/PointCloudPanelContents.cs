@@ -16,9 +16,8 @@ namespace Iviz.App
         public SliderWidget PointSize { get; private set; }
         public SliderWidget SizeMultiplier { get; private set; }
         public DropdownWidget Colormap { get; private set; }
-        public DropdownWidget IntensityChannel { get; private set; }
+        public InputFieldWithHintsWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }
@@ -37,7 +36,7 @@ namespace Iviz.App
             PointSize = p.AddSlider("Point Size").SetMinValue(0.05f).SetMaxValue(1f);
             SizeMultiplier = p.AddSlider("Multiply Point Size by Power of 10").SetMinValue(-4).SetMaxValue(4)
                 .SetIntegerOnly(true);
-            IntensityChannel = p.AddDropdown("Intensity Channel")
+            IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)

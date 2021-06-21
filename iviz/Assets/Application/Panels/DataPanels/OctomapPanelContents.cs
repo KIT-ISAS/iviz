@@ -8,7 +8,6 @@ namespace Iviz.App
     public sealed class OctomapPanelContents : ListenerPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public SliderWidget MaxDepth { get; private set; }
         public ColorPickerWidget Tint { get; private set; }

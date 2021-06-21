@@ -13,7 +13,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="InteractiveMarkerPanelContents"/> 
     /// </summary>
-    public sealed class InteractiveMarkerModuleData : ListenerModuleData
+    public sealed class InteractiveMarkerModuleData : ListenerModuleData, IInteractableModuleData
     {
         [NotNull] readonly InteractiveMarkerListener listener;
         [NotNull] readonly InteractiveMarkerPanelContents panel;
@@ -41,14 +41,15 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
 
-            listener.Interactable = ModuleListPanel.SceneInteractable;
+            Interactable = ModuleListPanel.SceneInteractable;
             listener.StartListening();
             UpdateModuleButton();
         }
 
-        public void UpdateInteractable()
+        public bool Interactable
         {
-            listener.Interactable = ModuleListPanel.SceneInteractable;
+            get => listener.Interactable;
+            set => listener.Interactable = value;
         }
 
         public override void SetupPanel()
@@ -61,17 +62,8 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
 
             panel.DescriptionsVisible.ValueChanged += f => { listener.DescriptionsVisible = f; };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void AddToState(StateConfiguration config)

@@ -21,7 +21,6 @@ namespace Iviz.App
         public SliderWidget Max { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         void Awake()
         {

@@ -57,12 +57,8 @@ namespace Iviz.App
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.Sender.Set(listener.Publisher);
-            
-            panel.HideButton.Clicked += () =>
-            {
-                listener.FramesVisible = !listener.FramesVisible;
-                panel.HideButton.State = listener.FramesVisible;
-            };
+
+            panel.HideButton.Clicked += ToggleVisible;
             panel.ShowFrameLabels.ValueChanged += f =>
             {
                 listener.FrameLabelsVisible = f;
@@ -84,6 +80,12 @@ namespace Iviz.App
                 listener.ResetController();
             };
         }
+        
+        public override void Close()
+        {
+            // do nothing!
+        }
+        
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

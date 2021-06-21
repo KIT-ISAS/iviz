@@ -91,6 +91,8 @@ namespace Iviz.Controllers
 
         [NotNull] static string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
 
+        public static bool InstanceVisible => Instance != null && Instance.Visible;
+
         public ARConfiguration Config
         {
             get => config;
@@ -231,8 +233,8 @@ namespace Iviz.Controllers
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
-            HeadSender = new Sender<PoseStamped>("head");
-            MarkerSender = new Sender<DetectedARMarkerArray>("markers");
+            HeadSender = new Sender<PoseStamped>("~head");
+            MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             detector.MarkerDetected += OnMarkerDetected;
         }
@@ -262,12 +264,16 @@ namespace Iviz.Controllers
             else
             {
                 var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
-                Vector3 forward = arCameraPose.Multiply(Vector3.forward);
-                Vector3 cameraPosition = arCameraPose.position + forward;
-                var q1 = Pose.identity.WithPosition(cameraPosition);
+                Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
+                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
+                /*
+                var q1 = Pose.identity.WithPosition(pivot);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
-                var q3 = Pose.identity.WithPosition(-cameraPosition);
+                var q3 = Pose.identity.WithPosition(-pivot);
                 SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
+                */
+                var pose = new Pose(rotation * (-pivot) + pivot, rotation);
+                SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
             }
         }
 

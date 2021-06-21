@@ -47,7 +47,7 @@ namespace Iviz.Displays
         {
             resource = ResourcePool.RentDisplay<LineResource>(TfListener.RootFrame.Transform);
             resource.ElementScale = 0.001f;
-            resource.Visible = ARController.Instance != null && !ARController.Instance.Visible;
+            resource.Visible = ARController.InstanceVisible;
 
             MeshFilter.sharedMesh = new Mesh {name = "AR Mesh"};
 

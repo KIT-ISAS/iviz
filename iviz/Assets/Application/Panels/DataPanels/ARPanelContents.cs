@@ -11,7 +11,6 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public TrashButtonWidget ResetButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget WorldScale { get; private set; }
         public DropdownWidget OcclusionQuality { get; private set; }
         public DataLabelWidget Description { get; private set; }

@@ -52,7 +52,7 @@ namespace Iviz.Controllers
             {
                 if (session == null || session.subsystem == null)
                 {
-                    return "<b>(No AR Subsystem)</b>";
+                    return "<b>[No AR Subsystem]</b>";
                 }
 
                 string trackingState;

@@ -25,7 +25,7 @@ namespace Iviz.App
 
         [NotNull] public ImageListener Image => listener;
 
-        Material IImageDialogListener.Material => listener.Material;
+        [NotNull] Material IImageDialogListener.Material => listener.Material;
 
         Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
 
@@ -93,11 +93,7 @@ namespace Iviz.App
             {
                 listener.FlipMinMax = f;
             };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
+            panel.CloseButton.Clicked += Close;
             panel.ShowBillboard.ValueChanged += f =>
             {
                 panel.BillboardSize.Interactable = f;
@@ -122,12 +118,7 @@ namespace Iviz.App
                 ModuleListPanel.ShowImageDialog(this);
                 panel.PreviewWidget.Interactable = false;
             };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void UpdatePanel()

@@ -49,5 +49,7 @@ namespace Iviz.Controllers
         /// For example, it can erase its cache or removed stored information.
         /// </summary>
         void ResetController();
+        
+        bool Visible { get; set; }
     }
 }

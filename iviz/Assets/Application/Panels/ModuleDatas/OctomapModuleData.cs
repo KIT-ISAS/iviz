@@ -58,17 +58,8 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
             panel.MaxDepth.ValueChanged += f => listener.MaxDepth = (int) f;
 
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

@@ -52,15 +52,8 @@ namespace Iviz.App
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.SizeMultiplier.Value = listener.SizeMultiplierPow10;
-            panel.IntensityChannel.Options = listener.FieldNames;
-            try
-            {
-                panel.IntensityChannel.Value = listener.IntensityChannel;
-            }
-            catch (InvalidOperationException)
-            {
-                panel.IntensityChannel.Index = 0;
-            }
+            panel.IntensityChannel.Hints = listener.FieldNames;
+            panel.IntensityChannel.Value = listener.IntensityChannel;
 
             panel.HideButton.State = listener.Visible;
 
@@ -73,19 +66,10 @@ namespace Iviz.App
             panel.PointCloudType.Index = (int) listener.PointCloudType;
 
             panel.PointSize.ValueChanged += f => listener.PointSize = f;
-            panel.IntensityChannel.ValueChanged += (_, s) => listener.IntensityChannel = s;
+            panel.IntensityChannel.EndEdit += s => listener.IntensityChannel = s;
             panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
             panel.ForceMinMax.ValueChanged += f =>
             {
                 listener.OverrideMinMax = f;
@@ -102,13 +86,11 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             base.UpdatePanel();
-            panel.IntensityChannel.Options = listener.FieldNames;
-
-            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            panel.IntensityChannel.Hints = listener.FieldNames;
             panel.NumPoints.Label = BuildDescriptionString();
         }
 
+        [NotNull]
         string BuildDescriptionString()
         {
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);

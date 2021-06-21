@@ -7,7 +7,6 @@ namespace Iviz.App
     public sealed class JoystickPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         public ToggleWidget SendJoy { get; private set; }
         public InputFieldWithHintsWidget JoyTopic { get; private set; }

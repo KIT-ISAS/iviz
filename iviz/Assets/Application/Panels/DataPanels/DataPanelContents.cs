@@ -9,6 +9,8 @@ namespace Iviz.App
 {
     public abstract class DataPanelContents : MonoBehaviour
     {
+        public ToggleButtonWidget HideButton { get; protected set; }
+        
         public bool Active
         {
             get => gameObject.activeSelf;

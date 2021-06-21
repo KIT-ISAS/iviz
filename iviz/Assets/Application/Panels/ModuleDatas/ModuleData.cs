@@ -48,9 +48,9 @@ namespace Iviz.App
         [NotNull] public abstract DataPanelContents Panel { get; }
         [NotNull] public abstract IController Controller { get; }
         [NotNull] public abstract IConfiguration Configuration { get; }
-        bool Visible => Configuration.Visible;
-        protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
 
+        protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
+        
         protected ModuleData([NotNull] string topic, [NotNull] string type)
         {
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
@@ -75,7 +75,24 @@ namespace Iviz.App
                 text = $"<b>{ModuleType}</b>";
             }
 
-            ButtonText = Visible ? text : $"<color=grey>{text}</color>";
+            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
+        }
+        
+        public void ToggleVisible()
+        {
+            Controller.Visible = !Controller.Visible;
+            if (Panel.Active && Panel.HideButton != null)
+            {
+                Panel.HideButton.State = Controller.Visible;
+            }
+
+            UpdateModuleButton();
+        }
+
+        public virtual void Close()
+        {
+            DataPanelManager.HideSelectedPanel();
+            ModuleListPanel.RemoveModule(this);            
         }
 
         public abstract void SetupPanel();
@@ -131,6 +148,7 @@ namespace Iviz.App
             Controller.ResetController();
         }
 
+        [NotNull]
         public override string ToString()
         {
             return $"[{ModuleType} guid={Configuration.Id}]";

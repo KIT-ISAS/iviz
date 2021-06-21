@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.MarkerDetection;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -27,8 +26,6 @@ namespace Iviz.App
 {
     public sealed class ModuleListPanel : MonoBehaviour
     {
-        const float YOffset = 2;
-
         public const int ModuleDataCaptionWidth = 200;
 
         static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
@@ -37,7 +34,7 @@ namespace Iviz.App
         static readonly Color ConnectedWarningColor = new Color(1f, 0.8f, 0.3f, 0.4f);
 
         [SerializeField] DataLabelWidget masterUriStr = null;
-        [SerializeField] TrashButtonWidget masterUriButton = null;
+        [SerializeField] DraggableButtonWidget masterUriButton = null;
         [SerializeField] TrashButtonWidget connectButton = null;
         [SerializeField] TrashButtonWidget stopButton = null;
         [SerializeField] Image topPanel = null;
@@ -183,9 +180,9 @@ namespace Iviz.App
             private set
             {
                 sceneInteractable = value;
-                foreach (var moduleData in moduleDatas.OfType<InteractiveMarkerModuleData>())
+                foreach (var moduleData in moduleDatas.OfType<IInteractableModuleData>())
                 {
-                    moduleData.UpdateInteractable();
+                    moduleData.Interactable = value;
                 }
             }
         }
@@ -297,6 +294,7 @@ namespace Iviz.App
 
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += () => connectionData.Show();
+            masterUriButton.Dragged += OnHideGuiButtonClick;
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
@@ -440,8 +438,11 @@ namespace Iviz.App
 
         void OnConnectionWarningChanged(bool value)
         {
-            topPanel.color = value ? ConnectedWarningColor :
-                RosServerManager.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
+            topPanel.color = value
+                ? ConnectedWarningColor
+                : RosServerManager.IsActive
+                    ? ConnectedOwnMasterColor
+                    : ConnectedColor;
         }
 
         void RotateSprite()
@@ -706,8 +707,7 @@ namespace Iviz.App
 
         void CheckIfInteractableNeeded()
         {
-            InteractableButton.Visible =
-                ModuleDatas.Any(module => module.ModuleType == ModuleType.InteractiveMarker);
+            InteractableButton.Visible = ModuleDatas.Any(module => module is IInteractableModuleData);
         }
 
         [NotNull]
@@ -742,9 +742,9 @@ namespace Iviz.App
             }
 
             moduleDatas.Add(moduleData);
-            Buttons.CreateButtonObject(moduleData);
+            Buttons.CreateButtonForModule(moduleData);
 
-            if (moduleData.ModuleType == ModuleType.InteractiveMarker)
+            if (moduleData is IInteractableModuleData)
             {
                 InteractableButton.Visible = true;
             }
@@ -811,7 +811,7 @@ namespace Iviz.App
                 return;
             }
 
-            Buttons.UpdateModuleButton(index, content);
+            Buttons.UpdateButton(index, content);
         }
 
         public void RegisterDisplayedTopic([NotNull] string topic)
@@ -833,18 +833,6 @@ namespace Iviz.App
         {
             markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
-
-        /*
-        void ShowFrame([NotNull] TfFrame frame)
-        {
-            if (frame == null)
-            {
-                throw new ArgumentNullException(nameof(frame));
-            }
-
-            tfTreeData.Show(frame);
-        }
-        */
 
         void UpdateFpsStats()
         {
@@ -911,90 +899,6 @@ namespace Iviz.App
             }
 
             menuDialog.Set(menuEntries, unityPositionHint, callback);
-        }
-
-        sealed class ModuleListButtons
-        {
-            [ItemNotNull] readonly List<GameObject> buttons = new List<GameObject>();
-            readonly GameObject contentObject;
-            readonly float buttonHeight;
-
-            public ModuleListButtons(GameObject contentObject)
-            {
-                buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
-                this.contentObject = contentObject;
-            }
-
-            public void CreateButtonObject([NotNull] ModuleData moduleData)
-            {
-                GameObject buttonObject =
-                    ResourcePool.Rent(Resource.Widgets.DisplayButton, contentObject.transform, false);
-
-                int size = buttons.Count;
-                float y = 2 * YOffset + size * (buttonHeight + YOffset);
-
-                ((RectTransform) buttonObject.transform).anchoredPosition = new Vector2(0, -y);
-
-                Text buttonObjectText = buttonObject.GetComponentInChildren<Text>();
-                buttonObjectText.text = moduleData.ButtonText;
-                buttonObject.name = $"Button:{moduleData.ModuleType}";
-                buttonObject.SetActive(true);
-                buttons.Add(buttonObject);
-
-                Button button = buttonObject.GetComponent<Button>();
-                button.onClick.AddListener(moduleData.ToggleShowPanel);
-                ((RectTransform) contentObject.transform).sizeDelta = new Vector2(0, y + buttonHeight + YOffset);
-            }
-
-            public void RemoveButton(int index)
-            {
-                GameObject displayButton = buttons[index];
-                buttons.RemoveAt(index);
-
-                displayButton.GetComponent<Button>().onClick.RemoveAllListeners();
-                ResourcePool.Return(Resource.Widgets.DisplayButton, displayButton);
-
-                int i;
-                for (i = index; i < buttons.Count; i++)
-                {
-                    GameObject buttonObject = buttons[i];
-                    float y = 2 * YOffset + i * (buttonHeight + YOffset);
-                    ((RectTransform) buttonObject.transform).anchoredPosition = new Vector3(0, -y);
-                }
-
-                ((RectTransform) contentObject.transform).sizeDelta =
-                    new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
-            }
-
-            public void UpdateModuleButton(int index, [NotNull] string content)
-            {
-                if (index < 0 || index >= buttons.Count)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                }
-
-                if (content == null)
-                {
-                    throw new ArgumentNullException(nameof(content));
-                }
-
-                GameObject buttonObject = buttons[index];
-                Text text = buttonObject.GetComponentInChildren<Text>();
-                text.text = content;
-                int lineBreaks = content.Count(x => x == '\n');
-                switch (lineBreaks)
-                {
-                    case 2:
-                        text.fontSize = 11;
-                        break;
-                    case 3:
-                        text.fontSize = 10;
-                        break;
-                    default:
-                        text.fontSize = 12;
-                        break;
-                }
-            }
         }
     }
 }

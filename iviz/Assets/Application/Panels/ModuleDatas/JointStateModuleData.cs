@@ -69,17 +69,16 @@ namespace Iviz.App
                 listener.Robot = (i == 0) ? null : GetRobotWithName(s);
                 listener.RobotName = s;
             };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
+            panel.CloseButton.Clicked += Close;
         }
 
-        IJointProvider GetRobotWithName(string name)
+        [CanBeNull]
+        static IJointProvider GetRobotWithName(string name)
         {
-            return ModuleListPanel.ModuleDatas.Select(x => x.Controller).OfType<IJointProvider>()
-                .FirstOrDefault(x => x.Name == name);
+            return ModuleListPanel.ModuleDatas
+                .Select(moduleData => moduleData.Controller)
+                .OfType<IJointProvider>()
+                .FirstOrDefault(provider => provider.Name == name);
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

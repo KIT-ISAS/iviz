@@ -78,7 +78,8 @@ namespace Iviz.Ros
         {
             if (lastMsgCounter == 0)
             {
-                Stats = new RosSenderStats();
+                Stats = default;
+                NumSubscribers = Connection.GetNumSubscribers(this);
                 return;
             }
 

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
-    public sealed class MoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
+    public sealed class DialogMoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
         [SerializeField] Transform targetTransform;
         bool isDragging;

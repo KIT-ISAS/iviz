@@ -46,17 +46,26 @@ namespace Iviz.App
                 }
 
                 frame = value;
-                if (frame != null)
+                string newText;
+                if (frame == null)
                 {
-                    text.text = TfListener.FixedFrameId == frame.Id
-                        ? $"<b>➤{frame.Id}</b> <i>[Fixed]</i>"
-                        : $"<b>➤{frame.Id}</b>";
-                    UpdateStats();
+                    newText = "<i>➤ (none)</i>";
+                }
+                else if (TfListener.FixedFrameId == frame.Id)
+                {
+                    newText = $"<b>➤{frame.Id}</b> <i>[Fixed]</i>";
+                }
+                else if (frame.Id == TfListener.OriginFrameId)
+                {
+                    newText = "➤[origin]";
                 }
                 else
                 {
-                    text.text = "<i>➤ (none)</i>";
+                    newText = $"<b>➤{frame.Id}</b>";
                 }
+
+                text.text = newText;
+                UpdateStats();
             }
         }
 
@@ -82,7 +91,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             ModuleListPanel.GuiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
             TfListener.Instance.HighlightFrame(Frame.Id);
         }

@@ -9,7 +9,6 @@ namespace Iviz.App
     public sealed class SimpleRobotPanelContents : DataPanelContents
     {
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget HelpText { get; private set; }
         public InputFieldWithHintsWidget SourceParameter { get; private set; }

@@ -82,17 +82,8 @@ namespace Iviz.App
             }
 
             panel.Listener.Listener = listener.Listener;
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

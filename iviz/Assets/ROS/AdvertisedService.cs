@@ -20,6 +20,9 @@ namespace Iviz.Ros
 
     internal sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
     {
+        const int NumRetries = 3;
+        const int WaitBetweenRetriesInMs = 500;
+        
         [NotNull] Func<T, Task> callback;
         [NotNull] readonly string service;
 
@@ -51,7 +54,19 @@ namespace Iviz.Ros
             string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
             if (client != null)
             {
-                await client.AdvertiseServiceAsync<T>(fullService, CallbackImpl, token);
+                for (int t = 0; t < NumRetries; t++)
+                {
+                    try
+                    {
+                        await client.AdvertiseServiceAsync<T>(fullService, CallbackImpl, token);
+                        break;
+                    }
+                    catch (RoslibException e)
+                    {
+                        Core.Logger.Error($"Failed to advertise service (try {t}): ", e);
+                        await Task.Delay(WaitBetweenRetriesInMs, token);
+                    }
+                }
             }
         }
 

@@ -140,19 +140,8 @@ namespace Iviz.App
             };
             panel.AttachToTf.ValueChanged += f =>
                 RobotController.AttachedToTf = f;
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            //panel.FramePrefix.EndEdit += f => Robot.FramePrefix = f;
-            //panel.FrameSuffix.EndEdit += f => Robot.FrameSuffix = f;
-            panel.HideButton.Clicked += () =>
-            {
-                RobotController.Visible = !RobotController.Visible;
-                panel.HideButton.State = RobotController.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
             panel.Save.ValueChanged += f =>
             {
                 if (string.IsNullOrEmpty(RobotController.Robot?.Name) ||

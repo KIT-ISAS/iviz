@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool PublishLongTapPosition { get; set; } = false;
-        [DataMember] public string TapTopic { get; set; } = "clicked_point";
+        [DataMember] public string TapTopic { get; set; } = "~clicked_point";
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
@@ -95,11 +95,13 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (!value)
+
+                bool arEnabled = ARController.InstanceVisible;
+                bool gridVisible = value && (arEnabled && !HideInARMode || !arEnabled);
+                if (!gridVisible)
                 {
                     reflectionProbe.transform.parent = TfListener.DefaultFrame.Transform;
-                    grid.Visible = false;
-                    //node.Selected = false;
+                    grid.Visible = false; 
                 }
                 else
                 {

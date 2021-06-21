@@ -12,7 +12,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="PathPanelContents"/> 
     /// </summary>
-
     public sealed class PathModuleData : ListenerModuleData
     {
         [NotNull] readonly PathListener listener;
@@ -26,8 +25,8 @@ namespace Iviz.App
 
 
         public PathModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
-            constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
+                constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(ModuleType.Path);
             listener = new PathListener(this);
@@ -38,8 +37,9 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (PathConfiguration)constructor.Configuration;
+                listener.Config = (PathConfiguration) constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -73,46 +73,22 @@ namespace Iviz.App
                     break;
             }
 
-            panel.LineWidth.ValueChanged += f =>
-            {
-                listener.LineWidth = f;
-            };
-            panel.ShowAxes.ValueChanged += f =>
-            {
-                listener.FramesVisible = f;
-            };
-            panel.ShowLines.ValueChanged += f =>
-            {
-                listener.LinesVisible = f;
-            };
-            panel.AxesLength.ValueChanged += f =>
-            {
-                listener.FrameSize = f;
-            };
-            panel.LineColor.ValueChanged += f =>
-            {
-                listener.LineColor = f;
-            };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.LineWidth.ValueChanged += f => listener.LineWidth = f;
+            panel.ShowAxes.ValueChanged += f => listener.FramesVisible = f;
+            panel.ShowLines.ValueChanged += f => listener.LinesVisible = f;
+            panel.AxesLength.ValueChanged += f => listener.FrameSize = f;
+            panel.LineColor.ValueChanged += f => listener.LineColor = f;
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<PathConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(PathConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -134,12 +110,12 @@ namespace Iviz.App
                         break;
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
+
             ResetPanel();
-        }          
+        }
 
         public override void AddToState(StateConfiguration config)
         {

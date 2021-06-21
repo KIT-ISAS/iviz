@@ -4,9 +4,7 @@ using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -23,9 +21,9 @@ namespace Iviz.Controllers
         [DataMember] public bool PublishTwist { get; set; } = true;
         [DataMember] public bool UseTwistStamped { get; set; }
         [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
-        [DataMember] public string AttachToFrame { get; set; } = "map";
+        [DataMember, NotNull] public string AttachToFrame { get; set; } = TfListener.MapFrameId;
         [DataMember] public bool XIsFront { get; set; } = true;
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember, NotNull] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
     }
@@ -66,7 +64,7 @@ namespace Iviz.Controllers
             get => config.JoyTopic;
             set
             {
-                config.JoyTopic = string.IsNullOrEmpty(value) ? "joy" : value;
+                config.JoyTopic = string.IsNullOrEmpty(value) ? "~joy" : value;
                 RebuildJoy();
             }
         }
@@ -86,7 +84,7 @@ namespace Iviz.Controllers
             get => config.TwistTopic;
             set
             {
-                config.TwistTopic = string.IsNullOrEmpty(value) ? "twist" : value;
+                config.TwistTopic = string.IsNullOrEmpty(value) ? "~twist" : value;
                 RebuildTwist();
             }
         }
@@ -168,6 +166,7 @@ namespace Iviz.Controllers
             }
         }
 
+        [NotNull]
         public string AttachToFrame
         {
             get => config.AttachToFrame;

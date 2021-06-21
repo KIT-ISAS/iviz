@@ -83,17 +83,8 @@ namespace Iviz.App
             };
 
             panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                listener.Visible = !listener.Visible;
-                panel.HideButton.State = listener.Visible;
-                UpdateModuleButton();
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
         }
 
         public override void UpdatePanel()

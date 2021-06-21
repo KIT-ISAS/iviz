@@ -31,7 +31,7 @@ namespace Iviz.Ros
     {
         readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
         [NotNull] readonly string topic;
-        [CanBeNull] string clientId;
+        [CanBeNull] string subscriberId;
 
         [CanBeNull] BagListener bagListener;
         [CanBeNull] string bagId;
@@ -57,7 +57,6 @@ namespace Iviz.Ros
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            string fullTopic = topic[0] == '/' ? topic : $"{client?.CallerId}/{topic}";
             IRosSubscriber subscriber;
             if (listener != null)
             {
@@ -66,7 +65,7 @@ namespace Iviz.Ros
 
             if (client != null)
             {
-                (clientId, subscriber) = await client.SubscribeAsync<T>(fullTopic, Callback, token: token);
+                (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
                 if (bagListener != null)
                 {
                     bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
@@ -91,10 +90,10 @@ namespace Iviz.Ros
 
             BagListener = null;
 
-            if (clientId != null)
+            if (subscriberId != null)
             {
-                await Subscriber.UnsubscribeAsync(clientId, token);
-                clientId = null;
+                await Subscriber.UnsubscribeAsync(subscriberId, token);
+                subscriberId = null;
             }
 
             Subscriber = null;

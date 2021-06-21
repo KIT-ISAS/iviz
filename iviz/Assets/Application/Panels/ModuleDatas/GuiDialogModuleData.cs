@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public sealed class GuiDialogModuleData : ListenerModuleData
+    public sealed class GuiDialogModuleData : ListenerModuleData, IInteractableModuleData
     {
         readonly GuiDialogListener dialogListener;
         readonly GuiDialogPanelContents dialogPanel;
@@ -35,8 +35,15 @@ namespace Iviz.App
                 dialogListener.Config = (GuiDialogConfiguration) constructor.Configuration;
             }
 
+            Interactable = ModuleListPanel.SceneInteractable;
             dialogListener.StartListening();
             UpdateModuleButton();
+        }
+        
+        public bool Interactable
+        {
+            get => dialogListener.Interactable;
+            set => dialogListener.Interactable = value;
         }
 
         public override void SetupPanel()
@@ -44,11 +51,7 @@ namespace Iviz.App
             dialogPanel.Frame.Owner = dialogListener;
             dialogPanel.Listener.Listener = dialogListener.Listener;
             dialogPanel.FeedbackSender.Set(dialogListener.FeedbackSender);
-            dialogPanel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
+            dialogPanel.CloseButton.Clicked += Close;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

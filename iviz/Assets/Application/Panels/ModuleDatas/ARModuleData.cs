@@ -67,18 +67,9 @@ namespace Iviz.App
                 controller.OcclusionQuality = (OcclusionQualityType) i;
 
             panel.Description.Label = controller.Description;
-            
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                controller.Visible = !controller.Visible;
-                panel.HideButton.State = controller.Visible;
-                UpdateModuleButton();
-            };
+
+            panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
             panel.ResetButton.Clicked += () =>
             {
                 controller.ResetSetupMode();
@@ -91,7 +82,7 @@ namespace Iviz.App
             
             panel.MarkerSender.Set(controller.MarkerSender);
         }
-
+        
         public override void UpdatePanel()
         {
             panel.Description.Label = controller.Description;

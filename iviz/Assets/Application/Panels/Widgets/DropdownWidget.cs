@@ -41,10 +41,11 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
                 
-                int index = optionDatas.FindIndex(x => x.text == value);
+                int index = optionDatas.FindIndex(data => data.text == value);
                 if (index == -1)
                 {
-                    throw new InvalidOperationException("Value does not correspond to any index");
+                    Core.Logger.Error($"DropdownWidget: Value {value} does not correspond to any index");
+                    return;
                 }
 
                 Index = index;

@@ -8,7 +8,6 @@
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
         public SliderWidget LineWidth { get; private set; }
         public ToggleWidget ShowAxes { get; private set; }
         public SliderWidget AxesLength { get; private set; }

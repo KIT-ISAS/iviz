@@ -17,7 +17,7 @@ namespace Iviz.App
     public sealed class GridModuleData : ModuleData
     {
         const float InteriorColorFactor = 0.25f;
-        
+
         [NotNull] public GridController GridController { get; }
         [NotNull] readonly GridPanelContents panel;
 
@@ -33,7 +33,7 @@ namespace Iviz.App
             GridController = new GridController(this);
             if (constructor.Configuration != null)
             {
-                GridController.Config = (GridConfiguration)constructor.Configuration;
+                GridController.Config = (GridConfiguration) constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -44,7 +44,6 @@ namespace Iviz.App
             base.Stop();
             GridController.StopController();
         }
-
 
 
         public override void SetupPanel()
@@ -62,38 +61,17 @@ namespace Iviz.App
             panel.TapTopic.Interactable = GridController.PublishLongTapPosition;
             panel.TapTopic.Hints = GetTopicHints();
 
-            panel.ColorPicker.ValueChanged += f =>
-            {
-                UpdateColor();
-            };
+            panel.ColorPicker.ValueChanged += f => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
             {
                 GridController.InteriorVisible = f;
                 UpdateColor();
             };
-            panel.CloseButton.Clicked += () =>
-            {
-                DataPanelManager.HideSelectedPanel();
-                ModuleListPanel.RemoveModule(this);
-            };
-            panel.Offset.ValueChanged += f =>
-            {
-                GridController.Offset = f;
-            };
-            panel.HideButton.Clicked += () =>
-            {
-                GridController.Visible = !GridController.Visible;
-                panel.HideButton.State = GridController.Visible;
-                UpdateModuleButton();
-            };
-            panel.FollowCamera.ValueChanged += f =>
-            {
-                GridController.FollowCamera = f;
-            };
-            panel.HideInARMode.ValueChanged += f =>
-            {
-                GridController.HideInARMode = f;
-            };
+            panel.CloseButton.Clicked += Close;
+            panel.Offset.ValueChanged += f => GridController.Offset = f;
+            panel.HideButton.Clicked += ToggleVisible;
+            panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
+            panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
             panel.PublishLongTapPosition.ValueChanged += f =>
             {
                 GridController.PublishLongTapPosition = f;
@@ -127,7 +105,7 @@ namespace Iviz.App
         }
 
         static readonly string[] OwnPublishedTopicName = {"clicked_point"};
-        
+
         [NotNull]
         IEnumerable<string> GetTopicHints()
         {
@@ -145,10 +123,10 @@ namespace Iviz.App
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             GridConfiguration config = JsonConvert.DeserializeObject<GridConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(GridConfiguration.Visible):
                         GridController.Visible = config.Visible;
@@ -184,10 +162,10 @@ namespace Iviz.App
                         break;
                     default:
                         Core.Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
+
             ResetPanel();
         }
 
@@ -196,14 +174,9 @@ namespace Iviz.App
             config.Grids.Add(GridController.Config);
         }
 
-        public override void OnARModeChanged(bool value)
+        public override void OnARModeChanged(bool _)
         {
-            if (!GridController.HideInARMode)
-            {
-                return;
-            }
-
-            GridController.Visible = !value;
+            GridController.Visible = GridController.Visible; // reread value
             UpdateModuleButton();
         }
     }

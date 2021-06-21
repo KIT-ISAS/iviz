@@ -17,7 +17,6 @@ namespace Iviz.App
         public SliderWidget PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public ToggleButtonWidget HideButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }

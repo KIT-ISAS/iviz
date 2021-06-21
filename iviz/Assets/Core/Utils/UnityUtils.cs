@@ -225,6 +225,12 @@ namespace Iviz.Core
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
+        /// <summary>
+        /// Returns null if the Unity object is null or null-equivalent, otherwise returns the object itself.
+        /// </summary>
+        /// <param name="o">The Unity object to evaluate</param>
+        /// <typeparam name="T">The type of the Unity object</typeparam>
+        /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
         [CanBeNull]
         public static T CheckedNull<T>([CanBeNull] this T o) where T : UnityEngine.Object => o != null ? o : null;
 
@@ -232,6 +238,7 @@ namespace Iviz.Core
         public static Color32 WithAlpha(this Color32 c, byte alpha) => new Color32(c.r, c.g, c.b, alpha);
         public static Pose WithPosition(this Pose p, in Vector3 v) => new Pose(v, p.rotation);
         public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
+        public static Vector3 WithX(this Vector3 c, float x) => new Vector3(x, c.y, c.z);
         public static Vector3 WithY(this Vector3 c, float y) => new Vector3(c.x, y, c.z);
 
         public static bool IsUsable(this Pose pose)
