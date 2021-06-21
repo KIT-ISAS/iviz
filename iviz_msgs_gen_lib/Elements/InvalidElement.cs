@@ -10,7 +10,7 @@ namespace Iviz.MsgsGen
 
         internal InvalidElement(string text)
         {
-            Console.WriteLine($"Adding invalid '{text}'");
+            Console.WriteLine($"** InvalidElement: Found invalid token '{text}'");
             Text = text;
         }
 
