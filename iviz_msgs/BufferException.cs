@@ -2,7 +2,7 @@ using System;
 
 namespace Iviz.Msgs
 {
-    public class BufferException : Exception
+    public sealed class BufferException : Exception
     {
         public BufferException()
         {

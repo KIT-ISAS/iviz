@@ -24,9 +24,12 @@ namespace Iviz.Msgs
         IReadOnlyCollection<string> TcpHeader { get; }
     }
 
+    /// <summary>
+    /// Helper class to create a custom IRosConnection
+    /// </summary>
     public static class RosConnection
     {
-        public static IRosConnection Create<T>(string topic, string callerId, bool requestNoDelay = false)
+        public static IRosConnection Create<T>(string topic, string callerId, bool requestNoDelay = true)
             where T : IMessage
         {
             string type = BuiltIns.GetMessageType<T>();

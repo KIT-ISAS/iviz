@@ -7,11 +7,18 @@ using Iviz.Msgs;
 
 namespace Iviz.Rosbag.Writer
 {
+    /// <summary>
+    /// Writer for Rosbag files.
+    /// Usage: Construct, call <see cref="Write"/> to add messages, and close it with <see cref="Dispose"/>.
+    /// Don't forget to dispose, the file cannot be read without it.
+    /// </summary>
     public sealed class RosbagFileWriter : IDisposable
 #if !NETSTANDARD2_0
         , IAsyncDisposable
 #endif
     {
+        const int MaxChunkSize = int.MaxValue / 2; // 1 GB
+        
         const string RosbagMagic = "#ROSBAG V2.0\n";
 
         readonly Stream writer;
@@ -26,8 +33,23 @@ namespace Iviz.Rosbag.Writer
         time chunkEndTime;
         bool disposed;
 
+        /// <summary>
+        /// The current size of the rosbag file.
+        /// </summary>
         public long Length => writer.Length;
 
+        /// <summary>
+        /// The size of the current chunk.
+        /// </summary>
+        long CurrentChunkLength => chunkStart == null ? 0 : writer.Length - chunkStart.Value;
+
+        /// <summary>
+        /// Creates a rosbag file that writes on the given stream.
+        /// </summary>
+        /// <param name="stream">A writable and seekable stream</param>
+        /// <param name="leaveOpen">Whether the stream should be left open after disposing this file</param>
+        /// <exception cref="ArgumentNullException">Thrown if stream is null</exception>
+        /// <exception cref="ArgumentException">Thrown if the stream is not writable</exception>
         public RosbagFileWriter(Stream stream, bool leaveOpen = false)
         {
             writer = stream ?? throw new ArgumentNullException(nameof(stream));
@@ -42,6 +64,11 @@ namespace Iviz.Rosbag.Writer
             WriteHeaderRecord(0, 0, 0);
         }
 
+        /// <summary>
+        /// Creates a rosbag file on the given path.
+        /// Use <see cref="CreateAsync"/> instead if you want to use async operations.
+        /// </summary>
+        /// <param name="path">The path where the file should be written</param>
         public RosbagFileWriter(string path) : this(new FileStream(path, FileMode.Create), false)
         {
         }
@@ -51,6 +78,11 @@ namespace Iviz.Rosbag.Writer
             this.writer = writer;
         }
 
+        /// <summary>
+        /// Creates a rosbag file using a stream that allows async operations.
+        /// </summary>
+        /// <param name="path">The path where the file should be written</param>
+        /// <returns>An awaitable task</returns>
         public static async ValueTask<RosbagFileWriter> CreateAsync(string path)
         {
             var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
@@ -148,7 +180,8 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
-        async Task WriteConnectionRecordAsync(int connectionId, string topicName, IReadOnlyCollection<string> headerData)
+        async Task WriteConnectionRecordAsync(int connectionId, string topicName,
+            IReadOnlyCollection<string> headerData)
         {
             var op = new OpCodeHeaderEntry(OpCode.Connection);
             var conn = new IntHeaderEntry("conn", connectionId);
@@ -418,11 +451,18 @@ namespace Iviz.Rosbag.Writer
             chunkStartTime = timestamp;
         }
 
-        void TryCloseChunk()
+        /// <summary>
+        /// Closes the current chunk. The next message will be written in a new chunk.
+        /// A chunk is a container for messages. Splitting the rosbag into multiple chunks will make it easier to
+        /// recover the closed chunks if for some reason you cannot close the file properly.
+        /// In most cases you do not need to call this.
+        /// </summary>
+        /// <returns>True if the current chunk was closed. False if there is no current chunk.</returns>
+        public bool TryCloseChunk()
         {
             if (chunkStart == null)
             {
-                return;
+                return false;
             }
 
             long position = writer.Position;
@@ -449,13 +489,23 @@ namespace Iviz.Rosbag.Writer
             {
                 list.Clear();
             }
+
+            return true;
         }
 
-        async Task TryCloseChunkAsync()
+        
+        /// <summary>
+        /// Closes the current chunk. The next message will be written in a new chunk.
+        /// A chunk is a container for messages. Splitting the rosbag into multiple chunks will make it easier to
+        /// recover the closed chunks if for some reason you cannot close the file properly.
+        /// In most cases you do not need to call this.
+        /// </summary>
+        /// <returns>True if the current chunk was closed. False if there is no current chunk.</returns>
+        async ValueTask<bool> TryCloseChunkAsync()
         {
             if (chunkStart == null)
             {
-                return;
+                return false;
             }
 
             long position = writer.Position;
@@ -482,8 +532,20 @@ namespace Iviz.Rosbag.Writer
             {
                 list.Clear();
             }
+
+            return true;
         }
 
+        
+        /// <summary>
+        /// Adds a message to the rosbag file.
+        /// </summary>
+        /// <param name="message">The message to write</param>
+        /// <param name="connection">
+        /// The connection where the message originated.
+        /// See for example RosSubscriber.Subscribe with the IRosTcpReceiver callback.
+        /// </param>
+        /// <param name="timestamp">The time at which the message arrived</param>
         public void Write(IMessage message, IRosConnection connection, in time timestamp)
         {
             TryOpenChunk(timestamp);
@@ -509,8 +571,22 @@ namespace Iviz.Rosbag.Writer
 
             WriteMessageRecord(connectionId, timestamp, message);
             chunkEndTime = timestamp;
+
+            if (CurrentChunkLength > MaxChunkSize)
+            {
+                TryCloseChunk();
+            }
         }
 
+        /// <summary>
+        /// Adds a message to the rosbag file.
+        /// </summary>
+        /// <param name="message">The message to write</param>
+        /// <param name="connection">
+        /// The connection where the message originated.
+        /// See for example RosSubscriber.Subscribe with the IRosTcpReceiver callback.
+        /// </param>
+        /// <param name="timestamp">The time at which the message arrived</param>
         public async Task WriteAsync(IMessage message, IRosConnection connection, time timestamp)
         {
             await TryOpenChunkAsync(timestamp);
@@ -536,8 +612,16 @@ namespace Iviz.Rosbag.Writer
 
             await WriteMessageRecordAsync(connectionId, timestamp, message);
             chunkEndTime = timestamp;
+            
+            if (CurrentChunkLength > MaxChunkSize)
+            {
+                await TryCloseChunkAsync();
+            }            
         }
 
+        /// <summary>
+        /// Writes the index and closes the file.
+        /// </summary>
         public void Dispose()
         {
             if (disposed)
@@ -579,6 +663,9 @@ namespace Iviz.Rosbag.Writer
         ValueTask IAsyncDisposable.DisposeAsync() => new(DisposeAsync());
 #endif
 
+        /// <summary>
+        /// Writes the connection index and closes the file.
+        /// </summary>
         public async Task DisposeAsync()
         {
             await TryCloseChunkAsync();
