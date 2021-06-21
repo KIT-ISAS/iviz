@@ -402,14 +402,9 @@ namespace Iviz.Roslib.XmlRpc
                 //using XmlRpcConnection freeConnection = new XmlRpcConnection("Rpc#0", MasterUri);
                 tmp = await freeConnection.MethodCallAsync(CallerUri, function, args, ts.Token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (!token.IsCancellationRequested)
             {
-                if (!token.IsCancellationRequested)
-                {
-                    throw new TimeoutException($"Call to '{function}' timed out");
-                }
-
-                throw;
+                throw new TimeoutException($"Call to '{function}' timed out");
             }
 
             if (!tmp.TryGetArray(out XmlRpcValue[] result))

@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
@@ -28,21 +27,21 @@ namespace Iviz.Roslib
         TopicInfo<T> topicInfo;
         TcpClient? tcpClient;
         bool disposed;
-
         long numReceived;
         long bytesReceived;
-
         string? errorDescription;
 
         Endpoint? RemoteEndpoint { get; set; }
         Endpoint? Endpoint { get; set; }
         string[]? TcpHeader { get; set; }
+
         bool KeepRunning => !runningTs.IsCancellationRequested;
-        public Uri RemoteUri { get; }
         string Topic => topicInfo.Topic;
+
+        public bool IsPaused { get; set; }
+        public Uri RemoteUri { get; }
         public bool IsAlive => !task.IsCompleted;
         public bool IsConnected => tcpClient is {Connected: true};
-        public bool IsPaused { get; set; }
 
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
             Uri remoteUri, Endpoint? remoteEndpoint, TopicInfo<T> topicInfo,
@@ -142,7 +141,7 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                Logger.LogDebugFormat("{0}: Changed endpoint from {1} to {2}", this, 
+                Logger.LogDebugFormat("{0}: Changed endpoint from {1} to {2}", this,
                     RemoteEndpoint?.ToString() ?? "(none)", newEndpoint);
                 RemoteEndpoint = newEndpoint;
             }
@@ -393,7 +392,8 @@ namespace Iviz.Roslib
                 if (receivedSize != fixedSize)
                 {
                     throw new RosInvalidPackageSizeException(
-                        $"Receiver expected packet with fixed size of {fixedSize} bytes, but got a packet of size {receivedSize}!");
+                        $"Receiver expected packet with fixed size of {fixedSize} bytes, " +
+                        $"but got a packet of size {receivedSize}!");
                 }
 
                 numReceived++;
@@ -440,7 +440,7 @@ namespace Iviz.Roslib
                 await Task.Yield();
             }
         }
-        
+
         RosTcpReceiver CreateConnectionInfo() => new(
             RemoteUri,
             RemoteEndpoint ?? default,
@@ -454,28 +454,6 @@ namespace Iviz.Roslib
         {
             return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
                    $"PartnerSocket={RemoteEndpoint?.Hostname ?? "(none)"}:{RemoteEndpoint?.Port ?? -1}]";
-        }
-    }
-
-    [DataContract]
-    internal sealed class RosTcpReceiver : IRosTcpReceiver
-    {
-        [DataMember] public Uri RemoteUri { get; }
-        [DataMember] public Endpoint RemoteEndpoint { get; }
-        [DataMember] public Endpoint Endpoint { get; }
-        [DataMember] public string Topic { get; }
-        [DataMember] public string Type { get; }
-        [DataMember] public IReadOnlyCollection<string> TcpHeader { get; }
-
-        public RosTcpReceiver(Uri remoteUri, Endpoint remoteEndpoint, Endpoint endpoint, string topic, string type,
-            IList<string> tcpHeader)
-        {
-            RemoteUri = remoteUri;
-            RemoteEndpoint = remoteEndpoint;
-            Endpoint = endpoint;
-            Topic = topic;
-            Type = type;
-            TcpHeader = tcpHeader.AsReadOnly();
         }
     }
 }

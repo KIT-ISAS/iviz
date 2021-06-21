@@ -831,7 +831,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe(string topic, Action<IMessage> callback, Type msgType, out IRosSubscriber subscriber,
-            bool requestNoDelay = false)
+            bool requestNoDelay = true)
         {
             if (callback == null)
             {

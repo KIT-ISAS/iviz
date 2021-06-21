@@ -5,10 +5,19 @@ using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
-    
+    /// <summary>
+    /// Determines how to wait for a message being sent.
+    /// </summary>
     public enum RosPublishPolicy
     {
+        /// <summary>
+        /// Enqueue the message without waiting. 
+        /// </summary>
         DoNotWait,
+        
+        /// <summary>
+        /// Enqueue the message and wait until all connections finish sending it.
+        /// </summary>
         WaitUntilSent,
     }
     
@@ -120,13 +129,13 @@ namespace Iviz.Roslib
         /// </summary>
         public bool ForceTcpNoDelay { get; set; }
 
-        internal Endpoint? RequestTopicRpc();
-        
         /// <summary>
         /// Async version of Dispose(), for NET Standard 2.0 where IAsyncDisposable is not available.
         /// </summary>
         /// <returns>The awaitable dispose task.</returns>
-        Task DisposeAsync(CancellationToken token);
+        public Task DisposeAsync(CancellationToken token);
+        
+        internal Endpoint? RequestTopicRpc();
     }
     
     public interface IRosPublisher<in T> : IRosPublisher where T : IMessage

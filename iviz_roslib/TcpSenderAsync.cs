@@ -107,11 +107,11 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-
+            
             runningTs.Cancel();
-
+            tcpClient.Dispose();
+            
             await task.AwaitNoThrow(5000, this, token);
-
             runningTs.Dispose();
         }
 
@@ -176,11 +176,12 @@ namespace Iviz.Roslib
             await stream.WriteHeaderAsync(contents, runningTs.Token);
         }
 
-        string? ProcessRemoteHeader(List<string> fields)
+        bool ProcessRemoteHeader(List<string> fields, out string errorMessage)
         {
             if (fields.Count < 5)
             {
-                return "error=Expected at least 5 fields, closing connection";
+                errorMessage = "error=Expected at least 5 fields, closing connection";
+                return false;
             }
 
             Dictionary<string, string> values = new();
@@ -189,7 +190,8 @@ namespace Iviz.Roslib
                 int index = field.IndexOf('=');
                 if (index < 0)
                 {
-                    return $"error=Invalid field '{field}'";
+                    errorMessage = $"error=Invalid field '{field}'";
+                    return false;
                 }
 
                 string key = field.Substring(0, index);
@@ -202,13 +204,15 @@ namespace Iviz.Roslib
             }
             else
             {
-                return "error=Missing entry 'callerid'";
+                errorMessage = "error=Missing entry 'callerid'";
+                return false;
             }
 
             if (!values.TryGetValue("topic", out string? receivedTopic) || receivedTopic != topicInfo.Topic)
             {
-                return
-                    $"error=Expected topic '{topicInfo.Topic}' but received '{receivedTopic}', closing connection";
+                errorMessage =
+                    $"error=Expected topic '{topicInfo.Topic}' but received request for '{receivedTopic}'. Closing connection";
+                return false;
             }
 
             if (!values.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
@@ -219,8 +223,9 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    return
-                        $"error=Expected type '{topicInfo.Type}' but received '{receivedType}', closing connection";
+                    errorMessage =
+                        $"error=Expected type '{topicInfo.Type}' but received '{receivedType}'. Closing connection";
+                    return false;
                 }
             }
 
@@ -228,8 +233,9 @@ namespace Iviz.Roslib
             {
                 if (receivedMd5Sum != "*")
                 {
-                    return
-                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}', closing connection";
+                    errorMessage =
+                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}'. Closing connection";
+                    return false;
                 }
             }
 
@@ -238,7 +244,8 @@ namespace Iviz.Roslib
                 TcpNoDelay = true;
             }
 
-            return null;
+            errorMessage = "";
+            return true;
         }
 
         async Task ProcessHandshake(NetworkStream stream, bool latching)
@@ -249,11 +256,11 @@ namespace Iviz.Roslib
                 fields = BaseUtils.ParseHeader(readBuffer);
             }
 
-            string? errorMessage = ProcessRemoteHeader(fields);
+            bool success = ProcessRemoteHeader(fields, out string errorMessage);
 
             await SendHeader(stream, latching, errorMessage);
 
-            if (errorMessage != null)
+            if (!success)
             {
                 throw new RosHandshakeException($"Partner sent error message: [{errorMessage}]");
             }

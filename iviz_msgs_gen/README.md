@@ -6,7 +6,7 @@ If you have a new message type that you want to use with *iviz_roslib*, just cop
 ## Getting Started
 
 You can either:
-* Open the .csproj file in your favorite C# editor, or
+* Open the .csproj file in your favorite C# editor, and hit Run.
 * Open a console, go to this folder, and run the following command:
 ```bash
 dotnet run -c Release

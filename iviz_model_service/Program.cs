@@ -30,7 +30,7 @@ namespace Iviz.ModelService
             Uri? masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Is ROS_MASTER_URI set?");
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Try ROS_MASTER_URI to the address of the master.");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace Iviz.ModelService
                 }
                 catch (IOException e)
                 {
-                    Console.WriteLine($"Extras file '{extrasPath}' could not be read: {e.Message}");
+                    Console.WriteLine($"EE Extras file '{extrasPath}' could not be read: {e.Message}");
                 }
             }
 
@@ -127,11 +127,13 @@ namespace Iviz.ModelService
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
             if (!File.Exists(extrasPath))
             {
+                Console.WriteLine($"** Tried to search for extra ROS paths in file '{extrasPath}', but it is not present.");
                 return null;
             }
 
             try
             {
+                Console.WriteLine($"** Reading extra ROS paths from file '{extrasPath}'");
                 return await File.ReadAllTextAsync(extrasPath);
             }
             catch (IOException e)

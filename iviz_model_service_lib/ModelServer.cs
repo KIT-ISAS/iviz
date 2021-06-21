@@ -108,6 +108,7 @@ namespace Iviz.ModelService
             if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
                 Logger.LogError("EE Failed to find package '" + package + "'.");
+                Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
                 return null;
             }
 
@@ -119,6 +120,7 @@ namespace Iviz.ModelService
 
                 if (!File.Exists(path))
                 {
+                    Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
                     continue;
                 }
 
@@ -128,10 +130,12 @@ namespace Iviz.ModelService
                     return path;
                 }
 
+                Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
                 Logger.LogError("EE Rejecting resource request '" + uri + "' for path traversal.");
                 return null;
             }
 
+            Console.WriteLine($"EE Failed to resolve uri '{uri}'.");
             Logger.LogError("EE Failed to find resource '" + uri + "'.");
             return null;
         }
@@ -148,6 +152,7 @@ namespace Iviz.ModelService
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to parse uri from requested string";
+                Console.WriteLine($"EE Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
                 return;
             }
 
@@ -450,7 +455,7 @@ namespace Iviz.ModelService
         {
             return new(texCoords.Select(ToVector3UV).ToArray());
         }
-        
+
         static Texture ToTexture(TextureSlot texture)
         {
             return new()

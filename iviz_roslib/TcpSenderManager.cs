@@ -119,7 +119,13 @@ namespace Iviz.Roslib
                         continue;
                     }
 
-                    senders.Add(new TcpSenderAsync<TMessage>(client, topicInfo, latchedMessage));
+                    var sender = new TcpSenderAsync<TMessage>(client, topicInfo, latchedMessage);
+                    if (ForceTcpNoDelay)
+                    {
+                        sender.TcpNoDelay = true;
+                    }
+
+                    senders.Add(sender);
                     await CleanupAsync(tokenSource.Token);
                 }
             }
@@ -142,7 +148,7 @@ namespace Iviz.Roslib
             {
                 return;
             }
-            
+
             var sendersToDelete = senders.Where(sender => !sender.IsAlive).ToArray();
             if (sendersToDelete.Length == 0)
             {
@@ -239,7 +245,7 @@ namespace Iviz.Roslib
             return $"[TcpSenderManager '{Topic}']";
         }
     }
-    
+
     internal readonly struct NullableMessage<T> where T : IMessage
     {
         readonly T? element;

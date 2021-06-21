@@ -42,6 +42,10 @@ namespace Iviz.Roslib
         /// </summary>
         public int NumActivePublishers { get; }
 
+        /// <summary>
+        /// Sets whether the subscriber is paused.
+        /// When paused, the connections will still receive data, but will not process or parse it.
+        /// </summary>
         public bool IsPaused { get; set; }
         
         /// <summary>

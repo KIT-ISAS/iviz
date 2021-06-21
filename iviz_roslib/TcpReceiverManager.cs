@@ -57,38 +57,6 @@ namespace Iviz.Roslib
         public int NumConnections => connectionsByUri.Count;
 
         public int NumActiveConnections => connectionsByUri.Count(pair => pair.Value.IsConnected);
-        
-
-        /*
-        public async ValueTask<int> GetTotalActiveConnectionsAsync(CancellationToken token)
-        {
-            int numActiveConnections = NumActiveConnections;
-            if (!NeedsCleanup())
-            {
-                return numActiveConnections;
-            }
-
-            try
-            {
-                bool numConnectionsChanged;
-
-                using (await mutex.LockAsync(token))
-                {
-                    numConnectionsChanged = await CleanupAsync(token);
-                }
-
-                if (numConnectionsChanged)
-                {
-                    subscriber.RaiseNumPublishersChanged();
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-
-            return numActiveConnections;
-        }
-        */
 
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
@@ -141,29 +109,7 @@ namespace Iviz.Roslib
         {
             subscriber.MessageCallback(msg, receiver);
         }
-
-        /*
-        async ValueTask<bool> AddPublisherAsync(Uri remoteUri, CancellationToken token)
-        {
-            try
-            {
-                //Endpoint? remoteEndpoint = await RequestConnectionFromPublisherAsync(remoteUri, token);
-                CreateConnection(null, remoteUri);
-                return true;
-            }
-            catch (OperationCanceledException)
-            {
-                return false;
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Connection request to publisher {1} returned an unexpected exception: {2}",
-                    this, remoteUri, e);
-                return false;
-            }
-        }
-        */
-
+        
         void CreateConnection(Uri remoteUri, Endpoint? remoteEndpointHint = null)
         {
             connectionsByUri[remoteUri] =
@@ -177,7 +123,7 @@ namespace Iviz.Roslib
 
             using (await mutex.LockAsync(token))
             {
-                HashSet<Uri> newPublishers = new(publisherUris);
+                var newPublishers = new HashSet<Uri>(publisherUris);
                 allPublisherUris = newPublishers;
 
                 if (connectionsByUri.Keys.Any(key => !newPublishers.Contains(key)))
@@ -193,14 +139,8 @@ namespace Iviz.Roslib
 
                 if (newPublishers.Any(uri => !connectionsByUri.ContainsKey(uri)))
                 {
-                    /*
-                    IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
-                    var addTasks = toAdd.Select(uri => AddPublisherAsync(uri, token).AsTask());
-                    bool[]? results = await addTasks.WhenAll().AwaitNoThrow(this);
-                    numConnectionsHasChanged = (results != null && results.Any(b => b)) | await CleanupAsync(token);
-                    */
-
-                    IEnumerable<Uri> toAdd = newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
+                    IEnumerable<Uri> toAdd =
+                        newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
                     foreach (Uri remoteUri in toAdd)
                     {
                         CreateConnection(remoteUri);
@@ -227,7 +167,7 @@ namespace Iviz.Roslib
             {
                 return false;
             }
-            
+
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
             var tasks = toDelete.Select(receiver =>
             {
