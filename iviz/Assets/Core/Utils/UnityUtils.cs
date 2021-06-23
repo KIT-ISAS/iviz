@@ -477,6 +477,10 @@ namespace Iviz.Core
 
             return result;
         }
+
+        [NotNull]
+        public static T EnsureComponent<T>([NotNull] this GameObject gameObject) where T : Component =>
+            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
     }
 
     public static class MeshUtils

@@ -77,7 +77,8 @@ namespace Iviz.Displays
                 GameObject obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
-                obj.AddComponent<BoxCollider>();
+                obj.EnsureComponent<BoxCollider>();
+
                 obj.transform.SetParent(root.transform, false);
 
                 MeshTrianglesResource meshResource = obj.AddComponent<MeshTrianglesResource>();
@@ -211,11 +212,12 @@ namespace Iviz.Displays
 
             amm.Children = children;
 
-            BoxCollider ammCollider = root.AddComponent<BoxCollider>();
+            BoxCollider ammCollider = root.EnsureComponent<BoxCollider>();
 
             Bounds? ammBounds = amm.Children
                 .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.transform, root.transform))
                 .CombineBounds();
+            
             if (ammBounds != null)
             {
                 ammCollider.center = ammBounds.Value.center;

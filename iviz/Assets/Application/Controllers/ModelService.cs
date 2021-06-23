@@ -115,6 +115,7 @@ namespace Iviz.Controllers
             }
         }
 
+#if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
         async Task ModelCallback([NotNull] GetModelResource msg)
         {
             modelServer.ModelCallback(msg);
@@ -130,6 +131,7 @@ namespace Iviz.Controllers
                 msg.Response.Model = model;
             }
         }
+#endif
 
         public void Dispose()
         {

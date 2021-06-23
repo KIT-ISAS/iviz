@@ -313,7 +313,7 @@ namespace Iviz.Displays
                     child.transform.localScale = meshFilter.transform.lossyScale;
                     child.layer = LayerType.Collider;
 
-                    var collider = child.AddComponent<MeshCollider>();
+                    var collider = child.EnsureComponent<MeshCollider>();
                     collider.sharedMesh = meshFilter.sharedMesh;
                     collider.convex = true;
                 }
@@ -323,7 +323,7 @@ namespace Iviz.Displays
             else if (geometry.Cylinder != null)
             {
                 var resourceObject = Resource.Displays.Cylinder.Object;
-                var collider = collisionObject.AddComponent<MeshCollider>();
+                var collider = collisionObject.EnsureComponent<MeshCollider>();
                 collider.sharedMesh = resourceObject.GetComponent<MeshFilter>().sharedMesh;
                 collider.convex = true;
 
@@ -334,12 +334,12 @@ namespace Iviz.Displays
             }
             else if (geometry.Box != null)
             {
-                var collider = collisionObject.AddComponent<BoxCollider>();
+                var collider = collisionObject.EnsureComponent<BoxCollider>();
                 collider.size = geometry.Box.Size.ToVector3().Abs();
             }
             else if (geometry.Sphere != null)
             {
-                var collider = collisionObject.AddComponent<SphereCollider>();
+                var collider = collisionObject.EnsureComponent<SphereCollider>();
                 collider.radius = geometry.Sphere.Radius;
             }
         }
