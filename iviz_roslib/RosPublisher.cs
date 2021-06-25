@@ -258,6 +258,9 @@ namespace Iviz.Roslib
             return ids.Contains(id);
         }
 
+        /// <summary>
+        /// Checks whether the given type matches the publisher message type <see cref="T"/>  
+        /// </summary>
         public bool MessageTypeMatches(Type type)
         {
             return type == typeof(T);

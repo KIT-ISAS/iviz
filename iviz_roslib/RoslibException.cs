@@ -115,6 +115,10 @@ namespace Iviz.Roslib
         public RosHandshakeException(string message) : base(message)
         {
         }
+        
+        public RosHandshakeException(string message, Exception e) : base(message, e)
+        {
+        }
     }
 
     public class RosServiceNotFoundException : RoslibException
@@ -155,15 +159,18 @@ namespace Iviz.Roslib
         public RosInvalidPackageSizeException(string message) : base(message)
         {
         }
-
-        public RosInvalidPackageSizeException()
-        {
-        }
-
-        public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
     }
+    
+    public class RosInvalidHeaderException : RosHandshakeException
+    {
+        public RosInvalidHeaderException(string message) : base(message)
+        {
+        }
+
+        public RosInvalidHeaderException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }    
 
     public class RosQueueOverflowException : RosQueueException
     {

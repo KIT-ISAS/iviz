@@ -191,7 +191,7 @@ namespace Iviz.Roslib
             const int maxMessageLength = 64 * 1024 * 1024;
             if (length is < 0 or > maxMessageLength)
             {
-                throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
+                throw new RosInvalidPackageSizeException($"Invalid packet size {length}. Disconnecting.");
             }
 
             readBuffer.EnsureCapability(length);
@@ -238,7 +238,7 @@ namespace Iviz.Roslib
 
 
             List<string> responses = BaseUtils.ParseHeader(readBuffer.Array, receivedLength);
-            if (responses.Count != 0 && responses[0].HasPrefix("error"))
+            if (responses.Count != 0 && responses[0].HasPrefix("error")) // TODO: improve error handling here
             {
                 int index = responses[0].IndexOf('=');
                 string description = index != -1 ? responses[0].Substring(index + 1) : responses[0];
@@ -405,7 +405,7 @@ namespace Iviz.Roslib
                     manager.MessageCallback(message, connectionInfo);
                 }
 
-                await Task.Yield();
+                //await Task.Yield();
             }
         }
 
@@ -427,6 +427,8 @@ namespace Iviz.Roslib
                     Logger.LogDebugFormat("{0}: Partner closed connection", this);
                     return;
                 }
+                
+                //Logger.Log(time.Now() + ": Received.");
 
                 numReceived++;
                 bytesReceived += rcvLength + 4;
@@ -437,11 +439,11 @@ namespace Iviz.Roslib
                     manager.MessageCallback(message, connectionInfo);
                 }
 
-                await Task.Yield();
+                //await Task.Yield();
             }
         }
 
-        RosTcpReceiver CreateConnectionInfo() => new(
+        IRosTcpReceiver CreateConnectionInfo() => new RosTcpReceiver(
             RemoteUri,
             RemoteEndpoint ?? default,
             Endpoint ?? default,
