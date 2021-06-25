@@ -128,8 +128,19 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Clear();
-            description.Append("<color=blue><font=Bold>** InteractiveMarker '").Append(msg.Name).Append("'</font></color>")
-                .AppendLine();
+            description.Append("<color=blue><font=Bold>** InteractiveMarker ");
+
+            if (string.IsNullOrEmpty(msg.Name))
+            {
+                description.Append("(empty name)");
+            }
+            else
+            {
+                description.Append("'").Append(msg.Name).Append("'");
+            }
+
+            description.Append("</font></color>").AppendLine();
+
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
                 : "[]";
@@ -275,7 +286,7 @@ namespace Iviz.Controllers
                 controlNode.transform.AsLocalPose());
         }
 
-        public override void Stop()
+        protected override void Stop()
         {
             base.Stop();
             foreach (var controlObject in controls.Values)

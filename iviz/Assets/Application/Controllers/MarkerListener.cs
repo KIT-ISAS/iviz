@@ -393,8 +393,7 @@ namespace Iviz.Controllers
 
         static void DeleteMarkerObject([NotNull] MarkerObject markerToDelete)
         {
-            markerToDelete.Stop();
-            Object.Destroy(markerToDelete.gameObject);
+            markerToDelete.DestroySelf();
         }
 
         static MarkerObject CreateMarkerObject()

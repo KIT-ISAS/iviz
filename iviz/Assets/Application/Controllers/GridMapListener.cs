@@ -258,10 +258,8 @@ namespace Iviz.Controllers
 
             resource.ReturnToPool();
 
-            link.Stop();
-            Object.Destroy(link.gameObject);
-            node.Stop();
-            Object.Destroy(node.gameObject);
+            link.DestroySelf();
+            node.DestroySelf();
         }
     }
 }

@@ -588,8 +588,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            node.Stop();
-            Destroy(node);
+            node.DestroySelf();
         }
     }
 }

@@ -396,7 +396,7 @@ namespace Iviz.Controllers
             Transform.SetLocalPose(newPose);
         }
 
-        public override void Stop()
+        protected override void Stop()
         {
             base.Stop();
             axis.ReturnToPool();

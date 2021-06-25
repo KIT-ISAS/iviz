@@ -100,12 +100,10 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (Size == 0)
+            if (Size == 0 && !isDirty)
             {
                 return;
             }
-
-            //bool isProcessing = processing;
 
             Properties.SetFloat(ScaleId, ElementScale * transform.lossyScale.x);
 
@@ -117,28 +115,21 @@ namespace Iviz.Displays
             {
                 UpdateWithMesh();
             }
-
-            /*
-            if (isProcessing)
-            {
-                processing = false;
-            }
-            */
         }
 
         void UpdateWithComputeBuffers()
         {
+            if (isDirty)
+            {
+                UpdateBuffer();
+                CalculateBounds();
+                isDirty = false;
+            }
+
             Bounds worldBounds = WorldBounds;
             if (!worldBounds.IsVisibleFromMainCamera())
             {
                 return;
-            }
-
-            if (isDirty)
-            {
-                UpdateBuffer();
-                UpdateStats();
-                isDirty = false;
             }
 
             UpdateTransform();
@@ -151,6 +142,15 @@ namespace Iviz.Displays
         {
             if (!isDirty)
             {
+                return;
+            }
+
+            mesh.Clear();
+
+            if (Size == 0)
+            {
+                CalculateBounds();
+                isDirty = false;
                 return;
             }
 
@@ -168,7 +168,6 @@ namespace Iviz.Displays
                             uvs.Array[i].x = pointBuffer[i].w;
                         }
 
-                        mesh.Clear();
                         mesh.SetVertices(points);
                         mesh.SetUVs(0, uvs);
                         mesh.SetIndices(indices, MeshTopology.Points, 0);
@@ -185,7 +184,6 @@ namespace Iviz.Displays
                             colors.Array[i] = PointWithColor.ColorFromFloatBits(pointBuffer[i].w);
                         }
 
-                        mesh.Clear();
                         mesh.SetVertices(points);
                         mesh.SetColors(colors);
                         mesh.SetIndices(indices, MeshTopology.Points, 0);
@@ -194,7 +192,7 @@ namespace Iviz.Displays
             }
 
             isDirty = false;
-            UpdateStats();
+            CalculateBounds();
         }
 
         void OnDestroy()
@@ -226,24 +224,19 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(points));
             }
 
-            /*
-            if (processing)
-            {
-                Logger.Debug($"{this}: Missed a Set!");
-                return;
-            }
-            */
-
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
-            foreach (ref PointWithColor t in points.Ref())
+            if (points.Length != 0)
             {
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                foreach (ref PointWithColor t in points.Ref())
                 {
-                    continue;
-                }
+                    if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                    {
+                        continue;
+                    }
 
-                pointBuffer.Add(t.f);
+                    pointBuffer.Add(t.f);
+                }
             }
 
             isDirty = true;
@@ -251,18 +244,12 @@ namespace Iviz.Displays
 
 
         /// <summary>
-        ///     Copies the array of points directly without checking.
+        ///     Copies the list of points directly without checking.
         /// </summary>
-        /// <param name="points">A native array with the points.</param>
-        public void SetDirect(in NativeArray<float4> points)
+        /// <param name="points">A native list with the points.</param>
+        public void SetDirect([NotNull] NativeList<float4> points)
         {
             pointBuffer.Clear();
-
-            if (points.Length == 0)
-            {
-                return;
-            }
-
             pointBuffer.AddRange(points);
             isDirty = true;
         }
@@ -307,8 +294,14 @@ namespace Iviz.Displays
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
         }
 
-        void UpdateStats()
+        void CalculateBounds()
         {
+            if (Size == 0)
+            {
+                CalculateBoundsEmpty();
+                return;
+            }
+
             MinMaxJob.CalculateBounds(pointBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
             BoxCollider.center = bounds.center;
             BoxCollider.size = bounds.size + ElementScale * Vector3.one;
@@ -316,6 +309,17 @@ namespace Iviz.Displays
             if (!OverrideIntensityBounds)
             {
                 IntensityBounds = span;
+            }
+        }
+
+        void CalculateBoundsEmpty()
+        {
+            BoxCollider.center = Vector3.zero;
+            BoxCollider.size = Vector3.zero;
+            MeasuredIntensityBounds = Vector2.zero;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = Vector2.zero;
             }
         }
 

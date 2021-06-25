@@ -538,8 +538,6 @@ namespace Iviz.Controllers
         
         public void StopController()
         {
-            node.Stop();
-
             if (AttachedToTf)
             {
                 AttachedToTf = false;
@@ -547,7 +545,8 @@ namespace Iviz.Controllers
 
             Robot = null;
             Stopped?.Invoke();
-            Object.Destroy(node.gameObject);
+
+            node.DestroySelf();
         }
 
         public void ResetController()

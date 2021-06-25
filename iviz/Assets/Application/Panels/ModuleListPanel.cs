@@ -116,10 +116,8 @@ namespace Iviz.App
             set => menuDialog = value;
         }
 
-        [NotNull]
-        public static GuiInputModule GuiInputModule => GuiInputModule.Instance.CheckedNull() ??
-                                                       throw new InvalidOperationException(
-                                                           "GuiInputModule has not been started!");
+        [CanBeNull]
+        public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
 
         bool dialogIsDragged;
 

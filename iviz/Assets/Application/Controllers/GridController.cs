@@ -323,8 +323,7 @@ namespace Iviz.Controllers
         public void StopController()
         {
             grid.ReturnToPool();
-            node.Stop();
-            UnityEngine.Object.Destroy(node.gameObject);
+            node.DestroySelf();
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
 
             GuiInputModule.Instance.LongClick -= OnLongClick;

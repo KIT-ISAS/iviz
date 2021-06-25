@@ -88,7 +88,17 @@ namespace Iviz.Controllers
             numWarnings = 0;
 
             description.Clear();
-            description.Append("<color=#000080ff><font=Bold>* Control '").Append(msg.Name).Append("'</font></color>").AppendLine();
+            description.Append("<color=#000080ff><font=Bold>* Control ");
+            if (string.IsNullOrEmpty(msg.Name))
+            {
+                description.Append("(empty name)");
+            }
+            else
+            {
+                description.Append("'").Append(msg.Name).Append("'");
+            }
+
+            description.Append("</font></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")
@@ -160,7 +170,8 @@ namespace Iviz.Controllers
                     parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
 
-                var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+                var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
+                    .GetComponent<AppAssetHolder>();
                 AudioSource.PlayClipAtPoint(assetHolder.Click, transform.position);
             };
 
@@ -325,7 +336,8 @@ namespace Iviz.Controllers
 
                 if (numUnnamed > 1)
                 {
-                    description.Append(WarnStr).Append(numUnnamed).Append(" interactive markers have empty ids").AppendLine();
+                    description.Append(WarnStr).Append(numUnnamed).Append(" interactive markers have empty ids")
+                        .AppendLine();
                     numWarnings++;
                 }
             }
@@ -344,7 +356,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             Control.Suspend();
             GameObject controlObject = ((MonoBehaviour) Control).gameObject;
             if (Settings.IsHololens)
@@ -383,14 +395,13 @@ namespace Iviz.Controllers
 
         void DeleteMarkerObject([NotNull] MarkerObject marker)
         {
-            marker.Stop();
             marker.BoundsChanged -= RecalculateBounds;
-            Destroy(marker.gameObject);
+            marker.DestroySelf();
         }
 
         [NotNull]
         MarkerObject CreateMarkerObject()
-        { 
+        {
             var markerObject = new GameObject("MarkerObject").AddComponent<MarkerObject>();
             markerObject.Visible = visible;
             markerObject.BoundsChanged += RecalculateBounds;
