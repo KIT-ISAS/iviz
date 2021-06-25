@@ -442,6 +442,32 @@ namespace Iviz.Roslib.MarkerHelper
             };
         }
 
+        public int CreateResource(string resource, Pose? pose = null, string frameId = "",
+            int replaceId = -1)
+        {
+            int id = replaceId != -1 ? replaceId : GetFreeId();
+            markers[id] = CreateResource(resource, ns, id, pose, frameId);
+            return id;
+        }
+
+        public static Marker CreateResource(string resource, string ns = "", int id = 0, Pose? pose = null,
+            string frameId = "")
+        {
+            return new Marker
+            {
+                Header = (0, frameId),
+                Ns = ns ?? "",
+                Id = id,
+                Type = Marker.MESH_RESOURCE,
+                Action = Marker.ADD,
+                Pose = pose ?? Pose.Identity,
+                Scale = Vector3.One,
+                Color = ColorRGBA.White,
+                MeshResource = resource,
+                FrameLocked = true
+            };
+        }
+
         public static Marker CreateDelete(string ns = "", int id = 0)
         {
             return new Marker
