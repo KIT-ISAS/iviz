@@ -29,6 +29,12 @@ namespace Iviz.Displays
 
         public Transform TargetTransform { get; set; }
 
+        public Transform SourceTransform
+        {
+            get => sourceTransform;
+            set => sourceTransform = value;
+        }
+
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;

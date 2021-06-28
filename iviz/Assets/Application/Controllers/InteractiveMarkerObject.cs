@@ -218,6 +218,14 @@ namespace Iviz.Controllers
                 control.UpdateControlBounds(totalBounds);
             }
 
+            var interactableControl =
+                controls.Values
+                    .FirstOrDefault(control => control.ControlInteractionMode == InteractionModeType.ClickOnly)?.Control
+                ?? controls.Values.FirstOrDefault(control => control.ControlColliderCanInteract)?.Control;
+
+            interactableControl?.SetColliderInteractable();
+
+
             if (msg.MenuEntries.Length != 0)
             {
                 menuEntries = new MenuEntryList(msg.MenuEntries, description, out int newNumErrors);

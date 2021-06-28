@@ -69,6 +69,7 @@ namespace Iviz.Controllers
             highlightFrame.Visible = false;
             highlightFrame.CastsShadows = false;
             highlightFrame.Emissive = 1;
+            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
 
             highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
             highlightFrame.Transform.parent = highlightFrameNode.Transform;
@@ -487,7 +488,6 @@ namespace Iviz.Controllers
             }
 
             highlightFrame.Tint = Color.white.WithAlpha(alpha);
-            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
         }
 
         public override void StopController()

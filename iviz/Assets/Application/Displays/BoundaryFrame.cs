@@ -114,7 +114,6 @@ namespace Iviz.Controllers
                 {
                     resource.EmissiveColor = value / 2;
                     resource.Color = value;
-                    resource.Visible = value.a >= 1f / 255;
                 }
             }
         }

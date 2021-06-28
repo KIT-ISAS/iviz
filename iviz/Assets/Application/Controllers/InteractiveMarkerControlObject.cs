@@ -35,6 +35,9 @@ namespace Iviz.Controllers
 
         [CanBeNull] public Bounds? Bounds { get; private set; }
 
+        public InteractionModeType ControlInteractionMode => Control?.InteractionMode ?? InteractionModeType.None;
+        public bool ControlColliderCanInteract => Control?.ColliderCanInteract ?? false;
+
         public bool Visible
         {
             get => visible;
@@ -61,7 +64,7 @@ namespace Iviz.Controllers
                 interactable = value;
                 if (Control != null)
                 {
-                    Control.Layer = value ? LayerType.Clickable : LayerType.IgnoreRaycast;
+                    Control.Interactable = value;
                 }
             }
         }
@@ -79,6 +82,8 @@ namespace Iviz.Controllers
             parent = newIMarkerObject;
             rosId = realId;
         }
+
+        const string FloatFormat = "#,0.###";
 
         public void Set([NotNull] InteractiveMarkerControl msg)
         {
@@ -104,6 +109,12 @@ namespace Iviz.Controllers
                 ? msg.Description.ToString().Replace("\t", "\\t").Replace("\n", "\\n")
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
+            description.Append("Orientation: ")
+                .Append(msg.Orientation.X.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.Y.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.Z.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.W.ToString(FloatFormat)).AppendLine();
+
 
             transform.localRotation = msg.Orientation.Ros2Unity();
 
@@ -170,9 +181,11 @@ namespace Iviz.Controllers
                     parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
 
+                /*
                 var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
                     .GetComponent<AppAssetHolder>();
                 AudioSource.PlayClipAtPoint(assetHolder.Click, transform.position);
+                */
             };
 
             Control.MenuClicked += unityPositionHint => { parent.ShowMenu(unityPositionHint); };
@@ -211,34 +224,40 @@ namespace Iviz.Controllers
                 IControlMarker mControl = EnsureControlDisplayExists();
                 mControl.EnableMenu = false;
 
+                InteractionModeType interactionModeType;
                 switch (interactionMode)
                 {
                     case InteractionMode.Menu:
                     case InteractionMode.Button:
-                        mControl.InteractionMode = InteractionModeType.ClickOnly;
+                        interactionModeType = InteractionModeType.ClickOnly;
                         break;
                     case InteractionMode.MoveAxis:
-                        mControl.InteractionMode = InteractionModeType.MoveAxisX;
+                        interactionModeType = InteractionModeType.MoveAxisX;
                         break;
                     case InteractionMode.MovePlane:
-                        mControl.InteractionMode = InteractionModeType.MovePlaneYz;
+                        interactionModeType = InteractionModeType.MovePlaneYz;
                         break;
                     case InteractionMode.RotateAxis:
-                        mControl.InteractionMode = InteractionModeType.RotateAxisX;
+                        interactionModeType = InteractionModeType.RotateAxisX;
                         break;
                     case InteractionMode.MoveRotate:
-                        mControl.InteractionMode = InteractionModeType.MovePlaneYzRotateAxisX;
+                        interactionModeType = InteractionModeType.MovePlaneYzRotateAxisX;
                         break;
                     case InteractionMode.Move3D:
-                        mControl.InteractionMode = InteractionModeType.Move3D;
+                        interactionModeType = InteractionModeType.Move3D;
                         break;
                     case InteractionMode.Rotate3D:
-                        mControl.InteractionMode = InteractionModeType.Rotate3D;
+                        interactionModeType = InteractionModeType.Rotate3D;
                         break;
                     case InteractionMode.MoveRotate3D:
-                        mControl.InteractionMode = InteractionModeType.MoveRotate3D;
+                        interactionModeType = InteractionModeType.MoveRotate3D;
+                        break;
+                    default:
+                        interactionModeType = InteractionModeType.None; // unreachable
                         break;
                 }
+
+                mControl.InteractionMode = interactionModeType;
             }
 
             if (orientationMode < 0 || orientationMode > OrientationMode.ViewFacing)
@@ -271,7 +290,7 @@ namespace Iviz.Controllers
                     break;
             }
 
-            if (Control is null)
+            if (Control == null)
             {
                 return;
             }
@@ -289,9 +308,20 @@ namespace Iviz.Controllers
                     break;
                 case OrientationMode.Fixed:
                     Control.PointsToCamera = false;
-                    Control.KeepAbsoluteRotation = true;
+                    Control.KeepAbsoluteRotation = false;
+                    //Control.KeepAbsoluteRotation = true; // TODO: fix this
                     break;
             }
+        }
+
+        void ClearMarkers()
+        {
+            foreach (var markerObject in markers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
+
+            markers.Clear();
         }
 
         void UpdateMarkers([NotNull] IEnumerable<Marker> msg)
@@ -345,12 +375,7 @@ namespace Iviz.Controllers
 
         public void Stop()
         {
-            foreach (var markerObject in markers.Values)
-            {
-                DeleteMarkerObject(markerObject);
-            }
-
-            markers.Clear();
+            ClearMarkers();
 
             if (Control == null)
             {
