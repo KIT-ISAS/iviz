@@ -8,6 +8,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -170,7 +171,7 @@ namespace Iviz.Controllers
                         warnStr = "1 warning";
                         break;
                     default:
-                        warnStr = $"{totalErrors} warnings";
+                        warnStr = $"{totalWarnings} warnings";
                         break;
                 }
 
@@ -188,8 +189,16 @@ namespace Iviz.Controllers
         {
             Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate) {MaxQueueSize = 50};
 
-            int lastSlash = config.Topic.LastIndexOf('/');
-            string root = lastSlash == -1 ? config.Topic : config.Topic.Substring(0, lastSlash);
+            string root;
+            if (config.Topic.HasSuffix("/update"))
+            {
+                int lastSlash = config.Topic.LastIndexOf('/');
+                root = config.Topic.Substring(0, lastSlash);
+            }
+            else
+            {
+                root = config.Topic;
+            }
 
             string feedbackTopic = string.Format(FeedbackFormatStr, root);
             string fullTopic = string.Format(UpdateFullFormatStr, root);
@@ -210,8 +219,7 @@ namespace Iviz.Controllers
             interactiveMarkers.Clear();
             Publisher.Stop();
 
-            node.Stop();
-            Object.Destroy(node.gameObject);
+            node.DestroySelf();
         }
 
         public override void ResetController()
@@ -288,8 +296,7 @@ namespace Iviz.Controllers
 
         static void DeleteMarkerObject([NotNull] InteractiveMarkerObject marker)
         {
-            marker.Stop();
-            Object.Destroy(marker.gameObject);
+            marker.DestroySelf();
         }
 
         void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
@@ -310,8 +317,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            interactiveMarker.Stop();
-            Object.Destroy(interactiveMarker.gameObject);
+            interactiveMarker.DestroySelf();
             interactiveMarkers.Remove(id);
         }
 

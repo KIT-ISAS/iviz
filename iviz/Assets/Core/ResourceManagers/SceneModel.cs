@@ -20,7 +20,6 @@ namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        [NotNull]
         [ItemNotNull]
         public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
             [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
@@ -125,8 +124,8 @@ namespace Iviz.Displays
 
                     for (int i = 0; i < mesh.Tangents.Length; i++)
                     {
-                        var tangent = mesh.Tangents[i];
-                        tangents.Array[i] = new Vector4(tangent.X, tangent.Y, tangent.Z, -1);
+                        (float x, float y, float z) = mesh.Tangents[i];
+                        tangents.Array[i] = new Vector4(x, y, z, -1);
                     }
 
                     meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
@@ -215,7 +214,7 @@ namespace Iviz.Displays
             BoxCollider ammCollider = root.EnsureComponent<BoxCollider>();
 
             Bounds? ammBounds = amm.Children
-                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.transform, root.transform))
+                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform))
                 .CombineBounds();
             
             if (ammBounds != null)
@@ -262,6 +261,8 @@ namespace Iviz.Displays
             where TA : unmanaged
             where TB : unmanaged
         {
+            Buffer.BlockCopy(src, 0, dst, 0, sizeToCopy);
+            /*
             unsafe
             {
                 if (sizeToCopy > src.Length * sizeof(TA) || sizeToCopy > dst.Length * sizeof(TB))
@@ -275,6 +276,7 @@ namespace Iviz.Displays
                     Buffer.MemoryCopy(a, b, sizeToCopy, sizeToCopy);
                 }
             }
+            */
         }
     }
 }

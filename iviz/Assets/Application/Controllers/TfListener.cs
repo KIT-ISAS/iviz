@@ -26,7 +26,8 @@ namespace Iviz.Controllers
         public const string DefaultTopic = "/tf";
         public const string OriginFrameId = "_origin_";
         public const string MapFrameId = "map";
-
+        const int MaxQueueSize = 10000;
+        
         const string DefaultTopicStatic = "/tf_static";
 
         static uint tfSeq;
@@ -68,6 +69,7 @@ namespace Iviz.Controllers
             highlightFrame.Visible = false;
             highlightFrame.CastsShadows = false;
             highlightFrame.Emissive = 1;
+            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
 
             highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
             highlightFrame.Transform.parent = highlightFrameNode.Transform;
@@ -276,8 +278,9 @@ namespace Iviz.Controllers
         {
             while (messageList.TryDequeue(out var value))
             {
+                
                 var (frame, isStatic) = value;
-                foreach (var (parentFrameId, childFrameId, transform, _) in frame)
+                foreach (var (parentFrameId, childFrameId, transform, stamp) in frame)
                 {
                     if (transform.HasNaN()
                         || childFrameId.Length == 0
@@ -425,12 +428,26 @@ namespace Iviz.Controllers
 
         bool HandlerNonStatic([NotNull] TFMessage msg)
         {
+            if (messageList.Count > MaxQueueSize)
+            {
+                return false;
+            }
+            
+            //DateTime now = DateTime.Now;
+            //Debug.Log((now - msg.Transforms[0].Header.Stamp.ToDateTime()).TotalMilliseconds);
+            //Debug.Log(messageList.Count);
+
             messageList.Enqueue((msg.Transforms, false));
             return true;
         }
 
         bool HandlerStatic([NotNull] TFMessage msg)
         {
+            if (messageList.Count > MaxQueueSize)
+            {
+                return false;
+            }
+
             messageList.Enqueue((msg.Transforms, true));
             return true;
         }
@@ -444,8 +461,7 @@ namespace Iviz.Controllers
 
             frames.Remove(frame.Id);
 
-            frame.Stop();
-            Object.Destroy(frame.gameObject);
+            frame.DestroySelf();
         }
 
         void LateUpdate()
@@ -472,13 +488,12 @@ namespace Iviz.Controllers
             }
 
             highlightFrame.Tint = Color.white.WithAlpha(alpha);
-            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
         }
 
         public override void StopController()
         {
             base.StopController();
-            staticListener.Stop();
+            staticListener.DestroySelf();
             Publisher.Stop();
             GameThread.LateEveryFrame -= LateUpdate;
             Instance = null;

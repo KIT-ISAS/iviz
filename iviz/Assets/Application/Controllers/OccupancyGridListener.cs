@@ -435,10 +435,8 @@ namespace Iviz.Controllers
                 texture.ReturnToPool();
             }
 
-            cubeNode.Stop();
-            textureNode.Stop();
-            UnityEngine.Object.Destroy(cubeNode.gameObject);
-            UnityEngine.Object.Destroy(textureNode.gameObject);
+            cubeNode.DestroySelf();
+            textureNode.DestroySelf();
         }
     }
 }

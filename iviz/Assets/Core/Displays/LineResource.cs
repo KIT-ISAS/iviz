@@ -95,14 +95,17 @@ namespace Iviz.Displays
             lineBuffer.EnsureCapacity(lines.Length);
 
             lineBuffer.Clear();
-            foreach (ref LineWithColor t in lines.Ref())
+            if (lines.Length != 0)
             {
-                if (!IsElementValid(t))
+                foreach (ref LineWithColor t in lines.Ref())
                 {
-                    continue;
-                }
+                    if (!IsElementValid(t))
+                    {
+                        continue;
+                    }
 
-                lineBuffer.Add(t.f);
+                    lineBuffer.Add(t.f);
+                }
             }
 
             UpdateLines(overrideNeedsAlpha);
@@ -186,6 +189,11 @@ namespace Iviz.Displays
 
         bool CheckIfAlphaNeeded()
         {
+            if (lineBuffer.Length == 0)
+            {
+                return false;
+            }
+            
             foreach (ref float4x2 t in lineBuffer.Ref())
             {
                 Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
@@ -298,6 +306,7 @@ namespace Iviz.Displays
         {
             if (Size == 0)
             {
+                CalculateBoundsEmpty();
                 return;
             }
 
@@ -322,6 +331,7 @@ namespace Iviz.Displays
             {
                 enabled = false;
                 MeshRenderer.enabled = false;
+                CalculateBoundsEmpty();
                 return;
             }
 
@@ -366,6 +376,18 @@ namespace Iviz.Displays
             if (!OverrideIntensityBounds)
             {
                 IntensityBounds = span;
+            }
+        }
+
+        void CalculateBoundsEmpty()
+        {
+            BoxCollider.center = Vector3.zero;
+            BoxCollider.size = Vector3.zero;;
+
+            MeasuredIntensityBounds = Vector2.zero;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = Vector2.zero;;
             }
         }
 

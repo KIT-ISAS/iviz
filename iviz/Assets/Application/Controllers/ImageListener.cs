@@ -256,8 +256,7 @@ namespace Iviz.Controllers
             ImageTexture.Stop();
             ImageTexture.Destroy();
 
-            Node.Stop();
-            UnityEngine.Object.Destroy(Node.gameObject);
+            Node.DestroySelf();
         }
     }
 }

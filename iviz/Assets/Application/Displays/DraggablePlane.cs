@@ -29,6 +29,12 @@ namespace Iviz.Displays
 
         public Transform TargetTransform { get; set; }
 
+        public Transform SourceTransform
+        {
+            get => sourceTransform;
+            set => sourceTransform = value;
+        }
+
         public event MovedAction Moved;
         public event Action PointerDown;
         public event Action PointerUp;
@@ -68,7 +74,11 @@ namespace Iviz.Displays
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
-            ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
+            if (ModuleListPanel.GuiInputModule != null)
+            {
+                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
+            }
+
             PointerDown?.Invoke();
         }
 

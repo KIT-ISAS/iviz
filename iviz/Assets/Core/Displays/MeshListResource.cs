@@ -34,7 +34,7 @@ namespace Iviz.Displays
         [CanBeNull] Info<GameObject> meshResource;
 
         readonly NativeList<float4> pointBuffer = new NativeList<float4>();
-        
+
         [CanBeNull] ComputeBuffer pointComputeBuffer;
         bool useIntensityForScaleY;
         bool useIntensityForAllScales;
@@ -249,19 +249,22 @@ namespace Iviz.Displays
             pointBuffer.EnsureCapacity(points.Length);
 
             pointBuffer.Clear();
-            foreach (ref PointWithColor t in points.Ref())
+            if (points.Length != 0)
             {
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                foreach (ref PointWithColor t in points.Ref())
                 {
-                    continue;
-                }
+                    if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                    {
+                        continue;
+                    }
 
-                pointBuffer.Add(t.f);
+                    pointBuffer.Add(t.f);
+                }
             }
 
             UpdateBuffer();
         }
-        
+
         public void Reset()
         {
             pointBuffer.Clear();
@@ -272,14 +275,9 @@ namespace Iviz.Displays
         /// Copies the array directly without checking.
         /// </summary>
         /// <param name="points">A native array with the positions and colors.</param>        
-        public void SetDirect(in NativeArray<float4> points)
+        public void SetDirect([NotNull] NativeList<float4> points)
         {
             pointBuffer.Clear();
-            if (points.Length == 0)
-            {
-                return;
-            }
-            
             pointBuffer.AddRange(points);
             UpdateBuffer();
         }
@@ -318,6 +316,15 @@ namespace Iviz.Displays
         {
             if (Size == 0)
             {
+                BoxCollider.size = Vector3.zero;
+                BoxCollider.center = Vector3.zero;
+
+                MeasuredIntensityBounds = Vector2.zero;
+                if (!OverrideIntensityBounds)
+                {
+                    IntensityBounds = Vector2.zero;
+                }
+
                 return;
             }
 
@@ -343,9 +350,12 @@ namespace Iviz.Displays
                 meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
 
-            Bounds meshBounds = mesh.bounds;
-            meshBounds.center = Vector3.Scale(meshBounds.center + preTranslation, meshScale);
-            meshBounds.size = Vector3.Scale(meshBounds.size, meshScale);
+            Bounds baseMeshBounds = mesh.bounds;
+            Bounds meshBounds = new Bounds
+            {
+                center = Vector3.Scale(baseMeshBounds.center + preTranslation, meshScale),
+                size = Vector3.Scale(baseMeshBounds.size, meshScale)
+            };
 
             BoxCollider.size = pointBounds.size + meshBounds.size;
             BoxCollider.center = pointBounds.center + meshBounds.center;

@@ -91,9 +91,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public virtual void Stop()
+        protected virtual void Stop()
         {
             Parent = null;
+        }
+
+        public void DestroySelf()
+        {
+            Stop();
+            Destroy(gameObject);
         }
 
         sealed class SimpleFrameNode : FrameNode

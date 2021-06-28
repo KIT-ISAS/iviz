@@ -199,11 +199,8 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-
             resource.ReturnToPool();
-
-            node.Stop();
-            UnityEngine.Object.Destroy(node.gameObject);
+            node.DestroySelf();
         }
     }
 }

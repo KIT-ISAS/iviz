@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace Iviz.Core
 {
-    public sealed class NativeList<T> : IReadOnlyList<T>, IDisposable where T : unmanaged
+    public sealed class NativeList<T> : IDisposable where T : unmanaged
     {
         static NativeArray<T> emptyArray;
 
@@ -60,7 +61,7 @@ namespace Iviz.Core
             length = nextLength;
         }
 
-        public void AddRange(in NativeArray<T> otherArray)
+        public void AddRange([NotNull] NativeList<T> otherArray)
         {
             if (otherArray.Length == 0)
             {
@@ -68,23 +69,26 @@ namespace Iviz.Core
             }
             
             EnsureCapacity(length + otherArray.Length);
-            NativeArray<T>.Copy(otherArray, 0, array, length, otherArray.Length);
+            NativeArray<T>.Copy(otherArray.array, 0, array, length, otherArray.Length);
             length += otherArray.Length;
         }
 
-        public NativeArray<T>.Enumerator GetEnumerator() => AsArray().GetEnumerator();
+        //public NativeArray<T>.Enumerator GetEnumerator() => AsArray().GetEnumerator();
 
         public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length);
 
+        public int Length => length;
+
+
+        /*
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public int Length => length;
-
         int IReadOnlyCollection<T>.Count => length;
 
         T IReadOnlyList<T>.this[int index] => index < length ? array[index] : throw new IndexOutOfRangeException();
+        */
 
         public ref T this[int index]
         {

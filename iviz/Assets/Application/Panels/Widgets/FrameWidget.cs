@@ -92,7 +92,11 @@ namespace Iviz.App
                 return;
             }
 
-            ModuleListPanel.GuiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
+            if (ModuleListPanel.GuiInputModule != null)
+            {
+                ModuleListPanel.GuiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
+            }
+
             TfListener.Instance.HighlightFrame(Frame.Id);
         }
 

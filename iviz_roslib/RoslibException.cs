@@ -92,6 +92,10 @@ namespace Iviz.Roslib
         public RosHandshakeException(string message) : base(message)
         {
         }
+
+        public RosHandshakeException(string message, Exception e) : base(message, e)
+        {
+        }
     }
 
     public class RosServiceNotFoundException : RoslibException
@@ -132,8 +136,15 @@ namespace Iviz.Roslib
         public RosInvalidPackageSizeException(string message) : base(message)
         {
         }
+    }
 
-        public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
+    public class RosInvalidHeaderException : RosHandshakeException
+    {
+        public RosInvalidHeaderException(string message) : base(message)
+        {
+        }
+
+        public RosInvalidHeaderException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -144,22 +155,23 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     public class RosQueueException : RoslibException
     {
         public IRosTcpSender Sender { get; }
-        
+
         public RosQueueException(string message, IRosTcpSender sender) : base(message)
         {
             Sender = sender;
         }
 
-        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message, innerException)
+        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message,
+            innerException)
         {
             Sender = sender;
         }
-    }    
-    
+    }
+
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
@@ -172,8 +184,8 @@ namespace Iviz.Roslib
         public RosServiceRequestTimeout(string message) : base(message)
         {
         }
-    }    
-    
+    }
+
     public class RosInvalidResourceName : RoslibException
     {
         public RosInvalidResourceName(string message, Exception innerException) : base(message, innerException)
@@ -183,6 +195,5 @@ namespace Iviz.Roslib
         public RosInvalidResourceName(string message) : base(message)
         {
         }
-    }    
+    }
 }
-

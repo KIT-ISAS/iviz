@@ -157,7 +157,7 @@ namespace Iviz.Displays
             GameThread.PostImmediate(() =>
             {
                 resource.transform.SetLocalPose(pose);
-                resource.SetDirect(pointBuffer.AsArray());
+                resource.SetDirect(pointBuffer);
                 IsProcessing = false;
             });
         }
