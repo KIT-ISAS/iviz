@@ -108,7 +108,7 @@ namespace Iviz.App
         IMenuDialogContents menuDialog;
 
         bool initialized;
-        public static event Action InitFinished;
+        static event Action InitFinished;
 
         public IMenuDialogContents MenuDialog
         {
@@ -148,13 +148,13 @@ namespace Iviz.App
             }
         }
 
-        static ModuleListPanel instance;
+        [CanBeNull] static ModuleListPanel instance;
 
         [NotNull]
         public static ModuleListPanel Instance =>
             instance.CheckedNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
 
-        public static bool Initialized => Instance != null && Instance.initialized;
+        //public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
         public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
@@ -324,8 +324,8 @@ namespace Iviz.App
                 if (id == null)
                 {
                     Logger.Internal("<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
-                    Logger.Internal("* First character must be alphanumeric [a-z A-Z] or a /");
-                    Logger.Internal("* Remaining characters must be alphanumeric, digits, _ or /");
+                    Logger.Internal("First character must be alphanumeric [a-z A-Z] or a '/'");
+                    Logger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
                     return;
                 }
 
@@ -382,6 +382,18 @@ namespace Iviz.App
 
             InitFinished?.Invoke();
             InitFinished = null;
+        }
+
+        public static void CallWhenInitialized(Action action)
+        {
+            if (instance != null && instance.initialized)
+            {
+                action();
+            }
+            else
+            {
+                InitFinished += action;
+            }
         }
 
         void OnStartRecordBag()

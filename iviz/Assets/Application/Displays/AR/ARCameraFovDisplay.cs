@@ -51,7 +51,7 @@ namespace Iviz.Displays
                 }
             }
 
-            transform.SetLocalPose(ARController.RelativePoseToWorld(arCamera.transform.AsPose()));
+            transform.SetLocalPose(ARController.RelativePoseToOrigin(arCamera.transform.AsPose()));
         }
 
         void ConstructCameraFrame(in XRCameraIntrinsics intrinsics)

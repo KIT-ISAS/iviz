@@ -86,7 +86,7 @@ namespace Iviz.Displays
         {
             if (resource.Visible)
             {
-                var unityPose = ARController.RelativePoseToWorld(Transform.AsPose());
+                var unityPose = ARController.RelativePoseToOrigin(Transform.AsPose());
                 resource.Transform.SetPose(unityPose);
             }
         }

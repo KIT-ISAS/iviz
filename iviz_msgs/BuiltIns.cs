@@ -12,7 +12,18 @@ using Newtonsoft.Json;
 
 namespace Iviz.Msgs
 {
-    public class RosInvalidMessageException : Exception
+    public class RosException : Exception
+    {
+        public RosException(string msg) : base(msg)
+        {
+        }
+        
+        public RosException(string msg, Exception e) : base(msg, e)
+        {
+        }
+    }
+
+    public class RosInvalidMessageException : RosException
     {
         public RosInvalidMessageException(string msg) : base(msg)
         {

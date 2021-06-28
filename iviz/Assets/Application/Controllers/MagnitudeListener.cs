@@ -230,7 +230,6 @@ namespace Iviz.Controllers
         public override void StartListening()
         {
             frameNode.name = $"[{config.Topic}]";
-            frameNode.AttachTo("");
 
             switch (config.Type)
             {

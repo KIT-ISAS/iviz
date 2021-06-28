@@ -98,7 +98,7 @@ namespace Iviz.Displays
         {
             if (!isAREnabled)
             {
-                lines.transform.SetLocalPose( ARController.RelativePoseToWorld(transform.AsPose()));
+                lines.transform.SetLocalPose( ARController.RelativePoseToOrigin(transform.AsPose()));
             }
 
             bool shouldBeEnabled =

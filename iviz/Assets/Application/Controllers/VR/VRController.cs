@@ -1,7 +1,10 @@
-﻿using Iviz.App;
+﻿using System;
+using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
+using Iviz.Ros;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,23 +16,37 @@ namespace Iviz.Controllers
         bool PointerDown();
         bool PointerUp();
         bool State();
+        bool AltState();
     }
 
     public class VRController : MonoBehaviour
     {
+        static readonly int[][] Indices = 
+        {
+            Array.Empty<int>(),
+            new[] {0},
+            new[] {1},
+            new[] {0, 1},
+        };
+        
         [SerializeField] Camera mainCamera;
         [SerializeField] EventSystem eventSystem = null;
         [CanBeNull] IVRButton button;
+
+        [SerializeField] string tfName = "vr";
+        [SerializeField] bool canInteract = false;
+
+        [SerializeField] float scale = 1;
 
         Transform mTransform;
         [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         LineResource resource;
         MeshMarkerResource target;
-
-        [SerializeField] float scale = 1;
-
+        
         [CanBeNull] Transform currentHit;
+
+        Sender<Joy> sender;
 
         [CanBeNull]
         Transform CurrentHit
@@ -67,7 +84,7 @@ namespace Iviz.Controllers
         {
             Settings.IsVR = true;
             Settings.MainCamera = mainCamera;
-            
+
             resource = ResourcePool.RentDisplay<LineResource>(transform);
             resource.Set(new[]
             {
@@ -88,18 +105,34 @@ namespace Iviz.Controllers
 
         void Start()
         {
-            TfListener.RootScale = scale;            
+            sender = new Sender<Joy>($"~{tfName}");
         }
 
+        uint seq = 0;
         void Update()
         {
+            TfListener.Publish($"/isas/{tfName}", Transform.AsPose());
+            sender.Publish(new Joy
+            {
+                Header = (seq++, "/isas/vr_station"),
+                Buttons = button == null 
+                    ? Array.Empty<int>() 
+                    : Indices[(button.State() ? 1 : 0) + (button.AltState() ? 2 : 0)]
+            });
+            
+            if (!canInteract)
+            {
+                return;
+            }
+
+            TfListener.RootScale = scale;
             Ray raycast = new Ray(Transform.position, Transform.forward);
-            CurrentHit= !Physics.Raycast(raycast, out var hit)
+            CurrentHit = !Physics.Raycast(raycast, out var hit)
                 ? null
                 : hit.collider.transform;
 
 
-            if (CurrentHit is null)
+            if (CurrentHit == null)
             {
                 target.Visible = false;
             }
@@ -107,7 +140,8 @@ namespace Iviz.Controllers
             {
                 target.Visible = true;
                 target.Transform.position = hit.point;
-                target.Transform.rotation = Quaternion.LookRotation(hit.normal) * Quaternion.AngleAxis(90, Vector3.left);
+                target.Transform.rotation =
+                    Quaternion.LookRotation(hit.normal) * Quaternion.AngleAxis(90, Vector3.left);
             }
 
             if (button == null)
@@ -151,7 +185,6 @@ namespace Iviz.Controllers
                 {
                     handler.OnPointerClick(ptr);
                 }
-                
             }
             else
             {

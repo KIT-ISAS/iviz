@@ -181,10 +181,12 @@ namespace Iviz.Roslib
                 callerId = $"{namespacePrefix}{callerId}";
             }
 
-            if (!IsValidResourceName(callerId))
+            if (callerId[0] == '~')
             {
-                throw new ArgumentException($"Caller id '{callerId}' is not a valid global ROS resource name");
+                throw new RosInvalidResourceName("ROS node names may not start with a '~'");
             }
+
+            ValidateResourceName(callerId);
 
             CallerId = callerId;
             CallerUri = callerUri;
@@ -341,7 +343,7 @@ namespace Iviz.Roslib
 
             return client;
         }
-        
+
         /// <summary>
         /// Constructs and connects a ROS client. Same as calling new() directly.
         /// </summary>
@@ -362,7 +364,7 @@ namespace Iviz.Roslib
         public static RosClient Create(Uri? masterUri = null, string? callerId = null,
             Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
             new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
-        
+
 
         /// <summary>
         /// Constructs and connects a ROS client.
@@ -548,6 +550,8 @@ namespace Iviz.Roslib
         }
 
 
+        static bool IsAlpha(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z');
+
         /// <summary>
         /// Checks if the given name is a valid ROS resource name
         /// </summary>  
@@ -558,22 +562,52 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            static bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-
-            if (!IsAlpha(name![0]) && name[0] != '/' && name[0] != '~')
+            char c0 = name![0];
+            if (c0 != '/' && c0 != '~' && !IsAlpha(c0))
             {
                 return false;
             }
 
             for (int i = 1; i < name.Length; i++)
             {
-                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/')
+                char c = name[i];
+                if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks if the given name is a valid ROS resource name, and throws an exception with an error message if not
+        /// </summary>  
+        public static void ValidateResourceName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new RosInvalidResourceName("Resource name is empty");
+            }
+
+            char c0 = name![0];
+            if (!IsAlpha(c0) && c0 != '/' && c0 != '~')
+            {
+                throw new RosInvalidResourceName(
+                    $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
+                    $"'/' or '~'. Current start is '{c0}'");
+            }
+
+            for (int i = 1; i < name.Length; i++)
+            {
+                char c = name[i];
+                if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
+                {
+                    throw new RosInvalidResourceName(
+                        $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
+                        $"'/' or '_'. Character at position {i} is '{c}'");
+                }
+            }
         }
 
         /// <summary>
@@ -813,11 +847,12 @@ namespace Iviz.Roslib
             return subscriber.Subscribe(callback);
         }
 
-        string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber, bool requestNoDelay)
+        string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
+            bool requestNoDelay)
         {
             string id = Subscribe(topic, callback, out RosSubscriber<IMessage> newSubscriber, requestNoDelay);
             subscriber = newSubscriber;
-            return id;            
+            return id;
         }
 
 
@@ -1020,10 +1055,7 @@ namespace Iviz.Roslib
 
         string ResolveResourceName(string name)
         {
-            if (!IsValidResourceName(name))
-            {
-                throw new ArgumentException($"'{name}' is not a valid resource name");
-            }
+            ValidateResourceName(name);
 
             return name[0] switch
             {

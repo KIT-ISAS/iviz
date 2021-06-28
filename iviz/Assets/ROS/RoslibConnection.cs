@@ -238,11 +238,11 @@ namespace Iviz.Ros
                 switch (e)
                 {
                     case RosUnreachableUriException _:
-                        Core.Logger.Internal($"<b>Error:</b> Own uri validation failed. Reason: {e.Message}");
+                        Core.Logger.Internal($"<b>Error:</b> Cannot reach my own URI. Reason: {e.Message}");
                         break;
                     case RosUriBindingException _:
                         Core.Logger.Internal(
-                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running?");
+                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running? Try another port!");
                         break;
                     case RoslibException _:
                     case TimeoutException _:
@@ -516,8 +516,6 @@ namespace Iviz.Ros
             int id;
             if (Connected)
             {
-                await newAdvertisedTopic.AdvertiseAsync(Client, token);
-
                 var publisher = newAdvertisedTopic.Publisher;
                 id = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
                     ? freePair.Key
@@ -525,6 +523,8 @@ namespace Iviz.Ros
 
                 publishers[id] = publisher;
                 PublishedTopics = Client.PublishedTopics;
+
+                await newAdvertisedTopic.AdvertiseAsync(Client, token);
             }
 
             else
@@ -599,12 +599,11 @@ namespace Iviz.Ros
                 $"Advertising service <b>{serviceName}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
+            servicesByTopic.Add(serviceName, newAdvertisedService);
             if (Connected)
             {
                 await newAdvertisedService.AdvertiseAsync(Client, token);
             }
-
-            servicesByTopic.Add(serviceName, newAdvertisedService);
         }
 
         public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
@@ -728,8 +727,8 @@ namespace Iviz.Ros
             }
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
-            await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
+            await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
         }
 
         internal void SetPause([NotNull] IListener listener, bool value)
