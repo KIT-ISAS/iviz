@@ -165,7 +165,10 @@ namespace Iviz.Controllers
             }
             else if (button.PointerUp())
             {
-                ModuleListPanel.GuiInputModule.ResetDraggedObject();
+                if (ModuleListPanel.GuiInputModule != null)
+                {
+                    ModuleListPanel.GuiInputModule.ResetDraggedObject();
+                }
 
                 if (CurrentHit == null)
                 {
@@ -185,7 +188,10 @@ namespace Iviz.Controllers
             }
             else
             {
-                ModuleListPanel.GuiInputModule.DraggedObject?.OnPointerMove(raycast);
+                if (ModuleListPanel.GuiInputModule != null)
+                {
+                    ModuleListPanel.GuiInputModule.DraggedObject?.OnPointerMove(raycast);
+                }
             }
         }
     }

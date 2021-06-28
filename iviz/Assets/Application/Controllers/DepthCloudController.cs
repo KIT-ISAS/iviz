@@ -134,9 +134,8 @@ namespace Iviz.Controllers
 
         public void StopController()
         {
-            node.Stop();
             projector.ReturnToPool();
-            Object.Destroy(node.gameObject);
+            node.DestroySelf();
         }
 
         public void ResetController()

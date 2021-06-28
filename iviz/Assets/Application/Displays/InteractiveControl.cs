@@ -2,10 +2,12 @@ using System;
 using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.PlayerLoop;
 
 namespace Iviz.Displays
 {
@@ -13,22 +15,28 @@ namespace Iviz.Displays
         IPointerEnterHandler, IPointerExitHandler
     {
         static readonly Color FrameActiveColor = Color.white.WithAlpha(0.3f);
+#if UNITY_EDITOR
+        static readonly Color FrameInactiveColor = Color.green.WithAlpha(0.3f);
+#else
         static readonly Color FrameInactiveColor = Color.green.WithAlpha(0f);
+#endif
 
-        GameObject[] allResources;
-        [SerializeField] GameObject arrowMx = null;
-        [SerializeField] GameObject arrowMy = null;
-        [SerializeField] GameObject arrowMz = null;
+        MeshMarkerResource[] allResources;
+        [SerializeField] MeshMarkerResource arrowMx = null;
+        [SerializeField] MeshMarkerResource arrowMy = null;
+        [SerializeField] MeshMarkerResource arrowMz = null;
 
-        [SerializeField] GameObject arrowPx = null;
-        [SerializeField] GameObject arrowPy = null;
-        [SerializeField] GameObject arrowPz = null;
+        [SerializeField] MeshMarkerResource arrowPx = null;
+        [SerializeField] MeshMarkerResource arrowPy = null;
+        [SerializeField] MeshMarkerResource arrowPz = null;
 
-        [SerializeField] GameObject ringX = null;
-        [SerializeField] GameObject ringXPlane = null;
-        [SerializeField] GameObject ringY = null;
-        [SerializeField] GameObject ringZ = null;
-        [SerializeField] GameObject ringZPlane = null;
+        [SerializeField] MeshMarkerResource ringX = null;
+
+        //[SerializeField] MeshMarkerResource ringXPlane = null;
+        [SerializeField] MeshMarkerResource ringY = null;
+
+        [SerializeField] MeshMarkerResource ringZ = null;
+        //[SerializeField] GameObject ringZPlane = null;
 
         [SerializeField] BoxCollider holderCollider = null;
         [SerializeField] GameObject menuObject = null;
@@ -36,10 +44,8 @@ namespace Iviz.Displays
         [SerializeField] Transform targetTransform;
         [SerializeField] InteractionModeType interactionMode;
 
-        DraggableTranslation draggableTranslation;
-        DraggableRotation draggableRotation = null;
-        DraggablePlane draggablePlane;
-
+        DraggableTranslation colliderDraggableTranslation;
+        DraggablePlane colliderDraggablePlane;
 
         BoundaryFrame frame;
 
@@ -48,7 +54,8 @@ namespace Iviz.Displays
         bool pointsToCamera;
 
         Bounds? bounds;
-        int layer;
+        [SerializeField] Bounds serializedBounds; // for display only
+        bool interactable;
 
         [NotNull]
         public string Name
@@ -72,6 +79,16 @@ namespace Iviz.Displays
                 foreach (var resource in allResources)
                 {
                     resource.GetComponent<IDraggable>().TargetTransform = value;
+                }
+
+                if (colliderDraggablePlane != null)
+                {
+                    colliderDraggablePlane.TargetTransform = value;
+                }
+
+                if (colliderDraggableTranslation != null)
+                {
+                    colliderDraggableTranslation.TargetTransform = value;
                 }
             }
         }
@@ -165,46 +182,85 @@ namespace Iviz.Displays
         enum BoundaryMode
         {
             None,
+            Button,
             MoveAxisX,
             MovePlaneYZ
         }
 
-        void SetBoundaryMode(BoundaryMode mode)
+        void SetColliderInteractableMode(BoundaryMode mode)
         {
             switch (mode)
             {
                 case BoundaryMode.None:
-                    Destroy(draggableTranslation);
-                    Destroy(draggablePlane);
+                    Destroy(colliderDraggableTranslation);
+                    Destroy(colliderDraggablePlane);
+                    holderCollider.enabled = false;
+                    break;
+                case BoundaryMode.Button:
+                    Destroy(colliderDraggableTranslation);
+                    Destroy(colliderDraggablePlane);
+                    holderCollider.enabled = true;
                     break;
                 case BoundaryMode.MoveAxisX:
-                    Destroy(draggableRotation);
-                    Destroy(draggablePlane);
-                    if (draggableTranslation == null)
+                    Destroy(colliderDraggablePlane);
+                    holderCollider.enabled = true;
+                    if (colliderDraggableTranslation == null)
                     {
-                        draggableTranslation = gameObject.AddComponent<DraggableTranslation>();
-                        draggableTranslation.TargetTransform = TargetTransform;
-                        draggableTranslation.Moved += RaiseMoved;
-                        draggableTranslation.PointerDown += PointerDown;
-                        draggableTranslation.PointerUp += PointerUp;
+                        colliderDraggableTranslation = gameObject.AddComponent<DraggableTranslation>();
+                        colliderDraggableTranslation.TargetTransform = TargetTransform;
+                        colliderDraggableTranslation.Moved += RaiseMoved;
+                        colliderDraggableTranslation.PointerDown += PointerDown;
+                        colliderDraggableTranslation.PointerUp += PointerUp;
                     }
 
                     break;
                 case BoundaryMode.MovePlaneYZ:
-                    Destroy(draggableRotation);
-                    Destroy(draggableTranslation);
-                    if (draggablePlane == null)
+                    Destroy(colliderDraggableTranslation);
+                    holderCollider.enabled = true;
+                    if (colliderDraggablePlane == null)
                     {
-                        draggablePlane = gameObject.AddComponent<DraggablePlane>();
-                        draggablePlane.TargetTransform = TargetTransform;
-                        draggablePlane.Moved += RaiseMoved;
-                        draggablePlane.PointerDown += PointerDown;
-                        draggablePlane.PointerUp += PointerUp;
+                        colliderDraggablePlane = gameObject.AddComponent<DraggablePlane>();
+                        colliderDraggablePlane.TargetTransform = TargetTransform;
+                        colliderDraggablePlane.SourceTransform = colliderDraggablePlane.Transform;
+                        colliderDraggablePlane.Moved += RaiseMoved;
+                        colliderDraggablePlane.PointerDown += PointerDown;
+                        colliderDraggablePlane.PointerUp += PointerUp;
                     }
 
                     break;
             }
         }
+
+        public void SetColliderInteractable()
+        {
+            BoundaryMode boundaryMode;
+            switch (InteractionMode)
+            {
+                case InteractionModeType.ClickOnly:
+                    boundaryMode = BoundaryMode.Button;
+                    break;
+                case InteractionModeType.MoveAxisX:
+                    boundaryMode = BoundaryMode.MoveAxisX;
+                    break;
+                case InteractionModeType.MovePlaneYz:
+                    boundaryMode = BoundaryMode.MovePlaneYZ;
+                    break;
+                case InteractionModeType.MovePlaneYzRotateAxisX:
+                    boundaryMode = BoundaryMode.MovePlaneYZ;
+                    break;
+                default:
+                    boundaryMode = BoundaryMode.None;
+                    break;
+            }
+
+            SetColliderInteractableMode(boundaryMode);
+        }
+
+        public bool ColliderCanInteract => InteractionMode == InteractionModeType.ClickOnly
+                                           || InteractionMode == InteractionModeType.MoveAxisX
+                                           || InteractionMode == InteractionModeType.MovePlaneYz
+                                           || InteractionMode == InteractionModeType.MovePlaneYzRotateAxisX;
+
 
         public InteractionModeType InteractionMode
         {
@@ -213,6 +269,7 @@ namespace Iviz.Displays
             {
                 if (interactionMode == value)
                 {
+                    UpdateColor();
                     return;
                 }
 
@@ -220,70 +277,182 @@ namespace Iviz.Displays
 
                 foreach (var resource in allResources)
                 {
-                    resource.SetActive(false);
+                    resource.Visible = false;
                 }
 
                 holderCollider.enabled = false;
                 frame.Visible = false;
 
+                SetColliderInteractableMode(BoundaryMode.None);
+
                 switch (InteractionMode)
                 {
                     case InteractionModeType.ClickOnly:
-                        holderCollider.enabled = true;
                         frame.Visible = true;
-                        SetBoundaryMode(BoundaryMode.None);
                         break;
                     case InteractionModeType.MoveAxisX:
-                        holderCollider.enabled = true;
-                        arrowPx.SetActive(true);
-                        arrowMx.SetActive(true);
-                        SetBoundaryMode(BoundaryMode.MoveAxisX);
+                        arrowPx.Visible = true;
+                        arrowMx.Visible = true;
                         break;
                     case InteractionModeType.MovePlaneYz:
-                        holderCollider.enabled = true;
-                        ringXPlane.SetActive(true);
-                        SetBoundaryMode(BoundaryMode.MovePlaneYZ);
+                        arrowPy.Visible = true;
+                        arrowMy.Visible = true;
+                        arrowPz.Visible = true;
+                        arrowMz.Visible = true;
                         break;
                     case InteractionModeType.RotateAxisX:
-                        ringX.SetActive(true);
+                        ringX.Visible = true;
                         break;
                     case InteractionModeType.MovePlaneYzRotateAxisX:
-                        holderCollider.enabled = true;
-                        ringX.SetActive(true);
-                        ringXPlane.SetActive(true);
-                        SetBoundaryMode(BoundaryMode.MovePlaneYZ);
+                        arrowPy.Visible = true;
+                        arrowMy.Visible = true;
+                        arrowPz.Visible = true;
+                        arrowMz.Visible = true;
+                        ringX.Visible = true;
                         break;
                     case InteractionModeType.Frame:
-                        ringZ.SetActive(true);
-                        ringZPlane.SetActive(true);
+                        arrowPx.Visible = true;
+                        arrowMx.Visible = true;
+                        arrowPy.Visible = true;
+                        arrowMy.Visible = true;
+                        ringZ.Visible = true;
                         break;
                     case InteractionModeType.Move3D:
-                        arrowPx.SetActive(true);
-                        arrowMx.SetActive(true);
-                        arrowPy.SetActive(true);
-                        arrowMy.SetActive(true);
-                        arrowPz.SetActive(true);
-                        arrowMz.SetActive(true);
-                        ringZPlane.SetActive(true);
+                        arrowPx.Visible = true;
+                        arrowMx.Visible = true;
+                        arrowPy.Visible = true;
+                        arrowMy.Visible = true;
+                        arrowPz.Visible = true;
+                        arrowMz.Visible = true;
                         break;
                     case InteractionModeType.Rotate3D:
-                        ringX.SetActive(true);
-                        ringY.SetActive(true);
-                        ringZ.SetActive(true);
+                        ringX.Visible = true;
+                        ringY.Visible = true;
+                        ringZ.Visible = true;
                         break;
                     case InteractionModeType.MoveRotate3D:
-                        arrowPx.SetActive(true);
-                        arrowMx.SetActive(true);
-                        arrowPy.SetActive(true);
-                        arrowMy.SetActive(true);
-                        arrowPz.SetActive(true);
-                        arrowMz.SetActive(true);
-                        ringX.SetActive(true);
-                        ringY.SetActive(true);
-                        ringZ.SetActive(true);
+                        arrowPx.Visible = true;
+                        arrowMx.Visible = true;
+                        arrowPy.Visible = true;
+                        arrowMy.Visible = true;
+                        arrowPz.Visible = true;
+                        arrowMz.Visible = true;
+                        ringX.Visible = true;
+                        ringY.Visible = true;
+                        ringZ.Visible = true;
                         break;
                 }
+
+                UpdateColor();
             }
+        }
+
+        void UpdateColor()
+        {
+            Color color = Interactable
+                ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitX)
+                : Color.black.WithAlpha(0.5f);
+
+            switch (InteractionMode)
+            {
+                case InteractionModeType.None:
+                case InteractionModeType.ClickOnly:
+                    break;
+                case InteractionModeType.MoveAxisX:
+                    arrowPx.Color = color;
+                    arrowMx.Color = color;
+                    break;
+                case InteractionModeType.MovePlaneYz:
+                    arrowPy.Color = color;
+                    arrowMy.Color = color;
+                    arrowPz.Color = color;
+                    arrowMz.Color = color;
+                    break;
+                case InteractionModeType.RotateAxisX:
+                    ringX.Color = color;
+                    break;
+                case InteractionModeType.MovePlaneYzRotateAxisX:
+                    arrowPy.Color = color;
+                    arrowMy.Color = color;
+                    arrowPz.Color = color;
+                    arrowMz.Color = color;
+                    ringX.Color = color;
+                    break;
+                case InteractionModeType.Frame:
+                {
+                    Color colorY = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitY)
+                        : Color.black.WithAlpha(0.5f);
+
+                    arrowPx.Color = color;
+                    arrowMx.Color = color;
+                    arrowPy.Color = colorY;
+                    arrowMy.Color = colorY;
+                    ringZ.Color = color;
+                    break;
+                }
+                case InteractionModeType.Move3D:
+                {
+                    Color colorY = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitY)
+                        : Color.black.WithAlpha(0.5f);
+                    Color colorZ = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitZ)
+                        : Color.black.WithAlpha(0.5f);
+
+                    arrowPx.Color = color;
+                    arrowMx.Color = color;
+                    arrowPy.Color = colorY;
+                    arrowMy.Color = colorY;
+                    arrowPz.Color = colorZ;
+                    arrowMz.Color = colorZ;
+                    break;
+                }
+                case InteractionModeType.Rotate3D:
+                {
+                    Color colorY = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitY)
+                        : Color.black.WithAlpha(0.5f);
+                    Color colorZ = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitZ)
+                        : Color.black.WithAlpha(0.5f);
+
+                    ringX.Color = color;
+                    ringY.Color = colorY;
+                    ringZ.Color = colorZ;
+                    break;
+                }
+                case InteractionModeType.MoveRotate3D:
+                {
+                    Color colorY = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitY)
+                        : Color.black.WithAlpha(0.5f);
+                    Color colorZ = Interactable
+                        ? ColorFromOrientation(Msgs.GeometryMsgs.Vector3.UnitZ)
+                        : Color.black.WithAlpha(0.5f);
+
+                    arrowPx.Color = color;
+                    arrowMx.Color = color;
+                    arrowPy.Color = colorY;
+                    arrowMy.Color = colorY;
+                    arrowPz.Color = colorZ;
+                    arrowMz.Color = colorZ;
+
+                    ringX.Color = color;
+                    ringY.Color = colorY;
+                    ringZ.Color = colorZ;
+                    break;
+                }
+            }
+        }
+
+        Color ColorFromOrientation(in Msgs.GeometryMsgs.Vector3 direction)
+        {
+            var (x, y, z) = transform.parent.AsLocalPose().Unity2RosTransform() * direction;
+            return new Color(
+                Mathf.Abs((float) x),
+                Mathf.Abs((float) y),
+                Mathf.Abs((float) z));
         }
 
         public Bounds? Bounds
@@ -296,6 +465,7 @@ namespace Iviz.Displays
                 Bounds newBounds = bounds != null
                     ? new Bounds(bounds.Value.center, bounds.Value.size.Abs())
                     : new Bounds(Vector3.zero, 0.5f * Vector3.one);
+                serializedBounds = newBounds;
 
                 float holderScale;
                 switch (InteractionMode)
@@ -318,6 +488,7 @@ namespace Iviz.Displays
                 holder.transform.localScale = 2 * holderScale * Vector3.one;
                 holderCollider.size = newBounds.size / (2 * holderScale);
 
+
                 float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
                 float absoluteScaleY = transform.lossyScale.y;
                 menuObject.transform.localScale = 0.5f * Vector3.one;
@@ -328,18 +499,26 @@ namespace Iviz.Displays
             }
         }
 
-        public int Layer
+        public int Layer { get; set; } // ignored
+
+        public bool Interactable
         {
-            get => layer;
+            get => interactable;
             set
             {
-                layer = value;
-                gameObject.layer = value;
-                holderCollider.gameObject.layer = value;
-                foreach (GameObject resource in allResources)
+                interactable = value;
+
+                int layer = interactable
+                    ? LayerType.Clickable
+                    : LayerType.IgnoreRaycast;
+                gameObject.layer = layer;
+                holderCollider.gameObject.layer = layer;
+                foreach (var resource in allResources)
                 {
-                    resource.layer = value;
+                    resource.Layer = layer;
                 }
+
+                UpdateColor();
             }
         }
 
@@ -351,14 +530,14 @@ namespace Iviz.Displays
 
         public void Suspend()
         {
-            SetBoundaryMode(BoundaryMode.None);
+            SetColliderInteractableMode(BoundaryMode.None);
 
             PointsToCamera = false;
             KeepAbsoluteRotation = false;
             InteractionMode = InteractionModeType.None;
             EnableMenu = false;
             Bounds = new Bounds(Vector3.zero, Vector3.one);
-            Layer = LayerType.Clickable;
+            Interactable = true;
 
             Moved = null;
             PointerUp = null;
@@ -399,9 +578,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            allResources = new[]
-                {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ, ringXPlane, ringZPlane};
-            Layer = LayerType.Clickable;
+            allResources = new[] {arrowPx, arrowMx, arrowPy, arrowMy, arrowPz, arrowMz, ringX, ringY, ringZ};
+            Interactable = true;
 
             foreach (var resource in allResources)
             {

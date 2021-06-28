@@ -44,7 +44,11 @@ namespace Iviz.Displays
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
+            if (ModuleListPanel.GuiInputModule != null)
+            {
+                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
+            }
+
             PointerDown?.Invoke();
         }
 

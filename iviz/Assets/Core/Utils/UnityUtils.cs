@@ -240,6 +240,7 @@ namespace Iviz.Core
         public static Pose WithRotation(this Pose p, in Quaternion q) => new Pose(p.position, q);
         public static Vector3 WithX(this Vector3 c, float x) => new Vector3(x, c.y, c.z);
         public static Vector3 WithY(this Vector3 c, float y) => new Vector3(c.x, y, c.z);
+        public static Vector3 WithZ(this Vector3 c, float z) => new Vector3(c.x, c.y, z);
 
         public static bool IsUsable(this Pose pose)
         {

@@ -60,6 +60,12 @@ namespace Iviz.Displays
                 throw new ArgumentNullException(nameof(mesh));
             }
 
+            if (lineBuffer.Length == 0)
+            {
+                mesh.Clear();
+                return;
+            }
+
             int length = 10 * lineBuffer.Length;
             using (var points = new Rent<Vector3>(length))
             using (var colors = new Rent<Color32>(length))

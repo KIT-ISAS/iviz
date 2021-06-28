@@ -1,21 +1,18 @@
 using System;
+using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
     /// <summary>
     /// Parent class for the exceptions of this library.
     /// </summary>
-    public class RoslibException : Exception
+    public class RoslibException : RosException
     {
         protected RoslibException(string message) : base(message)
         {
         }
 
         public RoslibException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public RoslibException()
         {
         }
     }
@@ -26,10 +23,6 @@ namespace Iviz.Roslib
     public class RosInvalidMessageTypeException : RoslibException
     {
         public RosInvalidMessageTypeException(string message) : base(message)
-        {
-        }
-
-        public RosInvalidMessageTypeException()
         {
         }
 
@@ -47,10 +40,6 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosConnectionException()
-        {
-        }
-
         public RosConnectionException(string message) : base(message)
         {
         }
@@ -62,10 +51,6 @@ namespace Iviz.Roslib
     public class RosUriBindingException : RosConnectionException
     {
         public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public RosUriBindingException()
         {
         }
 
@@ -86,10 +71,6 @@ namespace Iviz.Roslib
         public RosUnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        public RosUnreachableUriException()
-        {
-        }
     }
 
     /// <summary>
@@ -101,10 +82,6 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosRpcException()
-        {
-        }
-
         public RosRpcException(string message, Exception innerException) : base(message, innerException)
         {
         }
@@ -113,6 +90,10 @@ namespace Iviz.Roslib
     public class RosHandshakeException : RosRpcException
     {
         public RosHandshakeException(string message) : base(message)
+        {
+        }
+
+        public RosHandshakeException(string message, Exception e) : base(message, e)
         {
         }
     }
@@ -155,12 +136,15 @@ namespace Iviz.Roslib
         public RosInvalidPackageSizeException(string message) : base(message)
         {
         }
+    }
 
-        public RosInvalidPackageSizeException()
+    public class RosInvalidHeaderException : RosHandshakeException
+    {
+        public RosInvalidHeaderException(string message) : base(message)
         {
         }
 
-        public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
+        public RosInvalidHeaderException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
@@ -171,22 +155,23 @@ namespace Iviz.Roslib
         {
         }
     }
-    
+
     public class RosQueueException : RoslibException
     {
         public IRosTcpSender Sender { get; }
-        
+
         public RosQueueException(string message, IRosTcpSender sender) : base(message)
         {
             Sender = sender;
         }
 
-        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message, innerException)
+        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message,
+            innerException)
         {
             Sender = sender;
         }
-    }    
-    
+    }
+
     /// <summary>
     /// Thrown when an error happened during the connection.
     /// </summary>
@@ -196,12 +181,19 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosServiceRequestTimeout()
-        {
-        }
-
         public RosServiceRequestTimeout(string message) : base(message)
         {
         }
-    }    
+    }
+
+    public class RosInvalidResourceName : RoslibException
+    {
+        public RosInvalidResourceName(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public RosInvalidResourceName(string message) : base(message)
+        {
+        }
+    }
 }

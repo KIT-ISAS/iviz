@@ -135,11 +135,27 @@ namespace Iviz.Roslib.Utils
                 int length = BitConverter.ToInt32(readBuffer, numRead);
                 if (length is < 0 or > maxEntrySize)
                 {
-                    throw new RosInvalidPackageSizeException($"Invalid packet size '{length}', disconnecting.");
+                    throw new RosInvalidHeaderException($"Invalid packet size {length}");
                 }
 
                 numRead += 4;
-                string entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
+
+                if (numRead + length > toRead)
+                {
+                    throw new RosInvalidHeaderException(
+                        $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left.");
+                }
+
+                string entry;
+                try
+                {
+                    entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
+                }
+                catch (Exception e)
+                {
+                    throw new RosInvalidHeaderException("Error parsing header line.", e);
+                }
+
                 numRead += length;
 
                 contents.Add(entry);

@@ -1,6 +1,7 @@
 ﻿using Iviz.Core;
 using UnityEngine;
 using Iviz.Resources;
+using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
@@ -131,7 +132,7 @@ namespace Iviz.Displays
             BoxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void OverrideMaterial(Material material)
+        public void OverrideMaterial([NotNull] Material material)
         {
             axisObjects[0].OverrideMaterial(material);
             axisObjects[1].OverrideMaterial(material);

@@ -107,10 +107,10 @@ namespace Iviz.Roslib
             }
 
             disposed = true;
-            
+
             runningTs.Cancel();
             tcpClient.Dispose();
-            
+
             await task.AwaitNoThrow(5000, this, token);
             runningTs.Dispose();
         }
@@ -119,7 +119,7 @@ namespace Iviz.Roslib
         {
             if (!await stream.ReadChunkAsync(lengthBuffer, 4, runningTs.Token))
             {
-                throw new IOException("Connection closed during handshake.");
+                throw new IOException("Connection closed during handshake");
             }
 
             int length = BitConverter.ToInt32(lengthBuffer, 0);
@@ -134,7 +134,7 @@ namespace Iviz.Roslib
             {
                 if (!await stream.ReadChunkAsync(readBuffer.Array, length, runningTs.Token))
                 {
-                    throw new IOException("Connection closed during handshake.");
+                    throw new IOException("Connection closed during handshake");
                 }
             }
             catch (Exception)
@@ -146,33 +146,30 @@ namespace Iviz.Roslib
             return readBuffer;
         }
 
-        async Task SendHeader(NetworkStream stream, bool latching, string? errorMessage)
+        async Task SendHeader(NetworkStream stream, bool latching)
         {
-            string[] contents;
-            if (errorMessage != null)
+            string[] contents =
             {
-                contents = new[]
-                {
-                    errorMessage,
-                    $"md5sum={topicInfo.Md5Sum}",
-                    $"type={topicInfo.Type}",
-                    $"callerid={topicInfo.CallerId}"
-                };
-            }
-            else
+                $"md5sum={topicInfo.Md5Sum}",
+                $"type={topicInfo.Type}",
+                $"callerid={topicInfo.CallerId}",
+                latching ? "latching=1" : "latching=0",
+                $"message_definition={topicInfo.MessageDependencies}",
+            };
+
+            TcpHeader = contents.AsReadOnly();
+            await stream.WriteHeaderAsync(contents, runningTs.Token);
+        }
+
+        async Task SendErrorHeader(NetworkStream stream, string errorMessage)
+        {
+            string[] contents =
             {
-                contents = new[]
-                {
-                    $"md5sum={topicInfo.Md5Sum}",
-                    $"type={topicInfo.Type}",
-                    $"callerid={topicInfo.CallerId}",
-                    latching ? "latching=1" : "latching=0",
-                    $"message_definition={topicInfo.MessageDependencies}",
-                };
-
-                TcpHeader = contents.AsReadOnly();
-            }
-
+                errorMessage,
+                $"md5sum={topicInfo.Md5Sum}",
+                $"type={topicInfo.Type}",
+                $"callerid={topicInfo.CallerId}"
+            };
             await stream.WriteHeaderAsync(contents, runningTs.Token);
         }
 
@@ -180,7 +177,7 @@ namespace Iviz.Roslib
         {
             if (fields.Count < 5)
             {
-                errorMessage = "error=Expected at least 5 fields, closing connection";
+                errorMessage = "error=Expected at least 5 fields. Closing connection";
                 return false;
             }
 
@@ -190,7 +187,7 @@ namespace Iviz.Roslib
                 int index = field.IndexOf('=');
                 if (index < 0)
                 {
-                    errorMessage = $"error=Invalid field '{field}'";
+                    errorMessage = $"error=Invalid entry. Expected '=' separator.";
                     return false;
                 }
 
@@ -204,14 +201,14 @@ namespace Iviz.Roslib
             }
             else
             {
-                errorMessage = "error=Missing entry 'callerid'";
+                errorMessage = "error=Expected entry 'callerid'";
                 return false;
             }
 
             if (!values.TryGetValue("topic", out string? receivedTopic) || receivedTopic != topicInfo.Topic)
             {
                 errorMessage =
-                    $"error=Expected topic '{topicInfo.Topic}' but received request for '{receivedTopic}'. Closing connection";
+                    $"error=Expected topic '{topicInfo.Topic}' but received request for '{receivedTopic}'";
                 return false;
             }
 
@@ -224,7 +221,7 @@ namespace Iviz.Roslib
                 else
                 {
                     errorMessage =
-                        $"error=Expected type '{topicInfo.Type}' but received '{receivedType}'. Closing connection";
+                        $"error=Expected message type [{topicInfo.Type}] but received [{receivedType}]";
                     return false;
                 }
             }
@@ -234,7 +231,7 @@ namespace Iviz.Roslib
                 if (receivedMd5Sum != "*")
                 {
                     errorMessage =
-                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}'. Closing connection";
+                        $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}'";
                     return false;
                 }
             }
@@ -257,12 +254,15 @@ namespace Iviz.Roslib
             }
 
             bool success = ProcessRemoteHeader(fields, out string errorMessage);
-
-            await SendHeader(stream, latching, errorMessage);
-
-            if (!success)
+            if (success)
             {
-                throw new RosHandshakeException($"Partner sent error message: [{errorMessage}]");
+                await SendHeader(stream, latching);
+            }
+            else
+            {
+                await SendErrorHeader(stream, errorMessage);
+                throw new RosHandshakeException(
+                    $"Failed to parse header sent by partner. Error message: [{errorMessage}]");
             }
         }
 
@@ -379,6 +379,8 @@ namespace Iviz.Roslib
 
                         WriteLengthToBuffer(sendLength);
                         await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token);
+
+                        //Logger.Log(time.Now() + ": Sent.");
 
                         numSent++;
                         bytesSent += (int) sendLength + 4;

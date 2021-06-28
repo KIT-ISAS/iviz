@@ -445,15 +445,13 @@ namespace Iviz.Controllers
 
             trail.DataSource = null;
 
-            frameNode.Stop();
-            UnityEngine.Object.Destroy(frameNode.gameObject);
+            frameNode.DestroySelf();
 
             trail.ReturnToPool();
 
             if (childNode != null)
             {
-                childNode.Stop();
-                UnityEngine.Object.Destroy(childNode.gameObject);
+                childNode.DestroySelf();
             }
 
             axis.ReturnToPool();

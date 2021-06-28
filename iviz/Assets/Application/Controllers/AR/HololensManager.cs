@@ -7,6 +7,7 @@ using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -57,18 +58,7 @@ namespace Iviz.Hololens
         void Awake()
         {
             instance = this;
-        }
-
-        void Start()
-        {
-            if (ModuleListPanel.Initialized)
-            {
-                Initialize();
-            }
-            else
-            {
-                ModuleListPanel.InitFinished += Initialize;
-            }
+            ModuleListPanel.CallWhenInitialized(Initialize);
         }
 
         void Initialize()
@@ -80,9 +70,6 @@ namespace Iviz.Hololens
                 Logger.Debug("Hololens Manager: Initializing!");
                 Settings.SettingsManager = this;
                 Settings.ScreenshotManager = new HololensScreenshotManager();
-
-
-                ModuleListPanel.InitFinished -= Initialize;
 
                 if (!UnityEngine.Application.isEditor)
                 {
@@ -197,17 +184,12 @@ namespace Iviz.Hololens
 
         static void StartRosConnection()
         {
-#if UNITY_EDITOR
-            const string myUri = "http://141.3.59.11:7613";
-            const string myId = "/iviz_win_hololens";
-#else
-            const string myUri = "http://141.3.59.45:7613";
+#if !UNITY_EDITOR
+            //const string myUri = "http://141.3.59.45:7613";
             //const string myUri = "http://192.168.20.5:7613";
-            const string myId = "/iviz_hololens";
+            //const string myId = "/iviz_hololens";
+            //ModuleListPanel.Instance.SetConnectionData(masterUri, myUri, myId);
 #endif
-            const string masterUri = "http://141.3.59.5:11311";
-            //const string masterUri = "http://192.168.20.7:11311";
-            ModuleListPanel.Instance.SetConnectionData(masterUri, myUri, myId);
         }
 
         void StartPalms()
@@ -241,12 +223,12 @@ namespace Iviz.Hololens
         {
             void MenuListClick(string robotName)
             {
-                var robotConfig = new SimpleRobotConfiguration
+                var robotConfig = new RobotConfiguration
                 {
                     SavedRobotName = robotName,
                     AttachedToTf = true
                 };
-                ModuleListPanel.Instance.CreateModule(Resource.ModuleType.Robot, configuration: robotConfig);
+                ModuleListPanel.Instance.CreateModule(ModuleType.Robot, configuration: robotConfig);
             }
 
             hololensHandMenu.SetPalm(Resource.GetRobotNames().Select(
@@ -258,7 +240,7 @@ namespace Iviz.Hololens
             void MenuListClick(string topic, string type)
             {
                 ModuleData data = ModuleListPanel.Instance.CreateModuleForTopic(topic, type);
-                if (data.ModuleType == Resource.ModuleType.PointCloud)
+                if (data.ModuleType == ModuleType.PointCloud)
                 {
                     PointCloudConfiguration config = new PointCloudConfiguration
                     {
@@ -270,8 +252,8 @@ namespace Iviz.Hololens
                 }
             }
 
-            hololensHandMenu.SetPalm(AddTopicDialogData.GetTopicCandidates().Select(
-                topic => new HololensMenuEntry(topic.Topic, () => MenuListClick(topic.Topic, topic.Type))));
+            //hololensHandMenu.SetPalm(AddTopicDialogData.GetTopicCandidates().Select(
+            //    topic => new HololensMenuEntry(topic.Topic, () => MenuListClick(topic.Topic, topic.Type))));
         }
 
         void OnHandMenuRemoveModule()
@@ -283,7 +265,7 @@ namespace Iviz.Hololens
 
             hololensHandMenu.SetPalm(
                 ModuleDatas
-                    .Where(data => data.ModuleType != Resource.ModuleType.TF)
+                    .Where(data => data.ModuleType != ModuleType.TF)
                     .Select(data => new HololensMenuEntry(data.Description, () => MenuListClick(data))));
         }
 
@@ -353,9 +335,9 @@ namespace Iviz.Hololens
 
         static void ResetAll()
         {
-            ModuleListPanel.Instance.ResetAllModules();
+            //ModuleListPanel.Instance.ResetAllModules();
         }
-
+        
         void ShowConsoleLog()
         {
             Vector3 cameraPosition = Settings.MainCamera.transform.position;

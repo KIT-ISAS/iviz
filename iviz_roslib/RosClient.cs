@@ -181,10 +181,12 @@ namespace Iviz.Roslib
                 callerId = $"{namespacePrefix}{callerId}";
             }
 
-            if (!IsValidResourceName(callerId))
+            if (callerId[0] == '~')
             {
-                throw new ArgumentException($"Caller id '{callerId}' is not a valid global ROS resource name");
+                throw new RosInvalidResourceName("ROS node names may not start with a '~'");
             }
+
+            ValidateResourceName(callerId);
 
             CallerId = callerId;
             CallerUri = callerUri;
@@ -341,7 +343,7 @@ namespace Iviz.Roslib
 
             return client;
         }
-        
+
         /// <summary>
         /// Constructs and connects a ROS client. Same as calling new() directly.
         /// </summary>
@@ -362,7 +364,7 @@ namespace Iviz.Roslib
         public static RosClient Create(Uri? masterUri = null, string? callerId = null,
             Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
             new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
-        
+
 
         /// <summary>
         /// Constructs and connects a ROS client.
@@ -548,6 +550,8 @@ namespace Iviz.Roslib
         }
 
 
+        static bool IsAlpha(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z');
+
         /// <summary>
         /// Checks if the given name is a valid ROS resource name
         /// </summary>  
@@ -558,22 +562,52 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            static bool IsAlpha(char c) => ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-
-            if (!IsAlpha(name![0]) && name[0] != '/' && name[0] != '~')
+            char c0 = name![0];
+            if (c0 != '/' && c0 != '~' && !IsAlpha(c0))
             {
                 return false;
             }
 
             for (int i = 1; i < name.Length; i++)
             {
-                if (!IsAlpha(name[i]) && !char.IsDigit(name[i]) && name[i] != '_' && name[i] != '/')
+                char c = name[i];
+                if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Checks if the given name is a valid ROS resource name, and throws an exception with an error message if not
+        /// </summary>  
+        public static void ValidateResourceName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new RosInvalidResourceName("Resource name is empty");
+            }
+
+            char c0 = name![0];
+            if (!IsAlpha(c0) && c0 != '/' && c0 != '~')
+            {
+                throw new RosInvalidResourceName(
+                    $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
+                    $"'/' or '~'. Current start is '{c0}'");
+            }
+
+            for (int i = 1; i < name.Length; i++)
+            {
+                char c = name[i];
+                if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
+                {
+                    throw new RosInvalidResourceName(
+                        $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
+                        $"'/' or '_'. Character at position {i} is '{c}'");
+                }
+            }
         }
 
         /// <summary>
@@ -777,7 +811,8 @@ namespace Iviz.Roslib
 
             RosSubscriber<T>? newSubscriber = baseSubscriber as RosSubscriber<T>;
             subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-                $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
+                $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
+                $"requested type was [{BuiltIns.GetMessageType<T>()}]");
             return subscriber.Subscribe(callback);
         }
 
@@ -807,15 +842,17 @@ namespace Iviz.Roslib
 
             RosSubscriber<IMessage>? newSubscriber = baseSubscriber as RosSubscriber<IMessage>;
             subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-                $"There is already a subscriber with a different type [{baseSubscriber.TopicType}]");
+                $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
+                $"requested type was [IMessage](generic)");
             return subscriber.Subscribe(callback);
         }
 
-        string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber, bool requestNoDelay)
+        string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
+            bool requestNoDelay)
         {
             string id = Subscribe(topic, callback, out RosSubscriber<IMessage> newSubscriber, requestNoDelay);
             subscriber = newSubscriber;
-            return id;            
+            return id;
         }
 
 
@@ -865,7 +902,8 @@ namespace Iviz.Roslib
                 if (!baseSubscriber.MessageTypeMatches(msgType))
                 {
                     throw new RosInvalidMessageTypeException(
-                        $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
+                        $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
+                        $"requested type was [{BuiltIns.GetMessageType(msgType)}]");
                 }
 
                 subscriber = baseSubscriber;
@@ -900,7 +938,8 @@ namespace Iviz.Roslib
 
             var newSubscriber = baseSubscriber as RosSubscriber<T>;
             RosSubscriber<T> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-                $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
+                $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
+                $"requested type was [{BuiltIns.GetMessageType<T>()}]");
             return new((subscriber.Subscribe(callback), subscriber));
         }
 
@@ -926,7 +965,8 @@ namespace Iviz.Roslib
 
             var newSubscriber = baseSubscriber as RosSubscriber<IMessage>;
             RosSubscriber<IMessage> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
-                $"Existing subscriber message type {baseSubscriber.TopicType} does not match the given type.");
+                $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
+                $"requested type was [IMessage](generic)");
             return new((subscriber.Subscribe(callback), subscriber));
         }
 
@@ -1015,10 +1055,7 @@ namespace Iviz.Roslib
 
         string ResolveResourceName(string name)
         {
-            if (!IsValidResourceName(name))
-            {
-                throw new ArgumentException($"'{name}' is not a valid resource name");
-            }
+            ValidateResourceName(name);
 
             return name[0] switch
             {
@@ -1118,7 +1155,8 @@ namespace Iviz.Roslib
             {
                 var newPublisher = basePublisher as RosPublisher<T>;
                 publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
-                    $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
+                    $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                    $"requested type was [{BuiltIns.GetMessageType<T>()}]");
             }
 
             return publisher.Advertise();
@@ -1146,7 +1184,8 @@ namespace Iviz.Roslib
             {
                 var newPublisher = basePublisher as RosPublisher<DynamicMessage>;
                 publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
-                    $"There is already an advertiser with a different type [{basePublisher.TopicType}]");
+                    $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                    $"requested type was [{generator.RosType}](dynamic)");
             }
 
             return publisher.Advertise();
@@ -1186,8 +1225,9 @@ namespace Iviz.Roslib
             else
             {
                 var newPublisher = basePublisher as RosPublisher<T>;
-                publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
-                    $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
+                publisher = newPublisher ?? throw new RosInvalidMessageTypeException( 
+                    $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                    $"requested type was [{BuiltIns.GetMessageType<T>()}]");
             }
 
             return (publisher.Advertise(), publisher);
@@ -1218,7 +1258,8 @@ namespace Iviz.Roslib
             {
                 var newPublisher = basePublisher as RosPublisher<DynamicMessage>;
                 publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
-                    $"Existing subscriber message type {basePublisher.TopicType} does not match the given type.");
+                    $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                    $"requested type was [{generator.RosType}](dynamic)");
             }
 
             return (publisher.Advertise(), publisher);
@@ -1264,7 +1305,8 @@ namespace Iviz.Roslib
                 if (!basePublisher.MessageTypeMatches(msgType))
                 {
                     throw new RosInvalidMessageTypeException(
-                        $"Type {msgType} does not match existing publisher type {basePublisher.TopicType}.");
+                        $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                        $"requested type was [{BuiltIns.GetMessageType(msgType)}]");
                 }
 
                 publisher = basePublisher;
@@ -1309,7 +1351,8 @@ namespace Iviz.Roslib
                 if (!basePublisher.MessageTypeMatches(msgType))
                 {
                     throw new RosInvalidMessageTypeException(
-                        $"Type {msgType} does not match existing publisher type {basePublisher.TopicType}.");
+                        $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
+                        $"requested type was [{BuiltIns.GetMessageType(msgType)}]");
                 }
 
                 publisher = basePublisher;

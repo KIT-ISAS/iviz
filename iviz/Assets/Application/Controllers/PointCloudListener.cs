@@ -383,13 +383,13 @@ namespace Iviz.Controllers
                         else if (PointCloudType == PointCloudType.Points)
                         {
                             pointCloud.UseColormap = !rgbaHint;
-                            pointCloud.SetDirect(pointBuffer.AsArray());
+                            pointCloud.SetDirect(pointBuffer);
                             meshCloud.Reset();
                         }
                         else
                         {
                             meshCloud.UseColormap = !rgbaHint;
-                            meshCloud.SetDirect(pointBuffer.AsArray());
+                            meshCloud.SetDirect(pointBuffer);
                             pointCloud.Reset();
                         }
                     }
@@ -679,8 +679,7 @@ namespace Iviz.Controllers
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
-            node.Stop();
-            Object.Destroy(node.gameObject);
+            node.DestroySelf();
 
             pointBuffer.Dispose();
         }
