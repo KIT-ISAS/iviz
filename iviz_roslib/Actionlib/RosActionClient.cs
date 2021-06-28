@@ -144,10 +144,7 @@ namespace Iviz.Roslib.Actionlib
                 ? newActionName.Substring(1)
                 : newActionName;
 
-            if (!RosClient.IsValidResourceName(validatedActionName))
-            {
-                throw new ArgumentException($"Action name '{validatedActionName}' is not a valid resource name");
-            }
+            RosClient.ValidateResourceName(validatedActionName);
 
             actionName = validatedActionName;
             callerId = client.CallerId;

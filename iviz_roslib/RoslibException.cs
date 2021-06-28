@@ -1,21 +1,18 @@
 using System;
+using Iviz.Msgs;
 
 namespace Iviz.Roslib
 {
     /// <summary>
     /// Parent class for the exceptions of this library.
     /// </summary>
-    public class RoslibException : Exception
+    public class RoslibException : RosException
     {
         protected RoslibException(string message) : base(message)
         {
         }
 
         public RoslibException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public RoslibException()
         {
         }
     }
@@ -26,10 +23,6 @@ namespace Iviz.Roslib
     public class RosInvalidMessageTypeException : RoslibException
     {
         public RosInvalidMessageTypeException(string message) : base(message)
-        {
-        }
-
-        public RosInvalidMessageTypeException()
         {
         }
 
@@ -47,10 +40,6 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosConnectionException()
-        {
-        }
-
         public RosConnectionException(string message) : base(message)
         {
         }
@@ -62,10 +51,6 @@ namespace Iviz.Roslib
     public class RosUriBindingException : RosConnectionException
     {
         public RosUriBindingException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        public RosUriBindingException()
         {
         }
 
@@ -86,10 +71,6 @@ namespace Iviz.Roslib
         public RosUnreachableUriException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        public RosUnreachableUriException()
-        {
-        }
     }
 
     /// <summary>
@@ -98,10 +79,6 @@ namespace Iviz.Roslib
     public class RosRpcException : RoslibException
     {
         public RosRpcException(string message) : base(message)
-        {
-        }
-
-        public RosRpcException()
         {
         }
 
@@ -156,10 +133,6 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosInvalidPackageSizeException()
-        {
-        }
-
         public RosInvalidPackageSizeException(string message, Exception innerException) : base(message, innerException)
         {
         }
@@ -196,12 +169,20 @@ namespace Iviz.Roslib
         {
         }
 
-        public RosServiceRequestTimeout()
-        {
-        }
-
         public RosServiceRequestTimeout(string message) : base(message)
         {
         }
     }    
+    
+    public class RosInvalidResourceName : RoslibException
+    {
+        public RosInvalidResourceName(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        public RosInvalidResourceName(string message) : base(message)
+        {
+        }
+    }    
 }
+
