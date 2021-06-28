@@ -100,7 +100,7 @@ namespace Iviz.App.ARDialogs
                 Transform.SetParentLocal(Node.Transform);
                 Transform.SetLocalPose(Pose.identity);
             }
-
+            
             Node.AttachTo(parentId);
         }
 

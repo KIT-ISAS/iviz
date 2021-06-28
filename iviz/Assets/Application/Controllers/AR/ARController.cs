@@ -263,7 +263,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+                var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
                 Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
                 Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
                 /*
@@ -300,7 +300,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
+                var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
                 float rotY = arCameraPose.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
                 (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
@@ -381,7 +381,7 @@ namespace Iviz.Controllers
             UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
         }
 
-        public static Pose RelativePoseToWorld(in Pose unityPose)
+        public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
             if (Instance == null || Instance.Visible)
             {
@@ -395,8 +395,9 @@ namespace Iviz.Controllers
 
         public virtual void Update()
         {
-            var arCameraPose = RelativePoseToWorld(ARCamera.transform.AsPose());
-            var relativePose = TfListener.RelativePoseToFixedFrame(arCameraPose).Unity2RosPose();
+            var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
+            var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosPose();
+            
             TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
 
             if (!ConnectionManager.IsConnected)

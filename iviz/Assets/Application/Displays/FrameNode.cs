@@ -18,7 +18,7 @@ namespace Iviz.Controllers
     /// </summary>
     public abstract class FrameNode : MonoBehaviour
     {
-        TfFrame parent;
+        [CanBeNull] TfFrame parent;
 
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -33,13 +33,13 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        public string Name
+        protected string Name
         {
             get => gameObject.name;
-            protected set => gameObject.name = value;
+            set => gameObject.name = value;
         }
 
-        void SetParent(TfFrame newParent, bool attach)
+        void SetParent([CanBeNull] TfFrame newParent, bool attach)
         {
             if (gameObject == null)
             {
@@ -73,7 +73,7 @@ namespace Iviz.Controllers
             AttachTo(header.FrameId, header.Stamp);
         }
 
-        public void AttachTo(string parentId)
+        public void AttachTo([CanBeNull] string parentId)
         {
             AttachTo(parentId, default);
         }
@@ -108,8 +108,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(name));
             }
 
-            GameObject obj = new GameObject(name);
-            SimpleFrameNode node = obj.AddComponent<SimpleFrameNode>();
+            SimpleFrameNode node = new GameObject(name).AddComponent<SimpleFrameNode>();
             if (TfListener.Instance != null && TfListener.DefaultFrame != null)
             {
                 node.Parent = TfListener.DefaultFrame;

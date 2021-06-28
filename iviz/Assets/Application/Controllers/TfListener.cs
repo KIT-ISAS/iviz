@@ -62,7 +62,6 @@ namespace Iviz.Controllers
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            Instance = this;
 
             highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
             highlightFrame.Visible = false;
@@ -77,32 +76,34 @@ namespace Iviz.Controllers
             unityFrame.Visible = false;
 
             var defaultListener = FrameNode.Instantiate("[.]");
-            UnityFrame.AddListener(defaultListener);
+            unityFrame.AddListener(defaultListener);
 
             keepAllListener = FrameNode.Instantiate("[TFNode]");
             staticListener = FrameNode.Instantiate("[TFStatic]");
             fixedFrameListener = FrameNode.Instantiate("[TFFixedFrame]");
-            defaultListener.transform.parent = UnityFrame.Transform;
+            defaultListener.transform.parent = unityFrame.Transform;
 
-            rootFrame = Add(CreateFrameObject("/", UnityFrame.Transform, UnityFrame));
+            rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
             rootFrame.ForceInvisible = true;
             rootFrame.Visible = false;
             rootFrame.AddListener(defaultListener);
 
-            originFrame = Add(CreateFrameObject(OriginFrameId, RootFrame.Transform, RootFrame));
-            originFrame.Parent = RootFrame;
+            originFrame = Add(CreateFrameObject(OriginFrameId, rootFrame.Transform, rootFrame));
+            originFrame.Parent = rootFrame;
             originFrame.ForceInvisible = true;
             originFrame.Visible = false;
             originFrame.AddListener(defaultListener);
             originFrame.ParentCanChange = false;
 
-            mapFrame = Add(CreateFrameObject(MapFrameId, OriginFrame.Transform, OriginFrame));
-            mapFrame.Parent = OriginFrame;
+            mapFrame = Add(CreateFrameObject(MapFrameId, originFrame.Transform, originFrame));
+            mapFrame.Parent = originFrame;
             mapFrame.AddListener(defaultListener);
 
+            Instance = this;
             Config = new TfConfiguration();
 
             Publisher = new Sender<TFMessage>(DefaultTopic);
+
 
             GameThread.LateEveryFrame += LateUpdate;
         }
@@ -276,8 +277,8 @@ namespace Iviz.Controllers
         {
             while (messageList.TryDequeue(out var value))
             {
-                var (frame, isStatic) = value;
-                foreach (var (parentFrameId, childFrameId, transform, _) in frame)
+                var (transforms, isStatic) = value;
+                foreach (var (parentFrameId, childFrameId, transform, _) in transforms)
                 {
                     if (transform.HasNaN()
                         || childFrameId.Length == 0
@@ -536,14 +537,24 @@ namespace Iviz.Controllers
 
         public static Pose FixedFramePose => Instance.FixedFrame.Transform.AsPose();
 
-        public static void Publish([CanBeNull] string parentFrame, [CanBeNull] string childFrame,
-            in Msgs.GeometryMsgs.Transform rosTransform)
+        public static void Publish([NotNull] string childFrame, in Pose absoluteUnityPose)
         {
+            Pose relativePose = RelativePoseToFixedFrame(absoluteUnityPose);
+            Publish(FixedFrameId, childFrame, relativePose.Unity2RosTransform());
+        }
+
+        public static void Publish([CanBeNull] string parentFrame, [NotNull] string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
+        {
+            if (Instance == null)
+            {
+                return;
+            }
+            
             TFMessage msg = new TFMessage
             (
                 new[]
                 {
-                    new TransformStamped((tfSeq++, parentFrame), childFrame ?? FixedFrameId, rosTransform)
+                    new TransformStamped((tfSeq++, parentFrame ?? FixedFrameId), childFrame, rosTransform)
                 }
             );
 
