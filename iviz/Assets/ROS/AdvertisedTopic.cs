@@ -83,7 +83,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.Logger.Error($"Failed to advertise service (try {t}): ", e);
+                        Core.Logger.Error($"Failed to advertise topic (try {t}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }

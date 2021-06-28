@@ -16,7 +16,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] float linkWidth = 0.2f;
         [SerializeField] float dragBackDistance = 0.5f;
         [SerializeField] LineResource lines;
-        [SerializeField] ARLineConnector connector = null;
+        //[SerializeField] ARLineConnector connector = null;
 
         readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
         float? currentAngle;

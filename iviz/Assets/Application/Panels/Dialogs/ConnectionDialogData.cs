@@ -15,7 +15,7 @@ namespace Iviz.App
     public sealed class ConnectionDialogData : DialogData
     {
         const int DefaultPort = 7613;
-        static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
+        [NotNull] static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         [NotNull] static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
         [NotNull] static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
@@ -147,6 +147,7 @@ namespace Iviz.App
             };
             panel.MyId.EndEdit += text =>
             {
+                
                 MyId = RosClient.IsValidResourceName(text) ? text : null;
             };
             panel.RefreshMyId.Clicked += () =>

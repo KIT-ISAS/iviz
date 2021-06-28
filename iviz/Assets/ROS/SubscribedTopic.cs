@@ -29,6 +29,9 @@ namespace Iviz.Ros
 
     internal sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
     {
+        const int NumRetries = 3;
+        const int WaitBetweenRetriesInMs = 500;
+
         readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
         [NotNull] readonly string topic;
         [CanBeNull] string subscriberId;
@@ -56,27 +59,38 @@ namespace Iviz.Ros
         public async Task SubscribeAsync(RosClient client, IListener listener,
             CancellationToken token)
         {
-            token.ThrowIfCancellationRequested();
-            IRosSubscriber subscriber;
             if (listener != null)
             {
                 listeners.Add((Listener<T>) listener);
             }
 
+            token.ThrowIfCancellationRequested();
             if (client != null)
             {
-                (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
-                if (bagListener != null)
+                for (int t = 0; t < NumRetries; t++)
                 {
-                    bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
+                    try
+                    {
+                        IRosSubscriber subscriber;
+                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
+                        if (bagListener != null)
+                        {
+                            bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
+                        }
+
+                        Subscriber = subscriber;
+                    }
+                    catch (RoslibException e)
+                    {
+                        Core.Logger.Error($"Failed to subscribe to service (try {t}): ", e);
+                        await Task.Delay(WaitBetweenRetriesInMs, token);
+                    }
                 }
             }
             else
             {
-                subscriber = null;
+                Subscriber = null;
             }
-
-            Subscriber = subscriber;
         }
 
         public async Task UnsubscribeAsync(CancellationToken token)

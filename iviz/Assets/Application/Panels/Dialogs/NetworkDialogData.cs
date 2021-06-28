@@ -91,8 +91,7 @@ namespace Iviz.App
 
                 if (stat.Receivers.Count == 0)
                 {
-                    builder.Append("  (None)").AppendLine();
-                    builder.AppendLine();
+                    builder.Append("  (None)").AppendLine().AppendLine();
                     continue;
                 }
 
@@ -165,7 +164,7 @@ namespace Iviz.App
 
                 if (stat.Senders.Count == 0)
                 {
-                    builder.Append("  (None)").AppendLine();
+                    builder.Append("  (None)").AppendLine().AppendLine();
                     continue;
                 }
 
