@@ -29,17 +29,19 @@ namespace Iviz.Displays
         [SerializeField] bool occlusionOnly;
         [SerializeField] float smoothness = Settings.IsHololens ? 0.25f : 0.5f;
         [SerializeField] float metallic = 0.5f;
-        
+
         MeshRenderer mainRenderer;
         MeshFilter meshFilter;
         Material textureMaterial;
         Material textureMaterialAlpha;
+        [SerializeField] bool autoSelectMaterial = true;
 
         [NotNull]
         MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
 
         [NotNull]
         MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
+
 
         [CanBeNull]
         public Texture2D DiffuseTexture
@@ -175,12 +177,20 @@ namespace Iviz.Displays
                 occlusionOnly = value;
                 if (value)
                 {
-                    MainRenderer.sharedMaterial = Resource.Materials.LitOcclusionOnly.Object;
+                    SetOcclusionMaterial();
                 }
                 else
                 {
                     SetEffectiveColor();
                 }
+            }
+        }
+
+        void SetOcclusionMaterial()
+        {
+            if (autoSelectMaterial)
+            {
+                MainRenderer.sharedMaterial = Resource.Materials.LitOcclusionOnly.Object;
             }
         }
 
@@ -210,44 +220,53 @@ namespace Iviz.Displays
             {
                 return;
             }
-
+            
             var effectiveColor = Color * Tint;
-            if (DiffuseTexture == null && BumpTexture == null)
+            if (autoSelectMaterial)
             {
-                var material = effectiveColor.a > 254f / 255f
-                    ? Resource.Materials.Lit.Object
-                    : Resource.Materials.TransparentLit.Object;
-                MainRenderer.sharedMaterial = material;
-            }
-            else if (effectiveColor.a > 254f / 255f)
-            {
-                if (textureMaterial == null)
+                if (DiffuseTexture == null && BumpTexture == null)
                 {
-                    textureMaterial = Resource.TexturedMaterials.Get(DiffuseTexture, BumpTexture);
+                    var material = effectiveColor.a > 254f / 255f
+                        ? Resource.Materials.Lit.Object
+                        : Resource.Materials.TransparentLit.Object;
+                    MainRenderer.sharedMaterial = material;
                 }
-
-                MainRenderer.sharedMaterial = textureMaterial;
-            }
-            else
-            {
-                if (textureMaterialAlpha == null)
+                else if (effectiveColor.a > 254f / 255f)
                 {
-                    textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(DiffuseTexture, BumpTexture);
-                }
+                    if (textureMaterial == null)
+                    {
+                        textureMaterial = Resource.TexturedMaterials.Get(DiffuseTexture, BumpTexture);
+                    }
 
-                MainRenderer.sharedMaterial = textureMaterialAlpha;
+                    MainRenderer.sharedMaterial = textureMaterial;
+                }
+                else
+                {
+                    if (textureMaterialAlpha == null)
+                    {
+                        textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(DiffuseTexture, BumpTexture);
+                    }
+
+                    MainRenderer.sharedMaterial = textureMaterialAlpha;
+                }
             }
 
             MainRenderer.SetPropertyColor(effectiveColor);
         }
 
-        public void OverrideMaterial(Material material)
+        public void OverrideMaterial([NotNull] Material material)
         {
             MainRenderer.sharedMaterial = material;
-            var effectiveColor = Color * Tint;
-            MainRenderer.SetPropertyColor(effectiveColor);
+            autoSelectMaterial = false;
+            SetEffectiveColor();
         }
 
+        public void DisableOverrideMaterial()
+        {
+            autoSelectMaterial = true;
+            SetEffectiveColor();
+        }
+        
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {

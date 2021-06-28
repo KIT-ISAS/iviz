@@ -171,7 +171,7 @@ namespace Iviz.Controllers
                         warnStr = "1 warning";
                         break;
                     default:
-                        warnStr = $"{totalErrors} warnings";
+                        warnStr = $"{totalWarnings} warnings";
                         break;
                 }
 

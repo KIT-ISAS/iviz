@@ -28,8 +28,11 @@ namespace Iviz.Displays
         bool HandlesPointToCamera { get; set; }
         bool KeepAbsoluteRotation { get; set; }
         InteractionModeType InteractionMode { get; set; }
+        bool ColliderCanInteract { get; }
         new Bounds? Bounds { set; }
         bool EnableMenu { get; set; }
+        bool Interactable { get; set; }
+        void SetColliderInteractable();
 
         event MovedAction Moved;
         event Action PointerUp;
