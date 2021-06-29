@@ -8,6 +8,8 @@ namespace Iviz.Msgs
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct time : IEquatable<time>, IComparable<time>
     {
+        public static TimeSpan GlobalTimeOffset { get; set; } = TimeSpan.Zero;
+        
         [DataMember(Name = "secs")] public uint Secs { get; }
         [DataMember(Name = "nsecs")] public uint Nsecs { get; }
 
@@ -28,7 +30,7 @@ namespace Iviz.Msgs
 
         public static time Now()
         {
-            return new(DateTime.UtcNow);
+            return new(DateTime.UtcNow + GlobalTimeOffset);
         }
 
         public DateTime ToDateTime()
