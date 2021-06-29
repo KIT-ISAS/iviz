@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
@@ -46,6 +47,7 @@ namespace Iviz.Ros
         [NotNull] CancellationTokenSource connectionTs = new CancellationTokenSource();
 
         Task watchdogTask;
+        Task ntpTask;
         Uri masterUri;
         string myId;
         Uri myUri;
@@ -183,8 +185,6 @@ namespace Iviz.Ros
                     Core.Logger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
-                    //ConnectionUtils.GlobalResolver["cpr-nextr17"] = "192.168.131.1";
-                    //ConnectionUtils.GlobalResolver["ids-robdekon-1"] = "192.168.1.11";
                     (bool success, XmlRpcValue hosts) =
                         await Client.Parameters.GetParameterAsync("/iviz/hosts", token);
                     if (success)
@@ -223,7 +223,8 @@ namespace Iviz.Ros
 
                     Core.Logger.Internal("Finished resubscribing and readvertising!");
 
-                    watchdogTask = WatchdogAsync(Client.RosMasterClient, token);
+                    watchdogTask = WatchdogTask(Client.RosMasterClient, token);
+                    ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
 
                 Core.Logger.Debug("*** Connected!");
@@ -333,7 +334,7 @@ namespace Iviz.Ros
             }
         }
 
-        static async Task WatchdogAsync(
+        static async Task WatchdogTask(
             [NotNull] RosMasterClient masterApi,
             CancellationToken token)
         {
@@ -412,6 +413,38 @@ namespace Iviz.Ros
             connection.SetConnectionWarningState(false);
         }
 
+        static async Task NtpCheckerTask([NotNull] string hostname, CancellationToken token)
+        {
+            Core.Logger.Debug("[NtpChecker] Starting NTP task");
+            time.GlobalTimeOffset = TimeSpan.Zero;
+
+            TimeSpan offset;
+            try
+            {
+                offset = await NtpQuery.GetNetworkTimeOffsetAsync(hostname, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error("[NtpChecker] Failed to read remote clock", e);
+                return;
+            }
+
+            if (Math.Abs(offset.TotalMilliseconds) < 1)
+            {
+                Core.Logger.Info("[NtpChecker] No significant time offset detected");
+            }
+            else
+            {
+                time.GlobalTimeOffset = offset;
+                string offsetStr = offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture);
+                Core.Logger.Info($"[NtpChecker] Setting time offset of {offsetStr}");
+            }
+        }
+
         static readonly Random Random = new Random();
 
         [NotNull]
@@ -430,9 +463,7 @@ namespace Iviz.Ros
         async Task ReSubscribe([NotNull] ISubscribedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
-            //Logger.LogDebug("Resubscribing " + topic.Subscriber?.Topic);
             await topic.SubscribeAsync(Connected ? Client : null, token: token);
-            //Logger.LogDebug("Finished resubscribing " + topic.Subscriber?.Topic);
         }
 
         async Task ReAdvertiseService([NotNull] IAdvertisedService service, CancellationToken token)
@@ -475,6 +506,12 @@ namespace Iviz.Ros
             {
                 await watchdogTask.AwaitNoThrow(this);
                 watchdogTask = null;
+            }
+
+            if (ntpTask != null)
+            {
+                await ntpTask.AwaitNoThrow(this);
+                ntpTask = null;
             }
 
             base.Disconnect();
