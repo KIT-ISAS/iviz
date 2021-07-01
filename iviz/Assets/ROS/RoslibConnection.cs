@@ -415,8 +415,16 @@ namespace Iviz.Ros
 
         static async Task NtpCheckerTask([NotNull] string hostname, CancellationToken token)
         {
-            Core.Logger.Debug("[NtpChecker] Starting NTP task");
+            Core.Logger.Debug("[NtpChecker] Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
+
+            /*
+            for (int i = 0; i < 20; i++)
+            {
+                var ts = await NtpQuery.GetNetworkTimeOffsetOneShotAsync(hostname, token);
+                Debug.Log(new TimeSpan(mean).TotalMilliseconds);
+            }
+            */
 
             TimeSpan offset;
             try
@@ -429,19 +437,21 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("[NtpChecker] Failed to read remote clock", e);
+                Core.Logger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
                 return;
             }
 
-            if (Math.Abs(offset.TotalMilliseconds) < 1)
+            const int minOffsetInMs = 2;
+            if (Math.Abs(offset.TotalMilliseconds) < minOffsetInMs)
             {
-                Core.Logger.Info("[NtpChecker] No significant time offset detected");
+                Core.Logger.Info("[NtpChecker] No significant time offset detected from master clock.");
             }
             else
             {
                 time.GlobalTimeOffset = offset;
                 string offsetStr = offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture);
-                Core.Logger.Info($"[NtpChecker] Setting time offset of {offsetStr}");
+                Core.Logger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr} ms. " +
+                                 "Local published messages will use this offset.");
             }
         }
 
