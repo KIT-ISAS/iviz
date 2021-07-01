@@ -181,6 +181,7 @@ namespace Iviz.Ros
             recentMsgs += messageQueue.Count;
         }
 
+        int j = 0;
         void CallHandlerDirect([NotNull] in T msg)
         {
             Interlocked.Increment(ref totalMsgCounter);
@@ -222,9 +223,9 @@ namespace Iviz.Ros
 
             ConnectionManager.ReportBandwidthDown(lastMsgBytes);
 
-            lastMsgBytes = 0;
-            droppedMsgs = 0;
-            recentMsgs = 0;
+            Interlocked.Exchange(ref lastMsgBytes, 0);
+            Interlocked.Exchange(ref droppedMsgs, 0);
+            Interlocked.Exchange(ref recentMsgs, 0);
         }
 
 
