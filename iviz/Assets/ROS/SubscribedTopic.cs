@@ -79,6 +79,7 @@ namespace Iviz.Ros
                         }
 
                         Subscriber = subscriber;
+                        break;
                     }
                     catch (RoslibException e)
                     {

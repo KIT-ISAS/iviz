@@ -49,8 +49,23 @@ namespace Iviz.Ntp
                 await Task.Delay(1000, token);
             }
 
-            offsets.Sort();
-            return offsets[minSuccess / 2]; // TODO: implement fancier filtering
+            offsets.Sort(); // TODO: implement fancier filtering
+            
+            long mean = 0L;
+            long remainder = 0L;
+            int minIndex = offsets.Count / 3;
+            int maxIndex = offsets.Count * 2 / 3;
+            int n = maxIndex - minIndex;
+            for (int i = minIndex; i < maxIndex; i++) // workaround to avoid overflow (don't think it can happen)
+            {
+                long ticks = offsets[i].Ticks;
+                mean += ticks / n;
+                remainder += ticks % n;
+                mean += remainder / n;
+                remainder %= n;
+            }
+            
+            return new TimeSpan(mean); 
         }
         
         public static async ValueTask<TimeSpan> GetNetworkTimeOffsetOneShotAsync(string ntpServer, CancellationToken token = default)
