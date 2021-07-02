@@ -64,22 +64,22 @@ namespace Iviz.Ntp
             byte[] ntpData = ntpDataRent.Array;
             var ntpDataSegment = new ArraySegment<byte>(ntpData, 0, 48);
 
+            Array.Clear(ntpData, 0, ntpData.Length);
             ntpData[0] = 0x1B; //LI = 0 (no warning), VN = 3 (IPv4 only), Mode = 3 (Client Mode)
 
-            var addresses = (await Dns.GetHostEntryAsync(ntpServer)).AddressList;
+            Task timerTask = Task.Delay(3000, token);
+
+            var hostEntry = await AwaitWithTimeout(Dns.GetHostEntryAsync(ntpServer), timerTask);
+            var addresses = hostEntry?.AddressList;
             if (addresses == null || addresses.Length == 0)
             {
                 throw new IOException($"Failed to resolve address for '{ntpServer}'");
             }
 
-            var ipEndPoint = new IPEndPoint(addresses[0], 123);
-
             DateTime t0, t3;
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                Task timerTask = Task.Delay(3000, token);
-
-                await AwaitWithTimeout(socket.ConnectAsync(ipEndPoint), timerTask);
+                await AwaitWithTimeout(socket.ConnectAsync(ntpServer, 123), timerTask);
                 t0 = DateTime.UtcNow;
                 await AwaitWithTimeout(socket.SendAsync(ntpDataSegment, SocketFlags.None), timerTask);
                 await AwaitWithTimeout(socket.ReceiveAsync(ntpDataSegment, SocketFlags.None), timerTask);
@@ -101,9 +101,20 @@ namespace Iviz.Ntp
                 throw new TimeoutException("NTP call did not return in time");
             }
 
-            await resultTask;
+            await task;
         }
 
+        static async ValueTask<T> AwaitWithTimeout<T>(Task<T> task, Task timerTask)
+        {
+            Task resultTask = await Task.WhenAny(task, timerTask);
+            if (resultTask == timerTask)
+            {
+                throw new TimeoutException("NTP call did not return in time");
+            }
+            
+            return await task;
+        }        
+        
         static DateTime ToDateTime(uint chunk1, uint chunk2)
         {
             ulong secondsInt = SwapEndianness(chunk1);
