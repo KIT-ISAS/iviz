@@ -7,8 +7,8 @@ namespace Iviz.App
 {
     public class TrashButtonWidget : MonoBehaviour, IWidget
     {
-        public Button button;
-        public Image image;
+        [SerializeField] Button button;
+        [SerializeField] Image image;
 
         public bool Interactable
         {

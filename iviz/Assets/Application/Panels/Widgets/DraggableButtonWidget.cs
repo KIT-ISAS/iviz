@@ -39,13 +39,19 @@ namespace Iviz.App
         
         void IEndDragHandler.OnEndDrag(PointerEventData _)
         {
-            Dragged?.Invoke();
-            dragged = false;
+            if (dragged)
+            {
+                Dragged?.Invoke();
+                dragged = false;
+            }
         }
 
-        void IDragHandler.OnDrag(PointerEventData _)
+        void IDragHandler.OnDrag([NotNull] PointerEventData pointerEventData)
         {
-            dragged = true;
+            if (pointerEventData.delta.x < 0)
+            {
+                dragged = true;
+            }
         }
     }
 }

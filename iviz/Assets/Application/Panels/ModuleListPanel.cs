@@ -34,7 +34,8 @@ namespace Iviz.App
         static readonly Color ConnectedWarningColor = new Color(1f, 0.8f, 0.3f, 0.4f);
 
         [SerializeField] DataLabelWidget masterUriStr = null;
-        [SerializeField] DraggableButtonWidget masterUriButton = null;
+        [SerializeField] DraggableButtonWidget dragButton = null;
+        [SerializeField] TrashButtonWidget masterUriButton = null;
         [SerializeField] TrashButtonWidget connectButton = null;
         [SerializeField] TrashButtonWidget stopButton = null;
         [SerializeField] Image topPanel = null;
@@ -292,7 +293,7 @@ namespace Iviz.App
 
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += () => connectionData.Show();
-            masterUriButton.Dragged += OnHideGuiButtonClick;
+            dragButton.Dragged += OnHideGuiButtonClick;
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
@@ -406,7 +407,7 @@ namespace Iviz.App
             }
             else
             {
-                string filename = $"{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+                string filename = $"{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
                 Directory.CreateDirectory(Settings.BagsFolder);
                 ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
                 recordBagImage.color = Color.red;

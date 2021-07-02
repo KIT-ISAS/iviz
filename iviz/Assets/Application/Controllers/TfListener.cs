@@ -27,7 +27,7 @@ namespace Iviz.Controllers
         public const string OriginFrameId = "_origin_";
         public const string MapFrameId = "map";
         const int MaxQueueSize = 10000;
-        
+
         const string DefaultTopicStatic = "/tf_static";
 
         static uint tfSeq;
@@ -277,25 +277,30 @@ namespace Iviz.Controllers
 
         void ProcessMessages()
         {
+            TfFrame lastChild = null;
             while (messageList.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                foreach (var (parentFrameId, childFrameId, transform, _) in transforms)
+                foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
                 {
-                    if (transform.HasNaN()
-                        || childFrameId.Length == 0
-                        || !IsValid(transform.Translation))
+                    if (rosTransform.HasNaN()
+                        || childIdUnchecked.Length == 0
+                        || !IsValid(rosTransform.Translation))
                     {
                         continue;
                     }
 
                     // remove starting '/' from tf v1
-                    string childId = childFrameId[0] != '/'
-                        ? childFrameId
-                        : childFrameId.Substring(1);
+                    string childId = childIdUnchecked[0] != '/'
+                        ? childIdUnchecked
+                        : childIdUnchecked.Substring(1);
 
                     TfFrame child;
-                    if (isStatic)
+                    if (!(lastChild is null) && lastChild.Id == childId)
+                    {
+                        child = lastChild;
+                    }
+                    else if (isStatic)
                     {
                         child = GetOrCreateFrame(childId, staticListener);
                         if (config.KeepAllFrames)
@@ -312,27 +317,28 @@ namespace Iviz.Controllers
                         continue;
                     }
 
-                    if (parentFrameId.Length == 0)
+                    lastChild = child;
+                    if (parentIdUnchecked.Length == 0)
                     {
                         child.SetParent(DefaultFrame);
-                        child.SetPose(transform.Ros2Unity());
+                        child.SetPose(rosTransform.Ros2Unity());
                         continue;
                     }
 
-                    string parentId = parentFrameId[0] != '/'
-                        ? parentFrameId
-                        : parentFrameId.Substring(1);
+                    string parentId = parentIdUnchecked[0] != '/'
+                        ? parentIdUnchecked
+                        : parentIdUnchecked.Substring(1);
 
                     if (!(child.Parent is null) && parentId == child.Parent.Id)
                     {
-                        child.SetPose(transform.Ros2Unity());
+                        child.SetPose(rosTransform.Ros2Unity());
                     }
                     else
                     {
                         TfFrame parent = GetOrCreateFrame(parentId);
                         if (child.SetParent(parent))
                         {
-                            child.SetPose(transform.Ros2Unity());
+                            child.SetPose(rosTransform.Ros2Unity());
                         }
                     }
                 }
@@ -432,7 +438,7 @@ namespace Iviz.Controllers
             {
                 return false;
             }
-            
+
             //DateTime now = DateTime.Now;
             //Debug.Log((now - msg.Transforms[0].Header.Stamp.ToDateTime()).TotalMilliseconds);
             //Debug.Log(messageList.Count);
@@ -557,13 +563,14 @@ namespace Iviz.Controllers
             Publish(FixedFrameId, childFrame, relativePose.Unity2RosTransform());
         }
 
-        public static void Publish([CanBeNull] string parentFrame, [NotNull] string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
+        public static void Publish([CanBeNull] string parentFrame, [NotNull] string childFrame,
+            in Msgs.GeometryMsgs.Transform rosTransform)
         {
             if (Instance == null)
             {
                 return;
             }
-            
+
             TFMessage msg = new TFMessage
             (
                 new[]

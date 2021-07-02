@@ -303,7 +303,7 @@ namespace Iviz.Controllers
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
                         frameNode.Transform);
-                    sphere.transform.localScale = 0.05f * Vector3.one;
+                    sphere.Transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     trail.DataSource = TrailDataSource;
                     break;
@@ -319,7 +319,7 @@ namespace Iviz.Controllers
                     angleAxis.Color = Color.yellow;
                     sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
                         frameNode.Transform);
-                    sphere.transform.localScale = 0.05f * Vector3.one;
+                    sphere.Transform.localScale = 0.05f * Vector3.one;
                     sphere.Color = Color;
                     trail.DataSource = TrailDataSource;
                     break;

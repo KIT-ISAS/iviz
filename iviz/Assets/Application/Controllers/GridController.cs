@@ -199,7 +199,11 @@ namespace Iviz.Controllers
         public bool HideInARMode
         {
             get => config.HideInARMode;
-            set => config.HideInARMode = value;
+            set
+            {
+                config.HideInARMode = value;
+                Visible = Visible; // update
+            }
         }
 
         public SerializableVector3 Offset

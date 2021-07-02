@@ -34,8 +34,7 @@ namespace Iviz.Displays
         bool isDirty;
 
         Mesh mesh;
-
-        //bool processing;
+        
         [CanBeNull] MeshRenderer meshRenderer;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
 

@@ -61,7 +61,7 @@ namespace Iviz.Core
 
     public static class RosUtils
     {
-        public static readonly Msgs.GeometryMsgs.Quaternion XFrontToZFront = (0.5, -0.5, 0.5, -0.5);
+        static readonly Msgs.GeometryMsgs.Quaternion XFrontToZFront = (0.5, -0.5, 0.5, -0.5);
 
         /// Make camera point to +Z instead of +X
         public static Msgs.GeometryMsgs.Pose ToCameraFrame(this Msgs.GeometryMsgs.Pose pose) =>
@@ -77,7 +77,7 @@ namespace Iviz.Core
         //----
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Unity2Ros(this Vector3 vector3) => new Vector3(vector3.z, -vector3.x, vector3.y);
+        static Vector3 Unity2Ros(this Vector3 vector3) => new Vector3(vector3.z, -vector3.x, vector3.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this Vector3 vector3) => new Vector3(-vector3.y, vector3.z, vector3.x);
@@ -90,7 +90,7 @@ namespace Iviz.Core
             new Quaternion(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Quaternion Unity2Ros(this Quaternion quaternion) =>
+        static Quaternion Unity2Ros(this Quaternion quaternion) =>
             new Quaternion(-quaternion.z, quaternion.x, -quaternion.y, quaternion.w);
         //----
 
@@ -104,58 +104,35 @@ namespace Iviz.Core
         public static Quaternion RosRpy2Unity(this Msgs.GeometryMsgs.Vector3 v) => v.ToUnity().RosRpy2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToUnity(this Msgs.IvizMsgs.Vector3f v) => new Vector3(v.X, v.Y, v.Z);
+        static Vector3 ToUnity(this Msgs.IvizMsgs.Vector3f v) => new Vector3(v.X, v.Y, v.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this Msgs.IvizMsgs.Vector3f v) => v.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p)
-        {
-            return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
-        }
+        public static Vector3 ToUnity(this Msgs.GeometryMsgs.Vector3 p) =>
+            new Vector3((float) p.X, (float) p.Y, (float) p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point32 p)
-        {
-            return new Vector3(p.X, p.Y, p.Z);
-        }
+        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point32 p) => new Vector3(p.X, p.Y, p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p)
-        {
-            return p.ToUnity().Ros2Unity();
-        }
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Vector3 p) => p.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point32 p)
-        {
-            return p.ToUnity().Ros2Unity();
-        }
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point32 p) => p.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Msgs.GeometryMsgs.Vector3 ToRosVector3(this Vector3 p)
-        {
-            return new Msgs.GeometryMsgs.Vector3(p.x, p.y, p.z);
-        }
+        static Msgs.GeometryMsgs.Vector3 ToRosVector3(this Vector3 p) => new Msgs.GeometryMsgs.Vector3(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this Vector3 p)
-        {
-            return ToRosVector3(p.Unity2Ros());
-        }
+        public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this Vector3 p) => ToRosVector3(p.Unity2Ros());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point p)
-        {
-            return new Vector3((float) p.X, (float) p.Y, (float) p.Z);
-        }
+        static Vector3 ToUnity(this Msgs.GeometryMsgs.Point p) => new Vector3((float) p.X, (float) p.Y, (float) p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point p)
-        {
-            return p.ToUnity().Ros2Unity();
-        }
+        public static Vector3 Ros2Unity(this Msgs.GeometryMsgs.Point p) => p.ToUnity().Ros2Unity();
 
         public static Color ToUnityColor(this ColorRGBA p) => new Color(p.R, p.G, p.B, p.A);
 
@@ -199,78 +176,51 @@ namespace Iviz.Core
         static Msgs.GeometryMsgs.Point ToRosPoint(this Vector3 p) => (p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Point Unity2RosPoint(this Vector3 p)
-        {
-            return ToRosPoint(p.Unity2Ros());
-        }
+        public static Msgs.GeometryMsgs.Point Unity2RosPoint(this Vector3 p) => ToRosPoint(p.Unity2Ros());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Quaternion ToUnity(this Msgs.GeometryMsgs.Quaternion p)
-        {
-            return new Quaternion((float) p.X, (float) p.Y, (float) p.Z, (float) p.W);
-        }
+        static Quaternion ToUnity(this Msgs.GeometryMsgs.Quaternion p) =>
+            new Quaternion((float) p.X, (float) p.Y, (float) p.Z, (float) p.W);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Quaternion Ros2Unity(this Msgs.GeometryMsgs.Quaternion p)
-        {
-            Quaternion q = p.ToUnity().Ros2Unity();
-            return (q.x == 0 && q.y == 0 && q.z == 0 && q.w == 0) ? Quaternion.identity : q;
-        }
+        public static Quaternion Ros2Unity(this Msgs.GeometryMsgs.Quaternion p) =>
+            (p.X == 0 && p.Y == 0 && p.Z == 0 && p.W == 0) ? Quaternion.identity : p.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Msgs.GeometryMsgs.Quaternion ToRos(this Quaternion p) => (p.x, p.y, p.z, p.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p)
-        {
-            return ToRos(p.Unity2Ros());
-        }
+        public static Msgs.GeometryMsgs.Quaternion Unity2RosQuaternion(this Quaternion p) => ToRos(p.Unity2Ros());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Pose ToUnity(this Msgs.GeometryMsgs.Transform pose)
-        {
-            return new Pose(pose.Translation.ToUnity(), pose.Rotation.ToUnity());
-        }
+        static Pose ToUnity(this Msgs.GeometryMsgs.Transform pose) =>
+            new Pose(pose.Translation.ToUnity(), pose.Rotation.ToUnity());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Transform pose)
-        {
-            return new Pose(pose.Translation.Ros2Unity(), pose.Rotation.Ros2Unity());
-        }
+        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Transform pose) =>
+            new Pose(pose.Translation.Ros2Unity(), pose.Rotation.Ros2Unity());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Pose ToUnity(this Msgs.GeometryMsgs.Pose pose)
-        {
-            return new Pose(pose.Position.ToUnity(), pose.Orientation.ToUnity());
-        }
+        static Pose ToUnity(this Msgs.GeometryMsgs.Pose pose) =>
+            new Pose(pose.Position.ToUnity(), pose.Orientation.ToUnity());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Pose pose)
-        {
-            return new Pose(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
-        }
+        public static Pose Ros2Unity(this Msgs.GeometryMsgs.Pose pose) =>
+            new Pose(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Msgs.GeometryMsgs.Transform Unity2RosTransform(this Pose p) =>
             (p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p)
-        {
-            return new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
-        }
+        public static Msgs.GeometryMsgs.Pose Unity2RosPose(this Pose p) =>
+            new Msgs.GeometryMsgs.Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this float f)
-        {
-            return float.IsNaN(f) || float.IsInfinity(f);
-        }
+        public static bool IsInvalid(this float f) => float.IsNaN(f) || float.IsInfinity(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this double f)
-        {
-            return double.IsNaN(f) || double.IsInfinity(f);
-        }
+        public static bool IsInvalid(this double f) => double.IsNaN(f) || double.IsInfinity(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this float4 v) => float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
@@ -286,39 +236,26 @@ namespace Iviz.Core
             float.IsNaN(v.R) || float.IsNaN(v.G) || float.IsNaN(v.B) || float.IsNaN(v.A);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Vector3 v)
-        {
-            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
-        }
+        public static bool HasNaN(this Msgs.GeometryMsgs.Vector3 v) =>
+            double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Point v)
-        {
-            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
-        }
+        public static bool HasNaN(this Msgs.GeometryMsgs.Point v) =>
+            double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Point32 v)
-        {
-            return float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z);
-        }
+        public static bool HasNaN(this Msgs.GeometryMsgs.Point32 v) =>
+            float.IsNaN(v.X) || float.IsNaN(v.Y) || float.IsNaN(v.Z);
+
+        static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v) =>
+            double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool HasNaN(this Msgs.GeometryMsgs.Quaternion v)
-        {
-            return double.IsNaN(v.X) || double.IsNaN(v.Y) || double.IsNaN(v.Z) || double.IsNaN(v.W);
-        }
+        public static bool HasNaN(this Msgs.GeometryMsgs.Transform transform) =>
+            HasNaN(transform.Rotation) || HasNaN(transform.Translation);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Transform transform)
-        {
-            return HasNaN(transform.Rotation) || HasNaN(transform.Translation);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this Msgs.GeometryMsgs.Pose pose)
-        {
-            return HasNaN(pose.Orientation) || HasNaN(pose.Position);
-        }
+        public static bool HasNaN(this Msgs.GeometryMsgs.Pose pose) =>
+            HasNaN(pose.Orientation) || HasNaN(pose.Position);
     }
 }

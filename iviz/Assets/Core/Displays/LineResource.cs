@@ -111,17 +111,17 @@ namespace Iviz.Displays
             UpdateLines(overrideNeedsAlpha);
         }
 
-        public void Set([NotNull] IReadOnlyCollection<LineWithColor> lines, bool? overrideNeedsAlpha = null)
+        public void Set([NotNull] LineWithColor[] lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
                 throw new ArgumentNullException(nameof(lines));
             }
 
-            lineBuffer.EnsureCapacity(lines.Count);
+            lineBuffer.EnsureCapacity(lines.Length);
 
             lineBuffer.Clear();
-            foreach (var t in lines)
+            foreach (ref LineWithColor t in lines.Ref())
             {
                 if (!IsElementValid(t))
                 {
