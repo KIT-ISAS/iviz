@@ -183,7 +183,7 @@ namespace Iviz.App
                         }
 
                         panel.ServerMode.State = true;
-                        Logger.Internal("Created <b>master node</b>. You can connect now!");
+                        Logger.Internal($"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
                         MasterActiveChanged?.Invoke(true);
                     }
                 }
@@ -196,7 +196,7 @@ namespace Iviz.App
                     }
 
                     RosServerManager.Dispose();
-                    Logger.Internal("Master node removed.");
+                    Logger.Internal("Master node removed. Switched to <b>client mode</b>.");
                     panel.ServerMode.State = false;
                     MasterActiveChanged?.Invoke(false);
                 }

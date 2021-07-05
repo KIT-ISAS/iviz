@@ -132,8 +132,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 798c23ac711f4eaeb80a5b1d4e42b902, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  button: {fileID: 0}
   targetTransform: {fileID: 8075607159443275990}
   buttonText: {fileID: 6820480755857316914}
+  allowRevealLeft: 1
+  allowRevealRight: 1
+  moveThresholdLeft: 40
+  moveThresholdRight: 80
+  minMotionThreshold: 5
+  parentScrollRect: {fileID: 0}
+  detachables: []
 --- !u!1 &269147477799477329
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.7490196}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -388,7 +396,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.7490196}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -462,7 +470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -543,7 +551,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9916463, g: 0.8254717, b: 1, a: 0.4}
+  m_Color: {r: 0.2956123, g: 0.39257115, b: 0.6886792, a: 0.4}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:

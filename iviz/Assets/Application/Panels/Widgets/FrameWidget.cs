@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class FrameWidget : MonoBehaviour, IWidget
+    public sealed class FrameWidget : MovableButtonWidget
     {
         [SerializeField] Text text = null;
 
@@ -69,13 +69,15 @@ namespace Iviz.App
             }
         }
 
-        void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             Frame = null;
         }
 
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
+            base.ClearSubscribers();
             Owner = null;
             Frame = null;
         }
@@ -85,8 +87,10 @@ namespace Iviz.App
             Frame = Owner?.Frame;
         }
 
-        public void OnGotoClick()
+        protected override void OnClicked()
         {
+            base.OnClicked();
+
             if (Frame == null)
             {
                 return;
@@ -100,8 +104,16 @@ namespace Iviz.App
             TfListener.Instance.HighlightFrame(Frame.Id);
         }
 
-        public void OnTrailClick()
+        protected override void OnRevealedRight()
         {
+            base.OnRevealedRight();
+            if (frame != null && ModuleListPanel.GuiInputModule != null)
+            {
+                ModuleListPanel.GuiInputModule.OrbitCenterOverride =
+                    ModuleListPanel.GuiInputModule.OrbitCenterOverride != frame
+                        ? frame
+                        : null;
+            }
         }
     }
 }

@@ -7,18 +7,25 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class MovableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
+    public class MovableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler
     {
+        [SerializeField] Button button;
         [SerializeField] RectTransform targetTransform;
         [SerializeField] Text buttonText;
         [SerializeField] bool allowRevealLeft = true;
         [SerializeField] bool allowRevealRight = true;
         [SerializeField] float moveThresholdLeft = 40;
-        [SerializeField] float moveThresholdRight = 80;
+        [SerializeField] float moveThresholdRight = 60;
+        [SerializeField] float minMotionThreshold = 5;
+        [SerializeField] ScrollRect parentScrollRect;
+        [SerializeField] GameObject[] detachables;
+
         bool isDragging;
         bool stuckRight;
         bool stuckLeft;
         float startX;
+        float movedX;
+        float movedY;
 
         bool raiseLeftOnRelease;
         bool raiseRightOnRelease;
@@ -44,31 +51,61 @@ namespace Iviz.App
             set => GameObject.SetActive(value);
         }
 
-        void Awake()
+        protected virtual void Awake()
         {
             if (targetTransform == null)
             {
                 targetTransform = (RectTransform) transform;
             }
 
-            GameObject.GetComponentInChildren<Button>().onClick.AddListener(OnClicked);
+            if (button == null)
+            {
+                button = GameObject.GetComponentInChildren<Button>();
+            }
+
+            button.onClick.AddListener(() =>
+            {
+                if (!isDragging)
+                {
+                    OnClicked();
+                }
+            });
+
+            if (parentScrollRect == null)
+            {
+                parentScrollRect = GetComponentInParent<ScrollRect>();
+            }
+        }
+
+        void Start()
+        {
+            if (detachables != null)
+            {
+                foreach (var detachable in detachables)
+                {
+                    detachable.transform.SetParent(transform.parent);
+                    detachable.transform.SetAsFirstSibling();
+                }
+            }
         }
 
         void IDragHandler.OnDrag([NotNull] PointerEventData eventData)
         {
-            if (eventData.delta.x > 0 && !allowRevealLeft)
-            {
-                return;
-            }
+            movedX += eventData.delta.x;
+            movedY += eventData.delta.y;
 
-            if (eventData.delta.x < 0 && !allowRevealRight)
+            if (movedX > 0 && !allowRevealLeft
+                || movedX < 0 && !allowRevealRight
+                || Mathf.Abs(movedX) < minMotionThreshold && !isDragging
+                || Mathf.Abs(movedY) > 5 && !isDragging) 
             {
+                parentScrollRect.OnDrag(eventData);
                 return;
             }
 
             if (!isDragging)
             {
-                startX = targetTransform.localPosition.x;
+                startX = targetTransform.position.x;
                 isDragging = true;
             }
 
@@ -77,17 +114,16 @@ namespace Iviz.App
                 return;
             }
 
-            targetTransform.localPosition += eventData.delta.x * Vector3.right;
-            if (targetTransform.localPosition.x > startX + moveThresholdLeft)
+            targetTransform.position = targetTransform.position.WithX(startX + movedX);
+            if (movedX > moveThresholdLeft)
             {
                 if (!stuckRight)
                 {
-                    //RevealedLeft?.Invoke();
                     raiseLeftOnRelease = true;
                     stuckRight = true;
                 }
 
-                targetTransform.localPosition = targetTransform.localPosition.WithX(startX + moveThresholdLeft);
+                targetTransform.position = targetTransform.position.WithX(startX + moveThresholdLeft);
             }
             else
             {
@@ -95,7 +131,7 @@ namespace Iviz.App
                 stuckRight = false;
             }
 
-            if (targetTransform.localPosition.x < startX - moveThresholdRight)
+            if (movedX < -moveThresholdRight)
             {
                 if (!stuckLeft)
                 {
@@ -103,7 +139,7 @@ namespace Iviz.App
                     stuckLeft = true;
                 }
 
-                targetTransform.localPosition = targetTransform.localPosition.WithX(startX - moveThresholdRight);
+                targetTransform.position = targetTransform.position.WithX(startX - moveThresholdRight);
             }
             else
             {
@@ -112,38 +148,67 @@ namespace Iviz.App
             }
         }
 
-        void IEndDragHandler.OnEndDrag(PointerEventData _)
+        void IEndDragHandler.OnEndDrag(PointerEventData eventData)
         {
+            movedX = 0;
+            movedY = 0;
+
+            if (!isDragging)
+            {
+                parentScrollRect.OnEndDrag(eventData);
+                return;
+            }
+
             isDragging = false;
             stuckLeft = false;
             stuckRight = false;
-            targetTransform.localPosition = targetTransform.localPosition.WithX(startX);
+            targetTransform.position = targetTransform.position.WithX(startX);
             if (raiseLeftOnRelease)
             {
-                RevealedLeft?.Invoke();
+                OnRevealedLeft();
                 raiseLeftOnRelease = false;
             }
 
             if (raiseRightOnRelease)
             {
-                RevealedRight?.Invoke();
+                OnRevealedRight();
                 raiseRightOnRelease = false;
             }
         }
 
-        void OnClicked()
+        protected virtual void OnClicked()
         {
-            if (!isDragging)
-            {
-                Clicked?.Invoke();
-            }
+            Clicked?.Invoke();
         }
 
-        public void ClearSubscribers()
+        protected virtual void OnRevealedLeft()
+        {
+            RevealedLeft?.Invoke();
+        }
+
+        protected virtual void OnRevealedRight()
+        {
+            RevealedRight?.Invoke();
+        }
+
+        public virtual void ClearSubscribers()
         {
             RevealedRight = null;
             RevealedLeft = null;
             Clicked = null;
+
+            if (isDragging)
+            {
+                isDragging = false;
+                stuckLeft = false;
+                stuckRight = false;
+                targetTransform.position = targetTransform.position.WithX(startX);
+            }
+        }
+
+        void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
+        {
+            parentScrollRect.OnBeginDrag(eventData);
         }
     }
 }

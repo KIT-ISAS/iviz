@@ -73,7 +73,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public string HelpText { get; private set; } = "<b>No Robot Selected</b>";
+        public string HelpText { get; private set; } = "<b>No Robot Loaded</b>";
 
         [NotNull] public string SourceParameter => config.SourceParameter;
 
@@ -217,7 +217,7 @@ namespace Iviz.Controllers
             {
                 if (Robot == null)
                 {
-                    return "[No Robot Selected]";
+                    return "[No Robot Loaded]";
                 }
 
                 if (!string.IsNullOrEmpty(Robot.Name))
@@ -298,7 +298,7 @@ namespace Iviz.Controllers
             if (string.IsNullOrEmpty(value))
             {
                 config.SavedRobotName = "";
-                HelpText = "[No Robot Selected]";
+                HelpText = "[No Robot Loaded]";
                 return;
             }
 
@@ -353,7 +353,7 @@ namespace Iviz.Controllers
             if (string.IsNullOrEmpty(robotName))
             {
                 config.SourceParameter = "";
-                HelpText = "[No Robot Selected]";
+                HelpText = "[No Robot Loaded]";
                 return;
             }
 

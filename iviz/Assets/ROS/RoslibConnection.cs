@@ -243,17 +243,18 @@ namespace Iviz.Ros
                         break;
                     case RosUriBindingException _:
                         Core.Logger.Internal(
-                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. Maybe another iviz instance is running? Try another port!");
+                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. " +
+                            $"Maybe another iviz instance is running? Try another port!");
                         break;
                     case RoslibException _:
                     case TimeoutException _:
                     case XmlRpcException _:
                     {
-                        Core.Logger.Internal("Error:", e);
+                        Core.Logger.Internal("<b>Error:</b>", e);
                         if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                         {
-                            Core.Logger.Internal(
-                                "Note: This appears to be my own master. Are you sure the uri network is reachable?");
+                            Core.Logger.Internal("Note: This appears to be a local ROS master. " +
+                                                 "Make sure that <b>My URI</b> is a reachable address.");
                         }
 
                         break;
@@ -449,8 +450,10 @@ namespace Iviz.Ros
             else
             {
                 time.GlobalTimeOffset = offset;
-                string offsetStr = offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture);
-                Core.Logger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr} ms. " +
+                string offsetStr = Math.Abs(offset.TotalSeconds) >= 1
+                    ? offset.TotalSeconds.ToString("#,0.###", BuiltIns.Culture) + " sec"
+                    : offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture) + " ms";
+                Core.Logger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr}. " +
                                  "Local published messages will use this offset.");
             }
         }
@@ -725,7 +728,7 @@ namespace Iviz.Ros
                     publisher.Publish(msg);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Debug.LogWarning($"Exception during RoslibConnection.Publish(): {e.Message}");
             }
@@ -757,7 +760,7 @@ namespace Iviz.Ros
                 {
                     await SubscribeImpl<T>(listener, token);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!(e is OperationCanceledException))
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Subscribe()", e);
                 }
@@ -811,10 +814,7 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseImpl(advertiser, token);
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
+                catch (Exception e) when (!(e is OperationCanceledException))
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unadvertise()", e);
                 }
@@ -861,10 +861,7 @@ namespace Iviz.Ros
                 {
                     await UnsubscribeImpl(subscriber, token);
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
+                catch (Exception e) when (!(e is OperationCanceledException))
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unsubscribe()", e);
                 }

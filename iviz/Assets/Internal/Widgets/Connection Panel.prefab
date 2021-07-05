@@ -563,7 +563,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 0
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -2343,12 +2343,12 @@ PrefabInstance:
     - target: {fileID: 1971379016370457840, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_Text
-      value: wwwssssswwwsssssssw
+      value: ---
       objectReference: {fileID: 0}
     - target: {fileID: 1971379016440108386, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_Text
-      value: wwwssssswwwsssssssw
+      value: ---
       objectReference: {fileID: 0}
     - target: {fileID: 1971379016570804536, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
@@ -2358,7 +2358,7 @@ PrefabInstance:
     - target: {fileID: 1971379016570804537, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_Text
-      value: My ID
+      value: My ROS ID
       objectReference: {fileID: 0}
     - target: {fileID: 1971379017273447936, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
@@ -2515,7 +2515,7 @@ PrefabInstance:
     - target: {fileID: 1971379016570804537, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_Text
-      value: My URL
+      value: My URI
       objectReference: {fileID: 0}
     - target: {fileID: 5661116835407948645, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
@@ -2847,7 +2847,7 @@ PrefabInstance:
     - target: {fileID: 1971379016570804537, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_Text
-      value: Master URL
+      value: Master URI
       objectReference: {fileID: 0}
     - target: {fileID: 5661116835407948645, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}

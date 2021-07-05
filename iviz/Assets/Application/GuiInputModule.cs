@@ -24,6 +24,8 @@ namespace Iviz.App
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
         const float BrakeCoeff = 0.9f;
+        
+        const float AnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
             {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
@@ -74,14 +76,14 @@ namespace Iviz.App
         [CanBeNull]
         public TfFrame OrbitCenterOverride
         {
-            get => orbitCenterOverride;
+            get => lookAtAnimationStart != null ? null : orbitCenterOverride;
             set
             {
                 orbitCenterOverride = value;
                 if (value != null)
                 {
-                    StartOrbiting();
                     CameraViewOverride = null;
+                    LookAt(value.AbsoluteUnityPose.position);
                 }
 
                 ModuleListPanel.Instance.UnlockButtonVisible = value;
@@ -144,8 +146,7 @@ namespace Iviz.App
 
             if (!Settings.SupportsComputeBuffers)
             {
-                Logger.Info(
-                    "Platform does not support compute shaders. Point cloud rendering will probably not work.");
+                Logger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
             }
 
             Config = new SettingsConfiguration();
@@ -183,10 +184,8 @@ namespace Iviz.App
                 {
                     ProcessOrbiting();
                     ProcessScaling(false);
-                    Quaternion q = OrbitCenterOverride.AbsoluteUnityPose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
-                    Transform.SetPositionAndRotation(
-                        -orbitRadius * (q * Vector3.forward) + orbitCenter,
-                        q);
+                    Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+                    Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
                     orbitCenter = OrbitCenterOverride.AbsoluteUnityPose.position;
                 }
                 else
@@ -194,16 +193,18 @@ namespace Iviz.App
                     ProcessOrbiting();
                     ProcessScaling(true);
                 }
+                
+                ProcessTurning();
+                ProcessFlying();
+                return;
             }
 
             if (OrbitCenterOverride != null)
             {
                 ProcessOrbiting();
-                Quaternion q = OrbitCenterOverride.AbsoluteUnityPose.rotation * Quaternion.Euler(orbitY, orbitX, 0);
+                Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+                Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
                 orbitCenter = OrbitCenterOverride.AbsoluteUnityPose.position;
-                Transform.SetPositionAndRotation(
-                    -orbitRadius * (q * Vector3.forward) + orbitCenter,
-                    q);
             }
             else
             {
@@ -382,16 +383,19 @@ namespace Iviz.App
 
             if (lookAtAnimationStart != null)
             {
-                const float animationTime = 0.3f;
                 float diff = Time.time - lookAtAnimationStart.Value;
-                if (diff > animationTime)
+                if (diff > AnimationTime)
                 {
                     Transform.SetPose(lookAtCameraTargetPose);
                     lookAtAnimationStart = null;
+                    if (OrbitCenterOverride != null)
+                    {
+                        StartOrbiting();
+                    }
                 }
                 else
                 {
-                    float t = diff / animationTime;
+                    float t = diff / AnimationTime;
                     Pose currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
                     Transform.SetPose(currentPose);
                     return;
