@@ -79,6 +79,9 @@ namespace Iviz.App
         [SerializeField] Canvas contentCanvas;
         [SerializeField] GameObject moduleListCanvas;
         [SerializeField] GameObject dataPanelCanvas;
+        
+        [SerializeField] ARSidePanel arSidePanel = null;
+
 
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
@@ -146,6 +149,7 @@ namespace Iviz.App
                 allGuiVisible = value;
                 HideGuiButton.State = value;
                 contentCanvas.gameObject.SetActive(value);
+                arSidePanel.Visible = !value;
             }
         }
 
@@ -158,8 +162,8 @@ namespace Iviz.App
         //public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
-        public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
-        public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
+        //public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
+        //public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         AnchorToggleButton InteractableButton => anchorCanvas.Interact;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
@@ -285,11 +289,13 @@ namespace Iviz.App
             recordBag.onClick.AddListener(OnStartRecordBag);
             showSystem.onClick.AddListener(systemData.Show);
 
+            /*
             ShowARJoystickButton.Clicked += () =>
             {
                 // should be !Visible, but the new Visible hasn't been set yet
                 TwistJoystick.RightJoystickVisible = ARJoystick.Visible;
             };
+            */
 
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += () => connectionData.Show();

@@ -72,7 +72,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.ResetButton.Clicked += () =>
             {
-                controller.ResetSetupMode();
+                controller.ResetSession();
             };
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;

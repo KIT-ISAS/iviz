@@ -24,6 +24,7 @@ namespace Iviz.Controllers
         //static ARSessionInfo savedSessionInfo;
 
         [SerializeField] Camera arCamera = null;
+        [SerializeField] ARSession arSession = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
         [SerializeField] Light arLight = null;
         [SerializeField] ARCameraFovDisplay fovDisplay = null;
@@ -33,7 +34,7 @@ namespace Iviz.Controllers
         Camera mainCamera;
         ARCameraManager cameraManager;
         ARSession session;
-        ARPlaneManager planeManager;
+        [CanBeNull] ARPlaneManager planeManager;
         ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
         ARAnchorManager anchorManager;
@@ -70,9 +71,11 @@ namespace Iviz.Controllers
                 }
 
                 string numPlanes =
-                    planeManager.trackables.count == 0
-                        ? "Planes: None"
-                        : "Planes: " + planeManager.trackables.count.ToString();
+                    planeManager == null
+                        ? "Plane Detection Disabled"
+                        : planeManager.trackables.count == 0
+                            ? "Planes: None"
+                            : "Planes: " + planeManager.trackables.count.ToString();
 
                 return $"<b>{trackingState}</b>\n{numPlanes}";
             }
@@ -143,15 +146,20 @@ namespace Iviz.Controllers
 
         bool setupModeEnabled = true;
 
-        bool SetupModeEnabled
+        public bool SetupModeEnabled
         {
             get => setupModeEnabled;
             set
             {
+                if (setupModeEnabled == value)
+                {
+                    return;
+                }
+
                 setupModeEnabled = value;
                 ArSet.Visible = value;
                 ArSet.State = value;
-                
+
                 if (value)
                 {
                     arCamera.cullingMask = 1 << LayerType.ARSetupMode;
@@ -178,7 +186,7 @@ namespace Iviz.Controllers
             get => cameraManager.autoFocusRequested;
             set => cameraManager.autoFocusRequested = value;
         }
-        
+
         public override bool EnableMeshing
         {
             get => base.EnableMeshing;
@@ -192,7 +200,7 @@ namespace Iviz.Controllers
                 base.EnableMeshing = value;
                 if (value)
                 {
-                    var meshManager = arCamera.gameObject.AddComponent<ARMeshManager>();
+                    var meshManager = arCamera.gameObject.EnsureComponent<ARMeshManager>();
                     meshManager.meshPrefab = meshPrefab;
                     meshManager.normals = false;
                 }
@@ -203,9 +211,32 @@ namespace Iviz.Controllers
                     Destroy(meshManager);
                 }
             }
-        }            
+        }
 
-        protected override bool PinRootMarker
+        public override bool EnablePlaneDetection
+        {
+            get => base.EnableMeshing;
+            set
+            {
+                if (base.EnablePlaneDetection == value)
+                {
+                    return;
+                }
+
+                base.EnablePlaneDetection = value;
+                if (value)
+                {
+                    planeManager = arSessionOrigin.gameObject.EnsureComponent<ARPlaneManager>();
+                }
+                else
+                {
+                    Destroy(planeManager);
+                    planeManager = null;
+                }
+            }
+        }
+
+        public override bool PinRootMarker
         {
             get => base.PinRootMarker;
             set
@@ -252,7 +283,7 @@ namespace Iviz.Controllers
 
             defaultCullingMask = arCamera.cullingMask;
 
-            cameraManager.frameReceived += args => { UpdateLights(args.lightEstimation); };
+            cameraManager.frameReceived += args => UpdateLights(args.lightEstimation);
 
             Config = new ARConfiguration();
 
@@ -274,6 +305,8 @@ namespace Iviz.Controllers
             OcclusionQuality = OcclusionQualityType.Off;
 
             Settings.ScreenshotManager = this;
+
+            RaiseARActiveChanged();
         }
 
         void ArSetOnClicked()
@@ -284,6 +317,12 @@ namespace Iviz.Controllers
         public void ResetSetupMode()
         {
             SetupModeEnabled = true;
+        }
+
+        public void ResetSession()
+        {
+            arSession.Reset();
+            ResetSetupMode();
         }
 
         bool IsSamePose(in Pose b)
@@ -322,7 +361,7 @@ namespace Iviz.Controllers
         public override void Update()
         {
             base.Update();
-            
+
             if (SetupModeEnabled)
             {
                 Transform cameraTransform = arCamera.transform;
@@ -462,8 +501,11 @@ namespace Iviz.Controllers
                 : new[] {(configuration.Value.width, configuration.Value.height)};
         }
 
-        [NotNull] Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
-        [NotNull] Task IScreenshotManager.StopAsync() => Task.CompletedTask;
+        [NotNull]
+        Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
+
+        [NotNull]
+        Task IScreenshotManager.StopAsync() => Task.CompletedTask;
 
         public Task<Screenshot> TakeScreenshotColorAsync()
         {
@@ -512,10 +554,9 @@ namespace Iviz.Controllers
                         {
                             (fx, fy, cx, cy) = (0, 0, 0, 0);
                         }
-                        
-                        
 
-                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, 
+
+                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3,
                             fx, cx, fy, cy, pose, bytes);
 
                         task.TrySetResult(s);

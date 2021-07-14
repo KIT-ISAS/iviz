@@ -42,6 +42,7 @@ namespace Iviz.Controllers
         [DataMember] public bool EnableQrDetection { get; set; }
         [DataMember] public bool EnableArucoDetection { get; set; }
         [DataMember] public bool EnableMeshing { get; set; }
+        [DataMember] public bool EnablePlaneDetection { get; set; } = true;
         [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
@@ -68,8 +69,8 @@ namespace Iviz.Controllers
 
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
 
-        static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
-        static AnchorToggleButton ShowARJoystickButton => ModuleListPanel.Instance.ShowARJoystickButton;
+        //static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
+        //static AnchorToggleButton ShowARJoystickButton => ModuleListPanel.Instance.ShowARJoystickButton;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
         readonly ARConfiguration config = new ARConfiguration();
@@ -164,7 +165,13 @@ namespace Iviz.Controllers
         {
             get => config.EnableMeshing;
             set => config.EnableMeshing = value;
-        }        
+        }       
+        
+        public virtual bool EnablePlaneDetection
+        {
+            get => config.EnablePlaneDetection;
+            set => config.EnablePlaneDetection = value;
+        }  
 
         public bool EnableArucoDetection
         {
@@ -184,23 +191,22 @@ namespace Iviz.Controllers
             set => TfListener.RootScale = value;
         }
 
-        protected virtual bool PinRootMarker
+        public virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
             set
             {
                 config.PinRootMarker = value;
-                PinControlButton.State = value;
+                //PinControlButton.State = value;
             }
         }
 
-        bool ShowARJoystick
+        public bool ShowARJoystick
         {
             get => config.ShowARJoystick;
             set
             {
                 config.ShowARJoystick = value;
-                ShowARJoystickButton.State = value;
                 ARJoystick.Visible = value;
 
                 if (value)
@@ -209,6 +215,21 @@ namespace Iviz.Controllers
                 }
             }
         }
+        
+        public IModuleData ModuleData
+        {
+            get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
+            set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
+        }
+
+        [NotNull] public TfFrame Frame => TfListener.GetOrCreateFrame(CameraFrameId);
+
+        public static event Action<bool> ARModeChanged;
+
+        public static event Action<bool> ARActiveChanged;
+
+        public event Action<RootMover> WorldPoseChanged;
+
 
         protected virtual void Awake()
         {
@@ -221,11 +242,11 @@ namespace Iviz.Controllers
 
             //node = FrameNode.Instantiate("AR Node");
 
-            PinControlButton.Visible = true;
-            ShowARJoystickButton.Visible = true;
+            //PinControlButton.Visible = true;
+            //ShowARJoystickButton.Visible = true;
 
-            PinControlButton.Clicked += OnPinControlButtonClicked;
-            ShowARJoystickButton.Clicked += OnShowARJoystickClicked;
+            //PinControlButton.Clicked += OnPinControlButtonClicked;
+            //ShowARJoystickButton.Clicked += OnShowARJoystickClicked;
 
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
@@ -237,6 +258,11 @@ namespace Iviz.Controllers
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             detector.MarkerDetected += OnMarkerDetected;
+        }
+
+        protected void RaiseARActiveChanged()
+        {
+            ARActiveChanged?.Invoke(true);            
         }
 
         static int Sign(float f) => f > 0 ? 1 : f < 0 ? -1 : 0;
@@ -316,6 +342,7 @@ namespace Iviz.Controllers
             joyVelocityAngle = null;
         }
 
+        /*
         void OnPinControlButtonClicked()
         {
             PinRootMarker = PinControlButton.State;
@@ -325,18 +352,7 @@ namespace Iviz.Controllers
         {
             ShowARJoystick = ShowARJoystickButton.State;
         }
-
-        public IModuleData ModuleData
-        {
-            get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
-            set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
-        }
-
-        [NotNull] public TfFrame Frame => TfListener.GetOrCreateFrame(CameraFrameId);
-
-        public static event Action<bool> ARModeChanged;
-
-        public event Action<RootMover> WorldPoseChanged;
+        */
 
         void UpdateWorldPose(in Pose pose, RootMover mover)
         {
@@ -439,18 +455,20 @@ namespace Iviz.Controllers
 
         public virtual void StopController()
         {
+            ARActiveChanged?.Invoke(false);
+
             Visible = false;
             WorldScale = 1;
 
-            PinControlButton.Visible = false;
-            ShowARJoystickButton.Visible = false;
+            //PinControlButton.Visible = false;
+            //ShowARJoystickButton.Visible = false;
 
             WorldPoseChanged = null;
             ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
             ARJoystick.PointerUp -= OnARJoystickPointerUp;
-            PinControlButton.Clicked -= OnPinControlButtonClicked;
-            ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
+            //PinControlButton.Clicked -= OnPinControlButtonClicked;
+            //ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
             ShowARJoystick = false;
             Instance = null;
 
