@@ -50,6 +50,8 @@ namespace Iviz.Urdf
             return attr is null ? @default : new Vector3f(attr);
         }
 
+        public void Deconstruct(out float x, out float y, out float z) => (x, y, z) = (X, Y, Z);
+
         public override string ToString() => JsonConvert.SerializeObject(this);
 
         public static implicit operator Vector3(Vector3f v) => (v.X, v.Y, v.Z);

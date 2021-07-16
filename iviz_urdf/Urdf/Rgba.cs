@@ -48,6 +48,8 @@ namespace Iviz.Urdf
         
         public override string ToString() => JsonConvert.SerializeObject(this);
         
+        public void Deconstruct(out float r, out float g, out float b, out float a) => (r, g, b, a) = (R, G, B, A);
+
         public static implicit operator ColorRGBA(Rgba v) => (v.R, v.G, v.B, v.A);
     }
 }
