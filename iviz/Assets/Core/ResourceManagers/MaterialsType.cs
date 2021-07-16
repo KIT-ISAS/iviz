@@ -50,6 +50,7 @@ namespace Iviz.Resources
         public MaterialsType()
         {
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
+            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
 
             FontMaterial = new Info<Material>(assetHolder.FontMaterial);
             FontMaterialZWrite = new Info<Material>(assetHolder.FontMaterialZWrite);
@@ -69,15 +70,15 @@ namespace Iviz.Resources
             TransparentLitAlwaysVisible = new Info<Material>(assetHolder.TransparentLitAlwaysVisible);
             BumpLit = new Info<Material>(assetHolder.BumpLit);
             TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
-            ImagePreview = new Info<Material>("Materials/ImagePreview");
-            GridInterior = new Info<Material>("Materials/Grid Interior");
-            GridInteriorSimple = new Info<Material>("Materials/Grid Interior Simple");
-            GridMap = new Info<Material>("Materials/GridMap");
-            TransparentGridMap = new Info<Material>("Materials/Transparent GridMap");
-            DepthCloud = new Info<Material>("Materials/DepthCloud");
+            ImagePreview = new Info<Material>(appAssetHolder.ImagePreview);
+            GridInterior = new Info<Material>(appAssetHolder.GridInterior);
+            GridInteriorSimple = new Info<Material>(appAssetHolder.GridInteriorSimple);
+            GridMap = new Info<Material>(appAssetHolder.GridMapMat);
+            TransparentGridMap = new Info<Material>(appAssetHolder.TransparentGridMap);
+            DepthCloud = new Info<Material>(appAssetHolder.DepthCloud);
             OccupancyGridTexture = (Settings.IsMobile || Settings.IsHololens)
-                ? new Info<Material>("Materials/OccupancyGrid") 
-                : new Info<Material>("Materials/OccupancyGrid Clip");
+                ? new Info<Material>(appAssetHolder.OccupancyGridMat) 
+                : new Info<Material>(appAssetHolder.OccupancyGridClipMat);
 
             PointCloud = new Info<Material>(assetHolder.PointCloud);
             PointCloudDirect = new Info<Material>(assetHolder.PointCloudDirect);

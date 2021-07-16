@@ -30,5 +30,9 @@ namespace Iviz.Msgs.IvizCommonMsgs
 
         [DataMember, NotNull] public Intrinsic Intrinsic { get; set; } = new Intrinsic();
         [DataMember] public Pose CameraPose { get; set; }
+
+        [DataMember] public bool HasExtrinsicPose { get; set; }
+        [DataMember] public Pose PoseRelativeToCamera { get; set; }
+        [DataMember] public Pose ExtrinsicPose { get; set; }
     }
 }

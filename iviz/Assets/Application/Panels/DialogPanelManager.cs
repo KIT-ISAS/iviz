@@ -21,7 +21,8 @@ namespace Iviz.App
         Console,
         Settings,
         Echo,
-        System
+        System,
+        ARMarkers,
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -59,6 +60,7 @@ namespace Iviz.App
                 (DialogPanelType.Settings, CreatePanel<SettingsDialogContents>(Resource.Widgets.SettingsPanel)),
                 (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
                 (DialogPanelType.System, CreatePanel<SystemDialogContents>(Resource.Widgets.SystemPanel)),
+                (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogContents>(Resource.Widgets.ARMarkerPanel)),
             };
 
             foreach (var (type, panel) in panels)

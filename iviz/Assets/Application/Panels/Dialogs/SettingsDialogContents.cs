@@ -1,4 +1,5 @@
 using System;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,6 +48,11 @@ namespace Iviz.App
             clearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
             clearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
             clearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
+
+            if (Settings.IsMobile)
+            {
+                modelService.Visible = false;
+            }
         }
 
         public bool Active

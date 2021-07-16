@@ -184,6 +184,13 @@ namespace Iviz.App
             GameObject o = Resource.Widgets.Frame.Instantiate(nonstatics.transform);
             return AddToBottom(o).GetComponent<FrameWidget>();
         }
+        
+        [NotNull]
+        public ARMarkerWidget AddARMarker()
+        {
+            GameObject o = Resource.Widgets.ARMarkerWidget.Instantiate(nonstatics.transform);
+            return AddToBottom(o).GetComponent<ARMarkerWidget>();
+        }
 
         public void UpdateSize()
         {

@@ -137,9 +137,9 @@ MonoBehaviour:
   buttonText: {fileID: 6820480755857316914}
   allowRevealLeft: 1
   allowRevealRight: 1
-  moveThresholdLeft: 40
-  moveThresholdRight: 80
-  minMotionThreshold: 5
+  moveThresholdLeft: 35
+  moveThresholdRight: 60
+  minMotionThreshold: 10
   parentScrollRect: {fileID: 0}
   detachables: []
 --- !u!1 &269147477799477329

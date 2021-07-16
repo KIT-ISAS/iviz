@@ -14,7 +14,7 @@ namespace Iviz.App
     {
         const float YOffset = 2;
 
-        [NotNull, ItemNotNull] readonly List<MovableButtonWidget> buttons = new List<MovableButtonWidget>();
+        [NotNull, ItemNotNull] readonly List<DraggableButtonWidget> buttons = new List<DraggableButtonWidget>();
         [NotNull] readonly RectTransform contentObjectTransform;
         readonly float buttonHeight;
 
@@ -29,9 +29,9 @@ namespace Iviz.App
             int size = buttons.Count;
             float y = 2 * YOffset + size * (buttonHeight + YOffset);
 
-            MovableButtonWidget button = ResourcePool
+            DraggableButtonWidget button = ResourcePool
                 .Rent(Resource.Widgets.DisplayButton, contentObjectTransform, false)
-                .GetComponentInChildren<MovableButtonWidget>();
+                .GetComponentInChildren<DraggableButtonWidget>();
 
             button.Transform.anchoredPosition = new Vector2(0, -y);
             button.Text.text = moduleData.ButtonText;
@@ -49,7 +49,7 @@ namespace Iviz.App
 
         public void RemoveButton(int index)
         {
-            MovableButtonWidget button = buttons[index];
+            DraggableButtonWidget button = buttons[index];
             button.ClearSubscribers();
             ResourcePool.Return(Resource.Widgets.DisplayButton, button.GameObject);
 

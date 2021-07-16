@@ -146,15 +146,17 @@ namespace Iviz.Controllers
 
         bool setupModeEnabled = true;
 
-        public bool SetupModeEnabled
+        bool SetupModeEnabled
         {
             get => setupModeEnabled;
             set
             {
+                /*
                 if (setupModeEnabled == value)
                 {
                     return;
                 }
+                */
 
                 setupModeEnabled = value;
                 ArSet.Visible = value;
@@ -215,7 +217,7 @@ namespace Iviz.Controllers
 
         public override bool EnablePlaneDetection
         {
-            get => base.EnableMeshing;
+            get => base.EnablePlaneDetection;
             set
             {
                 if (base.EnablePlaneDetection == value)

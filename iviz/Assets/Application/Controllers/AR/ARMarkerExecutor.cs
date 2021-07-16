@@ -49,8 +49,19 @@ namespace Iviz.Controllers
             [DataMember] public float Size { get; set; }
         }
 
+        public void Process([NotNull] DetectedARMarker marker)
+        {
+            
+            
+            if (marker.MarkerType == ARMarkerType.QrCode && marker.QrCode.HasPrefix(Prefix))
+            {
+                Execute(marker);
+            }            
+        }
+
         public void Execute([NotNull] DetectedARMarker marker)
         {
+            
             ExecutorBaseMarker baseMarker;
 
             try

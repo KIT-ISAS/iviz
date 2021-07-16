@@ -14,6 +14,12 @@ namespace Iviz.App
         [SerializeField] Text label = null;
         [SerializeField] TMP_Dropdown dropdown = null;
 
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        } 
+        
         [NotNull]
         public string Label
         {

@@ -47,6 +47,9 @@ namespace Iviz.Resources
         public Info<GameObject> Mover { get; }
 
         public Info<GameObject> DataPanel { get; }
+        
+        public Info<GameObject> ARMarkerPanel { get; }
+        public Info<GameObject> ARMarkerWidget { get; }
 
         public WidgetsType()
         {
@@ -95,6 +98,8 @@ namespace Iviz.Resources
             MarkerWidget = new Info<GameObject>(assetHolder.Markers);            
             
             DataPanel = new Info<GameObject>(assetHolder.DataPanel);
+            ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel);
+            ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers);
         }
     }
 }

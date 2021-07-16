@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
 using Unity.Collections;
@@ -9,25 +10,23 @@ namespace Iviz.Displays
 {
     public class ARPlaneResource : MonoBehaviour
     {
-        [SerializeField] Color boundaryColor = Color.white;
-
         Mesh mesh;
         MeshRenderer meshRenderer;
         MeshCollider meshCollider;
         ARPlane plane;
         LineResource lines;
-        bool isEnabled;
-        bool isAREnabled;
+
+        readonly NativeList<LineWithColor> lineArray = new NativeList<LineWithColor>();
 
         void Awake()
         {
             mesh = new Mesh();
             plane = GetComponent<ARPlane>();
 
-            lines = ResourcePool.RentDisplay<LineResource>(transform);
+            lines = ResourcePool.RentDisplay<LineResource>();
             lines.Visible = false;
             lines.ElementScale = 0.005f;
-            lines.Layer = gameObject.layer;
+            lines.Tint = Color.yellow;
 
             MeshFilter meshFilter = GetComponent<MeshFilter>();
             meshFilter.sharedMesh = mesh;
@@ -36,8 +35,8 @@ namespace Iviz.Displays
             meshCollider.sharedMesh = mesh;
 
             meshRenderer = GetComponent<MeshRenderer>();
-            
-            isEnabled = true;
+
+            //isEnabled = true;
 
             plane.boundaryChanged += OnBoundaryChanged;
             ARController.ARModeChanged += OnARModeChanged;
@@ -45,16 +44,7 @@ namespace Iviz.Displays
 
         void OnARModeChanged(bool value)
         {
-            isAREnabled = value;
-            if (isAREnabled)
-            {
-                lines.transform.parent = transform;
-                lines.transform.SetLocalPose(Pose.identity);
-            }
-            else
-            {
-                lines.transform.parent = TfListener.RootFrame.transform;
-            }
+            lines.Visible = !value;
         }
 
         void OnBoundaryChanged(ARPlaneBoundaryChangedEventArgs _)
@@ -69,11 +59,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            //Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
+            Vector3 Project(in Vector2 v) => new Vector3(v.x, 0, v.y);
 
-            /*
             Vector3 a, b;
-            List<LineWithColor> lineArray = new List<LineWithColor>();
             for (int i = 0; i < boundary.Length - 1; ++i)
             {
                 a = boundary[i];
@@ -84,18 +72,20 @@ namespace Iviz.Displays
             a = boundary[boundary.Length - 1];
             b = boundary[0];
             lineArray.Add(new LineWithColor(Project(a), Project(b)));
-            */
-
-            //lines.LinesWithColor = lineArray;
-            //lines.Visible = true;
-            //pulseStart = Time.time;
+            lines.Set(lineArray);
         }
 
-        float? pulseStart;
-        const float PulseLength = 0.25f;
+        //float? pulseStart;
+        //const float PulseLength = 0.25f;
 
         void Update()
         {
+            bool shouldBeVisible =
+                plane != null && plane.subsumedBy == null && plane.trackingState != TrackingState.None;
+            lines.Visible = shouldBeVisible;
+            meshRenderer.enabled = shouldBeVisible;
+
+            /*
             if (!isAREnabled)
             {
                 lines.transform.SetLocalPose( ARController.RelativePoseToOrigin(transform.AsPose()));
@@ -132,6 +122,7 @@ namespace Iviz.Displays
 
             float alpha = 1 - delta / PulseLength;
             lines.Tint = boundaryColor.WithAlpha(alpha);
+            */
         }
 
         void OnDestroy()
@@ -139,6 +130,12 @@ namespace Iviz.Displays
             lines.ReturnToPool();
             lines = null;
             ARController.ARModeChanged -= OnARModeChanged;
+            if (plane != null)
+            {
+                plane.boundaryChanged -= OnBoundaryChanged;
+            }
+
+            lineArray.Dispose();
         }
     }
 }

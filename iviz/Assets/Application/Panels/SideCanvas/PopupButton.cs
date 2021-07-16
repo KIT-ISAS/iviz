@@ -11,9 +11,11 @@ namespace Iviz.App
 {
     public class PopupButton : MonoBehaviour
     {
-        static readonly Color DisabledColor = new Color(0.3f, 0.3f, 0.3f, 1); 
+        static readonly Color DisabledColorFrame = new Color(0.75f, 0.75f, 0.75f, 1);
+        static readonly Color DisabledColor = new Color(0.25f, 0.25f, 0.25f, 0.5f); 
+        static readonly Color EnabledColor = Color.black; 
+        static readonly Color EnabledColorFrame = new Color(0.2f, 0.3f, 0.4f); 
         
-        [SerializeField] int id;
         [SerializeField, CanBeNull] LauncherButton parent;
         Button button;
 
@@ -21,29 +23,35 @@ namespace Iviz.App
         [SerializeField] Image frame;
         [SerializeField] TMP_Text text;
 
-        bool viewEnabled = true;
+        bool? viewEnabled;
 
         public event Action Clicked;
         
         public bool Enabled
         {
-            get => viewEnabled;
+            get => viewEnabled ?? false;
             set
             {
+                if (viewEnabled == value)
+                {
+                    return;
+                }
+
                 viewEnabled = value;
+                
                 if (image != null)
                 {
-                    image.color = value ? Color.black : DisabledColor;
+                    image.color = value ? EnabledColor : DisabledColor;
                 }
 
                 if (text != null)
                 {
-                    text.color = value ? Color.black : DisabledColor;
+                    text.color = value ? EnabledColor : DisabledColor;
                 }
 
                 if (frame != null)
                 {
-                    frame.color = value ? Color.black : DisabledColor;
+                    frame.color = value ? EnabledColorFrame : DisabledColorFrame;
                 }
             }
         }
@@ -52,7 +60,7 @@ namespace Iviz.App
         {
             button = GetComponent<Button>();
             button.onClick.AddListener(OnClick);
-            Enabled = Enabled;
+            Enabled = viewEnabled ?? true;
         }
 
         void OnClick()

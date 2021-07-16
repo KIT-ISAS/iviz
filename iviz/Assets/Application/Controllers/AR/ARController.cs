@@ -57,7 +57,7 @@ namespace Iviz.Controllers
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
-        [NotNull] static Camera ARCamera =>  Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
+        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
 
         public enum RootMover
         {
@@ -84,13 +84,13 @@ namespace Iviz.Controllers
         readonly MarkerDetector detector = new MarkerDetector();
         readonly ARMarkerExecutor executor = new ARMarkerExecutor();
 
-        public Sender<PoseStamped> HeadSender { get; private set; }
+        //public Sender<PoseStamped> HeadSender { get; private set; }
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
 
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
 
-        [NotNull] static string CameraFrameId => $"{ConnectionManager.Connection.MyId}/ar_head";
+        const string CameraFrameId = "~ar_head";
 
         public static bool InstanceVisible => Instance != null && Instance.Visible;
 
@@ -143,7 +143,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 GuiInputModule.Instance.DisableCameraLock();
-                TfListener.RootFrame.transform.SetPose(value ? WorldPose : Pose.identity);
+                TfListener.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
                 ARModeChanged?.Invoke(value);
             }
         }
@@ -160,18 +160,18 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public virtual bool EnableMeshing
         {
             get => config.EnableMeshing;
             set => config.EnableMeshing = value;
-        }       
-        
+        }
+
         public virtual bool EnablePlaneDetection
         {
             get => config.EnablePlaneDetection;
             set => config.EnablePlaneDetection = value;
-        }  
+        }
 
         public bool EnableArucoDetection
         {
@@ -215,14 +215,30 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public IModuleData ModuleData
         {
             get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
             set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
         }
 
-        [NotNull] public TfFrame Frame => TfListener.GetOrCreateFrame(CameraFrameId);
+        [CanBeNull] TfFrame cameraFrame;
+
+        [NotNull]
+        public TfFrame Frame
+        {
+            get
+            {
+                string frameId = TfListener.ResolveFrameId(CameraFrameId);
+                if (cameraFrame == null || frameId != cameraFrame.Id)
+                {
+                    cameraFrame = TfListener.ResolveFrame(CameraFrameId);
+                    cameraFrame.ForceInvisible = true;
+                }
+
+                return cameraFrame;
+            }
+        }
 
         public static event Action<bool> ARModeChanged;
 
@@ -254,7 +270,7 @@ namespace Iviz.Controllers
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
-            HeadSender = new Sender<PoseStamped>("~head");
+            //HeadSender = new Sender<PoseStamped>("~head");
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             detector.MarkerDetected += OnMarkerDetected;
@@ -262,7 +278,7 @@ namespace Iviz.Controllers
 
         protected void RaiseARActiveChanged()
         {
-            ARActiveChanged?.Invoke(true);            
+            ARActiveChanged?.Invoke(true);
         }
 
         static int Sign(float f) => f > 0 ? 1 : f < 0 ? -1 : 0;
@@ -289,16 +305,26 @@ namespace Iviz.Controllers
             }
             else
             {
-                var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
+                //var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
+                //Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
+
+                var arCameraPose = ARCamera.transform.AsPose();
                 Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
-                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
+                //Debug.Log(pivot);
+
                 /*
                 var q1 = Pose.identity.WithPosition(pivot);
                 var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
                 var q3 = Pose.identity.WithPosition(-pivot);
-                SetWorldPose(q1.Multiply(q2.Multiply(q3.Multiply(WorldPose))), RootMover.ControlMarker);
+                var targetPose = q1.Multiply(q2.Multiply(q3.Multiply(WorldPose)));
+                SetWorldPose(targetPose, RootMover.ControlMarker);
                 */
+
+
+                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
                 var pose = new Pose(rotation * (-pivot) + pivot, rotation);
+                //SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
+
                 SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
             }
         }
@@ -407,22 +433,32 @@ namespace Iviz.Controllers
             return Instance.WorldPose.Inverse().Multiply(unityPose);
         }
 
+        public static Pose OriginToRelativePose(in Pose unityPose)
+        {
+            if (Instance == null || Instance.Visible)
+            {
+                return unityPose;
+            }
+
+            return Instance.WorldPose.Multiply(unityPose);
+        }
+
         uint headSeq;
 
         public virtual void Update()
         {
             var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
-            var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosPose();
-            
+            var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
+
             TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
 
-            if (!ConnectionManager.IsConnected)
-            {
-                return;
-            }
+            //if (!ConnectionManager.IsConnected)
+            //{
+            //    return;
+            //}
 
-            var poseStamped = new PoseStamped((headSeq++, TfListener.FixedFrameId), relativePose.ToCameraFrame());
-            HeadSender.Publish(poseStamped);
+            //var poseStamped = new PoseStamped((headSeq++, TfListener.FixedFrameId), relativePose.ToCameraFrame());
+            //HeadSender.Publish(poseStamped);
         }
 
 
@@ -446,10 +482,7 @@ namespace Iviz.Controllers
 
             foreach (var marker in array)
             {
-                if (marker.MarkerType == ARMarkerType.QrCode && marker.QrCode.HasPrefix(ARMarkerExecutor.Prefix))
-                {
-                    executor.Execute(marker);
-                }
+                executor.Process(marker);
             }
         }
 
@@ -474,7 +507,7 @@ namespace Iviz.Controllers
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
-            HeadSender.Stop();
+            //HeadSender.Stop();
             MarkerSender.Stop();
 
             detector.Dispose();

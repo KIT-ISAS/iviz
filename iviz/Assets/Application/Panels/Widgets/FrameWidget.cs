@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class FrameWidget : MovableButtonWidget
+    public sealed class FrameWidget : DraggableButtonWidget
     {
         [SerializeField] Text text = null;
 

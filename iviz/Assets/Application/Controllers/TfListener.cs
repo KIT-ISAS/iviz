@@ -383,6 +383,23 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
+        public static string ResolveFrameId([NotNull] string frameId)
+        {
+            if (frameId[0] != '~')
+            {
+                return frameId;
+            }
+
+            return ConnectionManager.MyId == null
+                ? frameId.Substring(1)
+                : $"{ConnectionManager.MyId}/{frameId.Substring(1)}";
+        }
+
+        [NotNull]
+        public static TfFrame ResolveFrame([NotNull] string frameId, [CanBeNull] FrameNode listener = null) =>
+            GetOrCreateFrame(ResolveFrameId(frameId), listener);
+
+        [NotNull]
         public static TfFrame GetOrCreateFrame([NotNull] string frameId, [CanBeNull] FrameNode listener = null)
         {
             if (frameId == null)
@@ -575,7 +592,10 @@ namespace Iviz.Controllers
             (
                 new[]
                 {
-                    new TransformStamped((tfSeq++, parentFrame ?? FixedFrameId), childFrame, rosTransform)
+                    new TransformStamped(
+                        (tfSeq++, parentFrame ?? FixedFrameId),
+                        ResolveFrameId(childFrame),
+                        rosTransform)
                 }
             );
 

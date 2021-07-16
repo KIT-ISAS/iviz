@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arCamera: {fileID: 6019251948242916433}
+  arSession: {fileID: 6019251946498178309}
   arSessionOrigin: {fileID: 6019251946659006209}
   arLight: {fileID: 978464836206565950}
   fovDisplay: {fileID: 749892901891460485}

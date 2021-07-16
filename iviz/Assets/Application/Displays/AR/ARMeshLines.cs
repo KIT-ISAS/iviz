@@ -62,6 +62,7 @@ namespace Iviz.Displays
             }
 
             ARController.ARModeChanged += OnARModeChanged;
+            OnARModeChanged(ARController.InstanceVisible);
         }
 
         void Start()

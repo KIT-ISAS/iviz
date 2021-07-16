@@ -181,7 +181,6 @@ namespace Iviz.Ros
             recentMsgs += messageQueue.Count;
         }
 
-        int j = 0;
         void CallHandlerDirect([NotNull] in T msg)
         {
             Interlocked.Increment(ref totalMsgCounter);

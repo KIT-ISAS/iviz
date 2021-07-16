@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -53,6 +54,16 @@ namespace Iviz.Displays
         public Material LineConnectorMaterial;
         public Material TextMaterial;
 
+        public Material ImagePreview;
+        public Material GridInterior;
+        public Material GridInteriorSimple;
+        public Material GridMapMat;
+        public Material TransparentGridMap;
+        public Material DepthCloud;
+        public Material OccupancyGridMat;
+        public Material OccupancyGridClipMat;
+        
+        
         public AudioClip Click;
         public AudioClip Screenshot;
 

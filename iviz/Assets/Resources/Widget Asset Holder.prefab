@@ -117,3 +117,7 @@ MonoBehaviour:
   Vector3: {fileID: 3925610196380257193, guid: 6446f7c93f7c54d9ebe0f8fc3b1765ff, type: 3}
   SystemInfo: {fileID: 1273616110607400797, guid: 8f626f809b939485da186fa56eee2b25,
     type: 3}
+  ARMarkerPanel: {fileID: 1273616110607400797, guid: c4b37e9aec82848dc925f2948f71c4a9,
+    type: 3}
+  ARMarkers: {fileID: 6469948729944380942, guid: 929fe40406d244701b9d2a3803336720,
+    type: 3}

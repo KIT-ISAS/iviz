@@ -115,5 +115,14 @@ MonoBehaviour:
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
     type: 2}
   TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}
+  ImagePreview: {fileID: 2100000, guid: bdca2e3222097a249b26542375318451, type: 2}
+  GridInterior: {fileID: 2100000, guid: 64f66be0487d84820abb42b120f807d5, type: 2}
+  GridInteriorSimple: {fileID: 2100000, guid: f3449decfce2b4320b10491c7a2a911a, type: 2}
+  Gridmap: {fileID: 2100000, guid: f8f957cebab399e47b5efc4174b2b14d, type: 2}
+  TransparentGridmap: {fileID: 2100000, guid: 4e683f97d8be24d8ca6e940646270fe4, type: 2}
+  DepthCloud: {fileID: 2100000, guid: 068f66693b9c4b64b8fe01cf78ce88f6, type: 2}
+  OccupancyGridMat: {fileID: 2100000, guid: e410ed67dcc4542b6bde372d33cd3c6f, type: 2}
+  OccupancyGridClipMat: {fileID: 2100000, guid: 66c121943c904442598918986b422f44,
+    type: 2}
   Click: {fileID: 8300000, guid: 8ef554f74ef29574c82580a0a1b37c22, type: 3}
   Screenshot: {fileID: 8300000, guid: b516c6c7a08544f429fcba475c006d49, type: 3}

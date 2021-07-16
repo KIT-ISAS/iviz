@@ -47,5 +47,7 @@ namespace Iviz.Displays
         public GameObject Vector3 = null;
         
         public GameObject SystemInfo = null;
+        public GameObject ARMarkerPanel = null;
+        public GameObject ARMarkers = null;
     }
 }

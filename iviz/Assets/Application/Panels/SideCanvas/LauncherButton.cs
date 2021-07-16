@@ -10,16 +10,22 @@ namespace Iviz.App
 {
     public class LauncherButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
+        static readonly Color EnabledColorFrame = new Color(0.2f, 0.3f, 0.4f); 
+        
         [SerializeField] ARSidePanel arSidePanel;
         [SerializeField] GameObject children;
-        [SerializeField] int id;
-
+        [SerializeField] Image frame;
+        
         float? popupAnimationStart;
         float clickStart;
         
         void Awake()
         {
             children.SetActive(false);
+            if (frame != null)
+            {
+                frame.color = EnabledColorFrame;
+            }            
         }
 
         public void HideChildren()

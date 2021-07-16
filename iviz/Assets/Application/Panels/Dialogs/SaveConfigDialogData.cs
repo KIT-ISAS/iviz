@@ -14,9 +14,9 @@ namespace Iviz.App
         [NotNull] readonly SaveConfigDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        const string Suffix = ".config.json";
+        const string Suffix = LoadConfigDialogData.Suffix;
 
-        readonly List<string> files = new List<string>();
+        readonly List<SavedFileInfo> files = new List<SavedFileInfo>();
 
         public SaveConfigDialogData()
         {
@@ -38,14 +38,10 @@ namespace Iviz.App
         void ReadAllFiles()
         {
             files.Clear();
-            files.AddRange(LoadConfigDialogData.SavedFiles.Select(GetFileName));
-            panel.Items = files.Select(file => $"<b>{file}</b>");
-        }
-
-        static string GetFileName(string s)
-        {
-            string fs = Path.GetFileName(s);
-            return fs.Substring(0, fs.Length - Suffix.Length);
+            files.AddRange(LoadConfigDialogData.SavedFiles);
+            files.Sort();
+            files.Reverse();
+            panel.Items = files.Select(file => file.Description);
         }
 
         void OnItemClicked(int index, int subIndex)
@@ -53,11 +49,11 @@ namespace Iviz.App
             switch (subIndex)
             {
                 case 0:
-                    ModuleListPanel.SaveStateConfiguration(files[index] + Suffix);
+                    ModuleListPanel.SaveStateConfiguration(files[index].FileName);
                     Close();
                     break;
                 case 1:
-                    string filename = $"{Settings.SavedFolder}/{files[index]}{Suffix}";
+                    string filename = files[index].FullPath;
                     try
                     {
                         File.Delete(filename);
@@ -74,7 +70,9 @@ namespace Iviz.App
 
         void OnSaveClicked()
         {
-            ModuleListPanel.SaveStateConfiguration(panel.Input.Value + Suffix);
+            string name = panel.Input.Value;
+            string validatedName = name.HasSuffix(Suffix) ? name : name + Suffix;
+            ModuleListPanel.SaveStateConfiguration(validatedName);
             Close();
         }
     }

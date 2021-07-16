@@ -46,6 +46,7 @@ namespace Iviz.App
 
         readonly StringBuilder description = new StringBuilder(65536);
         uint? descriptionHash;
+        uint? textHash;
 
         readonly List<TfNode> nodes = new List<TfNode>();
 
@@ -224,9 +225,15 @@ namespace Iviz.App
 
         void UpdateFrameText()
         {
+            if (!isInitialized)
+            {
+                return;
+            }
+
+            description.Clear();
             if (SelectedFrame == null)
             {
-                tfName.text = "<color=grey>[none]</color>";
+                description.Append("<color=grey>[none]</color>");
             }
             else
             {
@@ -269,8 +276,17 @@ namespace Iviz.App
 
                 string poseStr = $"t:[{px}, {py}, {pz}]  r:[{rx}, {ry}, {rz}, {rw}]";
 
-                tfName.text = $"{nameText}\n{parentId}\n{poseStr}";
+                description.AppendLine(nameText).AppendLine(parentId).AppendLine(poseStr);
             }
+            
+            uint newHash = Crc32Calculator.Instance.Compute(description);
+            if (newHash == textHash)
+            {
+                return;
+            }
+
+            textHash = newHash;
+            tfName.SetText(description);
         }
 
         public void UpdateFrameButtons()

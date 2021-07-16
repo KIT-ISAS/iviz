@@ -11,10 +11,10 @@ namespace Iviz.App
 {
     public sealed class LoadConfigDialogData : DialogData
     {
-        const string Suffix = ".config.json";
+        internal const string Suffix = ".config.json";
 
         [NotNull] readonly ItemListDialogContents itemList;
-        [NotNull] readonly List<string> files = new List<string>();
+        [NotNull] readonly List<SavedFileInfo> files = new List<SavedFileInfo>();
         public override IDialogPanelContents Panel => itemList;
 
         public LoadConfigDialogData()
@@ -23,15 +23,16 @@ namespace Iviz.App
             itemList.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 
-        public static IEnumerable<string> SavedFiles => Directory.GetFiles(Settings.SavedFolder)
-            .Where(x => x.HasSuffix(Suffix));
+        [NotNull]
+        public static IEnumerable<SavedFileInfo> SavedFiles => Directory
+            .GetFiles(Settings.SavedFolder)
+            .Where(name => name.HasSuffix(Suffix))
+            .Select(name => new SavedFileInfo(name));
 
         public override void SetupPanel()
         {
-            files.Clear();
-            files.AddRange(SavedFiles.Select(GetFileName));
+            ReadAllFiles();
             itemList.Title = "Load Config File";
-            itemList.Items = files.Select(file => $"<b>{file}</b>");
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;
             itemList.EmptyText = "No Config Files Found";
@@ -39,15 +40,10 @@ namespace Iviz.App
         void ReadAllFiles()
         {
             files.Clear();
-            files.AddRange(SavedFiles.Select(GetFileName));
-            itemList.Items = files.Select(file => $"<b>{file}</b>");
-        }
-        
-        [NotNull]
-        static string GetFileName([NotNull] string s)
-        {
-            string fs = Path.GetFileName(s);
-            return fs.Substring(0, fs.Length - Suffix.Length);
+            files.AddRange(SavedFiles);
+            files.Sort();
+            files.Reverse();
+            itemList.Items = files.Select(file => file.Description);
         }
 
         void OnItemClicked(int index, int subIndex)
@@ -55,11 +51,11 @@ namespace Iviz.App
             switch (subIndex)
             {
                 case 0:
-                    ModuleListPanel.LoadStateConfiguration(files[index] + Suffix);
+                    ModuleListPanel.LoadStateConfiguration(files[index].FileName);
                     Close();
                     break;
                 case 1:
-                    string filename = $"{Settings.SavedFolder}/{files[index]}{Suffix}";
+                    string filename = files[index].FullPath;
                     try
                     {
                         File.Delete(filename);
@@ -74,4 +70,43 @@ namespace Iviz.App
             }
         }
     }
+
+    public sealed class SavedFileInfo : IComparable<SavedFileInfo>
+    {
+        [NotNull] public string FullPath { get; }
+        [NotNull] public string FileName => Path.GetFileName(FullPath);
+
+        DateTime date;
+        DateTime Date => date != default ? date : (date = File.GetLastWriteTime(FullPath));
+
+        [NotNull]
+        public string Description
+        {
+            get
+            {
+                string fileName = FileName;
+                string simpleName = fileName.Substring(0, fileName.Length - LoadConfigDialogData.Suffix.Length);
+                string lastModified = Date.ToString("MM/dd/yyyy HH:mm");
+                return $"<b>{simpleName}</b>\n[{lastModified}]";
+            }
+        } 
+
+        public SavedFileInfo([NotNull] string fullPath)
+        {
+            FullPath = fullPath;
+        }
+
+        public int CompareTo([CanBeNull] SavedFileInfo other)
+        {
+            if (ReferenceEquals(this, other)) return 0;
+            if (ReferenceEquals(null, other)) return 1;
+            return Date.CompareTo(other.Date);
+        }
+
+        [NotNull]
+        public override string ToString()
+        {
+            return FullPath;
+        }
+    } 
 }

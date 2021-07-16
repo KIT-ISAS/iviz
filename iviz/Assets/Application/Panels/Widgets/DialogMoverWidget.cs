@@ -8,6 +8,7 @@ namespace Iviz.App
     public sealed class DialogMoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
         [SerializeField] Transform targetTransform;
+        [SerializeField] bool hideModuleList = true;
         bool isDragging;
         
         public event Action StartedDragging;
@@ -26,7 +27,10 @@ namespace Iviz.App
             {
                 StartedDragging?.Invoke();
                 isDragging = true;
-                ModuleListPanel.Instance.DialogIsDragged = true;
+                if (hideModuleList)
+                {
+                    ModuleListPanel.Instance.DialogIsDragged = true;
+                }
             }
 
             if (targetTransform != null)

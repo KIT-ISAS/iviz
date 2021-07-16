@@ -34,7 +34,7 @@ namespace Iviz.App
         static readonly Color ConnectedWarningColor = new Color(1f, 0.8f, 0.3f, 0.4f);
 
         [SerializeField] DataLabelWidget masterUriStr = null;
-        [SerializeField] DraggableButtonWidget dragButton = null;
+        [SerializeField] TopButtonWidget dragButton = null;
         [SerializeField] TrashButtonWidget masterUriButton = null;
         [SerializeField] TrashButtonWidget connectButton = null;
         [SerializeField] TrashButtonWidget stopButton = null;
@@ -76,11 +76,13 @@ namespace Iviz.App
 
         [SerializeField] ARJoystick arJoystick = null;
 
-        [SerializeField] Canvas contentCanvas;
-        [SerializeField] GameObject moduleListCanvas;
-        [SerializeField] GameObject dataPanelCanvas;
+        [SerializeField] Canvas contentCanvas = null;
+        [SerializeField] GameObject moduleListCanvas = null;
+        [SerializeField] GameObject dataPanelCanvas = null;
         
         [SerializeField] ARSidePanel arSidePanel = null;
+        [SerializeField] Canvas rootCanvas = null;
+
 
 
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
@@ -103,6 +105,7 @@ namespace Iviz.App
         SettingsDialogData settingsData;
         EchoDialogData echoData;
         SystemDialogData systemData;
+        ARMarkerDialogData arMarkerData;
 
         public Controllers.ModelService ModelService { get; private set; }
         ControllerService controllerService;
@@ -207,6 +210,8 @@ namespace Iviz.App
             }
         }
 
+        public static float CanvasScale => Instance.rootCanvas.scaleFactor;
+
         void Awake()
         {
             instance = this;
@@ -253,6 +258,7 @@ namespace Iviz.App
                 settingsData = new SettingsDialogData(),
                 echoData = new EchoDialogData(),
                 systemData = new SystemDialogData(),
+                arMarkerData = new ARMarkerDialogData(),
             };
 
             Directory.CreateDirectory(Settings.SavedFolder);
@@ -701,11 +707,11 @@ namespace Iviz.App
 
         public static void ClearSavedFiles()
         {
-            foreach (string file in LoadConfigDialogData.SavedFiles)
+            foreach (var file in LoadConfigDialogData.SavedFiles)
             {
                 try
                 {
-                    File.Delete(file);
+                    File.Delete(file.FullPath);
                 }
                 catch (Exception e)
                 {
@@ -851,6 +857,11 @@ namespace Iviz.App
             markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
 
+        public void ShowARMarkerDialog()
+        {
+            arMarkerData.Show();
+        }
+        
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR

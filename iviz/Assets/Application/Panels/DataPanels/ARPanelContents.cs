@@ -20,6 +20,7 @@ namespace Iviz.App
         public ToggleWidget DetectArucos { get; private set; }
         public ToggleWidget DetectQrs { get; private set; }
         public ToggleWidget EnableMeshing { get; private set; }
+        public ARMarkerWidget ARMarkers { get; private set; }
         public SenderWidget MarkerSender { get; private set; }
         
 
@@ -39,8 +40,9 @@ namespace Iviz.App
             AutoFocus = p.AddToggle("Enable AutoFocus");
             DetectArucos = p.AddToggle("Detect Arucos");
             DetectQrs = p.AddToggle("Detect QRs");
-            EnableMeshing= p.AddToggle("Enable Meshing (if available)");
+            EnableMeshing = p.AddToggle("Enable Meshing (if available)");
 
+            ARMarkers = p.AddARMarker();
             MarkerSender = p.AddSender();
 
             p.UpdateSize();
