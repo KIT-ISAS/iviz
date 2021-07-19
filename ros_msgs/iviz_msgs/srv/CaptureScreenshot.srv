@@ -6,6 +6,6 @@ Header header
 int32 width
 int32 height
 int32 bpp
-float64[] intrinsics
+float64[9] intrinsics
 geometry_msgs/Pose pose
 byte[] data

@@ -51,7 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/CaptureScreenshot";
         
         /// <summary> MD5 hash of a compact representation of the service. </summary>
-        [Preserve] public const string RosMd5Sum = "41b6a7b3e6d595bdc6e085d2d94b94e6";
+        [Preserve] public const string RosMd5Sum = "3846b8955f5006a6c3a2585f806a8d1c";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "width")] public int Width { get; set; }
         [DataMember (Name = "height")] public int Height { get; set; }
         [DataMember (Name = "bpp")] public int Bpp { get; set; }
-        [DataMember (Name = "intrinsics")] public double[] Intrinsics { get; set; }
+        [DataMember (Name = "intrinsics")] public double[/*9*/] Intrinsics { get; set; }
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
         [DataMember (Name = "data")] public byte[] Data { get; set; }
     
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.IvizMsgs
         public CaptureScreenshotResponse()
         {
             Message = string.Empty;
-            Intrinsics = System.Array.Empty<double>();
+            Intrinsics = new double[9];
             Data = System.Array.Empty<byte>();
         }
         
@@ -153,7 +153,7 @@ namespace Iviz.Msgs.IvizMsgs
             Width = b.Deserialize<int>();
             Height = b.Deserialize<int>();
             Bpp = b.Deserialize<int>();
-            Intrinsics = b.DeserializeStructArray<double>();
+            Intrinsics = b.DeserializeStructArray<double>(9);
             Pose = new GeometryMsgs.Pose(ref b);
             Data = b.DeserializeStructArray<byte>();
         }
@@ -176,7 +176,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Width);
             b.Serialize(Height);
             b.Serialize(Bpp);
-            b.SerializeStructArray(Intrinsics, 0);
+            b.SerializeStructArray(Intrinsics, 9);
             Pose.RosSerialize(ref b);
             b.SerializeStructArray(Data, 0);
         }
@@ -189,16 +189,16 @@ namespace Iviz.Msgs.IvizMsgs
         {
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
             if (Intrinsics is null) throw new System.NullReferenceException(nameof(Intrinsics));
+            if (Intrinsics.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(Intrinsics), Intrinsics.Length, 9);
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 81;
+                int size = 149;
                 size += BuiltIns.UTF8.GetByteCount(Message);
                 size += Header.RosMessageLength;
-                size += 8 * Intrinsics.Length;
                 size += 1 * Data.Length;
                 return size;
             }

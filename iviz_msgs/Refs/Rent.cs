@@ -7,13 +7,12 @@ namespace Iviz.Msgs
 {
     /// <summary>
     /// Wrapper around renting and returning an array from an <see cref="ArrayPool{T}"/>.
-    /// Creating this value will rent an array of the given size, and disposing it will return it.
-    /// This class is meant only for short-lived rents. If you want to pass the reference around,
-    /// then you should probably use <see cref="UniqueRef{T}"/> or <see cref="SharedRef{T}"/>.
+    /// Creating this value will rent an array of (at least) the given size, and disposing it will return it.
+    /// This class is meant only for short-lived rents.
     /// </summary>
     /// <typeparam name="T">
-    /// The array type. Must be unmanaged. This is to prevent references from remaining in the array
-    /// after releasing it into the array pool, which keeps them from being garbage collected.
+    /// The array type. Must be unmanaged. This is to prevent object references from remaining in the array
+    /// after returning it to the array pool, which keeps them from being garbage collected.
     /// For a more generic version that clears the array after disposing, use <see cref="RentAndClear{T}"/>.
     /// </typeparam>
     public readonly struct Rent<T> : IDisposable where T : unmanaged
