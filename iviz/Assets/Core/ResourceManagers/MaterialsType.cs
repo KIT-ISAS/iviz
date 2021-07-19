@@ -37,6 +37,9 @@ namespace Iviz.Resources
         public Info<Material> LineSimpleWithColormap { get; }
         public Info<Material> TransparentLineSimpleWithColormap { get; }
 
+        public Info<Material> LinePulse { get; }
+        public Info<Material> LineMesh { get; }
+
         public Info<Material> LitOcclusionOnly { get; }
 
         public Info<Material> MeshList { get; }
@@ -93,6 +96,9 @@ namespace Iviz.Resources
             TransparentLineWithColormap = new Info<Material>(assetHolder.TransparentLineWithColormap);
             LineSimpleWithColormap = new Info<Material>(assetHolder.LineSimpleWithColormap);
             TransparentLineSimpleWithColormap = new Info<Material>(assetHolder.TransparentLineSimpleWithColormap);
+
+            LinePulse = new Info<Material>(assetHolder.LinePulse);
+            LineMesh = new Info<Material>(assetHolder.LineMesh);
 
             MeshList = new Info<Material>(assetHolder.MeshListMaterial);
             MeshListWithColormap = new Info<Material>(assetHolder.MeshListWithColormap);

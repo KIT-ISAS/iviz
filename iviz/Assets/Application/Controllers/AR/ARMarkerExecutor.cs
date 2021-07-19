@@ -1,118 +1,102 @@
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Linq;
+using Iviz.App;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.MarkerDetection;
 using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Roslib.Utils;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.XR.ARSubsystems;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
     public class ARMarkerExecutor
     {
-        public const string Prefix = "{\"IvizE\":";
+        readonly Dictionary<(ARMarkerType, string), ARExecutableMarker> markers =
+            new Dictionary<(ARMarkerType, string), ARExecutableMarker>();
 
-        readonly Dictionary<string, ARTfFrame> frames = new Dictionary<string, ARTfFrame>();
+        readonly Dictionary<(ARMarkerType, string), ARTfFrame> frames =
+            new Dictionary<(ARMarkerType, string), ARTfFrame>();
 
-        public enum ExecutorMarkerCommand
+        [CanBeNull] ARExecutableMarker lastSeen;
+        float maxMarkerDistanceInM = 0.5f;
+
+        [NotNull]
+        public string Description
         {
-            PublishTfFrame = 0,
-            SetOrigin = 1
-        }
-
-        [DataContract]
-        sealed class ExecutorBaseMarker : JsonToString
-        {
-            [DataMember] public ExecutorMarkerCommand IvizE { get; set; }
-        }
-
-        [DataContract]
-        sealed class ExecutorTfMarker : JsonToString
-        {
-            [DataMember] public ExecutorMarkerCommand IvizE => ExecutorMarkerCommand.PublishTfFrame;
-            [DataMember] public float Size { get; set; }
-            [DataMember] public string Tf { get; set; }
-        }
-
-        [DataContract]
-        sealed class ExecutorOriginMarker : JsonToString
-        {
-            [DataMember] public ExecutorMarkerCommand IvizE => ExecutorMarkerCommand.SetOrigin;
-            [DataMember] public float Size { get; set; }
-        }
-
-        public void Process([NotNull] DetectedARMarker marker)
-        {
-            
-            
-            if (marker.MarkerType == ARMarkerType.QrCode && marker.QrCode.HasPrefix(Prefix))
+            get
             {
-                Execute(marker);
-            }            
-        }
+                string markerCount;
+                switch (markers.Count)
+                {
+                    case 0:
+                        markerCount = "No markers registered";
+                        break;
+                    case 1:
+                        markerCount = "1 marker registered";
+                        break;
+                    default:
+                        markerCount = markers.Count.ToString() + " markers registered";
+                        break;
+                }
 
-        public void Execute([NotNull] DetectedARMarker marker)
-        {
-            
-            ExecutorBaseMarker baseMarker;
+                const int maxLastSeenLength = 8;
+                string lastSeenStr;
+                if (lastSeen == null)
+                {
+                    lastSeenStr = "Last seen: None";
+                }
+                else if (lastSeen.Code.Length < maxLastSeenLength)
+                {
+                    lastSeenStr = $"Last seen: {lastSeen.Type} [{lastSeen.Code}]";
+                }
+                else
+                {
+                    lastSeenStr = $"Last seen: {lastSeen.Type} [{lastSeen.Code.Substring(0, maxLastSeenLength)}...]";
+                }
 
-            try
-            {
-                baseMarker = JsonConvert.DeserializeObject<ExecutorBaseMarker>(marker.QrCode);
+                return "<b>AR Markers</b>\n" +
+                       markerCount + "\n" +
+                       lastSeenStr;
             }
-            catch (JsonException)
+        }
+
+        [NotNull]
+        public ARMarkersConfiguration Configuration
+        {
+            get => new ARMarkersConfiguration
             {
-                Logger.Info($"{this}: Failed to deserialize code '{marker.QrCode}'");
+                MaxMarkerDistanceInM = maxMarkerDistanceInM, Markers = markers.Values.ToArray()
+            };
+            set
+            {
+                maxMarkerDistanceInM = value.MaxMarkerDistanceInM;
+                markers.Clear();
+                foreach (var marker in value.Markers)
+                {
+                    markers.Add((marker.Type, marker.Code), marker);
+                }
+            }
+        }
+
+        public void Process([NotNull] DetectedARMarker detectedMarker)
+        {
+            var key = ((ARMarkerType) detectedMarker.Type, detectedMarker.Code);
+            if (!markers.TryGetValue(key, out var executableMarker))
+            {
                 return;
             }
 
-            switch (baseMarker.IvizE)
-            {
-                case ExecutorMarkerCommand.PublishTfFrame:
-                    ExecuteTfMarker(marker);
-                    break;
-                case ExecutorMarkerCommand.SetOrigin:
-                    ExecuteOriginMarker(marker);
-                    break;
-                default:
-                    Logger.Info($"{this}: Detected unknown code {baseMarker.IvizE}");
-                    break;
-            }
-        }
+            detectedMarker.MarkerSize = executableMarker.SizeInMm;
 
-        void ExecuteTfMarker([NotNull] DetectedARMarker marker)
-        {
-            ExecutorTfMarker tfExecutor;
+            Msgs.GeometryMsgs.Pose rosMarkerPose;
             try
             {
-                tfExecutor = JsonConvert.DeserializeObject<ExecutorTfMarker>(marker.QrCode);
-                Logger.Debug($"{this}: Obtained tf marker {tfExecutor}");
-            }
-            catch (JsonException)
-            {
-                Logger.Info($"{this}: Failed to deserialize code '{marker.QrCode}'");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(tfExecutor.Tf) || tfExecutor.Size <= 0)
-            {
-                Logger.Info($"{this}: Invalid data Tf='{tfExecutor.Tf}' Size=" +
-                            tfExecutor.Size.ToString(BuiltIns.Culture));
-                return;
-            }
-
-            Msgs.GeometryMsgs.Transform rosMarkerPose;
-            try
-            {
-                rosMarkerPose = SolvePnp(marker, tfExecutor.Size * 0.001f);
+                rosMarkerPose = SolvePnp(detectedMarker);
             }
             catch (CvMarkerException)
             {
@@ -120,68 +104,12 @@ namespace Iviz.Controllers
                 return;
             }
 
-            const double maxMarkerDistance = 0.5;
+            detectedMarker.HasExtrinsicPose = true;
+            detectedMarker.PoseRelativeToCamera = rosMarkerPose;
 
-            Msgs.GeometryMsgs.Vector3 rosCameraPosition = marker.CameraPose.Position;
-            double distanceMarkerToCamera = (rosCameraPosition - rosMarkerPose.Translation).Norm;
-            if (distanceMarkerToCamera > maxMarkerDistance)
-            {
-                Logger.Debug($"{this}: Detected tf marker at distance " +
-                             $"{distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
-                             "discarding.");
-                return;
-            }
-
-            if (!frames.TryGetValue(tfExecutor.Tf, out ARTfFrame tfFrame))
-            {
-                tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
-                tfFrame.Caption = tfExecutor.Tf;
-                frames[tfExecutor.Tf] = tfFrame;
-                Logger.Info("Adding " + tfExecutor.Tf);
-            }
-
-
-            Pose unityPose = TfListener.FixedFramePose.Multiply(rosMarkerPose.Ros2Unity());
-            tfFrame.TargetPose = unityPose;
-
-            TfListener.Publish(TfListener.FixedFrameId, tfExecutor.Tf, rosMarkerPose);
-        }
-
-        void ExecuteOriginMarker(DetectedARMarker marker)
-        {
-            if (ARController.Instance == null)
-            {
-                return;
-            }
-
-            ExecutorOriginMarker originExecutor;
-            try
-            {
-                originExecutor = JsonConvert.DeserializeObject<ExecutorOriginMarker>(marker.QrCode);
-                Logger.Debug($"{this}: Obtained origin marker {originExecutor}");
-            }
-            catch (JsonException)
-            {
-                Logger.Info($"{this}: Failed to deserialize code '{marker.QrCode}'");
-                return;
-            }
-
-            Msgs.GeometryMsgs.Transform rosMarkerPose;
-            try
-            {
-                rosMarkerPose = SolvePnp(marker, originExecutor.Size * 0.001f);
-            }
-            catch (CvMarkerException)
-            {
-                Logger.Info($"{this}: OpenCV error while processing image");
-                return;
-            }
-
-            const double maxMarkerDistance = 0.5;
-
-            Msgs.GeometryMsgs.Vector3 rosCameraPosition = marker.CameraPose.Position;
-            double distanceMarkerToCamera = (rosCameraPosition - rosMarkerPose.Translation).Norm;
-            if (distanceMarkerToCamera > maxMarkerDistance)
+            Msgs.GeometryMsgs.Vector3 rosCameraPosition = detectedMarker.CameraPose.Position;
+            double distanceMarkerToCamera = (rosCameraPosition - rosMarkerPose.Position).Norm;
+            if (distanceMarkerToCamera > maxMarkerDistanceInM)
             {
                 Logger.Debug($"{this}: Detected origin marker at distance " +
                              $"{distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
@@ -189,43 +117,63 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (!frames.TryGetValue(TfListener.OriginFrameId, out ARTfFrame originFrame))
-            {
-                originFrame = ResourcePool.RentDisplay<ARTfFrame>();
-                originFrame.Caption = "[origin]";
-                frames[TfListener.OriginFrameId] = originFrame;
-            }
+            lastSeen = executableMarker;
+            Msgs.GeometryMsgs.Pose rosAbsolutePose =
+                (Msgs.GeometryMsgs.Transform) detectedMarker.CameraPose * rosMarkerPose;
+            Pose unityPose = TfListener.FixedFramePose.Multiply(rosAbsolutePose.Ros2Unity());
 
-            Pose unityPose = TfListener.FixedFramePose.Multiply(rosMarkerPose.Ros2Unity());
-            originFrame.TargetPose = unityPose;
-
-            Vector3 up = unityPose.up;
-            if (Vector3.Dot(up, Vector3.up) > 1 - 0.05f)
+            switch (executableMarker.Action)
             {
-                ARController.Instance.SetWorldPose(unityPose, ARController.RootMover.Executor);
+                case ARMarkerAction.Origin:
+                    if (ARController.Instance == null)
+                    {
+                        break;
+                    }
+
+                    bool isUp = Vector3.Dot(unityPose.up, Vector3.up) > 1 - 0.05f;
+                    if (isUp)
+                    {
+                        ARController.Instance.SetWorldPose(unityPose, ARController.RootMover.Executor);
+                    }
+
+                    break;
+                case ARMarkerAction.Publish:
+                    if (!frames.TryGetValue(key, out ARTfFrame tfFrame))
+                    {
+                        tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
+                        tfFrame.Caption = detectedMarker.Code;
+                        frames[key] = tfFrame;
+                        Logger.Info("Adding " + detectedMarker.Code);
+                    }
+
+
+                    tfFrame.TargetPose = unityPose;
+                    TfListener.Publish(TfListener.FixedFrameId, $"~{detectedMarker.Code}", rosMarkerPose);
+                    break;
             }
         }
 
-        static Msgs.GeometryMsgs.Transform SolvePnp([NotNull] DetectedARMarker marker, float size)
+        public void Reset()
         {
-            var imageCorners = marker.Corners;
-            var objectCorners = new Vector3f[]
+            foreach (var frame in frames.Values)
             {
-                (-size / 2, size / 2, 0),
-                (size / 2, size / 2, 0),
-                (size / 2, -size / 2, 0),
-                (-size / 2, -size / 2, 0),
-            };
+                frame.ReturnToPool();
+            }
 
-            var localPoseInRos = CvContext.SolvePnp(imageCorners, objectCorners, 
-                (float) marker.Intrinsic.Fx, (float) marker.Intrinsic.Cx, 
-                (float) marker.Intrinsic.Fy, (float) marker.Intrinsic.Cy,
-                SolvePnPMethod.IPPESquare);
-
-            var absolutePoseInRos = (Msgs.GeometryMsgs.Transform) marker.CameraPose * localPoseInRos;
-            return absolutePoseInRos;
+            frames.Clear();
         }
 
-        [NotNull] public override string ToString() => "[ARMarkerExecutor]";
+        static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] DetectedARMarker marker)
+        {
+            float size = (float) marker.MarkerSize;
+            var intrinsic = new Intrinsic(marker.CameraIntrinsic);
+            var imageCorners = marker.Corners
+                .Select(corner => new Vector2f((float) corner.X, (float) corner.Y))
+                .ToArray();
+            return MarkerDetector.SolvePnp(imageCorners, intrinsic, size);
+        }
+
+        [NotNull]
+        public override string ToString() => "[ARMarkerExecutor]";
     }
 }

@@ -121,7 +121,7 @@ namespace Iviz.MarkerDetection
             Marshal.Copy(image, 0, imagePtr, Width * Height * 3);
         }
 
-        public void SetImageDataFlipY(byte[] image, int bpp)
+        public void SetImageDataFlipY([NotNull] byte[] image, int bpp)
         {
             if (imageSize > image.Length)
             {
@@ -345,6 +345,7 @@ namespace Iviz.MarkerDetection
             return markers;
         }
 
+        [NotNull]
         public QrMarkerCorners[] GetDetectedQrCorners()
         {
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
@@ -373,7 +374,7 @@ namespace Iviz.MarkerDetection
                 int o = 0;
                 for (int i = 0; i < numDetected; i++)
                 {
-                    string code = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
+                    string code = Marshal.PtrToStringUni(pointers[i], pointerLengths[i]);
                     markers[i] = new QrMarkerCorners(code, new Vector2f[]
                     {
                         (corners[o++], corners[o++]),
@@ -387,6 +388,7 @@ namespace Iviz.MarkerDetection
             return markers;
         }
 
+        [NotNull]
         public ArucoMarkerCorners[] GetDetectedArucoCorners()
         {
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
@@ -427,7 +429,8 @@ namespace Iviz.MarkerDetection
             return markers;
         }
 
-        public static (float, Transform) Umeyama(Vector3f[] input, Vector3f[] output, bool estimateScale)
+        public static (float, Transform) Umeyama([NotNull] Vector3f[] input, [NotNull] Vector3f[] output,
+            bool estimateScale)
         {
             if (input.Length != output.Length)
             {
@@ -466,16 +469,28 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp(Vector2f[] input, Vector3f[] output, float fx, float cx, float fy, float cy,
+        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> input, 
+            [NotNull] IReadOnlyList<Vector3f> output,
+            in Intrinsic intrinsic,
             SolvePnPMethod method = SolvePnPMethod.Iterative)
         {
-            if (input.Length != output.Length)
+            if (input == null)
+            {
+                throw new ArgumentNullException(nameof(input));
+            }
+
+            if (output == null)
+            {
+                throw new ArgumentNullException(nameof(output));
+            }
+
+            if (input.Count != output.Count)
             {
                 throw new ArgumentException("Input and output lengths do not match");
             }
 
-            using (var inputFloats = new Rent<float>(input.Length * 2))
-            using (var outputFloats = new Rent<float>(output.Length * 3))
+            using (var inputFloats = new Rent<float>(input.Count * 2))
+            using (var outputFloats = new Rent<float>(output.Count * 3))
             using (var cameraFloats = new Rent<float>(6))
             using (var resultFloats = new Rent<float>(6))
             {
@@ -493,12 +508,12 @@ namespace Iviz.MarkerDetection
                     o += 3;
                 }
 
-                cameraFloats[0] = fx;
+                cameraFloats[0] = intrinsic.Fx;
                 cameraFloats[1] = 0;
-                cameraFloats[2] = cx;
+                cameraFloats[2] = intrinsic.Cx;
                 cameraFloats[3] = 0;
-                cameraFloats[4] = fy;
-                cameraFloats[5] = cy;
+                cameraFloats[4] = intrinsic.Fy;
+                cameraFloats[5] = intrinsic.Cy;
 
                 if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
                     cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))
@@ -719,21 +734,27 @@ namespace Iviz.MarkerDetection
 
         public ArucoMarkerPose(int id, in Pose pose) => (Id, Pose) = (id, pose);
 
+        [NotNull]
         public override string ToString() => "{\"Id\":" + Id + ", \"Pose\":" + Pose + "}";
     }
 
     public interface IMarkerCorners
     {
         ReadOnlyCollection<Vector2f> Corners { get; }
+        [NotNull] string Code { get; }
+        ARMarkerType Type { get; }
     }
 
     public sealed class ArucoMarkerCorners : IMarkerCorners
     {
+        public ARMarkerType Type => ARMarkerType.Aruco;
         public int Id { get; }
-        public ReadOnlyCollection<Vector2f> Corners { get; }
+        public string Code => Id.ToString();
+        [NotNull] public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        internal ArucoMarkerCorners(int id, IList<Vector2f> corners) => (Id, Corners) = (id, corners.AsReadOnly());
+        internal ArucoMarkerCorners(int id, [NotNull] IList<Vector2f> corners) => (Id, Corners) = (id, corners.AsReadOnly());
 
+        [NotNull]
         public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }
@@ -745,17 +766,20 @@ namespace Iviz.MarkerDetection
 
         internal QrMarkerPose(string code, in Pose pose) => (Code, Pose) = (code, pose);
 
-        public override string ToString() => "{\"Code\":" + Code + ", \"Pose\":" + Pose + "}";
+        [NotNull]
+        public override string ToString() => $"{{\"Code\":{Code}, \"Pose\":{Pose}}}";
     }
 
     public sealed class QrMarkerCorners : IMarkerCorners
     {
+        public ARMarkerType Type => ARMarkerType.QrCode;
         public string Code { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        internal QrMarkerCorners(string code, IList<Vector2f> corners) =>
+        internal QrMarkerCorners(string code, [NotNull] IList<Vector2f> corners) =>
             (Code, Corners) = (code, corners.AsReadOnly());
 
+        [NotNull]
         public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }

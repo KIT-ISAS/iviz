@@ -39,10 +39,10 @@ namespace Iviz.Displays
             //isEnabled = true;
 
             plane.boundaryChanged += OnBoundaryChanged;
-            ARController.ARModeChanged += OnARModeChanged;
+            ARController.ARCameraViewChanged += OnARCameraViewChanged;
         }
 
-        void OnARModeChanged(bool value)
+        void OnARCameraViewChanged(bool value)
         {
             lines.Visible = !value;
         }
@@ -129,7 +129,7 @@ namespace Iviz.Displays
         {
             lines.ReturnToPool();
             lines = null;
-            ARController.ARModeChanged -= OnARModeChanged;
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
             if (plane != null)
             {
                 plane.boundaryChanged -= OnBoundaryChanged;

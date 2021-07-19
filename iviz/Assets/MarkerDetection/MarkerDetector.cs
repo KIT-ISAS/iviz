@@ -6,8 +6,10 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.XmlRpc;
+using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.MarkerDetection
 {
@@ -20,7 +22,7 @@ namespace Iviz.MarkerDetection
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         CancellationToken Token => tokenSource.Token;
-        public event Action<Screenshot, IEnumerable<IMarkerCorners>> MarkerDetected;
+        public event Action<Screenshot, IReadOnlyList<IMarkerCorners>> MarkerDetected;
 
         public bool Enabled { get; private set; }
 
@@ -200,6 +202,19 @@ namespace Iviz.MarkerDetection
             }
         }
 
+        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float size)
+        {
+            var objectCorners = new Vector3f[]
+            {
+                (-size / 2, size / 2, 0),
+                (size / 2, size / 2, 0),
+                (size / 2, -size / 2, 0),
+                (-size / 2, -size / 2, 0),
+            };
+
+            return CvContext.SolvePnp(imageCorners, objectCorners, intrinsic);
+        }
+
         public void Dispose()
         {
             tokenSource.Cancel();
@@ -207,6 +222,7 @@ namespace Iviz.MarkerDetection
             task.WaitNoThrow(2000, this);
         }
 
+        [NotNull]
         public override string ToString()
         {
             return "[MarkerDetector]";

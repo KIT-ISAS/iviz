@@ -80,12 +80,14 @@ namespace Iviz.App
             panel.DetectQrs.ValueChanged += f => controller.EnableQrDetection = f;
             panel.EnableMeshing.ValueChanged += f => controller.EnableMeshing = f;
             
+            panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
         }
         
         public override void UpdatePanel()
         {
             panel.Description.Label = controller.Description;
+            panel.ARMarkers.Description = controller.MarkerExecutor.Description;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

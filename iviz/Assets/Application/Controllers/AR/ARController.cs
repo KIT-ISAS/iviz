@@ -82,7 +82,8 @@ namespace Iviz.Controllers
         protected Canvas canvas;
 
         readonly MarkerDetector detector = new MarkerDetector();
-        readonly ARMarkerExecutor executor = new ARMarkerExecutor();
+        
+        public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
 
         //public Sender<PoseStamped> HeadSender { get; private set; }
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
@@ -142,9 +143,13 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                GuiInputModule.Instance.DisableCameraLock();
+                if (GuiInputModule.Instance != null)
+                {
+                    GuiInputModule.Instance.DisableCameraLock();
+                }
+
                 TfListener.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
-                ARModeChanged?.Invoke(value);
+                ARCameraViewChanged?.Invoke(value);
             }
         }
 
@@ -240,9 +245,15 @@ namespace Iviz.Controllers
             }
         }
 
-        public static event Action<bool> ARModeChanged;
-
+        /// <summary>
+        /// AR has been enabled / disabled
+        /// </summary>
         public static event Action<bool> ARActiveChanged;
+
+        /// <summary>
+        /// AR camera view has been enabled / disabled
+        /// </summary>
+        public static event Action<bool> ARCameraViewChanged;
 
         public event Action<RootMover> WorldPoseChanged;
 
@@ -256,21 +267,15 @@ namespace Iviz.Controllers
                 canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
             }
 
-            //node = FrameNode.Instantiate("AR Node");
-
-            //PinControlButton.Visible = true;
-            //ShowARJoystickButton.Visible = true;
-
-            //PinControlButton.Clicked += OnPinControlButtonClicked;
-            //ShowARJoystickButton.Clicked += OnShowARJoystickClicked;
-
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.UpdateQualityLevel();
+            }
 
-            //HeadSender = new Sender<PoseStamped>("~head");
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             detector.MarkerDetected += OnMarkerDetected;
@@ -443,48 +448,42 @@ namespace Iviz.Controllers
             return Instance.WorldPose.Multiply(unityPose);
         }
 
-        uint headSeq;
-
         public virtual void Update()
         {
             var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
             var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-
             TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
-
-            //if (!ConnectionManager.IsConnected)
-            //{
-            //    return;
-            //}
-
-            //var poseStamped = new PoseStamped((headSeq++, TfListener.FixedFrameId), relativePose.ToCameraFrame());
-            //HeadSender.Publish(poseStamped);
         }
 
 
         uint markerSeq;
-
-        void OnMarkerDetected(Screenshot screenshot, [NotNull] IEnumerable<IMarkerCorners> markers)
+        void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IReadOnlyList<IMarkerCorners> markers)
         {
-            var array = markers.Select(marker => new DetectedARMarker
+            DetectedARMarker ToMarker(IMarkerCorners marker) => new DetectedARMarker
             {
-                MarkerType = marker is ArucoMarkerCorners ? ARMarkerType.Aruco : ARMarkerType.QrCode,
+                Type = (byte) marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
-                ArucoId = marker is ArucoMarkerCorners aruco ? (uint) aruco.Id : 0,
-                QrCode = marker is QrMarkerCorners qr ? qr.Code : "",
-                CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose).Unity2RosPose()
+                Code = marker.Code,
+                CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose)
+                    .Unity2RosPose()
                     .ToCameraFrame(),
-                Corners = marker.Corners.ToArray(),
-                Intrinsic = new Intrinsic(screenshot.Fx, screenshot.Cx, screenshot.Fy, screenshot.Cy)
-            }).ToArray();
-
-            MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
+                Corners = marker.Corners
+                    .Select(corner => new Msgs.GeometryMsgs.Vector3(corner.X, corner.Y, 0))
+                    .ToArray(),
+                CameraIntrinsic = screenshot.Intrinsic.ToArray(),
+            };
+            
+            var array = markers.Select(ToMarker).ToArray();
 
             foreach (var marker in array)
             {
-                executor.Process(marker);
+                MarkerExecutor.Process(marker);
             }
+
+            MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
         }
+        
+        
 
         public virtual void StopController()
         {
@@ -493,23 +492,19 @@ namespace Iviz.Controllers
             Visible = false;
             WorldScale = 1;
 
-            //PinControlButton.Visible = false;
-            //ShowARJoystickButton.Visible = false;
-
             WorldPoseChanged = null;
             ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
             ARJoystick.PointerUp -= OnARJoystickPointerUp;
-            //PinControlButton.Clicked -= OnPinControlButtonClicked;
-            //ShowARJoystickButton.Clicked -= OnShowARJoystickClicked;
             ShowARJoystick = false;
             Instance = null;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.UpdateQualityLevel();
+            }
 
-            //HeadSender.Stop();
             MarkerSender.Stop();
-
             detector.Dispose();
         }
 

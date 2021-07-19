@@ -24,11 +24,11 @@ namespace Iviz.Displays
             }
 
             transform.SetParentLocal(TfListener.OriginFrame.Transform);
-            ARController.ARModeChanged += OnARModeChanged;
+            ARController.ARCameraViewChanged += OnARCameraViewChanged;
             gameObject.SetActive(false);
         }
 
-        void OnARModeChanged(bool newState)
+        void OnARCameraViewChanged(bool newState)
         {
             arActive = newState;
             gameObject.SetActive(!arActive);
@@ -88,7 +88,7 @@ namespace Iviz.Displays
         void OnDestroy()
         {
             resource.ReturnToPool();
-            ARController.ARModeChanged -= OnARModeChanged;
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
         }
     }
 }

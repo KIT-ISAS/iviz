@@ -46,6 +46,12 @@ namespace Iviz.App
             DialogPanelManager.TogglePanel(this);
             ModuleListPanel.AllGuiVisible = true;
         }
+        
+        [NotNull]
+        public override string ToString()
+        {
+            return $"[{GetType().Name}]";
+        }        
 
         protected void Close()
         {

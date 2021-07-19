@@ -37,12 +37,16 @@ namespace Iviz.App
             }
 
             UpdateModuleButton();
+
+            ARController.ARCameraViewChanged += OnARCameraViewChanged;
         }
 
         public override void Stop()
         {
             base.Stop();
             GridController.StopController();
+            
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
         }
 
 
@@ -174,7 +178,7 @@ namespace Iviz.App
             config.Grids.Add(GridController.Config);
         }
 
-        public override void OnARModeChanged(bool _)
+        void OnARCameraViewChanged(bool _)
         {
             GridController.Visible = GridController.Visible; // reread value
             UpdateModuleButton();

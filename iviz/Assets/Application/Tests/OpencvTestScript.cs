@@ -1,14 +1,16 @@
 using System.IO;
-using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.XmlRpc;
 using UnityEngine;
 using Transform = Iviz.Msgs.GeometryMsgs.Transform;
 
-namespace Iviz.MarkerDetection
+namespace Iviz.App.Tests
 {
     /*
 {"IvizE":0,"Size":176,"Tf":"table1"}
@@ -59,17 +61,16 @@ namespace Iviz.MarkerDetection
 
             var detectedMarker = new DetectedARMarker
             {
-                MarkerType = ARMarkerType.QrCode,
-                Header = new Header(0, default, TfListener.FixedFrameId ?? ""),
-                ArucoId = 0,
-                QrCode = qr.Code,
+                Type = (byte) ARMarkerType.QrCode,
+                Header = new Header(0, default, TfListener.FixedFrameId),
+                Code = qr.Code,
                 CameraPose = TfListener.RelativePoseToFixedFrame(Pose.identity).Unity2RosPose()
                     .ToCameraFrame(),
-                Corners = qr.Corners.ToArray(),
-                Intrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f)
+                Corners = qr.Corners.Select(v => new Msgs.GeometryMsgs.Vector3(v.X, v.Y, 0)).ToArray(),
+                CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };
 
-            executor.Execute(detectedMarker);
+            executor.Process(detectedMarker);
 
             Msgs.GeometryMsgs.Pose localPoseInRos = Transform.Identity;
             {

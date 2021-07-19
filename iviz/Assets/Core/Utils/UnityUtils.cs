@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -311,6 +313,18 @@ namespace Iviz.Core
                 resource.Suspend();
                 ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
             }
+        }
+        
+        [NotNull]
+        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>([NotNull] this Dictionary<T, TU> t)
+        {
+            return new ReadOnlyDictionary<T, TU>(t);
+        }
+        
+        [NotNull]
+        public static IEnumerable<(T item, int index)> WithIndex<T>([NotNull] this IEnumerable<T> source)
+        {
+            return source.Select((item, index) => (item, index));
         }
     }
 
@@ -664,6 +678,9 @@ namespace Iviz.Core
         }
 
         public static void Deconstruct(this Vector3 v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.x, v.y, v.z);
+
+        public static void Deconstruct(this Vector3Int v, out int x, out int y, out int z) =>
             (x, y, z) = (v.x, v.y, v.z);
 
         public static void Deconstruct(this Vector2 v, out float x, out float y) =>

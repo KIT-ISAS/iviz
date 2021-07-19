@@ -68,6 +68,8 @@ namespace Iviz.Displays
             }
         }
 
+        [CanBeNull] public Material MaterialOverride { get; set; }
+
         int Size => lineBuffer.Length;
 
         bool UseCapsuleLines => (RenderType == LineRenderType.Auto && Size <= MaxSegmentsForMesh) ||
@@ -193,7 +195,7 @@ namespace Iviz.Displays
             {
                 return false;
             }
-            
+
             foreach (ref float4x2 t in lineBuffer.Ref())
             {
                 Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
@@ -263,20 +265,27 @@ namespace Iviz.Displays
             Bounds worldBounds = BoxCollider.bounds;
 
             Material material;
-            switch (UseColormap)
+            if (MaterialOverride != null)
             {
-                case true when !UsesAlpha:
-                    material = Resource.Materials.LineWithColormap.Object;
-                    break;
-                case true:
-                    material = Resource.Materials.TransparentLineWithColormap.Object;
-                    break;
-                case false when !UsesAlpha:
-                    material = Resource.Materials.Line.Object;
-                    break;
-                case false:
-                    material = Resource.Materials.TransparentLine.Object;
-                    break;
+                material = MaterialOverride;
+            }
+            else
+            {
+                switch (UseColormap)
+                {
+                    case true when !UsesAlpha:
+                        material = Resource.Materials.LineWithColormap.Object;
+                        break;
+                    case true:
+                        material = Resource.Materials.TransparentLineWithColormap.Object;
+                        break;
+                    case false when !UsesAlpha:
+                        material = Resource.Materials.Line.Object;
+                        break;
+                    case false:
+                        material = Resource.Materials.TransparentLine.Object;
+                        break;
+                }
             }
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size,
@@ -382,12 +391,14 @@ namespace Iviz.Displays
         void CalculateBoundsEmpty()
         {
             BoxCollider.center = Vector3.zero;
-            BoxCollider.size = Vector3.zero;;
+            BoxCollider.size = Vector3.zero;
+            ;
 
             MeasuredIntensityBounds = Vector2.zero;
             if (!OverrideIntensityBounds)
             {
-                IntensityBounds = Vector2.zero;;
+                IntensityBounds = Vector2.zero;
+                ;
             }
         }
 

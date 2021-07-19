@@ -63,7 +63,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener.SetPause(value);
+                Listener?.SetPause(value);
             }
         }
 
@@ -305,7 +305,7 @@ namespace Iviz.Controllers
             }
         }
 
-        async void AwaitAndReset(IEnumerable<Task> tasks)
+        async void AwaitAndReset([NotNull] IEnumerable<Task> tasks)
         {
             await tasks.WhenAll().AwaitNoThrow(this);
             IsProcessing = false;
@@ -316,14 +316,14 @@ namespace Iviz.Controllers
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridResource[16];
-                for (int j = 0; j < gridTiles.Length; j++)
+                foreach (ref var gridTile in gridTiles.Ref())
                 {
-                    gridTiles[j] = ResourcePool.Rent<OccupancyGridResource>(
+                    gridTile = ResourcePool.Rent<OccupancyGridResource>(
                         Resource.Displays.OccupancyGridResource,
                         cubeNode.Transform);
-                    gridTiles[j].Transform.SetLocalPose(Pose.identity);
-                    gridTiles[j].Colormap = Colormap;
-                    gridTiles[j].FlipMinMax = FlipMinMax;
+                    gridTile.Transform.SetLocalPose(Pose.identity);
+                    gridTile.Colormap = Colormap;
+                    gridTile.FlipMinMax = FlipMinMax;
                 }
             }
 
@@ -363,7 +363,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] sbyte[] data, Pose pose, List<Task> tasks)
+        void SetTextures([NotNull] sbyte[] data, Pose pose, ICollection<Task> tasks)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;

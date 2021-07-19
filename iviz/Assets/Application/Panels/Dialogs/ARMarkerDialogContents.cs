@@ -2,31 +2,20 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public enum GuiARMarkerType
-    {
-        None,
-        Qr,
-        Aruco,
-    }
-
-    public enum GuiARMarkerAction
-    {
-        None,
-    }
-    
     public sealed class ARMarkerDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] GameObject[] rows = null;
         [SerializeField] TrashButtonWidget close = null;
+        bool initialized;
 
         public TrashButtonWidget Close => close;
         public IReadOnlyList<DropdownWidget> Types { get; private set; }
@@ -34,13 +23,23 @@ namespace Iviz.App
         public IReadOnlyList<InputFieldWidget> Sizes { get; private set; }
         public IReadOnlyList<DropdownWidget> Actions { get; private set; }
 
-        public event Action<int, GuiARMarkerType> TypesChanged;
-        public event Action<int, GuiARMarkerAction> ActionsChanged;
+        public event Action<int, ARMarkerType> TypesChanged;
+        public event Action<int, ARMarkerAction> ActionsChanged;
         public event Action<int, string> CodesEndEdit;
         public event Action<int, float> SizesEndEdit;
 
         void Awake()
         {
+            Initialize();
+        }
+        
+        void Initialize()
+        {
+            if (initialized)
+            {
+                return;
+            }
+
             var types = new List<DropdownWidget>();
             var codes = new List<InputFieldWidget>();
             var sizes = new List<InputFieldWidget>();
@@ -54,62 +53,65 @@ namespace Iviz.App
                 actions.Add(mTransform.GetChild(3).GetComponent<DropdownWidget>());
             }
 
-            string[] typesStr =
-            {
-                "None", "QR", "Aruco"
-            };
-
-            foreach (var (widget, row) in WithIndex(types))
-            {
-                widget.ValueChanged += (index, _) => OnTypeChanged(row, (GuiARMarkerType) index);
-                widget.Options = typesStr;
-                widget.Index = (int) GuiARMarkerType.None;
-            }
-
-            foreach (var (widget, row) in WithIndex(codes))
-            {
-                widget.EndEdit += value => CodesEndEdit?.Invoke(row, value);
-            }
-
-            foreach (var (widget, row) in WithIndex(sizes))
-            {
-                widget.EndEdit += value => SizesEndEdit?.Invoke(row,
-                    float.TryParse(value, NumberStyles.Float, BuiltIns.Culture, out float i) ? i : -1);
-                widget.Placeholder = "100";
-                widget.SetContentType(InputField.ContentType.DecimalNumber);
-            }
-
-            string[] actionsStr =
-            {
-                "None"
-            };
-
-            foreach (var (widget, row) in WithIndex(actions))
-            {
-                widget.ValueChanged += (index, _) => ActionsChanged?.Invoke(row, (GuiARMarkerAction) index);
-                widget.Options = actionsStr;
-                widget.Index = 0;
-            }
-
-
             Types = types.AsReadOnly();
             Codes = codes.AsReadOnly();
             Sizes = sizes.AsReadOnly();
             Actions = actions.AsReadOnly();
 
-            for (int row = 0; row < types.Count; row++)
+            string[] typesStr = Enum.GetNames(typeof(ARMarkerType));
+
+            foreach (var (widget, row) in types.WithIndex())
             {
-                OnTypeChanged(row, GuiARMarkerType.None);
+                widget.ValueChanged += (index, _) => OnTypeChanged(row, (ARMarkerType) index);
+                widget.Options = typesStr;
+                widget.Index = (int) ARMarkerType.Unset;
             }
+
+            foreach (var (widget, row) in codes.WithIndex())
+            {
+                widget.EndEdit += value => CodesEndEdit?.Invoke(row, value);
+            }
+
+            foreach (var (widget, row) in sizes.WithIndex())
+            {
+                widget.EndEdit += value => SizesEndEdit?.Invoke(row,
+                    float.TryParse(value, NumberStyles.Float, BuiltIns.Culture, out float i) ? i : -1);
+                widget.Placeholder = "0";
+                widget.SetContentType(InputField.ContentType.DecimalNumber);
+            }
+
+            string[] actionsStr = Enum.GetNames(typeof(ARMarkerAction));
+
+            foreach (var (widget, row) in actions.WithIndex())
+            {
+                widget.ValueChanged += (index, _) => ActionsChanged?.Invoke(row, (ARMarkerAction) index);
+                widget.Options = actionsStr;
+                widget.Index = 0;
+            }
+
+            initialized = true;
         }
 
-        void OnTypeChanged(int id, GuiARMarkerType index)
+        void OnTypeChanged(int id, ARMarkerType index)
         {
             TypesChanged?.Invoke(id, index);
-            bool restEnabled = (index != GuiARMarkerType.None);
+            bool restEnabled = (index != ARMarkerType.Unset);
             Codes[id].Interactable = restEnabled;
             Sizes[id].Interactable = restEnabled;
             Actions[id].Interactable = restEnabled;
+        }
+
+        public void ResetAll()
+        {
+            Initialize();
+
+            for (int id = 0; id < Codes.Count; id++)
+            {
+                Types[id].Index = (int) ARMarkerType.Unset;
+                Codes[id].Interactable = false;
+                Sizes[id].Interactable = false;
+                Actions[id].Interactable = false;
+            }
         }
 
         public bool Active
@@ -125,12 +127,6 @@ namespace Iviz.App
             SizesEndEdit = null;
             TypesChanged = null;
             ActionsChanged = null;
-        }
-
-        [NotNull]
-        static IEnumerable<(T item, int index)> WithIndex<T>([NotNull] IEnumerable<T> source)
-        {
-            return source.Select((item, index) => (item, index));
         }
     }
 }

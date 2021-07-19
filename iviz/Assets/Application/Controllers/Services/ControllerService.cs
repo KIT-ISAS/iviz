@@ -635,7 +635,7 @@ namespace Iviz.Controllers
             srv.Response.Height = ss.Height;
             srv.Response.Bpp = ss.Bpp;
             srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId);
-            srv.Response.Intrinsics = new double[] {ss.Fx, 0, ss.Cx, 0, ss.Fy, ss.Cy, 0, 0, 1};
+            srv.Response.Intrinsics = ss.Intrinsic.ToArray();
             srv.Response.Pose = pose ?? Pose.Identity;
 
             using (ss)

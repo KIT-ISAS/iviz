@@ -101,7 +101,6 @@ namespace Iviz.App
         {
             movedX += eventData.delta.x;
             movedY += eventData.delta.y;
-            Debug.Log(movedX + " " + movedY);
             
             if (movedX > 0 && !allowRevealLeft
                 || movedX < 0 && !allowRevealRight

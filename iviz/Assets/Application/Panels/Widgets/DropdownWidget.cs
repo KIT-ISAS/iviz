@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
@@ -134,6 +135,7 @@ namespace Iviz.App
             return this;
         }
 
+        [NotNull]
         public DropdownWidget OverrideCaption(string f)
         {
             dropdown.value = 0;

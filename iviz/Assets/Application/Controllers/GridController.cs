@@ -101,7 +101,7 @@ namespace Iviz.Controllers
                 if (!gridVisible)
                 {
                     reflectionProbe.transform.parent = TfListener.DefaultFrame.Transform;
-                    grid.Visible = false; 
+                    grid.Visible = false;
                 }
                 else
                 {
@@ -225,13 +225,19 @@ namespace Iviz.Controllers
                 if (value && SenderPoint == null)
                 {
                     SenderPoint = new Sender<PointStamped>(TapTopic);
-                    GuiInputModule.Instance.LongClick += OnLongClick;
+                    if (GuiInputModule.Instance != null)
+                    {
+                        GuiInputModule.Instance.LongClick += OnLongClick;
+                    }
                 }
                 else if (!value && SenderPoint != null)
                 {
                     SenderPoint.Stop();
                     SenderPoint = null;
-                    GuiInputModule.Instance.LongClick -= OnLongClick;
+                    if (GuiInputModule.Instance != null)
+                    {
+                        GuiInputModule.Instance.LongClick -= OnLongClick;
+                    }
                 }
 
                 config.PublishLongTapPosition = value;

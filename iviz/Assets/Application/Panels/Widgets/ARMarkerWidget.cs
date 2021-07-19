@@ -10,6 +10,11 @@ namespace Iviz.App
         [SerializeField] Text text = null;
         [SerializeField] Button button = null;
 
+        public string Description
+        {
+            set => text.text = value;
+        }
+        
         void Awake()
         {
             button.onClick.AddListener(OnClick);
@@ -17,7 +22,7 @@ namespace Iviz.App
 
         void OnClick()
         {
-            //ModuleListPanel.Instance.ShowARMarkerDialog();
+            ModuleListPanel.Instance.ShowARMarkerDialog();
         }
 
         public void ClearSubscribers()

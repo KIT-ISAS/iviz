@@ -151,13 +151,6 @@ namespace Iviz.Controllers
             get => setupModeEnabled;
             set
             {
-                /*
-                if (setupModeEnabled == value)
-                {
-                    return;
-                }
-                */
-
                 setupModeEnabled = value;
                 ArSet.Visible = value;
                 ArSet.State = value;
@@ -308,6 +301,11 @@ namespace Iviz.Controllers
 
             Settings.ScreenshotManager = this;
 
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.ShortClick += TriggerPulse;
+            }
+
             RaiseARActiveChanged();
         }
 
@@ -369,7 +367,7 @@ namespace Iviz.Controllers
                 Transform cameraTransform = arCamera.transform;
                 setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
                 Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-                if (TryGetClosestPlane(ray, out ARRaycastHit hit))
+                if (TryGetPlaneHit(ray, out ARRaycastHit hit))
                 {
                     setupModeFrame.Transform.position = hit.pose.position;
                     setupModeFrame.Tint = Color.white;
@@ -399,7 +397,7 @@ namespace Iviz.Controllers
 
                 Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
-                if (TryGetClosestPlane(ray, out ARRaycastHit hit))
+                if (TryGetPlaneHit(ray, out ARRaycastHit hit))
                 {
                     Pose pose = WorldPose.WithPosition(hit.pose.position);
                     InitializeWorldAnchor();
@@ -435,7 +433,7 @@ namespace Iviz.Controllers
             SetWorldPose(newPose, RootMover.Anchor);
         }
 
-        bool TryGetClosestPlane(in Ray ray, out ARRaycastHit hit)
+        bool TryGetPlaneHit(in Ray ray, out ARRaycastHit hit)
         {
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
@@ -545,22 +543,12 @@ namespace Iviz.Controllers
                         var bytes = new UniqueRef<byte>(array.Length);
                         NativeArray<byte>.Copy(array, bytes.Array, array.Length);
 
-                        float fx, fy, cx, cy;
-                        if (cameraManager.TryGetIntrinsics(out var intrinsics))
-                        {
-                            (fx, fy, cx, cy) =
-                                (intrinsics.focalLength.x, intrinsics.focalLength.y,
-                                    intrinsics.principalPoint.x, intrinsics.principalPoint.y);
-                        }
-                        else
-                        {
-                            (fx, fy, cx, cy) = (0, 0, 0, 0);
-                        }
+                        var intrinsic = cameraManager.TryGetIntrinsics(out var intrinsics)
+                            ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
+                                intrinsics.focalLength.y, intrinsics.principalPoint.y)
+                            : default;
 
-
-                        Screenshot s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3,
-                            fx, cx, fy, cy, pose, bytes);
-
+                        var s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, intrinsic, pose, bytes);
                         task.TrySetResult(s);
                     });
                 }
@@ -573,11 +561,32 @@ namespace Iviz.Controllers
             return task.Task;
         }
 
+        void TriggerPulse(Vector2 cursorPosition)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            var ray = Settings.MainCamera.ScreenPointToRay(cursorPosition);
+            if (!TryGetPlaneHit(ray, out ARRaycastHit hit))
+            {
+                return;
+            }
+
+            ARMeshLines.TriggerPulse(hit.pose.position);
+        }
+
         public override void StopController()
         {
             base.StopController();
             ArSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.ShortClick -= TriggerPulse;
+            }
+
             Destroy(fovDisplay.gameObject);
 
             ArSet.Visible = false;

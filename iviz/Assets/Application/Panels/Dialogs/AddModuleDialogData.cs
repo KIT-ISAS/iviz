@@ -55,7 +55,15 @@ namespace Iviz.App
         {
             var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();
-            moduleData.ShowPanel();
+            
+            if (moduleData is ARModuleData)
+            {
+                ModuleListPanel.AllGuiVisible = false;
+            }
+            else
+            {
+                moduleData.ShowPanel();
+            }
         }
 
         public override void CleanupPanel()
@@ -65,6 +73,5 @@ namespace Iviz.App
                 entry.Interactable = true;
             }
         }
-
     }
 }

@@ -85,6 +85,8 @@ MonoBehaviour:
     type: 2}
   TransparentLineSimpleWithColormap: {fileID: 2100000, guid: 32af4d95c3ca34683b8a78eaf94f0d4e,
     type: 2}
+  LineMesh: {fileID: 2100000, guid: 3073a184dd3904aa9920b788f7e3d5a6, type: 2}
+  LinePulse: {fileID: 2100000, guid: ca42fce2b47404f9dab65980a1b37205, type: 2}
   LitOcclusionOnly: {fileID: 2100000, guid: de0cfb337e3f84356a7a652c47ee75d5, type: 2}
   MeshListMaterial: {fileID: 2100000, guid: 4d085d458d11a23488567d041611c202, type: 2}
   MeshListWithColormap: {fileID: 2100000, guid: efabf005bac284c55baf34451ee0e132,

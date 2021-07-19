@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
@@ -12,9 +11,6 @@ using Iviz.Ros;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Utilities;
-using UnityEngine;
-using UnityEngine.PlayerLoop;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -567,14 +563,14 @@ namespace Iviz.App
                 HostAliases[index] = newHostAlias;
                 Logger.Info($"{this}: Adding pair {hostname} -> {address} to resolver list.");
                 ConnectionUtils.GlobalResolver[hostname] = address;
-                ModuleListPanel.UpdateAddresses();
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             }
             else if (HostAliases[index] != default)
             {
                 ConnectionUtils.GlobalResolver.Remove(HostAliases[index].Hostname);
                 Logger.Info($"{this}: Removing {HostAliases[index].Hostname} from resolver list.");
                 HostAliases[index] = default;
-                ModuleListPanel.UpdateAddresses();
+                ModuleListPanel.UpdateSimpleConfigurationSettings();
             }
         }
 

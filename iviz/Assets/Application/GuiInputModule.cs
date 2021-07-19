@@ -24,14 +24,14 @@ namespace Iviz.App
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
         const float BrakeCoeff = 0.9f;
-        
+
         const float AnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
             {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
 
         static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
-        static readonly Vector3 DirectionWeight = new Vector3(1.5f, 0, 1);
+        static readonly Vector3 DirectionWeight = new Vector3(1.5f, 1.5f, 1);
 
         readonly SettingsConfiguration config = new SettingsConfiguration();
 
@@ -69,7 +69,7 @@ namespace Iviz.App
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
 
-        public static GuiInputModule Instance { get; private set; }
+        [CanBeNull] public static GuiInputModule Instance { get; private set; }
 
         [NotNull] static Camera MainCamera => Settings.MainCamera;
 
@@ -193,7 +193,7 @@ namespace Iviz.App
                     ProcessOrbiting();
                     ProcessScaling(true);
                 }
-                
+
                 ProcessTurning();
                 ProcessFlying();
                 return;
@@ -353,6 +353,7 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
+        public event Action<Vector2> ShortClick;
         public event Action<Vector2> LongClick;
 
         public void ResetDraggedObject()
@@ -373,8 +374,9 @@ namespace Iviz.App
 
         void UpdateEvenIfInactive()
         {
+            const float shortClickTime = 0.3f;
             const float longClickTime = 0.5f;
-            const float maxDistanceForLongClick = 20;
+            const float maxDistanceForClickEvent = 20;
 
             bool prevPointerDown = pointerIsDown;
 
@@ -435,10 +437,18 @@ namespace Iviz.App
                 else
                 {
                     if (prevPointerDown
-                        && Time.time - pointerDownTime > longClickTime
-                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForLongClick)
+                        && !pointerIsOnGui
+                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
                     {
-                        LongClick?.Invoke(pointerPosition);
+                        float timeDown = Time.time - pointerDownTime;
+                        if (timeDown < shortClickTime)
+                        {
+                            ShortClick?.Invoke(pointerPosition);
+                        }
+                        else if (timeDown > longClickTime)
+                        {
+                            LongClick?.Invoke(pointerPosition);
+                        }
                     }
                 }
             }
@@ -459,13 +469,22 @@ namespace Iviz.App
                 }
                 else
                 {
-                    pointerIsOnGui = false;
-                    if (prevPointerDown
-                        && Time.time - pointerDownTime > longClickTime
-                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForLongClick)
+                    if (prevPointerDown 
+                        && !pointerIsOnGui
+                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
                     {
-                        LongClick?.Invoke(pointerPosition);
+                        float timeDown = Time.time - pointerDownTime;
+                        if (timeDown < shortClickTime)
+                        {
+                            ShortClick?.Invoke(pointerPosition);
+                        }
+                        else if (timeDown > longClickTime)
+                        {
+                            LongClick?.Invoke(pointerPosition);
+                        }
                     }
+
+                    pointerIsOnGui = false;
                 }
             }
 
@@ -692,6 +711,15 @@ namespace Iviz.App
                 }
             }
 
+            if (baseInput.y == 0)
+            {
+                accel.y *= BrakeCoeff;
+                if (Mathf.Abs(accel.y) < 0.001f)
+                {
+                    accel.y = 0;
+                }
+            }
+
             if (baseInput.z == 0)
             {
                 accel.z *= BrakeCoeff;
@@ -753,6 +781,16 @@ namespace Iviz.App
             if (Input.GetKey(KeyCode.D))
             {
                 pVelocity += Vector3Int.right;
+            }
+
+            if (Input.GetKey(KeyCode.Q))
+            {
+                pVelocity += Vector3Int.down;
+            }
+
+            if (Input.GetKey(KeyCode.E))
+            {
+                pVelocity += Vector3Int.up;
             }
 
             return pVelocity;

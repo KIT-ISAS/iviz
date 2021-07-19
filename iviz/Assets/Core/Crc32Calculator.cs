@@ -14,7 +14,7 @@ namespace Iviz.Core
 
         readonly uint[] table;
 
-        public Crc32Calculator()
+        Crc32Calculator()
         {
             table = InitializeTable();
         }
@@ -22,7 +22,7 @@ namespace Iviz.Core
         [NotNull]
         static uint[] InitializeTable()
         {
-            var createTable = new uint[256];
+            uint[] createTable = new uint[256];
             for (int i = 0; i < 256; i++)
             {
                 uint entry = (uint) i;

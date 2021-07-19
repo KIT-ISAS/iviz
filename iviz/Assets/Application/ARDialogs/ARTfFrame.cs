@@ -59,24 +59,37 @@ namespace Iviz.App.ARDialogs
 
             const float maxDistance = 0.5f;
             const float minDistance = 0.3f;
-            
-            float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
-            Debug.Log(distance);
-            float alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
-            if (alpha == 0)
-            {
-                axisFrame.Visible = false;
-                cylinder.Visible = false;
-                text.gameObject.SetActive(false);
-            }
-            else
+
+            float alpha;
+            if (!ARController.InstanceVisible)
             {
                 axisFrame.Visible = true;
                 cylinder.Visible = true;
                 text.gameObject.SetActive(true);
-                Tint = Color.white.WithAlpha(alpha);
+                Tint = Color.white;
             }
-            
+            else
+            {
+                float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
+                //Debug.Log(distance);
+                alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
+
+                if (alpha == 0)
+                {
+                    axisFrame.Visible = false;
+                    cylinder.Visible = false;
+                    text.gameObject.SetActive(false);
+                }
+                else
+                {
+                    axisFrame.Visible = true;
+                    cylinder.Visible = true;
+                    text.gameObject.SetActive(true);
+                    Tint = Color.white.WithAlpha(alpha);
+                }
+            }
+
+
             if (currentPose == null)
             {
                 currentPose = TargetPose;
@@ -90,7 +103,15 @@ namespace Iviz.App.ARDialogs
                     return;
                 }
 
-                Transform.position += 0.05f * deltaPosition;
+                if (deltaPosition.MaxAbsCoeff() > 0.5f)
+                {
+                    Transform.position = TargetPose.position;
+                }
+                else
+                {
+                    Transform.position += 0.05f * deltaPosition;
+                }
+
                 Transform.rotation = Quaternion.Slerp(Transform.rotation, TargetPose.rotation, 0.05f);
             }
         }

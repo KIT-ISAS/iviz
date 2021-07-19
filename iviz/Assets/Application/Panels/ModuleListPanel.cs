@@ -222,7 +222,6 @@ namespace Iviz.App
             instance = null;
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
             ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
-            ARController.ARModeChanged -= OnARModeChanged;
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
 
@@ -378,7 +377,6 @@ namespace Iviz.App
 
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
             ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
-            ARController.ARModeChanged += OnARModeChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             UpdateFpsStats();
@@ -603,6 +601,7 @@ namespace Iviz.App
                 }
 
                 systemData.HostAliases = config.HostAliases;
+                arMarkerData.Configuration = config.MarkersConfiguration;
             }
             catch (Exception e) when
                 (e is IOException || e is SecurityException || e is JsonException)
@@ -626,6 +625,7 @@ namespace Iviz.App
                     LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
                     Settings = Settings.SettingsManager?.Config ?? new SettingsConfiguration(),
                     HostAliases = systemData.HostAliases,
+                    MarkersConfiguration = arMarkerData.Configuration,
                 };
 
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
@@ -638,7 +638,7 @@ namespace Iviz.App
             }
         }
 
-        void UpdateSimpleConfigurationSettings()
+        public void UpdateSimpleConfigurationSettings()
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -652,6 +652,7 @@ namespace Iviz.App
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = systemData.HostAliases;
+                config.MarkersConfiguration = arMarkerData.Configuration;
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(path, outText);
             }
@@ -669,11 +670,6 @@ namespace Iviz.App
             {
                 gridModuleData.GridController.OnSettingsChanged();
             }
-        }
-
-        public void UpdateAddresses()
-        {
-            UpdateSimpleConfigurationSettings();
         }
 
         public int NumMastersInCache => connectionData.LastMasterUris.Count;
@@ -701,6 +697,10 @@ namespace Iviz.App
                 (e is IOException || e is SecurityException || e is JsonException)
             {
             }
+            catch (Exception e)
+            {
+                Logger.Error($"Error clearing cache", e);
+            }            
         }
 
         public static int NumSavedFiles => LoadConfigDialogData.SavedFiles.Count();
@@ -722,9 +722,9 @@ namespace Iviz.App
 
         void ResetAllModules()
         {
-            foreach (ModuleData m in moduleDatas)
+            foreach (ModuleData module in moduleDatas)
             {
-                m.ResetController();
+                module.ResetController();
             }
         }
 
@@ -908,14 +908,6 @@ namespace Iviz.App
         void UpdateFpsCounter()
         {
             frameCounter++;
-        }
-
-        void OnARModeChanged(bool value)
-        {
-            foreach (var module in ModuleDatas)
-            {
-                module.OnARModeChanged(value);
-            }
         }
 
         public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback,

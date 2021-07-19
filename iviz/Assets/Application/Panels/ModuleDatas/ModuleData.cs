@@ -134,10 +134,6 @@ namespace Iviz.App
 
         public abstract void AddToState([NotNull] StateConfiguration config);
 
-        public virtual void OnARModeChanged(bool value)
-        {
-        }
-
         public virtual void Stop()
         {
             DataPanelManager.HidePanelFor(this);

@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Controllers;
-using Iviz.Resources;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public sealed class ModuleDataConstructor
+    [DataContract]
+    public sealed class ModuleDataConstructor : JsonToString
     {
-        public ModuleType ModuleType { get; }
-        [NotNull] public string Topic { get; }
-        [NotNull] public string Type { get; }
-        [CanBeNull] public IConfiguration Configuration { get; }
+        [DataMember] public ModuleType ModuleType { get; }
+        [DataMember, NotNull] public string Topic { get; }
+        [DataMember, NotNull] public string Type { get; }
+        [DataMember, CanBeNull] public IConfiguration Configuration { get; }
 
         [CanBeNull] public T GetConfiguration<T>() where T : class, IConfiguration => Configuration as T;
 

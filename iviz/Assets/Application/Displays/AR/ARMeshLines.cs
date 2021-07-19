@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
@@ -13,9 +14,48 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : MonoBehaviour, IDisplay
     {
+        static float? pulseStart;
+        static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
+        static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
+        static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
+        
+        public static void TriggerPulse(in Vector3 start)
+        {
+            bool hasPulse = pulseStart != null;
+            pulseStart = Time.time;
+            if (!hasPulse)
+            {
+                GameThread.EveryFrame += UpdateStatic;
+            }
+            
+            var material = Resource.Materials.LinePulse.Object;
+            material.SetVector(PulseCenter, start);
+            material.SetFloat(PulseDelta, 1f);            
+        }
+
+        static void UpdateStatic()
+        {
+            if (pulseStart == null)
+            {
+                return;
+            }
+
+            float timeDiff = Time.time - pulseStart.Value;
+            if (timeDiff > 5)
+            {
+                pulseStart = null;
+                GameThread.EveryFrame -= UpdateStatic;
+                return;
+            }
+            
+            var material = Resource.Materials.LinePulse.Object;
+            material.SetFloat(PulseTime,  (timeDiff - 1) * 2);
+        }
+        
+
+        bool pulseMaterialSet;
         readonly List<int> indices = new List<int>();
         readonly List<Vector3> vertices = new List<Vector3>();
-        static readonly float White = PointWithColor.FloatFromColorBits(Color.white);
 
         Transform mTransform;
         [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -49,6 +89,11 @@ namespace Iviz.Displays
             resource.ElementScale = 0.001f;
             resource.Visible = ARController.InstanceVisible;
 
+            resource.MaterialOverride = pulseStart != null
+                ? Resource.Materials.LinePulse.Object
+                : Resource.Materials.LineMesh.Object;
+            pulseMaterialSet = pulseStart != null;
+
             MeshFilter.sharedMesh = new Mesh {name = "AR Mesh"};
 
             if (Settings.ARCamera != null)
@@ -61,8 +106,8 @@ namespace Iviz.Displays
                 Logger.Warn("ARMeshLines: No mesh manager found!");
             }
 
-            ARController.ARModeChanged += OnARModeChanged;
-            OnARModeChanged(ARController.InstanceVisible);
+            ARController.ARCameraViewChanged += OnARCameraViewChanged;
+            OnARCameraViewChanged(ARController.InstanceVisible);
         }
 
         void Start()
@@ -70,9 +115,10 @@ namespace Iviz.Displays
             WriteMeshLines();
         }
 
-        void OnARModeChanged(bool value)
+        void OnARCameraViewChanged(bool value)
         {
-            resource.Visible = !value;
+            bool hasPulse = pulseStart != null;
+            resource.Visible = hasPulse || !value;
         }
 
         void OnManagerChanged(ARMeshesChangedEventArgs args)
@@ -90,6 +136,20 @@ namespace Iviz.Displays
                 var unityPose = ARController.RelativePoseToOrigin(Transform.AsPose());
                 resource.Transform.SetPose(unityPose);
             }
+
+            bool hasPulse = pulseStart != null;
+            if (hasPulse && !pulseMaterialSet)
+            {
+                resource.MaterialOverride = Resource.Materials.LinePulse.Object;
+                pulseMaterialSet = true;
+                resource.Visible = true;
+            }
+            else if (!hasPulse && pulseMaterialSet)
+            {
+                resource.MaterialOverride = Resource.Materials.LineMesh.Object;
+                pulseMaterialSet = false;
+                resource.Visible = !ARController.InstanceVisible;
+            }
         }
 
         void WriteMeshLines()
@@ -102,44 +162,63 @@ namespace Iviz.Displays
             vertices.Clear();
             mesh.GetVertices(vertices);
 
+            resource.SetDirect(DirectLineSetter);
+        }
+
+        bool? DirectLineSetter([NotNull] NativeList<float4x2> lineBuffer)
+        {
+            var mesh = MeshFilter.sharedMesh;
             var topology = mesh.GetTopology(0);
             int[] mIndices = indices.ExtractArray();
             Vector3[] mVertices = vertices.ExtractArray();
 
-            resource.SetDirect(DirectLineSetter);
-
-            bool? DirectLineSetter(NativeList<float4x2> lineBuffer)
+            int count = indices.Count;
+            lineBuffer.Resize(count);
+            switch (topology)
             {
-                int count = indices.Count;
-                lineBuffer.Resize(count);
-                switch (topology)
-                {
-                    case MeshTopology.Triangles:
-                        for (int i = 0; i < count; i += 3)
-                        {
-                            Write(ref lineBuffer[i], mVertices[mIndices[i]], mVertices[mIndices[i + 1]]);
-                            Write(ref lineBuffer[i + 1], mVertices[mIndices[i + 1]], mVertices[mIndices[i + 2]]);
-                            Write(ref lineBuffer[i + 2], mVertices[mIndices[i + 2]], mVertices[mIndices[i]]);
-                        }
+                case MeshTopology.Triangles:
+                    for (int i = 0; i < count; i += 3)
+                    {
+                        int ia = mIndices[i];
+                        int ib = mIndices[i + 1];
+                        int ic = mIndices[i + 2];
 
-                        break;
-                    case MeshTopology.Quads:
-                        for (int i = 0; i < count; i += 4)
-                        {
-                            Write(ref lineBuffer[i], mVertices[mIndices[i]], mVertices[mIndices[i + 1]]);
-                            Write(ref lineBuffer[i + 1], mVertices[mIndices[i + 1]], mVertices[mIndices[i + 2]]);
-                            Write(ref lineBuffer[i + 2], mVertices[mIndices[i + 2]], mVertices[mIndices[i + 3]]);
-                            Write(ref lineBuffer[i + 3], mVertices[mIndices[i + 3]], mVertices[mIndices[i]]);
-                        }
+                        Vector3 a = mVertices[ia];
+                        Vector3 b = mVertices[ib];
+                        Vector3 c = mVertices[ic];
 
-                        break;
-                    default:
-                        Logger.Debug("MeshToLinesHelper: Unknown topology " + topology);
-                        break;
-                }
+                        Write(ref lineBuffer[i], a, b);
+                        Write(ref lineBuffer[i + 1], b, c);
+                        Write(ref lineBuffer[i + 2], c, a);
+                    }
 
-                return false;
+                    break;
+                case MeshTopology.Quads:
+                    for (int i = 0; i < count; i += 4)
+                    {
+                        int ia = mIndices[i];
+                        int ib = mIndices[i + 1];
+                        int ic = mIndices[i + 2];
+                        int id = mIndices[i + 3];
+
+                        Vector3 a = mVertices[ia];
+                        Vector3 b = mVertices[ib];
+                        Vector3 c = mVertices[ic];
+                        Vector3 d = mVertices[id];
+
+                        Write(ref lineBuffer[i], a, b);
+                        Write(ref lineBuffer[i + 1], b, c);
+                        Write(ref lineBuffer[i + 2], c, d);
+                        Write(ref lineBuffer[i + 3], d, a);
+                    }
+
+                    break;
+                default:
+                    Logger.Debug("MeshToLinesHelper: Unknown topology " + topology);
+                    break;
             }
+
+            return false;
         }
 
         public void Suspend()
@@ -149,7 +228,7 @@ namespace Iviz.Displays
         void OnDestroy()
         {
             resource.ReturnToPool();
-            ARController.ARModeChanged -= OnARModeChanged;
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
             Destroy(MeshFilter.sharedMesh);
 
             if (Settings.ARCamera == null)
@@ -166,12 +245,12 @@ namespace Iviz.Displays
             f.c0.x = a.x;
             f.c0.y = a.y;
             f.c0.z = a.z;
-            f.c0.w = White;
+            //f.c0.w = White;
 
             f.c1.x = b.x;
             f.c1.y = b.y;
             f.c1.z = b.z;
-            f.c1.w = White;
+            //f.c1.w = White;
         }
     }
 }
