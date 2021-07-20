@@ -51,7 +51,7 @@ namespace Iviz.Octree
                     case BinNodeIterator.OccupiedNode:
                         if (currentIt.depth < maxDepth)
                         {
-                            current = parent.KeyToPosition(currentIt.ChildKey, currentIt.depth + 1);
+                            parent.KeyToPosition(currentIt.ChildKey, currentIt.depth + 1, out current);
                             return true;
                         }
 
@@ -63,7 +63,7 @@ namespace Iviz.Octree
                         stack.Push(childIt);
                         if (childIt.depth == maxDepth)
                         {
-                            current = parent.KeyToPosition(childIt.key, childIt.depth);
+                            parent.KeyToPosition(childIt.key, childIt.depth, out current);
                             return true;
                         }
 

@@ -42,8 +42,8 @@ namespace Iviz.Octree
             return new float3(x, y, z);
         }
 
-        internal float4 KeyToPosition(in OcTreeKey key, int depth) =>
-            new float4(KeyToCoord(key, depth), sizeLookupTable[depth]);
+        internal void KeyToPosition(in OcTreeKey key, int depth, out float4 position) =>
+            position = new float4(KeyToCoord(key, depth), sizeLookupTable[depth]);
 
         /// <summary>
         /// Creates an iterator that returns the childless nodes before maxDepth

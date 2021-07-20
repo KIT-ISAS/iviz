@@ -374,7 +374,13 @@ namespace Iviz.MarkerDetection
                 int o = 0;
                 for (int i = 0; i < numDetected; i++)
                 {
-                    string code = Marshal.PtrToStringUni(pointers[i], pointerLengths[i]);
+                    string code;
+                    using (var strBytes = new Rent<byte>(pointerLengths[i]))
+                    {
+                        Marshal.Copy(pointers[i], strBytes.Array, 0, strBytes.Length);
+                        code = BuiltIns.UTF8.GetString(strBytes.Array, 0, strBytes.Length);
+                    }
+
                     markers[i] = new QrMarkerCorners(code, new Vector2f[]
                     {
                         (corners[o++], corners[o++]),
@@ -469,7 +475,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> input, 
+        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> input,
             [NotNull] IReadOnlyList<Vector3f> output,
             in Intrinsic intrinsic,
             SolvePnPMethod method = SolvePnPMethod.Iterative)
@@ -752,7 +758,8 @@ namespace Iviz.MarkerDetection
         public string Code => Id.ToString();
         [NotNull] public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        internal ArucoMarkerCorners(int id, [NotNull] IList<Vector2f> corners) => (Id, Corners) = (id, corners.AsReadOnly());
+        internal ArucoMarkerCorners(int id, [NotNull] IList<Vector2f> corners) =>
+            (Id, Corners) = (id, corners.AsReadOnly());
 
         [NotNull]
         public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +

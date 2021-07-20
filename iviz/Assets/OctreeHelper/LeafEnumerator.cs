@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Unity.Mathematics;
 
 namespace Iviz.Octree
@@ -70,7 +71,7 @@ namespace Iviz.Octree
                 if (logOdds > MinLogOdds &&
                     (childIt.IsLeaf && childIt.depth <= maxDepth || childIt.depth == maxDepth))
                 {
-                    current = parent.KeyToPosition(childIt.key, childIt.depth);
+                    parent.KeyToPosition(childIt.key, childIt.depth, out current);
                     return true;
                 }
             }
@@ -83,7 +84,7 @@ namespace Iviz.Octree
         public LeafEnumerator GetEnumerator() => this;
         
         public void Reset() => throw new System.NotSupportedException();
-        object IEnumerator.Current => Current;
+        [NotNull] object IEnumerator.Current => Current;
         IEnumerator<float4> IEnumerable<float4>.GetEnumerator() => this;
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         

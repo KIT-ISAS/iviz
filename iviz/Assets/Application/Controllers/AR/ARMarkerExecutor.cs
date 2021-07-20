@@ -44,7 +44,7 @@ namespace Iviz.Controllers
                         break;
                 }
 
-                const int maxLastSeenLength = 8;
+                const int maxLastSeenLength = 10;
                 string lastSeenStr;
                 if (lastSeen == null)
                 {
@@ -92,6 +92,7 @@ namespace Iviz.Controllers
             }
 
             detectedMarker.MarkerSize = executableMarker.SizeInMm;
+            //Debug.Log("Detected " +  key.Code + " with size " + detectedMarker.MarkerSize);
 
             Msgs.GeometryMsgs.Pose rosMarkerPose;
             try
@@ -125,7 +126,7 @@ namespace Iviz.Controllers
             switch (executableMarker.Action)
             {
                 case ARMarkerAction.Origin:
-                    if (ARController.Instance == null)
+                    if (ARController.Instance == null || !ARController.InstanceVisible)
                     {
                         break;
                     }
@@ -143,12 +144,12 @@ namespace Iviz.Controllers
                         tfFrame = ResourcePool.RentDisplay<ARTfFrame>();
                         tfFrame.Caption = detectedMarker.Code;
                         frames[key] = tfFrame;
-                        Logger.Info("Adding " + detectedMarker.Code);
+                        //Logger.Info("Adding " + detectedMarker.Code);
                     }
 
-
-                    tfFrame.TargetPose = unityPose;
-                    TfListener.Publish(TfListener.FixedFrameId, $"~{detectedMarker.Code}", rosMarkerPose);
+                    tfFrame.ParentFrame = TfListener.FixedFrameId;
+                    tfFrame.TargetPose = rosAbsolutePose.Ros2Unity();
+                    TfListener.Publish(TfListener.FixedFrameId, $"~{detectedMarker.Code}", rosAbsolutePose);
                     break;
             }
         }
@@ -165,12 +166,13 @@ namespace Iviz.Controllers
 
         static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] DetectedARMarker marker)
         {
-            float size = (float) marker.MarkerSize;
+            float sizeInMm = (float) marker.MarkerSize;
+            float sizeInM = sizeInMm / 1000f;
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
             var imageCorners = marker.Corners
                 .Select(corner => new Vector2f((float) corner.X, (float) corner.Y))
                 .ToArray();
-            return MarkerDetector.SolvePnp(imageCorners, intrinsic, size);
+            return MarkerDetector.SolvePnp(imageCorners, intrinsic, sizeInM);
         }
 
         [NotNull]

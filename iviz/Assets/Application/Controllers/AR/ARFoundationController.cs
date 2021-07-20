@@ -187,11 +187,6 @@ namespace Iviz.Controllers
             get => base.EnableMeshing;
             set
             {
-                if (base.EnableMeshing == value)
-                {
-                    return;
-                }
-
                 base.EnableMeshing = value;
                 if (value)
                 {

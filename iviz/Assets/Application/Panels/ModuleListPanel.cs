@@ -239,6 +239,7 @@ namespace Iviz.App
         {
             Resource.ClearResources();
             GuiDialogListener.ClearResources();
+            ARController.ClearResources();
 
             //parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();

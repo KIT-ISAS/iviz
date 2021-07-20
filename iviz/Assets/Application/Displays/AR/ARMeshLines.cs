@@ -30,7 +30,7 @@ namespace Iviz.Displays
             
             var material = Resource.Materials.LinePulse.Object;
             material.SetVector(PulseCenter, start);
-            material.SetFloat(PulseDelta, 1f);            
+            material.SetFloat(PulseDelta, 0.25f);            
         }
 
         static void UpdateStatic()
@@ -41,7 +41,7 @@ namespace Iviz.Displays
             }
 
             float timeDiff = Time.time - pulseStart.Value;
-            if (timeDiff > 5)
+            if (timeDiff > 10)
             {
                 pulseStart = null;
                 GameThread.EveryFrame -= UpdateStatic;
@@ -49,7 +49,7 @@ namespace Iviz.Displays
             }
             
             var material = Resource.Materials.LinePulse.Object;
-            material.SetFloat(PulseTime,  (timeDiff - 1) * 2);
+            material.SetFloat(PulseTime,  (timeDiff - 0.5f));
         }
         
 

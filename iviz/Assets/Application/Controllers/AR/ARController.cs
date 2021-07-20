@@ -41,9 +41,8 @@ namespace Iviz.Controllers
 
         [DataMember] public bool EnableQrDetection { get; set; }
         [DataMember] public bool EnableArucoDetection { get; set; }
-        [DataMember] public bool EnableMeshing { get; set; }
+        [DataMember] public bool EnableMeshing { get; set; } = true;
         [DataMember] public bool EnablePlaneDetection { get; set; } = true;
-        [DataMember] public SerializableVector3 MarkerOffset { get; set; } = Vector3.zero;
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
 
         [IgnoreDataMember] public float WorldAngle { get; set; }
@@ -104,6 +103,10 @@ namespace Iviz.Controllers
                 WorldScale = value.WorldScale;
 
                 OcclusionQuality = value.OcclusionQuality;
+                EnableMeshing = value.EnableMeshing;
+                EnablePlaneDetection = value.EnablePlaneDetection;
+                EnableArucoDetection = value.EnableArucoDetection;
+                EnableQrDetection = value.EnableQrDetection;
             }
         }
 
@@ -279,6 +282,8 @@ namespace Iviz.Controllers
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             detector.MarkerDetected += OnMarkerDetected;
+            
+            Frame.ForceInvisible = true;
         }
 
         protected void RaiseARActiveChanged()
@@ -482,8 +487,6 @@ namespace Iviz.Controllers
 
             MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
         }
-        
-        
 
         public virtual void StopController()
         {
@@ -506,10 +509,17 @@ namespace Iviz.Controllers
 
             MarkerSender.Stop();
             detector.Dispose();
+            MarkerExecutor.Reset();
         }
 
         void IController.ResetController()
         {
+        }
+        
+        public static void ClearResources()
+        {
+            ARActiveChanged = null;
+            ARCameraViewChanged = null;
         }
     }
 }

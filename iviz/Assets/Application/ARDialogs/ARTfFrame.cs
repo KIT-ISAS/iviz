@@ -1,6 +1,9 @@
+using System;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.MsgsGen.Dynamic;
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
@@ -12,7 +15,8 @@ namespace Iviz.App.ARDialogs
         [SerializeField] TMP_Text text = null;
         [SerializeField] AxisFrameResource axisFrame = null;
         [SerializeField] MeshMarkerResource cylinder = null;
-
+        [CanBeNull] FrameNode node;
+        
         public string Caption
         {
             get => text.text;
@@ -50,6 +54,20 @@ namespace Iviz.App.ARDialogs
             }
         }
 
+        public string ParentFrame
+        {
+            set
+            {
+                if (node == null)
+                {
+                    node = FrameNode.Instantiate("ARTfFrame Node");
+                    Transform.parent = node.Transform;
+                }
+
+                node.AttachTo(value);
+            }
+        }
+
         Pose? currentPose;
         public Pose TargetPose { get; set; }
 
@@ -60,7 +78,6 @@ namespace Iviz.App.ARDialogs
             const float maxDistance = 0.5f;
             const float minDistance = 0.3f;
 
-            float alpha;
             if (!ARController.InstanceVisible)
             {
                 axisFrame.Visible = true;
@@ -71,8 +88,7 @@ namespace Iviz.App.ARDialogs
             else
             {
                 float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
-                //Debug.Log(distance);
-                alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
+                float alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
 
                 if (alpha == 0)
                 {
@@ -96,8 +112,8 @@ namespace Iviz.App.ARDialogs
             }
             else
             {
-                Vector3 deltaPosition = TargetPose.position - Transform.position;
-                Vector4 deltaRotation = TargetPose.rotation.ToVector() - Transform.rotation.ToVector();
+                Vector3 deltaPosition = TargetPose.position - Transform.localPosition;
+                Vector4 deltaRotation = TargetPose.rotation.ToVector() - Transform.localRotation.ToVector();
                 if (deltaPosition.MaxAbsCoeff() < 0.001f && deltaRotation.MaxAbsCoeff() < 0.01f)
                 {
                     return;
@@ -105,14 +121,14 @@ namespace Iviz.App.ARDialogs
 
                 if (deltaPosition.MaxAbsCoeff() > 0.5f)
                 {
-                    Transform.position = TargetPose.position;
+                    Transform.localPosition = TargetPose.position;
                 }
                 else
                 {
-                    Transform.position += 0.05f * deltaPosition;
+                    Transform.localPosition += 0.05f * deltaPosition;
                 }
 
-                Transform.rotation = Quaternion.Slerp(Transform.rotation, TargetPose.rotation, 0.05f);
+                Transform.localRotation = Quaternion.Slerp(Transform.localRotation, TargetPose.rotation, 0.05f);
             }
         }
 
@@ -120,6 +136,14 @@ namespace Iviz.App.ARDialogs
         {
             base.Suspend();
             currentPose = null;
+        }
+        
+        void OnDestroy()
+        {
+            if (node != null)
+            {
+                Destroy(node);
+            }
         }
     }
 }

@@ -390,9 +390,15 @@ namespace Iviz.Controllers
                 return frameId;
             }
 
-            return ConnectionManager.MyId == null
-                ? frameId.Substring(1)
-                : $"{ConnectionManager.MyId}/{frameId.Substring(1)}";
+            string frameIdSuffix = frameId.Substring(1);
+            if (ConnectionManager.MyId == null)
+            {
+                return frameIdSuffix;
+            }
+                
+            return ConnectionManager.MyId[0] == '/' 
+                ? $"{ConnectionManager.MyId.Substring(1)}/{frameIdSuffix}"
+                : $"{ConnectionManager.MyId}/{frameIdSuffix}";
         }
 
         [NotNull]

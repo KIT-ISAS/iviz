@@ -202,14 +202,14 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float size)
+        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
         {
             var objectCorners = new Vector3f[]
             {
-                (-size / 2, size / 2, 0),
-                (size / 2, size / 2, 0),
-                (size / 2, -size / 2, 0),
-                (-size / 2, -size / 2, 0),
+                (-sizeInM / 2, sizeInM / 2, 0),
+                (sizeInM / 2, sizeInM / 2, 0),
+                (sizeInM / 2, -sizeInM / 2, 0),
+                (-sizeInM / 2, -sizeInM / 2, 0),
             };
 
             return CvContext.SolvePnp(imageCorners, objectCorners, intrinsic);
