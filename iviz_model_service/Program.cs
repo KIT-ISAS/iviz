@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.ModelService
@@ -25,12 +23,12 @@ namespace Iviz.ModelService
 
         static async Task MainImpl(string[] args)
         {
-            Console.WriteLine("** Iviz.ModelService: Starting...");
+            Console.WriteLine("** Starting Iviz.ModelService...");
 
             Uri? masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Try ROS_MASTER_URI to the address of the master.");
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Try setting ROS_MASTER_URI to the address of the master.");
                 return;
             }
 
@@ -67,25 +65,28 @@ namespace Iviz.ModelService
 
             if (modelServer.NumPackages == 0)
             {
-                Console.WriteLine("EE Empty list of package paths. Nothing to do.");
                 return;
             }
 
-            await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
-                modelServer.ModelCallback);
-            await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
-                modelServer.TextureCallback);
-            await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
-            await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
-
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
                 GetModelResource.RosServiceType);
+            await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
+                modelServer.ModelCallback);
+
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.TextureServiceName,
                 GetModelTexture.RosServiceType);
+            await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
+                modelServer.TextureCallback);
+            
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.FileServiceName, GetFile.RosServiceType);
+            await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
+            
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.SdfServiceName, GetSdf.RosServiceType);
+            await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
+            
             Console.WriteLine("** Done.");
+            Console.WriteLine("** Iviz.ModelService started with " + modelServer.NumPackages + " ROS package path(s).");
             Console.WriteLine("** Waiting for requests...");
 
             await WaitForCancel();
@@ -95,8 +96,8 @@ namespace Iviz.ModelService
 
         static Task WaitForCancel()
         {
-            TaskCompletionSource tc = new TaskCompletionSource();
-            Console.CancelKeyPress += (_, __) => { tc.SetResult(); };
+            var tc = new TaskCompletionSource();
+            Console.CancelKeyPress += (_, __) => tc.SetResult();
             return tc.Task;
         }
 
