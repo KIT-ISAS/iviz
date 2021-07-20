@@ -24,9 +24,21 @@ namespace Iviz.ModelService
         public int NumPackages => packagePaths.Count;
         public bool IsFileSchemaEnabled { get; set; }
 
+        static void LogError(string msg)
+        {
+            Logger.LogError(msg);
+            Console.Error.WriteLine("EE " + msg);
+        }
+        
+        static void Log(string msg)
+        {
+            Logger.Log(msg);
+            Console.WriteLine("** " + msg);
+        }        
+
         public ModelServer(string additionalPaths = null, bool enableFileSchema = false)
         {
-            Logger.Log("** Used package paths:");
+            //Logger.Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null && additionalPaths is null)
             {
@@ -51,7 +63,7 @@ namespace Iviz.ModelService
                     string pathNormalized = path.Trim();
                     if (!Directory.Exists(pathNormalized))
                     {
-                        Logger.Log("** Ignoring '" + pathNormalized + "'");
+                        //Logger.Log("** Ignoring '" + pathNormalized + "'");
                         continue;
                     }
 
@@ -62,7 +74,7 @@ namespace Iviz.ModelService
 
             if (packagePaths.Count == 0)
             {
-                Logger.Log("EE Empty list of package paths. Nothing to do.");
+                LogError("No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, or creating a ros_package_path file.");
             }
 
             IsFileSchemaEnabled = enableFileSchema;
@@ -92,12 +104,12 @@ namespace Iviz.ModelService
             }
 
             paths.Add(path);
-            Logger.Log("++ " + package);
+            //Logger.Log("++ " + package);
         }
 
         string ResolvePath(Uri uri)
         {
-            return ResolvePath(uri, out string _);
+            return ResolvePath(uri, out _);
         }
 
         string ResolvePath(Uri uri, out string outPackagePath)
@@ -107,8 +119,7 @@ namespace Iviz.ModelService
             string package = uri.Host;
             if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
-                Logger.LogError("EE Failed to find package '" + package + "'.");
-                Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
+                LogError($"Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
                 return null;
             }
 
@@ -120,7 +131,7 @@ namespace Iviz.ModelService
 
                 if (!File.Exists(path))
                 {
-                    Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
+                    LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
                     continue;
                 }
 
@@ -130,13 +141,11 @@ namespace Iviz.ModelService
                     return path;
                 }
 
-                Console.WriteLine($"EE Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
-                Logger.LogError("EE Rejecting resource request '" + uri + "' for path traversal.");
+                LogError($"Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
                 return null;
             }
 
-            Console.WriteLine($"EE Failed to resolve uri '{uri}'.");
-            Logger.LogError("EE Failed to find resource '" + uri + "'.");
+            LogError($"Failed to resolve uri '{uri}'.");
             return null;
         }
 
@@ -152,7 +161,7 @@ namespace Iviz.ModelService
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to parse uri from requested string";
-                Console.WriteLine($"EE Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
+                LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
                 return;
             }
 
@@ -174,6 +183,7 @@ namespace Iviz.ModelService
                 case "file" when !IsFileSchemaEnabled:
                     msg.Response.Success = false;
                     msg.Response.Message = "File schema is disabled";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
                     return;
                 case "file":
                 {
@@ -182,6 +192,7 @@ namespace Iviz.ModelService
                     {
                         msg.Response.Success = false;
                         msg.Response.Message = $"File '{modelPath}' does not exist";
+                        LogError($"Failed to resolve uri '{uri}'. Reason: File '{modelPath}' does not exist.");
                         return;
                     }
 
@@ -190,10 +201,11 @@ namespace Iviz.ModelService
                 default:
                     msg.Response.Success = false;
                     msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
                     return;
             }
 
-            Logger.Log("** Requesting " + modelPath);
+            //Logger.Log("** Requesting " + modelPath);
 
             Model model;
             try
@@ -203,7 +215,7 @@ namespace Iviz.ModelService
             }
             catch (AssimpException e)
             {
-                Logger.LogErrorFormat("EE Assimp exception loading '{0}': {1}", modelPath, e);
+                LogError($"Failed to resolve uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
 
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
@@ -214,7 +226,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Model = model;
 
-            Logger.Log(">> " + uri);
+            Log(">> " + uri);
         }
 
         public void TextureCallback(GetModelTexture msg)
@@ -231,6 +243,7 @@ namespace Iviz.ModelService
             {
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to parse uri from requested string";
+                LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
                 return;
             }
 
@@ -252,6 +265,7 @@ namespace Iviz.ModelService
                 case "file" when !IsFileSchemaEnabled:
                     msg.Response.Success = false;
                     msg.Response.Message = "File schema is disabled";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
                     return;
                 case "file":
                 {
@@ -260,6 +274,7 @@ namespace Iviz.ModelService
                     {
                         msg.Response.Success = false;
                         msg.Response.Message = $"File '{texturePath}' does not exist";
+                        LogError($"Failed to resolve uri '{uri}'. Reason: File '{texturePath}' does not exist.");
                         return;
                     }
 
@@ -268,6 +283,7 @@ namespace Iviz.ModelService
                 default:
                     msg.Response.Success = false;
                     msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
                     return;
             }
 
@@ -279,7 +295,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Logger.LogError("EE Failed to read '" + texturePath + "': " + e.Message);
+                LogError($"Failed to resolve uri '{uri}'. Reason: Failed to read path '{texturePath}'. {e.Message}");
                 msg.Response.Success = false;
                 msg.Response.Message = e.Message;
                 return;
