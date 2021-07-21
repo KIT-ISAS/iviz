@@ -537,6 +537,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(advertiser));
             }
 
+            advertiser.Id = InvalidId;
             CancellationToken token = connectionTs.Token;
             AddTask(async () =>
             {
@@ -566,15 +567,20 @@ namespace Iviz.Ros
             int id;
             if (Connected)
             {
-                var publisher = newAdvertisedTopic.Publisher;
                 id = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
                     ? freePair.Key
                     : publishers.Count;
 
+                await newAdvertisedTopic.AdvertiseAsync(Client, token);
+                var publisher = newAdvertisedTopic.Publisher;
+                if (publisher == null)
+                {
+                    Core.Logger.Error($"Failed to advertise topic '{advertiser.Topic}'");
+                    return;
+                }
+                
                 publishers[id] = publisher;
                 PublishedTopics = Client.PublishedTopics;
-
-                await newAdvertisedTopic.AdvertiseAsync(Client, token);
             }
 
             else
