@@ -461,7 +461,7 @@ namespace Iviz.Controllers
 
         internal static void GetCaptureResolutions([NotNull] GetCaptureResolutions srv)
         {
-            if (Settings.ScreenshotManager == null)
+            if (Settings.ScreenCaptureManager == null)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "No screenshot manager has been set for this platform";
@@ -469,14 +469,14 @@ namespace Iviz.Controllers
             }
 
             srv.Response.Success = true;
-            srv.Response.Resolutions = Settings.ScreenshotManager.GetResolutions()
+            srv.Response.Resolutions = Settings.ScreenCaptureManager.GetResolutions()
                 .Select(resolution => new Vector2i(resolution.width, resolution.height))
                 .ToArray();
         }
 
         internal static async Task StartCaptureAsync([NotNull] StartCapture srv)
         {
-            if (Settings.ScreenshotManager == null)
+            if (Settings.ScreenCaptureManager == null)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "No screenshot manager has been set for this platform";
@@ -490,7 +490,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        await Settings.ScreenshotManager.StartAsync(
+                        await Settings.ScreenCaptureManager.StartAsync(
                             srv.Request.ResolutionX, srv.Request.ResolutionY, srv.Request.WithHolograms);
                     }
                     catch (Exception e)
@@ -524,7 +524,7 @@ namespace Iviz.Controllers
 
         internal static async Task StopCaptureAsync([NotNull] StopCapture srv)
         {
-            if (Settings.ScreenshotManager == null)
+            if (Settings.ScreenCaptureManager == null)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "No screenshot manager has been set for this platform";
@@ -538,7 +538,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        await Settings.ScreenshotManager.StopAsync();
+                        await Settings.ScreenCaptureManager.StopAsync();
                     }
                     catch (Exception e)
                     {
@@ -573,7 +573,7 @@ namespace Iviz.Controllers
 
         internal static async Task CaptureScreenshotAsync([NotNull] CaptureScreenshot srv)
         {
-            if (Settings.ScreenshotManager == null)
+            if (Settings.ScreenCaptureManager == null)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "No screenshot manager has been set for this platform";
@@ -594,8 +594,10 @@ namespace Iviz.Controllers
                             .GetComponent<AppAssetHolder>();
                         AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
 
-                        ss = await Settings.ScreenshotManager.TakeScreenshotColorAsync();
-                        pose = TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame();
+                        ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
+                        pose = ss != null
+                            ? TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
+                            : (Pose?) null;
                     }
                     catch (Exception e)
                     {
@@ -637,11 +639,7 @@ namespace Iviz.Controllers
             srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId);
             srv.Response.Intrinsics = ss.Intrinsic.ToArray();
             srv.Response.Pose = pose ?? Pose.Identity;
-
-            using (ss)
-            {
-                srv.Response.Data = await CompressAsync(ss);
-            }
+            srv.Response.Data = await CompressAsync(ss);
         }
 
         [NotNull]
@@ -666,8 +664,7 @@ namespace Iviz.Controllers
                         throw new InvalidOperationException("Unknown screenshot format");
                 }
 
-                var builder = new BigGustave.PngBuilder(
-                    ss.Bytes.Array, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
+                var builder = new BigGustave.PngBuilder(ss.Bytes, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
                 return builder.Save();
             });
         }
@@ -704,8 +701,8 @@ namespace Iviz.Controllers
                 srv.Response.Success = true;
                 srv.Response.Message = $"WW There is no node with name '{id}'";
                 return;
-            }            
-            
+            }
+
             if (moduleData.ModuleType != ModuleType.Robot)
             {
                 srv.Response.Success = false;

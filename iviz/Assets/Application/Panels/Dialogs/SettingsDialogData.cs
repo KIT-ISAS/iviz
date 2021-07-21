@@ -219,10 +219,10 @@ namespace Iviz.App
                 return "<b>Model Service:</b> Off";
             }
 
-            if (modelService.IsFileSchemaEnabled)
+            if (modelService.IsFileSchemeEnabled)
             {
                 return "<b>Model Service:</b> " + modelService.NumPackages +
-                       " packages\n<b>[File schema enabled]</b>";
+                       " packages\n<b>[File scheme enabled]</b>";
             }
 
             return "<b>Model Service:</b> " + modelService.NumPackages + " packages";

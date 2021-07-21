@@ -264,8 +264,9 @@ namespace Iviz.App
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
-            Logger.Internal("<b>Welcome to iviz</b>");
-            Logger.Info("Welcome to iviz! This is the log console.");
+            Logger.Internal("<b>Welcome to iviz!</b>");
+            Logger.Internal("This is the console for connection messages. " +
+                            "General ROS log messages are shown in the Log dialog.");
 
             CreateModule(ModuleType.TF, TfListener.DefaultTopic);
 

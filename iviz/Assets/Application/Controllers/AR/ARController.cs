@@ -10,6 +10,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MarkerDetection;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
@@ -56,8 +57,6 @@ namespace Iviz.Controllers
 
     public abstract class ARController : MonoBehaviour, IController, IHasFrame
     {
-        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
-
         public enum RootMover
         {
             Anchor,
@@ -66,33 +65,37 @@ namespace Iviz.Controllers
             Setup
         }
 
-        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
+        protected const string HeadFrameId = "~ar_head";
+        protected const string CameraFrameId = "~ar_camera";
 
-        //static AnchorToggleButton PinControlButton => ModuleListPanel.Instance.PinControlButton;
-        //static AnchorToggleButton ShowARJoystickButton => ModuleListPanel.Instance.ShowARJoystickButton;
+        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
+        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
+        public static bool HasARController => Instance != null;
+        [CanBeNull] public static ARFoundationController Instance { get; protected set; }
+        public static bool InstanceVisible => Instance != null && Instance.Visible;
+        
         readonly ARConfiguration config = new ARConfiguration();
-        IModuleData moduleData;
+        readonly MarkerDetector detector = new MarkerDetector();
 
+        IModuleData moduleData;
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
 
         protected Canvas canvas;
-
-        readonly MarkerDetector detector = new MarkerDetector();
         
         public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
-
-        //public Sender<PoseStamped> HeadSender { get; private set; }
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
+        
+        public Sender<Image> ColorSender { get; private set; }
+        public Sender<Image> DepthSender { get; private set; }
+        protected Sender<CameraInfo> colorInfoSender;  
+        protected Sender<CameraInfo> depthInfoSender;  
 
-        public static bool HasARController => Instance != null;
-        [CanBeNull] public static ARFoundationController Instance { get; protected set; }
+        public bool PublishColor { get; set; }
+        public bool PublishDepth { get; set; }
 
-        const string CameraFrameId = "~ar_head";
-
-        public static bool InstanceVisible => Instance != null && Instance.Visible;
 
         public ARConfiguration Config
         {
@@ -237,10 +240,10 @@ namespace Iviz.Controllers
         {
             get
             {
-                string frameId = TfListener.ResolveFrameId(CameraFrameId);
+                string frameId = TfListener.ResolveFrameId(HeadFrameId);
                 if (cameraFrame == null || frameId != cameraFrame.Id)
                 {
-                    cameraFrame = TfListener.ResolveFrame(CameraFrameId);
+                    cameraFrame = TfListener.ResolveFrame(HeadFrameId);
                     cameraFrame.ForceInvisible = true;
                 }
 
@@ -281,12 +284,17 @@ namespace Iviz.Controllers
 
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
+            ColorSender = new Sender<Image>("~color/image_color");
+            DepthSender = new Sender<Image>("~depth/image_color");
+            colorInfoSender = new Sender<CameraInfo>("~color/camera_info");
+            depthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
+
             detector.MarkerDetected += OnMarkerDetected;
             
             Frame.ForceInvisible = true;
         }
 
-        protected void RaiseARActiveChanged()
+        protected static void RaiseARActiveChanged()
         {
             ARActiveChanged?.Invoke(true);
         }
@@ -315,25 +323,11 @@ namespace Iviz.Controllers
             }
             else
             {
-                //var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
-                //Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
-
                 var arCameraPose = ARCamera.transform.AsPose();
                 Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
-                //Debug.Log(pivot);
-
-                /*
-                var q1 = Pose.identity.WithPosition(pivot);
-                var q2 = Pose.identity.WithRotation(Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up));
-                var q3 = Pose.identity.WithPosition(-pivot);
-                var targetPose = q1.Multiply(q2.Multiply(q3.Multiply(WorldPose)));
-                SetWorldPose(targetPose, RootMover.ControlMarker);
-                */
-
 
                 Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
                 var pose = new Pose(rotation * (-pivot) + pivot, rotation);
-                //SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
 
                 SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
             }
@@ -377,18 +371,6 @@ namespace Iviz.Controllers
             joyVelocityPos = null;
             joyVelocityAngle = null;
         }
-
-        /*
-        void OnPinControlButtonClicked()
-        {
-            PinRootMarker = PinControlButton.State;
-        }
-
-        void OnShowARJoystickClicked()
-        {
-            ShowARJoystick = ShowARJoystickButton.State;
-        }
-        */
 
         void UpdateWorldPose(in Pose pose, RootMover mover)
         {
@@ -457,7 +439,7 @@ namespace Iviz.Controllers
         {
             var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
             var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-            TfListener.Publish(TfListener.FixedFrameId, CameraFrameId, relativePose);
+            TfListener.Publish(TfListener.FixedFrameId, HeadFrameId, relativePose);
         }
 
 

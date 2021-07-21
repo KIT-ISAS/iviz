@@ -109,11 +109,18 @@ namespace Iviz.App
                     continue;
                 }
 
+                string code = panel.Codes[index].Value.Trim();
+                if (string.IsNullOrEmpty(code))
+                {
+                    Logger.Info($"{this}: Ignoring empty code for entry {index}.");
+                    continue;
+                }
+
                 ARExecutableMarker marker = new ARExecutableMarker
                 {
                     Type = type,
                     Action = (ARMarkerAction) panel.Actions[index].Index,
-                    Code = panel.Codes[index].Value,
+                    Code = code,
                     SizeInMm = sizeInMm,
                 };
                 markers.Add(marker);

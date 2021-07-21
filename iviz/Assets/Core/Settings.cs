@@ -1,60 +1,11 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
 
 namespace Iviz.Core
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum QualityType
-    {
-        VeryLow,
-        Low,
-        Medium,
-        High,
-        VeryHigh,
-        Ultra,
-        Mega
-    }
-
-    [DataContract]
-    public sealed class SettingsConfiguration : JsonToString
-    {
-        [DataMember] public QualityType QualityInView { get; set; } = QualityType.Ultra;
-        [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
-        [DataMember] public int NetworkFrameSkip { get; set; } = 1;
-
-        [DataMember]
-        public int TargetFps { get; set; } = (Settings.IsMobile || Settings.IsHololens) ? Settings.DefaultFps : 60;
-
-        [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
-        [DataMember] public int SunDirection { get; set; } = 0;
-    }
-
-    public interface ISettingsManager
-    {
-        QualityType QualityInView { get; set; }
-        QualityType QualityInAr { get; set; }
-        int NetworkFrameSkip { get; set; }
-        int TargetFps { get; set; }
-        Color BackgroundColor { get; set; }
-        int SunDirection { get; set; }
-        [NotNull] SettingsConfiguration Config { get; set; }
-
-        bool SupportsView { get; }
-        bool SupportsAR { get; }
-        [NotNull] IEnumerable<string> QualityLevelsInView { get; }
-        [NotNull] IEnumerable<string> QualityLevelsInAR { get; }
-    }
-
-
     public static class Settings
     {
         public const int DefaultFps = -1;
@@ -175,7 +126,7 @@ namespace Iviz.Core
         }
         
         [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
-        [CanBeNull] public static IScreenshotManager ScreenshotManager { get; set; }
+        [CanBeNull] public static IScreenCaptureManager ScreenCaptureManager { get; set; }
 
         static bool? supportsComputeBuffersHelper;
 
@@ -199,14 +150,5 @@ namespace Iviz.Core
         {
             AotHelper.EnsureType<StringEnumConverter>();
         }
-    }
-    
-    public interface IScreenshotManager
-    {
-        bool Started { get; }
-        IEnumerable<(int width, int height)> GetResolutions();
-        Task StartAsync(int width, int height, bool withHolograms);
-        Task StopAsync();
-        Task<Screenshot> TakeScreenshotColorAsync();
     }
 }

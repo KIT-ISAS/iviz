@@ -64,7 +64,7 @@ namespace Iviz.Controllers
             get => config.JoyTopic;
             set
             {
-                config.JoyTopic = string.IsNullOrEmpty(value) ? "~joy" : value;
+                config.JoyTopic = string.IsNullOrWhiteSpace(value) ? "~joy" : value.Trim();
                 RebuildJoy();
             }
         }
@@ -84,7 +84,7 @@ namespace Iviz.Controllers
             get => config.TwistTopic;
             set
             {
-                config.TwistTopic = string.IsNullOrEmpty(value) ? "~twist" : value;
+                config.TwistTopic = string.IsNullOrWhiteSpace(value) ? "~twist" : value.Trim();
                 RebuildTwist();
             }
         }

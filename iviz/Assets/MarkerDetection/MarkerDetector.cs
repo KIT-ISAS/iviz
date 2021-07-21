@@ -24,6 +24,9 @@ namespace Iviz.MarkerDetection
         CancellationToken Token => tokenSource.Token;
         public event Action<Screenshot, IReadOnlyList<IMarkerCorners>> MarkerDetected;
 
+        public int DelayBetweenCapturesInMs { get; set; } = 2000;
+        public int DelayBetweenCapturesFastInMs { get; set; } = 500;
+
         public bool Enabled { get; private set; }
 
         public bool EnableQr
@@ -59,31 +62,24 @@ namespace Iviz.MarkerDetection
                 SemaphoreSlim signal = new SemaphoreSlim(0);
                 List<IMarkerCorners> corners = new List<IMarkerCorners>();
 
-                //Logger.Info("Starting detector");
-
+                bool lastRoundSuccess = false;
                 while (!Token.IsCancellationRequested)
                 {
-                    //Logger.Info("Starting loop " + Enabled + " " + enableQr + " " + enableAruco);
-                    await Task.Delay(2000, Token);
-
-                    if (Settings.ScreenshotManager == null || !Enabled)
+                    var screenCaptureManager = Settings.ScreenCaptureManager;
+                    if (screenCaptureManager == null || MarkerDetected == null || !Enabled)
                     {
+                        await Task.Delay(DelayBetweenCapturesInMs, Token);
                         continue;
                     }
 
-
-                    //Logger.Info("Taking screenshot");
+                    await Task.Delay(lastRoundSuccess ? DelayBetweenCapturesFastInMs : DelayBetweenCapturesInMs, Token);
 
                     Screenshot screenshot = null;
                     GameThread.Post(async () =>
                     {
                         try
                         {
-                            screenshot = await Settings.ScreenshotManager.TakeScreenshotColorAsync();
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("Error during detector screenshot:", e);
+                            screenshot = await screenCaptureManager.CaptureColorAsync(250, Token).AwaitNoThrow(this);
                         }
                         finally
                         {
@@ -97,51 +93,46 @@ namespace Iviz.MarkerDetection
                         continue;
                     }
 
-                    //Logger.Info("Back from screenshot");
-
 
                     if (cvContext != null &&
                         (cvContext.Width != screenshot.Width || cvContext.Height != screenshot.Height))
                     {
-                        //Logger.Info("Disposing old");
                         cvContext.Dispose();
                         cvContext = null;
                     }
 
                     if (cvContext == null)
                     {
-                        //Logger.Info("Creating new context " + screenshot.Width + " " + screenshot.Height);
                         cvContext = new CvContext(screenshot.Width, screenshot.Height);
                     }
 
                     if (Settings.IsHololens)
                     {
-                        cvContext.SetImageDataFlipY(screenshot.Bytes.Array, screenshot.Bpp);
+                        cvContext.SetImageDataFlipY(screenshot.Bytes, screenshot.Bpp);
                     }
                     else
                     {
-                        //Logger.Info("Setting data");
-                        cvContext.SetImageData(screenshot.Bytes.Array, screenshot.Bpp);
+                        cvContext.SetImageData(screenshot.Bytes, screenshot.Bpp);
                     }
 
 
                     corners.Clear();
-                    //Logger.Info("Searching for markers: " + enableQr + " " + enableAruco);
                     if (EnableQr && cvContext.DetectQrMarkers() != 0)
                     {
-                        var markers = cvContext.GetDetectedQrCorners();
-                        Logger.Debug($"{this}: Found QR with code '{markers[0].Code}'");
-                        corners.AddRange(markers);
+                        var markerCorners = cvContext.GetDetectedQrCorners();
+                        //Logger.Debug($"{this}: Found QR with code '{markerCorners[0].Code}'");
+                        corners.AddRange(markerCorners);
                     }
 
                     if (EnableAruco && cvContext.DetectArucoMarkers() != 0)
                     {
-                        var markers = cvContext.GetDetectedArucoCorners();
-                        Logger.Debug($"{this}: Found Aruco with code {markers[0].Id.ToString()}");
+                        var markerCorners = cvContext.GetDetectedArucoCorners();
+                        //Logger.Debug($"{this}: Found Aruco with code {markerCorners[0].Code}");
                         corners.AddRange(cvContext.GetDetectedArucoCorners());
                     }
 
-                    if (corners.Count == 0)
+                    lastRoundSuccess = corners.Count != 0;
+                    if (!lastRoundSuccess)
                     {
                         continue;
                     }
@@ -190,19 +181,20 @@ namespace Iviz.MarkerDetection
             {
                 if (Settings.IsHololens)
                 {
-                    await Settings.ScreenshotManager.StartAsync(1920, 1080, false).AwaitNoThrow(this);
+                    await Settings.ScreenCaptureManager.StartAsync(1920, 1080, false).AwaitNoThrow(this);
                 }
             }
             else
             {
                 if (Settings.IsHololens)
                 {
-                    await Settings.ScreenshotManager.StopAsync().AwaitNoThrow(this);
+                    await Settings.ScreenCaptureManager.StopAsync().AwaitNoThrow(this);
                 }
             }
         }
 
-        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
+        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic,
+            float sizeInM)
         {
             var objectCorners = new Vector3f[]
             {

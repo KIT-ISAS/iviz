@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
@@ -9,31 +8,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
-    [DataContract]
-    public readonly struct LogMessage
-    {
-        [CanBeNull, DataMember] public string SourceId { get; }
-        [DataMember] public DateTime Stamp { get; }
-        [DataMember] public LogLevel Level { get; }
-        [NotNull, DataMember] public string Message { get; }
-
-        public LogMessage(LogLevel level, [NotNull] string message)
-        {
-            SourceId = null;
-            Stamp = GameThread.Now;
-            Level = level;
-            Message = message;
-        }
-
-        public LogMessage(in Log msg)
-        {
-            SourceId = msg.Name;
-            Stamp = msg.Header.Stamp.ToDateTime();
-            Level = (LogLevel) msg.Level;
-            Message = msg.Msg ?? "";
-        }
-    }
-
     public static class Logger
     {
         const string NullMessage = "[null message]";
@@ -84,7 +58,7 @@ namespace Iviz.Core
 
         public static void Internal([CanBeNull] string msg)
         {
-            var msgTxt = $"<b>[{GameThread.NowFormatted}]</b> {msg ?? NullMessage}";
+            string msgTxt = $"<b>[{GameThread.NowFormatted}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }

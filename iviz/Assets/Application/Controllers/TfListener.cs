@@ -385,18 +385,28 @@ namespace Iviz.Controllers
         [NotNull]
         public static string ResolveFrameId([NotNull] string frameId)
         {
+            if (string.IsNullOrEmpty(frameId))
+            {
+                return FixedFrameId;
+            }
+
             if (frameId[0] != '~')
             {
                 return frameId;
             }
 
-            string frameIdSuffix = frameId.Substring(1);
+            if (frameId.Length == 1)
+            {
+                return ConnectionManager.MyId ?? FixedFrameId;
+            }
+
+            string frameIdSuffix = frameId[1] == '/' ? frameId.Substring(2) : frameId.Substring(1);
             if (ConnectionManager.MyId == null)
             {
                 return frameIdSuffix;
             }
-                
-            return ConnectionManager.MyId[0] == '/' 
+
+            return ConnectionManager.MyId[0] == '/'
                 ? $"{ConnectionManager.MyId.Substring(1)}/{frameIdSuffix}"
                 : $"{ConnectionManager.MyId}/{frameIdSuffix}";
         }

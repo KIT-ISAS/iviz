@@ -17,25 +17,25 @@ namespace Iviz.Controllers
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
         public bool IsEnabled => modelServer != null;
         public int NumPackages => modelServer?.NumPackages ?? 0;
-        public bool IsFileSchemaEnabled => modelServer?.IsFileSchemaEnabled ?? false;
+        public bool IsFileSchemeEnabled => modelServer?.IsFileSchemaEnabled ?? false;
 
         ModelServer modelServer;
 #else
         public bool IsEnabled => false;
         public int NumPackages => 0;
-        public bool IsFileSchemaEnabled => false;
+        public bool IsFileSchemeEnabled => false;
 
 #endif
 
 
-        public async Task Restart(bool enableFileSchema, CancellationToken token = default)
+        public async Task Restart(bool enableFileScheme, CancellationToken token = default)
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
             string rosPackagePathExtras = await GetPathExtras(token);
 
             modelServer?.Dispose();
-            modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema);
-            if (enableFileSchema)
+            modelServer = new ModelServer(rosPackagePathExtras, enableFileScheme);
+            if (enableFileScheme)
             {
                 Logger.Warn(
                     "Iviz.ModelService started. Uris starting with 'package://' and 'file://' are now enabled." +

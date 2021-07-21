@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Threading;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
@@ -17,7 +17,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARFoundationController : ARController, IScreenshotManager
+    public sealed class ARFoundationController : ARController
     {
         const float AnchorPauseTimeInSec = 2;
 
@@ -40,6 +40,7 @@ namespace Iviz.Controllers
         ARAnchorManager anchorManager;
         AROcclusionManager occlusionManager;
         [CanBeNull] ARAnchorResource worldAnchor;
+        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         int defaultCullingMask;
 
@@ -273,7 +274,7 @@ namespace Iviz.Controllers
 
             defaultCullingMask = arCamera.cullingMask;
 
-            cameraManager.frameReceived += args => UpdateLights(args.lightEstimation);
+            cameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
 
             Config = new ARConfiguration();
 
@@ -294,7 +295,8 @@ namespace Iviz.Controllers
 
             OcclusionQuality = OcclusionQualityType.Off;
 
-            Settings.ScreenshotManager = this;
+            Settings.ScreenCaptureManager =
+                new ARFoundationScreenCaptureManager(cameraManager, arCamera.transform, occlusionManager);
 
             if (GuiInputModule.Instance != null)
             {
@@ -352,33 +354,46 @@ namespace Iviz.Controllers
         }
 
         float? lastAnchorMoved;
+        float lastScreenCapture = 0;
 
         public override void Update()
         {
             base.Update();
 
-            if (SetupModeEnabled)
+            ProcessSetupMode();
+            ProcessAnchorMoved();
+            ProcessCapture();
+        }
+
+        void ProcessSetupMode()
+        {
+            if (!SetupModeEnabled)
             {
-                Transform cameraTransform = arCamera.transform;
-                setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
-                Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-                if (TryGetPlaneHit(ray, out ARRaycastHit hit))
-                {
-                    setupModeFrame.Transform.position = hit.pose.position;
-                    setupModeFrame.Tint = Color.white;
-                    //hasSetupModePose = true;
-                    ArSet.Visible = true;
-                    ArInfoPanel.SetActive(false);
-                }
-                else
-                {
-                    setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
-                    setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
-                    //hasSetupModePose = false;
-                    ArSet.Visible = false;
-                }
+                return;
             }
 
+            Transform cameraTransform = arCamera.transform;
+            setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
+            Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
+            if (TryGetPlaneHit(ray, out ARRaycastHit hit))
+            {
+                setupModeFrame.Transform.position = hit.pose.position;
+                setupModeFrame.Tint = Color.white;
+                //hasSetupModePose = true;
+                ArSet.Visible = true;
+                ArInfoPanel.SetActive(false);
+            }
+            else
+            {
+                setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
+                setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
+                //hasSetupModePose = false;
+                ArSet.Visible = false;
+            }
+        }
+
+        void ProcessAnchorMoved()
+        {
             if (lastAnchorMoved == null || Time.time - lastAnchorMoved.Value < AnchorPauseTimeInSec)
             {
                 return;
@@ -407,6 +422,17 @@ namespace Iviz.Controllers
             {
                 InitializeWorldAnchor();
             }
+        }
+
+        void ProcessCapture()
+        {
+            if (!(GameThread.GameTime - lastScreenCapture > 0.5f))
+            {
+                return;
+            }
+
+            lastScreenCapture = GameThread.GameTime;
+            CaptureScreenForPublish(tokenSource.Token);
         }
 
         void InitializeWorldAnchor()
@@ -451,13 +477,14 @@ namespace Iviz.Controllers
                     return true;
                 default:
                     Vector3 origin = ray.origin;
-                    hit = results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit;
+                    hit = Enumerable.Select(results, rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit))
+                        .Min().rayHit;
                     return true;
             }
         }
 
 
-        void UpdateLights(in ARLightEstimationData lightEstimation)
+        void ProcessLights(in ARLightEstimationData lightEstimation)
         {
             if (lightEstimation.averageColorTemperature.HasValue && lightEstimation.averageBrightness.HasValue)
             {
@@ -485,77 +512,6 @@ namespace Iviz.Controllers
             }
         }
 
-        bool IScreenshotManager.Started => true;
-
-        [NotNull]
-        IEnumerable<(int width, int height)> IScreenshotManager.GetResolutions()
-        {
-            var configuration = cameraManager.subsystem.currentConfiguration;
-            return configuration == null
-                ? Array.Empty<(int width, int height)>()
-                : new[] {(configuration.Value.width, configuration.Value.height)};
-        }
-
-        [NotNull]
-        Task IScreenshotManager.StartAsync(int width, int height, bool withHolograms) => Task.CompletedTask;
-
-        [NotNull]
-        Task IScreenshotManager.StopAsync() => Task.CompletedTask;
-
-        public Task<Screenshot> TakeScreenshotColorAsync()
-        {
-            if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
-            {
-                return Task.FromResult<Screenshot>(null);
-            }
-
-            var conversionParams = new XRCpuImage.ConversionParams
-            {
-                inputRect = new RectInt(0, 0, image.width, image.height),
-                outputDimensions = new Vector2Int(image.width, image.height),
-                outputFormat = TextureFormat.RGB24,
-            };
-
-            var task = new TaskCompletionSource<Screenshot>();
-
-            int width = image.width;
-            int height = image.height;
-            var pose = arCamera.transform.AsPose();
-
-            using (image)
-            {
-                try
-                {
-                    image.ConvertAsync(conversionParams, (status, _, array) =>
-                    {
-                        if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                        {
-                            Debug.LogErrorFormat("Request failed with status {0}", status);
-                            task.TrySetResult(null);
-                            return;
-                        }
-
-                        var bytes = new UniqueRef<byte>(array.Length);
-                        NativeArray<byte>.Copy(array, bytes.Array, array.Length);
-
-                        var intrinsic = cameraManager.TryGetIntrinsics(out var intrinsics)
-                            ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
-                                intrinsics.focalLength.y, intrinsics.principalPoint.y)
-                            : default;
-
-                        var s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, intrinsic, pose, bytes);
-                        task.TrySetResult(s);
-                    });
-                }
-                catch (Exception e)
-                {
-                    task.TrySetException(e);
-                }
-            }
-
-            return task.Task;
-        }
-
         void TriggerPulse(Vector2 cursorPosition)
         {
             if (!Visible)
@@ -572,9 +528,64 @@ namespace Iviz.Controllers
             ARMeshLines.TriggerPulse(hit.pose.position);
         }
 
+        uint colorSeq, depthSeq;
+
+        async void CaptureScreenForPublish(CancellationToken token)
+        {
+            var captureManager = Settings.ScreenCaptureManager;
+            bool shouldPublishColor = PublishColor && ColorSender.NumSubscribers != 0;
+            bool shouldPublishDepth = PublishDepth && DepthSender.NumSubscribers != 0;
+            if (captureManager == null || token.IsCancellationRequested || (!shouldPublishColor && !shouldPublishDepth))
+            {
+                return;
+            }
+
+            Screenshot color, depth;
+            const int captureReuseTimeInMs = 125;
+
+            if (shouldPublishColor && !shouldPublishDepth)
+            {
+                color = await captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
+                depth = null;
+            }
+            else if (!shouldPublishColor)
+            {
+                color = null;
+                depth = await captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
+            }
+            else
+            {
+                var colorTask = captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
+                var depthTask = captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
+                await (colorTask.AsTask(), depthTask.AsTask()).WhenAll();
+                color = colorTask.Result;
+                depth = depthTask.Result;
+            }
+
+            string frameId = TfListener.ResolveFrameId(CameraFrameId);
+            if (color != null)
+            {
+                ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
+                colorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
+            }
+
+            if (depth != null)
+            {
+                DepthSender.Publish(depth.CreateImageMessage(frameId, depthSeq));
+                depthInfoSender.Publish(depth.CreateCameraInfoMessage(frameId, depthSeq++));
+            }
+
+            var anyPose = (color ?? depth)?.CameraPose;
+            if (anyPose != null)
+            {
+                TfListener.Publish(frameId, anyPose.Value);
+            }
+        }
+
         public override void StopController()
         {
             base.StopController();
+            tokenSource.Cancel();
             ArSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
             if (GuiInputModule.Instance != null)
@@ -588,7 +599,7 @@ namespace Iviz.Controllers
             ArInfoPanel.SetActive(false);
 
             Settings.ARCamera = null;
-            Settings.ScreenshotManager = null;
+            Settings.ScreenCaptureManager = null;
         }
     }
 }

@@ -53,18 +53,9 @@ namespace Iviz.App
             panel.Frame.Owner = controller;
             panel.WorldScale.Value = controller.WorldScale;
 
-            panel.OcclusionQuality.Options = new[] {"Off", "Fast", "Medium", "Best"};
-            panel.OcclusionQuality.Index = (int) controller.OcclusionQuality;
-
             panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
 
             panel.AutoFocus.Value = controller.EnableAutoFocus;
-            panel.DetectArucos.Value = controller.EnableArucoDetection;
-            panel.DetectQrs.Value = controller.EnableQrDetection;
-            panel.EnableMeshing.Value = controller.EnableMeshing;
-
-            panel.OcclusionQuality.ValueChanged += (i, _) =>
-                controller.OcclusionQuality = (OcclusionQualityType) i;
 
             panel.Description.Label = controller.Description;
 
@@ -74,14 +65,19 @@ namespace Iviz.App
             {
                 controller.ResetSession();
             };
+            
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
-            panel.DetectArucos.ValueChanged += f => controller.EnableArucoDetection = f;
-            panel.DetectQrs.ValueChanged += f => controller.EnableQrDetection = f;
-            panel.EnableMeshing.ValueChanged += f => controller.EnableMeshing = f;
             
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
+            panel.PublishColor.Value = controller.PublishColor;
+            panel.ColorSender.Set(controller.ColorSender);
+            panel.PublishDepth.Value = controller.PublishDepth;
+            panel.DepthSender.Set(controller.DepthSender);
+
+            panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
+            panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
         }
         
         public override void UpdatePanel()

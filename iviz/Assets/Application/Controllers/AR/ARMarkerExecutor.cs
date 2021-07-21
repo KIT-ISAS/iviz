@@ -30,6 +30,7 @@ namespace Iviz.Controllers
         {
             get
             {
+                /*
                 string markerCount;
                 switch (markers.Count)
                 {
@@ -43,6 +44,7 @@ namespace Iviz.Controllers
                         markerCount = markers.Count.ToString() + " markers registered";
                         break;
                 }
+                */
 
                 const int maxLastSeenLength = 10;
                 string lastSeenStr;
@@ -60,7 +62,7 @@ namespace Iviz.Controllers
                 }
 
                 return "<b>AR Markers</b>\n" +
-                       markerCount + "\n" +
+                       //markerCount + "\n" +
                        lastSeenStr;
             }
         }

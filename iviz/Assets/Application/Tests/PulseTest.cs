@@ -43,10 +43,10 @@ namespace Iviz.App.Tests
             float timeDiff = Time.time - start;
             var material = Resource.Materials.LinePulse.Object;
             material.SetVector(PulseCenter,  new Vector4(0, 0, 0, 0));
-            material.SetFloat(PulseTime,  (timeDiff - 1) * 2);
-            material.SetFloat(PulseDelta, 1f);
+            material.SetFloat(PulseTime,  (timeDiff - 0.5f) );
+            material.SetFloat(PulseDelta, 0.25f);
 
-            if (timeDiff > 10)
+            if (timeDiff > 5)
             {
                 start = Time.time;
             }

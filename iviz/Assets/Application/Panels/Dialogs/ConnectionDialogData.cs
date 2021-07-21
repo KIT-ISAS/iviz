@@ -128,11 +128,13 @@ namespace Iviz.App
             panel.Close.Clicked += Close;
             panel.MyUri.EndEdit += text =>
             {
-                MyUri = (Uri.TryCreate(text, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
+                string trimmed = text.Trim();
+                MyUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
             };
             panel.MasterUri.EndEdit += text =>
             {
-                MasterUri = (Uri.TryCreate(text, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
+                string trimmed = text.Trim();
+                MasterUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
                 if (MasterUri == null)
                 {
                     return;
@@ -147,8 +149,8 @@ namespace Iviz.App
             };
             panel.MyId.EndEdit += text =>
             {
-                
-                MyId = RosClient.IsValidResourceName(text) ? text : null;
+                string trimmed = text.Trim();
+                MyId = RosClient.IsValidResourceName(trimmed) ? trimmed : null;
             };
             panel.RefreshMyId.Clicked += () =>
             {
@@ -172,7 +174,7 @@ namespace Iviz.App
 
                     string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host; 
                     Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort}/");
-                    const string ownMasterId = "/iviz_master";
+                    const string ownMasterId = "iviz_master";
 
                     if (RosServerManager.Create(ownMasterUri, ownMasterId))
                     {
