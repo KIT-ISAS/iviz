@@ -250,11 +250,12 @@ namespace Iviz.Controllers
             get => config.TapTopic;
             set
             {
-                config.TapTopic = value;
-                if (SenderPoint != null && SenderPoint.Topic != value)
+                string trimmed = value.Trim();
+                config.TapTopic = trimmed;
+                if (SenderPoint != null && SenderPoint.Topic != trimmed)
                 {
                     SenderPoint.Stop();
-                    SenderPoint = new Sender<PointStamped>(value);
+                    SenderPoint = new Sender<PointStamped>(trimmed);
                 }
             }
         }
