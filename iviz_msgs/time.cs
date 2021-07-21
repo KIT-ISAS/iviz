@@ -23,24 +23,19 @@ namespace Iviz.Msgs
 
         public time(in DateTime time)
         {
-            TimeSpan diff = time - UnixEpoch;
+            TimeSpan diff = time.ToLocalTime() - UnixEpoch;
             Secs = (uint) diff.TotalSeconds;
             Nsecs = (uint) (diff.Ticks % 10000000) * 100;
         }
 
         public static time Now()
         {
-            return new(DateTime.UtcNow + GlobalTimeOffset);
+            return new(DateTime.Now + GlobalTimeOffset);
         }
 
-        public DateTime ToUtcDateTime()
+        public DateTime ToDateTime()
         {
-            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);
-        }
-
-        public DateTime ToLocalDateTime()
-        {
-            return ToLocalTime(ToUtcDateTime());
+            return UnixEpoch.ToLocalTime() + ToTimeSpan();
         }
 
         public TimeSpan ToTimeSpan()
@@ -109,8 +104,8 @@ namespace Iviz.Msgs
             return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
         }
 
+        /*
         static long? cachedTicksDiff;
-
         static DateTime ToLocalTime(DateTime utc)
         {
             if (cachedTicksDiff == null)
@@ -124,5 +119,6 @@ namespace Iviz.Msgs
                 ? utc
                 : new DateTime(utc.Ticks + cachedTicksDiff.Value, DateTimeKind.Local);
         }
+        */
     }
 }
