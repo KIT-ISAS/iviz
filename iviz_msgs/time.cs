@@ -33,9 +33,14 @@ namespace Iviz.Msgs
             return new(DateTime.UtcNow + GlobalTimeOffset);
         }
 
-        public DateTime ToDateTime()
+        public DateTime ToUtcDateTime()
         {
-            return ToLocalTime(UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100));
+            return UnixEpoch.AddSeconds(Secs).AddTicks(Nsecs / 100);
+        }
+
+        public DateTime ToLocalDateTime()
+        {
+            return ToLocalTime(ToUtcDateTime());
         }
 
         public TimeSpan ToTimeSpan()
@@ -117,7 +122,7 @@ namespace Iviz.Msgs
 
             return utc.Kind == DateTimeKind.Local
                 ? utc
-                : utc.AddTicks(cachedTicksDiff.Value);
+                : new DateTime(utc.Ticks + cachedTicksDiff.Value, DateTimeKind.Local);
         }
     }
 }

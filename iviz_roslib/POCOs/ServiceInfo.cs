@@ -1,4 +1,5 @@
-﻿using Iviz.Msgs;
+﻿using System;
+using Iviz.Msgs;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
@@ -8,6 +9,8 @@ namespace Iviz.Roslib
     /// </summary>
     internal sealed class ServiceInfo<T> : JsonToString where T : IService
     {
+        readonly T? generator;
+
         /// <summary>
         /// ROS name of this node.
         /// </summary>
@@ -32,24 +35,25 @@ namespace Iviz.Roslib
         /// Instance of the message used to generate others of the same type.
         /// <seealso cref="IService.Create"/>
         /// </summary>
-        public T Generator { get; }
+        public T Generator =>
+            generator ?? throw new InvalidOperationException("This service does not have a generator!");
 
-        ServiceInfo(string callerId, string topic, string md5Sum, string type, T generator)
+        ServiceInfo(string callerId, string topic, string md5Sum, string type, T? generator)
         {
             CallerId = callerId;
             Service = topic;
             Md5Sum = md5Sum;
             Type = type;
-            Generator = generator;
+            this.generator = generator;
         }
 
-        public ServiceInfo(string callerId, string service, T generator = default)
-        : this(
+        public ServiceInfo(string callerId, string service, T? generator = default)
+            : this(
                 callerId, service,
                 BuiltIns.GetMd5Sum<T>(),
                 BuiltIns.GetServiceType<T>(),
                 generator
-                )
+            )
         {
         }
     }

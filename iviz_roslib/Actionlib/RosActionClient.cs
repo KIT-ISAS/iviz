@@ -251,7 +251,7 @@ namespace Iviz.Roslib.Actionlib
             time now = time.Now();
             goalId = new GoalID
             {
-                Id = $"{callerId}#{now.ToDateTime()}",
+                Id = $"{callerId}#{now.ToLocalDateTime()}",
                 Stamp = now
             };
 
