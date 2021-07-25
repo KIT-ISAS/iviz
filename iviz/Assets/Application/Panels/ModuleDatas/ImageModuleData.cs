@@ -23,11 +23,9 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
-        [NotNull] public ImageListener Image => listener;
+        Material IImageDialogListener.Material => listener.Material;
 
-        [NotNull] Material IImageDialogListener.Material => listener.Material;
-
-        Vector2 IImageDialogListener.ImageSize => new Vector2(listener.ImageWidth, listener.ImageHeight);
+        Vector2Int IImageDialogListener.ImageSize => listener.ImageSize;
 
         public ImageModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,

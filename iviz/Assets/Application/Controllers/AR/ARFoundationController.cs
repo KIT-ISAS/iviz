@@ -445,7 +445,7 @@ namespace Iviz.Controllers
             }
             catch (InvalidOperationException e)
             {
-                Logger.Error("Failed to initialize AR world anchor", e);
+                Logger.Error("Failed to initialize AR world anchor:", e);
             }
         }
 

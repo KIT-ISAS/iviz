@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Iviz.Core;
 using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -71,6 +72,7 @@ namespace Iviz.Resources
         public Info<GameObject> TargetArea { get; }
         public Info<GameObject> PositionDisc3D { get; }
         public Info<GameObject> PositionDisc { get; }
+        public Info<GameObject> ARMarkerHighlighter { get; }
 
         public DisplaysType()
         {
@@ -111,6 +113,7 @@ namespace Iviz.Resources
                 ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
                 ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice);
                 ARButtonDialog = new Info<GameObject>(appAssetHolder.ARButtonDialog);
+                ARMarkerHighlighter = new Info<GameObject>(appAssetHolder.ARMarkerHighlighter);
                 
                 RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc);
                 SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc);

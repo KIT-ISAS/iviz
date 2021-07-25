@@ -93,12 +93,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5539705e78a249688f015fe10b01b3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 0}
-  texture: {fileID: 0}
+  boxCollider: {fileID: 5326575301416476572}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
+  smoothness: 0.5
+  metallic: 0.5
+  mainRenderer: {fileID: 327268736964035834}
+  meshFilter: {fileID: 692155524018303300}
+  autoSelectMaterial: 1
 --- !u!65 &5326575301416476572
 BoxCollider:
   m_ObjectHideFlags: 0

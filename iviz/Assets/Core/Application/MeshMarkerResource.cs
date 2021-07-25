@@ -29,9 +29,9 @@ namespace Iviz.Displays
         [SerializeField] bool occlusionOnly;
         [SerializeField] float smoothness = Settings.IsHololens ? 0.25f : 0.5f;
         [SerializeField] float metallic = 0.5f;
-
-        MeshRenderer mainRenderer;
-        MeshFilter meshFilter;
+        [SerializeField] MeshRenderer mainRenderer;
+        [SerializeField] MeshFilter meshFilter;
+        
         Material textureMaterial;
         Material textureMaterialAlpha;
         [SerializeField] bool autoSelectMaterial = true;

@@ -106,8 +106,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 0}
+  boxCollider: {fileID: 7754240947016480701}
+  diffuseTexture: {fileID: 0}
+  bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
+  smoothness: 0.5
+  metallic: 0.5
+  mainRenderer: {fileID: 8744172025110862399}
+  meshFilter: {fileID: 6826750501056737013}
+  autoSelectMaterial: 1

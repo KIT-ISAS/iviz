@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace Iviz.Displays
 {
     public sealed class DepthCloudResource : MarkerResource
     {
-        static readonly int PQuad = Shader.PropertyToID("_Quad");
+        //static readonly int PQuad = Shader.PropertyToID("_Quad");
         static readonly int PColor = Shader.PropertyToID("_ColorTexture");
         static readonly int PDepth = Shader.PropertyToID("_DepthTexture");
         static readonly int PPoints = Shader.PropertyToID("_Points");
@@ -30,20 +31,21 @@ namespace Iviz.Displays
             new Vector2(-0.5f, 0.5f)
         };
 
-        
+
         [SerializeField] Material material;
         [SerializeField] float elementScale = 1;
-        [SerializeField] float fovAngle;
         [SerializeField] int width;
         [SerializeField] int height;
+        Intrinsic intrinsic;
 
         ImageTexture colorImage;
         ImageTexture depthImage;
         ComputeBuffer pointComputeBuffer;
-        ComputeBuffer quadComputeBuffer;
+        //ComputeBuffer quadComputeBuffer;
 
         Vector2[] uvs = Array.Empty<Vector2>();
 
+        /*
         /// <summary>
         /// Size multiplier for points
         /// </summary>
@@ -53,16 +55,22 @@ namespace Iviz.Displays
             set
             {
                 elementScale = value;
-                UpdateQuadComputeBuffer();
+                //UpdateQuadComputeBuffer();
             }
         }
+        */
 
-        public float FovAngle
+        public Intrinsic Intrinsic
         {
-            get => fovAngle;
+            get => intrinsic;
             set
             {
-                fovAngle = value;
+                if (value.Equals(intrinsic))
+                {
+                    return;
+                }
+
+                intrinsic = value;
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -70,6 +78,7 @@ namespace Iviz.Displays
             }
         }
 
+        [CanBeNull]
         public ImageTexture ColorImage
         {
             get => colorImage;
@@ -93,6 +102,7 @@ namespace Iviz.Displays
             }
         }
 
+        [CanBeNull]
         public ImageTexture DepthImage
         {
             get => depthImage;
@@ -127,14 +137,14 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (DepthImage?.Texture is null)
+            if (DepthImage?.Texture == null)
             {
                 return;
             }
 
-            material.SetFloat(PScale, transform.lossyScale.x);
-            material.SetMatrix(PLocalToWorld, transform.localToWorldMatrix);
-            material.SetMatrix(PWorldToLocal, transform.worldToLocalMatrix);
+            material.SetFloat(PScale, Transform.lossyScale.x);
+            material.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
+            material.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
 
             Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
@@ -154,21 +164,24 @@ namespace Iviz.Displays
                 pointComputeBuffer = null;
             }
 
+            /*
             if (quadComputeBuffer != null)
             {
                 quadComputeBuffer.Release();
                 quadComputeBuffer = null;
             }
+            */
 
             uvs = Array.Empty<Vector2>();
             width = 0;
             height = 0;
 
-            UpdateQuadComputeBuffer();
+            //UpdateQuadComputeBuffer();
             ColorImage = ColorImage;
             DepthImage = DepthImage;
         }
 
+        /*
         void UpdateQuadComputeBuffer()
         {
             if (quadComputeBuffer == null)
@@ -179,6 +192,7 @@ namespace Iviz.Displays
 
             quadComputeBuffer.SetData(BaseQuad, 0, 0, 4);
         }
+        */
 
         void UpdateColorTexture([CanBeNull] Texture2D texture)
         {
@@ -204,7 +218,8 @@ namespace Iviz.Displays
 
         void UpdatePointComputeBuffers([CanBeNull] Texture2D sourceTexture)
         {
-            if (sourceTexture == null || sourceTexture.width == width && sourceTexture.height == height)
+            if (sourceTexture == null
+                || sourceTexture.width == width && sourceTexture.height == height)
             {
                 return;
             }
@@ -242,23 +257,25 @@ namespace Iviz.Displays
 
         void UpdatePosValues([CanBeNull] Texture2D texture)
         {
-            if (texture is null)
+            if (texture == null)
             {
                 return;
             }
 
             float ratio = (float) texture.height / texture.width;
-            float posCoeffX = 2 * Mathf.Tan(FovAngle * Mathf.Deg2Rad / 2);
-            float posCoeffY = posCoeffX * ratio;
-            float posAddX = -0.5f * posCoeffX;
-            float posAddY = -0.5f * posCoeffY;
+            float posMulX = intrinsic.Fx / texture.width;
+            float posMulY = intrinsic.Fy / texture.width * ratio;
+            //float posAddX = -0.5f * posCoeffX;
+            //float posAddY = -0.5f * posCoeffY;
+            float posAddX = -intrinsic.Cx / texture.width * posMulX;
+            float posAddY = -intrinsic.Cy / texture.height * posMulY;
 
-            material.SetFloat(PropPointSize, posCoeffX / texture.width * ElementScale);
-            material.SetVector(PropPosSt, new Vector4(posCoeffX, posCoeffY, posAddX, posAddY));
+            material.SetFloat(PropPointSize, posMulX / texture.width);
+            material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
 
-            const float maxDepth = 5.0f;
-            Vector3 size = new Vector3(posCoeffX, 1, posCoeffY) * maxDepth;
-            Vector3 center = new Vector3(0, maxDepth / 2, 0);
+            const float maxDepthForBounds = 5.0f;
+            Vector3 size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
+            Vector3 center = new Vector3(0, maxDepthForBounds / 2, 0);
 
             BoxCollider.center = center;
             BoxCollider.size = size;
@@ -274,9 +291,11 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
 
+            /*
             quadComputeBuffer?.Release();
             quadComputeBuffer = null;
-            
+            */
+
             material.SetTexture(PColor, null);
             material.SetTexture(PDepth, null);
 
@@ -284,14 +303,14 @@ namespace Iviz.Displays
             height = 0;
             uvs = Array.Empty<Vector2>();
         }
-        
+
         void OnDestroy()
         {
             ColorImage = null;
             DepthImage = null;
 
             pointComputeBuffer?.Release();
-            quadComputeBuffer?.Release();
+            //quadComputeBuffer?.Release();
 
             if (material != null)
             {

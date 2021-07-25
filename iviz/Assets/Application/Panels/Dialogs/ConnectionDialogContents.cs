@@ -33,8 +33,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            serverMode.InactiveText = "Master Mode";
-            serverMode.ActiveText = "Client Mode";
+            serverMode.InactiveText = "Master Off";
+            serverMode.ActiveText = "Master On";
             serverMode.State = false;
         }
 

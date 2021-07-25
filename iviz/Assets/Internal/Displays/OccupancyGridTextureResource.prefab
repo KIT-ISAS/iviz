@@ -106,5 +106,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 614dc1dc30584260a7c67dca6f4e1a04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 0}
+  boxCollider: {fileID: 9001608685486769029}
+  colormap: 0
+  intensityBounds: {x: 0, y: 0}
+  flipMinMax: 0
+  tint: {r: 0, g: 0, b: 0, a: 0}
+  elementScale: 1
   texture: {fileID: 0}
+  meshRenderer: {fileID: 3543364979145727234}

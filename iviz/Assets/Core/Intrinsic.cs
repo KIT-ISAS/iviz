@@ -1,5 +1,7 @@
+using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.MsgsWrapper;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
@@ -26,7 +28,18 @@ namespace Iviz.Core
 
         public Intrinsic Scale(float f) => new Intrinsic(Fx * f, Cx * f, Fy * f, Cy * f);
 
+        public Vector3f Unproject(in Vector2f v, float z)
+        {
+            return new Vector3f((v.X - Cx) / Fx * z, (v.Y - Cy) / Fy * z, z);
+        }
+
         [NotNull]
         public double[] ToArray() => new double[] {Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1};
+
+        public bool Equals(in Intrinsic other) => (Fx, Cx, Fy, Cy) == (other.Fx, other.Cx, other.Fy, other.Cy);
+
+        public override bool Equals(object obj) => obj is Intrinsic other && Equals(other);
+
+        public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }
 } 

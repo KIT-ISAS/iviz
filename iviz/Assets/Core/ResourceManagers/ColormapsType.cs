@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Iviz.Displays;
 using Iviz.Msgs.IvizCommonMsgs;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -10,8 +11,8 @@ namespace Iviz.Resources
     {
         public const int Size = 14;
         public const int AtlasSize = 16;
-        public ReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
-        public ReadOnlyCollection<string> Names { get; }
+        [NotNull] public ReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
+        [NotNull] public ReadOnlyCollection<string> Names { get; }
         
         public ColormapsType()
         {

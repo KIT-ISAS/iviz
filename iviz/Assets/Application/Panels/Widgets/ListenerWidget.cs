@@ -36,10 +36,7 @@ namespace Iviz.App
                 }
 
                 listener = value;
-                if (value != null)
-                {
-                    UpdateStats();
-                }
+                UpdateStats();
             }
         }
 
@@ -56,6 +53,13 @@ namespace Iviz.App
 
         void UpdateStats()
         {
+            if (listener == null)
+            {
+                text.text = "[No Topic Set]\n<b>Off</b>";
+                panel.color = Resource.Colors.DisabledPanelColor;
+                return;
+            }
+            
             CachedStr.Length = 0;
             CachedStr.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
 
@@ -81,12 +85,6 @@ namespace Iviz.App
                 .Append(" kB/s</b>");
 
             text.text = CachedStr.ToString();
-
-            if (listener == null)
-            {
-                panel.color = EnabledColor;
-                return;
-            }
 
             panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
         }

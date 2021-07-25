@@ -35,13 +35,13 @@ namespace Iviz.Displays
 
         Mesh mesh;
         
-        [CanBeNull] MeshRenderer meshRenderer;
+        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] MeshFilter meshFilter;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
 
         Material currentMaterial;
 
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
+        [NotNull] MeshRenderer MeshRenderer => meshRenderer;
 
         int Size => pointBuffer.Length;
 
@@ -75,7 +75,7 @@ namespace Iviz.Displays
                             "Point clouds may not appear correctly.");
                 mesh = new Mesh {name = "PointCloud Mesh"};
                 mesh.MarkDynamic();
-                GetComponent<MeshFilter>().mesh = mesh;
+                meshFilter.mesh = mesh;
                 MeshRenderer.enabled = true;
             }
 

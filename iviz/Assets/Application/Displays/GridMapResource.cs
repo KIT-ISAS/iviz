@@ -23,15 +23,14 @@ namespace Iviz.Displays
 
         [SerializeField] Material opaqueMaterial;
         [SerializeField] Material transparentMaterial;
+        [SerializeField] MeshRenderer meshRenderer;
 
         Mesh mesh;
         int cellsX;
         int cellsY;
-
-        [CanBeNull] MeshRenderer meshRenderer;
-
+        
         [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
+        MeshRenderer MeshRenderer => meshRenderer;
 
         protected override void Awake()
         {

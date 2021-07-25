@@ -41,6 +41,8 @@ namespace Iviz.Displays
         public GameObject ARDialogNotice;
         public GameObject ARButtonDialog;
 
+        public GameObject ARMarkerHighlighter;
+
         public GameObject RotationDisc;
         public GameObject SpringDisc;
         public GameObject SpringDisc3D;

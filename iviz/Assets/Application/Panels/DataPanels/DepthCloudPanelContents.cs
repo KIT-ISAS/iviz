@@ -3,21 +3,27 @@
     public sealed class DepthCloudPanelContents : DataPanelContents
     {
         public FrameWidget Frame { get; private set; }
-        public DropdownWidget Depth { get; private set; }
-        public DropdownWidget Color { get; private set; }
-        public SliderWidget FOV { get; private set; }
-        public SliderWidget PointSize { get; private set; }
+        public InputFieldWithHintsWidget Depth { get; private set; }
+        public ListenerWidget DepthTopic { get; private set; }
+        public ListenerWidget DepthInfoTopic { get; private set; }
+        public InputFieldWithHintsWidget Color { get; private set; }
+        public ListenerWidget ColorTopic { get; private set; }
+        public ImagePreviewWidget DepthPreview { get; private set; }
+        public ImagePreviewWidget ColorPreview { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
 
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthCloud");
+            DepthTopic = p.AddListener();
+            DepthInfoTopic = p.AddListener();
+            ColorTopic = p.AddListener();
             Frame = p.AddFrame();
-            Depth = p.AddDropdown("Depth Image");
-            Color = p.AddDropdown("Color Image");
-            FOV = p.AddSlider("FOV Angle").SetMinValue(0).SetMaxValue(89).SetNumberOfSteps(89);
-            PointSize = p.AddSlider("Point Size").SetMinValue(0.1f).SetMaxValue(5f).SetNumberOfSteps(49);
+            Depth = p.AddInputFieldWithHints("Depth Topic");
+            Color = p.AddInputFieldWithHints("Color Topic");
+            DepthPreview = p.AddImagePreviewWidget("Depth Preview");
+            ColorPreview = p.AddImagePreviewWidget("Color Preview");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

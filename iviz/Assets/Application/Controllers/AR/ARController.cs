@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -75,7 +76,7 @@ namespace Iviz.Controllers
         public static bool HasARController => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
         public static bool InstanceVisible => Instance != null && Instance.Visible;
-        
+
         readonly ARConfiguration config = new ARConfiguration();
         readonly MarkerDetector detector = new MarkerDetector();
 
@@ -84,14 +85,14 @@ namespace Iviz.Controllers
         Vector3? joyVelocityPos;
 
         protected Canvas canvas;
-        
+
         public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
-        
+
         public Sender<Image> ColorSender { get; private set; }
         public Sender<Image> DepthSender { get; private set; }
-        protected Sender<CameraInfo> colorInfoSender;  
-        protected Sender<CameraInfo> depthInfoSender;  
+        protected Sender<CameraInfo> colorInfoSender;
+        protected Sender<CameraInfo> depthInfoSender;
 
         public bool PublishColor { get; set; }
         public bool PublishDepth { get; set; }
@@ -290,7 +291,7 @@ namespace Iviz.Controllers
             depthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
 
             detector.MarkerDetected += OnMarkerDetected;
-            
+
             Frame.ForceInvisible = true;
         }
 
@@ -444,6 +445,7 @@ namespace Iviz.Controllers
 
 
         uint markerSeq;
+
         void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IReadOnlyList<IMarkerCorners> markers)
         {
             DetectedARMarker ToMarker(IMarkerCorners marker) => new DetectedARMarker
@@ -459,15 +461,21 @@ namespace Iviz.Controllers
                     .ToArray(),
                 CameraIntrinsic = screenshot.Intrinsic.ToArray(),
             };
-            
-            var array = markers.Select(ToMarker).ToArray();
 
+            var array = markers.Select(ToMarker).ToArray();
             foreach (var marker in array)
             {
                 MarkerExecutor.Process(marker);
             }
 
             MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
+
+            foreach (var corners in markers)
+            {
+                var highlighter = ResourcePool.RentDisplay<ARMarkerHighlighter>();
+                highlighter.Highlight(corners.Corners, corners.Code, screenshot.Intrinsic,
+                    detector.DelayBetweenCapturesFastInMs - 1 / 30f);
+            }
         }
 
         public virtual void StopController()
@@ -497,7 +505,7 @@ namespace Iviz.Controllers
         void IController.ResetController()
         {
         }
-        
+
         public static void ClearResources()
         {
             ARActiveChanged = null;

@@ -11,6 +11,7 @@ namespace Iviz.Displays
     {
         [SerializeField] LineResource resource = null;
         [SerializeField] GameObject arCamera = null;
+        Transform arCameraTransform;
         bool isSetup;
         bool arActive;
 
@@ -20,12 +21,13 @@ namespace Iviz.Displays
 
             if (resource == null)
             {
-                resource = ResourcePool.RentDisplay<LineResource>(transform);
+                resource = ResourcePool.RentDisplay<LineResource>(Transform);
             }
 
-            transform.SetParentLocal(TfListener.OriginFrame.Transform);
+            arCameraTransform = arCamera.transform;
+            Transform.SetParentLocal(TfListener.OriginFrame.Transform);
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            gameObject.SetActive(false);
+            gameObject.SetActive(!ARController.InstanceVisible);
         }
 
         void OnARCameraViewChanged(bool newState)
@@ -51,7 +53,7 @@ namespace Iviz.Displays
                 }
             }
 
-            transform.SetLocalPose(ARController.RelativePoseToOrigin(arCamera.transform.AsPose()));
+            Transform.SetLocalPose(ARController.RelativePoseToOrigin(arCameraTransform.AsPose()));
         }
 
         void ConstructCameraFrame(in XRCameraIntrinsics intrinsics)

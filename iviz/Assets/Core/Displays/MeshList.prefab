@@ -57,14 +57,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f1a5766e4eb5494b810ab9c05093707, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 0}
-  useIntensityTexture: 0
+  boxCollider: {fileID: 8497843833201729866}
   colormap: 0
   intensityBounds: {x: 0, y: 0}
   flipMinMax: 0
   tint: {r: 0, g: 0, b: 0, a: 0}
-  perVertexScale_: 0
-  size_: 0
-  scale_: {x: 0, y: 0, z: 0}
-  offset_: {x: 0, y: 0, z: 0}
-  occlussionOnly_: 0
+  elementScale: 1
+  elementScale3: {x: 0, y: 0, z: 0}
+  preTranslation: {x: 0, y: 0, z: 0}
+  mesh: {fileID: 0}

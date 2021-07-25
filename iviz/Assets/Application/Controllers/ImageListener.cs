@@ -35,22 +35,22 @@ namespace Iviz.Controllers
 
     public sealed class ImageListener : ListenerController
     {
-        public FrameNode Node { get; }
-        ImageResource marker;
+        readonly FrameNode node;
+        readonly ImageResource billboard;
+        readonly ImageTexture imageTexture;
 
-        public override TfFrame Frame => Node.Parent;
+        public override TfFrame Frame => node.Parent;
 
-        [NotNull] public ImageTexture ImageTexture { get; }
-        [CanBeNull] Texture2D Texture => ImageTexture.Texture;
-        [NotNull] public Material Material => ImageTexture.Material;
+        [CanBeNull] Texture2D Texture => imageTexture.Texture;
+        [NotNull] public Material Material => imageTexture.Material;
 
-        public int ImageWidth => Texture != null ? Texture.width : 0;
-        public int ImageHeight => Texture != null ? Texture.height : 0;
+        public Vector2Int ImageSize =>
+            Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
 
         string descriptionOverride;
-        [NotNull] public string Description => descriptionOverride ?? ImageTexture.Description;
+        [NotNull] public string Description => descriptionOverride ?? imageTexture.Description;
 
-        public bool IsMono => ImageTexture.IsMono;
+        public bool IsMono => imageTexture.IsMono;
         bool isProcessing;
         
         bool IsProcessing
@@ -59,7 +59,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener.SetPause(value);
+                Listener?.SetPause(value);
             }
         }        
 
@@ -93,7 +93,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                marker.Visible = value && config.EnableBillboard;
+                billboard.Visible = value && config.EnableBillboard;
             }
         }
 
@@ -103,7 +103,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Colormap = value;
-                ImageTexture.Colormap = value;
+                imageTexture.Colormap = value;
             }
         }
 
@@ -113,7 +113,7 @@ namespace Iviz.Controllers
             set
             {
                 config.MinIntensity = value;
-                ImageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
             }
         }
 
@@ -123,7 +123,7 @@ namespace Iviz.Controllers
             set
             {
                 config.MaxIntensity = value;
-                ImageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
             }
         }
 
@@ -133,7 +133,7 @@ namespace Iviz.Controllers
             set
             {
                 config.FlipMinMax = value;
-                ImageTexture.FlipMinMax = value;
+                imageTexture.FlipMinMax = value;
             }
         }
 
@@ -143,7 +143,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableBillboard = value;
-                marker.Visible = value && config.Visible;
+                billboard.Visible = value && config.Visible;
             }
         }
 
@@ -153,7 +153,7 @@ namespace Iviz.Controllers
             set
             {
                 config.BillboardSize = value;
-                marker.Scale = value;
+                billboard.Scale = value;
             }
         }
 
@@ -163,7 +163,7 @@ namespace Iviz.Controllers
             set
             {
                 config.BillboardFollowCamera = value;
-                marker.BillboardEnabled = value;
+                billboard.BillboardEnabled = value;
             }
         }
 
@@ -173,18 +173,18 @@ namespace Iviz.Controllers
             set
             {
                 config.BillboardOffset = value;
-                marker.Offset = value.Ros2Unity();
+                billboard.Offset = value.Ros2Unity();
             }
         }
 
         public ImageListener([NotNull] IModuleData moduleData)
         {
-            ImageTexture = new ImageTexture();
-            Node = FrameNode.Instantiate("[ImageNode]");
+            imageTexture = new ImageTexture();
+            node = FrameNode.Instantiate("[ImageNode]");
             this.moduleData = (ImageModuleData) (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
-            marker = ResourcePool.RentDisplay<ImageResource>();
-            marker.Texture = ImageTexture;
-            marker.Parent = Node.transform;
+            billboard = ResourcePool.RentDisplay<ImageResource>();
+            billboard.Texture = imageTexture;
+            billboard.Parent = node.transform;
 
             Config = new ImageConfiguration();
         }
@@ -213,7 +213,7 @@ namespace Iviz.Controllers
 
             void PostProcess()
             {
-                Node.AttachTo(msg.Header);
+                node.AttachTo(msg.Header);
                 IsProcessing = false;
             }
 
@@ -221,11 +221,12 @@ namespace Iviz.Controllers
             {
                 case "png":
                     descriptionOverride = null;
-                    ImageTexture.ProcessPng(msg.Data, PostProcess);
+                    imageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
                 case "jpeg":
+                case "jpg":
                     descriptionOverride = null;
-                    ImageTexture.ProcessJpg(msg.Data, PostProcess);
+                    imageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
@@ -239,24 +240,23 @@ namespace Iviz.Controllers
 
         void Handler([NotNull] Image msg)
         {
-            Node.AttachTo(msg.Header);
+            node.AttachTo(msg.Header);
 
             int width = (int) msg.Width;
             int height = (int) msg.Height;
-            ImageTexture.Set(width, height, msg.Encoding, msg.Data);
+            imageTexture.Set(width, height, msg.Encoding, msg.Data);
         }
 
         public override void StopController()
         {
             base.StopController();
-            marker.Texture = null;
-            marker.ReturnToPool();
-            marker = null;
+            billboard.Texture = null;
+            billboard.ReturnToPool();
 
-            ImageTexture.Stop();
-            ImageTexture.Destroy();
+            imageTexture.Stop();
+            imageTexture.Destroy();
 
-            Node.DestroySelf();
+            node.DestroySelf();
         }
     }
 }

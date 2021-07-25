@@ -1,12 +1,14 @@
-﻿using System;
-using Iviz.Resources;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
-using Iviz.Core;
+using Iviz.Displays;
+using Iviz.Msgs.SensorMsgs;
+using Iviz.Ros;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using UnityEngine;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -25,7 +27,7 @@ namespace Iviz.App
         readonly List<string> depthImageCandidates = new List<string>();
         readonly List<string> colorImageCandidates = new List<string>();
 
-        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) : 
+        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
@@ -34,8 +36,6 @@ namespace Iviz.App
             if (constructor.Configuration != null)
             {
                 controller.Config = (DepthCloudConfiguration) constructor.Configuration;
-                controller.ColorImage = GetImageWithName(controller.ColorName);
-                controller.DepthImage = GetImageWithName(controller.DepthName);
             }
 
             UpdateModuleButton();
@@ -52,90 +52,62 @@ namespace Iviz.App
             panel.Frame.Owner = controller;
             panel.HideButton.State = controller.Visible;
 
-            depthImageCandidates.Clear();
-            depthImageCandidates.Add(NoneStr);
-            depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == ModuleType.Image)
-                    .Select(data => data.Topic)
-            );
-            panel.Depth.Options = depthImageCandidates;
-            try
-            {
-                panel.Depth.Value = controller.DepthName.Length != 0 ? controller.DepthName : NoneStr;
-            }
-            catch (InvalidOperationException)
-            {
-                panel.Depth.Index = 0;
-            }
+            panel.ColorTopic.Listener = controller.ColorListener;
+            panel.DepthTopic.Listener = controller.DepthListener;
+            panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
 
-            colorImageCandidates.Clear();
-            colorImageCandidates.Add(NoneStr);
-            colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == ModuleType.Image)
-                    .Select(data => data.Topic)
-            );
-            panel.Color.Options = colorImageCandidates;
-            try
-            {
-                panel.Color.Value = controller.ColorName.Length != 0 ? controller.ColorName : NoneStr;
-            }
-            catch (InvalidOperationException)
-            {
-                panel.Color.Index = 0;
-            }
+            panel.Color.Value = controller.ColorTopic;
+            panel.Depth.Value = controller.DepthTopic;
 
-            panel.PointSize.Value = controller.PointSize;
-            panel.FOV.Value = controller.FovAngle;
+            panel.ColorPreview.Material = controller.ColorMaterial;
+            panel.DepthPreview.Material = controller.DepthMaterial;
 
-            panel.PointSize.ValueChanged += f => { controller.PointSize = f; };
-            panel.Depth.ValueChanged += (i, s) =>
-            {
-                controller.DepthImage = (i == 0) ? null : GetImageWithName(s);
-                controller.DepthName = s;
-            };
-            panel.Color.ValueChanged += (i, s) =>
-            {
-                controller.ColorImage = (i == 0) ? null : GetImageWithName(s);
-                controller.ColorName = s;
-            };
-            panel.FOV.ValueChanged += f => { controller.FovAngle = f; };
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
-        }
-        
-        [CanBeNull]
-        ImageListener GetImageWithName(string name)
-        {
-            return ModuleListPanel.ModuleDatas
-                .OfType<ImageModuleData>()
-                .FirstOrDefault(data => data.Topic == name)
-                ?.Image;
+
+            string[] topics = GetImageTopics().ToArray();
+            panel.Color.Hints = topics;
+            panel.Depth.Hints = topics;
+
+            panel.Color.EndEdit += f =>
+            {
+                controller.ColorTopic = f;
+                panel.ColorTopic.Listener = controller.ColorListener;
+            };
+            panel.Depth.EndEdit += f =>
+            {
+                controller.DepthTopic = f;
+                panel.DepthTopic.Listener = controller.DepthListener;
+                panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
+            };
+            panel.ColorPreview.Clicked += () =>
+            {
+                ModuleListPanel.ShowImageDialog(new ColorListener(this));
+                panel.ColorPreview.Interactable = false;
+            };
+            panel.DepthPreview.Clicked += () =>
+            {
+                ModuleListPanel.ShowImageDialog(new DepthListener(this));
+                panel.DepthPreview.Interactable = false;
+            };
         }
 
         public override void UpdatePanel()
         {
             base.UpdatePanel();
 
-            depthImageCandidates.Clear();
-            depthImageCandidates.Add(NoneStr);
-            depthImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == ModuleType.Image)
-                    .Select(data => data.Topic)
-            );
-            panel.Depth.Options = depthImageCandidates;
-
-            colorImageCandidates.Clear();
-            colorImageCandidates.Add(NoneStr);
-            colorImageCandidates.AddRange(
-                ModuleListPanel.ModuleDatas
-                    .Where(data => data.ModuleType == ModuleType.Image)
-                    .Select(data => data.Topic)
-            );
-            panel.Color.Options = colorImageCandidates;
+            string[] topics = GetImageTopics().ToArray();
+            panel.Color.Hints = topics;
+            panel.Depth.Hints = topics;
+            panel.ColorPreview.ToggleImageEnabled();
+            panel.DepthPreview.ToggleImageEnabled();
         }
+
+        [NotNull]
+        static IEnumerable<string> GetImageTopics() => ConnectionManager.Connection.GetSystemPublishedTopicTypes()
+            .Where(topicInfo =>
+                topicInfo.Type == Image.RosMessageType || topicInfo.Type == CompressedImage.RosMessageType)
+            .Select(topicInfo => topicInfo.Topic);
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
@@ -148,21 +120,11 @@ namespace Iviz.App
                     case nameof(DepthCloudConfiguration.Visible):
                         controller.Visible = config.Visible;
                         break;
-                    case nameof(DepthCloudConfiguration.ColorName):
-                        ImageListener color = GetImageWithId(config.ColorName);
-                        controller.ColorImage = color;
-                        controller.ColorName = color.Config.Topic;
+                    case nameof(DepthCloudConfiguration.ColorTopic):
+                        controller.ColorTopic = config.ColorTopic;
                         break;
-                    case nameof(DepthCloudConfiguration.DepthName):
-                        ImageListener depth = GetImageWithId(config.DepthName);
-                        controller.DepthImage = depth;
-                        controller.DepthName = depth.Config.Topic;
-                        break;
-                    case nameof(DepthCloudConfiguration.PointSize):
-                        controller.PointSize = config.PointSize;
-                        break;
-                    case nameof(DepthCloudConfiguration.FovAngle):
-                        controller.FovAngle = config.FovAngle;
+                    case nameof(DepthCloudConfiguration.DepthTopic):
+                        controller.DepthTopic = config.DepthTopic;
                         break;
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
@@ -173,27 +135,35 @@ namespace Iviz.App
             ResetPanel();
         }
 
-        [NotNull]
-        static ImageListener GetImageWithId(string imageId)
-        {
-            ModuleData imageData = ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
-                data => data.Configuration.Id == imageId);
-            if (imageData == null)
-            {
-                throw new InvalidOperationException($"No image with id '{imageId}' found");
-            }
-
-            if (imageData.ModuleType != ModuleType.Image)
-            {
-                throw new InvalidOperationException($"Module with id '{imageId}' is not an image");
-            }
-
-            return ((ImageModuleData) imageData).Image;
-        }
-
         public override void AddToState(StateConfiguration config)
         {
             config.DepthImageProjectors.Add(controller.Config);
         }
+
+        sealed class ColorListener : IImageDialogListener
+        {
+            readonly DepthCloudController controller;
+            readonly ImagePreviewWidget previewWidget;
+
+            public ColorListener([NotNull] DepthCloudModuleData moduleData) =>
+                (controller, previewWidget) = (moduleData.controller, moduleData.panel.ColorPreview);
+
+            public Material Material => controller.ColorMaterial;
+            public Vector2Int ImageSize => controller.ColorImageSize;
+            public void OnDialogClosed() => previewWidget.Interactable = true;
+        }
+        
+        sealed class DepthListener : IImageDialogListener
+        {
+            readonly DepthCloudController controller;
+            readonly ImagePreviewWidget previewWidget;
+
+            public DepthListener([NotNull] DepthCloudModuleData moduleData) =>
+                (controller, previewWidget) = (moduleData.controller, moduleData.panel.DepthPreview);
+
+            public Material Material => controller.DepthMaterial;
+            public Vector2Int ImageSize => controller.DepthImageSize;
+            public void OnDialogClosed() => previewWidget.Interactable = true;
+        }        
     }
 }

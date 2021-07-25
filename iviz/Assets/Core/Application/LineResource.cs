@@ -44,15 +44,14 @@ namespace Iviz.Displays
 
         [CanBeNull] ComputeBuffer lineComputeBuffer;
         [CanBeNull] Mesh mesh;
-        [CanBeNull] MeshRenderer meshRenderer;
+
+        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] MeshFilter meshFilter;
 
         bool linesNeedAlpha;
 
         [NotNull] Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
-
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
-
+        [NotNull] MeshRenderer MeshRenderer => meshRenderer;
         bool UsesAlpha => linesNeedAlpha || Tint.a <= 254f / 255f;
 
         public override bool UseColormap
@@ -242,7 +241,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            GetComponent<MeshFilter>().sharedMesh = Mesh;
+            meshFilter.sharedMesh = Mesh;
             MeshRenderer.SetPropertyBlock(Properties);
 
             base.Awake();

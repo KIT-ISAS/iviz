@@ -6,8 +6,8 @@ namespace Iviz.App
 {
     public interface IImageDialogListener
     {
-        Material Material { get; }
-        Vector2 ImageSize { get; }
+        [NotNull] Material Material { get; }
+        Vector2Int ImageSize { get; }
         void OnDialogClosed();
     }
 

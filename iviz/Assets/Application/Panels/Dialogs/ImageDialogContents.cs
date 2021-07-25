@@ -19,23 +19,17 @@ namespace Iviz.App
         public string Label
         {
             get => text.text;
-            set
-            {
-                text.text = value;
-            }
+            set => text.text = value;
         }
 
         public Material Material
         {
             get => image.material;
-            set
-            {
-                image.material = value;
-            }
+            set => image.material = value;
         }
 
-        Vector2 imageSize;
-        public Vector2 ImageSize
+        Vector2Int imageSize;
+        public Vector2Int ImageSize
         {
             get => imageSize;
             set
@@ -57,21 +51,21 @@ namespace Iviz.App
                 image.transform.localScale = Vector3.one;
                 return;
             }
-            float xscale = maxWidth / imageSize.x;
-            float scaledY = imageSize.y * xscale;
+            float xScale = maxWidth / imageSize.x;
+            float scaledY = imageSize.y * xScale;
 
-            float yscale = maxHeight / imageSize.y;
-            float scaledX = imageSize.x * yscale;
+            float yScale = maxHeight / imageSize.y;
+            float scaledX = imageSize.x * yScale;
 
             if (scaledY < maxHeight)
             {
-                float newYscale = scaledY / maxHeight;
-                image.transform.localScale = new Vector3(1, newYscale, 1);
+                float newYScale = scaledY / maxHeight;
+                image.transform.localScale = new Vector3(1, newYScale, 1);
             }
             else
             {
-                float newXscale = scaledX / maxWidth;
-                image.transform.localScale = new Vector3(newXscale, 1, 1);
+                float newXScale = scaledX / maxWidth;
+                image.transform.localScale = new Vector3(newXScale, 1, 1);
             }
         }
 

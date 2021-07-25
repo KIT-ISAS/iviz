@@ -93,13 +93,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3062ccb030de43c18056a32d3acaecd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 0}
-  useIntensityTexture: 0
+  boxCollider: {fileID: 2234756334549693617}
   colormap: 0
   intensityBounds: {x: 0, y: 0}
   flipMinMax: 0
   tint: {r: 0, g: 0, b: 0, a: 0}
-  squareTexture: {fileID: 2800000, guid: 04213bdf833214d08bd82bfb7d5c1296, type: 3}
+  elementScale: 1
+  opaqueMaterial: {fileID: 0}
+  transparentMaterial: {fileID: 0}
+  meshRenderer: {fileID: 6789157690098177885}
 --- !u!65 &2234756334549693617
 BoxCollider:
   m_ObjectHideFlags: 0

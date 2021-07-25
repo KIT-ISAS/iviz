@@ -135,4 +135,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff47e7a304145d845a14d3aa9746b2e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 0}
+  boxCollider: {fileID: 1128600323534261624}

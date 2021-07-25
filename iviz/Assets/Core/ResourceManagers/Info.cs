@@ -71,8 +71,8 @@ namespace Iviz.Resources
 
         Info([CanBeNull] string resourceName, [CanBeNull] T baseObject) =>
             (this.resourceName, this.baseObject) = (resourceName, baseObject);
-        
-        
+
+
         /// <summary>
         /// Name of this resource.
         /// </summary>
@@ -86,6 +86,7 @@ namespace Iviz.Resources
         /// </summary>
         /// <param name="parent">If not null, sets the clone parent to this.</param>
         /// <returns>An instantiated clone.</returns>
+        [NotNull]
         public T Instantiate([CanBeNull] Transform parent = null) =>
             Object != null
                 ? UnityEngine.Object.Instantiate(Object, parent)

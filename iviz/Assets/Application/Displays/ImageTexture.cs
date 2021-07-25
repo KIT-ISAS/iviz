@@ -91,7 +91,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
+        [NotNull] public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
         public ImageTexture()
         {
@@ -105,6 +105,7 @@ namespace Iviz.Displays
                 case "rgba8":
                 case "bgra8":
                 case "8SC4":
+                case "32FC":
                     return 4;
                 case "rgb8":
                 case "bgr8":
@@ -189,8 +190,14 @@ namespace Iviz.Displays
 
                     GameThread.PostInListenerQueue(() =>
                     {
-                        Set(png.Width, png.Height, EncodingFromPng(png), newData);
-                        onFinished();
+                        try
+                        {
+                            Set(png.Width, png.Height, EncodingFromPng(png), newData);
+                        }
+                        finally
+                        {
+                            onFinished();
+                        }
                     });
                 }
                 catch (Exception e)
@@ -273,8 +280,14 @@ namespace Iviz.Displays
 
                     GameThread.PostInListenerQueue(() =>
                     {
-                        Set(image.Width, image.Height, encoding, bitmapBuffer.AsSegment(bmpHeaderLength));
-                        onFinished();
+                        try
+                        {
+                            Set(image.Width, image.Height, encoding, bitmapBuffer.AsSegment(bmpHeaderLength));
+                        }
+                        finally
+                        {
+                            onFinished();
+                        }
                     });
                 }
                 catch (Exception e)
@@ -338,6 +351,10 @@ namespace Iviz.Displays
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
                     break;
+                case "32FC":
+                    IsMono = true;
+                    Material.EnableKeyword("USE_INTENSITY");
+                    break;
                 default:
                     return;
             }
@@ -382,6 +399,9 @@ namespace Iviz.Displays
                 case "mono8":
                 case "8UC1":
                     texture = EnsureSize(width, height, TextureFormat.R8);
+                    break;
+                case "32FC":
+                    texture = EnsureSize(width, height, TextureFormat.RFloat);
                     break;
                 default:
                     return;
