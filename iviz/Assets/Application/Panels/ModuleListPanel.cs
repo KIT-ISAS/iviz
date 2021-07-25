@@ -419,7 +419,7 @@ namespace Iviz.App
             }
             else
             {
-                string filename = $"{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+                string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
                 Directory.CreateDirectory(Settings.BagsFolder);
                 ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
                 recordBagImage.color = Color.red;

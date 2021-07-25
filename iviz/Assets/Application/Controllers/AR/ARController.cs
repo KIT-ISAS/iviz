@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.App;
@@ -19,6 +20,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -40,11 +42,14 @@ namespace Iviz.Controllers
         [IgnoreDataMember] public float WorldScale { get; set; } = 1.0f;
         [IgnoreDataMember] public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
 
-        [DataMember] public bool EnableQrDetection { get; set; }
-        [DataMember] public bool EnableArucoDetection { get; set; }
+        [DataMember] public bool EnableQrDetection { get; set; } = true;
+        [DataMember] public bool EnableArucoDetection { get; set; } = true;
         [DataMember] public bool EnableMeshing { get; set; } = true;
         [DataMember] public bool EnablePlaneDetection { get; set; } = true;
-        [DataMember] public OcclusionQualityType OcclusionQuality { get; set; }
+        [DataMember] public OcclusionQualityType OcclusionQuality { get; set; } = OcclusionQualityType.Fast;
+
+        [DataMember] public bool PublishDepth { get; set; } = true;
+        [DataMember] public bool PublishColor { get; set; } = true;
 
         [IgnoreDataMember] public float WorldAngle { get; set; }
         [IgnoreDataMember] public bool ShowARJoystick { get; set; }
@@ -90,11 +95,21 @@ namespace Iviz.Controllers
         
         public Sender<Image> ColorSender { get; private set; }
         public Sender<Image> DepthSender { get; private set; }
+        public Sender<Image> DepthConfidenceSender { get; private set; }
         protected Sender<CameraInfo> colorInfoSender;  
-        protected Sender<CameraInfo> depthInfoSender;  
+        protected Sender<CameraInfo> depthInfoSender;
 
-        public bool PublishColor { get; set; }
-        public bool PublishDepth { get; set; }
+        public bool PublishColor
+        {
+            get => config.PublishColor;
+            set => config.PublishColor = value;            
+        }
+
+        public bool PublishDepth
+        {
+            get => config.PublishDepth;
+            set => config.PublishDepth = value;
+        }
 
 
         public ARConfiguration Config
@@ -110,6 +125,8 @@ namespace Iviz.Controllers
                 EnablePlaneDetection = value.EnablePlaneDetection;
                 EnableArucoDetection = value.EnableArucoDetection;
                 EnableQrDetection = value.EnableQrDetection;
+                PublishColor = value.PublishColor;
+                PublishDepth = value.PublishDepth;
             }
         }
 
@@ -286,6 +303,7 @@ namespace Iviz.Controllers
 
             ColorSender = new Sender<Image>("~color/image_color");
             DepthSender = new Sender<Image>("~depth/image_color");
+            DepthConfidenceSender = new Sender<Image>("~depth/image_confidence");
             colorInfoSender = new Sender<CameraInfo>("~color/camera_info");
             depthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
 
@@ -439,9 +457,8 @@ namespace Iviz.Controllers
         {
             var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
             var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-            TfListener.Publish(TfListener.FixedFrameId, HeadFrameId, relativePose);
+            TfListener.Publish(HeadFrameId, relativePose);
         }
-
 
         uint markerSeq;
         void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IReadOnlyList<IMarkerCorners> markers)

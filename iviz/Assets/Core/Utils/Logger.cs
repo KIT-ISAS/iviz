@@ -36,6 +36,7 @@ namespace Iviz.Core
             ExternalImpl(t, LogLevel.Error, e, file, line);
         }
 
+        [Obsolete]
         public static void Error(Exception e)
         {
         }
@@ -175,7 +176,8 @@ namespace Iviz.Core
             string message = str.ToString();
             LogExternal?.Invoke(new LogMessage(level, message));
 
-            if (!Settings.IsMobile)
+            //if (!Settings.IsMobile)
+            if (true)
             {
                 UnityEngine.Debug.LogWarning((string) msg + e);
             }

@@ -71,13 +71,14 @@ namespace Iviz.App
             
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
-            panel.PublishColor.Value = controller.PublishColor;
+            //panel.PublishColor.Value = controller.PublishColor;
             panel.ColorSender.Set(controller.ColorSender);
-            panel.PublishDepth.Value = controller.PublishDepth;
+            //panel.PublishDepth.Value = controller.PublishDepth;
             panel.DepthSender.Set(controller.DepthSender);
+            panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
 
-            panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
-            panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
+            //panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
+            //panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
         }
         
         public override void UpdatePanel()

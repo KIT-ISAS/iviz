@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
@@ -192,14 +193,19 @@ namespace Iviz.Controllers
                 if (value)
                 {
                     var meshManager = arCamera.gameObject.EnsureComponent<ARMeshManager>();
+                    //Debug.Log("Adding new mesh managgr");
                     meshManager.meshPrefab = meshPrefab;
                     meshManager.normals = false;
                 }
                 else
                 {
                     var meshManager = arCamera.gameObject.GetComponent<ARMeshManager>();
-                    meshManager.DestroyAllMeshes();
-                    Destroy(meshManager);
+                    if (meshManager != null)
+                    {
+                        //Debug.Log("Destroying mesh managgr");
+                        meshManager.DestroyAllMeshes();
+                        Destroy(meshManager);
+                    }
                 }
             }
         }
@@ -293,10 +299,8 @@ namespace Iviz.Controllers
 
             WorldPoseChanged += OnWorldPoseChanged;
 
-            OcclusionQuality = OcclusionQualityType.Off;
-
             Settings.ScreenCaptureManager =
-                new ARFoundationScreenCaptureManager(cameraManager, arCamera.transform, occlusionManager);
+                new ARFoundationScreenCaptureManager(cameraManager, arCamera.transform, occlusionManager, arSession);
 
             if (GuiInputModule.Instance != null)
             {
@@ -316,10 +320,17 @@ namespace Iviz.Controllers
             SetupModeEnabled = true;
         }
 
-        public void ResetSession()
+        public async void ResetSession()
         {
+            bool meshingEnabled = EnableMeshing;
+            var occlusionQuality = OcclusionQuality;
+            EnableMeshing = false;
             arSession.Reset();
             ResetSetupMode();
+
+            await Task.Delay(200);
+            EnableMeshing = meshingEnabled;
+            OcclusionQuality = occlusionQuality;
         }
 
         bool IsSamePose(in Pose b)
@@ -379,7 +390,6 @@ namespace Iviz.Controllers
             {
                 setupModeFrame.Transform.position = hit.pose.position;
                 setupModeFrame.Tint = Color.white;
-                //hasSetupModePose = true;
                 ArSet.Visible = true;
                 ArInfoPanel.SetActive(false);
             }
@@ -387,7 +397,6 @@ namespace Iviz.Controllers
             {
                 setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
                 setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
-                //hasSetupModePose = false;
                 ArSet.Visible = false;
             }
         }
@@ -424,9 +433,11 @@ namespace Iviz.Controllers
             }
         }
 
+        public int CaptureFps { get; set; } = 15;
+
         void ProcessCapture()
         {
-            if (!(GameThread.GameTime - lastScreenCapture > 0.5f))
+            if (CaptureFps <= 0 || GameThread.GameTime - lastScreenCapture < 1 / (float) CaptureFps)
             {
                 return;
             }
@@ -532,53 +543,71 @@ namespace Iviz.Controllers
 
         async void CaptureScreenForPublish(CancellationToken token)
         {
-            var captureManager = Settings.ScreenCaptureManager;
-            bool shouldPublishColor = PublishColor && ColorSender.NumSubscribers != 0;
-            bool shouldPublishDepth = PublishDepth && DepthSender.NumSubscribers != 0;
-            if (captureManager == null || token.IsCancellationRequested || (!shouldPublishColor && !shouldPublishDepth))
+            try
             {
-                return;
-            }
+                var captureManager = (ARFoundationScreenCaptureManager) Settings.ScreenCaptureManager;
+                bool shouldPublishColor = PublishColor && ColorSender.NumSubscribers != 0;
+                bool shouldPublishDepth = PublishDepth && DepthSender.NumSubscribers != 0;
+                bool shouldPublishConfidence = PublishDepth && DepthConfidenceSender.NumSubscribers != 0;
+                if (captureManager == null || token.IsCancellationRequested ||
+                    (!shouldPublishColor && !shouldPublishDepth && !shouldPublishConfidence))
+                {
+                    return;
+                }
 
-            Screenshot color, depth;
-            const int captureReuseTimeInMs = 125;
+                const int captureReuseTimeInMs = 30;
 
-            if (shouldPublishColor && !shouldPublishDepth)
-            {
-                color = await captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
-                depth = null;
-            }
-            else if (!shouldPublishColor)
-            {
-                color = null;
-                depth = await captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
-            }
-            else
-            {
-                var colorTask = captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
-                var depthTask = captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this);
-                await (colorTask.AsTask(), depthTask.AsTask()).WhenAll();
-                color = colorTask.Result;
-                depth = depthTask.Result;
-            }
+                var colorTask = shouldPublishColor
+                    ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
+                    : (ValueTask<Screenshot>?) null;
 
-            string frameId = TfListener.ResolveFrameId(CameraFrameId);
-            if (color != null)
-            {
-                ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
-                colorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
-            }
+                var depthTask = shouldPublishDepth
+                    ? captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
+                    : (ValueTask<Screenshot>?) null;
 
-            if (depth != null)
-            {
-                DepthSender.Publish(depth.CreateImageMessage(frameId, depthSeq));
-                depthInfoSender.Publish(depth.CreateCameraInfoMessage(frameId, depthSeq++));
-            }
+                var confidenceTask = shouldPublishConfidence
+                    ? captureManager.CaptureDepthConfidenceAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
+                    : (ValueTask<Screenshot>?) null;
 
-            var anyPose = (color ?? depth)?.CameraPose;
-            if (anyPose != null)
+                var color = colorTask != null ? await colorTask.Value : null;
+                var depth = depthTask != null ? await depthTask.Value : null;
+                var confidence = confidenceTask != null ? await confidenceTask.Value : null;
+
+                var frame = TfListener.ResolveFrame(CameraFrameId);
+                frame.ForceInvisible = true;
+                string frameId = frame.Id;
+
+                if (color != null)
+                {
+                    ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
+                    colorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
+                }
+
+                if (depth != null)
+                {
+                    DepthSender.Publish(depth.CreateImageMessage(frameId, depthSeq));
+                }
+
+                if (confidence != null)
+                {
+                    DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
+                }
+
+                if (depth != null || confidence != null)
+                {
+                    depthInfoSender.Publish((depth ?? confidence).CreateCameraInfoMessage(frameId, depthSeq++));
+                }
+
+                var anyPose = (color ?? depth)?.CameraPose;
+                if (anyPose != null)
+                {
+                    var rosPose = TfListener.RelativePoseToFixedFrame(anyPose.Value).Unity2RosPose().ToCameraFrame();
+                    TfListener.Publish(frameId, rosPose);
+                }
+            }
+            catch (Exception e)
             {
-                TfListener.Publish(frameId, anyPose.Value);
+                Logger.Error("CaptureScreenForPublish failed", e);
             }
         }
 

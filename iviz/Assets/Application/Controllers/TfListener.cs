@@ -596,6 +596,9 @@ namespace Iviz.Controllers
             Publish(FixedFrameId, childFrame, relativePose.Unity2RosTransform());
         }
 
+        public static void Publish([NotNull] string childFrame, in Msgs.GeometryMsgs.Transform rosTransform) =>
+            Publish(FixedFrameId, childFrame, rosTransform);
+        
         public static void Publish([CanBeNull] string parentFrame, [NotNull] string childFrame,
             in Msgs.GeometryMsgs.Transform rosTransform)
         {

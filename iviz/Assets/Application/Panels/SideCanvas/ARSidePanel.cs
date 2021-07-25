@@ -19,6 +19,7 @@ namespace Iviz.App
         static ARFoundationController Controller =>
             ARController.Instance.CheckedNull() ?? throw new NullReferenceException("AR Controller is not set");
 
+        [SerializeField] PopupButton openPanel;
         [SerializeField] PopupButton arVisible;
         [SerializeField] PopupButton move;
         [SerializeField] PopupButton reposition;
@@ -105,6 +106,13 @@ namespace Iviz.App
         {
             ARController.ARActiveChanged += OnArEnabledChanged;
 
+            openPanel.Clicked += () =>
+            {
+                if (ARController.Instance != null)
+                {
+                    ARController.Instance.ModuleData.ShowPanel();
+                }
+            };
             arVisible.Clicked += () =>
                 Controller.Visible = (arVisible.Enabled = !arVisible.Enabled);
             move.Clicked += () =>
@@ -129,7 +137,7 @@ namespace Iviz.App
             {
                 occlusionEnabled.Enabled = !occlusionEnabled.Enabled;
                 Controller.OcclusionQuality =
-                    occlusionEnabled.Enabled ? OcclusionQualityType.Best : OcclusionQualityType.Off;
+                    occlusionEnabled.Enabled ? OcclusionQualityType.Fast : OcclusionQualityType.Off;
             };
             
             tfVisible.Clicked += () => 

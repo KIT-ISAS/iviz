@@ -65,6 +65,7 @@ namespace Iviz.Displays
         [NotNull] MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
 
         LineResource resource;
+        static readonly int Tint = Shader.PropertyToID("_Tint");
 
         public Bounds? Bounds => resource.Bounds;
 
@@ -126,6 +127,11 @@ namespace Iviz.Displays
             if (args.added.Contains(MeshFilter) || args.updated.Contains(MeshFilter))
             {
                 WriteMeshLines();
+            }
+
+            if (args.removed.Contains(MeshFilter))
+            {
+                resource.Reset();
             }
         }
 

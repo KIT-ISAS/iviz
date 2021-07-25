@@ -75,11 +75,6 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Action<IMessage> handler) : this(topic, (T t) => handler(t))
-        {
-        }
-
-
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
