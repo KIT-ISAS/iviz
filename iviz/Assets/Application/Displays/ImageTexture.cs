@@ -22,13 +22,13 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-        byte[] bitmapBuffer;
+        [CanBeNull] byte[] bitmapBuffer;
+        Vector2 intensityBounds;
+        bool flipMinMax;
 
         public event Action<Texture2D> TextureChanged;
         public event Action<Texture2D> ColormapChanged;
-
-        Vector2 intensityBounds;
-
+        
         public Vector2 IntensityBounds
         {
             get => intensityBounds;
@@ -57,9 +57,7 @@ namespace Iviz.Displays
                 }
             }
         }
-
-        bool flipMinMax;
-
+        
         public bool FlipMinMax
         {
             get => flipMinMax;
@@ -98,36 +96,36 @@ namespace Iviz.Displays
             Material = Resource.Materials.ImagePreview.Instantiate();
         }
 
-        static int FieldSizeFromEncoding(string encoding)
+        static int? FieldSizeFromEncoding([NotNull] string encoding)
         {
-            switch (encoding)
+            switch (encoding.ToUpperInvariant())
             {
                 case "32FC":
                 case "32FC1":
-                case "rgba8":
-                case "bgra8":
+                case "RGBA8":
+                case "BGRA8":
                 case "8SC4":
                 case "8UC4":
                     return 4;
-                case "rgb8":
-                case "bgr8":
+                case "RGB8":
+                case "BGR8":
                 case "8SC3":
                 case "8UC3":
                     return 3;
-                case "mono16":
+                case "MONO16":
                 case "16UC":
                 case "16UC1":
                 case "16SC":
                 case "16SC1":
                     return 2;
-                case "mono8":
+                case "MONO8":
                 case "8UC":
                 case "8UC1":
                 case "8SC":
                 case "8SC1":
                     return 1;
                 default:
-                    return -1;
+                    return null;
             }
         }
 
@@ -165,13 +163,29 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void ProcessPng(byte[] data, [NotNull] Action onFinished)
+        public void ProcessPng([NotNull] byte[] data, [NotNull] Action onFinished)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (onFinished == null)
+            {
+                throw new ArgumentNullException(nameof(onFinished));
+            }
+
             Task.Run(() =>
             {
                 try
                 {
                     BigGustave.Png png = BigGustave.Png.Open(data);
+                    string encoding = EncodingFromPng(png);
+                    if (encoding == null)
+                    {
+                        Logger.Error($"{this}: Ignoring PNG with unsupported encoding '{png.Header.ColorType}'");
+                        return;
+                    }
 
                     byte[] newData;
                     if (png.RowOffset != 0)
@@ -201,7 +215,7 @@ namespace Iviz.Displays
                     {
                         try
                         {
-                            Set(png.Width, png.Height, EncodingFromPng(png), newData);
+                            Set(png.Width, png.Height, encoding, newData);
                         }
                         finally
                         {
@@ -217,16 +231,25 @@ namespace Iviz.Displays
             });
         }
 
-        public void ProcessJpg(byte[] data, [NotNull] Action onFinished)
+        public void ProcessJpg([NotNull] byte[] data, [NotNull] Action onFinished)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (onFinished == null)
+            {
+                throw new ArgumentNullException(nameof(onFinished));
+            }
+
             Task.Run(() =>
             {
                 try
                 {
                     JpegImage image = new JpegImage(new MemoryStream(data));
 
-                    string encoding = null;
-
+                    string encoding;
                     int reqSize = image.Height * image.Width;
                     switch (image.Colorspace)
                     {
@@ -265,6 +288,9 @@ namespace Iviz.Displays
                             reqSize *= 2;
                             break;
                         }
+                        default:
+                            encoding = null;
+                            break;
                     }
 
                     if (encoding == null)
@@ -307,57 +333,67 @@ namespace Iviz.Displays
             });
         }
 
-        public void Set(int width, int height, string encoding, [NotNull] byte[] data)
+        public void Set(int width, int height, [NotNull] string encoding, [NotNull] byte[] data)
         {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+            
             Set(width, height, encoding, data.AsSegment());
         }
 
-        public void Set(int width, int height, string encoding, in ArraySegment<byte> data,
+        public void Set(int width, int height, [NotNull] string encoding, in ArraySegment<byte> data,
             bool generateMipmaps = false)
         {
-            int size = width * height;
-            int bpp = FieldSizeFromEncoding(encoding);
-
-            if (bpp == -1)
+            if (encoding == null)
             {
-                Logger.Debug($"ImageListener: Unsupported encoding '{encoding}'");
+                throw new ArgumentNullException(nameof(encoding));
+            }
+            
+            int size = width * height;
+            int? bpp = FieldSizeFromEncoding(encoding);
+
+            if (bpp == null)
+            {
+                Logger.Debug($"{this}: Unsupported encoding '{encoding}'");
                 return;
             }
 
             if (data.Count < size * bpp)
             {
                 Logger.Debug(
-                    $"ImageListener: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
+                    $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
                     $"received {data.Count.ToString()}");
                 return;
             }
 
-            Description = $"<b>{width.ToString()}x{height.ToString()} pixels | {encoding}</b>";
+            Description = $"{width.ToString()}x{height.ToString()} pixels | {encoding}";
 
-            switch (encoding)
+            switch (encoding.ToUpperInvariant())
             {
-                case "rgba8":
+                case "RGBA8":
                 case "8SC4":
                 case "8UC4":
-                case "rgb8":
+                case "RGB8":
                 case "8SC3":
                 case "8UC3":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
                     break;
-                case "bgra8":
-                case "bgr8":
+                case "BGRA8":
+                case "BGR8":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.EnableKeyword("FLIP_RB");
                     break;
-                case "mono16":
+                case "MONO16":
                 case "16UC":
                 case "16UC1":
                 case "16SC":
                 case "16SC1":
-                case "mono8":
+                case "MONO8":
                 case "8UC":
                 case "8UC1":
                 case "8SC":
@@ -371,53 +407,56 @@ namespace Iviz.Displays
                     return;
             }
 
-            ApplyTexture(width, height, data, encoding, size * bpp, generateMipmaps);
+            ApplyTexture(width, height, data, encoding, size * bpp.Value, generateMipmaps);
         }
 
-        void ApplyTexture(int width, int height, in ArraySegment<byte> data, string type, int length,
+        void ApplyTexture(int width, int height, in ArraySegment<byte> data, [NotNull] string encoding, int length,
             bool generateMipmaps)
         {
             bool alreadyCopied = false;
             Texture2D texture;
-            switch (type)
+            switch (encoding.ToUpperInvariant())
             {
-                case "rgb8" when !Settings.SupportsRGB24:
-                case "bgr8" when !Settings.SupportsRGB24:
-                case "8UC3" when !Settings.SupportsRGB24:
-                case "8SC3" when !Settings.SupportsRGB24:
-                    texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                    CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>(), length);
-                    alreadyCopied = true;
-                    break;
-                case "rgb8":
-                case "bgr8":
+                case "RGB8":
+                case "BGR8":
                 case "8SC3":
                 case "8UC3":
-                    texture = EnsureSize(width, height, TextureFormat.RGB24);
+                    if (!Settings.SupportsRGB24)
+                    {
+                        texture = EnsureSize(width, height, TextureFormat.RGBA32);
+                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>(), length);
+                        alreadyCopied = true;
+                    }
+                    else
+                    {
+                        texture = EnsureSize(width, height, TextureFormat.RGB24);
+                    }
+
                     break;
-                case "rgba8":
-                case "bgra8":
+                case "RGBA8":
+                case "BGRA8":
                 case "8SC4":
                 case "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     break;
-                case "mono16" when !Settings.SupportsR16:
-                case "16SC1" when !Settings.SupportsR16:
-                case "16UC1" when !Settings.SupportsR16:
-                case "16SC" when !Settings.SupportsR16:
-                case "16UC" when !Settings.SupportsR16:
-                    texture = EnsureSize(width, height, TextureFormat.R8);
-                    CopyR16ToR8(data, texture.GetRawTextureData<byte>(), length);
-                    alreadyCopied = true;
-                    break;
-                case "mono16":
+                case "MONO16":
                 case "16UC1":
                 case "16SC1":
                 case "16UC":
                 case "16SC":
-                    texture = EnsureSize(width, height, TextureFormat.R16);
+                    if (!Settings.SupportsR16)
+                    {
+                        texture = EnsureSize(width, height, TextureFormat.R8);
+                        CopyR16ToR8(data, texture.GetRawTextureData<byte>(), length);
+                        alreadyCopied = true;
+                    }
+                    else
+                    {
+                        texture = EnsureSize(width, height, TextureFormat.R16);
+                    }
+
                     break;
-                case "mono8":
+                case "MONO8":
                 case "8UC1":
                 case "8UC":
                 case "8SC1":
@@ -457,7 +496,7 @@ namespace Iviz.Displays
             fixed (byte* srcPtr = &src.Array[src.Offset])
             {
                 byte* srcPtrOff = srcPtr + 1;
-                
+
                 for (int i = numElements; i >= 0; i--)
                 {
                     *dstPtr = *srcPtrOff;
@@ -466,7 +505,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         unsafe void CopyRgb24ToRgba32(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)
         {
             if (src.Array == null)
@@ -484,7 +523,7 @@ namespace Iviz.Displays
             fixed (byte* srcPtr0 = &src.Array[src.Offset])
             {
                 byte* srcPtr = srcPtr0;
-                
+
                 for (int i = numElements; i >= 0; i--)
                 {
                     *dstPtr++ = *srcPtr++;
@@ -493,7 +532,7 @@ namespace Iviz.Displays
                     *dstPtr++ = 255;
                 }
             }
-        }        
+        }
 
         [NotNull]
         Texture2D EnsureSize(int width, int height, TextureFormat format)
@@ -532,10 +571,7 @@ namespace Iviz.Displays
                 UnityEngine.Object.Destroy(Texture);
             }
 
-            if (Material != null)
-            {
-                UnityEngine.Object.Destroy(Material);
-            }
+            UnityEngine.Object.Destroy(Material);
         }
     }
 }

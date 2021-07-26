@@ -33,6 +33,7 @@ namespace Iviz.Controllers
         readonly ImageTexture colorImageTexture;
         bool depthIsProcessing;
         bool colorIsProcessing;
+        TextureFormat? lastDepthFormat;
 
         public IModuleData ModuleData { get; }
         public TfFrame Frame => node.Parent;
@@ -193,6 +194,38 @@ namespace Iviz.Controllers
                 DepthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
             }
         }
+        
+        [NotNull]
+        public string Description
+        {
+            get
+            {
+                var depthTexture = depthImageTexture.Texture;
+                var colorTexture = colorImageTexture.Texture;
+
+                if (depthTexture == null && colorTexture == null)
+                {
+                    return "[No Depth or Color Image]";
+                }
+
+                string depthDescription = depthTexture != null
+                    ? $"<b>Depth {depthImageTexture.Description}</b> | "
+                    : "[No Depth Image] | ";
+                
+                string colorDescription = colorTexture != null
+                    ? $"<b>Color {depthImageTexture.Description}</b>\n"
+                    : "[No Color Image]\n";
+
+                float horizontalFov = projector.Intrinsic.GetHorizontalFovInRad(depthImageTexture.Width);
+                float verticalFov = projector.Intrinsic.GetVerticalFovInRad(depthImageTexture.Height);
+                string intrinsicDescription = horizontalFov != 0
+                    ? "hFOV=" + ((int) (horizontalFov * Mathf.Rad2Deg)).ToString() + " deg " +
+                      "vFOV=" + ((int) (verticalFov * Mathf.Rad2Deg)).ToString() + " deg"
+                    : "[No Intrinsic Data]";
+
+                return depthDescription + colorDescription + intrinsicDescription;
+            }
+        }
 
         void DepthHandler([NotNull] Image msg)
         {
@@ -201,6 +234,7 @@ namespace Iviz.Controllers
             int width = (int) msg.Width;
             int height = (int) msg.Height;
             depthImageTexture.Set(width, height, msg.Encoding, msg.Data);
+            UpdateIntensityBounds();
         }
 
         bool DepthHandlerCompressed([NotNull] CompressedImage msg)
@@ -216,6 +250,7 @@ namespace Iviz.Controllers
             {
                 node.AttachTo(msg.Header);
                 DepthIsProcessing = false;
+                UpdateIntensityBounds();
             }
 
             switch (msg.Format)
@@ -230,6 +265,29 @@ namespace Iviz.Controllers
             }
 
             return true;
+        }
+
+        void UpdateIntensityBounds()
+        {
+            TextureFormat? format = depthImageTexture.Texture != null
+                ? depthImageTexture.Texture.format
+                : (TextureFormat?) null;
+            
+            if (format == lastDepthFormat)
+            {
+                return;
+            }
+
+            lastDepthFormat = format;
+            switch (format)
+            {
+                case TextureFormat.RFloat:
+                    depthImageTexture.IntensityBounds = new Vector2(0, 5);
+                    break;
+                case TextureFormat.R16:
+                    depthImageTexture.IntensityBounds = new Vector2(0, 5000 / 65535f);
+                    break;
+            }
         }
 
         void ColorHandler([NotNull] Image msg)

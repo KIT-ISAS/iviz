@@ -81,7 +81,7 @@ Shader "iviz/DepthCloud"
 				const float2 quadVertex = Quad[id];
 				float2 center = _Points[inst];
 
-				const float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r ;
+				const float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r * _DepthScale;
 				const float2 size = z * extent * _PointSize;
 
 				float4 pos;
@@ -92,7 +92,7 @@ Shader "iviz/DepthCloud"
 
 				// Set vertex output.
 				o.position = UnityObjectToClipPos(pos) + float4(quadVertex * size, 0, 0);				 
-                o.uv = float2(center);
+                o.uv = center;
 				return o;
 			}
 

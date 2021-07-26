@@ -50,7 +50,7 @@ namespace Iviz.App
         {
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
-            panel.Description.Label = listener.Description;
+            panel.Description.Label = $"<b>{listener.Description}</b>";
             panel.HideButton.State = listener.Visible;
 
             panel.PreviewWidget.Material = listener.Material;
@@ -126,7 +126,7 @@ namespace Iviz.App
             panel.Min.Interactable = listener.IsMono;
             panel.Max.Interactable = listener.IsMono;
             panel.FlipMinMax.Interactable = listener.IsMono;
-            panel.Description.Label = listener.Description;
+            panel.Description.Label = $"<b>{listener.Description}</b>";
             panel.PreviewWidget.ToggleImageEnabled();
         }
 

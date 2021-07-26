@@ -30,6 +30,10 @@ namespace Iviz.App
         {
         }
 
+        public virtual void UpdatePanelFast()
+        {
+        }
+
         public virtual void FinalizePanel()
         {
         }

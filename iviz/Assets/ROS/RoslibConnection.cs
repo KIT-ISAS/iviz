@@ -239,22 +239,22 @@ namespace Iviz.Ros
                 switch (e)
                 {
                     case RosUnreachableUriException _:
-                        Core.Logger.Internal($"<b>Error:</b> Cannot reach my own URI. Reason: {e.Message}");
+                        Core.Logger.Internal($"<b>Connection failed:</b> Cannot reach my own URI. Reason: {e.Message}");
                         break;
                     case RosUriBindingException _:
                         Core.Logger.Internal(
-                            $"<b>Error:</b> Failed to bind to port {MyUri?.Port}. " +
+                            $"<b>Error:</b> Port {MyUri?.Port} is already being used by another application. " +
                             $"Maybe another iviz instance is running? Try another port!");
                         break;
                     case RoslibException _:
                     case TimeoutException _:
                     case XmlRpcException _:
                     {
-                        Core.Logger.Internal("<b>Error:</b>", e);
+                        Core.Logger.Internal("<b>Connection failed:</b>", e);
                         if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                         {
                             Core.Logger.Internal("Note: This appears to be a local ROS master. " +
-                                                 "Make sure that <b>My URI</b> is a reachable address.");
+                                                 "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
                         }
 
                         break;

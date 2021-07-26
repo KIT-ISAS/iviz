@@ -22,43 +22,19 @@ namespace Iviz.Displays
         static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         static readonly int PScale = Shader.PropertyToID("_Scale");
-
-        static readonly Vector2[] BaseQuad =
-        {
-            new Vector2(0.5f, 0.5f),
-            new Vector2(0.5f, -0.5f),
-            new Vector2(-0.5f, -0.5f),
-            new Vector2(-0.5f, 0.5f)
-        };
-
-
+        static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
+        
         [SerializeField] Material material;
         [SerializeField] float elementScale = 1;
         [SerializeField] int width;
         [SerializeField] int height;
         Intrinsic intrinsic;
 
-        ImageTexture colorImage;
-        ImageTexture depthImage;
-        ComputeBuffer pointComputeBuffer;
-        //ComputeBuffer quadComputeBuffer;
+        [CanBeNull] ImageTexture colorImage;
+        [CanBeNull] ImageTexture depthImage;
+        [CanBeNull] ComputeBuffer pointComputeBuffer;
 
-        Vector2[] uvs = Array.Empty<Vector2>();
-
-        /*
-        /// <summary>
-        /// Size multiplier for points
-        /// </summary>
-        public float ElementScale
-        {
-            get => elementScale;
-            set
-            {
-                elementScale = value;
-                //UpdateQuadComputeBuffer();
-            }
-        }
-        */
+        [NotNull] Vector2[] uvs = Array.Empty<Vector2>();
 
         public Intrinsic Intrinsic
         {
@@ -90,10 +66,10 @@ namespace Iviz.Displays
                 }
 
                 colorImage = value;
-                if (colorImage != null)
+                if (value != null)
                 {
-                    UpdateColorTexture(colorImage.Texture);
-                    colorImage.TextureChanged += UpdateColorTexture;
+                    UpdateColorTexture(value.Texture);
+                    value.TextureChanged += UpdateColorTexture;
                 }
                 else
                 {
@@ -115,12 +91,12 @@ namespace Iviz.Displays
                 }
 
                 depthImage = value;
-                if (depthImage != null)
+                if (value != null)
                 {
-                    UpdateDepthTexture(depthImage.Texture);
-                    UpdateColormap(depthImage.ColormapTexture);
-                    depthImage.TextureChanged += UpdateDepthTexture;
-                    depthImage.ColormapChanged += UpdateColormap;
+                    UpdateDepthTexture(value.Texture);
+                    UpdateColormap(value.ColormapTexture);
+                    value.TextureChanged += UpdateDepthTexture;
+                    value.ColormapChanged += UpdateColormap;
                 }
                 else
                 {
@@ -164,35 +140,13 @@ namespace Iviz.Displays
                 pointComputeBuffer = null;
             }
 
-            /*
-            if (quadComputeBuffer != null)
-            {
-                quadComputeBuffer.Release();
-                quadComputeBuffer = null;
-            }
-            */
-
             uvs = Array.Empty<Vector2>();
             width = 0;
             height = 0;
 
-            //UpdateQuadComputeBuffer();
             ColorImage = ColorImage;
             DepthImage = DepthImage;
         }
-
-        /*
-        void UpdateQuadComputeBuffer()
-        {
-            if (quadComputeBuffer == null)
-            {
-                quadComputeBuffer = new ComputeBuffer(4, Marshal.SizeOf<Vector2>());
-                material.SetBuffer(PQuad, quadComputeBuffer);
-            }
-
-            quadComputeBuffer.SetData(BaseQuad, 0, 0, 4);
-        }
-        */
 
         void UpdateColorTexture([CanBeNull] Texture2D texture)
         {
@@ -214,6 +168,23 @@ namespace Iviz.Displays
 
             UpdatePointComputeBuffers(texture);
             UpdatePosValues(texture);
+
+            if (depthImage == null || depthImage.Texture == null)
+            {
+                return;
+            }
+            
+            switch (depthImage.Texture.format)
+            {
+                case TextureFormat.RFloat:
+                    depthImage.IntensityBounds = new Vector2(0, 5);
+                    material.SetFloat(PDepthScale, 1);
+                    break;
+                case TextureFormat.R16:
+                    depthImage.IntensityBounds = new Vector2(0, 5000 / 65535f);
+                    material.SetFloat(PDepthScale, 65.535f);
+                    break;
+            }            
         }
 
         void UpdatePointComputeBuffers([CanBeNull] Texture2D sourceTexture)
@@ -291,11 +262,6 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
 
-            /*
-            quadComputeBuffer?.Release();
-            quadComputeBuffer = null;
-            */
-
             material.SetTexture(PColor, null);
             material.SetTexture(PDepth, null);
 
@@ -310,7 +276,6 @@ namespace Iviz.Displays
             DepthImage = null;
 
             pointComputeBuffer?.Release();
-            //quadComputeBuffer?.Release();
 
             if (material != null)
             {

@@ -1,9 +1,12 @@
-﻿namespace Iviz.App
+﻿using UnityEngine;
+
+namespace Iviz.App
 {
     public sealed class DepthCloudPanelContents : DataPanelContents
     {
         public FrameWidget Frame { get; private set; }
         public InputFieldWithHintsWidget Depth { get; private set; }
+        public DataLabelWidget Description { get; private set; }
         public ListenerWidget DepthTopic { get; private set; }
         public ListenerWidget DepthInfoTopic { get; private set; }
         public InputFieldWithHintsWidget Color { get; private set; }
@@ -20,6 +23,7 @@
             DepthInfoTopic = p.AddListener();
             ColorTopic = p.AddListener();
             Frame = p.AddFrame();
+            Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;
             Depth = p.AddInputFieldWithHints("Depth Topic");
             Color = p.AddInputFieldWithHints("Color Topic");
             DepthPreview = p.AddImagePreviewWidget("Depth Preview");

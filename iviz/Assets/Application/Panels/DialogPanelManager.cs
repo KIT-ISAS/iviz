@@ -74,6 +74,7 @@ namespace Iviz.App
             started = true;
 
             GameThread.EverySecond += UpdateSelected;
+            GameThread.EveryFastTick += UpdateSelectedFast;
         }
 
         [NotNull]
@@ -97,8 +98,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
-
-            //Span<byte> var numbers = stackalloc byte[1024];
+            GameThread.EveryFastTick -= UpdateSelectedFast;
         }
 
         void UpdateSelected()
@@ -106,6 +106,18 @@ namespace Iviz.App
             try
             {
                 selectedDialogData?.UpdatePanel();
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Error($"{this}: Exception during UpdatePanel" + e);
+            }
+        }
+
+        void UpdateSelectedFast()
+        {
+            try
+            {
+                selectedDialogData?.UpdatePanelFast();
             }
             catch (Exception e)
             {

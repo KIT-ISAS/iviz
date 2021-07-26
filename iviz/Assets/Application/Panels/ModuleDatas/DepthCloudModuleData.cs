@@ -24,9 +24,6 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        readonly List<string> depthImageCandidates = new List<string>();
-        readonly List<string> colorImageCandidates = new List<string>();
-
         public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
@@ -61,6 +58,8 @@ namespace Iviz.App
 
             panel.ColorPreview.Material = controller.ColorMaterial;
             panel.DepthPreview.Material = controller.DepthMaterial;
+
+            panel.Description.Label = controller.Description;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -101,6 +100,7 @@ namespace Iviz.App
             panel.Depth.Hints = topics;
             panel.ColorPreview.ToggleImageEnabled();
             panel.DepthPreview.ToggleImageEnabled();
+            panel.Description.Label = controller.Description;
         }
 
         [NotNull]
@@ -152,7 +152,7 @@ namespace Iviz.App
             public Vector2Int ImageSize => controller.ColorImageSize;
             public void OnDialogClosed() => previewWidget.Interactable = true;
         }
-        
+
         sealed class DepthListener : IImageDialogListener
         {
             readonly DepthCloudController controller;
@@ -164,6 +164,6 @@ namespace Iviz.App
             public Material Material => controller.DepthMaterial;
             public Vector2Int ImageSize => controller.DepthImageSize;
             public void OnDialogClosed() => previewWidget.Interactable = true;
-        }        
+        }
     }
 }

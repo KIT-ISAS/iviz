@@ -178,7 +178,7 @@ namespace Iviz.App
 
             UpdateFrameText();
         }
-
+        
         void UpdateFrameListAsTree()
         {
             description.Clear();
@@ -223,7 +223,7 @@ namespace Iviz.App
             cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }
 
-        void UpdateFrameText()
+        public void UpdateFrameText()
         {
             if (!isInitialized)
             {

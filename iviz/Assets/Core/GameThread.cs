@@ -15,7 +15,8 @@ namespace Iviz.Core
         static GameThread Instance;
         readonly ConcurrentQueue<Action> actionsQueue = new ConcurrentQueue<Action>();
         readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
-        float lastRunTime;
+        float lastSecondRunTime;
+        float lastTickRunTime;
         Thread gameThread; // only used for id
         int counter;
 
@@ -55,7 +56,7 @@ namespace Iviz.Core
             Now = DateTime.Now;
             nowFormatted = null;
             GameTime = Time.time;
-            if (GameTime - lastRunTime > 1)
+            if (GameTime - lastSecondRunTime > 1)
             {
                 try
                 {
@@ -75,8 +76,22 @@ namespace Iviz.Core
                     Logger.Error($"{this}: Error during LateEverySecond" + e);
                 }
 
-                lastRunTime = GameTime;
+                lastSecondRunTime = GameTime;
             }
+            
+            if (GameTime - lastTickRunTime > 0.1f)
+            {
+                try
+                {
+                    EveryFastTick?.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{this}: Error during EveryFastTick", e);
+                }
+
+                lastTickRunTime = GameTime;
+            }            
 
             while (actionsQueue.TryDequeue(out Action action))
             {
@@ -179,6 +194,8 @@ namespace Iviz.Core
         /// Runs once per second.
         /// </summary>
         public static event Action EverySecond;
+
+        public static event Action EveryFastTick;
 
         /// <summary>
         /// Runs once per second, but after EverySecond has finished.

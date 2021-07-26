@@ -230,8 +230,8 @@ namespace Iviz.Controllers
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
-                        ? $"<b>[Unknown Format]</b>"
-                        : $"<b>[Unknown Format '{msg.Format}']</b>";
+                        ? "[Unknown Format]"
+                        : $"[Unknown Format '{msg.Format}']";
                     break;
             }
 

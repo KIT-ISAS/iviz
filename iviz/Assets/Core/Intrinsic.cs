@@ -5,6 +5,7 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.MsgsWrapper;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -38,8 +39,14 @@ namespace Iviz.Core
 
         public bool Equals(in Intrinsic other) => (Fx, Cx, Fy, Cy) == (other.Fx, other.Cx, other.Fy, other.Cy);
 
+        public float GetHorizontalFovInRad(float width) => 
+            Fx != 0 && width != 0 ? 2 * Mathf.Atan(width / (2 * Fx)) : 0;
+
+        public float GetVerticalFovInRad(float height) =>
+            Fy != 0 && height != 0 ? 2 * Mathf.Atan(height / (2 * Fy)) : 0;
+
         public override bool Equals(object obj) => obj is Intrinsic other && Equals(other);
 
         public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }
-} 
+}

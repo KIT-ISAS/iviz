@@ -23,12 +23,16 @@ namespace Iviz.App
         [SerializeField] PopupButton arVisible;
         [SerializeField] PopupButton move;
         [SerializeField] PopupButton reposition;
+
         [SerializeField] PopupButton reset;
-        [SerializeField] PopupButton pin;
-        [SerializeField] PopupButton meshVisible;
+
+        //[SerializeField] PopupButton pin;
+        //[SerializeField] PopupButton meshVisible;
         [SerializeField] PopupButton meshEnabled;
+
         [SerializeField] PopupButton meshReset;
-        [SerializeField] PopupButton meshPing;
+
+        //[SerializeField] PopupButton meshPing;
         [SerializeField] PopupButton qrEnabled;
         [SerializeField] PopupButton arucoEnabled;
         [SerializeField] PopupButton occlusionEnabled;
@@ -95,7 +99,7 @@ namespace Iviz.App
             qrEnabled.Enabled = Controller.EnableQrDetection;
             arucoEnabled.Enabled = Controller.EnableArucoDetection;
             meshEnabled.Enabled = Controller.EnableMeshing;
-            pin.Enabled = Controller.PinRootMarker;
+            //pin.Enabled = Controller.PinRootMarker;
             occlusionEnabled.Enabled = Controller.OcclusionQuality != OcclusionQualityType.Off;
             tfVisible.Enabled = TfListener.Instance.Visible;
             tfConnect.Enabled = TfListener.Instance.ParentConnectorVisible;
@@ -116,7 +120,17 @@ namespace Iviz.App
             arVisible.Clicked += () =>
                 Controller.Visible = (arVisible.Enabled = !arVisible.Enabled);
             move.Clicked += () =>
-                Controller.ShowARJoystick = (move.Enabled = !move.Enabled);
+            {
+                if (ARController.Instance != null && !ARController.Instance.SetupModeEnabled)
+                {
+                    Controller.ShowARJoystick = (move.Enabled = !move.Enabled);
+                }
+                else if (move.Enabled)
+                {
+                    Controller.ShowARJoystick = false;
+                    move.Enabled = false;
+                }
+            };
             reposition.Clicked += () =>
                 Controller.ResetSetupMode();
             qrEnabled.Clicked += () =>
@@ -125,8 +139,8 @@ namespace Iviz.App
                 Controller.EnableArucoDetection = (arucoEnabled.Enabled = !arucoEnabled.Enabled);
             meshEnabled.Clicked += () =>
                 Controller.EnableMeshing = (meshEnabled.Enabled = !meshEnabled.Enabled);
-            pin.Clicked += () =>
-                Controller.PinRootMarker = (pin.Enabled = !pin.Enabled);
+            //pin.Clicked += () =>
+            //    Controller.PinRootMarker = (pin.Enabled = !pin.Enabled);
             reset.Clicked += () => Controller.ResetSession();
             meshReset.Clicked += () =>
             {
@@ -139,12 +153,12 @@ namespace Iviz.App
                 Controller.OcclusionQuality =
                     occlusionEnabled.Enabled ? OcclusionQualityType.Fast : OcclusionQualityType.Off;
             };
-            
-            tfVisible.Clicked += () => 
+
+            tfVisible.Clicked += () =>
                 TfListener.Instance.Visible = (tfVisible.Enabled = !tfVisible.Enabled);
-            tfConnect.Clicked  += () => 
+            tfConnect.Clicked += () =>
                 TfListener.Instance.ParentConnectorVisible = (tfConnect.Enabled = !tfConnect.Enabled);
-            tfText.Clicked  += () => 
+            tfText.Clicked += () =>
                 TfListener.Instance.FrameLabelsVisible = (tfText.Enabled = !tfText.Enabled);
 
             Active = true;

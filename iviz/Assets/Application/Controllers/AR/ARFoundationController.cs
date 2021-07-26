@@ -148,10 +148,10 @@ namespace Iviz.Controllers
 
         bool setupModeEnabled = true;
 
-        bool SetupModeEnabled
+        public bool SetupModeEnabled
         {
             get => setupModeEnabled;
-            set
+            private set
             {
                 setupModeEnabled = value;
                 ArSet.Visible = value;

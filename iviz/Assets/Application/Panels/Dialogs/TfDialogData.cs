@@ -35,7 +35,12 @@ namespace Iviz.App
         {
             panel.TfLog.Flush();
         }
-        
+
+        public override void UpdatePanelFast()
+        {
+            panel.TfLog.UpdateFrameText();
+        }
+
         public void Show([NotNull] TfFrame frame)
         {
             if (frame == null)
