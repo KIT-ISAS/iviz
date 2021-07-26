@@ -6,6 +6,8 @@ namespace Iviz.Resources
 {
     public sealed class MaterialsType
     {
+        static readonly int Tint = Shader.PropertyToID("_Tint");
+        
         public Info<Material> FontMaterial { get; }
         public Info<Material> FontMaterialZWrite { get; }
 
@@ -98,7 +100,10 @@ namespace Iviz.Resources
             TransparentLineSimpleWithColormap = new Info<Material>(assetHolder.TransparentLineSimpleWithColormap);
 
             LinePulse = new Info<Material>(assetHolder.LinePulse);
+            LinePulse.Object.SetColor(Tint, Color.white);            
+
             LineMesh = new Info<Material>(assetHolder.LineMesh);
+            LineMesh.Object.SetColor(Tint, Color.white);            
 
             MeshList = new Info<Material>(assetHolder.MeshListMaterial);
             MeshListWithColormap = new Info<Material>(assetHolder.MeshListWithColormap);

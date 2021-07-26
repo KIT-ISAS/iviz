@@ -32,7 +32,7 @@ namespace Iviz.App
         {
             Initialize();
         }
-        
+
         void Initialize()
         {
             if (initialized)
@@ -58,7 +58,7 @@ namespace Iviz.App
             Sizes = sizes.AsReadOnly();
             Actions = actions.AsReadOnly();
 
-            string[] typesStr = Enum.GetNames(typeof(ARMarkerType));
+            string[] typesStr = {"Aruco", "QR", "Unset"};
 
             foreach (var (widget, row) in types.WithIndex())
             {

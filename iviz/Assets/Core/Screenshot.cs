@@ -8,9 +8,11 @@ namespace Iviz.Core
 {
     public enum ScreenshotFormat
     {
+        Mono8,
         Rgb,
         Bgra,
-        R16,
+        Mono16,
+        Float,
     }
 
     public sealed class Screenshot
@@ -24,14 +26,14 @@ namespace Iviz.Core
         public Pose CameraPose { get; }
         public byte[] Bytes { get; }
 
-        public Screenshot(ScreenshotFormat format, int width, int height, int bpp, in Intrinsic intrinsic,
-            in Pose cameraPose, byte[] bytes)
+        public Screenshot(ScreenshotFormat format, int width, int height, in Intrinsic intrinsic, in Pose cameraPose,
+            byte[] bytes)
         {
             Format = format;
             Timestamp = time.Now();
             Width = width;
             Height = height;
-            Bpp = bpp;
+            Bpp = BppFromFormat(format);
             Intrinsic = intrinsic;
             CameraPose = cameraPose;
             Bytes = bytes;
@@ -48,7 +50,7 @@ namespace Iviz.Core
                 K = Intrinsic.ToArray(),
             };
         }
-        
+
         [NotNull]
         public Image CreateImageMessage(string cameraFrameId, uint seqId = 0)
         {
@@ -72,8 +74,32 @@ namespace Iviz.Core
                     return "bgra8";
                 case ScreenshotFormat.Rgb:
                     return "rgb8";
-                case ScreenshotFormat.R16:
+                case ScreenshotFormat.Mono8:
+                    return "mono8";
+                case ScreenshotFormat.Mono16:
                     return "mono16";
+                case ScreenshotFormat.Float:
+                    return "32FC";
+                default:
+                    throw new ArgumentException();
+            }
+        }
+        
+        [NotNull]
+        static int BppFromFormat(ScreenshotFormat format)
+        {
+            switch (format)
+            {
+                case ScreenshotFormat.Bgra:
+                    return 4;
+                case ScreenshotFormat.Rgb:
+                    return 3;
+                case ScreenshotFormat.Mono8:
+                    return 1;
+                case ScreenshotFormat.Mono16:
+                    return 2;
+                case ScreenshotFormat.Float:
+                    return 4;
                 default:
                     throw new ArgumentException();
             }

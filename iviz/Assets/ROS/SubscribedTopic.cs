@@ -83,7 +83,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.Logger.Error($"Failed to subscribe to service (try {t}): ", e);
+                        Core.Logger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }

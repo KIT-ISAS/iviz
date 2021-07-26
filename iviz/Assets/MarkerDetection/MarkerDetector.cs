@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -7,7 +9,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
@@ -24,10 +26,8 @@ namespace Iviz.MarkerDetection
         CancellationToken Token => tokenSource.Token;
         public event Action<Screenshot, IReadOnlyList<IMarkerCorners>> MarkerDetected;
 
-        public int DelayBetweenCapturesInMs { get; set; } = 2000;
+        public int DelayBetweenCapturesInMs { get; set; } = 3000;
         public int DelayBetweenCapturesFastInMs { get; set; } = 500;
-
-        public bool Enabled { get; private set; }
 
         public bool EnableQr
         {
@@ -57,22 +57,26 @@ namespace Iviz.MarkerDetection
         async Task RunAsync()
         {
             CvContext cvContext = null;
+
+            //bool round = false;
             try
             {
                 SemaphoreSlim signal = new SemaphoreSlim(0);
-                List<IMarkerCorners> corners = new List<IMarkerCorners>();
 
-                bool lastRoundSuccess = false;
+                ARMarkerType? lastRoundFound = null;
                 while (!Token.IsCancellationRequested)
                 {
                     var screenCaptureManager = Settings.ScreenCaptureManager;
-                    if (screenCaptureManager == null || MarkerDetected == null || !Enabled)
+                    if (screenCaptureManager == null
+                        || MarkerDetected == null
+                        || (!enableAruco && !enableQr))
                     {
                         await Task.Delay(DelayBetweenCapturesInMs, Token);
                         continue;
                     }
 
-                    await Task.Delay(lastRoundSuccess ? DelayBetweenCapturesFastInMs : DelayBetweenCapturesInMs, Token);
+                    await Task.Delay(lastRoundFound != null ? DelayBetweenCapturesFastInMs : DelayBetweenCapturesInMs,
+                        Token);
 
                     Screenshot screenshot = null;
                     GameThread.Post(async () =>
@@ -92,7 +96,6 @@ namespace Iviz.MarkerDetection
                     {
                         continue;
                     }
-
 
                     if (cvContext != null &&
                         (cvContext.Width != screenshot.Width || cvContext.Height != screenshot.Height))
@@ -115,25 +118,57 @@ namespace Iviz.MarkerDetection
                         cvContext.SetImageData(screenshot.Bytes, screenshot.Bpp);
                     }
 
+                    IEnumerable<IMarkerCorners> markerCorners;
 
-                    corners.Clear();
-                    if (EnableQr && cvContext.DetectQrMarkers() != 0)
+                    IEnumerable<IMarkerCorners> ProcessQr()
                     {
-                        var markerCorners = cvContext.GetDetectedQrCorners();
-                        //Logger.Debug($"{this}: Found QR with code '{markerCorners[0].Code}'");
-                        corners.AddRange(markerCorners);
+                        if (cvContext.DetectQrMarkers() == 0)
+                        {
+                            return null;
+                        }
+
+                        lastRoundFound = ARMarkerType.QrCode;
+                        return cvContext.GetDetectedQrCorners();
                     }
 
-                    if (EnableAruco && cvContext.DetectArucoMarkers() != 0)
+                    IEnumerable<IMarkerCorners> ProcessAruco()
                     {
-                        var markerCorners = cvContext.GetDetectedArucoCorners();
-                        //Logger.Debug($"{this}: Found Aruco with code {markerCorners[0].Code}");
-                        corners.AddRange(cvContext.GetDetectedArucoCorners());
+                        if (cvContext.DetectArucoMarkers() == 0)
+                        {
+                            return null;
+                        }
+
+                        lastRoundFound = ARMarkerType.Aruco;
+                        return cvContext.GetDetectedArucoCorners();
                     }
 
-                    lastRoundSuccess = corners.Count != 0;
-                    if (!lastRoundSuccess)
+                    //float start = GameThread.GameTime;
+                    if (enableQr && !enableAruco)
                     {
+                        markerCorners = ProcessQr();
+                    }
+                    else if (enableAruco && !enableQr)
+                    {
+                        markerCorners = ProcessAruco();
+                    }
+                    else if (lastRoundFound != null)
+                    {
+                        markerCorners = lastRoundFound == ARMarkerType.Aruco ? ProcessAruco() : ProcessQr();
+                    }
+                    else
+                    {
+                        var qrCorners = ProcessQr();
+                        var arucoCorners = ProcessAruco();
+                        markerCorners = (qrCorners != null && arucoCorners != null)
+                            ? qrCorners.Concat(arucoCorners)
+                            : (qrCorners ?? arucoCorners);
+                    }
+
+                    //Debug.Log(GameThread.GameTime - start);
+
+                    if (markerCorners == null)
+                    {
+                        lastRoundFound = null;
                         continue;
                     }
 
@@ -141,7 +176,7 @@ namespace Iviz.MarkerDetection
                     {
                         try
                         {
-                            MarkerDetected?.Invoke(screenshot, corners);
+                            MarkerDetected?.Invoke(screenshot, markerCorners.ToArray());
                         }
                         catch (Exception e)
                         {
@@ -171,13 +206,7 @@ namespace Iviz.MarkerDetection
 
         async void SetEnabled(bool value)
         {
-            if (Enabled == value)
-            {
-                return;
-            }
-
-            Enabled = value;
-            if (Enabled)
+            if (value)
             {
                 if (Settings.IsHololens)
                 {

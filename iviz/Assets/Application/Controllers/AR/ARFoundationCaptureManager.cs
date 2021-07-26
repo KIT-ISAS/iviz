@@ -1,24 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Controllers.ARKit;
 using Iviz.Core;
 using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using Debug = UnityEngine.Debug;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARFoundationScreenCaptureManager : IScreenCaptureManager
+    public sealed class ARFoundationScreenCaptureManager : IScreenCaptureManager, IDisposable
     {
         [NotNull] readonly ARCameraManager cameraManager;
         [NotNull] readonly Transform arCameraTransform;
         [NotNull] readonly AROcclusionManager occlusionManager;
+        [NotNull] readonly ARSession arSession;
+        [NotNull] readonly ARKitDepthMapReader depthMapReader = new ARKitDepthMapReader();
+
+        Intrinsic? intrinsic;
+
+        Intrinsic Intrinsic
+        {
+            get
+            {
+                if (intrinsic != null)
+                {
+                    return intrinsic.Value;
+                }
+
+                intrinsic = (cameraManager.TryGetIntrinsics(out var intrinsics)
+                    ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
+                        intrinsics.focalLength.y, intrinsics.principalPoint.y)
+                    : default);
+                return intrinsic.Value;
+            }
+        }
 
         [CanBeNull] Screenshot lastColor;
         [CanBeNull] Screenshot lastDepth;
+        [CanBeNull] Screenshot lastConfidence;
 
         public event Action<Screenshot> ScreenshotColor;
         public event Action<Screenshot> ScreenshotDepth;
@@ -26,11 +52,21 @@ namespace Iviz.Controllers
         public ARFoundationScreenCaptureManager(
             [NotNull] ARCameraManager cameraManager,
             [NotNull] Transform arCameraTransform,
-            [NotNull] AROcclusionManager occlusionManager)
+            [NotNull] AROcclusionManager occlusionManager,
+            [NotNull] ARSession arSession)
         {
-            this.cameraManager = cameraManager;
-            this.arCameraTransform = arCameraTransform;
-            this.occlusionManager = occlusionManager;
+            this.cameraManager = cameraManager != null
+                ? cameraManager
+                : throw new ArgumentNullException(nameof(cameraManager));
+            this.arCameraTransform = arCameraTransform != null
+                ? arCameraTransform
+                : throw new ArgumentNullException(nameof(arCameraTransform));
+            this.occlusionManager = occlusionManager != null
+                ? occlusionManager
+                : throw new ArgumentNullException(nameof(occlusionManager));
+            this.arSession = arSession != null
+                ? arSession
+                : throw new ArgumentNullException(nameof(arSession));
         }
 
         public bool Started => true;
@@ -51,35 +87,40 @@ namespace Iviz.Controllers
         [NotNull]
         public Task StopAsync() => Task.CompletedTask;
 
-        public ValueTask<Screenshot> CaptureColorAsync(int reuseCaptureAgeInMs = 0, CancellationToken token = default)
+        public async ValueTask<Screenshot> CaptureColorAsync(
+            int reuseCaptureAgeInMs = 0,
+            CancellationToken token = default)
         {
             if (reuseCaptureAgeInMs > 0
                 && lastColor != null
                 && (GameThread.Now - lastColor.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return new ValueTask<Screenshot>(lastColor);
+                return lastColor;
             }
 
             token.ThrowIfCancellationRequested();
+
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {
-                return new ValueTask<Screenshot>((Screenshot) null);
+                //Logger.Info($"{this}: Color capture failed.");
+                return null;
             }
 
-            var conversionParams = new XRCpuImage.ConversionParams
+            TaskCompletionSource<Screenshot> task;
+            using (image)
             {
-                inputRect = new RectInt(0, 0, image.width, image.height),
-                outputDimensions = new Vector2Int(image.width, image.height),
-                outputFormat = TextureFormat.RGB24,
-            };
+                var conversionParams = new XRCpuImage.ConversionParams
+                {
+                    inputRect = new RectInt(0, 0, image.width, image.height),
+                    outputDimensions = new Vector2Int(image.width / 2, image.height / 2),
+                    outputFormat = TextureFormat.RGB24,
+                };
 
-            var task = new TaskCompletionSource<Screenshot>();
-            int width = image.width;
-            int height = image.height;
-            var pose = arCameraTransform.AsPose();
+                task = new TaskCompletionSource<Screenshot>();
+                int width = image.width / 2;
+                int height = image.height / 2;
+                var pose = arCameraTransform.AsPose();
 
-            try
-            {
                 image.ConvertAsync(conversionParams, (status, _, array) =>
                 {
                     if (token.IsCancellationRequested)
@@ -90,7 +131,7 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        Debug.LogErrorFormat("Request failed with status {0}", status);
+                        Logger.Info($"{this}: Conversion request of color image failed with status {status}");
                         task.TrySetResult(null);
                         return;
                     }
@@ -98,58 +139,69 @@ namespace Iviz.Controllers
                     byte[] bytes = new byte[array.Length];
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
-                    var intrinsic = cameraManager.TryGetIntrinsics(out var intrinsics)
-                        ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
-                            intrinsics.focalLength.y, intrinsics.principalPoint.y)
-                        : default;
-
-                    var s = new Screenshot(ScreenshotFormat.Rgb, width, height, 3, intrinsic, pose, bytes);
-                    lastColor = s;
-                    ScreenshotColor?.Invoke(s);
-                    task.TrySetResult(s);
+                    var ss = new Screenshot(ScreenshotFormat.Rgb, width, height, Intrinsic, pose, bytes);
+                    lastColor = ss;
+                    ScreenshotColor?.Invoke(ss);
+                    task.TrySetResult(ss);
                 });
             }
-            catch (Exception e)
-            {
-                task.TrySetException(e);
-            }
-            finally
-            {
-                image.Dispose();
-            }
 
-            return new ValueTask<Screenshot>(task.Task);
+            return await task.Task;
         }
-        
-        public ValueTask<Screenshot> CaptureDepthAsync(int reuseCaptureAgeInMs = 0, CancellationToken token = default)
+
+        public async ValueTask<Screenshot> CaptureDepthAsync(
+            int reuseCaptureAgeInMs = 0,
+            CancellationToken token = default)
         {
             if (reuseCaptureAgeInMs > 0
                 && lastDepth != null
                 && (GameThread.Now - lastDepth.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return new ValueTask<Screenshot>(lastDepth);
+                return lastDepth;
             }
 
             token.ThrowIfCancellationRequested();
-            if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
+
+            if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
             {
-                return new ValueTask<Screenshot>((Screenshot) null);
+                return null;
             }
 
-            var conversionParams = new XRCpuImage.ConversionParams
+            /*
+            var screenshot = depthMapReader.GetDepthImage(arSession.subsystem, arCameraTransform.AsPose());
+            if (screenshot != null)
             {
-                inputRect = new RectInt(0, 0, image.width, image.height),
-                outputDimensions = new Vector2Int(image.width, image.height),
-                outputFormat = TextureFormat.R16,
-            };
+                lastDepth = screenshot;
+            }
 
-            var task = new TaskCompletionSource<Screenshot>();
-            int width = image.width;
-            int height = image.height;
-            var pose = arCameraTransform.AsPose();
+            return new ValueTask<Screenshot>(screenshot);
+            */
 
-            try
+            if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
             {
+                Logger.Info($"{this}: Depth capture failed.");
+                return null;
+            }
+
+            TaskCompletionSource<Screenshot> task;
+            using (image)
+            {
+                var conversionParams = new XRCpuImage.ConversionParams
+                {
+                    inputRect = new RectInt(0, 0, image.width, image.height),
+                    outputDimensions = new Vector2Int(image.width, image.height),
+                    outputFormat = TextureFormat.RFloat,
+                    transformation = XRCpuImage.Transformation.MirrorY
+                };
+
+
+                task = new TaskCompletionSource<Screenshot>();
+                int width = image.width;
+                int height = image.height;
+                var pose = arCameraTransform.AsPose();
+
+                int? colorWidth = cameraManager.subsystem.currentConfiguration?.width;
+
                 image.ConvertAsync(conversionParams, (status, _, array) =>
                 {
                     if (token.IsCancellationRequested)
@@ -160,7 +212,7 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        Debug.LogErrorFormat("Request failed with status {0}", status);
+                        Logger.Info($"{this}: Conversion request of depth image failed with status {status}");
                         task.TrySetResult(null);
                         return;
                     }
@@ -168,27 +220,125 @@ namespace Iviz.Controllers
                     byte[] bytes = new byte[array.Length];
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
-                    var intrinsic = cameraManager.TryGetIntrinsics(out var intrinsics)
-                        ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
-                            intrinsics.focalLength.y, intrinsics.principalPoint.y)
-                        : default;
-
-                    var s = new Screenshot(ScreenshotFormat.R16, width, height, 2, intrinsic, pose, bytes);
-                    lastDepth = s;
-                    ScreenshotDepth?.Invoke(s);
-                    task.TrySetResult(s);
+                    float scale = colorWidth == null ? 1 : width / (float) colorWidth.Value;
+                    var ss = new Screenshot(ScreenshotFormat.Float, width, height, Intrinsic.Scale(scale), pose, bytes);
+                    lastDepth = ss;
+                    ScreenshotDepth?.Invoke(ss);
+                    task.TrySetResult(ss);
                 });
             }
-            catch (Exception e)
+
+            var screenshot = await task.Task;
+            await Task.Run(() => FlipX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
+            return screenshot;
+        }
+
+        public async ValueTask<Screenshot> CaptureDepthConfidenceAsync(
+            int reuseCaptureAgeInMs = 0,
+            CancellationToken token = default)
+        {
+            if (reuseCaptureAgeInMs > 0
+                && lastConfidence != null
+                && (GameThread.Now - lastConfidence.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                task.TrySetException(e);
-            }
-            finally
-            {
-                image.Dispose();
+                return lastConfidence;
             }
 
-            return new ValueTask<Screenshot>(task.Task);
+            token.ThrowIfCancellationRequested();
+
+            if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
+            {
+                return null;
+            }
+
+            if (!occlusionManager.TryAcquireEnvironmentDepthConfidenceCpuImage(out XRCpuImage image))
+            {
+                Logger.Info($"{this}: Depth capture failed.");
+                return null;
+            }
+
+            TaskCompletionSource<Screenshot> task;
+            using (image)
+            {
+                var conversionParams = new XRCpuImage.ConversionParams
+                {
+                    inputRect = new RectInt(0, 0, image.width, image.height),
+                    outputDimensions = new Vector2Int(image.width, image.height),
+                    outputFormat = TextureFormat.R8,
+                    transformation = XRCpuImage.Transformation.MirrorY
+                };
+
+
+                task = new TaskCompletionSource<Screenshot>();
+                int width = image.width;
+                int height = image.height;
+                var pose = arCameraTransform.AsPose();
+
+                int? colorWidth = cameraManager.subsystem.currentConfiguration?.width;
+
+                image.ConvertAsync(conversionParams, (status, _, array) =>
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        task.TrySetCanceled();
+                        return;
+                    }
+
+                    if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                    {
+                        Logger.Info($"{this}: Conversion request of confidence image failed with status {status}");
+                        task.TrySetResult(null);
+                        return;
+                    }
+
+                    byte[] bytes = new byte[array.Length];
+                    NativeArray<byte>.Copy(array, bytes, array.Length);
+
+                    float scale = colorWidth == null ? 1 : width / (float) colorWidth.Value;
+                    var ss = new Screenshot(ScreenshotFormat.Mono8, width, height, Intrinsic.Scale(scale), pose, bytes);
+                    lastConfidence = ss;
+                    task.TrySetResult(ss);
+                });
+            }
+
+            var screenshot = await task.Task;
+            await Task.Run(() => FlipX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
+            return screenshot;
+        }
+
+        static unsafe void FlipX<T>([NotNull] byte[] bytes, int width, int height) where T : unmanaged
+        {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException(nameof(bytes));
+            }
+
+            if (width * height * sizeof(T) > bytes.Length)
+            {
+                throw new ArgumentException("Sizes are not correct and might cause a buffer overflow!");
+            }
+
+            fixed (byte* bytesPtr = bytes)
+            {
+                T* ptr = (T*) bytesPtr;
+
+                for (int v = 0; v < height; v++)
+                {
+                    T* start = ptr + v * width;
+                    T* end = ptr + (v + 1) * width - 1;
+                    for (int u = 0; u < width / 2; u++, start++, end--)
+                    {
+                        T tmp = *end;
+                        *end = *start;
+                        *start = tmp;
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            depthMapReader.Dispose();
         }
     }
 }

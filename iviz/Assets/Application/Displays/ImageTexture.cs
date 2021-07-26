@@ -102,20 +102,29 @@ namespace Iviz.Displays
         {
             switch (encoding)
             {
+                case "32FC":
+                case "32FC1":
                 case "rgba8":
                 case "bgra8":
                 case "8SC4":
-                case "32FC":
+                case "8UC4":
                     return 4;
                 case "rgb8":
                 case "bgr8":
                 case "8SC3":
+                case "8UC3":
                     return 3;
                 case "mono16":
+                case "16UC":
                 case "16UC1":
+                case "16SC":
+                case "16SC1":
                     return 2;
                 case "mono8":
+                case "8UC":
                 case "8UC1":
+                case "8SC":
+                case "8SC1":
                     return 1;
                 default:
                     return -1;
@@ -329,8 +338,10 @@ namespace Iviz.Displays
             {
                 case "rgba8":
                 case "8SC4":
+                case "8UC4":
                 case "rgb8":
                 case "8SC3":
+                case "8UC3":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
@@ -342,16 +353,17 @@ namespace Iviz.Displays
                     Material.EnableKeyword("FLIP_RB");
                     break;
                 case "mono16":
+                case "16UC":
                 case "16UC1":
-                    IsMono = true;
-                    Material.EnableKeyword("USE_INTENSITY");
-                    break;
+                case "16SC":
+                case "16SC1":
                 case "mono8":
+                case "8UC":
                 case "8UC1":
-                    IsMono = true;
-                    Material.EnableKeyword("USE_INTENSITY");
-                    break;
+                case "8SC":
+                case "8SC1":
                 case "32FC":
+                case "32FC1":
                     IsMono = true;
                     Material.EnableKeyword("USE_INTENSITY");
                     break;
@@ -371,6 +383,7 @@ namespace Iviz.Displays
             {
                 case "rgb8" when !Settings.SupportsRGB24:
                 case "bgr8" when !Settings.SupportsRGB24:
+                case "8UC3" when !Settings.SupportsRGB24:
                 case "8SC3" when !Settings.SupportsRGB24:
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>(), length);
@@ -379,27 +392,39 @@ namespace Iviz.Displays
                 case "rgb8":
                 case "bgr8":
                 case "8SC3":
+                case "8UC3":
                     texture = EnsureSize(width, height, TextureFormat.RGB24);
                     break;
                 case "rgba8":
                 case "bgra8":
                 case "8SC4":
+                case "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     break;
                 case "mono16" when !Settings.SupportsR16:
+                case "16SC1" when !Settings.SupportsR16:
                 case "16UC1" when !Settings.SupportsR16:
+                case "16SC" when !Settings.SupportsR16:
+                case "16UC" when !Settings.SupportsR16:
                     texture = EnsureSize(width, height, TextureFormat.R8);
                     CopyR16ToR8(data, texture.GetRawTextureData<byte>(), length);
                     alreadyCopied = true;
                     break;
                 case "mono16":
                 case "16UC1":
+                case "16SC1":
+                case "16UC":
+                case "16SC":
                     texture = EnsureSize(width, height, TextureFormat.R16);
                     break;
                 case "mono8":
                 case "8UC1":
+                case "8UC":
+                case "8SC1":
+                case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
                     break;
+                case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
                     break;

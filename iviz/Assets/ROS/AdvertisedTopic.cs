@@ -33,7 +33,8 @@ namespace Iviz.Ros
         readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
         [NotNull] readonly string topic;
         [CanBeNull] string publisherId;
-        int id;
+        
+        int id = RoslibConnection.InvalidId;
 
         public AdvertisedTopic([NotNull] string topic)
         {

@@ -30,35 +30,31 @@ namespace Iviz.Controllers
         {
             get
             {
-                /*
-                string markerCount;
-                switch (markers.Count)
-                {
-                    case 0:
-                        markerCount = "No markers registered";
-                        break;
-                    case 1:
-                        markerCount = "1 marker registered";
-                        break;
-                    default:
-                        markerCount = markers.Count.ToString() + " markers registered";
-                        break;
-                }
-                */
-
                 const int maxLastSeenLength = 10;
                 string lastSeenStr;
                 if (lastSeen == null)
                 {
                     lastSeenStr = "Last seen: None";
                 }
-                else if (lastSeen.Code.Length < maxLastSeenLength)
-                {
-                    lastSeenStr = $"Last seen: {lastSeen.Type} [{lastSeen.Code}]";
-                }
                 else
                 {
-                    lastSeenStr = $"Last seen: {lastSeen.Type} [{lastSeen.Code.Substring(0, maxLastSeenLength)}...]";
+                    string typeStr;
+                    switch (lastSeen.Type)
+                    {
+                        case ARMarkerType.Aruco:
+                            typeStr = "Aruco";
+                            break;
+                        case ARMarkerType.QrCode:
+                            typeStr = "QR";
+                            break;
+                        default:
+                            typeStr = "(Unknown)";
+                            break;
+                    }
+
+                    lastSeenStr = lastSeen.Code.Length < maxLastSeenLength
+                        ? $"Last seen: {typeStr} \"{lastSeen.Code}\""
+                        : $"Last seen: {typeStr} \"{lastSeen.Code.Substring(0, maxLastSeenLength)}...\"";
                 }
 
                 return "<b>AR Markers</b>\n" +

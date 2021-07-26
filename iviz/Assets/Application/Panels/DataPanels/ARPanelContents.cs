@@ -20,10 +20,11 @@ namespace Iviz.App
         public ARMarkerWidget ARMarkers { get; private set; }
         public SenderWidget MarkerSender { get; private set; }
         
-        public ToggleWidget PublishColor { get; private set; }
+        //public ToggleWidget PublishColor { get; private set; }
         public SenderWidget ColorSender { get; private set; }
-        public ToggleWidget PublishDepth { get; private set; }
+        //public ToggleWidget PublishDepth { get; private set; }
         public SenderWidget DepthSender { get; private set; }
+        public SenderWidget DepthConfidenceSender { get; private set; }
         
 
         void Awake()
@@ -41,10 +42,11 @@ namespace Iviz.App
 
             ARMarkers = p.AddARMarker();
             MarkerSender = p.AddSender();
-            PublishColor = p.AddToggle("Publish Color");
-            PublishDepth = p.AddToggle("Publish Depth");
+            //PublishColor = p.AddToggle("Publish Color");
+            //PublishDepth = p.AddToggle("Publish Depth");
             ColorSender = p.AddSender();
             DepthSender = p.AddSender();
+            DepthConfidenceSender = p.AddSender();
 
             p.UpdateSize();
             gameObject.SetActive(false);

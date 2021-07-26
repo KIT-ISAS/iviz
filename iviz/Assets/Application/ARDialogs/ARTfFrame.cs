@@ -142,7 +142,7 @@ namespace Iviz.App.ARDialogs
         {
             if (node != null)
             {
-                Destroy(node);
+                node.DestroySelf();
             }
         }
     }
