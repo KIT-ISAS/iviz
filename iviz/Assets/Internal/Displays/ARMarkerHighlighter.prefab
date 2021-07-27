@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5697476346805300377}
   - component: {fileID: 5697476346805300382}
   - component: {fileID: 5697476346805300383}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,8 +109,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476346805300382}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -127,7 +127,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5697476346812867965}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Corner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 5697476346908880122}
   - component: {fileID: 5697476346908880123}
   - component: {fileID: 5697476346908880120}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,8 +259,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476346908880123}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -277,7 +277,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5697476347140772149}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Corner (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -313,7 +313,7 @@ GameObject:
   - component: {fileID: 5697476347440374880}
   - component: {fileID: 5697476347440374881}
   - component: {fileID: 5697476347440374886}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -409,8 +409,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476347440374881}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -427,7 +427,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5697476347525395220}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Corner (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -463,7 +463,7 @@ GameObject:
   - component: {fileID: 5697476347832763977}
   - component: {fileID: 5697476347832763982}
   - component: {fileID: 5697476347832763983}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -559,8 +559,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476347832763982}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -577,7 +577,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5697476347968411526}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Corner (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -613,7 +613,7 @@ GameObject:
   - component: {fileID: 5697476348219326689}
   - component: {fileID: 5697476348219326694}
   - component: {fileID: 5697476348219326695}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -709,8 +709,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476348219326694}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -730,7 +730,7 @@ GameObject:
   - component: {fileID: 5697476348305610838}
   - component: {fileID: 5697476348305610833}
   - component: {fileID: 5697476348305610839}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -754,7 +754,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0.49999997}
-  m_SizeDelta: {x: 30, y: 8}
+  m_SizeDelta: {x: 100, y: 40}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!23 &5697476348305610838
 MeshRenderer:
@@ -832,8 +832,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4294965707
+  m_fontColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -906,8 +906,8 @@ GameObject:
   - component: {fileID: 5697476348398527483}
   - component: {fileID: 5697476348398527461}
   - component: {fileID: 5697476348398527482}
-  m_Layer: 2
-  m_Name: ARMarkerHighlight
+  m_Layer: 5
+  m_Name: ARMarkerHighlighter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -976,7 +976,7 @@ GameObject:
   - component: {fileID: 5697476348473597206}
   - component: {fileID: 5697476348473597207}
   - component: {fileID: 5697476348473597204}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1072,8 +1072,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476348473597207}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -1094,7 +1094,7 @@ GameObject:
   - component: {fileID: 5697476348671288408}
   - component: {fileID: 5697476348671288409}
   - component: {fileID: 5697476348671288414}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1190,8 +1190,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476348671288409}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5
@@ -1212,7 +1212,7 @@ GameObject:
   - component: {fileID: 5697476348745073522}
   - component: {fileID: 5697476348745073523}
   - component: {fileID: 5697476348745073520}
-  m_Layer: 2
+  m_Layer: 5
   m_Name: Quad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1308,8 +1308,8 @@ MonoBehaviour:
   boxCollider: {fileID: 5697476348745073523}
   diffuseTexture: {fileID: 0}
   bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0.79607844, g: 0.9764706, b: 1, a: 1}
-  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 0.7490196}
+  emissiveColor: {r: 0.079607844, g: 0.09764706, b: 0.1, a: 1}
+  color: {r: 0.7971698, g: 0.97628057, b: 1, a: 1}
   tint: {r: 1, g: 1, b: 1, a: 1}
   occlusionOnly: 0
   smoothness: 0.5

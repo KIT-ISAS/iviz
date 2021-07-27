@@ -15,7 +15,7 @@ namespace Iviz.App
         public ToggleWidget ShowVector { get; private set; }
         public ToggleWidget ShowAngle { get; private set; }
         public SliderWidget VectorScale { get; private set; }
-        public SliderWidget TrailTime { get; private set; }
+        //public SliderWidget TrailTime { get; private set; }
         public ColorPickerWidget Color { get; private set; }
         public SliderWidget ScaleMultiplier { get; private set; }
 
@@ -30,12 +30,12 @@ namespace Iviz.App
             ShowAxis = p.AddToggle("Show Frame");
             ShowAngle = p.AddToggle("Show Angle");
             ShowTrail = p.AddToggle("Enable Trail");
-            TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f).SetNumberOfSteps(45);
-            Color = p.AddColorPicker("Color");
             ShowVector = p.AddToggle("Enable Vector");
-            Scale = p.AddSlider("Scale").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
-            VectorScale = p.AddSlider("Vector Scale").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
-            ScaleMultiplier = p.AddSlider("Scale by Power of 10").SetMinValue(-4).SetMaxValue(4).SetIntegerOnly(true);
+            //TrailTime = p.AddSlider("Trail Time").SetMinValue(0.5f).SetMaxValue(5.0f).SetNumberOfSteps(45);
+            Color = p.AddColorPicker("Color");
+            Scale = p.AddSlider("Scale (All)").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
+            VectorScale = p.AddSlider("Additional Scale (Vector)").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
+            ScaleMultiplier = p.AddSlider("Multiply All Scales by Power of 10").SetMinValue(-4).SetMaxValue(4).SetIntegerOnly(true);
             p.UpdateSize();
             gameObject.SetActive(false);
         }

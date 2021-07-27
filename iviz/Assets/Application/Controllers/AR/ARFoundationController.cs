@@ -159,7 +159,7 @@ namespace Iviz.Controllers
 
                 if (value)
                 {
-                    arCamera.cullingMask = 1 << LayerType.ARSetupMode;
+                    arCamera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
                     ArInfoPanel.SetActive(true);
                 }
                 else
@@ -599,11 +599,15 @@ namespace Iviz.Controllers
                 }
 
                 var anyPose = (color ?? depth)?.CameraPose;
-                if (anyPose != null)
+                if (anyPose == null)
                 {
-                    var rosPose = TfListener.RelativePoseToFixedFrame(anyPose.Value).Unity2RosPose().ToCameraFrame();
-                    TfListener.Publish(frameId, rosPose);
+                    return;
                 }
+
+                var absoluteArCameraPose = RelativePoseToOrigin(anyPose.Value);
+                var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
+                //var rosPose = TfListener.RelativePoseToFixedFrame(anyPose.Value).Unity2RosPose().ToCameraFrame();
+                TfListener.Publish(frameId, relativePose.ToCameraFrame());
             }
             catch (Exception e)
             {

@@ -876,9 +876,7 @@ namespace Iviz.App
             frameCounter = 0;
 
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
-            long downKb = downB / 1000;
-            long upKb = upB / 1000;
-            bottomBandwidth.text = $"↓{downKb.ToString("N0")}kB/s ↑{upKb.ToString("N0")}kB/s";
+            bottomBandwidth.text = $"↓{FormatSpeed(downB)} ↑{FormatSpeed(upB)}";
 
             if (ConnectionManager.Connection.BagListener != null)
             {
@@ -906,6 +904,19 @@ namespace Iviz.App
                     break;
             }
         }
+        
+        [NotNull]
+        static string FormatSpeed(long speedB)
+        {
+            if (speedB >= 1024 * 1024)
+            {
+                double speedMb = speedB / (1024d * 1024d);
+                return $"{speedMb.ToString("N01")}MB/s";
+            }
+
+            long speedKb = speedB / 1024;
+            return $"{speedKb.ToString("N0")}kB/s";
+        }        
 
         void UpdateFpsCounter()
         {

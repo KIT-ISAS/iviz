@@ -97,13 +97,13 @@ namespace Iviz.Controllers
         public Sender<Image> ColorSender { get; private set; }
         public Sender<Image> DepthSender { get; private set; }
         public Sender<Image> DepthConfidenceSender { get; private set; }
-        protected Sender<CameraInfo> colorInfoSender;  
+        protected Sender<CameraInfo> colorInfoSender;
         protected Sender<CameraInfo> depthInfoSender;
 
         public bool PublishColor
         {
             get => config.PublishColor;
-            set => config.PublishColor = value;            
+            set => config.PublishColor = value;
         }
 
         public bool PublishDepth
@@ -470,7 +470,12 @@ namespace Iviz.Controllers
                 Type = (byte) marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
                 Code = marker.Code,
+                /*
                 CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose)
+                    .Unity2RosPose()
+                    .ToCameraFrame(),
+                    */
+                CameraPose = TfListener.RelativePoseToFixedFrame(RelativePoseToOrigin(screenshot.CameraPose))
                     .Unity2RosPose()
                     .ToCameraFrame(),
                 Corners = marker.Corners
@@ -491,7 +496,7 @@ namespace Iviz.Controllers
             {
                 var highlighter = ResourcePool.RentDisplay<ARMarkerHighlighter>();
                 highlighter.Highlight(corners.Corners, corners.Code, screenshot.Intrinsic,
-                    detector.DelayBetweenCapturesFastInMs - 1 / 30f);
+                    detector.DelayBetweenCapturesFastInMs);
             }
         }
 
@@ -514,9 +519,14 @@ namespace Iviz.Controllers
                 GuiInputModule.Instance.UpdateQualityLevel();
             }
 
-            MarkerSender.Stop();
+            MarkerSender?.Stop();
             detector.Dispose();
-            MarkerExecutor.Reset();
+            MarkerExecutor.Stop();
+
+            colorInfoSender?.Stop();
+            ColorSender?.Stop();
+            DepthSender?.Stop();
+            DepthConfidenceSender?.Stop();
         }
 
         void IController.ResetController()

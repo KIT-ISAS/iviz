@@ -139,7 +139,7 @@ namespace Iviz.Controllers
                     byte[] bytes = new byte[array.Length];
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
-                    var ss = new Screenshot(ScreenshotFormat.Rgb, width, height, Intrinsic, pose, bytes);
+                    var ss = new Screenshot(ScreenshotFormat.Rgb, width, height, Intrinsic.Scale(0.5f), pose, bytes);
                     lastColor = ss;
                     ScreenshotColor?.Invoke(ss);
                     task.TrySetResult(ss);
@@ -229,7 +229,7 @@ namespace Iviz.Controllers
             }
 
             var screenshot = await task.Task;
-            await Task.Run(() => FlipX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
+            await Task.Run(() => MirrorX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
             return screenshot;
         }
 
@@ -302,11 +302,11 @@ namespace Iviz.Controllers
             }
 
             var screenshot = await task.Task;
-            await Task.Run(() => FlipX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
+            await Task.Run(() => MirrorX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height), token);
             return screenshot;
         }
 
-        static unsafe void FlipX<T>([NotNull] byte[] bytes, int width, int height) where T : unmanaged
+        static unsafe void MirrorX<T>([NotNull] byte[] bytes, int width, int height) where T : unmanaged
         {
             if (bytes == null)
             {

@@ -62,11 +62,14 @@ namespace Iviz.Core
     public static class RosUtils
     {
         static readonly Msgs.GeometryMsgs.Quaternion XFrontToZFront = (0.5, -0.5, 0.5, -0.5);
+        //public static readonly Msgs.GeometryMsgs.Quaternion ZFrontToXFront = XFrontToZFront.Inverse;
 
         /// Make camera point to +Z instead of +X
         public static Msgs.GeometryMsgs.Pose ToCameraFrame(this Msgs.GeometryMsgs.Pose pose) =>
             (pose.Position, pose.Orientation * XFrontToZFront);
 
+        public static Msgs.GeometryMsgs.Transform ToCameraFrame(this Msgs.GeometryMsgs.Transform pose) =>
+            (pose.Translation, pose.Rotation * XFrontToZFront);
 
         public static readonly Vector3 Ros2UnityScale = new Vector3(1, -1, 1);
         public static readonly Quaternion Ros2UnityRotation = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);

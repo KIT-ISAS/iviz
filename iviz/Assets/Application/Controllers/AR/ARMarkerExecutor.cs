@@ -152,7 +152,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Reset()
+        public void Stop()
         {
             foreach (var frame in frames.Values)
             {

@@ -23,12 +23,13 @@ namespace Iviz.Displays
         static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         static readonly int PScale = Shader.PropertyToID("_Scale");
         static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
-        
+
         [SerializeField] Material material;
         [SerializeField] float elementScale = 1;
         [SerializeField] int width;
         [SerializeField] int height;
         Intrinsic intrinsic;
+        float pointSize;
 
         [CanBeNull] ImageTexture colorImage;
         [CanBeNull] ImageTexture depthImage;
@@ -118,7 +119,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            material.SetFloat(PScale, Transform.lossyScale.x);
+            material.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
             material.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
             material.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
 
@@ -173,7 +174,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             switch (depthImage.Texture.format)
             {
                 case TextureFormat.RFloat:
@@ -184,7 +185,7 @@ namespace Iviz.Displays
                     depthImage.IntensityBounds = new Vector2(0, 5000 / 65535f);
                     material.SetFloat(PDepthScale, 65.535f);
                     break;
-            }            
+            }
         }
 
         void UpdatePointComputeBuffers([CanBeNull] Texture2D sourceTexture)
@@ -233,15 +234,14 @@ namespace Iviz.Displays
                 return;
             }
 
-            float ratio = (float) texture.height / texture.width;
-            float posMulX = intrinsic.Fx / texture.width;
-            float posMulY = intrinsic.Fy / texture.width * ratio;
-            //float posAddX = -0.5f * posCoeffX;
-            //float posAddY = -0.5f * posCoeffY;
-            float posAddX = -intrinsic.Cx / texture.width * posMulX;
-            float posAddY = -intrinsic.Cy / texture.height * posMulY;
+            float posMulX = texture.width / intrinsic.Fx;
+            float posMulY = texture.height / intrinsic.Fy;
 
-            material.SetFloat(PropPointSize, posMulX / texture.width);
+            float posAddX = -intrinsic.Cx / intrinsic.Fx;
+            float posAddY = -intrinsic.Cy / intrinsic.Fy;
+
+            pointSize = 1f / intrinsic.Fx;
+
             material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
 
             const float maxDepthForBounds = 5.0f;

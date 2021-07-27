@@ -9,6 +9,7 @@ using Iviz.Ros;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
@@ -59,6 +60,8 @@ namespace Iviz.Controllers
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
             node = FrameNode.Instantiate("DepthCloud");
+            node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
+
             projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
@@ -209,13 +212,16 @@ namespace Iviz.Controllers
                 }
 
                 string depthDescription = depthTexture != null
-                    ? $"<b>Depth {depthImageTexture.Description}</b> | "
-                    : "[No Depth Image] | ";
+                    ? $"<b>Depth {depthImageTexture.Description}</b>\n"
+                    : "[No Depth Image]\n";
                 
                 string colorDescription = colorTexture != null
-                    ? $"<b>Color {depthImageTexture.Description}</b>\n"
-                    : "[No Color Image]\n";
+                    ? $"<b>Color {depthImageTexture.Description}</b>"
+                    : "[No Color Image]";
 
+                return depthDescription + colorDescription;
+                
+                /*
                 float horizontalFov = projector.Intrinsic.GetHorizontalFovInRad(depthImageTexture.Width);
                 float verticalFov = projector.Intrinsic.GetVerticalFovInRad(depthImageTexture.Height);
                 string intrinsicDescription = horizontalFov != 0
@@ -224,13 +230,14 @@ namespace Iviz.Controllers
                     : "[No Intrinsic Data]";
 
                 return depthDescription + colorDescription + intrinsicDescription;
+                */
             }
         }
 
         void DepthHandler([NotNull] Image msg)
         {
             node.AttachTo(msg.Header);
-
+            
             int width = (int) msg.Width;
             int height = (int) msg.Height;
             depthImageTexture.Set(width, height, msg.Encoding, msg.Data);
@@ -253,13 +260,13 @@ namespace Iviz.Controllers
                 UpdateIntensityBounds();
             }
 
-            switch (msg.Format)
+            switch (msg.Format.ToUpperInvariant())
             {
-                case "png":
+                case "PNG":
                     depthImageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
-                case "jpeg":
-                case "jpg":
+                case "JPEG":
+                case "JPG":
                     depthImageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
             }
@@ -279,6 +286,7 @@ namespace Iviz.Controllers
             }
 
             lastDepthFormat = format;
+            depthImageTexture.Colormap = ColormapId.gray;
             switch (format)
             {
                 case TextureFormat.RFloat:
@@ -311,13 +319,13 @@ namespace Iviz.Controllers
                 ColorIsProcessing = false;
             }
 
-            switch (msg.Format)
+            switch (msg.Format.ToUpperInvariant())
             {
-                case "png":
+                case "PNG":
                     colorImageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
-                case "jpeg":
-                case "jpg":
+                case "JPEG":
+                case "JPG":
                     colorImageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
             }

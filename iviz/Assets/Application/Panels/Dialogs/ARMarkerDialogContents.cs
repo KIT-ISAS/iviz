@@ -13,6 +13,9 @@ namespace Iviz.App
 {
     public sealed class ARMarkerDialogContents : MonoBehaviour, IDialogPanelContents
     {
+        static readonly string[] TypesStr = {"Aruco", "QR", "Unset"};
+        static readonly string[] ActionsStr = Enum.GetNames(typeof(ARMarkerAction));
+
         [SerializeField] GameObject[] rows = null;
         [SerializeField] TrashButtonWidget close = null;
         bool initialized;
@@ -58,12 +61,11 @@ namespace Iviz.App
             Sizes = sizes.AsReadOnly();
             Actions = actions.AsReadOnly();
 
-            string[] typesStr = {"Aruco", "QR", "Unset"};
 
             foreach (var (widget, row) in types.WithIndex())
             {
                 widget.ValueChanged += (index, _) => OnTypeChanged(row, (ARMarkerType) index);
-                widget.Options = typesStr;
+                widget.Options = TypesStr;
                 widget.Index = (int) ARMarkerType.Unset;
             }
 
@@ -80,12 +82,11 @@ namespace Iviz.App
                 widget.SetContentType(InputField.ContentType.DecimalNumber);
             }
 
-            string[] actionsStr = Enum.GetNames(typeof(ARMarkerAction));
 
             foreach (var (widget, row) in actions.WithIndex())
             {
                 widget.ValueChanged += (index, _) => ActionsChanged?.Invoke(row, (ARMarkerAction) index);
-                widget.Options = actionsStr;
+                widget.Options = ActionsStr;
                 widget.Index = 0;
             }
 

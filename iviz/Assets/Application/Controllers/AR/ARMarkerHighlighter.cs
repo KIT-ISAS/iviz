@@ -21,12 +21,12 @@ namespace Iviz.Controllers
         [SerializeField] BoxCollider boxCollider;
         [SerializeField] TextMeshPro text;
         MeshMarkerResource[] resources;
-        const float Scale = 0.01f;
+        const float Scale = 0.005f;
         const float Z = 0.05f;
 
         const float HighlightScale = Scale * 1.05f;
 
-        float highlightTime = 0.45f;
+        float highlightTime = 0.5f;
         float? highlightStart;
 
         /*
@@ -45,15 +45,15 @@ namespace Iviz.Controllers
         }
         */
 
-        public void Highlight([NotNull] IEnumerable<Vector2f> corners, [NotNull] string code, Intrinsic intrinsic,
-            float highlightTimeInSec)
+        public void Highlight([NotNull] IEnumerable<Vector2f> corners2, [NotNull] string code, Intrinsic intrinsic,
+            float highlightTimeInMs)
         {
             if (resources == null)
             {
                 resources = GetComponentsInChildren<MeshMarkerResource>();
             }
 
-            var cornersWorld = corners.Select(corner => intrinsic.Unproject(corner, Z)).ToArray();
+            var cornersWorld = corners2.Select(corner => intrinsic.Unproject(corner, Z)).ToArray();
             if (cornersWorld.Length == 0)
             {
                 throw new ArgumentException("[ARMarkerHighlighter] Cannot highlight marker with no corners.");
@@ -61,8 +61,8 @@ namespace Iviz.Controllers
             
             float minX = cornersWorld.Min(corner => corner.X);
             float maxX = cornersWorld.Max(corner => corner.X);
-            float minY = cornersWorld.Min(corner => corner.Y);
-            float maxY = cornersWorld.Max(corner => corner.Y);
+            float minY = cornersWorld.Min(corner => -corner.Y);
+            float maxY = cornersWorld.Max(corner => -corner.Y);
 
             Vector3 center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, Z);
             float sizeX = maxX - center.x;
@@ -71,7 +71,7 @@ namespace Iviz.Controllers
 
             Transform mTransform = transform;
             mTransform.parent = Settings.ARCamera.CheckedNull()?.transform;
-            //mTransform.parent = Settings.MainCameraTransform;
+            mTransform.localRotation = Quaternion.identity;
             mTransform.localPosition = center;
             mTransform.localScale = HighlightScale * Vector3.one;
 
@@ -83,7 +83,7 @@ namespace Iviz.Controllers
             text.text = code;
 
             highlightStart = GameThread.GameTime;
-            highlightTime = Mathf.Max(highlightTimeInSec, 0.1f);
+            highlightTime = Mathf.Max(highlightTimeInMs / 1000f, 0);
         }
 
         public Bounds? Bounds => boxCollider.bounds;

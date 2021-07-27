@@ -51,7 +51,7 @@ namespace Iviz.App
             panel.ShowAngle.Value = listener.AngleVisible;
             panel.ShowVector.Value = listener.VectorVisible;
             panel.Color.Value = listener.Color;
-            panel.TrailTime.Value = listener.TrailTime;
+            //panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;
             panel.HideButton.State = listener.Visible;
@@ -60,7 +60,7 @@ namespace Iviz.App
             panel.ShowTrail.ValueChanged += f => { listener.TrailVisible = f; };
             panel.ShowAngle.ValueChanged += f => { listener.AngleVisible = f; };
             panel.Color.ValueChanged += f => { listener.Color = f; };
-            panel.TrailTime.ValueChanged += f => { listener.TrailTime = f; };
+            //panel.TrailTime.ValueChanged += f => { listener.TrailTime = f; };
             panel.Scale.ValueChanged += f => { listener.Scale = f; };
             panel.ShowAxis.ValueChanged += f => { listener.FrameVisible = f; };
             panel.ShowVector.ValueChanged += f => { listener.VectorVisible = f; };
