@@ -102,6 +102,8 @@ namespace Iviz.App
             }
 
             TfListener.Instance.HighlightFrame(Frame.Id);
+            
+            //NativeFilePicker.OpenAppFolder("/bags");
         }
 
         protected override void OnRevealedRight()

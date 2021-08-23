@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
@@ -22,8 +21,6 @@ namespace Iviz.Controllers
     {
         const float AnchorPauseTimeInSec = 2;
 
-        //static ARSessionInfo savedSessionInfo;
-
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSession arSession = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
@@ -36,7 +33,6 @@ namespace Iviz.Controllers
         ARCameraManager cameraManager;
         ARSession session;
         [CanBeNull] ARPlaneManager planeManager;
-        ARTrackedImageManager tracker;
         ARRaycastManager raycaster;
         ARAnchorManager anchorManager;
         AROcclusionManager occlusionManager;
@@ -193,7 +189,7 @@ namespace Iviz.Controllers
                 if (value)
                 {
                     var meshManager = arCamera.gameObject.EnsureComponent<ARMeshManager>();
-                    //Debug.Log("Adding new mesh managgr");
+                    //Debug.Log("Adding new mesh manager");
                     meshManager.meshPrefab = meshPrefab;
                     meshManager.normals = false;
                 }
@@ -202,7 +198,7 @@ namespace Iviz.Controllers
                     var meshManager = arCamera.gameObject.GetComponent<ARMeshManager>();
                     if (meshManager != null)
                     {
-                        //Debug.Log("Destroying mesh managgr");
+                        //Debug.Log("Destroying mesh manager");
                         meshManager.DestroyAllMeshes();
                         Destroy(meshManager);
                     }
@@ -223,12 +219,12 @@ namespace Iviz.Controllers
                 base.EnablePlaneDetection = value;
                 if (value)
                 {
-                    planeManager = arSessionOrigin.gameObject.EnsureComponent<ARPlaneManager>();
+                    //planeManager = arSessionOrigin.gameObject.EnsureComponent<ARPlaneManager>();
                 }
                 else
                 {
-                    Destroy(planeManager);
-                    planeManager = null;
+                    //Destroy(planeManager);
+                    //planeManager = null;
                 }
             }
         }
@@ -272,7 +268,7 @@ namespace Iviz.Controllers
             session = GetComponentInChildren<ARSession>();
             occlusionManager = GetComponentInChildren<AROcclusionManager>();
             planeManager = arSessionOrigin.GetComponent<ARPlaneManager>();
-            tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
+            //tracker = arSessionOrigin.GetComponent<ARTrackedImageManager>();
             raycaster = arSessionOrigin.GetComponent<ARRaycastManager>();
             anchorManager = arSessionOrigin.GetComponent<ARAnchorManager>();
             cameraManager = arCamera.GetComponent<ARCameraManager>();
@@ -308,6 +304,7 @@ namespace Iviz.Controllers
             }
 
             RaiseARActiveChanged();
+            
         }
 
         void ArSetOnClicked()
@@ -361,7 +358,6 @@ namespace Iviz.Controllers
             }
 
             lastAnchorMoved = recreateNow ? Time.time - AnchorPauseTimeInSec : Time.time;
-            //Debug.Log("destroying anchor! " + recreateNow);
         }
 
         float? lastAnchorMoved;
@@ -374,6 +370,8 @@ namespace Iviz.Controllers
             ProcessSetupMode();
             ProcessAnchorMoved();
             ProcessCapture();
+            
+            Debug.Log(occlusionManager.currentEnvironmentDepthMode);
         }
 
         void ProcessSetupMode()
@@ -433,11 +431,31 @@ namespace Iviz.Controllers
             }
         }
 
-        public int CaptureFps { get; set; } = 15;
-
         void ProcessCapture()
         {
-            if (CaptureFps <= 0 || GameThread.GameTime - lastScreenCapture < 1 / (float) CaptureFps)
+            float captureFps;
+            switch (PublicationFrequency)
+            {
+                case PublicationFrequency.Fps5:
+                    captureFps = 5;
+                    break;
+                case PublicationFrequency.Fps10:
+                    captureFps = 10;
+                    break;
+                case PublicationFrequency.Fps15:
+                    captureFps = 15;
+                    break;
+                case PublicationFrequency.Fps20:
+                    captureFps = 20;
+                    break;
+                case PublicationFrequency.Fps30:
+                    captureFps = 30;
+                    break;
+                default:
+                    return;
+            }
+
+            if (GameThread.GameTime - lastScreenCapture < 1 / captureFps)
             {
                 return;
             }
@@ -546,16 +564,16 @@ namespace Iviz.Controllers
             try
             {
                 var captureManager = (ARFoundationScreenCaptureManager) Settings.ScreenCaptureManager;
-                bool shouldPublishColor = PublishColor && ColorSender.NumSubscribers != 0;
-                bool shouldPublishDepth = PublishDepth && DepthSender.NumSubscribers != 0;
-                bool shouldPublishConfidence = PublishDepth && DepthConfidenceSender.NumSubscribers != 0;
+                bool shouldPublishColor = ColorSender.NumSubscribers != 0;
+                bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
+                bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers != 0;
                 if (captureManager == null || token.IsCancellationRequested ||
                     (!shouldPublishColor && !shouldPublishDepth && !shouldPublishConfidence))
                 {
                     return;
                 }
 
-                const int captureReuseTimeInMs = 30;
+                const int captureReuseTimeInMs = 0;
 
                 var colorTask = shouldPublishColor
                     ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
@@ -579,8 +597,35 @@ namespace Iviz.Controllers
 
                 if (color != null)
                 {
+                    int pitch = color.Width * 3;
+                    byte[] bytes = color.Bytes;
+                    
+                    for (int v = 0; v < color.Height; v++)
+                    {
+                        int o_base = v * pitch;
+                        for (int u = 0; u < pitch; u += 3 * 16)
+                        {
+                            int o = o_base + u;
+                            bytes[o] = 0;
+                            bytes[o + 1] = 0;
+                            bytes[o + 2] = 0;
+                        }
+                    }
+
+                    for (int v = 0; v < color.Height; v += 16)
+                    {
+                        int o_base = v * pitch;
+                        for (int u = 0; u < pitch; u += 3)
+                        {
+                            int o = o_base + u;
+                            bytes[o] = 0;
+                            bytes[o + 1] = 0;
+                            bytes[o + 2] = 0;
+                        }
+                    }
+                
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
-                    colorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
+                    ColorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
                 }
 
                 if (depth != null)
@@ -590,12 +635,19 @@ namespace Iviz.Controllers
 
                 if (confidence != null)
                 {
+                    byte[] bytes = confidence.Bytes;
+
+                    for (int v = 0; v < confidence.Height * confidence.Width; v++)
+                    {
+                        bytes[v] = (byte)(bytes[v] * 127);
+                    }
+
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
                 }
 
                 if (depth != null || confidence != null)
                 {
-                    depthInfoSender.Publish((depth ?? confidence).CreateCameraInfoMessage(frameId, depthSeq++));
+                    DepthInfoSender.Publish((depth ?? confidence).CreateCameraInfoMessage(frameId, depthSeq++));
                 }
 
                 var anyPose = (color ?? depth)?.CameraPose;
@@ -606,7 +658,6 @@ namespace Iviz.Controllers
 
                 var absoluteArCameraPose = RelativePoseToOrigin(anyPose.Value);
                 var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-                //var rosPose = TfListener.RelativePoseToFixedFrame(anyPose.Value).Unity2RosPose().ToCameraFrame();
                 TfListener.Publish(frameId, relativePose.ToCameraFrame());
             }
             catch (Exception e)

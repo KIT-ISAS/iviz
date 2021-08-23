@@ -14,7 +14,7 @@ namespace Iviz.App
 {
     public sealed class DepthCloudModuleData : ModuleData
     {
-        const string NoneStr = "<none>";
+        static readonly string[] NoneStr = {"<none>"};
 
         [NotNull] readonly DepthCloudController controller;
         [NotNull] readonly DepthCloudPanelContents panel;
@@ -51,7 +51,7 @@ namespace Iviz.App
 
             panel.ColorTopic.Listener = controller.ColorListener;
             panel.DepthTopic.Listener = controller.DepthListener;
-            panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
+            //panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
 
             panel.Color.Value = controller.ColorTopic;
             panel.Depth.Value = controller.DepthTopic;
@@ -70,14 +70,13 @@ namespace Iviz.App
 
             panel.Color.EndEdit += f =>
             {
-                controller.ColorTopic = f;
+                controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0][0] ? "" : f;
                 panel.ColorTopic.Listener = controller.ColorListener;
             };
             panel.Depth.EndEdit += f =>
             {
-                controller.DepthTopic = f;
+                controller.DepthTopic = f.Length == 0 || f[0] == NoneStr[0][0] ? "" : f;
                 panel.DepthTopic.Listener = controller.DepthListener;
-                panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
             };
             panel.ColorPreview.Clicked += () =>
             {
@@ -104,10 +103,13 @@ namespace Iviz.App
         }
 
         [NotNull]
-        static IEnumerable<string> GetImageTopics() => ConnectionManager.Connection.GetSystemPublishedTopicTypes()
-            .Where(topicInfo =>
-                topicInfo.Type == Image.RosMessageType || topicInfo.Type == CompressedImage.RosMessageType)
-            .Select(topicInfo => topicInfo.Topic);
+        static IEnumerable<string> GetImageTopics() =>
+            NoneStr.Concat(
+                ConnectionManager.Connection.GetSystemPublishedTopicTypes()
+                    .Where(topicInfo =>
+                        topicInfo.Type == Image.RosMessageType || topicInfo.Type == CompressedImage.RosMessageType)
+                    .Select(topicInfo => topicInfo.Topic)
+            );
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

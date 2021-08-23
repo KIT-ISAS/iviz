@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MarkerDetection;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
@@ -21,7 +16,6 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -37,6 +31,17 @@ namespace Iviz.Controllers
         Best
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PublicationFrequency
+    {
+        Off,
+        Fps5,
+        Fps10,
+        Fps15,
+        Fps20,
+        Fps30,
+    }
+
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
@@ -48,9 +53,7 @@ namespace Iviz.Controllers
         [DataMember] public bool EnableMeshing { get; set; } = true;
         [DataMember] public bool EnablePlaneDetection { get; set; } = true;
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; } = OcclusionQualityType.Fast;
-
-        [DataMember] public bool PublishDepth { get; set; } = true;
-        [DataMember] public bool PublishColor { get; set; } = true;
+        [DataMember] public PublicationFrequency PublicationFrequency { get; set; } = PublicationFrequency.Fps15;
 
         [IgnoreDataMember] public float WorldAngle { get; set; }
         [IgnoreDataMember] public bool ShowARJoystick { get; set; }
@@ -94,24 +97,11 @@ namespace Iviz.Controllers
         public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
 
-        public Sender<Image> ColorSender { get; private set; }
-        public Sender<Image> DepthSender { get; private set; }
-        public Sender<Image> DepthConfidenceSender { get; private set; }
-        protected Sender<CameraInfo> colorInfoSender;
-        protected Sender<CameraInfo> depthInfoSender;
-
-        public bool PublishColor
-        {
-            get => config.PublishColor;
-            set => config.PublishColor = value;
-        }
-
-        public bool PublishDepth
-        {
-            get => config.PublishDepth;
-            set => config.PublishDepth = value;
-        }
-
+        protected Sender<Image> ColorSender { get; private set; }
+        protected Sender<Image> DepthSender { get; private set; }
+        protected Sender<Image> DepthConfidenceSender { get; private set; }
+        protected Sender<CameraInfo> ColorInfoSender { get; private set; }
+        protected Sender<CameraInfo> DepthInfoSender { get; private set; }
 
         public ARConfiguration Config
         {
@@ -126,8 +116,8 @@ namespace Iviz.Controllers
                 EnablePlaneDetection = value.EnablePlaneDetection;
                 EnableArucoDetection = value.EnableArucoDetection;
                 EnableQrDetection = value.EnableQrDetection;
-                PublishColor = value.PublishColor;
-                PublishDepth = value.PublishDepth;
+
+                PublicationFrequency = value.PublicationFrequency;
             }
         }
 
@@ -215,6 +205,12 @@ namespace Iviz.Controllers
             }
         }
 
+        public PublicationFrequency PublicationFrequency
+        {
+            get => config.PublicationFrequency;
+            set => config.PublicationFrequency = value;
+        }
+
         static float TfRootScale
         {
             set => TfListener.RootScale = value;
@@ -223,11 +219,7 @@ namespace Iviz.Controllers
         public virtual bool PinRootMarker
         {
             get => config.PinRootMarker;
-            set
-            {
-                config.PinRootMarker = value;
-                //PinControlButton.State = value;
-            }
+            set => config.PinRootMarker = value;
         }
 
         public bool ShowARJoystick
@@ -303,10 +295,10 @@ namespace Iviz.Controllers
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
 
             ColorSender = new Sender<Image>("~color/image_color");
-            DepthSender = new Sender<Image>("~depth/image_color");
+            DepthSender = new Sender<Image>("~depth/image");
             DepthConfidenceSender = new Sender<Image>("~depth/image_confidence");
-            colorInfoSender = new Sender<CameraInfo>("~color/camera_info");
-            depthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
+            ColorInfoSender = new Sender<CameraInfo>("~color/camera_info");
+            DepthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
 
             detector.MarkerDetected += OnMarkerDetected;
 
@@ -523,7 +515,7 @@ namespace Iviz.Controllers
             detector.Dispose();
             MarkerExecutor.Stop();
 
-            colorInfoSender?.Stop();
+            ColorInfoSender?.Stop();
             ColorSender?.Stop();
             DepthSender?.Stop();
             DepthConfidenceSender?.Stop();
