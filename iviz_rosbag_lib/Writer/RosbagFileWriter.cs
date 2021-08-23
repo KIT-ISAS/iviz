@@ -289,7 +289,7 @@ namespace Iviz.Rosbag.Writer
                 return;
             }
 
-            Console.WriteLine("** Index start " + writer.Position);
+            //Console.WriteLine("** Index start " + writer.Position);
 
             var op = new OpCodeHeaderEntry(OpCode.IndexData);
             var ver = new IntHeaderEntry("ver", 1);
@@ -313,7 +313,7 @@ namespace Iviz.Rosbag.Writer
                     .WriteValue((int) offset);
             }
 
-            Console.WriteLine("** End position: " + writer.Position);
+            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         async Task WriteIndexRecordAsync(int connectionId)
@@ -324,7 +324,7 @@ namespace Iviz.Rosbag.Writer
                 return;
             }
 
-            Console.WriteLine("** Index start " + writer.Position);
+            //Console.WriteLine("** Index start " + writer.Position);
 
             var op = new OpCodeHeaderEntry(OpCode.IndexData);
             var ver = new IntHeaderEntry("ver", 1);
@@ -348,12 +348,12 @@ namespace Iviz.Rosbag.Writer
                 await writer.WriteValueAsync((int) offset);
             }
 
-            Console.WriteLine("** End position: " + writer.Position);
+            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         void WriteChunkInfoRecord(ChunkInfoRecord record)
         {
-            Console.WriteLine("** Chunk start " + writer.Position);
+            //Console.WriteLine("** Chunk start " + writer.Position);
 
             var op = new OpCodeHeaderEntry(OpCode.ChunkInfo);
             var ver = new IntHeaderEntry("ver", 1);
@@ -382,12 +382,12 @@ namespace Iviz.Rosbag.Writer
                     .WriteValue(connCount);
             }
 
-            Console.WriteLine("** End position: " + writer.Position);
+            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         async Task WriteChunkInfoRecordAsync(ChunkInfoRecord record)
         {
-            Console.WriteLine("** Chunk start " + writer.Position);
+            //Console.WriteLine("** Chunk start " + writer.Position);
 
             var op = new OpCodeHeaderEntry(OpCode.ChunkInfo);
             var ver = new IntHeaderEntry("ver", 1);
@@ -416,7 +416,7 @@ namespace Iviz.Rosbag.Writer
                 await writer.WriteValueAsync(connCount);
             }
 
-            Console.WriteLine("** End position: " + writer.Position);
+            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         void TryOpenChunk(in time timestamp)
@@ -557,7 +557,7 @@ namespace Iviz.Rosbag.Writer
             }
             else
             {
-                Console.WriteLine("**  Adding connection " + connections.Count);
+                //Console.WriteLine("**  Adding connection " + connections.Count);
                 connectionId = connections[connection] = connections.Count;
                 WriteConnectionRecord(connectionId, connection.Topic, connection.TcpHeader);
             }
@@ -598,7 +598,7 @@ namespace Iviz.Rosbag.Writer
             }
             else
             {
-                Console.WriteLine("**  Adding connection " + connections.Count);
+                //Console.WriteLine("**  Adding connection " + connections.Count);
                 connectionId = connections[connection] = connections.Count;
                 await WriteConnectionRecordAsync(connectionId, connection.Topic, connection.TcpHeader);
             }
@@ -636,19 +636,19 @@ namespace Iviz.Rosbag.Writer
             {
                 long connectionStart = writer.Position;
 
-                Console.WriteLine("** Writing connections");
+                //Console.WriteLine("** Writing connections");
                 foreach (var pair in connections)
                 {
                     WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.TcpHeader);
                 }
 
-                Console.WriteLine("** Writing chunk infos");
+                //Console.WriteLine("** Writing chunk infos");
                 foreach (var info in chunkInfos)
                 {
                     WriteChunkInfoRecord(info);
                 }
 
-                Console.WriteLine("** Updating header");
+                //Console.WriteLine("** Updating header");
                 writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
                 WriteHeaderRecord(connections.Count, chunkInfos.Count, connectionStart);
             }
@@ -674,19 +674,19 @@ namespace Iviz.Rosbag.Writer
             {
                 long connectionStart = writer.Position;
 
-                Console.WriteLine("** Writing connections");
+                //Console.WriteLine("** Writing connections");
                 foreach (var pair in connections)
                 {
                     await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.TcpHeader);
                 }
 
-                Console.WriteLine("** Writing chunk infos");
+                //Console.WriteLine("** Writing chunk infos");
                 foreach (var info in chunkInfos)
                 {
                     await WriteChunkInfoRecordAsync(info);
                 }
 
-                Console.WriteLine("** Updating header");
+                //Console.WriteLine("** Updating header");
                 writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
                 await WriteHeaderRecordAsync(connections.Count, chunkInfos.Count, connectionStart);
             }

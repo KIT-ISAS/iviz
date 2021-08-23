@@ -32,7 +32,7 @@ namespace Iviz.Ntp
                 try
                 {
                     TimeSpan offset = await GetNetworkTimeOffsetOneShotAsync(ntpServer, token);
-                    Console.WriteLine(offset.TotalMilliseconds);
+                    //Console.WriteLine(offset.TotalMilliseconds);
                     offsets.Add(offset);
                     numFailures = 0;
                 }
