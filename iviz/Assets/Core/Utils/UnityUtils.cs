@@ -13,6 +13,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
@@ -299,20 +300,24 @@ namespace Iviz.Core
     {
         public static void ReturnToPool<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
         {
-            if (resource != null)
+            if (resource == null)
             {
-                resource.Suspend();
-                ResourcePool.ReturnDisplay(resource);
+                return;
             }
+            
+            resource.Suspend();
+            ResourcePool.ReturnDisplay(resource);
         }
 
         public static void ReturnToPool([CanBeNull] this IDisplay resource, [NotNull] Info<GameObject> info)
         {
-            if (resource != null)
+            if (resource == null)
             {
-                resource.Suspend();
-                ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
+                return;
             }
+            
+            resource.Suspend();
+            ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
         }
         
         [NotNull]

@@ -91,7 +91,7 @@ namespace Iviz.App
             }
 
             panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount} files";
-            panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles} files";
+            panel.SavedFilesLabel.text = $"<b>Saved Files:</b> {ModuleListPanel.NumSavedFiles} files";
             panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
 
             panel.ModelService.Options = ModelServerModesNames;

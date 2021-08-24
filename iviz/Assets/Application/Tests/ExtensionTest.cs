@@ -19,7 +19,7 @@ using Iviz.Roslib;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Msgs.Logger;
+using Logger = Iviz.Tools.Logger;
 using Pose = UnityEngine.Pose;
 using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
 using Time = UnityEngine.Time;

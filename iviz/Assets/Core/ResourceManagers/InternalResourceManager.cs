@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using Iviz.Core;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -34,7 +36,7 @@ namespace Iviz.Resources
             if (string.IsNullOrEmpty(robotsFile))
             {
                 Logger.Warn($"{this}: Empty resource file!");
-                robotDescriptions = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
+                robotDescriptions = new Dictionary<string, string>().AsReadOnly();
                 return;
             }
 
@@ -53,7 +55,7 @@ namespace Iviz.Resources
                 tmpRobotDescriptions[pair.Key] = robotDescription;
             }
 
-            robotDescriptions = new ReadOnlyDictionary<string, string>(tmpRobotDescriptions);
+            robotDescriptions = tmpRobotDescriptions.AsReadOnly();
         }
 
         public bool ContainsRobot([NotNull] string robotName)
@@ -89,10 +91,11 @@ namespace Iviz.Resources
             return TryGet(uriString, textures, negTextures, out info);
         }
 
+        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
         bool TryGet<T>([NotNull] string uriString,
             [NotNull] Dictionary<string, Info<T>> repository,
             [NotNull] HashSet<string> negRepository,
-            out Info<T> info)
+            [CanBeNull] out Info<T> info)
             where T : UnityEngine.Object
         {
             if (uriString is null)
@@ -106,11 +109,10 @@ namespace Iviz.Resources
                 {
                     return true;
                 }
-                
+
                 repository.Remove(uriString);
                 info = null;
                 return false;
-
             }
 
             if (negRepository.Contains(uriString))
@@ -127,6 +129,13 @@ namespace Iviz.Resources
 
             string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}".Replace("//", "/");
             T resource = UnityEngine.Resources.Load<T>(path);
+
+            if (resource == null)
+            {
+                string alternativePath = Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(path);
+                resource = UnityEngine.Resources.Load<T>(alternativePath);
+            }
+
             if (resource == null)
             {
                 negRepository.Add(uriString);

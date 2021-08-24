@@ -6,6 +6,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -22,47 +23,14 @@ namespace Iviz.App
 
         readonly Dictionary<string, Type> topicTypes = new Dictionary<string, Type>();
 
-        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue = new ConcurrentQueue<(string, IMessage)>();
+        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue =
+            new ConcurrentQueue<(string, IMessage)>();
 
         readonly List<TopicEntry> entries = new List<TopicEntry>();
         readonly StringBuilder messageBuffer = new StringBuilder(65536);
         IListener listener;
         bool queueIsDirty;
-
-        sealed class TopicEntry : IComparable<TopicEntry>
-        {
-            public static readonly TopicEntry Empty = new TopicEntry();
-            [NotNull] public string Topic { get; }
-            [CanBeNull] public string RosMsgType { get; }
-            [NotNull] public Type CsType { get; }
-            [NotNull] public string Description { get; }
-
-            TopicEntry()
-            {
-                Topic = "";
-                RosMsgType = null;
-                CsType = typeof(object);
-                Description = "<color=grey>(None)</color>";
-            }
-
-            public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
-            {
-                Topic = topic;
-                RosMsgType = rosMsgType;
-                CsType = csType;
-
-                int lastSlash = RosMsgType.LastIndexOf('/');
-                string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType.Substring(lastSlash + 1);
-                Description = $"{topic} <color=grey>[{shortType}]</color>";
-            }
-
-            public int CompareTo(TopicEntry other)
-            {
-                return ReferenceEquals(this, other)
-                    ? 0
-                    : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
-            }
-        }
+        bool isPaused;
 
         public EchoDialogData()
         {
@@ -114,8 +82,8 @@ namespace Iviz.App
         void CreateTopicList()
         {
             var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+            
             entries.Clear();
-
             entries.Add(TopicEntry.Empty);
 
             foreach ((string topic, string msgType) in newTopics)
@@ -168,6 +136,16 @@ namespace Iviz.App
             };
 
             UpdateOptions();
+            
+            isPaused = dialog.Pause.State;
+            listener?.SetSuspend(isPaused);
+            
+            dialog.Pause.Clicked += () =>
+            {
+                dialog.Pause.State = !dialog.Pause.State;
+                isPaused = dialog.Pause.State;
+                listener?.SetSuspend(isPaused);
+            };            
         }
 
         void UpdateOptions()
@@ -188,8 +166,9 @@ namespace Iviz.App
             }
             else
             {
-                dialog.Publishers.text =
-                    $"{listener.NumPublishers.Active.ToString()}/{listener.NumPublishers.Total.ToString()} publishers";
+                messageBuffer.Length = 0;
+                listener.WriteDescriptionTo(messageBuffer);
+                dialog.Publishers.SetText(messageBuffer);
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
                 long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
@@ -216,9 +195,44 @@ namespace Iviz.App
             {
                 messageBuffer.Remove(0, MaxMessages * MaxMessageLength - messageBuffer.Length);
             }
-            
+
             dialog.Text.SetText(messageBuffer);
             queueIsDirty = false;
         }
+        
+        sealed class TopicEntry : IComparable<TopicEntry>
+        {
+            public static readonly TopicEntry Empty = new TopicEntry();
+            [NotNull] public string Topic { get; }
+            [CanBeNull] public string RosMsgType { get; }
+            [NotNull] public Type CsType { get; }
+            [NotNull] public string Description { get; }
+
+            TopicEntry()
+            {
+                Topic = "";
+                RosMsgType = null;
+                CsType = typeof(object);
+                Description = "<color=grey>(None)</color>";
+            }
+
+            public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
+            {
+                Topic = topic;
+                RosMsgType = rosMsgType;
+                CsType = csType;
+
+                int lastSlash = RosMsgType.LastIndexOf('/');
+                string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType.Substring(lastSlash + 1);
+                Description = $"{topic} <color=grey>[{shortType}]</color>";
+            }
+
+            public int CompareTo(TopicEntry other)
+            {
+                return ReferenceEquals(this, other)
+                    ? 0
+                    : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
+            }
+        }        
     }
 }

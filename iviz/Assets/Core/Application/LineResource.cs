@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -45,8 +46,8 @@ namespace Iviz.Displays
         [CanBeNull] ComputeBuffer lineComputeBuffer;
         [CanBeNull] Mesh mesh;
 
-        [SerializeField] MeshRenderer meshRenderer;
-        [SerializeField] MeshFilter meshFilter;
+        [SerializeField] MeshRenderer meshRenderer = null;
+        [SerializeField] MeshFilter meshFilter = null;
 
         bool linesNeedAlpha;
 

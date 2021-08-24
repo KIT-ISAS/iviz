@@ -8,6 +8,7 @@ using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -45,7 +46,7 @@ namespace Iviz.Controllers
         public PointCloudListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            FieldNames = new ReadOnlyCollection<string>(fieldNames);
+            FieldNames = fieldNames.AsReadOnly();
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
             meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);

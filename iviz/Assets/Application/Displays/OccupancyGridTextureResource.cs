@@ -38,12 +38,12 @@ namespace Iviz.Displays
         [NotNull] sbyte[] buffer = Array.Empty<sbyte>();
         uint? previousHash;
 
-        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] MeshRenderer meshRenderer = null;
 
         [NotNull]
         MeshRenderer MeshRenderer => meshRenderer;
 
-        public bool IsProcessing { get; private set; }
+        bool IsProcessing { get; set; }
 
         public int NumValidValues { get; private set; }
 

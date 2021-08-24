@@ -110,7 +110,7 @@ namespace Iviz.Controllers
             text.BillboardOffset = Vector3.up * 0.1f;
             text.ElementSize = 0.1f;
             text.Visible = false;
-            text.VisibleOnTop = true;
+            text.AlwaysVisible = true;
 
             Interactable = true;
         }

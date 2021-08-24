@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -49,10 +50,12 @@ namespace Iviz.Controllers
 
         [NotNull] public TfFrame FixedFrame { get; private set; }
 
+        /*
         const float HighlightDuration = 2.0f;
         float? highlightFrameStart;
         readonly FrameNode highlightFrameNode;
         readonly AxisFrameResource highlightFrame;
+        */
 
         public static float RootScale
         {
@@ -64,6 +67,7 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
+            /*
             highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
             highlightFrame.Visible = false;
             highlightFrame.CastsShadows = false;
@@ -72,6 +76,7 @@ namespace Iviz.Controllers
 
             highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
             highlightFrame.Transform.parent = highlightFrameNode.Transform;
+            */
 
             unityFrame = Add(CreateFrameObject("TF", null, null));
             unityFrame.ForceInvisible = true;
@@ -106,8 +111,42 @@ namespace Iviz.Controllers
 
             Publisher = new Sender<TFMessage>(DefaultTopic);
 
-
             GameThread.LateEveryFrame += LateUpdate;
+
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.ShortClick += OnTfShortClick;
+            }
+        }
+
+        static void OnTfShortClick([NotNull] ClickInfo clickInfo)
+        {
+            if (!clickInfo.TryGetRaycastResults(out var hitResults))
+            {
+                return;
+            }
+
+            bool tfHighlighted = false;
+            foreach (var result in hitResults)
+            {
+                if (result.gameObject.layer != LayerType.TfAxis)
+                {
+                    continue;
+                }
+
+                var tfFrame = result.gameObject.transform.parent.GetComponent<TfFrame>();
+                HighlightFrame(tfFrame.Id);
+                tfHighlighted = true;
+            }
+
+            if (tfHighlighted || !hitResults.TryGetFirst(out var nearestResult))
+            {
+                return;
+            }
+
+            ResourcePool
+                .RentDisplay<PoseHighlighter>()
+                .HighlightPose(nearestResult.worldPosition, nearestResult.worldNormal);
         }
 
         [NotNull]
@@ -212,8 +251,6 @@ namespace Iviz.Controllers
                 {
                     frame.FrameSize = value;
                 }
-
-                highlightFrame.AxisLength = value * 3;
             }
         }
 
@@ -512,21 +549,6 @@ namespace Iviz.Controllers
             {
                 OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
             }
-
-            if (highlightFrameStart == null)
-            {
-                return;
-            }
-
-            float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
-            if (alpha < 0)
-            {
-                highlightFrameStart = null;
-                highlightFrame.Visible = false;
-                return;
-            }
-
-            highlightFrame.Tint = Color.white.WithAlpha(alpha);
         }
 
         public override void StopController()
@@ -538,17 +560,14 @@ namespace Iviz.Controllers
             Instance = null;
         }
 
-        public void HighlightFrame([NotNull] string frameId)
+        public static void HighlightFrame([NotNull] string frameId)
         {
-            if (!frames.ContainsKey(frameId))
+            if (!Instance.frames.ContainsKey(frameId))
             {
                 return;
             }
 
-            highlightFrameNode.AttachTo(frameId);
-            highlightFrameStart = Time.time;
-            highlightFrame.Tint = Color.white;
-            highlightFrame.Visible = true;
+            ResourcePool.RentDisplay<TfFrameHighlighter>().HighlightFrame(frameId);
         }
 
         static void Publish([NotNull] TFMessage msg)
@@ -567,6 +586,7 @@ namespace Iviz.Controllers
             Transform fixedFrame = Instance.FixedFrame.Transform;
             return fixedFrame.InverseTransformPoint(unityPosition);
         }
+
 
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
@@ -598,7 +618,7 @@ namespace Iviz.Controllers
 
         public static void Publish([NotNull] string childFrame, in Msgs.GeometryMsgs.Transform rosTransform) =>
             Publish(FixedFrameId, childFrame, rosTransform);
-        
+
         public static void Publish([CanBeNull] string parentFrame, [NotNull] string childFrame,
             in Msgs.GeometryMsgs.Transform rosTransform)
         {

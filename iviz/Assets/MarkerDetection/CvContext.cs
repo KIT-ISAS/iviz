@@ -8,7 +8,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib.Utils;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.MarkerDetection
@@ -194,157 +194,6 @@ namespace Iviz.MarkerDetection
             return Native.GetNumDetectedMarkers(ContextPtr);
         }
 
-        public int[] GetDetectedArucoIds()
-        {
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
-            if (numDetected < 0)
-            {
-                throw new CvMarkerException();
-            }
-
-            if (numDetected == 0)
-            {
-                return Array.Empty<int>();
-            }
-
-
-            int[] indices = new int[numDetected];
-            if (!Native.GetArucoMarkerIds(ContextPtr, indices, indices.Length))
-            {
-                throw new CvMarkerException();
-            }
-
-            return indices;
-        }
-
-        public string[] GetDetectedQrCodes()
-        {
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
-            if (numDetected < 0)
-            {
-                throw new CvMarkerException();
-            }
-
-            if (numDetected == 0)
-            {
-                return Array.Empty<string>();
-            }
-
-
-            using (var pointers = new Rent<IntPtr>(numDetected))
-            using (var pointerLengths = new Rent<int>(numDetected))
-            {
-                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected))
-                {
-                    throw new CvMarkerException();
-                }
-
-                string[] indices = new string[numDetected];
-                for (int i = 0; i < numDetected; i++)
-                {
-                    indices[i] = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
-                }
-
-                return indices;
-            }
-        }
-
-        public ArucoMarkerPose[] EstimateArucoMarkerPoses(float markerSizeInM)
-        {
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
-            if (numDetected < 0)
-            {
-                throw new CvMarkerException();
-            }
-
-            if (numDetected == 0)
-            {
-                return Array.Empty<ArucoMarkerPose>();
-            }
-
-            var markers = new ArucoMarkerPose[numDetected];
-
-            using (var indices = new Rent<int>(numDetected))
-            using (var rotations = new Rent<float>(3 * numDetected))
-            using (var translations = new Rent<float>(3 * numDetected))
-            {
-                if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
-                    !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
-                        translations.Array, translations.Length))
-                {
-                    throw new CvMarkerException();
-                }
-
-                for (int i = 0; i < numDetected; i++)
-                {
-                    Vector3 translation = (
-                        translations[3 * i + 0],
-                        translations[3 * i + 1],
-                        translations[3 * i + 2]);
-                    Vector3 angleAxis = (
-                        rotations[3 * i + 0],
-                        rotations[3 * i + 1],
-                        rotations[3 * i + 2]);
-                    double angle = angleAxis.Norm;
-                    var rotation = angle == 0
-                        ? Quaternion.Identity
-                        : Quaternion.AngleAxis(angle, angleAxis / angle);
-                    markers[i] = new ArucoMarkerPose(indices[i], new Pose(translation, rotation));
-                }
-            }
-
-            return markers;
-        }
-
-        public QrMarkerPose[] EstimateQrMarkerPoses(float markerSizeInM)
-        {
-            int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
-            if (numDetected < 0)
-            {
-                throw new CvMarkerException();
-            }
-
-            if (numDetected == 0)
-            {
-                return Array.Empty<QrMarkerPose>();
-            }
-
-            var markers = new QrMarkerPose[numDetected];
-
-            using (var pointers = new Rent<IntPtr>(numDetected))
-            using (var pointerLengths = new Rent<int>(numDetected))
-            using (var rotations = new Rent<float>(3 * numDetected))
-            using (var translations = new Rent<float>(3 * numDetected))
-            {
-                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
-                    !Native.EstimateMarkerPoses(ContextPtr, markerSizeInM, rotations.Array, rotations.Length,
-                        translations.Array, translations.Length))
-                {
-                    throw new CvMarkerException();
-                }
-
-                for (int i = 0; i < numDetected; i++)
-                {
-                    string code = Marshal.PtrToStringAnsi(pointers[i], pointerLengths[i]);
-                    Vector3 translation = (
-                        translations[3 * i + 0],
-                        translations[3 * i + 1],
-                        translations[3 * i + 2]);
-                    Vector3 angleAxis = (
-                        rotations[3 * i + 0],
-                        rotations[3 * i + 1],
-                        rotations[3 * i + 2]);
-                    double angle = angleAxis.Norm;
-                    var rotation = angle == 0
-                        ? Quaternion.Identity
-                        : Quaternion.AngleAxis(angle, angleAxis / angle);
-                    markers[i] = new QrMarkerPose(code, new Pose(translation, rotation));
-                }
-            }
-
-            return markers;
-        }
-
         [NotNull]
         public QrMarkerCorners[] GetDetectedQrCorners()
         {
@@ -433,46 +282,6 @@ namespace Iviz.MarkerDetection
             }
 
             return markers;
-        }
-
-        public static (float, Transform) Umeyama([NotNull] Vector3f[] input, [NotNull] Vector3f[] output,
-            bool estimateScale)
-        {
-            if (input.Length != output.Length)
-            {
-                throw new ArgumentException("Input and output lengths do not match");
-            }
-
-            using (var inputFloats = new Rent<float>(input.Length * 3))
-            using (var outputFloats = new Rent<float>(output.Length * 3))
-            using (var resultFloats = new Rent<float>(7))
-            {
-                int o = 0;
-                foreach (var v in input)
-                {
-                    (inputFloats[o], inputFloats[o + 1], inputFloats[o + 2]) = v;
-                    o += 3;
-                }
-
-                o = 0;
-                foreach (var v in output)
-                {
-                    (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
-                    o += 3;
-                }
-
-                Native.EstimateUmeyama(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
-                    estimateScale, resultFloats.Array, resultFloats.Length);
-
-                Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
-                Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
-                double angle = angleAxis.Norm;
-                var rotation = angle == 0
-                    ? Quaternion.Identity
-                    : Quaternion.AngleAxis(angle, angleAxis / angle);
-
-                return (resultFloats[6], (translation, rotation));
-            }
         }
 
         public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> input,

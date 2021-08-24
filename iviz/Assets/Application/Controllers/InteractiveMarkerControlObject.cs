@@ -118,15 +118,18 @@ namespace Iviz.Controllers
 
             transform.localRotation = msg.Orientation.Ros2Unity();
 
-            InteractionMode interactionMode = (InteractionMode) msg.InteractionMode;
-            OrientationMode orientationMode = (OrientationMode) msg.OrientationMode;
-            description.Append("InteractionMode: ").Append(EnumToString(interactionMode)).AppendLine();
-            description.Append("OrientationMode: ").Append(EnumToString(orientationMode)).AppendLine();
+            description.Append("InteractionMode: ").Append(InteractionModeToString(msg.InteractionMode)).AppendLine();
+            description.Append("OrientationMode: ").Append(OrientationModeToString(msg.OrientationMode)).AppendLine();
 
             UpdateMarkers(msg.Markers);
             RecalculateBounds();
 
-            UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
+            InteractionMode? interactionMode = ValidateInteractionMode(msg.InteractionMode);
+            OrientationMode? orientationMode = ValidateOrientationMode(msg.OrientationMode);
+            if (interactionMode != null && orientationMode != null)
+            {
+                UpdateInteractionMode(interactionMode.Value, orientationMode.Value, msg.IndependentMarkerOrientation);
+            }
 
             if (markers.Count == 0)
             {
@@ -137,6 +140,12 @@ namespace Iviz.Controllers
                 description.Append("Markers: ").Append(markers.Count).AppendLine();
             }
         }
+
+        static InteractionMode? ValidateInteractionMode(int mode) =>
+            (mode < 0 || mode > (int) InteractionMode.MoveRotate3D) ? null : (InteractionMode?) mode;
+
+        static OrientationMode? ValidateOrientationMode(int mode) =>
+            (mode < 0 || mode > (int) OrientationMode.ViewFacing) ? null : (OrientationMode?) mode;
 
         [NotNull]
         IControlMarker EnsureControlDisplayExists()
@@ -434,9 +443,9 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        static string EnumToString(InteractionMode mode)
+        static string InteractionModeToString(int mode)
         {
-            switch (mode)
+            switch ((InteractionMode) mode)
             {
                 case InteractionMode.None:
                     return "None";
@@ -459,14 +468,14 @@ namespace Iviz.Controllers
                 case InteractionMode.MoveRotate3D:
                     return "MoveRotate3D";
                 default:
-                    return $"Unknown";
+                    return $"Unknown ({mode.ToString()})";
             }
         }
 
         [NotNull]
-        static string EnumToString(OrientationMode mode)
+        static string OrientationModeToString(int mode)
         {
-            switch (mode)
+            switch ((OrientationMode) mode)
             {
                 case OrientationMode.Inherit:
                     return "Inherit";
@@ -475,7 +484,7 @@ namespace Iviz.Controllers
                 case OrientationMode.ViewFacing:
                     return "ViewFacing";
                 default:
-                    return "Unknown";
+                    return $"Unknown ({mode.ToString()})";
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Msgs;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.Core

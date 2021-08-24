@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using JetBrains.Annotations;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {

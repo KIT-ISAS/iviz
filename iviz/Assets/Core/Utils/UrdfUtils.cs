@@ -43,7 +43,8 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(v));
             }
 
-            return new Color(v.Rgba.R, v.Rgba.G, v.Rgba.B, v.Rgba.A);
+            var (r, g, b, a) = v.Rgba;
+            return new Color(r, g, b, a);
         }
 
         public static bool IsReference([CanBeNull] this Urdf.Material material)

@@ -12,6 +12,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -89,7 +90,7 @@ namespace Iviz.Displays
 
         [NotNull]
         public ReadOnlyCollection<string> GetListOfModels() =>
-            new ReadOnlyCollection<string>(resourceFiles.Models.Keys.ToList());
+            resourceFiles.Models.Keys.ToList().AsReadOnly();
 
         public ExternalResourceManager(bool createNode = true)
         {

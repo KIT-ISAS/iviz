@@ -8,6 +8,7 @@ using Iviz.Roslib;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 

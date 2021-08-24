@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.XR.ARFoundation;
 using Logger = Iviz.Core.Logger;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -168,9 +169,11 @@ namespace Iviz.App
                 Transform.SetPose(CameraViewOverride.AbsoluteUnityPose);
             }
 
+            var mOrbitCenterOverride = OrbitCenterOverride;
+
             if (DraggedObject != null)
             {
-                if (!Settings.IsMobile && OrbitCenterOverride == null)
+                if (!Settings.IsMobile && mOrbitCenterOverride == null)
                 {
                     ProcessFlying();
                 }
@@ -180,13 +183,13 @@ namespace Iviz.App
 
             if (Settings.IsMobile)
             {
-                if (OrbitCenterOverride != null)
+                if (mOrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
                     ProcessScaling(false);
                     Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
                     Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
-                    orbitCenter = OrbitCenterOverride.AbsoluteUnityPose.position;
+                    orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
                 }
                 else
                 {
@@ -199,12 +202,12 @@ namespace Iviz.App
                 return;
             }
 
-            if (OrbitCenterOverride != null)
+            if (mOrbitCenterOverride != null)
             {
                 ProcessOrbiting();
                 Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
                 Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
-                orbitCenter = OrbitCenterOverride.AbsoluteUnityPose.position;
+                orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
             }
             else
             {
@@ -353,8 +356,9 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public event Action<Vector2> ShortClick;
-        public event Action<Vector2> LongClick;
+        public event Action<ClickInfo> PointerDown;
+        public event Action<ClickInfo> ShortClick;
+        public event Action<ClickInfo> LongClick;
 
         public void ResetDraggedObject()
         {
@@ -382,6 +386,10 @@ namespace Iviz.App
 
             QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
 
+            if (Settings.IsVR) // VR manages its own stuff
+            {
+                return;
+            }
 
             if (lookAtAnimationStart != null)
             {
@@ -403,7 +411,6 @@ namespace Iviz.App
                     return;
                 }
             }
-
 
             //Debug.Log(QualitySettings.shadowDistance);
 
@@ -434,25 +441,8 @@ namespace Iviz.App
                         pointerDownStart = Input.GetTouch(0).position;
                     }
                 }
-                else
-                {
-                    if (prevPointerDown
-                        && !pointerIsOnGui
-                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
-                    {
-                        float timeDown = Time.time - pointerDownTime;
-                        if (timeDown < shortClickTime)
-                        {
-                            ShortClick?.Invoke(pointerPosition);
-                        }
-                        else if (timeDown > longClickTime)
-                        {
-                            LongClick?.Invoke(pointerPosition);
-                        }
-                    }
-                }
             }
-            else if (!Settings.IsVR)
+            else
             {
                 pointerIsDown = Input.GetMouseButton(1);
 
@@ -469,33 +459,40 @@ namespace Iviz.App
                 }
                 else
                 {
-                    if (prevPointerDown 
-                        && !pointerIsOnGui
-                        && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
-                    {
-                        float timeDown = Time.time - pointerDownTime;
-                        if (timeDown < shortClickTime)
-                        {
-                            ShortClick?.Invoke(pointerPosition);
-                        }
-                        else if (timeDown > longClickTime)
-                        {
-                            LongClick?.Invoke(pointerPosition);
-                        }
-                    }
-
                     pointerIsOnGui = false;
                 }
             }
 
-            if (!Settings.IsVR) // VR manages its own dragging
+            if (!pointerIsDown)
             {
-                if (!pointerIsDown)
+                DraggedObject = null;
+            }
+
+            if (DraggedObject != null)
+            {
+                DraggedObject.OnPointerMove(pointerPosition);
+            }
+            else if (!pointerIsOnGui)
+            {
+                bool anyPointerDown = pointerIsDown ||  altPointerIsDown;
+                if (!prevPointerDown && anyPointerDown)
                 {
-                    DraggedObject = null;
+                    PointerDown?.Invoke(new ClickInfo(pointerPosition));
                 }
 
-                DraggedObject?.OnPointerMove(pointerPosition);
+                if (prevPointerDown && !anyPointerDown
+                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+                {
+                    float timeDown = Time.time - pointerDownTime;
+                    if (timeDown < shortClickTime)
+                    {
+                        ShortClick?.Invoke(new ClickInfo(pointerPosition));
+                    }
+                    else if (timeDown > longClickTime)
+                    {
+                        LongClick?.Invoke(new ClickInfo(pointerPosition));
+                    }
+                }
             }
         }
 

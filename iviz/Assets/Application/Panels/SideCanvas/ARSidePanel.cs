@@ -12,34 +12,34 @@ namespace Iviz.App
         [CanBeNull] RectTransform mTransform;
         [NotNull] RectTransform Transform => mTransform != null ? mTransform : (mTransform = (RectTransform) transform);
 
-        [SerializeField] GameObject divider;
+        [SerializeField] GameObject divider = null;
         [CanBeNull] LauncherButton selected;
 
         [NotNull]
         static ARFoundationController Controller =>
             ARController.Instance.CheckedNull() ?? throw new NullReferenceException("AR Controller is not set");
 
-        [SerializeField] PopupButton openPanel;
-        [SerializeField] PopupButton arVisible;
-        [SerializeField] PopupButton move;
-        [SerializeField] PopupButton reposition;
+        [SerializeField] PopupButton openPanel = null;
+        [SerializeField] PopupButton arVisible = null;
+        [SerializeField] PopupButton move = null;
+        [SerializeField] PopupButton reposition = null;
 
-        [SerializeField] PopupButton reset;
+        [SerializeField] PopupButton reset = null;
 
         //[SerializeField] PopupButton pin;
         //[SerializeField] PopupButton meshVisible;
-        [SerializeField] PopupButton meshEnabled;
+        [SerializeField] PopupButton meshEnabled = null;
 
-        [SerializeField] PopupButton meshReset;
+        [SerializeField] PopupButton meshReset = null;
 
         //[SerializeField] PopupButton meshPing;
-        [SerializeField] PopupButton qrEnabled;
-        [SerializeField] PopupButton arucoEnabled;
-        [SerializeField] PopupButton occlusionEnabled;
+        [SerializeField] PopupButton qrEnabled = null;
+        [SerializeField] PopupButton arucoEnabled = null;
+        [SerializeField] PopupButton occlusionEnabled = null;
 
-        [SerializeField] PopupButton tfVisible;
-        [SerializeField] PopupButton tfText;
-        [SerializeField] PopupButton tfConnect;
+        [SerializeField] PopupButton tfVisible = null;
+        [SerializeField] PopupButton tfText = null;
+        [SerializeField] PopupButton tfConnect = null;
 
         [SerializeField] float shiftLeft = -30;
         [SerializeField] float shiftRight = 40;

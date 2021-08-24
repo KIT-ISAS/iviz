@@ -14,12 +14,12 @@ namespace Iviz.Controllers
 {
     public class ARMarkerHighlighter : MonoBehaviour, IDisplay
     {
-        [SerializeField] Transform topLeft;
-        [SerializeField] Transform topRight;
-        [SerializeField] Transform bottomRight;
-        [SerializeField] Transform bottomLeft;
-        [SerializeField] BoxCollider boxCollider;
-        [SerializeField] TextMeshPro text;
+        [SerializeField] Transform topLeft = null;
+        [SerializeField] Transform topRight = null;
+        [SerializeField] Transform bottomRight = null;
+        [SerializeField] Transform bottomLeft = null;
+        [SerializeField] BoxCollider boxCollider = null;
+        [SerializeField] TextMeshPro text = null;
         MeshMarkerResource[] resources;
         const float Scale = 0.005f;
         const float Z = 0.05f;
@@ -28,22 +28,6 @@ namespace Iviz.Controllers
 
         float highlightTime = 0.5f;
         float? highlightStart;
-
-        /*
-    void Awake()
-    {
-        
-        Highlight(
-            new[]
-            {
-                new Vector2f(-1, -1),
-                new Vector2f(1, -1),
-                new Vector2f(1, 1),
-                new Vector2f(-1, 1),
-            }, "10", new Intrinsic(5, 0, 5, 0)
-        );
-        }
-        */
 
         public void Highlight([NotNull] IEnumerable<Vector2f> corners2, [NotNull] string code, Intrinsic intrinsic,
             float highlightTimeInMs)

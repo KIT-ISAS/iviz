@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
@@ -50,6 +51,8 @@ namespace Iviz.App
 
         readonly ConcurrentSet<string> ids = new ConcurrentSet<string>();
 
+        bool isPaused;
+        
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
 
@@ -90,6 +93,16 @@ namespace Iviz.App
                 idCode = GetIdCode(f);
                 ProcessLog(true);
             };
+
+            isPaused = dialog.Pause.State;
+            ConnectionManager.LogListener?.SetSuspend(isPaused);
+            
+            dialog.Pause.Clicked += () =>
+            {
+                dialog.Pause.State = !dialog.Pause.State;
+                isPaused = dialog.Pause.State;
+                ConnectionManager.LogListener?.SetSuspend(isPaused);
+            };
         }
 
         public override void UpdatePanel()
@@ -108,23 +121,8 @@ namespace Iviz.App
                 return "Error: No Log Listener";
             }
 
-            (int numActivePublishers, int numPublishers) = listener.NumPublishers;
-
             description.Length = 0;
-            description.Append(listener.Topic).Append(" ");
-            if (numPublishers == -1)
-            {
-                description.Append("Off");
-            }
-            else if (!listener.Subscribed)
-            {
-                description.Append("PAUSED");
-            }
-            else
-            {
-                description.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
-            }
-
+            listener.WriteDescriptionTo(description);
             string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
             description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
                 .Append(kbPerSecond).Append(" kB/s");
@@ -227,7 +225,6 @@ namespace Iviz.App
             }
         }
 
-
         static FromIdCode GetIdCode(string id)
         {
             switch (id)
@@ -245,7 +242,7 @@ namespace Iviz.App
 
         void ProcessLog(bool forceReprocess = false)
         {
-            if (!forceReprocess && !queueIsDirty)
+            if (!forceReprocess && (!queueIsDirty || isPaused))
             {
                 return;
             }

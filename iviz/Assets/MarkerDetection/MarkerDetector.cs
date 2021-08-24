@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using JetBrains.Annotations;
-using Debug = UnityEngine.Debug;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
@@ -196,7 +193,7 @@ namespace Iviz.MarkerDetection
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                //Debug.LogError(e);
             }
             finally
             {

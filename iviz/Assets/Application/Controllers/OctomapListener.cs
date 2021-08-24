@@ -112,7 +112,7 @@ namespace Iviz.Controllers
             Listener = new Listener<Octomap>(config.Topic, Handler);
         }
 
-        void Handler(Octomap msg)
+        void Handler([NotNull] Octomap msg)
         {
             node.AttachTo(msg.Header);
             lastMsg = msg;
@@ -137,9 +137,9 @@ namespace Iviz.Controllers
 
                 var enumerator = helper.EnumerateLeavesBinary(lastMsg.Data, 0, MaxDepth);
                 buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
-                foreach (var leaf in enumerator)
+                foreach (var (x, y, z, w) in enumerator)
                 {
-                    buffer.Add(leaf);
+                    buffer.Add(new float4(x, y, z, w));
                 }
             }
             else
@@ -160,9 +160,9 @@ namespace Iviz.Controllers
 
                 var enumerator = helper.EnumerateLeaves(lastMsg.Data, 0, valueStride, MaxDepth);
                 buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
-                foreach (var leaf in enumerator)
+                foreach (var (x, y, z, w) in enumerator)
                 {
-                    buffer.Add(leaf);
+                    buffer.Add(new float4(x, y, z, w));
                 }
             }
 

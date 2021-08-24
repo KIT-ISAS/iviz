@@ -11,6 +11,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -373,7 +374,7 @@ namespace Iviz.Controllers
                         markers[id] = markerToAdd;
                     }
 
-                    await markerToAdd.SetAsync(msg);
+                    await markerToAdd.SetAsync(msg).AwaitNoThrow(this);
                     break;
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))

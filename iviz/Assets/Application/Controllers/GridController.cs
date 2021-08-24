@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
@@ -38,7 +39,6 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        //public static readonly Color DefaultColor = new Color(0.12f, 0.14f, 0.19f); 
         public static readonly Color DefaultColor = (0.6f * Color.white).WithAlpha(1);
 
         const int ProbeRefreshTimeInSec = 5;
@@ -73,7 +73,7 @@ namespace Iviz.Controllers
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
-                PublishLongTapPosition = value.PublishLongTapPosition;
+                //PublishLongTapPosition = value.PublishLongTapPosition;
                 Offset = value.Offset;
             }
         }
@@ -85,7 +85,6 @@ namespace Iviz.Controllers
             {
                 config.Orientation = value;
                 grid.Orientation = value;
-                //reflectionProbe.transform.localPosition = new Vector3(0, 0, -2);
             }
         }
 
@@ -217,11 +216,13 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         public bool PublishLongTapPosition
         {
             get => config.PublishLongTapPosition;
             set
             {
+                
                 if (value && SenderPoint == null)
                 {
                     SenderPoint = new Sender<PointStamped>(TapTopic);
@@ -265,6 +266,7 @@ namespace Iviz.Controllers
             lastTapPosition == null
                 ? "<b>Last Tap Position:</b>\n<i>None</i>"
                 : $"<b>Last Tap Position:</b>\n[X:{lastTapPosition.Value.X:N3} Y:{lastTapPosition.Value.Y:N3} Z:{lastTapPosition.Value.Z:N3}]";
+        */
 
 
         //void Awake()
@@ -307,26 +309,30 @@ namespace Iviz.Controllers
             Config = new GridConfiguration();
         }
 
-        void OnLongClick(Vector2 cameraPoint)
+        /*
+        void OnLongClick(ClickInfo clickInfo)
         {
-            if (SenderPoint != null && grid.TryRaycast(cameraPoint, out Vector3 hit))
+            if (SenderPoint == null || !grid.TryRaycast(clickInfo.CursorPosition, out Vector3 hit))
             {
-                lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
-                SenderPoint.Publish(new PointStamped
-                {
-                    Header = (clickedSeq++, TfListener.FixedFrameId),
-                    Point = lastTapPosition.Value
-                });
-                ModuleData.ResetPanel();
+                return;
             }
+
+            lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
+            SenderPoint.Publish(new PointStamped
+            {
+                Header = (clickedSeq++, TfListener.FixedFrameId),
+                Point = lastTapPosition.Value
+            });
+            ModuleData.ResetPanel();
         }
+        */
 
         void UpdateMesh()
         {
             const int numberOfGridCells = 90;
             const float gridCellSize = 1;
-
-            float totalSize = numberOfGridCells * gridCellSize;
+            const float totalSize = numberOfGridCells * gridCellSize;
+            
             reflectionProbe.size = new Vector3(totalSize * 2, 20f, totalSize * 2);
             reflectionProbe.RenderProbe();
         }
@@ -337,18 +343,16 @@ namespace Iviz.Controllers
             node.DestroySelf();
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
 
-            GuiInputModule.Instance.LongClick -= OnLongClick;
-            //GameThread.EverySecond -= CheckProbeUpdate;
+            /*
+            if (GuiInputModule.Instance != null)
+            {
+                GuiInputModule.Instance.LongClick -= OnLongClick;
+            }
+            */
         }
 
         public void ResetController()
         {
-            /*
-            if (reflectionProbe)
-            {
-                reflectionProbe.RenderProbe();
-            }
-            */
         }
 
         public void OnSettingsChanged()
@@ -358,25 +362,5 @@ namespace Iviz.Controllers
                 reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
             }
         }
-
-
-        /*
-        int ticks;
-
-        void CheckProbeUpdate()
-        {
-            ticks++;
-            if (ticks == ProbeRefreshTimeInSec)
-            {
-                if (reflectionProbe != null)
-                {
-                    reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
-                    reflectionProbe.RenderProbe();
-                }
-
-                ticks = 0;
-            }
-        }
-                 */
     }
 }

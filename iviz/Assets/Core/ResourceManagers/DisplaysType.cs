@@ -10,6 +10,8 @@ namespace Iviz.Resources
 {
     public static class LayerType
     {
+        public const int Default = 0;
+
         /// <summary>
         /// Maps to the 'Ignore Raycast' layer, should be invisible to raycasts in any scene 
         /// </summary>
@@ -22,6 +24,8 @@ namespace Iviz.Resources
         /// </summary>
         public const int Clickable = 8;
         
+        public const int TfAxis = 9;
+
         public const int ARSetupMode = 14;
         
         public const int Collider = 15;
@@ -74,6 +78,9 @@ namespace Iviz.Resources
         public Info<GameObject> PositionDisc { get; }
         public Info<GameObject> ARMarkerHighlighter { get; }
 
+        public Info<GameObject> PoseHighlighter { get; }
+        public Info<GameObject> TfFrameHighlighter { get; }
+
         public DisplaysType()
         {
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
@@ -123,6 +130,9 @@ namespace Iviz.Resources
                 TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
                 PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
                 PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc);
+
+                PoseHighlighter = new Info<GameObject>(appAssetHolder.PoseHighlighter);
+                TfFrameHighlighter = new Info<GameObject>(appAssetHolder.TfFrameHighlighter);
 
                 resourceByType = CreateTypeDictionary(this);
             }

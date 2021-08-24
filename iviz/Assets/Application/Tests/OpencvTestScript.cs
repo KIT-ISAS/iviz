@@ -6,6 +6,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using UnityEngine;
 using Transform = Iviz.Msgs.GeometryMsgs.Transform;

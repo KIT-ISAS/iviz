@@ -58,12 +58,14 @@ namespace Iviz.App
             panel.Offset.Value = GridController.Offset;
             panel.FollowCamera.Value = GridController.FollowCamera;
             panel.HideInARMode.Value = GridController.HideInARMode;
+            /*
             panel.PublishLongTapPosition.Value = GridController.PublishLongTapPosition;
             panel.Sender.Set(GridController.SenderPoint);
             panel.LastTapPosition.Label = GridController.LastTapPositionString;
             panel.TapTopic.Value = GridController.TapTopic;
             panel.TapTopic.Interactable = GridController.PublishLongTapPosition;
             panel.TapTopic.Hints = GetTopicHints();
+            */
 
             panel.ColorPicker.ValueChanged += f => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
@@ -76,6 +78,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
             panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
+            /*
             panel.PublishLongTapPosition.ValueChanged += f =>
             {
                 GridController.PublishLongTapPosition = f;
@@ -87,6 +90,7 @@ namespace Iviz.App
                 GridController.TapTopic = f;
                 panel.Sender.Set(GridController.SenderPoint);
             };
+            */
         }
 
         void UpdateColor()
@@ -105,11 +109,12 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            panel.TapTopic.Hints = GetTopicHints();
+            //panel.TapTopic.Hints = GetTopicHints();
         }
 
+        /*
         static readonly string[] OwnPublishedTopicName = {"clicked_point"};
-
+        
         [NotNull]
         IEnumerable<string> GetTopicHints()
         {
@@ -123,6 +128,7 @@ namespace Iviz.App
                 .Select(tuple => tuple.Topic)
                 .Concat(OwnPublishedTopicName);
         }
+        */
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

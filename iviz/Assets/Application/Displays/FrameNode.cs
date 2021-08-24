@@ -32,6 +32,8 @@ namespace Iviz.Controllers
             set => SetParent(value, true);
         }
 
+        [NotNull] public string ParentId => parent != null ? parent.Id : ""; 
+
         [NotNull]
         protected string Name
         {
@@ -114,7 +116,7 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(name));
             }
 
-            SimpleFrameNode node = new GameObject(name).AddComponent<SimpleFrameNode>();
+            var node = new GameObject(name).AddComponent<SimpleFrameNode>();
             if (TfListener.Instance != null && TfListener.DefaultFrame != null)
             {
                 node.Parent = TfListener.DefaultFrame;

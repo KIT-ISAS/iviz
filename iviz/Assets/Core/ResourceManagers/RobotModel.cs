@@ -5,12 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
-using Iviz.Roslib;
 using Iviz.Urdf;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -65,9 +63,9 @@ namespace Iviz.Displays
             Name = robot.Name;
             Description = robotDescription;
 
-            LinkParents = new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
-            LinkObjects = new ReadOnlyDictionary<string, GameObject>(new Dictionary<string, GameObject>());
-            Joints = new ReadOnlyDictionary<string, Joint>(new Dictionary<string, Joint>());
+            LinkParents = new Dictionary<string, string>().AsReadOnly();
+            LinkObjects = new Dictionary<string, GameObject>().AsReadOnly();
+            Joints = new Dictionary<string, Joint>().AsReadOnly();
             BaseLinkObject = new GameObject(Name);
         }
 
@@ -93,7 +91,8 @@ namespace Iviz.Displays
                         rootMaterials[material.Name] = material;
                     }
 
-                    await robot.Links.Select(link =>
+                    await robot.Links
+                        .Select(link =>
                             ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token))
                         .WhenAll();
 
@@ -117,9 +116,9 @@ namespace Iviz.Displays
                         linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
                     }
 
-                    LinkParents = new ReadOnlyDictionary<string, string>(linkParents);
-                    LinkObjects = new ReadOnlyDictionary<string, GameObject>(linkObjects);
-                    Joints = new ReadOnlyDictionary<string, Joint>(joints);
+                    LinkParents = linkParents.AsReadOnly();
+                    LinkObjects = linkObjects.AsReadOnly();
+                    Joints = joints.AsReadOnly();
 
                     Tint = tint;
                     OcclusionOnly = occlusionOnly;
@@ -139,7 +138,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Failed to construct '{Name}'" + e);
+                    Logger.Error($"{this}: Failed to construct '{Name}'", e);
                     throw;
                 }
                 finally
@@ -171,8 +170,8 @@ namespace Iviz.Displays
         public ReadOnlyDictionary<string, GameObject> LinkObjects { get; private set; }
         public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
 
-        public bool IsStarting { get; private set; }
-        public int NumErrors { get; private set; }
+        bool IsStarting { get; set; }
+        int NumErrors { get; set; }
 
         public bool OcclusionOnly
         {
@@ -351,31 +350,24 @@ namespace Iviz.Displays
             [CanBeNull] IExternalServiceProvider provider,
             CancellationToken token)
         {
-            var geometry = visual.Geometry;
+            var (name, origin, geometry, material) = visual;
+            var (box, cylinder, sphere, mesh) = geometry;
 
-            var visualObject = new GameObject
-            (
-                visual.Name != null ? $"[Visual:{visual.Name}]" : "[Visual]"
-            );
+            var visualObject = new GameObject(name != null ? $"[Visual:{name}]" : "[Visual]");
             visualObject.transform.SetParent(linkObject.transform, false);
-            visualObject.transform.SetLocalPose(visual.Origin.ToPose());
+            visualObject.transform.SetLocalPose(origin.ToPose());
 
 
-            GameObject resourceObject = null;
-            bool isResource = false;
-            if (geometry.Mesh != null)
+            GameObject resourceObject;
+            if (mesh != null)
             {
-                string uri = geometry.Mesh.Filename;
+                string uri = mesh.Filename;
                 Info<GameObject> info;
                 try
                 {
-                    info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
+                    info = await Resource.GetGameObjectResourceAsync(uri, provider, token);
                 }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception e)
+                catch (Exception e) when (!(e is OperationCanceledException))
                 {
                     Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
                     NumErrors++;
@@ -389,46 +381,39 @@ namespace Iviz.Displays
                     return;
                 }
 
-                resourceObject = ResourcePool.Rent(info);
-                objectResources.Add((resourceObject, info));
-                resourceObject.transform.SetParent(visualObject.transform, false);
-                visualObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
-                isResource = true;
+                InternalRent(info, mesh.Scale.ToVector3().Abs());
             }
-            else if (geometry.Cylinder != null)
+            else if (cylinder != null)
             {
-                resourceObject = ResourcePool.Rent(Resource.Displays.Cylinder);
-                objectResources.Add((resourceObject, Resource.Displays.Cylinder));
-                resourceObject.transform.SetParent(visualObject.transform, false);
-                visualObject.transform.localScale = new Vector3(
-                    geometry.Cylinder.Radius * 2,
-                    geometry.Cylinder.Length,
-                    geometry.Cylinder.Radius * 2);
+                (float radius, float length) = cylinder;
+                InternalRent(Resource.Displays.Cylinder, new Vector3(radius * 2, length, radius * 2).Abs());
             }
-            else if (geometry.Box != null)
+            else if (box != null)
             {
-                resourceObject = ResourcePool.Rent(Resource.Displays.Cube);
-                objectResources.Add((resourceObject, Resource.Displays.Cube));
-                resourceObject.transform.SetParent(visualObject.transform, false);
-                visualObject.transform.localScale = geometry.Box.Size.ToVector3().Abs();
+                InternalRent(Resource.Displays.Cube, box.Size.ToVector3().Abs());                
             }
-            else if (geometry.Sphere != null)
+            else if (sphere != null)
             {
-                resourceObject = ResourcePool.Rent(Resource.Displays.Sphere);
-                objectResources.Add((resourceObject, Resource.Displays.Sphere));
-                resourceObject.transform.SetParent(visualObject.transform, false);
-                visualObject.transform.localScale = geometry.Sphere.Radius * Vector3.one;
+                InternalRent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);                
             }
-
-            if (resourceObject == null)
+            else
             {
                 return; //?
             }
 
-            if (isResource)
+            void InternalRent(Info<GameObject> info, in Vector3 scale)
             {
-                var material = GetMaterialForVisual(visual, keepMeshMaterials ? null : rootMaterials);
-                var color = material?.Color?.ToColor() ?? Color.white;
+                resourceObject = ResourcePool.Rent(info);
+                resourceObject.layer = LayerType.IgnoreRaycast;
+                objectResources.Add((resourceObject, info));
+                resourceObject.transform.SetParent(visualObject.transform, false);
+                visualObject.transform.localScale = scale;
+            }
+
+            if (mesh != null)
+            {
+                var resolvedMaterial = GetMaterialForVisual(material, keepMeshMaterials ? null : rootMaterials);
+                var color = resolvedMaterial?.Color?.ToColor() ?? Color.white;
 
                 var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
                 var resources = new List<MeshMarkerResource>();
@@ -453,18 +438,18 @@ namespace Iviz.Displays
                 var resource = resourceObject.AddComponent<MeshMarkerResource>();
                 displays.Add(resource);
 
-                var material = GetMaterialForVisual(visual, rootMaterials);
-                if (material == null)
+                var resolvedMaterial = GetMaterialForVisual(material, rootMaterials);
+                if (resolvedMaterial == null)
                 {
                     return;
                 }
 
-                if (material.Color != null)
+                if (resolvedMaterial.Color != null)
                 {
-                    resource.Color = material.Color.ToColor();
+                    resource.Color = resolvedMaterial.Color.ToColor();
                 }
 
-                if (material.Texture != null)
+                if (resolvedMaterial.Texture != null)
                 {
                     // TODO!!
                 }
@@ -508,21 +493,15 @@ namespace Iviz.Displays
         }
 
         [CanBeNull]
-        static Material GetMaterialForVisual([NotNull] Visual visual,
+        static Material GetMaterialForVisual([CanBeNull] Material material,
             [CanBeNull] IReadOnlyDictionary<string, Material> rootMaterials)
         {
-            var material = visual.Material;
-
-            if (material != null &&
-                visual.Material != null &&
-                visual.Material.IsReference() &&
-                rootMaterials != null &&
-                rootMaterials.TryGetValue(visual.Material.Name, out var newMaterial))
-            {
-                material = newMaterial;
-            }
-
-            return material;
+            return material != null &&
+                   material.IsReference() &&
+                   rootMaterials != null &&
+                   rootMaterials.TryGetValue(material.Name, out var newMaterial)
+                ? newMaterial
+                : material;
         }
 
         public void ResetLinkParents()

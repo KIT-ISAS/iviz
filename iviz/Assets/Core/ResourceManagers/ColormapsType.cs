@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -33,7 +35,7 @@ namespace Iviz.Resources
                 "jet",
                 "parula"
             };
-            Names = new ReadOnlyCollection<string>(names);
+            Names = names.AsReadOnly();
 
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
             Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>()
@@ -54,7 +56,7 @@ namespace Iviz.Resources
                 [ColormapId.winter] = assetHolder.Winter,
             };
 
-            Textures = new ReadOnlyDictionary<ColormapId, Texture2D>(textures);
+            Textures = textures.AsReadOnly();
         }
     }
 }

@@ -500,6 +500,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public abstract bool TryGetRaycastHit(in Ray ray, out Pose hit);
+
         public virtual void StopController()
         {
             ARActiveChanged?.Invoke(false);

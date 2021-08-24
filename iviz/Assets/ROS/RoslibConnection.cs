@@ -18,8 +18,9 @@ using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using UnityEditor;
-using Logger = Iviz.Msgs.Logger;
+using Logger = Iviz.Tools.Logger;
 using Random = System.Random;
 
 namespace Iviz.Ros
@@ -1019,7 +1020,6 @@ namespace Iviz.Ros
             }
         }
 
-
         [NotNull, ItemNotNull]
         public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
         {
@@ -1104,38 +1104,31 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                Task.Run(async () => await GetSystemStateAsync(), connectionTs.Token);
+                Task.Run(GetSystemStateAsync, connectionTs.Token);
             }
 
             return cachedSystemState;
         }
 
-        [ItemCanBeNull]
-        async ValueTask<SystemState> GetSystemStateAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        async Task GetSystemStateAsync()
         {
-            if (token.IsCancellationRequested)
-            {
-                return null;
-            }
-
             try
             {
-                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionTs.Token))
                 {
+                    const int timeoutInMs = 2000;
                     tokenSource.CancelAfter(timeoutInMs);
-                    return cachedSystemState = Connected
+                    cachedSystemState = Connected
                         ? await Client.GetSystemStateAsync(tokenSource.Token)
                         : null;
                 }
             }
             catch (OperationCanceledException)
             {
-                return null;
             }
             catch (Exception e)
             {
                 Core.Logger.Error("Exception during RoslibConnection.GetSystemState()", e);
-                return null;
             }
         }
 
@@ -1148,7 +1141,7 @@ namespace Iviz.Ros
 
             subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
             var subscriber = subscribedTopic?.Subscriber;
-            return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : default;
+            return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : (-1, -1);
         }
 
         internal int GetNumSubscribers([NotNull] ISender sender)

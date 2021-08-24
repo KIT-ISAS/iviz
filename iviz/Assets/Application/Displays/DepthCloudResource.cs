@@ -24,8 +24,7 @@ namespace Iviz.Displays
         static readonly int PScale = Shader.PropertyToID("_Scale");
         static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
 
-        [SerializeField] Material material;
-        [SerializeField] float elementScale = 1;
+        [SerializeField] Material material = null;
         [SerializeField] int width;
         [SerializeField] int height;
         Intrinsic intrinsic;
@@ -221,11 +220,13 @@ namespace Iviz.Displays
             material.SetTexture(PIntensity, texture);
         }
 
+        /*
         void UpdateIntensityValues(float intensityCoeff, float intensityAdd)
         {
             material.SetFloat(PIntensityCoeff, intensityCoeff);
             material.SetFloat(PIntensityAdd, intensityAdd);
         }
+        */
 
         void UpdatePosValues([CanBeNull] Texture2D texture)
         {

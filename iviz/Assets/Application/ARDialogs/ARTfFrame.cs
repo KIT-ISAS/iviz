@@ -11,7 +11,6 @@ namespace Iviz.App.ARDialogs
 {
     public class ARTfFrame : MarkerResource, ISupportsTint
     {
-        [SerializeField] Transform pivotTransform;
         [SerializeField] TMP_Text text = null;
         [SerializeField] AxisFrameResource axisFrame = null;
         [SerializeField] MeshMarkerResource cylinder = null;

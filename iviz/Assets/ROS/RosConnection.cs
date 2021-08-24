@@ -8,6 +8,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;

@@ -16,12 +16,12 @@ namespace Iviz.App
         static readonly Color EnabledColor = Color.black; 
         static readonly Color EnabledColorFrame = new Color(0.2f, 0.3f, 0.4f); 
         
-        [SerializeField, CanBeNull] LauncherButton parent;
+        [SerializeField, CanBeNull] LauncherButton parent = null;
         Button button;
 
-        [SerializeField] Image image;
-        [SerializeField] Image frame;
-        [SerializeField] TMP_Text text;
+        [SerializeField] Image image = null;
+        [SerializeField] Image frame = null;
+        [SerializeField] TMP_Text text = null;
 
         bool? viewEnabled;
 

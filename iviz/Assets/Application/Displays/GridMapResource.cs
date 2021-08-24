@@ -3,6 +3,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
@@ -21,9 +22,9 @@ namespace Iviz.Displays
         //[SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
 
-        [SerializeField] Material opaqueMaterial;
-        [SerializeField] Material transparentMaterial;
-        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] Material opaqueMaterial = null;
+        [SerializeField] Material transparentMaterial = null;
+        [SerializeField] MeshRenderer meshRenderer = null;
 
         Mesh mesh;
         int cellsX;

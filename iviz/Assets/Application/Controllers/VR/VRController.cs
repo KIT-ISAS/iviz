@@ -29,7 +29,7 @@ namespace Iviz.Controllers
             new[] {0, 1},
         };
         
-        [SerializeField] Camera mainCamera;
+        [SerializeField] Camera mainCamera = null;
         [SerializeField] EventSystem eventSystem = null;
         [CanBeNull] IVRButton button;
 

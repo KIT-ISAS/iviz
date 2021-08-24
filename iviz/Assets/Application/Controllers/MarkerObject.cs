@@ -9,6 +9,7 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -17,6 +18,7 @@ namespace Iviz.Controllers
 {
     public enum MarkerType
     {
+        Invalid = -1,
         Arrow = Marker.ARROW,
         Cube = Marker.CUBE,
         Sphere = Marker.SPHERE,
@@ -30,15 +32,16 @@ namespace Iviz.Controllers
         MeshResource = Marker.MESH_RESOURCE,
         TriangleList = Marker.TRIANGLE_LIST,
 
+
         /// <summary>
         ///     New: Text marker that does not face the camera
         /// </summary>
-        Text = 100,
+        Text = 12,
 
         /// <summary>
         ///     New: Image marker. Pixels in Colors field, image width in Scale.z
         /// </summary>
-        Image = 101
+        Image = 13
     }
 
     public enum MouseEventType
@@ -54,26 +57,26 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         const string FloatFormat = "#,0.###";
-        
+
         static Crc32Calculator Crc32 => Crc32Calculator.Instance;
 
         readonly StringBuilder description = new StringBuilder(250);
-        
+
         [CanBeNull] IDisplay resource;
         [CanBeNull] Info<GameObject> resourceInfo;
         [CanBeNull] CancellationTokenSource runningTs;
 
         [CanBeNull] MarkerLineHelper lineHelper;
         [CanBeNull] MarkerPointHelper pointHelper;
-        
+
         [NotNull] MarkerLineHelper LineHelper => lineHelper ?? (lineHelper = new MarkerLineHelper());
         [NotNull] MarkerPointHelper PointHelper => pointHelper ?? (pointHelper = new MarkerPointHelper());
-        
+
         Pose currentPose;
         Vector3 currentScale;
 
         (string Ns, int Id) id;
-        
+
         int numErrors;
         int numWarnings;
 
@@ -88,13 +91,13 @@ namespace Iviz.Controllers
         bool triangleListFlipWinding;
 
         public event Action BoundsChanged;
-        
+
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
 
         public Bounds? Bounds =>
             resource == null ? null : resource.Bounds.TransformBound(resource.GetTransform());
-        
+
         public bool OcclusionOnly
         {
             get => occlusionOnly;
@@ -205,6 +208,7 @@ namespace Iviz.Controllers
             description.Append("<color=#800000ff><font=Bold>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/")
                 .Append(id.Id)
                 .Append("</font></color>").AppendLine();
+            
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
             if (msg.Type() == MarkerType.MeshResource)
@@ -213,8 +217,6 @@ namespace Iviz.Controllers
             }
 
             description.Append("</b>").AppendLine();
-
-            ExpirationTime = msg.Lifetime == default ? DateTime.MaxValue : GameThread.Now + msg.Lifetime.ToTimeSpan();
 
             if (msg.Lifetime == default)
             {
@@ -225,6 +227,14 @@ namespace Iviz.Controllers
             {
                 ExpirationTime = GameThread.Now + msg.Lifetime.ToTimeSpan();
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
+            }
+
+            if (msg.Type < 0 || msg.Type > (int) MarkerType.Image)
+            {
+                // out!
+                StopLoadResourceTask();
+                DiscardResource();
+                return;
             }
 
             try
@@ -302,15 +312,10 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        T ValidateResource<T>() where T : MarkerResource
-        {
-            if (!(resource is T result))
-            {
-                throw new InvalidOperationException("Resource is not set!");
-            }
-
-            return result;
-        }
+        T ValidateResource<T>() where T : MarkerResource =>
+            resource is T result
+                ? result
+                : throw new InvalidOperationException("Resource is not set!");
 
         void AppendColor(ColorRGBA c)
         {
@@ -339,6 +344,7 @@ namespace Iviz.Controllers
             ImageResource image = ValidateResource<ImageResource>();
             int count = msg.Colors.Length;
             int width = (int) msg.Scale.Z;
+
             int height = width == 0 ? 0 : count / width;
             if (width <= 0 || height <= 0 || width * height != count)
             {
@@ -590,7 +596,6 @@ namespace Iviz.Controllers
             lineResource.SetDirect(setterCallback, isStrip ? msg.Points.Length - 1 : msg.Points.Length / 2);
         }
 
-
         void CreateMeshList([NotNull] Marker msg)
         {
             MeshListResource meshList = ValidateResource<MeshListResource>();
@@ -692,7 +697,6 @@ namespace Iviz.Controllers
             transform.localScale = currentScale = newScale;
         }
 
-
         void CreateArrow([NotNull] Marker msg)
         {
             ArrowResource arrowMarker = ValidateResource<ArrowResource>();
@@ -764,12 +768,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (resource != null && resourceInfo != null)
-            {
-                resource.ReturnToPool(resourceInfo);
-                resource = null;
-            }
-
+            DiscardResource();
             resourceInfo = newResourceInfo;
             if (resourceInfo == null)
             {
@@ -797,7 +796,7 @@ namespace Iviz.Controllers
             {
                 Layer = LayerType.IgnoreRaycast;
                 resource.Name = gameObject.name;
-                BoundsChanged?.Invoke();                
+                BoundsChanged?.Invoke();
                 return; // all OK
             }
 
@@ -810,7 +809,7 @@ namespace Iviz.Controllers
             AssetWrapperResource wrapper = resourceGameObject.AddComponent<AssetWrapperResource>();
             wrapper.Layer = LayerType.IgnoreRaycast;
             resource = wrapper;
-            BoundsChanged?.Invoke();                
+            BoundsChanged?.Invoke();
         }
 
         void UpdateTransform([NotNull] Marker msg)
@@ -837,7 +836,7 @@ namespace Iviz.Controllers
             {
                 numErrors++;
                 description.Append(ErrorStr).Append(
-                    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large");
+                    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
                 newPose = Pose.identity;
             }
 
@@ -910,7 +909,6 @@ namespace Iviz.Controllers
             }
         }
 
-
         void StopLoadResourceTask()
         {
             runningTs?.Cancel();
@@ -951,7 +949,7 @@ namespace Iviz.Controllers
                 case MarkerType.Image:
                     return "Image";
                 default:
-                    return "[Unknown]";
+                    return $"Unknown ({msg.Type.ToString()})";
             }
         }
 
@@ -1003,6 +1001,12 @@ namespace Iviz.Controllers
 
             StopLoadResourceTask();
 
+            DiscardResource();
+            previousHash = null;
+        }
+
+        void DiscardResource()
+        {
             if (resource == null || resourceInfo == null)
             {
                 return;
@@ -1011,7 +1015,6 @@ namespace Iviz.Controllers
             resource.ReturnToPool(resourceInfo);
             resource = null;
             resourceInfo = null;
-            previousHash = null;
         }
 
         [NotNull]
@@ -1019,7 +1022,7 @@ namespace Iviz.Controllers
         {
             return $"[MarkerObject {name}]";
         }
-        
+
         void OnDestroy()
         {
             StopLoadResourceTask();
@@ -1029,9 +1032,6 @@ namespace Iviz.Controllers
 
     internal static class MarkerTypeHelper
     {
-        public static MarkerType Type([NotNull] this Marker marker)
-        {
-            return (MarkerType) marker.Type;
-        }
+        public static MarkerType Type([NotNull] this Marker marker) => (MarkerType) marker.Type;
     }
 }

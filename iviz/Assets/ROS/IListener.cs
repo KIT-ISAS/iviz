@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
@@ -22,10 +23,10 @@ namespace Iviz.Ros
         int MaxQueueSize { set; }
         bool Subscribed { get; }
         void Stop();
-        void Suspend();
-        void Unsuspend();
+        void SetSuspend(bool value);
         void Reset();
         void SetPause(bool value);
+        void WriteDescriptionTo(StringBuilder b);
     }
 
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
@@ -118,6 +119,18 @@ namespace Iviz.Ros
 
             Connection.Subscribe(this);
             Subscribed = true;
+        }
+
+        public void SetSuspend(bool value)
+        {
+            if (value)
+            {
+                Suspend();
+            }
+            else
+            {
+                Unsuspend(); 
+            }
         }
 
         public void SetPause(bool value)
@@ -220,6 +233,23 @@ namespace Iviz.Ros
             Interlocked.Exchange(ref lastMsgBytes, 0);
             Interlocked.Exchange(ref droppedMsgs, 0);
             Interlocked.Exchange(ref recentMsgs, 0);
+        }
+
+        public void WriteDescriptionTo([NotNull] StringBuilder description)
+        {
+            (int numActivePublishers, int numPublishers) = NumPublishers;
+            if (numPublishers == -1)
+            {
+                description.Append("Off");
+            }
+            else if (!Subscribed)
+            {
+                description.Append("PAUSED");
+            }
+            else
+            {
+                description.Append($"{numActivePublishers.ToString()}/{numPublishers.ToString()}↓");
+            }            
         }
 
 

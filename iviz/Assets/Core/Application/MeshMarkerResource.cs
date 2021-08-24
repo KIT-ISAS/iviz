@@ -2,6 +2,7 @@
 using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -20,8 +21,10 @@ namespace Iviz.Displays
     public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
-        
-        [FormerlySerializedAs("texture")] [SerializeField] Texture2D diffuseTexture;
+
+        [FormerlySerializedAs("texture")] [SerializeField]
+        Texture2D diffuseTexture;
+
         [SerializeField] Texture2D bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
@@ -31,7 +34,7 @@ namespace Iviz.Displays
         [SerializeField] float metallic = 0.5f;
         [SerializeField] MeshRenderer mainRenderer;
         [SerializeField] MeshFilter meshFilter;
-        
+
         Material textureMaterial;
         Material textureMaterialAlpha;
         [SerializeField] bool autoSelectMaterial = true;
@@ -39,8 +42,7 @@ namespace Iviz.Displays
         [NotNull]
         MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
 
-        [NotNull]
-        MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
+        [NotNull] MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
 
 
         [CanBeNull]
@@ -75,7 +77,7 @@ namespace Iviz.Displays
                 textureMaterial = null;
                 textureMaterialAlpha = null;
                 bumpTexture = value;
-                SetEffectiveColor();                
+                SetEffectiveColor();
             }
         }
 
@@ -99,7 +101,7 @@ namespace Iviz.Displays
                 SetEffectiveColor();
             }
         }
-        
+
         public float Smoothness
         {
             get => smoothness;
@@ -119,7 +121,7 @@ namespace Iviz.Displays
                 MainRenderer.SetPropertyMetallic(metallic);
             }
         }
-        
+
         public bool CastsShadows
         {
             get => MainRenderer.shadowCastingMode == ShadowCastingMode.On;
@@ -131,21 +133,21 @@ namespace Iviz.Displays
         {
             get => MeshFilter.sharedMesh;
             set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException("Mesh is null");
-        } 
+        }
 
         protected override void Awake()
         {
             base.Awake();
 
             var sharedMaterial = MainRenderer.sharedMaterial;
-            if (diffuseTexture == null 
+            if (diffuseTexture == null
                 && sharedMaterial != null
                 && sharedMaterial.HasProperty(MainTex)
                 && sharedMaterial.mainTexture != null)
             {
                 diffuseTexture = (Texture2D) sharedMaterial.mainTexture;
             }
-            
+
             Color = color;
             EmissiveColor = emissiveColor;
             Tint = tint;
@@ -153,11 +155,11 @@ namespace Iviz.Displays
             Smoothness = smoothness;
 
             MainRenderer.ResetPropertyTextureScale();
-            
+
             if (Settings.IsHololens)
             {
                 var materials = MainRenderer.materials.ToArray();
-                foreach (ref var material in materials.Ref()) 
+                foreach (ref var material in materials.Ref())
                 {
                     if (material.name == "White") // bug: fix this!
                     {
@@ -220,7 +222,7 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             var effectiveColor = Color * Tint;
             if (autoSelectMaterial)
             {
@@ -254,19 +256,21 @@ namespace Iviz.Displays
             MainRenderer.SetPropertyColor(effectiveColor);
         }
 
-        public void OverrideMaterial([NotNull] Material material)
+        public void OverrideMaterial([CanBeNull] Material material)
         {
-            MainRenderer.sharedMaterial = material;
-            autoSelectMaterial = false;
+            if (material == null)
+            {
+                autoSelectMaterial = true;
+            }
+            else
+            {
+                MainRenderer.sharedMaterial = material;
+                autoSelectMaterial = false;
+            }
+
             SetEffectiveColor();
         }
 
-        public void DisableOverrideMaterial()
-        {
-            autoSelectMaterial = true;
-            SetEffectiveColor();
-        }
-        
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {

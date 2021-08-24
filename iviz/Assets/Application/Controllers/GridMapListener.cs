@@ -177,12 +177,12 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new System.ArgumentNullException(nameof(moduleData));
          
-            FieldNames = new ReadOnlyCollection<string>(fieldNames);
+            FieldNames = fieldNames.AsReadOnly();
             
             node = FrameNode.Instantiate("[GridMapNode]");
             link = FrameNode.Instantiate("[GridMapLink]");
-            link.transform.parent = node.Transform;
-            resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.transform);
+            link.Transform.parent = node.Transform;
+            resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.Transform);
 
             Config = new GridMapConfiguration();
         }

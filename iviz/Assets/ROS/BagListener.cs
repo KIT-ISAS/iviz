@@ -2,11 +2,12 @@
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
-using Logger = Iviz.Msgs.Logger;
+using Logger = Iviz.Tools.Logger;
 
 namespace Iviz.Ros
 {

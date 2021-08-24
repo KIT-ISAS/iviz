@@ -4,7 +4,7 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.App.ARDialogs

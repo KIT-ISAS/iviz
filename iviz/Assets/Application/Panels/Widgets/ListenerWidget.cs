@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,7 +45,7 @@ namespace Iviz.App
             (!ConnectionManager.IsConnected || Listener == null) ? (-1, -1) : Listener.NumPublishers;
 
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
-        long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
+        long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0; 
         int Dropped => Listener?.Stats.Dropped ?? 0;
         bool Subscribed => Listener?.Subscribed ?? false;
 
@@ -60,22 +59,11 @@ namespace Iviz.App
                 return;
             }
             
+            
             CachedStr.Length = 0;
             CachedStr.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
 
-            (int numActivePublishers, int numPublishers) = NumPublishers;
-            if (numPublishers == -1)
-            {
-                CachedStr.Append("Off");
-            }
-            else if (!Subscribed)
-            {
-                CachedStr.Append("PAUSED");
-            }
-            else
-            {
-                CachedStr.Append(numActivePublishers).Append("/").Append(numPublishers).Append("↓");
-            }
+            listener.WriteDescriptionTo(CachedStr);
 
             string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
             CachedStr.Append(" | ")
@@ -96,15 +84,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (listener.Subscribed)
-            {
-                listener.Suspend();
-            }
-            else
-            {
-                listener.Unsuspend();
-            }
-
+            listener.SetSuspend(listener.Subscribed);
             panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
         }
 

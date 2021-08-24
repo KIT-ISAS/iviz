@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -386,9 +387,9 @@ namespace Iviz.Controllers
             Transform cameraTransform = arCamera.transform;
             setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
             Ray ray = new Ray(cameraTransform.position, cameraTransform.forward);
-            if (TryGetPlaneHit(ray, out ARRaycastHit hit))
+            if (TryGetRaycastHit(ray, out Pose hit))
             {
-                setupModeFrame.Transform.position = hit.pose.position;
+                setupModeFrame.Transform.position = hit.position;
                 setupModeFrame.Tint = Color.white;
                 ArSet.Visible = true;
                 ArInfoPanel.SetActive(false);
@@ -416,9 +417,9 @@ namespace Iviz.Controllers
 
                 Vector3 origin = WorldPosition + maxDistanceAbovePlane * Vector3.up;
                 Ray ray = new Ray(origin, Vector3.down);
-                if (TryGetPlaneHit(ray, out ARRaycastHit hit))
+                if (TryGetRaycastHit(ray, out Pose hit))
                 {
-                    Pose pose = WorldPose.WithPosition(hit.pose.position);
+                    Pose pose = WorldPose.WithPosition(hit.position);
                     InitializeWorldAnchor();
                     SetWorldPose(pose, RootMover.Anchor);
                 }
@@ -465,7 +466,7 @@ namespace Iviz.Controllers
             SetWorldPose(newPose, RootMover.Anchor);
         }
 
-        bool TryGetPlaneHit(in Ray ray, out ARRaycastHit hit)
+        public override bool TryGetRaycastHit(in Ray ray, out Pose hit)
         {
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
@@ -484,12 +485,12 @@ namespace Iviz.Controllers
                     hit = default;
                     return false;
                 case 1:
-                    hit = results[0];
+                    hit = results[0].pose;
                     return true;
                 default:
                     Vector3 origin = ray.origin;
                     hit = Enumerable.Select(results, rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit))
-                        .Min().rayHit;
+                        .Min().rayHit.pose;
                     return true;
             }
         }
@@ -523,20 +524,19 @@ namespace Iviz.Controllers
             }
         }
 
-        void TriggerPulse(Vector2 cursorPosition)
+        void TriggerPulse(ClickInfo clickInfo)
         {
             if (!Visible)
             {
                 return;
             }
 
-            var ray = Settings.MainCamera.ScreenPointToRay(cursorPosition);
-            if (!TryGetPlaneHit(ray, out ARRaycastHit hit))
+            if (!clickInfo.TryGetARRaycastHit(out var pose))
             {
                 return;
             }
 
-            ARMeshLines.TriggerPulse(hit.pose.position);
+            ARMeshLines.TriggerPulse(pose.position);
         }
 
         uint colorSeq, depthSeq;

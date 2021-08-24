@@ -12,9 +12,9 @@ namespace Iviz.App
     {
         static readonly Color EnabledColorFrame = new Color(0.2f, 0.3f, 0.4f); 
         
-        [SerializeField] ARSidePanel arSidePanel;
-        [SerializeField] GameObject children;
-        [SerializeField] Image frame;
+        [SerializeField] ARSidePanel arSidePanel = null;
+        [SerializeField] GameObject children = null;
+        [SerializeField] Image frame = null;
         
         float? popupAnimationStart;
         float clickStart;

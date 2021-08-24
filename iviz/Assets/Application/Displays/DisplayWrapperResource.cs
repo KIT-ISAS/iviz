@@ -13,6 +13,7 @@ namespace Iviz.Displays
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         
+        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -46,7 +47,7 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        public void SplitForRecycle()
+        public virtual void  SplitForRecycle()
         {
             if (Display != null)
             {

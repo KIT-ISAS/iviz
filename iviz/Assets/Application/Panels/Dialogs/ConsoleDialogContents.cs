@@ -7,6 +7,7 @@ namespace Iviz.App
     public sealed class ConsoleDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] ToggleButtonWidget pause = null;
         [SerializeField] InputFieldWithHintsWidget fromField = null;
         [SerializeField] DropdownWidget logLevel = null;
         [SerializeField] DropdownWidget timeFormat = null;
@@ -15,10 +16,11 @@ namespace Iviz.App
         [SerializeField] Text bottomText = null;
 
         public TrashButtonWidget Close => close;
+        public ToggleButtonWidget Pause => pause;
         public InputFieldWithHintsWidget FromField => fromField;
         public DropdownWidget LogLevel => logLevel;
-        public DropdownWidget TimeFormat => timeFormat;
-        public DropdownWidget MessageFormat => messageFormat;
+        DropdownWidget TimeFormat => timeFormat;
+        DropdownWidget MessageFormat => messageFormat;
         public TMP_Text Text => text;
         public Text BottomText => bottomText;
 
@@ -35,6 +37,7 @@ namespace Iviz.App
             LogLevel.ClearSubscribers();
             TimeFormat.ClearSubscribers();
             MessageFormat.ClearSubscribers();
+            Pause.ClearSubscribers();
         }
     }
 }

@@ -10,9 +10,9 @@ namespace Iviz.Controllers
 {
     public class VRListener :  MonoBehaviour
     {
-        [SerializeField] string topic;
-        [SerializeField] string tfName;
-        [SerializeField] GameObject controllerTemplate;
+        [SerializeField] string topic = null;
+        [SerializeField] string tfName = null;
+        [SerializeField] GameObject controllerTemplate = null;
         
         GameObject controller;
         Transform controllerTransform;

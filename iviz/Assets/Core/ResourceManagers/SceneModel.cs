@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -262,21 +263,6 @@ namespace Iviz.Displays
             where TB : unmanaged
         {
             Buffer.BlockCopy(src, 0, dst, 0, sizeToCopy);
-            /*
-            unsafe
-            {
-                if (sizeToCopy > src.Length * sizeof(TA) || sizeToCopy > dst.Length * sizeof(TB))
-                {
-                    throw new InvalidOperationException("Potential buffer overflow!");
-                }
-
-                fixed (TA* a = src)
-                fixed (TB* b = dst)
-                {
-                    Buffer.MemoryCopy(a, b, sizeToCopy, sizeToCopy);
-                }
-            }
-            */
         }
     }
 }

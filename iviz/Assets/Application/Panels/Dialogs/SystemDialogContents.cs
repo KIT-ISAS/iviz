@@ -10,20 +10,20 @@ namespace Iviz.App
 {
     public sealed class SystemDialogContents : MonoBehaviour, IDialogPanelContents
     {
-        [SerializeField] Button topics;
-        [SerializeField] Button services;
-        [SerializeField] Button @params;
-        [SerializeField] Button nodes;
-        [SerializeField] Button aliases;
+        [SerializeField] Button topics = null;
+        [SerializeField] Button services = null;
+        [SerializeField] Button @params = null;
+        [SerializeField] Button nodes = null;
+        [SerializeField] Button aliases = null;
 
-        [SerializeField] Text topicsText;
-        [SerializeField] Text servicesText;
-        [SerializeField] Text paramsText;
-        [SerializeField] Text nodesText;
-        [SerializeField] Text aliasesText;
+        [SerializeField] Text topicsText = null;
+        [SerializeField] Text servicesText = null;
+        [SerializeField] Text paramsText = null;
+        [SerializeField] Text nodesText = null;
+        [SerializeField] Text aliasesText = null;
 
-        [SerializeField] TMP_Text textTop;
-        [SerializeField] TMP_Text textBottom;
+        [SerializeField] TMP_Text textTop = null;
+        [SerializeField] TMP_Text textBottom = null;
 
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] LinkResolver link = null;
@@ -33,8 +33,8 @@ namespace Iviz.App
         InputFieldWithHintsWidget[] hostnames;
         InputFieldWidget[] addresses;
 
-        [SerializeField] GameObject aliasesTab;
-        [SerializeField] GameObject infoTab;
+        [SerializeField] GameObject aliasesTab = null;
+        [SerializeField] GameObject infoTab = null;
 
         public TrashButtonWidget Close => close;
         public TMP_Text TextTop => textTop;

@@ -8,6 +8,7 @@ using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;

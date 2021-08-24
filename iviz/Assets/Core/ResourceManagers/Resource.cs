@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
@@ -38,37 +39,36 @@ namespace Iviz.Resources
         /// Dictionary that describes which module handles which ROS message type.
         /// </summary>
         public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType { get; }
-            = new ReadOnlyDictionary<string, ModuleType>(new Dictionary<string, ModuleType>
-                {
-                    {PointCloud2.RosMessageType, ModuleType.PointCloud},
-                    {Image.RosMessageType, ModuleType.Image},
-                    {CompressedImage.RosMessageType, ModuleType.Image},
-                    {Marker.RosMessageType, ModuleType.Marker},
-                    {MarkerArray.RosMessageType, ModuleType.Marker},
-                    {InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker},
-                    {JointState.RosMessageType, ModuleType.JointState},
-                    {LaserScan.RosMessageType, ModuleType.LaserScan},
-                    {PoseStamped.RosMessageType, ModuleType.Magnitude},
-                    {Pose.RosMessageType, ModuleType.Magnitude},
-                    {PointStamped.RosMessageType, ModuleType.Magnitude},
-                    {Point.RosMessageType, ModuleType.Magnitude},
-                    {WrenchStamped.RosMessageType, ModuleType.Magnitude},
-                    {Wrench.RosMessageType, ModuleType.Magnitude},
-                    {Odometry.RosMessageType, ModuleType.Magnitude},
-                    {TwistStamped.RosMessageType, ModuleType.Magnitude},
-                    {Twist.RosMessageType, ModuleType.Magnitude},
-                    {OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid},
-                    {Path.RosMessageType, ModuleType.Path},
-                    {PoseArray.RosMessageType, ModuleType.Path},
-                    {PolygonStamped.RosMessageType, ModuleType.Path},
-                    {Polygon.RosMessageType, ModuleType.Path},
-                    {GridMap.RosMessageType, ModuleType.GridMap},
-                    {Octomap.RosMessageType, ModuleType.Octomap},
-                    {OctomapWithPose.RosMessageType, ModuleType.Octomap},
-                    {Dialog.RosMessageType, ModuleType.GuiDialog},
-                    {GuiArray.RosMessageType, ModuleType.GuiDialog},
-                }
-            );
+            = new Dictionary<string, ModuleType>
+            {
+                {PointCloud2.RosMessageType, ModuleType.PointCloud},
+                {Image.RosMessageType, ModuleType.Image},
+                {CompressedImage.RosMessageType, ModuleType.Image},
+                {Marker.RosMessageType, ModuleType.Marker},
+                {MarkerArray.RosMessageType, ModuleType.Marker},
+                {InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker},
+                {JointState.RosMessageType, ModuleType.JointState},
+                {LaserScan.RosMessageType, ModuleType.LaserScan},
+                {PoseStamped.RosMessageType, ModuleType.Magnitude},
+                {Pose.RosMessageType, ModuleType.Magnitude},
+                {PointStamped.RosMessageType, ModuleType.Magnitude},
+                {Point.RosMessageType, ModuleType.Magnitude},
+                {WrenchStamped.RosMessageType, ModuleType.Magnitude},
+                {Wrench.RosMessageType, ModuleType.Magnitude},
+                {Odometry.RosMessageType, ModuleType.Magnitude},
+                {TwistStamped.RosMessageType, ModuleType.Magnitude},
+                {Twist.RosMessageType, ModuleType.Magnitude},
+                {OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid},
+                {Path.RosMessageType, ModuleType.Path},
+                {PoseArray.RosMessageType, ModuleType.Path},
+                {PolygonStamped.RosMessageType, ModuleType.Path},
+                {Polygon.RosMessageType, ModuleType.Path},
+                {GridMap.RosMessageType, ModuleType.GridMap},
+                {Octomap.RosMessageType, ModuleType.Octomap},
+                {OctomapWithPose.RosMessageType, ModuleType.Octomap},
+                {Dialog.RosMessageType, ModuleType.GuiDialog},
+                {GuiArray.RosMessageType, ModuleType.GuiDialog},
+            }.AsReadOnly();
 
         [NotNull] public static MaterialsType Materials => materials ?? (materials = new MaterialsType());
         [NotNull] public static ColormapsType Colormaps => colormaps ?? (colormaps = new ColormapsType());
@@ -101,7 +101,8 @@ namespace Iviz.Resources
             return Internal.GetRobotNames().Concat(External.GetRobotNames());
         }
 
-        public static async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync([NotNull] string robotName,
+        public static async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(
+            [NotNull] string robotName,
             CancellationToken token = default)
         {
             return Internal.TryGetRobot(robotName, out string robotDescription)
@@ -137,8 +138,7 @@ namespace Iviz.Resources
         {
             internals = null;
             externals = null;
+            texturedMaterials = null;
         }
-        
-        
     }
 }

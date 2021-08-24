@@ -6,6 +6,7 @@ namespace Iviz.App
     public sealed class EchoDialogContents : MonoBehaviour, IDialogPanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] ToggleButtonWidget pause = null;
         [SerializeField] DropdownWidget topics = null;
         [SerializeField] TMP_Text text = null;
         [SerializeField] TMP_Text publishers = null;
@@ -13,6 +14,7 @@ namespace Iviz.App
         [SerializeField] TMP_Text kbytes = null;
 
         public TrashButtonWidget Close => close;
+        public ToggleButtonWidget Pause => pause;
         public DropdownWidget Topics => topics;
         public TMP_Text Text => text;
         public TMP_Text Publishers => publishers;
@@ -29,6 +31,7 @@ namespace Iviz.App
         {
             Close.ClearSubscribers();
             Topics.ClearSubscribers();
+            Pause.ClearSubscribers();
         }
     }
 }

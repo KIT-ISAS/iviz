@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -35,8 +36,8 @@ namespace Iviz.Displays
 
         Mesh mesh;
         
-        [SerializeField] MeshRenderer meshRenderer;
-        [SerializeField] MeshFilter meshFilter;
+        [SerializeField] MeshRenderer meshRenderer = null;
+        [SerializeField] MeshFilter meshFilter = null;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
 
         Material currentMaterial;

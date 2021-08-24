@@ -27,13 +27,12 @@ namespace Iviz.Core
 
         public static void Error([CanBeNull] object t)
         {
-            ExternalImpl((string) t, LogLevel.Error);
+            ExternalImpl((string)t, LogLevel.Error);
         }
 
-        public static void Error([CanBeNull] object t, [CanBeNull] Exception e, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
+        public static void Error([CanBeNull] object t, [CanBeNull] Exception e)
         {
-            ExternalImpl(t, LogLevel.Error, e, file, line);
+            ExternalImpl(t, LogLevel.Error, e);
         }
 
         [Obsolete]
@@ -51,10 +50,9 @@ namespace Iviz.Core
             ExternalImpl(t?.ToString(), LogLevel.Debug);
         }
 
-        public static void Debug([CanBeNull] object t, Exception e, [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0)
+        public static void Debug([CanBeNull] object t, Exception e)
         {
-            ExternalImpl(t, LogLevel.Debug, e, file, line);
+            ExternalImpl(t, LogLevel.Debug, e);
         }
 
         public static void Internal([CanBeNull] string msg)
@@ -114,8 +112,7 @@ namespace Iviz.Core
         }
 
 
-        static void ExternalImpl([CanBeNull] string msg, LogLevel level,
-            [CallerFilePath] string _ = "", [CallerLineNumber] int __ = 0)
+        static void ExternalImpl([CanBeNull] string msg, LogLevel level)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
             switch (level)
@@ -134,12 +131,12 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string file, int line)
+        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e)
         {
             StringBuilder str = BuilderPool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
             try
             {
-                ExternalImpl(msg, level, e, file, line, str);
+                ExternalImpl(msg, level, e, str);
             }
             finally
             {
@@ -147,7 +144,7 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e, string _, int __,
+        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e,
             [NotNull] StringBuilder str)
         {
             str.Length = 0;
@@ -176,10 +173,9 @@ namespace Iviz.Core
             string message = str.ToString();
             LogExternal?.Invoke(new LogMessage(level, message));
 
-            //if (!Settings.IsMobile)
-            if (true)
+            if (!Settings.IsMobile)
             {
-                UnityEngine.Debug.LogWarning((string) msg + e);
+                UnityEngine.Debug.LogWarning((string)msg + e);
             }
             else
             {

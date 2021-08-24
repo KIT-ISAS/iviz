@@ -8,11 +8,16 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        static readonly string[] Names = { "Axis-X", "Axis-Y", "Axis-Z" };
+        static readonly Color BaseColorX = new Color(230 / 255f, 45 / 255f, 45 / 255f);
+        static readonly Color BaseColorY = new Color(45 / 255f, 230 / 255f, 45 / 255f);
+        static readonly Color BaseColorZ = new Color(45 / 255f, 45 / 255f, 230 / 255f);
+
+        static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};
 
         readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];
 
         float axisLength;
+
         public float AxisLength
         {
             get => axisLength;
@@ -41,6 +46,7 @@ namespace Iviz.Displays
             set => axisObjects[2].Color = value;
         }
 
+
         public override int Layer
         {
             get => base.Layer;
@@ -54,6 +60,7 @@ namespace Iviz.Displays
         }
 
         bool occlusionOnly;
+
         public bool OcclusionOnly
         {
             get => occlusionOnly;
@@ -67,6 +74,7 @@ namespace Iviz.Displays
         }
 
         Color tint;
+
         public Color Tint
         {
             get => tint;
@@ -81,7 +89,6 @@ namespace Iviz.Displays
 
         public bool CastsShadows
         {
-            get => axisObjects[0].CastsShadows;
             set
             {
                 axisObjects[0].CastsShadows = value;
@@ -89,16 +96,16 @@ namespace Iviz.Displays
                 axisObjects[2].CastsShadows = value;
             }
         }
-        
+
         public float Emissive
         {
             set
             {
                 axisObjects[0].EmissiveColor = value * axisObjects[0].EmissiveColor;
                 axisObjects[1].EmissiveColor = value * axisObjects[1].EmissiveColor;
-                axisObjects[2].EmissiveColor =  value * axisObjects[2].EmissiveColor;
+                axisObjects[2].EmissiveColor = value * axisObjects[2].EmissiveColor;
             }
-        }        
+        }
 
         protected override void Awake()
         {
@@ -114,9 +121,9 @@ namespace Iviz.Displays
 
             AxisLength = 0.25f;
 
-            ColorX = Color.red;
-            ColorY = Color.green;
-            ColorZ = Color.blue;
+            ColorX = BaseColorX;
+            ColorY = BaseColorY;
+            ColorZ = BaseColorZ;
         }
 
         void UpdateFrameMesh(float newFrameAxisLength, float newFrameAxisWidth)
@@ -132,13 +139,13 @@ namespace Iviz.Displays
             BoxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void OverrideMaterial([NotNull] Material material)
+        public void OverrideMaterial([CanBeNull] Material material)
         {
             axisObjects[0].OverrideMaterial(material);
             axisObjects[1].OverrideMaterial(material);
             axisObjects[2].OverrideMaterial(material);
-        }        
-        
+        }
+
         public void SplitForRecycle()
         {
             axisObjects[0].ReturnToPool(Resource.Displays.Cube);
@@ -150,10 +157,11 @@ namespace Iviz.Displays
         {
             base.Suspend();
 
+            OverrideMaterial(null);
             AxisLength = 0.25f;
-            ColorX = Color.red;
-            ColorY = Color.green;
-            ColorZ = Color.blue;
+            ColorX = BaseColorX;
+            ColorY = BaseColorY;
+            ColorZ = BaseColorZ;
             OcclusionOnly = false;
             Tint = Color.white;
             Emissive = 0;

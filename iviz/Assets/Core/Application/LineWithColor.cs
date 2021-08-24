@@ -15,7 +15,7 @@ namespace Iviz.Displays
     public readonly struct LineWithColor
     {
         static readonly float WhiteBits = PointWithColor.FloatFromColorBits(Color.white);
-        
+
         public readonly float4x2 f;
 
         public float3 A => f.c0.xyz;
@@ -26,29 +26,25 @@ namespace Iviz.Displays
 
         Color32 ColorB => PointWithColor.ColorFromFloatBits(f.c1.w);
 
-        float4 PA => f.c0;
-
-        float4 PB => f.c1;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB) :
             this(start, PointWithColor.FloatFromColorBits(colorA), end, PointWithColor.FloatFromColorBits(colorB))
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public LineWithColor(in Vector3 start, in Vector3 end, Color32 color) : 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public LineWithColor(in Vector3 start, in Vector3 end, Color32 color) :
             this(start, PointWithColor.FloatFromColorBits(color), end, PointWithColor.FloatFromColorBits(color))
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, in Vector3 end) :
             this(start, WhiteBits, end, WhiteBits)
         {
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, float intensityA, in Vector3 end, float intensityB)
         {
             f.c0.x = start.x;
@@ -62,7 +58,7 @@ namespace Iviz.Displays
             f.c1.w = intensityB;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in PointWithColor start, in PointWithColor end)
         {
             f.c0 = start.f;
@@ -72,13 +68,14 @@ namespace Iviz.Displays
         /// <summary>
         /// Do the positions have a Nan? (ignores intensity) 
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasNaN() => f.c0.HasNaN() || f.c1.HasNaN();
 
         [NotNull]
         public override string ToString()
         {
-            return $"[x={PA.x} y={PA.y} z={PA.z} i={PA.w} c={ColorA} ---- x={PB.x} y={PB.y} z={PB.z} i={PB.w} c={ColorB}]";
+            return
+                $"[x={f.c0.x} y={f.c0.y} z={f.c0.z} i={f.c0.w} c={ColorA} ---- x={f.c1.x} y={f.c1.y} z={f.c1.z} i={f.c1.w} c={ColorB}]";
         }
     };
 }
