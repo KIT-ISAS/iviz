@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,9 +6,10 @@ using System.Threading.Tasks;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using Iviz.XmlRpc;
+using Iviz.Tools;
 using Nito.AsyncEx;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
-using Logger = Iviz.Msgs.Logger;
+using Logger = Iviz.Tools.Logger;
 
 namespace Iviz.RosMaster
 {
@@ -228,7 +228,7 @@ namespace Iviz.RosMaster
 
         static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
-#if NET5_0
+#if NET5_0_OR_GREATER
             int id = Environment.ProcessId;
 #else
             int id = System.Diagnostics.Process.GetCurrentProcess().Id;

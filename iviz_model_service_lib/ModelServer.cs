@@ -7,7 +7,7 @@ using Assimp;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.ModelService
 {
@@ -373,12 +373,12 @@ namespace Iviz.ModelService
                 Msgs.IvizMsgs.Mesh dstMesh = new()
                 {
                     Name = srcMesh.Name ?? "[mesh]",
-                    Vertices = srcMesh.Vertices.Select(ToVector3).ToArray(),
-                    Normals = srcMesh.Normals.Select(ToVector3).ToArray(),
-                    Tangents = srcMesh.Tangents.Select(ToVector3).ToArray(),
-                    BiTangents = srcMesh.BiTangents.Select(ToVector3).ToArray(),
-                    TexCoords = srcMesh.TextureCoordinateChannels.Select(ToTexCoords).ToArray(),
-                    ColorChannels = srcMesh.VertexColorChannels.Select(ToColorChannel).ToArray(),
+                    Vertices = Enumerable.Select(srcMesh.Vertices, ToVector3).ToArray(),
+                    Normals = Enumerable.Select(srcMesh.Normals, ToVector3).ToArray(),
+                    Tangents = Enumerable.Select(srcMesh.Tangents, ToVector3).ToArray(),
+                    BiTangents = Enumerable.Select(srcMesh.BiTangents, ToVector3).ToArray(),
+                    TexCoords = Enumerable.Select(srcMesh.TextureCoordinateChannels, ToTexCoords).ToArray(),
+                    ColorChannels = Enumerable.Select(srcMesh.VertexColorChannels, ToColorChannel).ToArray(),
                     Faces = faces.ToArray(),
                     MaterialIndex = (uint) srcMesh.MaterialIndex,
                 };
@@ -402,7 +402,7 @@ namespace Iviz.ModelService
                     ShininessStrength = srcMaterial.ShininessStrength,
                     Reflectivity = srcMaterial.Reflectivity,
                     BlendMode = (byte) srcMaterial.BlendMode,
-                    Textures = srcMaterial.GetAllMaterialTextures().Select(ToTexture).ToArray()
+                    Textures = Enumerable.Select(srcMaterial.GetAllMaterialTextures(), ToTexture).ToArray()
                 };
             }
 
@@ -464,12 +464,12 @@ namespace Iviz.ModelService
 
         static ColorChannel ToColorChannel(List<Color4D> colorChannel)
         {
-            return new(colorChannel.Select(ToColor).ToArray());
+            return new(Enumerable.Select(colorChannel, ToColor).ToArray());
         }
 
         static TexCoords ToTexCoords(List<Vector3D> texCoords)
         {
-            return new(texCoords.Select(ToVector3UV).ToArray());
+            return new(Enumerable.Select(texCoords, ToVector3UV).ToArray());
         }
 
         static Texture ToTexture(TextureSlot texture)
@@ -603,7 +603,7 @@ namespace Iviz.ModelService
                 Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
                 Filename = uri.ToString(),
                 Includes = includes.ToArray(),
-                Lights = file.Lights.Select(ToLight).ToArray()
+                Lights = Enumerable.Select(file.Lights, ToLight).ToArray()
             };
         }
 

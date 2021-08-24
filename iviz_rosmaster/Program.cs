@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using Iviz.Msgs;
-using Iviz.Roslib;
+using Iviz.Tools;
 
 namespace Iviz.RosMaster
 {
@@ -12,9 +11,14 @@ namespace Iviz.RosMaster
         {
             Uri masterUri = null;
             
-            if (args.Length >= 1
-                && args[1] == "--uri")
+            if (args.Length >= 1) 
             {
+                if (args[0] != "--uri")
+                {
+                    Console.Error.WriteLine("Usage: Iviz.Rosmaster [--uri masterUri]");
+                    return;
+                }
+
                 if (args.Length == 1)
                 {
                     Console.Error.WriteLine("EE Expected an uri as parameter in position 2");
@@ -23,7 +27,7 @@ namespace Iviz.RosMaster
 
                 if (!Uri.TryCreate(args[2], UriKind.Absolute, out Uri uri))
                 {
-                    Console.Error.WriteLine("EE Could not parse position 2 as an uri (example: http://XXX:1234)");
+                    Console.Error.WriteLine("EE Could not parse position 2 as an uri (example: http://localhost:11311)");
                     return;
                 }
 
