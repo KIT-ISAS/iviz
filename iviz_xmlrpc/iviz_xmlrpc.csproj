@@ -13,12 +13,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
+      <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
-      <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.4.0" />
+      <ProjectReference Include="..\iviz_tools\iviz_tools.csproj" />
     </ItemGroup>
 
 </Project>

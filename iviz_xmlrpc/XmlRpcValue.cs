@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using Iviz.Msgs;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -203,9 +202,9 @@ namespace Iviz.XmlRpc
         {
             Type.Integer => $"[int:{((int) l).ToString()}]",
             Type.Empty => "[empty]",
-            Type.Double => $"[double:{DoubleLongReinterpret.ToDouble(l).ToString(BuiltIns.Culture)}]",
+            Type.Double => $"[double:{DoubleLongReinterpret.ToDouble(l).ToString(Defaults.Culture)}]",
             Type.Boolean => l != 0 ? "[bool:true]" : "[bool:false]",
-            Type.DateTime => $"[datetime:{new DateTime(l).ToString(BuiltIns.Culture)}]",
+            Type.DateTime => $"[datetime:{new DateTime(l).ToString(Defaults.Culture)}]",
             Type.String => $"[string:{(string) o!}]",
             Type.Array => $"[array:{((Array) o!).Length.ToString()} elems]",
             Type.Base64 => $"[base64:{((Array) o!).Length.ToString()} bytes]",

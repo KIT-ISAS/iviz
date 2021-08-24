@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Iviz.Tools;
 using Newtonsoft.Json;
 
 #if !NETSTANDARD2_0
@@ -46,10 +47,10 @@ namespace Iviz.Msgs
 
     public static class BuiltIns
     {
-        public static UTF8Encoding UTF8 { get; } = new(false);
+        public static UTF8Encoding UTF8 => Defaults.UTF8;
 
-        public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
-
+        public static CultureInfo Culture => Defaults.Culture;
+        
         static string GetClassStringConstant(Type type, string name)
         {
             Type? currentType = type;

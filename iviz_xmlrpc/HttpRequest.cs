@@ -4,7 +4,7 @@ using System.IO.Compression;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.XmlRpc
 {
@@ -39,7 +39,7 @@ namespace Iviz.XmlRpc
                    (keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n") +
                    "User-Agent: iviz XML-RPC\r\n" +
                    $"Host: {callerUri.Host}\r\n" +
-                   $"Content-Length: {BuiltIns.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
+                   $"Content-Length: {Defaults.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
                    "Accept-Encoding: gzip\r\n" +
                    "Content-Type: text/xml; charset=utf-8\r\n" +
                    $"\r\n{msgIn}";
@@ -47,8 +47,8 @@ namespace Iviz.XmlRpc
 
         (string, Rent<byte>, int length) CreateRequestGzipped(string msgIn, bool keepAlive = false)
         {
-            using var srcBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(msgIn.Length));
-            int srcLength = BuiltIns.UTF8.GetBytes(msgIn, 0, msgIn.Length, srcBytes.Array, 0);
+            using var srcBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(msgIn.Length));
+            int srcLength = Defaults.UTF8.GetBytes(msgIn, 0, msgIn.Length, srcBytes.Array, 0);
 
             var dstBytes = new Rent<byte>(srcBytes.Length);
 
@@ -80,9 +80,9 @@ namespace Iviz.XmlRpc
                 (string header, var payloadBytes, int length) = CreateRequestGzipped(msgIn, keepAlive);
                 using (payloadBytes)
                 {
-                    using (var headerBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(header.Length)))
+                    using (var headerBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(header.Length)))
                     {
-                        int headerSize = BuiltIns.UTF8.GetBytes(header, 0, header.Length, headerBytes.Array, 0);
+                        int headerSize = Defaults.UTF8.GetBytes(header, 0, header.Length, headerBytes.Array, 0);
                         await stream.WriteChunkAsync(headerBytes.Array, headerSize, token);
                     }
 
@@ -94,9 +94,9 @@ namespace Iviz.XmlRpc
             }
 
             string content = CreateRequest(msgIn, keepAlive);
-            using (var contentBytes = new Rent<byte>(BuiltIns.UTF8.GetMaxByteCount(content.Length)))
+            using (var contentBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(content.Length)))
             {
-                int contentSize = BuiltIns.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
+                int contentSize = Defaults.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
                 await stream.WriteChunkAsync(contentBytes.Array, contentSize, token);
             }
 
@@ -231,7 +231,7 @@ namespace Iviz.XmlRpc
             }
             else
             {
-                result = BuiltIns.UTF8.GetString(content.Array, 0, content.Length);
+                result = Defaults.UTF8.GetString(content.Array, 0, content.Length);
             }
 
             return (result, headerLength + contentLength, connectionClose);
@@ -249,7 +249,7 @@ namespace Iviz.XmlRpc
                 using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
                 decompressionStream.CopyTo(outputStream);
-                return BuiltIns.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
+                return Defaults.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
             }
             catch (NotSupportedException)
             {
@@ -259,14 +259,14 @@ namespace Iviz.XmlRpc
                 using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
                 decompressionStream.CopyTo(outputStream);
-                return BuiltIns.UTF8.GetString(outputStream.GetBuffer(), 0, (int) outputStream.Position);
+                return Defaults.UTF8.GetString(outputStream.GetBuffer(), 0, (int) outputStream.Position);
             }
         }
 
         static bool CheckHeaderLineForKey(string line, string key, out string value)
         {
             if (line.Length < key.Length + 1 ||
-                string.Compare(line, 0, key, 0, key.Length, true, BuiltIns.Culture) != 0)
+                string.Compare(line, 0, key, 0, key.Length, true, Defaults.Culture) != 0)
             {
                 value = "";
                 return false;

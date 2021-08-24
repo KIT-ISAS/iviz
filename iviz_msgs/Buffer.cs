@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Tools;
 
 namespace Iviz.Msgs
 {
@@ -110,6 +111,7 @@ namespace Iviz.Msgs
             return val;
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe StringRef DeserializeStringS()
         {
@@ -132,6 +134,7 @@ namespace Iviz.Msgs
 
             return val;
         }
+        */
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string[] DeserializeStringArray()
@@ -154,6 +157,7 @@ namespace Iviz.Msgs
             return val;
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe UniqueRef<StringRef> DeserializeStringArrayS()
         {
@@ -162,7 +166,9 @@ namespace Iviz.Msgs
             ptr += 4;
             return count == 0 ? UniqueRef<StringRef>.Empty : DeserializeStringArrayS(count);
         }
+        */
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public UniqueRef<StringRef> DeserializeStringArrayS(uint count)
         {
@@ -174,6 +180,7 @@ namespace Iviz.Msgs
 
             return val;
         }
+        */
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void DeserializeStringList(List<string> list)
@@ -343,11 +350,13 @@ namespace Iviz.Msgs
             }
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Serialize(StringRef val)
         {
             SerializeStructArray(val.Ref);
         }
+        */
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void SerializeArray(string[] val, uint count = 0)

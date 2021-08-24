@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.XmlRpc
 {
@@ -63,7 +62,7 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(msgOut));
             }
 
-            int msgOutLength = BuiltIns.UTF8.GetByteCount(msgOut);
+            int msgOutLength = Defaults.UTF8.GetByteCount(msgOut);
             string str = "HTTP/1.0 200 OK\r\n" +
                          "Server: iviz XML-RPC\r\n" +
                          "Connection: close\r\n" +
@@ -71,7 +70,7 @@ namespace Iviz.XmlRpc
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
                          msgOut;
 
-            using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
+            using StreamWriter writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
             await writer.WriteChunkAsync(str, token, timeoutInMs);
         }
 
@@ -94,7 +93,7 @@ namespace Iviz.XmlRpc
                 "Content-Length: 0\r\n" +
                 "\r\n";
 
-            using StreamWriter writer = new StreamWriter(client.GetStream(), BuiltIns.UTF8);
+            using StreamWriter writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
             await writer.WriteChunkAsync(errorMsg, token, timeoutInMs);
         }
     }

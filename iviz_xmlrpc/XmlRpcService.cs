@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.XmlRpc
 {
@@ -74,8 +74,6 @@ namespace Iviz.XmlRpc
         }
     }
 
-    
-    
 
     /// <summary>
     /// Functions for XML-RPC calls.
@@ -114,13 +112,13 @@ namespace Iviz.XmlRpc
                 case null:
                     throw new ParseException("Expected node name but received null!");
                 case "double":
-                    return double.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture,
+                    return double.TryParse(primitive.InnerText, NumberStyles.Number, Defaults.Culture,
                         out double @double)
                         ? new XmlRpcValue(@double)
                         : throw new ParseException($"Could not parse '{primitive.InnerText}' as double!");
                 case "i4":
                 case "int":
-                    return int.TryParse(primitive.InnerText, NumberStyles.Number, BuiltIns.Culture, out int @int)
+                    return int.TryParse(primitive.InnerText, NumberStyles.Number, Defaults.Culture, out int @int)
                         ? new XmlRpcValue(@int)
                         : throw new ParseException($"Could not parse '{primitive.InnerText}' as integer!");
                 case "boolean":
@@ -149,7 +147,7 @@ namespace Iviz.XmlRpc
                     List<(string, XmlRpcValue)> structValue = new();
                     foreach (XmlNode? member in primitive.ChildNodes)
                     {
-                        if (member == null || member.Name != "member")
+                        if (member is not {Name: "member"})
                         {
                             continue;
                         }
@@ -185,7 +183,7 @@ namespace Iviz.XmlRpc
                     throw new ParseException($"Could not parse type '{primitive.Name}'");
             }
         }
-        
+
         internal static string CreateRequest(string method, XmlRpcArg[] args)
         {
             string[] entries = new string[4 + args.Length * 3];
@@ -251,7 +249,7 @@ namespace Iviz.XmlRpc
                     throw new ParseException($"Expected 'params' or 'fault', but got '{child.Name}'");
             }
         }
-        
+
         /// <summary>
         /// Calls an XML-RPC method. The connection to the server is closed after the call.
         /// </summary>
@@ -263,7 +261,8 @@ namespace Iviz.XmlRpc
         /// <returns>The result of the remote call.</returns>
         /// <exception cref="ArgumentNullException">Thrown if one of the arguments is null.</exception>
         /// <exception cref="RpcConnectionException">An error happened during the connection.</exception>
-        public static async ValueTask<XmlRpcValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
+        public static async ValueTask<XmlRpcValue> MethodCallAsync(Uri remoteUri, Uri callerUri, string method,
+            XmlRpcArg[] args,
             CancellationToken token = default)
         {
             if (remoteUri is null)
@@ -284,7 +283,7 @@ namespace Iviz.XmlRpc
             string outData = CreateRequest(method, args);
             string inData;
 
-            using HttpRequest request = new (callerUri, remoteUri);
+            using HttpRequest request = new(callerUri, remoteUri);
             try
             {
                 await request.StartAsync(token);
@@ -430,6 +429,12 @@ namespace Iviz.XmlRpc
                         throw new ParseException("Expected 'params', 'fault', or 'methodName'; got null instead");
                     case "params":
                     {
+                        if (child.ChildNodes.Count == 0)
+                        {
+                            args = Array.Empty<XmlRpcValue>();
+                            break;
+                        }
+                        
                         args = new XmlRpcValue[child.ChildNodes.Count];
                         for (int i = 0; i < child.ChildNodes.Count; i++)
                         {

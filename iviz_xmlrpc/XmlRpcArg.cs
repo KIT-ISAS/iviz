@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web;
-using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.XmlRpc
 {
@@ -21,12 +21,16 @@ namespace Iviz.XmlRpc
 
         XmlRpcArg(bool f)
         {
-            content = f ? "<value><boolean>1</boolean></value>\n" : "<value><boolean>0</boolean></value>\n";
+            content = f 
+                ? "<value><boolean>1</boolean></value>\n" 
+                : "<value><boolean>0</boolean></value>\n";
         }
 
         XmlRpcArg(double f)
         {
-            content = $"<value><double>{f.ToString(BuiltIns.Culture)}</double></value>\n";
+            content = f == 0
+                ? "<value><double>0</double></value>\n"
+                : $"<value><double>{f.ToString(Defaults.Culture)}</double></value>\n";
         }
 
         XmlRpcArg(int f)
@@ -35,7 +39,7 @@ namespace Iviz.XmlRpc
             {
                 0 => "<value><i4>0</i4></value>\n",
                 1 => "<value><i4>1</i4></value>\n",
-                _ => $"<value><i4>{f.ToString(BuiltIns.Culture)}</i4></value>\n"
+                _ => $"<value><i4>{f.ToString(Defaults.Culture)}</i4></value>\n"
             };
         }
 
@@ -43,7 +47,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public XmlRpcArg(Uri[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(Uri[] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -59,10 +63,12 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            content = $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
+            content = f.Length == 0
+                ? "<value></value>\n"
+                : $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
         }
 
-        public XmlRpcArg(string[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(IReadOnlyList<string> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -70,7 +76,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg(string[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(IReadOnlyList<string[]> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -82,7 +88,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg((string, string)[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(IReadOnlyList<(string, string)> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -91,6 +97,12 @@ namespace Iviz.XmlRpc
             if (f == null)
             {
                 throw new ArgumentNullException(nameof(f));
+            }
+
+            if (f.Length == 0)
+            {
+                content = "<value><array><data></data></array></value>";
+                return;
             }
 
             string?[] fs = new string[f.Length + 2];
@@ -135,11 +147,11 @@ namespace Iviz.XmlRpc
                 "</data></array></value>";
         }
 
-        XmlRpcArg(XmlRpcArg[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(XmlRpcArg[][] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -150,7 +162,9 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(f));
             }
 
-            content = $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
+            content = f.Length == 0
+                ? "<value><base64></base64></value>\n"
+                : $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
         public XmlRpcArg((string name, XmlRpcArg value)[] f)
@@ -158,6 +172,12 @@ namespace Iviz.XmlRpc
             if (f == null)
             {
                 throw new ArgumentNullException(nameof(f));
+            }
+
+            if (f.Length == 0)
+            {
+                content = "<value><struct></struct></value>";
+                return;
             }
 
             StringBuilder builder = new(100);
