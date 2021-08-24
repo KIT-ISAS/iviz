@@ -16,6 +16,7 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib
@@ -77,7 +78,7 @@ namespace Iviz.Roslib
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
-                RosMasterClient.TimeoutInMs = (int) value.TotalMilliseconds;
+                RosMasterClient.TimeoutInMs = (int)value.TotalMilliseconds;
             }
         }
 
@@ -116,7 +117,7 @@ namespace Iviz.Roslib
                 }
 
                 tcpRosTimeout = value;
-                int valueInMs = (int) value.TotalMilliseconds;
+                int valueInMs = (int)value.TotalMilliseconds;
                 foreach (IRosSubscriber subscriber in subscribersByTopic.Values)
                 {
                     subscriber.TimeoutInMs = valueInMs;
@@ -676,7 +677,7 @@ namespace Iviz.Roslib
 
             static int GetProcessId()
             {
-#if NET5_0
+#if NET5_0_OR_GREATER
                 return Environment.ProcessId;
 #else
                 return Process.GetCurrentProcess().Id;
@@ -697,7 +698,7 @@ namespace Iviz.Roslib
 
         internal RosNodeClient CreateTalker(Uri otherUri)
         {
-            return new(CallerId, CallerUri, otherUri, (int) RpcNodeTimeout.TotalMilliseconds);
+            return new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
         }
 
         (string id, RosSubscriber<T> subscriber)
@@ -706,7 +707,7 @@ namespace Iviz.Roslib
             where T : IMessage
         {
             TopicInfo<T> topicInfo = new(CallerId, topic, generator);
-            int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
+            int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
             RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
             string id = subscription.Subscribe(firstCallback);
@@ -732,7 +733,7 @@ namespace Iviz.Roslib
             where T : IMessage
         {
             TopicInfo<T> topicInfo = new(CallerId, topic, generator);
-            int timeoutInMs = (int) TcpRosTimeout.TotalMilliseconds;
+            int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
             RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
 
@@ -892,9 +893,9 @@ namespace Iviz.Roslib
                 }
 
                 object? subscriberObj = method.Invoke(this, flags, null,
-                    new object[] {resolvedTopic, requestNoDelay}, BuiltIns.Culture);
+                    new object[] { resolvedTopic, requestNoDelay }, BuiltIns.Culture);
 
-                subscriber = (IRosSubscriber?) subscriberObj ??
+                subscriber = (IRosSubscriber?)subscriberObj ??
                              throw new RosInvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
             }
             else
@@ -1072,7 +1073,7 @@ namespace Iviz.Roslib
                 : new TopicInfo<T>(CallerId, topic, generator);
 
             RosPublisher<T> publisher = new(this, topicInfo)
-                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
+                { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };
 
             publishersByTopic[topic] = publisher;
 
@@ -1104,7 +1105,7 @@ namespace Iviz.Roslib
                 : new TopicInfo<T>(CallerId, topic, generator);
 
             RosPublisher<T> publisher = new(this, topicInfo)
-                {TimeoutInMs = (int) TcpRosTimeout.TotalMilliseconds};
+                { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };
 
             publishersByTopic[topic] = publisher;
 
@@ -1220,12 +1221,12 @@ namespace Iviz.Roslib
             RosPublisher<T> publisher;
             if (!TryGetPublisher(topic, out IRosPublisher basePublisher))
             {
-                publisher = (RosPublisher<T>) await CreatePublisherAsync<T>(resolvedTopic, token);
+                publisher = (RosPublisher<T>)await CreatePublisherAsync<T>(resolvedTopic, token);
             }
             else
             {
                 var newPublisher = basePublisher as RosPublisher<T>;
-                publisher = newPublisher ?? throw new RosInvalidMessageTypeException( 
+                publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
                     $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
                     $"requested type was [{BuiltIns.GetMessageType<T>()}]");
             }
@@ -1296,8 +1297,9 @@ namespace Iviz.Roslib
                     throw new RosInvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
-                object? publisherObj = method.Invoke(this, flags, null, new object[] {resolvedTopic}, BuiltIns.Culture);
-                publisher = (IRosPublisher?) publisherObj ??
+                object? publisherObj =
+                    method.Invoke(this, flags, null, new object[] { resolvedTopic }, BuiltIns.Culture);
+                publisher = (IRosPublisher?)publisherObj ??
                             throw new RosInvalidMessageTypeException("Failed to call 'CreatePublisher'!");
             }
             else
@@ -1336,14 +1338,14 @@ namespace Iviz.Roslib
                     throw new RosInvalidMessageTypeException($"Type {msgType} is not a message object");
                 }
 
-                object? result = method.Invoke(this, flags, null, new object[] {resolvedTopic, token},
+                object? result = method.Invoke(this, flags, null, new object[] { resolvedTopic, token },
                     BuiltIns.Culture);
                 if (result == null)
                 {
                     throw new RosInvalidMessageTypeException("Failed to call 'CreatePublisherAsync'!");
                 }
 
-                ValueTask<IRosPublisher> task = (ValueTask<IRosPublisher>) result;
+                ValueTask<IRosPublisher> task = (ValueTask<IRosPublisher>)result;
                 publisher = await task;
             }
             else
@@ -1745,9 +1747,9 @@ namespace Iviz.Roslib
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
-            TT service = new() {Request = request};
+            TT service = new() { Request = request };
             CallService(serviceName, service, persistent, token);
-            return (TU) service.Response;
+            return (TU)service.Response;
         }
 
         /// <summary>
@@ -1797,9 +1799,9 @@ namespace Iviz.Roslib
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
-            TT service = new() {Request = request};
+            TT service = new() { Request = request };
             await CallServiceAsync(serviceName, service, persistent, token);
-            return (TU) service.Response;
+            return (TU)service.Response;
         }
 
 
@@ -2016,6 +2018,19 @@ namespace Iviz.Roslib
             await advertisedService.DisposeAsync(token);
             await RosMasterClient.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);
             return true;
+        }
+
+        internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
+            where T : IMessage
+        {
+            if (subscribersByTopic.TryGetValue(topic, out var tmpSubscriber) &&
+                tmpSubscriber is IRosSubscriber<T> subscriber)
+            {
+                return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
+            }
+
+            receiver = null;
+            return false;
         }
 
         public void Dispose()

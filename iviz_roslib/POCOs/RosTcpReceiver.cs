@@ -6,7 +6,7 @@ using Iviz.Roslib.Utils;
 namespace Iviz.Roslib
 {
     [DataContract]
-    internal sealed class RosTcpReceiver : IRosTcpReceiver
+    internal sealed class RosTcpReceiver : JsonToString, IRosTcpReceiver
     {
         [DataMember] public Uri RemoteUri { get; }
         [DataMember] public Endpoint RemoteEndpoint { get; }

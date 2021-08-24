@@ -1,5 +1,6 @@
 ﻿using System;
 using Iviz.Roslib.Utils;
+using Iviz.Roslib.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -10,9 +11,10 @@ namespace Iviz.Roslib
     {
         public enum DirectionType
         {
-            In, Out
+            In,
+            Out
         }
-        
+
         public int ConnectionId { get; }
         public Uri DestinationId { get; }
         public DirectionType Direction { get; }
@@ -20,7 +22,8 @@ namespace Iviz.Roslib
         public string Topic { get; }
         public bool Connected { get; }
 
-        public BusInfo(int id, Uri? destinationId, DirectionType direction, string topic, bool status = true, string transport = "TCPROS")
+        public BusInfo(int id, Uri? destinationId, DirectionType direction, string topic, bool status = true,
+            string transport = RosNodeClient.ProtocolTcpRosName)
         {
             ConnectionId = id;
             DestinationId = destinationId ?? throw new ArgumentNullException(nameof(destinationId));
@@ -29,9 +32,10 @@ namespace Iviz.Roslib
             Topic = topic;
             Connected = status;
         }
-        
-        public BusInfo(int id, string topic, SubscriberReceiverState receiver) : 
-            this(id, receiver.RemoteUri, DirectionType.In, topic, receiver.IsAlive) {}
-        
+
+        public BusInfo(int id, string topic, SubscriberReceiverState receiver) :
+            this(id, receiver.RemoteUri, DirectionType.In, topic, receiver.IsAlive)
+        {
+        }
     }
 }

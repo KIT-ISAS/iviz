@@ -2,13 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.Utils;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
@@ -24,19 +25,7 @@ namespace Iviz.Roslib
         Dead
     }
 
-    public interface IRosTcpSender
-    {
-        string Topic { get; }
-        string? RemoteCallerId { get; }
-        Endpoint RemoteEndpoint { get; }
-        Endpoint Endpoint { get; }
-        IReadOnlyList<string>? TcpHeader { get; }
-        PublisherSenderState State { get; }
-        bool IsAlive { get; }
-        SenderStatus Status { get; }
-    }
-
-    internal sealed class TcpSenderAsync<T> : IRosTcpSender where T : IMessage
+    internal sealed class TcpSenderAsync<T> where T : IMessage
     {
         const int MaxSizeInPacketsWithoutConstraint = 2;
 
@@ -60,6 +49,7 @@ namespace Iviz.Roslib
         public Endpoint RemoteEndpoint { get; }
         public IReadOnlyList<string>? TcpHeader { get; private set; }
         public SenderStatus Status { get; private set; }
+        public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
         public bool TcpNoDelay
         {
@@ -94,8 +84,8 @@ namespace Iviz.Roslib
             this.topicInfo = topicInfo;
 
             tcpClient = client;
-            Endpoint = new Endpoint((IPEndPoint) tcpClient.Client.LocalEndPoint!);
-            RemoteEndpoint = new Endpoint((IPEndPoint) tcpClient.Client.RemoteEndPoint!);
+            Endpoint = new Endpoint((IPEndPoint)tcpClient.Client.LocalEndPoint!);
+            RemoteEndpoint = new Endpoint((IPEndPoint)tcpClient.Client.RemoteEndPoint!);
             task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
         }
 
@@ -309,28 +299,32 @@ namespace Iviz.Roslib
             foreach (var (_, msgSignal) in messageQueue)
             {
                 msgSignal?.TrySetException(new RosQueueException(
-                    $"Connection for '{RemoteCallerId}' is shutting down", this));
+                    $"Connection for '{RemoteCallerId}' is shutting down", CreateConnectionInfo()));
             }
         }
 
         RosQueueException CreateQueueException(Exception e) =>
-            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
+            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e,
+                CreateConnectionInfo());
 
         RosQueueOverflowException CreateOverflowException() =>
-            new($"Message could not be sent to node '{RemoteCallerId}'", this);
+            new($"Message could not be sent to node '{RemoteCallerId}'", CreateConnectionInfo());
+
+        IRosTcpSender CreateConnectionInfo() => new RosTcpSender(
+            Topic,
+            topicInfo.Type,
+            RemoteCallerId,
+            RemoteEndpoint,
+            Endpoint,
+            TcpHeader ?? Array.Empty<string>(),
+            State,
+            IsAlive,
+            Status
+        );
 
         async Task ProcessLoop(NetworkStream stream, NullableMessage<T> latchedMsg)
         {
             using ResizableRent<byte> writeBuffer = new(4);
-
-            void WriteLengthToBuffer(uint i)
-            {
-                byte[] array = writeBuffer.Array;
-                array[3] = (byte) (i >> 0x18);
-                array[0] = (byte) i;
-                array[1] = (byte) (i >> 8);
-                array[2] = (byte) (i >> 0x10);
-            }
 
             await ProcessHandshake(stream, latchedMsg.HasValue);
 
@@ -339,16 +333,16 @@ namespace Iviz.Roslib
                 Publish(latchedMsg.Value);
             }
 
-            List<(T msg, int msgLength, TaskCompletionSource? signal)> tmpQueue = new();
+            List<Element> queue = new();
 
             while (KeepRunning)
             {
                 await signal.WaitAsync(runningTs.Token);
 
-                int totalQueueSizeInBytes = ReadFromQueue(tmpQueue);
+                int totalQueueSizeInBytes = ReadFromQueue(queue);
 
                 int startIndex, newBytesDropped;
-                if (tmpQueue.Count <= MaxSizeInPacketsWithoutConstraint ||
+                if (queue.Count <= MaxSizeInPacketsWithoutConstraint ||
                     totalQueueSizeInBytes < MaxQueueSizeInBytes)
                 {
                     startIndex = 0;
@@ -356,48 +350,98 @@ namespace Iviz.Roslib
                 }
                 else
                 {
-                    DiscardOldMessages(tmpQueue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
+                    DiscardOldMessages(queue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
                         out startIndex, out newBytesDropped);
                 }
 
                 numDropped += startIndex;
                 bytesDropped += newBytesDropped;
 
-                for (int i = 0; i < startIndex; i++)
+                foreach (var (_, _, msgSignal) in queue.Take(startIndex))
                 {
-                    tmpQueue[i].signal?.TrySetException(CreateOverflowException());
+                    msgSignal?.TrySetException(CreateOverflowException());
                 }
 
-                for (int i = startIndex; i < tmpQueue.Count; i++)
+                if (LoopbackReceiver != null)
                 {
-                    try
-                    {
-                        (T msg, int msgLength, var msgSignal) = tmpQueue[i];
-                        writeBuffer.EnsureCapability(msgLength + 4);
-
-                        uint sendLength = msg.SerializeToArray(writeBuffer.Array, 4);
-
-                        WriteLengthToBuffer(sendLength);
-                        await stream.WriteChunkAsync(writeBuffer.Array, (int) sendLength + 4, runningTs.Token);
-
-                        //Logger.Log(time.Now() + ": Sent.");
-
-                        numSent++;
-                        bytesSent += (int) sendLength + 4;
-                        msgSignal?.TrySetResult(null);
-                    }
-                    catch (Exception e)
-                    {
-                        for (int j = i; j < tmpQueue.Count; j++)
-                        {
-                            tmpQueue[j].signal?.TrySetException(CreateQueueException(e));
-                        }
-
-                        throw;
-                    }
+                    SendWithLoopback(queue, startIndex);
+                }
+                else
+                {
+                    await SendWithSocketAsync(stream, queue, startIndex, writeBuffer);
                 }
             }
         }
+
+        void SendWithLoopback(IReadOnlyList<Element> queue, int startIndex)
+        {
+            var loopbackReceiver = LoopbackReceiver ??
+                                   throw new NullReferenceException("Can only use this when loopback receiver is set");
+
+            try
+            {
+                foreach (var (msg, msgLength, msgSignal) in queue.Skip(startIndex))
+                {
+                    loopbackReceiver.Post(msg, msgLength);
+
+                    numSent++;
+                    bytesSent += msgLength + 4;
+                    msgSignal?.TrySetResult(null);
+                }
+            }
+            catch (Exception e)
+            {
+                SetExceptionsInMessages(queue, CreateQueueException(e));
+                throw;
+            }
+        }
+
+        async Task SendWithSocketAsync(NetworkStream stream, IReadOnlyList<Element> queue, int startIndex,
+            ResizableRent<byte> writeBuffer)
+        {
+            void WriteLengthToBuffer(uint i)
+            {
+                byte[] array = writeBuffer.Array;
+                array[3] = (byte)(i >> 0x18);
+                array[0] = (byte)i;
+                array[1] = (byte)(i >> 8);
+                array[2] = (byte)(i >> 0x10);
+            }
+
+            try
+            {
+                foreach (var (msg, msgLength, msgSignal) in queue.Skip(startIndex))
+                {
+                    writeBuffer.EnsureCapability(msgLength + 4);
+
+                    uint sendLength = msg.SerializeToArray(writeBuffer.Array, 4);
+
+                    WriteLengthToBuffer(sendLength);
+                    await stream.WriteChunkAsync(writeBuffer.Array, (int)sendLength + 4, runningTs.Token);
+
+                    numSent++;
+                    bytesSent += (int)sendLength + 4;
+                    msgSignal?.TrySetResult(null);
+                }
+            }
+            catch (Exception e)
+            {
+                SetExceptionsInMessages(queue, CreateQueueException(e));
+                throw;
+            }
+        }
+
+        void SetExceptionsInMessages(IEnumerable<Element> queue, Exception e)
+        {
+            var entries = queue
+                .Select(element => element.Signal)
+                .Where(msgSignal => msgSignal != null && !msgSignal.Task.IsCompleted);
+            foreach (var msgSignal in entries)
+            {
+                msgSignal?.TrySetException(CreateQueueException(e));
+            }
+        }
+
 
         public void Publish(in T message)
         {
@@ -427,7 +471,7 @@ namespace Iviz.Roslib
             await msgSignal.Task;
         }
 
-        int ReadFromQueue(List<(T, int, TaskCompletionSource?)> result)
+        int ReadFromQueue(List<Element> result)
         {
             int totalQueueSizeInBytes = 0;
 
@@ -435,22 +479,22 @@ namespace Iviz.Roslib
             while (messageQueue.TryDequeue(out var tuple))
             {
                 int msgLength = tuple.msg.RosMessageLength;
-                result.Add((tuple.msg, msgLength, tuple.signal));
+                result.Add(new Element(tuple.msg, msgLength, tuple.signal));
                 totalQueueSizeInBytes += msgLength;
             }
 
             return totalQueueSizeInBytes;
         }
 
-        static void DiscardOldMessages(List<(T, int msgLength, TaskCompletionSource?)> queue,
-            int totalQueueSizeInBytes, int maxQueueSizeInBytes, out int numDropped, out int bytesDropped)
+        static void DiscardOldMessages(List<Element> queue, int totalQueueSizeInBytes, int maxQueueSizeInBytes,
+            out int numDropped, out int bytesDropped)
         {
             int c = queue.Count - 1;
 
             int remainingBytes = maxQueueSizeInBytes;
             for (int i = 0; i < MaxSizeInPacketsWithoutConstraint; i++)
             {
-                remainingBytes -= queue[c - i].msgLength;
+                remainingBytes -= queue[c - i].MessageLength;
             }
 
             int consideredPackets = MaxSizeInPacketsWithoutConstraint;
@@ -459,7 +503,7 @@ namespace Iviz.Roslib
                 // start discarding old messages
                 for (int i = MaxSizeInPacketsWithoutConstraint; i < queue.Count; i++)
                 {
-                    int currentMsgLength = queue[c - i].msgLength;
+                    int currentMsgLength = queue[c - i].MessageLength;
                     if (currentMsgLength > remainingBytes)
                     {
                         break;
@@ -477,6 +521,19 @@ namespace Iviz.Roslib
         public override string ToString()
         {
             return $"[TcpSender '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
+        }
+
+        readonly struct Element
+        {
+            T Message { get; }
+            public int MessageLength { get; }
+            public TaskCompletionSource? Signal { get; }
+
+            public Element(T message, int msgLength, TaskCompletionSource? signal) =>
+                (Message, MessageLength, Signal) = (message, msgLength, signal);
+
+            public void Deconstruct(out T message, out int msgLength, out TaskCompletionSource? signal) =>
+                (message, msgLength, signal) = (Message, MessageLength, Signal);
         }
     }
 }

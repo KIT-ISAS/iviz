@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
@@ -299,6 +299,11 @@ namespace Iviz.Roslib
             }
 
             return ids.Remove(topicId);
+        }
+
+        internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
+        {
+            return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
         }
 
         public override string ToString()

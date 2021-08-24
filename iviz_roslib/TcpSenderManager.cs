@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.Utils;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib
@@ -124,6 +124,11 @@ namespace Iviz.Roslib
                     {
                         sender.TcpNoDelay = true;
                     }
+                    
+                    if (publisher.TryGetLoopbackReceiver(sender.RemoteEndpoint, out var loopbackReceiver))
+                    {
+                        sender.LoopbackReceiver = loopbackReceiver;
+                    }
 
                     senders.Add(sender);
                     await CleanupAsync(tokenSource.Token);
@@ -155,7 +160,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            var tasks = sendersToDelete.Select(async sender =>
+            var tasks = Enumerable.Select(sendersToDelete, async sender =>
             {
                 await sender.DisposeAsync(token).AwaitNoThrow(this);
                 if (senders.Remove(sender))

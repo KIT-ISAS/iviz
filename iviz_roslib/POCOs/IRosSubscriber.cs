@@ -75,6 +75,12 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
         public string Subscribe(Action<IMessage> callback);
 
+        /// <summary>
+        /// Generates a new subscriber id with the given callback function.
+        /// </summary>
+        /// <param name="callback">The function to call when a message arrives.</param>
+        /// <returns>The subscribed id.</returns>
+        /// <exception cref="ArgumentNullException">The callback is null.</exception>
         public string Subscribe(Action<IMessage, IRosTcpReceiver> callback);
 
         /// <summary>
@@ -92,14 +98,34 @@ namespace Iviz.Roslib
         /// <returns>Whether the id belonged to the subscriber.</returns>        
         public ValueTask<bool> UnsubscribeAsync(string id, CancellationToken token = default);
 
+        /// <summary>
+        /// Called by the ROS client to notify the subscriber that the list of publishers has changed.
+        /// </summary>
+        /// <param name="publisherUris">The new list of publishers.</param>
+        /// <param name="token">A cancellation token</param>
         internal Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
 
         public Task DisposeAsync(CancellationToken token);
     }
     
-    public interface IRosSubscriber<out T> : IRosSubscriber where T : IMessage
+    public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
     {
+        /// <summary>
+        /// Generates a new subscriber id with the given callback function.
+        /// </summary>
+        /// <param name="callback">The function to call when a message arrives.</param>
+        /// <returns>The subscribed id.</returns>
+        /// <exception cref="ArgumentNullException">The callback is null.</exception>
         string Subscribe(Action<T> callback);
+        
+        /// <summary>
+        /// Generates a new subscriber id with the given callback function.
+        /// </summary>
+        /// <param name="callback">The function to call when a message arrives.</param>
+        /// <returns>The subscribed id.</returns>
+        /// <exception cref="ArgumentNullException">The callback is null.</exception>        
         string Subscribe(Action<T, IRosTcpReceiver> callback);
+        
+        internal bool TryGetLoopbackReceiver(in Endpoint uri, out ILoopbackReceiver<T> receiver);
     }    
 }

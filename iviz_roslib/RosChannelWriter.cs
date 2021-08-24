@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {

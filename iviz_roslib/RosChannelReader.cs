@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib

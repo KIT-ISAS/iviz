@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib.Utils
 {

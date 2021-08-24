@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Tools;
 
 namespace Iviz.Roslib.Actionlib
 {

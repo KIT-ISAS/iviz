@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib
@@ -86,7 +86,7 @@ namespace Iviz.Roslib
         async Task CleanupAsync(CancellationToken token)
         {
             ServiceRequestAsync<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
-            var tasks = toRemove.Select(async request =>
+            var tasks = Enumerable.Select(toRemove, async request =>
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
                     this, request.Hostname);

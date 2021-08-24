@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib

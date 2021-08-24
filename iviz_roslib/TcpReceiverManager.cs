@@ -8,10 +8,11 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using Nito.AsyncEx;
+using TaskExtensions = Nito.AsyncEx.TaskExtensions;
 
 namespace Iviz.Roslib
 {
@@ -109,12 +110,11 @@ namespace Iviz.Roslib
         {
             subscriber.MessageCallback(msg, receiver);
         }
-        
-        void CreateConnection(Uri remoteUri, Endpoint? remoteEndpointHint = null)
+
+        TcpReceiverAsync<T> CreateConnection(Uri remoteUri)
         {
-            connectionsByUri[remoteUri] =
-                new TcpReceiverAsync<T>(this, remoteUri, remoteEndpointHint, topicInfo, RequestNoDelay, TimeoutInMs)
-                    {IsPaused = IsPaused};
+            return new(this, remoteUri, null, topicInfo, RequestNoDelay, TimeoutInMs)
+                {IsPaused = IsPaused};
         }
 
         public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
@@ -133,7 +133,7 @@ namespace Iviz.Roslib
                         .Select(pair => pair.Value)
                         .ToArray();
 
-                    var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
+                    var deleteTasks = Enumerable.Select(toDelete, receiver => receiver.DisposeAsync(token));
                     await deleteTasks.WhenAll().AwaitNoThrow(this);
                 }
 
@@ -143,7 +143,7 @@ namespace Iviz.Roslib
                         newPublishers.Where(uri => uri != null && !connectionsByUri.ContainsKey(uri));
                     foreach (Uri remoteUri in toAdd)
                     {
-                        CreateConnection(remoteUri);
+                        connectionsByUri[remoteUri] = CreateConnection(remoteUri);
                     }
                 }
 
@@ -156,9 +156,11 @@ namespace Iviz.Roslib
             }
         }
 
-        bool NeedsCleanup()
+        public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<T> receiver)
         {
-            return connectionsByUri.Values.Any(receiver => !receiver.IsAlive);
+            var tmpReceiver = connectionsByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
+            receiver = tmpReceiver;
+            return tmpReceiver != null;
         }
 
         async ValueTask<bool> CleanupAsync(CancellationToken token)
@@ -169,7 +171,7 @@ namespace Iviz.Roslib
             }
 
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
-            var tasks = toDelete.Select(receiver =>
+            var tasks = Enumerable.Select(toDelete, receiver =>
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
@@ -195,7 +197,7 @@ namespace Iviz.Roslib
                 connectionsByUri.Clear();
             }
 
-            await receivers.Select(receiver => receiver.DisposeAsync(token)).WhenAll();
+            await TaskExtensions.WhenAll(receivers.Select(receiver => receiver.DisposeAsync(token)));
             subscriber.RaiseNumPublishersChanged();
         }
 

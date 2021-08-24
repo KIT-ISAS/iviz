@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
@@ -288,6 +288,11 @@ namespace Iviz.Roslib
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             Task.Run( () => PublisherUpdateRcpAsync(publisherUris, token), token).AwaitNoThrow(this);
+        }
+
+        bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T> receiver)
+        {
+            return manager.TryGetLoopbackReceiver(endPoint, out receiver);
         }
 
         public override string ToString()

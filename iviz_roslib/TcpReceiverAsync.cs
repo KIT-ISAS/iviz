@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpReceiverAsync<T> where T : IMessage
+    internal sealed class TcpReceiverAsync<T> : ILoopbackReceiver<T> where T : IMessage
     {
         const int MaxConnectionRetries = 120;
         const int DisposeTimeoutInMs = 2000;
@@ -32,7 +32,7 @@ namespace Iviz.Roslib
         string? errorDescription;
 
         Endpoint? RemoteEndpoint { get; set; }
-        Endpoint? Endpoint { get; set; }
+        internal Endpoint? Endpoint { get; private set; }
         string[]? TcpHeader { get; set; }
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -41,7 +41,9 @@ namespace Iviz.Roslib
         public bool IsPaused { get; set; }
         public Uri RemoteUri { get; }
         public bool IsAlive => !task.IsCompleted;
-        public bool IsConnected => tcpClient is {Connected: true};
+        public bool IsConnected => tcpClient is { Connected: true };
+
+        IRosTcpReceiver? cachedConnectionInfo;
 
         public TcpReceiverAsync(TcpReceiverManager<T> manager,
             Uri remoteUri, Endpoint? remoteEndpoint, TopicInfo<T> topicInfo,
@@ -87,7 +89,7 @@ namespace Iviz.Roslib
 
         async ValueTask<TcpClient?> TryToConnect(Endpoint newEndpoint)
         {
-            TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}};
+            TcpClient client = new(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
             (string hostname, int port) = newEndpoint;
 
             try
@@ -276,7 +278,7 @@ namespace Iviz.Roslib
                 && (lookupMsgName = BuiltIns.TryGetTypeFromMessageName(dynamicMsgName)) != null
                 && (lookupGenerator = Activator.CreateInstance(lookupMsgName)) != null)
             {
-                topicInfo = new TopicInfo<T>(callerId, topicName, (IDeserializable<T>) lookupGenerator);
+                topicInfo = new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
                 return;
             }
 
@@ -302,14 +304,13 @@ namespace Iviz.Roslib
                     break;
                 }
 
-                IPEndPoint? newEndPoint = (IPEndPoint?) newTcpClient.Client.RemoteEndPoint;
-                if (newEndPoint == null)
+                if (newTcpClient.Client?.RemoteEndPoint is null || newTcpClient.Client?.LocalEndPoint is null)
                 {
                     Logger.LogDebugFormat("{0}: Connection interrupted! Getting out.", this);
                     break;
                 }
 
-                Endpoint = new Endpoint(newEndPoint);
+                Endpoint = new Endpoint((IPEndPoint)newTcpClient.Client.LocalEndPoint);
                 Logger.LogDebugFormat("{0}: Connected!", this);
                 errorDescription = null;
 
@@ -374,10 +375,10 @@ namespace Iviz.Roslib
 
         async Task ProcessLoopFixed(NetworkStream stream, int fixedSize)
         {
+            cachedConnectionInfo = CreateConnectionInfo();
+
             int fixedSizeWithHeader = 4 + fixedSize;
             using var readBuffer = new Rent<byte>(fixedSizeWithHeader);
-
-            var connectionInfo = CreateConnectionInfo();
 
             while (KeepRunning)
             {
@@ -402,7 +403,7 @@ namespace Iviz.Roslib
                 if (!IsPaused)
                 {
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, fixedSizeWithHeader, 4);
-                    manager.MessageCallback(message, connectionInfo);
+                    manager.MessageCallback(message, cachedConnectionInfo);
                 }
 
                 //await Task.Yield();
@@ -411,7 +412,7 @@ namespace Iviz.Roslib
 
         async Task ProcessLoopVariable(NetworkStream stream)
         {
-            var connectionInfo = CreateConnectionInfo();
+            cachedConnectionInfo = CreateConnectionInfo();
 
             using ResizableRent<byte> readBuffer = new(4);
             while (KeepRunning)
@@ -427,7 +428,7 @@ namespace Iviz.Roslib
                     Logger.LogDebugFormat("{0}: Partner closed connection", this);
                     return;
                 }
-                
+
                 //Logger.Log(time.Now() + ": Received.");
 
                 numReceived++;
@@ -436,10 +437,28 @@ namespace Iviz.Roslib
                 if (!isPaused)
                 {
                     T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
-                    manager.MessageCallback(message, connectionInfo);
+                    manager.MessageCallback(message, cachedConnectionInfo);
                 }
 
                 //await Task.Yield();
+            }
+        }
+
+        void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
+        {
+            if (!IsAlive)
+            {
+                return;
+            }
+
+            cachedConnectionInfo ??= CreateConnectionInfo();
+
+            numReceived++;
+            bytesReceived += rcvLength + 4;
+
+            if (!IsPaused)
+            {
+                manager.MessageCallback(message, cachedConnectionInfo);
             }
         }
 
@@ -451,6 +470,7 @@ namespace Iviz.Roslib
             topicInfo.Type,
             TcpHeader ?? Array.Empty<string>() // none of these are null by creation time
         );
+
 
         public override string ToString()
         {

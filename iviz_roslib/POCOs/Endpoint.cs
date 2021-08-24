@@ -13,7 +13,8 @@ namespace Iviz.Roslib
         [DataMember] public string Hostname { get; }
         [DataMember] public int Port { get; }
 
-        internal Endpoint(string hostname, int port) => (Hostname, Port) = (hostname, port);
+        internal Endpoint(string hostname, int port) =>
+            (Hostname, Port) = (hostname ?? throw new ArgumentNullException(nameof(hostname)), port);
 
         internal Endpoint(IPEndPoint endPoint) => (Hostname, Port) = (endPoint.Address.ToString(), endPoint.Port);
 
@@ -21,6 +22,11 @@ namespace Iviz.Roslib
             other != null && Hostname == other.Value.Hostname && Port == other.Value.Port;
 
         public bool Equals(Endpoint other) => (other.Hostname, other.Port) == (Hostname, Port);
+        public static bool operator ==(in Endpoint a, in Endpoint b) => a.Equals(b);
+        public static bool operator !=(in Endpoint a, in Endpoint b) => !a.Equals(b);
+
+        public override bool Equals(object? obj) => obj is Endpoint other && Equals(other);
+        public override int GetHashCode() => (Hostname, Port).GetHashCode();
 
         public void Deconstruct(out string hostname, out int port) => (hostname, port) = (Hostname, Port);
 

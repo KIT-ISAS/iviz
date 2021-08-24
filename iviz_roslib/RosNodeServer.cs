@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
@@ -146,7 +146,7 @@ namespace Iviz.Roslib.XmlRpc
         XmlRpcArg GetBusInfo(XmlRpcValue[] _)
         {
             var busInfo = client.GetBusInfoRpc();
-            XmlRpcArg[][] response = busInfo.Select(BusInfoToArg).ToArray();
+            XmlRpcArg[][] response = Enumerable.Select(busInfo, BusInfoToArg).ToArray();
             return OkResponse(response);
         }
 
@@ -194,7 +194,7 @@ namespace Iviz.Roslib.XmlRpc
 
         static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
-#if NET5_0
+#if NET5_0_OR_GREATER
             int id = Environment.ProcessId;
 #else
             int id = Process.GetCurrentProcess().Id;
@@ -205,13 +205,13 @@ namespace Iviz.Roslib.XmlRpc
         XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
         {
             var subscriptions = client.GetSubscriptionsRpc();
-            return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type))));
+            return OkResponse(new XmlRpcArg(Enumerable.Select(subscriptions, info => (info.Topic, info.Type))));
         }
 
         XmlRpcArg GetPublications(XmlRpcValue[] _)
         {
             var publications = client.GetPublicationsRpc();
-            return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type))));
+            return OkResponse(new XmlRpcArg(Enumerable.Select(publications, info => (info.Topic, info.Type))));
         }
 
         XmlRpcArg ParamUpdate(XmlRpcValue[] args)

@@ -7,7 +7,10 @@ namespace Iviz.Roslib.XmlRpc
 {
     public sealed class RosNodeClient
     {
-        static readonly string[][] SupportedProtocols = {new[] {"TCPROS"}};
+        public const string ProtocolTcpRosName = "TCPROS";
+        public const string ProtocolUdpRosName = "UDPROS";
+        
+        static readonly string[][] SupportedProtocols = {new[] {ProtocolTcpRosName}};
 
         public string CallerId { get; }
         public Uri CallerUri { get; }
