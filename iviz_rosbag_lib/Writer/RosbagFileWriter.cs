@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.Rosbag.Writer
 {

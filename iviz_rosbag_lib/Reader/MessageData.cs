@@ -3,8 +3,8 @@ using System.IO;
 using Iviz.Msgs;
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
-using Iviz.MsgsGen;
 using Iviz.MsgsGen.Dynamic;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using Buffer = Iviz.Msgs.Buffer;
 

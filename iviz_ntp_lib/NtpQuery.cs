@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.Ntp
 {

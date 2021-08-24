@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Iviz.Msgs;
+using Iviz.Tools;
 
 namespace Iviz.Rosbag.Reader
 {

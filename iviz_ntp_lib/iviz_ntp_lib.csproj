@@ -9,11 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.4.0" />
+      <ProjectReference Include="..\iviz_tools\iviz_tools.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
-    </ItemGroup>
-
 </Project>
