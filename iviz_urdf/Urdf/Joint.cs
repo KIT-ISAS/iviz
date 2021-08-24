@@ -5,26 +5,58 @@ using Newtonsoft.Json.Converters;
 
 namespace Iviz.Urdf
 {
+    /// The joint element describes the kinematics and dynamics of the joint and also specifies the safety limits of the joint.
     [DataContract]
     public sealed class Joint
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public enum JointType
         {
+            /// A hinge joint that rotates along the axis and has a limited range specified by the upper and lower limit
             Revolute,
+
+            /// A continuous hinge joint that rotates around the axis and has no upper and lower limits
             Continuous,
+
+            /// A sliding joint that slides along the axis, and has a limited range specified by the upper and lower limits
             Prismatic,
+
+            ///  This is not really a joint because it cannot move. All degrees of freedom are locked. This type of joint does not require the axis, calibration, dynamics, limits or safety_controller
             Fixed,
+
+            /// This joint allows motion for all 6 degrees of freedom
             Floating,
+
+            /// This joint allows motion in a plane perpendicular to the axis
             Planar
         }
-        
-        [DataMember] public string Name { get; }
-        [DataMember] public JointType Type { get; }
-        [DataMember] public Origin Origin { get; }
-        [DataMember] public Parent Parent { get; }
-        [DataMember] public Child Child { get; }
-        [DataMember] public Axis Axis { get; }
+
+        /// Specifies a unique name of the joint
+        [DataMember]
+        public string Name { get; }
+
+        /// Specifies the type of joint
+        [DataMember]
+        public JointType Type { get; }
+
+        /// This is the transform from the parent link to the child link. The joint is located at the origin of the child link, as shown in the figure above
+        [DataMember]
+        public Origin Origin { get; }
+
+        /// Parent link name
+        [DataMember]
+        public Parent Parent { get; }
+
+        /// Child link name
+        [DataMember]
+        public Child Child { get; }
+
+        /// The joint axis specified in the joint frame. This is the axis of rotation for revolute joints,
+        /// the axis of translation for prismatic joints, and the surface normal for planar joints.
+        /// The axis is specified in the joint frame of reference. Fixed and floating joints do not use the axis field.
+        [DataMember]
+        public Axis Axis { get; }
+
         [DataMember] public Limit Limit { get; }
 
         internal Joint(XmlNode node)
@@ -38,7 +70,7 @@ namespace Iviz.Urdf
             Child? child = null;
             Axis? axis = null;
             Limit? limit = null;
-            
+
             foreach (XmlNode childNode in node.ChildNodes)
             {
                 switch (childNode.Name)
@@ -70,18 +102,18 @@ namespace Iviz.Urdf
 
         static JointType GetJointType(string type, XmlNode node)
         {
-            switch (type)
+            return type switch
             {
-                case "revolute": return JointType.Revolute;
-                case "continuous": return JointType.Continuous;
-                case "prismatic": return JointType.Prismatic;
-                case "fixed": return JointType.Fixed;
-                case "floating": return JointType.Floating;
-                case "planar": return JointType.Planar;
-                default: throw new MalformedUrdfException(node);
-            }
-        }        
-        
+                "revolute" => JointType.Revolute,
+                "continuous" => JointType.Continuous,
+                "prismatic" => JointType.Prismatic,
+                "fixed" => JointType.Fixed,
+                "floating" => JointType.Floating,
+                "planar" => JointType.Planar,
+                _ => throw new MalformedUrdfException(node)
+            };
+        }
+
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

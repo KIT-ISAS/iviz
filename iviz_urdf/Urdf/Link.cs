@@ -6,13 +6,25 @@ using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
+    /// The link element describes a rigid body with an inertia, visual features, and collision properties. 
     [DataContract]
     public sealed class Link
     {
-        [DataMember] public string? Name { get; }
-        [DataMember] public Inertial Inertial { get; }
-        [DataMember] public ReadOnlyCollection<Visual> Visuals { get; }
-        [DataMember] public ReadOnlyCollection<Collision> Collisions { get; }
+        /// The name of the link itself
+        [DataMember]
+        public string? Name { get; }
+
+        /// The inertial properties of the link
+        [DataMember]
+        public Inertial Inertial { get; }
+
+        /// The visual properties of the link. This element specifies the shape of the object (box, cylinder, etc.) for visualization purposes
+        [DataMember]
+        public ReadOnlyCollection<Visual> Visuals { get; }
+
+        /// The collision properties of a link
+        [DataMember]
+        public ReadOnlyCollection<Collision> Collisions { get; }
 
         internal Link(XmlNode node)
         {
@@ -42,7 +54,11 @@ namespace Iviz.Urdf
             Visuals = new ReadOnlyCollection<Visual>(visuals);
             Collisions = new ReadOnlyCollection<Collision>(collisions);
         }
-        
+
+        public void Deconstruct(out string? name, out Inertial inertial, out ReadOnlyCollection<Visual> visuals,
+            out ReadOnlyCollection<Collision> collisions) =>
+            (name, inertial, visuals, collisions) = (Name, Inertial, Visuals, Collisions);
+
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

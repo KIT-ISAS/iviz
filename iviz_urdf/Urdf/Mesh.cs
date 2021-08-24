@@ -16,6 +16,8 @@ namespace Iviz.Urdf
             Scale = Vector3f.Parse(node.Attributes?["scale"], Vector3f.One);
         }
         
+        public void Deconstruct(out string filename, out Vector3f scale) => (filename, scale) = (Filename, Scale);
+        
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

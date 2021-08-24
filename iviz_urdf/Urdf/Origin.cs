@@ -9,8 +9,13 @@ namespace Iviz.Urdf
     {
         public static readonly Origin Identity = new Origin();
 
-        [DataMember] public Vector3f Rpy { get; }
-        [DataMember] public Vector3f Xyz { get; }
+        /// Represents the fixed axis roll, pitch and yaw angles in radians
+        [DataMember]
+        public Vector3f Rpy { get; }
+
+        /// Represents the Cartesian coordinates of the translation
+        [DataMember]
+        public Vector3f Xyz { get; }
 
         Origin()
         {
@@ -23,7 +28,9 @@ namespace Iviz.Urdf
             Rpy = Vector3f.Parse(node.Attributes?["rpy"], Vector3f.Zero);
             Xyz = Vector3f.Parse(node.Attributes?["xyz"], Vector3f.Zero);
         }
-        
+
+        public void Deconstruct(out Vector3f rpy, out Vector3f xyz) => (rpy, xyz) = (Rpy, Xyz);
+
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

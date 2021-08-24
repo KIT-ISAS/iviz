@@ -24,7 +24,6 @@ namespace Iviz.Urdf
 
             Name = node.Attributes?["name"]?.Value ?? ""; // !
 
-
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
@@ -41,9 +40,9 @@ namespace Iviz.Urdf
                 }
             }
 
-            Links = new ReadOnlyCollection<Link>(links);
-            Joints = new ReadOnlyCollection<Joint>(joints);
-            Materials = new ReadOnlyCollection<Material>(materials);
+            Links = links.AsReadOnly();
+            Joints = joints.AsReadOnly();
+            Materials = materials.AsReadOnly();
         }
 
         internal static Robot Create(XmlDocument document)
@@ -61,7 +60,7 @@ namespace Iviz.Urdf
 
             return new Robot(root);
         }
-        
+
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

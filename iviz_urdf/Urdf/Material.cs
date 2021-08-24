@@ -28,6 +28,9 @@ namespace Iviz.Urdf
             }
         }
         
+        public void Deconstruct(out string? name, out Color? color, out Texture? texture) =>
+            (name, color, texture) = (Name, Color, Texture);         
+        
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

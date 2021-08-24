@@ -16,6 +16,8 @@ namespace Iviz.Urdf
             Length = Utils.ParseFloat(node?.Attributes?["length"]);
         }
         
+        public void Deconstruct(out float radius, out float length) => (radius, length) = (Radius, Length);
+
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

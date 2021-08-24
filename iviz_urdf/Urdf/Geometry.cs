@@ -34,6 +34,9 @@ namespace Iviz.Urdf
             }
         }
         
+        public void Deconstruct(out Box? box, out Cylinder? cylinder, out Sphere? sphere, out Mesh? mesh) => 
+            (box, cylinder, sphere, mesh) = (Box, Cylinder, Sphere, Mesh);
+        
         public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

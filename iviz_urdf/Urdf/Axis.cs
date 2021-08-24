@@ -7,18 +7,18 @@ namespace Iviz.Urdf
     [DataContract]
     public sealed class Axis
     {
-        public static readonly Axis Right = new Axis();
+        public static readonly Axis Right = new();
 
         [DataMember] public Vector3f Xyz { get; }
 
         Axis()
         {
-            Xyz = new Vector3f(1, 0, 0);
+            Xyz = Vector3f.UnitX;
         }
 
         internal Axis(XmlNode node)
         {
-            Xyz = new Vector3f(node.Attributes?["xyz"]);
+            Xyz = Vector3f.Parse(node.Attributes?["xyz"], Vector3f.UnitX);
         }
         
         public override string ToString() => JsonConvert.SerializeObject(this);

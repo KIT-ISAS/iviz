@@ -15,18 +15,10 @@ namespace Iviz.Urdf
         [DataMember] public float B { get; }
         [DataMember] public float A { get; }
 
-        public Rgba()
-        {
-            R = 1;
-            G = 1;
-            B = 1;
-            A = 1;
-        }
-
         internal Rgba(XmlAttribute? attr)
         {
             string s = Utils.ParseString(attr);
-            string[] elems = s.Split(new []{' '}, StringSplitOptions.RemoveEmptyEntries);
+            string[] elems = s.Split(Utils.Separator, StringSplitOptions.RemoveEmptyEntries);
             if (elems.Length != 4)
             {
                 throw new MalformedUrdfException(attr);

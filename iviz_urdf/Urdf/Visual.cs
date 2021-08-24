@@ -7,10 +7,21 @@ namespace Iviz.Urdf
     [DataContract]
     public sealed class Visual
     {
-        [DataMember] public string? Name { get; }
-        [DataMember] public Origin Origin { get; }
-        [DataMember] public Geometry Geometry { get; }
-        [DataMember] public Material? Material { get; }
+        /// Specifies a name for a part of a link's geometry. This is useful to be able to refer to specific bits of the geometry of a link
+        [DataMember]
+        public string? Name { get; }
+
+        /// The reference frame of the visual element with respect to the reference frame of the link
+        [DataMember]
+        public Origin Origin { get; }
+
+        /// The shape of the visual object
+        [DataMember]
+        public Geometry Geometry { get; }
+
+        /// The material of the visual element
+        [DataMember]
+        public Material? Material { get; }
 
         internal Visual(XmlNode node)
         {
@@ -18,7 +29,7 @@ namespace Iviz.Urdf
 
             Geometry? geometry = null;
             Origin? origin = null;
-            
+
             foreach (XmlNode child in node.ChildNodes)
             {
                 switch (child.Name)
@@ -38,6 +49,9 @@ namespace Iviz.Urdf
             Geometry = geometry ?? throw new MalformedUrdfException(node);
             Origin = origin ?? Origin.Identity;
         }
+
+        public void Deconstruct(out string? name, out Origin origin, out Geometry geometry, out Material? material) =>
+            (name, origin, geometry, material) = (Name, Origin, Geometry, Material);
 
         public override string ToString() => JsonConvert.SerializeObject(this);
     }

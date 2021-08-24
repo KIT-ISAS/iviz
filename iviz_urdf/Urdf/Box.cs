@@ -11,7 +11,7 @@ namespace Iviz.Urdf
 
         internal Box(XmlNode node)
         {
-            Size = new Vector3f(node.Attributes?["size"]);
+            Size = Vector3f.Parse(node.Attributes?["size"], Vector3f.One);
         }
         
         public override string ToString() => JsonConvert.SerializeObject(this);

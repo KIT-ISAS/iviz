@@ -2,7 +2,7 @@ using System.Xml;
 
 namespace Iviz.Sdf
 {
-    public class Wind
+    public sealed class Wind
     {
         public Vector3d LinearVelocity { get; } = Vector3d.Zero;
         
