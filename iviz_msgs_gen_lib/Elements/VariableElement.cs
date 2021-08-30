@@ -15,6 +15,7 @@ namespace Iviz.MsgsGen
         public const int DynamicSizeArray = 0;
 
         readonly string rosClassToken;
+        readonly bool serializeAsProperty;
 
         public ElementType Type => ElementType.Variable;
         public string Comment { get; }
@@ -54,11 +55,13 @@ namespace Iviz.MsgsGen
 
         internal VariableElement(string comment, string rosClassToken, string fieldName,
             string? parentClassName = null,
-            ClassInfo? classInfo = null
+            ClassInfo? classInfo = null,
+            bool serializeAsProperty = false
         )
         {
             Comment = comment;
             this.rosClassToken = rosClassToken;
+            this.serializeAsProperty = serializeAsProperty;
 
             RosFieldName = fieldName;
 
@@ -147,16 +150,31 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = isInStruct
-                            ? $"public string? {CsFieldName};"
-                            : $"public string {CsFieldName} {{ get; set; }}";
+                        if (serializeAsProperty)
+                        {
+                            result = isInStruct
+                                ? $"public string? {CsFieldName};"
+                                : $"public string {CsFieldName} {{ get; set; }}";
+                        }
+                        else
+                        {
+                            result = $"public string {CsFieldName};";
+                        }
                     }
 
                     break;
                 case NotAnArray:
-                    result = isInStruct
-                        ? $"public {CsClassName} {CsFieldName};"
-                        : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
+                    if (serializeAsProperty)
+                    {
+                        result = isInStruct
+                            ? $"public {CsClassName} {CsFieldName};"
+                            : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
+                    }
+                    else
+                    {
+                        result = $"public {CsClassName} {CsFieldName};";
+                    }
+
                     break;
                 case DynamicSizeArray when UseShared && CsClassName == "string":
                     if (UseShared)
@@ -188,9 +206,16 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = isInStruct
-                            ? $"public {CsClassName}[]? {CsFieldName};"
-                            : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                        if (serializeAsProperty)
+                        {
+                            result = isInStruct
+                                ? $"public {CsClassName}[]? {CsFieldName};"
+                                : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                        }
+                        else
+                        {
+                            result = $"public {CsClassName}[] {CsFieldName};";
+                        }
                     }
 
                     break;
@@ -204,9 +229,16 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = isInStruct
-                            ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
-                            : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
+                        if (serializeAsProperty)
+                        {
+                            result = isInStruct
+                                ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
+                                : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
+                        }
+                        else
+                        {
+                            result = $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName};";
+                        }
                     }
 
                     break;
@@ -236,7 +268,7 @@ namespace Iviz.MsgsGen
             return list;
             */
 
-            return new[] {csString};
+            return new[] { csString };
         }
 
         public string ToRosString()
@@ -307,7 +339,7 @@ namespace Iviz.MsgsGen
 
         static string GetClassStringConstant(Type type, string name)
         {
-            string? constant = (string?) type.GetField(name)?.GetRawConstantValue();
+            string? constant = (string?)type.GetField(name)?.GetRawConstantValue();
             if (constant == null)
             {
                 throw new ArgumentException($"Failed to resolve constant '{name}' in class {type.FullName}",

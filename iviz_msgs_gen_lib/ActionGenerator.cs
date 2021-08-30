@@ -46,36 +46,37 @@ namespace Iviz.MsgsGen
 
             IElement[] actionGoalElements =
             {
-                new VariableElement("", "Header", "header"),
-                new VariableElement("", "actionlib_msgs/GoalID", "goal_id"),
-                new VariableElement("", $"{actionName}Goal", "goal", null,  goalInfo),
+                new VariableElement("", "Header", "header", serializeAsProperty: true),
+                new VariableElement("", "actionlib_msgs/GoalID", "goal_id", serializeAsProperty: true),
+                new VariableElement("", $"{actionName}Goal", "goal", null, goalInfo, serializeAsProperty: true),
             };
             ClassInfo actionGoalInfo = new ClassInfo(package, $"{actionName}ActionGoal", actionGoalElements, actionName,
                 ActionMessageType.ActionGoal);
 
             IElement[] actionResultElements =
             {
-                new VariableElement("", "Header", "header"),
-                new VariableElement("", "actionlib_msgs/GoalStatus", "status"),
-                new VariableElement("", $"{actionName}Result", "result", null, resultInfo),
+                new VariableElement("", "Header", "header", serializeAsProperty: true),
+                new VariableElement("", "actionlib_msgs/GoalStatus", "status", serializeAsProperty: true),
+                new VariableElement("", $"{actionName}Result", "result", null, resultInfo, serializeAsProperty: true),
             };
             ClassInfo actionResultInfo = new ClassInfo(package, $"{actionName}ActionResult", actionResultElements,
                 actionName, ActionMessageType.ActionResult);
 
             IElement[] actionFeedbackElements =
             {
-                new VariableElement("", "Header", "header"),
-                new VariableElement("", "actionlib_msgs/GoalStatus", "status"),
-                new VariableElement("", $"{actionName}Feedback", "feedback", null, feedbackInfo),
+                new VariableElement("", "Header", "header", serializeAsProperty: true),
+                new VariableElement("", "actionlib_msgs/GoalStatus", "status", serializeAsProperty: true),
+                new VariableElement("", $"{actionName}Feedback", "feedback", null, feedbackInfo,
+                    serializeAsProperty: true),
             };
             ClassInfo actionFeedbackInfo = new ClassInfo(package, $"{actionName}ActionFeedback", actionFeedbackElements,
                 actionName, ActionMessageType.ActionFeedback);
 
             IElement[] actionElements =
             {
-                new VariableElement("", $"{actionName}ActionGoal", "action_goal"),
-                new VariableElement("", $"{actionName}ActionResult", "action_result"),
-                new VariableElement("", $"{actionName}ActionFeedback", "action_feedback"),
+                new VariableElement("", $"{actionName}ActionGoal", "action_goal", serializeAsProperty: true),
+                new VariableElement("", $"{actionName}ActionResult", "action_result", serializeAsProperty: true),
+                new VariableElement("", $"{actionName}ActionFeedback", "action_feedback", serializeAsProperty: true),
             };
             ClassInfo actionInfo = new ClassInfo(package, $"{actionName}Action", actionElements, actionName,
                 ActionMessageType.Action);
