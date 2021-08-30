@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Octree
 {
-    public struct LeafEnumerator : IEnumerable<Float4>, IEnumerator<Float4>
+    public class LeafEnumerator : IEnumerable<Float4>, IEnumerator<Float4>
     {
         const float MinProbabilityForOccupied = 0.5f;
         static readonly float MinLogOdds = OctreeHelper.LogOdds(MinProbabilityForOccupied);
@@ -25,7 +25,7 @@ namespace Iviz.Octree
             current = default;
 
             reader.Skip(valueStride);
-            var startIt = NodeIterator.Start(reader.ReadByte());
+            var startIt = new NodeIterator(reader.ReadByte());
             stack.Push(startIt);
         }
 
@@ -79,13 +79,15 @@ namespace Iviz.Octree
 
         public int NumberOfNodes => (int) (reader.Size / (4 + strideAfterValue));
         
-        public Float4 Current => current;
+        Float4 IEnumerator<Float4>.Current => current;
         
         public LeafEnumerator GetEnumerator() => this;
         
         public void Reset() => throw new System.NotSupportedException();
         
-        object IEnumerator.Current => Current;
+        public ref readonly Float4 Current => ref current;
+        
+        object IEnumerator.Current => current;
         
         IEnumerator<Float4> IEnumerable<Float4>.GetEnumerator() => this;
         

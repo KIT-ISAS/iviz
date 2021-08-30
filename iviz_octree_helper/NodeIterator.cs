@@ -14,11 +14,14 @@ namespace Iviz.Octree
             this.key = key;
             this.bitset = bitset;
         }
-
-        public static NodeIterator Start(sbyte bitset)
+        
+        public NodeIterator(sbyte bitset)
         {
-            return new NodeIterator(0, new OcTreeKey(OctreeHelper.TreeMaxVal), bitset);
-        }
+            depth = 0;
+            position = -1;
+            key = new OcTreeKey(OctreeHelper.TreeMaxVal);
+            this.bitset = bitset;
+        }        
 
         public bool MoveNext()
         {

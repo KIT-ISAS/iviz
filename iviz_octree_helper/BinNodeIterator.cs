@@ -12,17 +12,20 @@ namespace Iviz.Octree
         int position;
         readonly ushort bitset;
 
+        public BinNodeIterator(ushort bitset)
+        {
+            depth = 0;
+            position = -2;
+            key = new OcTreeKey(OctreeHelper.TreeMaxVal);
+            this.bitset = bitset;
+        }
+        
         BinNodeIterator(int depth, int position, in OcTreeKey key, ushort bitset)
         {
             this.depth = depth;
             this.position = position;
             this.key = key;
             this.bitset = bitset;
-        }
-
-        public static BinNodeIterator Start(ushort bitset)
-        {
-            return new BinNodeIterator(0, -2, new OcTreeKey(OctreeHelper.TreeMaxVal), bitset);
         }
 
         public bool MoveNext()

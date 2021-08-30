@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Octree
 {
-    public struct BinaryLeafEnumerator : IEnumerable<Float4>, IEnumerator<Float4>
+    public class BinaryLeafEnumerator : IEnumerable<Float4>, IEnumerator<Float4>
     {
         readonly OctreeHelper parent;
         readonly Stack<BinNodeIterator> stack;
@@ -19,7 +19,7 @@ namespace Iviz.Octree
             this.maxDepth = maxDepth;
             current = default;
 
-            var startIt = BinNodeIterator.Start(reader.ReadUshort());
+            var startIt = new BinNodeIterator(reader.ReadUshort());
             stack.Push(startIt);
         }
 
@@ -75,13 +75,15 @@ namespace Iviz.Octree
 
         public int NumberOfNodes => reader.Size / 2;
         
-        public Float4 Current => current;
-        
+        Float4 IEnumerator<Float4>.Current => current;
+
         public BinaryLeafEnumerator GetEnumerator() => this;
         
+        public ref readonly Float4 Current => ref current;
+
         public void Reset() => throw new System.NotSupportedException();
         
-        object IEnumerator.Current => Current;
+        object IEnumerator.Current => current;
         
         IEnumerator<Float4> IEnumerable<Float4>.GetEnumerator() => this;
         
