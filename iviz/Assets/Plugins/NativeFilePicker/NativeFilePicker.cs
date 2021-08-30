@@ -2,9 +2,11 @@
 using System.IO;
 using JetBrains.Annotations;
 using UnityEngine;
+
+#if UNITY_EDITOR
+
 #if UNITY_ANDROID || UNITY_IOS
 using NativeFilePickerNamespace;
-
 #endif
 
 public static class NativeFilePicker
@@ -422,3 +424,5 @@ public static class NativeFilePicker
 
     #endregion
 }
+
+#endif

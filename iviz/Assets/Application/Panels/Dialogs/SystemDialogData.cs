@@ -27,6 +27,8 @@ namespace Iviz.App
         public override IDialogPanelContents Panel => panel;
 
         readonly StringBuilder description = new StringBuilder(65536);
+        readonly SortedSet<string> hostsBuffer = new SortedSet<string>();
+
 
         uint? descriptionHash;
 
@@ -123,7 +125,7 @@ namespace Iviz.App
                 if (pair.Value)
                 {
                     description.Append("<font=Bold><u><link=").Append(pair.Key).Append(">").Append(pair.Key)
-                        .Append("</link></u></font>\n      <i>[");
+                        .Append("</link></u></font>\n      [");
                 }
                 else
                 {
@@ -532,20 +534,25 @@ namespace Iviz.App
             }
 
             var state = ConnectionManager.Connection.Client.GetSubscriberStatistics();
-            string[] hosts = state.Topics
+            var hostsEnum = state.Topics
                 .SelectMany(topic => topic.Receivers)
                 .Select(receiver => receiver.RemoteUri.Host)
-                .Where(host => !IPAddress.TryParse(host, out _))
-                .ToArray();
-
-            if (hosts.Length == 0)
+                .Where(host => !IPAddress.TryParse(host, out _));
+            
+            hostsBuffer.Clear();
+            foreach (string hostname in hostsEnum)
+            {
+                hostsBuffer.Add(hostname);
+            }
+            
+            if (hostsBuffer.Count == 0)
             {
                 return;
             }
 
             foreach (var widget in panel.HostNames)
             {
-                widget.Hints = hosts;
+                widget.Hints = hostsBuffer;
             }
         }
 
@@ -583,20 +590,22 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public struct HostAlias
+    public struct HostAlias : IEquatable<HostAlias>
     {
         [DataMember] public string Hostname { get; set; }
         [DataMember] public string Address { get; set; }
 
         public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
+        
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
-        public static bool operator !=(HostAlias a, HostAlias b) => !(a == b);
+        
+        public static bool operator !=(HostAlias a, HostAlias b) => !a.Equals(b);
 
-        public static bool operator ==(HostAlias a, HostAlias b) =>
-            (a.Hostname == b.Hostname && a.Address == b.Address);
+        public static bool operator ==(HostAlias a, HostAlias b) => a.Equals(b);
 
-        public override bool Equals(object obj) =>
-            obj is HostAlias other && Hostname == other.Hostname && Address == other.Address;
+        public bool Equals(HostAlias a) => a.Hostname == Hostname && a.Address == Address;
+
+        public override bool Equals(object obj) => obj is HostAlias other && Equals(other);
 
         public override int GetHashCode() => (Hostname, Address).GetHashCode();
     }

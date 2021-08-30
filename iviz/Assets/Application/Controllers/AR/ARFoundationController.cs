@@ -12,6 +12,7 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using Logger = Iviz.Core.Logger;
@@ -22,6 +23,9 @@ namespace Iviz.Controllers
     {
         const float AnchorPauseTimeInSec = 2;
 
+        static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
+        static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
+        
         [SerializeField] Camera arCamera = null;
         [SerializeField] ARSession arSession = null;
         [SerializeField] ARSessionOrigin arSessionOrigin = null;
@@ -41,9 +45,7 @@ namespace Iviz.Controllers
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         int defaultCullingMask;
-
-        static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
-        static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
+        uint colorSeq, depthSeq;
 
         [NotNull]
         public string Description
@@ -207,6 +209,9 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool ProvidesMesh { get; private set; }
+        public bool ProvidesOcclusion { get; private set; }
+
         public override bool EnablePlaneDetection
         {
             get => base.EnablePlaneDetection;
@@ -279,6 +284,11 @@ namespace Iviz.Controllers
 
             cameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
 
+            var subsystems = new List<ISubsystem>();
+            SubsystemManager.GetInstances(subsystems);
+            ProvidesMesh = subsystems.Any(s => s is XRMeshSubsystem);
+            ProvidesOcclusion = subsystems.Any(s => s is XROcclusionSubsystem);
+            
             Config = new ARConfiguration();
 
             if (setupModeFrame == null)
@@ -301,11 +311,10 @@ namespace Iviz.Controllers
 
             if (GuiInputModule.Instance != null)
             {
-                GuiInputModule.Instance.ShortClick += TriggerPulse;
+                GuiInputModule.Instance.LongClick += TriggerPulse;
             }
 
             RaiseARActiveChanged();
-            
         }
 
         void ArSetOnClicked()
@@ -371,8 +380,6 @@ namespace Iviz.Controllers
             ProcessSetupMode();
             ProcessAnchorMoved();
             ProcessCapture();
-            
-            Debug.Log(occlusionManager.currentEnvironmentDepthMode);
         }
 
         void ProcessSetupMode()
@@ -484,7 +491,7 @@ namespace Iviz.Controllers
             SetWorldPose(newPose, RootMover.Anchor);
         }
 
-        public override bool TryGetRaycastHit(in Ray ray, out Pose hit)
+        public bool TryGetRaycastHit(in Ray ray, out Pose hit)
         {
             if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
             {
@@ -507,33 +514,69 @@ namespace Iviz.Controllers
                     return true;
                 default:
                     Vector3 origin = ray.origin;
-                    hit = Enumerable.Select(results, rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit))
-                        .Min().rayHit.pose;
+                    hit = results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit.pose;
                     return true;
             }
+        }
+
+        
+        [ContractAnnotation("=> false, hits:null; => true, hits:notnull")]
+        public bool TryGetRaycastHits(in Ray ray, [CanBeNull] out List<ARRaycastHit> hits)
+        {
+            if (arSessionOrigin == null || arSessionOrigin.trackablesParent == null)
+            {
+                // not initialized yet!
+                hits = null;
+                return false;
+            }
+
+            hits = new List<ARRaycastHit>();
+            raycaster.Raycast(ray, hits);
+            hits.RemoveAll(rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
+            hits.Sort((a, b) => a.distance.CompareTo(b.distance));
+            
+            return hits.Count != 0;
         }
 
 
         void ProcessLights(in ARLightEstimationData lightEstimation)
         {
+            // ARKit back camera only appears to have these two
             if (lightEstimation.averageColorTemperature.HasValue && lightEstimation.averageBrightness.HasValue)
             {
+                var color = Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value);
+                float intensity = lightEstimation.averageBrightness.Value;
+                
+                arLight.color = color;
+                arLight.intensity = intensity;
+
+                // ambient light is only to prevent complete blacks
                 RenderSettings.ambientMode = AmbientMode.Flat;
-                RenderSettings.ambientLight =
-                    Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value) *
-                    lightEstimation.averageBrightness.Value;
+                RenderSettings.ambientLight = color;
+                RenderSettings.ambientIntensity = 0.1f;
             }
 
+            /*
+            if (lightEstimation.colorCorrection.HasValue)
+            {
+                arLight.color = lightEstimation.colorCorrection.Value;
+                Debug.Log("Color correction: " + lightEstimation.colorCorrection);
+            }
+            */
+            
+            // ARKit front camera (unused)
             if (lightEstimation.mainLightDirection.HasValue)
             {
                 arLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
             }
 
+            // ARKit front camera (unused)
             if (lightEstimation.mainLightColor.HasValue)
             {
                 arLight.color = lightEstimation.mainLightColor.Value;
             }
 
+            // Android only I think
             if (lightEstimation.ambientSphericalHarmonics.HasValue)
             {
                 var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
@@ -549,21 +592,19 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (!clickInfo.TryGetARRaycastHit(out var pose))
+            if (!clickInfo.TryGetARRaycastResults(out var results))
             {
                 return;
             }
 
-            ARMeshLines.TriggerPulse(pose.position);
+            ARMeshLines.TriggerPulse(results[0].Position);
         }
-
-        uint colorSeq, depthSeq;
 
         async void CaptureScreenForPublish(CancellationToken token)
         {
             try
             {
-                var captureManager = (ARFoundationScreenCaptureManager) Settings.ScreenCaptureManager;
+                var captureManager = (ARFoundationScreenCaptureManager)Settings.ScreenCaptureManager;
                 bool shouldPublishColor = ColorSender.NumSubscribers != 0;
                 bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
                 bool shouldPublishConfidence = DepthConfidenceSender.NumSubscribers != 0;
@@ -577,15 +618,15 @@ namespace Iviz.Controllers
 
                 var colorTask = shouldPublishColor
                     ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot>?) null;
+                    : (ValueTask<Screenshot>?)null;
 
                 var depthTask = shouldPublishDepth
                     ? captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot>?) null;
+                    : (ValueTask<Screenshot>?)null;
 
                 var confidenceTask = shouldPublishConfidence
                     ? captureManager.CaptureDepthConfidenceAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot>?) null;
+                    : (ValueTask<Screenshot>?)null;
 
                 var color = colorTask != null ? await colorTask.Value : null;
                 var depth = depthTask != null ? await depthTask.Value : null;
@@ -597,6 +638,7 @@ namespace Iviz.Controllers
 
                 if (color != null)
                 {
+                    /*
                     int pitch = color.Width * 3;
                     byte[] bytes = color.Bytes;
                     
@@ -623,7 +665,8 @@ namespace Iviz.Controllers
                             bytes[o + 2] = 0;
                         }
                     }
-                
+                    */
+
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
                     ColorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
                 }
@@ -656,7 +699,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var absoluteArCameraPose = RelativePoseToOrigin(anyPose.Value);
+                var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
                 var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
                 TfListener.Publish(frameId, relativePose.ToCameraFrame());
             }
@@ -674,7 +717,7 @@ namespace Iviz.Controllers
             WorldPoseChanged -= OnWorldPoseChanged;
             if (GuiInputModule.Instance != null)
             {
-                GuiInputModule.Instance.ShortClick -= TriggerPulse;
+                GuiInputModule.Instance.LongClick -= TriggerPulse;
             }
 
             Destroy(fovDisplay.gameObject);

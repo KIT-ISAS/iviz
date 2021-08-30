@@ -6,17 +6,14 @@ using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Tools;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
-using UnityEngine;
-using Color = UnityEngine.Color;
-using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
-using Time = UnityEngine.Time;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
@@ -24,6 +21,7 @@ namespace Iviz.Controllers
 {
     public sealed class TfListener : ListenerController
     {
+        const string DefaultTapTopic = "~clicked_pose";
         public const string DefaultTopic = "/tf";
         public const string OriginFrameId = "_origin_";
         public const string MapFrameId = "map";
@@ -31,6 +29,7 @@ namespace Iviz.Controllers
 
         const string DefaultTopicStatic = "/tf_static";
 
+        uint tapSeq;
         static uint tfSeq;
 
         readonly TfConfiguration config = new TfConfiguration();
@@ -50,13 +49,6 @@ namespace Iviz.Controllers
 
         [NotNull] public TfFrame FixedFrame { get; private set; }
 
-        /*
-        const float HighlightDuration = 2.0f;
-        float? highlightFrameStart;
-        readonly FrameNode highlightFrameNode;
-        readonly AxisFrameResource highlightFrame;
-        */
-
         public static float RootScale
         {
             get => RootFrame.transform.localScale.x;
@@ -66,17 +58,6 @@ namespace Iviz.Controllers
         public TfListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            /*
-            highlightFrame = ResourcePool.RentDisplay<AxisFrameResource>();
-            highlightFrame.Visible = false;
-            highlightFrame.CastsShadows = false;
-            highlightFrame.Emissive = 1;
-            highlightFrame.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
-
-            highlightFrameNode = FrameNode.Instantiate("Highlight FrameNode");
-            highlightFrame.Transform.parent = highlightFrameNode.Transform;
-            */
 
             unityFrame = Add(CreateFrameObject("TF", null, null));
             unityFrame.ForceInvisible = true;
@@ -110,43 +91,57 @@ namespace Iviz.Controllers
             Config = new TfConfiguration();
 
             Publisher = new Sender<TFMessage>(DefaultTopic);
+            TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
 
             GameThread.LateEveryFrame += LateUpdate;
 
             if (GuiInputModule.Instance != null)
             {
-                GuiInputModule.Instance.ShortClick += OnTfShortClick;
+                GuiInputModule.Instance.ShortClick += i => OnClick(i, true);
+                GuiInputModule.Instance.LongClick += i => OnClick(i, false);
             }
         }
 
-        static void OnTfShortClick([NotNull] ClickInfo clickInfo)
+        void OnClick([NotNull] ClickInfo clickInfo, bool isShortClick)
         {
             if (!clickInfo.TryGetRaycastResults(out var hitResults))
             {
+                if (clickInfo.TryGetARRaycastResults(out hitResults))
+                {
+                    DoHighlightPose();
+                }
+
                 return;
             }
 
             bool tfHighlighted = false;
-            foreach (var result in hitResults)
+            var tfResults = hitResults
+                .Select(hitResult => hitResult.GameObject)
+                .Where(result => result.layer == LayerType.TfAxis);
+            foreach (var result in tfResults)
             {
-                if (result.gameObject.layer != LayerType.TfAxis)
-                {
-                    continue;
-                }
-
-                var tfFrame = result.gameObject.transform.parent.GetComponent<TfFrame>();
+                var tfFrame = result.transform.parent.GetComponent<TfFrame>();
                 HighlightFrame(tfFrame.Id);
                 tfHighlighted = true;
             }
 
-            if (tfHighlighted || !hitResults.TryGetFirst(out var nearestResult))
+            if (tfHighlighted)
             {
                 return;
             }
 
-            ResourcePool
-                .RentDisplay<PoseHighlighter>()
-                .HighlightPose(nearestResult.worldPosition, nearestResult.worldNormal);
+            DoHighlightPose();
+
+            void DoHighlightPose()
+            {
+                Pose worldPose = hitResults[0].CreatePose();
+                HighlightPose(worldPose);
+                if (!isShortClick)
+                {
+                    var relativePose = RelativePoseToFixedFrame(worldPose);
+                    TapPublisher.Publish(new PoseStamped((tapSeq++, FixedFrameId), relativePose.Unity2RosPose()));
+                }
+            }
         }
 
         [NotNull]
@@ -176,7 +171,9 @@ namespace Iviz.Controllers
         }
 
         public static TfListener Instance { get; private set; }
-        [NotNull] public Sender<TFMessage> Publisher { get; }
+        [NotNull] public Sender<TFMessage> Publisher { get; } 
+        [NotNull] public Sender<PoseStamped> TapPublisher { get; }
+
         public IListener ListenerStatic { get; private set; }
 
         //[NotNull] public static TfFrame MapFrame => Instance.mapFrame;
@@ -509,10 +506,6 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            //DateTime now = DateTime.Now;
-            //Debug.Log((now - msg.Transforms[0].Header.Stamp.ToDateTime()).TotalMilliseconds);
-            //Debug.Log(messageList.Count);
-
             messageList.Enqueue((msg.Transforms, false));
             return true;
         }
@@ -560,6 +553,9 @@ namespace Iviz.Controllers
             Instance = null;
         }
 
+        static void HighlightPose(in Pose pose) =>
+            ResourcePool.RentDisplay<PoseHighlighter>().HighlightPose(pose);
+        
         public static void HighlightFrame([NotNull] string frameId)
         {
             if (!Instance.frames.ContainsKey(frameId))

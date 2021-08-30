@@ -4,6 +4,7 @@ using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Tools;
 using Iviz.Msgs.IvizCommonMsgs;
 using JetBrains.Annotations;
 using TMPro;
@@ -13,7 +14,7 @@ using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARDialog : MarkerResource, IRecyclable
+    public sealed class ARDialog : MarkerResource, IRecyclable
     {
         const float PopupDuration = 0.1f;
 
@@ -333,9 +334,9 @@ namespace Iviz.App.ARDialogs
                     menuButtons[i].Visible = true;
                 }
 
-                for (int i = numActives; i < menuButtons.Length; i++)
+                foreach (var menuButton in menuButtons.Skip(numActives))
                 {
-                    menuButtons[i].Visible = false;
+                    menuButton.Visible = false;
                 }
 
                 upButton.Visible = menuPage > 0;

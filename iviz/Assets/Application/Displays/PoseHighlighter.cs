@@ -21,7 +21,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            Transform.parent = TfListener.OriginFrame.Transform;
+            Transform.parent = null;
 
             resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, Transform);
             resource.CastsShadows = false;
@@ -35,21 +35,15 @@ namespace Iviz.Displays
         }
 
 
-        public void HighlightPose(in Vector3 position, in Vector3 up)
+        public void HighlightPose(in Pose absolutePose)
         {
-            var side = Mathf.Approximately(Vector3.forward.Cross(up).MagnitudeSq(), 0)
-                ? Vector3.right
-                : Vector3.forward;
-
-            var absolutePose = new Pose(position, Quaternion.LookRotation(side, up));
-
             highlightFrameStart = Time.time;
             resource.Tint = Color.white.WithAlpha(0.3f);
             label.Color = Color.white;
 
             float distanceToCam = Settings.MainCameraTransform
-                .InverseTransformDirection(position - Settings.MainCameraTransform.position).z;
-            float size = 0.3f * distanceToCam;
+                .InverseTransformDirection(absolutePose.position - Settings.MainCameraTransform.position).z;
+            float size = 0.2f * distanceToCam;
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * Mathf.Max(1, size);

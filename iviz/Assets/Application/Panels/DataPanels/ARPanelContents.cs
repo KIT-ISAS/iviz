@@ -13,7 +13,7 @@ namespace Iviz.App
 
         public SliderWidget WorldScale { get; private set; }
 
-        //public DropdownWidget OcclusionQuality { get; private set; }
+        public DropdownWidget OcclusionQuality { get; private set; }
         public DataLabelWidget Description { get; private set; }
 
         public ToggleWidget AutoFocus { get; private set; }
@@ -51,6 +51,15 @@ namespace Iviz.App
                 "15 FPS",
                 "20 FPS",
                 "30 FPS"
+            };
+            
+            OcclusionQuality = p.AddDropdown("Occlusion Quality");
+            OcclusionQuality.Options = new[]
+            {
+                "Off",
+                "Fastest",
+                "Medium",
+                "Best",
             };
 
             ARMarkers = p.AddARMarker();

@@ -40,7 +40,6 @@ namespace Iviz.App
     public sealed class ARMarkerDialogData : DialogData
     {
         [NotNull] readonly ARMarkerDialogContents panel;
-        [NotNull] readonly StringBuilder description = new StringBuilder(65536);
         public override IDialogPanelContents Panel => panel;
 
         [NotNull] public ARMarkersConfiguration Configuration { get; set; } = new ARMarkersConfiguration();

@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARTfFrame : MarkerResource, ISupportsTint
+    public sealed class ARTfFrame : MarkerResource, ISupportsTint
     {
         [SerializeField] TMP_Text text = null;
         [SerializeField] AxisFrameResource axisFrame = null;

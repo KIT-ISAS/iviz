@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class ARLineConnector : MonoBehaviour
+    public sealed class ARLineConnector : MonoBehaviour
     {
         GameObject node;
         readonly MeshMarkerResource[] spheres = new MeshMarkerResource[3];

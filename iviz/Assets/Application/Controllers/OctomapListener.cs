@@ -137,9 +137,9 @@ namespace Iviz.Controllers
 
                 var enumerator = helper.EnumerateLeavesBinary(lastMsg.Data, 0, MaxDepth);
                 buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
-                foreach (var (x, y, z, w) in enumerator)
+                foreach (ref readonly var leaf in enumerator)
                 {
-                    buffer.Add(new float4(x, y, z, w));
+                    buffer.Add(new float4(leaf.x, leaf.y, leaf.z, leaf.w));
                 }
             }
             else
@@ -160,9 +160,9 @@ namespace Iviz.Controllers
 
                 var enumerator = helper.EnumerateLeaves(lastMsg.Data, 0, valueStride, MaxDepth);
                 buffer.EnsureCapacity(enumerator.NumberOfNodes / 2);
-                foreach (var (x, y, z, w) in enumerator)
+                foreach (ref readonly var leaf in enumerator)
                 {
-                    buffer.Add(new float4(x, y, z, w));
+                    buffer.Add(new float4(leaf.x, leaf.y, leaf.z, leaf.w));
                 }
             }
 

@@ -221,16 +221,11 @@ namespace Iviz.Controllers
             }
 
             ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
-
             string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+            
             if (type == null)
             {
                 topics = await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs);
-                if (topics == null)
-                {
-                    return ("", false, "EE Failed to retrieve updated list of topics due to timeout");
-                }
-
                 type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             }
 
@@ -244,7 +239,7 @@ namespace Iviz.Controllers
                 return ("", false, $"EE Type '{type}' is unsupported");
             }
 
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
@@ -293,13 +288,13 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
                     try
                     {
-                        ModuleData module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
+                        var module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
                         if (module == null)
                         {
                             result.success = false;

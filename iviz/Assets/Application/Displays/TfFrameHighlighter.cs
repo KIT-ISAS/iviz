@@ -23,7 +23,7 @@ namespace Iviz.Displays
         void Awake()
         {
             node = FrameNode.Instantiate("Frame Highlighter");
-            node.Transform.parent = Transform;
+            node.Transform.SetParentLocal(Transform);
 
             resource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
             resource.CastsShadows = false;
@@ -44,10 +44,9 @@ namespace Iviz.Displays
             label.Color = Color.white;
             label.Text = frameId;
 
-            float distanceToCam = Settings.MainCameraTransform
-                .InverseTransformDirection(Transform.position - Settings.MainCameraTransform.position).z;
+            float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(node.Transform.position).z;
             
-            float size = 0.375f * distanceToCam;
+            float size = 0.25f * distanceToCam;
             float clampedSize = Mathf.Max(size, 2);
 
             float baseFrameSize = TfListener.Instance.FrameSize;
@@ -69,8 +68,6 @@ namespace Iviz.Displays
             float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
             if (alpha < 0)
             {
-                highlightFrameStart = null;
-                node.Transform.parent = Transform;
                 this.ReturnToPool();
                 return;
             }
@@ -90,7 +87,8 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            base.Suspend();
+            node.Parent = null;
+            node.Transform.SetParentLocal(Transform);
             highlightFrameStart = null;
         }
 

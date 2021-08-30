@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class BillboardDiscDisplay : MonoBehaviour
+    public sealed class BillboardDiscDisplay : MonoBehaviour
     {
         [SerializeField] DraggablePlane disc = null;
         float? distanceConstraint;

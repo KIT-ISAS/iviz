@@ -13,7 +13,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.MarkerDetection
 {
-    public class CvMarkerException : Exception
+    public sealed class CvMarkerException : Exception
     {
         public CvMarkerException() : base("An error happened in the native call")
         {
@@ -24,7 +24,7 @@ namespace Iviz.MarkerDetection
         }
     }
 
-    public class CvContext : IDisposable
+    public sealed class CvContext : IDisposable
     {
         static bool loggerSet;
         readonly IntPtr mContextPtr;
@@ -542,7 +542,7 @@ namespace Iviz.MarkerDetection
         DictApriltag36H11
     };
 
-    public class ArucoMarkerPose
+    public sealed class ArucoMarkerPose
     {
         public int Id { get; }
         public Pose Pose { get; }

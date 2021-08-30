@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
-    public class AppAssetHolder : MonoBehaviour
+    public sealed class AppAssetHolder : MonoBehaviour
     {
         public Texture2D AtlasLarge;
         public Texture2D AtlasLargeFlip;

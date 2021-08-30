@@ -8,9 +8,9 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        static readonly Color BaseColorX = new Color(230 / 255f, 45 / 255f, 45 / 255f);
-        static readonly Color BaseColorY = new Color(45 / 255f, 230 / 255f, 45 / 255f);
-        static readonly Color BaseColorZ = new Color(45 / 255f, 45 / 255f, 230 / 255f);
+        static readonly Color BaseColorX = Color.red.WithSaturation(0.7f);
+        static readonly Color BaseColorY = Color.green.WithSaturation(0.7f);
+        static readonly Color BaseColorZ = Color.blue.WithSaturation(0.7f);
 
         static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};
 
@@ -101,9 +101,9 @@ namespace Iviz.Displays
         {
             set
             {
-                axisObjects[0].EmissiveColor = value * axisObjects[0].EmissiveColor;
-                axisObjects[1].EmissiveColor = value * axisObjects[1].EmissiveColor;
-                axisObjects[2].EmissiveColor = value * axisObjects[2].EmissiveColor;
+                axisObjects[0].EmissiveColor = value * axisObjects[0].Color;
+                axisObjects[1].EmissiveColor = value * axisObjects[1].Color;
+                axisObjects[2].EmissiveColor = value * axisObjects[2].Color;
             }
         }
 

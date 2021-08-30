@@ -11,6 +11,7 @@ using Iviz.MarkerDetection;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -74,7 +75,7 @@ namespace Iviz.Controllers
             Setup
         }
 
-        protected const string HeadFrameId = "~ar_head";
+        const string HeadFrameId = "~ar_head";
         protected const string CameraFrameId = "~ar_camera";
 
         [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
@@ -91,6 +92,8 @@ namespace Iviz.Controllers
         IModuleData moduleData;
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
+        
+        uint markerSeq;
 
         protected Canvas canvas;
 
@@ -127,13 +130,13 @@ namespace Iviz.Controllers
             set => config.OcclusionQuality = value;
         }
 
-        public Vector3 WorldPosition
+        protected Vector3 WorldPosition
         {
             get => config.WorldOffset;
             private set => config.WorldOffset = value;
         }
 
-        public float WorldAngle
+        protected float WorldAngle
         {
             get => config.WorldAngle;
             private set => config.WorldAngle = value;
@@ -286,6 +289,7 @@ namespace Iviz.Controllers
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
+            ARJoystick.Close += () => ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick();
 
             if (GuiInputModule.Instance != null)
             {
@@ -367,7 +371,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                var arCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
+                var arCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
                 float rotY = arCameraPose.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
                 (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
@@ -426,7 +430,7 @@ namespace Iviz.Controllers
             UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
         }
 
-        public static Pose RelativePoseToOrigin(in Pose unityPose)
+        public static Pose ARPoseToUnity(in Pose unityPose)
         {
             if (Instance == null || Instance.Visible)
             {
@@ -448,14 +452,12 @@ namespace Iviz.Controllers
 
         public virtual void Update()
         {
-            var absoluteArCameraPose = RelativePoseToOrigin(ARCamera.transform.AsPose());
+            var absoluteArCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
             var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
             TfListener.Publish(HeadFrameId, relativePose);
         }
 
-        uint markerSeq;
-
-        void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IReadOnlyList<IMarkerCorners> markers)
+        void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IMarkerCorners[] markers)
         {
             DetectedARMarker ToMarker(IMarkerCorners marker) => new DetectedARMarker
             {
@@ -467,7 +469,7 @@ namespace Iviz.Controllers
                     .Unity2RosPose()
                     .ToCameraFrame(),
                     */
-                CameraPose = TfListener.RelativePoseToFixedFrame(RelativePoseToOrigin(screenshot.CameraPose))
+                CameraPose = TfListener.RelativePoseToFixedFrame(ARPoseToUnity(screenshot.CameraPose))
                     .Unity2RosPose()
                     .ToCameraFrame(),
                 Corners = marker.Corners
@@ -491,8 +493,6 @@ namespace Iviz.Controllers
                     detector.DelayBetweenCapturesFastInMs);
             }
         }
-
-        public abstract bool TryGetRaycastHit(in Ray ray, out Pose hit);
 
         public virtual void StopController()
         {

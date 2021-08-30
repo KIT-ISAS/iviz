@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DisplayTesterBehaviour : MonoBehaviour
+    public sealed class DisplayTesterBehaviour : MonoBehaviour
     {
         const int MaxSegmentsForMesh = 30;
 

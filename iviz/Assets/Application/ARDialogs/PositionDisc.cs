@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class PositionDisc : ARWidget, IRecyclable
+    public sealed class PositionDisc : ARWidget, IRecyclable
     {
         [SerializeField] ARButton button = null;
         [SerializeField] DraggablePlane disc = null;

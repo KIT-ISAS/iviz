@@ -31,8 +31,8 @@ namespace Iviz.Controllers
         //[DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
-        [DataMember] public bool PublishLongTapPosition { get; set; } = false;
-        [DataMember] public string TapTopic { get; set; } = "~clicked_point";
+        //[DataMember] public bool PublishLongTapPosition { get; set; } = false;
+        //[DataMember] public string TapTopic { get; set; } = "~clicked_point";
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
@@ -47,14 +47,14 @@ namespace Iviz.Controllers
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
-        Point? lastTapPosition;
-        uint clickedSeq;
+        //Point? lastTapPosition;
+        //uint clickedSeq;
 
         public IModuleData ModuleData { get; }
 
         readonly GridConfiguration config = new GridConfiguration();
 
-        public Sender<PointStamped> SenderPoint { get; private set; }
+        //public Sender<PointStamped> SenderPoint { get; private set; }
 
         public GridConfiguration Config
         {

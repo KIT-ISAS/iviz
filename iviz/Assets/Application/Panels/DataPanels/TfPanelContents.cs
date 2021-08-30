@@ -13,6 +13,7 @@
         public ToggleWidget ConnectToParent { get; private set; }
         public ToggleWidget KeepAllFrames { get; private set; }
         public SenderWidget Sender { get; private set; }
+        public SenderWidget TapSender { get; private set; }
 
         void Awake()
         {
@@ -30,6 +31,7 @@
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             //FrameLabelSize = p.AddSlider("Frame Names Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Sender = p.AddSender();
+            TapSender = p.AddSender();
             p.UpdateSize();
             gameObject.SetActive(false);
         }

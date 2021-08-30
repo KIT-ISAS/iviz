@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -19,7 +18,6 @@ using Nito.AsyncEx;
 using UnityEngine;
 using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using UnityEditor;
 using Logger = Iviz.Tools.Logger;
 using Random = System.Random;
 
@@ -37,6 +35,8 @@ namespace Iviz.Ros
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new Dictionary<string, IAdvertisedService>();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new Dictionary<string, ISubscribedTopic>();
+
+        readonly List<(string, string)> hostAliases = new List<(string, string)>();
 
         [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
         [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
@@ -117,6 +117,12 @@ namespace Iviz.Ros
             }
         }
 
+        public void SetHostAliases([NotNull] IEnumerable<(string, string)> newHostAliases)
+        {
+            hostAliases.Clear();
+            hostAliases.AddRange(newHostAliases);
+        }
+
         async Task DisposeClient()
         {
             if (!Connected)
@@ -190,8 +196,10 @@ namespace Iviz.Ros
                         await Client.Parameters.GetParameterAsync("/iviz/hosts", token);
                     if (success)
                     {
-                        ParseHostsParam(hosts);
+                        AddHostsParamFromArg(hosts);
                     }
+                    
+                    AddConfigHostAliases();
 
                     LogInternalIfHololens("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
@@ -227,7 +235,7 @@ namespace Iviz.Ros
                     watchdogTask = WatchdogTask(Client.RosMasterClient, token);
                     ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
-
+                
                 Core.Logger.Debug("*** Connected!");
 
                 Core.Logger.Internal("<b>Connected!</b>");
@@ -273,7 +281,7 @@ namespace Iviz.Ros
             return false;
         }
 
-        static void ParseHostsParam(XmlRpcValue hostsObj)
+        static void AddHostsParamFromArg(XmlRpcValue hostsObj)
         {
             if (hostsObj.IsEmpty)
             {
@@ -310,6 +318,19 @@ namespace Iviz.Ros
                 ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
             }
         }
+
+        void AddConfigHostAliases()
+        {
+            foreach ((string hostname, string address) in hostAliases) 
+            {
+                if (hostname == null || address == null)
+                {
+                    continue;
+                }
+
+                ConnectionUtils.GlobalResolver[hostname] = address;
+            }                    
+        } 
 
         static async void LogConnectionCheck(CancellationToken token)
         {

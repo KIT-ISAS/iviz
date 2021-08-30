@@ -57,6 +57,7 @@ namespace Iviz.App
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.Sender.Set(listener.Publisher);
+            panel.TapSender.Set(listener.TapPublisher);
 
             panel.HideButton.Clicked += ToggleVisible;
             panel.ShowFrameLabels.ValueChanged += f =>

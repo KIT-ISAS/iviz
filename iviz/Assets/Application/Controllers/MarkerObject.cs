@@ -38,10 +38,7 @@ namespace Iviz.Controllers
         /// </summary>
         Text = 12,
 
-        /// <summary>
-        ///     New: Image marker. Pixels in Colors field, image width in Scale.z
-        /// </summary>
-        Image = 13
+        // Image = 13
     }
 
     public enum MouseEventType
@@ -229,7 +226,7 @@ namespace Iviz.Controllers
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
-            if (msg.Type < 0 || msg.Type > (int) MarkerType.Image)
+            if (msg.Type < 0 || msg.Type > (int) MarkerType.TriangleList)
             {
                 // out!
                 StopLoadResourceTask();
@@ -305,9 +302,11 @@ namespace Iviz.Controllers
                     CreateTriangleList(msg);
                     break;
                 }
+                /*
                 case MarkerType.Image:
                     CreateImage(msg);
                     break;
+                    */
             }
         }
 
@@ -339,6 +338,7 @@ namespace Iviz.Controllers
             description.Append("Scale: ").Append(c.ToString(FloatFormat)).AppendLine();
         }
 
+        /*
         void CreateImage([NotNull] Marker msg)
         {
             ImageResource image = ValidateResource<ImageResource>();
@@ -402,6 +402,7 @@ namespace Iviz.Controllers
                 transform.localScale = imageScale;
             }
         }
+        */
 
         void CreateTriangleList([NotNull] Marker msg)
         {
@@ -874,8 +875,8 @@ namespace Iviz.Controllers
                     return Resource.Displays.PointList;
                 case MarkerType.TriangleList:
                     return Resource.Displays.MeshTriangles;
-                case MarkerType.Image:
-                    return Resource.Displays.Image;
+                //case MarkerType.Image:
+                //    return Resource.Displays.Image;
                 case MarkerType.MeshResource:
                     if (Resource.TryGetResource(msg.MeshResource, out var newResourceInfo))
                     {
@@ -946,8 +947,8 @@ namespace Iviz.Controllers
                     return "Points";
                 case MarkerType.TriangleList:
                     return "TriangleList";
-                case MarkerType.Image:
-                    return "Image";
+                //case MarkerType.Image:
+                //    return "Image";
                 default:
                     return $"Unknown ({msg.Type.ToString()})";
             }

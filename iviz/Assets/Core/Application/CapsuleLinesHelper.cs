@@ -81,7 +81,7 @@ namespace Iviz.Displays
 
                 const float minMagnitude = 1e-8f;
                 
-                foreach (ref float4x2 line in lineBuffer.Ref())
+                foreach (ref readonly float4x2 line in lineBuffer.Ref())
                 {
                     Vector3 a = line.c0.xyz;
                     Vector3 b = line.c1.xyz;

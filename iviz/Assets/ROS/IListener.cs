@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -169,9 +170,8 @@ namespace Iviz.Ros
             }
 
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
-            for (int i = start; i < tmpMessageBag.Count; i++)
+            foreach (var msg in tmpMessageBag.Skip(start))
             {
-                var msg = tmpMessageBag[i];
                 Interlocked.Increment(ref recentMsgs);
                 try
                 {

@@ -146,30 +146,31 @@ namespace Iviz.Core
             readonly NativeArray<T> a;
             readonly int length;
             public RefEnumerable(in NativeArray<T> a, int length) => (this.a, this.length) = (a, length);
-            public RefEnumerator GetEnumerator() => new RefEnumerator(a, length);
-        }
-
-        public unsafe struct RefEnumerator
-        {
-            T* pos;
-            readonly T* end;
-
-            public RefEnumerator(in NativeArray<T> a, int length)
+            public Enumerator GetEnumerator() => new Enumerator(a, length);
+            
+            public unsafe struct Enumerator
             {
-                if (length == 0)
+                T* pos;
+                readonly T* end;
+
+                public Enumerator(in NativeArray<T> a, int length)
                 {
-                    pos = null;
-                    end = null;
-                    return;
+                    if (length == 0)
+                    {
+                        pos = null;
+                        end = null;
+                        return;
+                    }
+
+                    T* ptr = (T*) a.GetUnsafePtr();
+                    pos = ptr - 1;
+                    end = ptr + length;
                 }
 
-                T* ptr = (T*) a.GetUnsafePtr();
-                pos = ptr - 1;
-                end = ptr + length;
+                public bool MoveNext() => ++pos < end;
+                public ref T Current => ref *pos;
             }
-
-            public bool MoveNext() => ++pos < end;
-            public ref T Current => ref *pos;
         }
+
     }
 }

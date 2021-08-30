@@ -16,6 +16,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Color representation from the bits of a float.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal static Color32 ColorFromFloatBits(float f)
         {
             unsafe
@@ -27,6 +28,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Float representation from the bits of a Color32.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public static float FloatFromColorBits(Color32 f)
         {
             unsafe

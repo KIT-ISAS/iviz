@@ -52,16 +52,18 @@ namespace Iviz.Controllers
 
         bool? ProcessLineStripSingleColor(NativeList<float4x2> lineBuffer)
         {
-            if (points.Length == 0)
+            var lPoints = points;
+            
+            if (lPoints.Length == 0)
             {
                 return color32.a < 255;
             }
 
-            var p = points[0].Ros2Unity();
+            var p = lPoints[0].Ros2Unity();
             float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
-            for (int i = 0; i < points.Length - 1; i++)
+            for (int i = 1; i < lPoints.Length; i++)
             {
-                var q = points[i + 1].Ros2Unity();
+                var q = lPoints[i].Ros2Unity();
 
                 LineWithColor line = new LineWithColor(p, colorAsFloat,q, colorAsFloat);
                 if (LineResource.IsElementValid(line))
@@ -77,18 +79,21 @@ namespace Iviz.Controllers
 
         bool? ProcessLineStripNoTint(NativeList<float4x2> lineBuffer)
         {
-            if (points.Length == 0)
+            var lPoints = points;
+            var lColors = colors;
+            
+            if (lPoints.Length == 0)
             {
                 return null;
             }
             
-            var p = points[0].Ros2Unity();
-            Color32 pc = colors[0].ToUnityColor32();
+            var p = lPoints[0].Ros2Unity();
+            var pc = lColors[0].ToUnityColor32();
 
-            for (int i = 0; i < points.Length - 1; i++)
+            for (int i = 1; i < lPoints.Length; i++)
             {
-                var q = points[i + 1].Ros2Unity();
-                Color32 qc = colors[i + 1].ToUnityColor32();
+                var q = lPoints[i].Ros2Unity();
+                var qc = lColors[i].ToUnityColor32();
                 
                 LineWithColor line = new LineWithColor(p, pc, q, qc);
                 if (LineResource.IsElementValid(line))
@@ -105,20 +110,22 @@ namespace Iviz.Controllers
 
         bool? ProcessLineStripTintColor(NativeList<float4x2> lineBuffer)
         {
+            var lPoints = points;
+            var lColors = colors;
             Color color = color32;
 
-            if (points.Length == 0)
+            if (lPoints.Length == 0)
             {
                 return color.a < 1 ? (bool?) true : null;;
             }
 
-            var p = points[0].Ros2Unity();
-            Color32 pc = color * colors[0].ToUnityColor();
+            var p = lPoints[0].Ros2Unity();
+            Color32 pc = color * lColors[0].ToUnityColor();
             
-            for (int i = 0; i < points.Length - 1; i++)
+            for (int i = 1; i < lPoints.Length; i++)
             {
-                var q = points[i + 1].Ros2Unity();
-                Color32 qc = color * colors[i + 1].ToUnityColor();
+                var q = lPoints[i].Ros2Unity();
+                Color32 qc = color * lColors[i].ToUnityColor();
                 
                 LineWithColor line = new LineWithColor(p, pc, q, qc);
                 if (LineResource.IsElementValid(line))
@@ -151,12 +158,14 @@ namespace Iviz.Controllers
 
         bool? ProcessLineListSingleColor(NativeList<float4x2> lineBuffer)
         {
+            var lPoints = points;
+            
             float colorAsFloat = PointWithColor.FloatFromColorBits(color32);
-            for (int i = 0; i < points.Length / 2; i++)
+            for (int i = 0; i < lPoints.Length / 2; i++)
             {
                 LineWithColor line = new LineWithColor(
-                    points[2 * i + 0].Ros2Unity(), colorAsFloat,
-                    points[2 * i + 1].Ros2Unity(), colorAsFloat
+                    lPoints[2 * i + 0].Ros2Unity(), colorAsFloat,
+                    lPoints[2 * i + 1].Ros2Unity(), colorAsFloat
                 );
                 if (LineResource.IsElementValid(line))
                 {
@@ -169,11 +178,14 @@ namespace Iviz.Controllers
 
         bool? ProcessLineListNoTint(NativeList<float4x2> lineBuffer)
         {
-            for (int i = 0; i < points.Length / 2; i++)
+            var lPoints = points;
+            var lColors = colors;
+            
+            for (int i = 0; i < lPoints.Length / 2; i++)
             {
                 LineWithColor line = new LineWithColor(
-                    points[2 * i + 0].Ros2Unity(), colors[2 * i + 0].ToUnityColor32(),
-                    points[2 * i + 1].Ros2Unity(), colors[2 * i + 1].ToUnityColor32()
+                    lPoints[2 * i + 0].Ros2Unity(), lColors[2 * i + 0].ToUnityColor32(),
+                    lPoints[2 * i + 1].Ros2Unity(), lColors[2 * i + 1].ToUnityColor32()
                 );
                 if (LineResource.IsElementValid(line))
                 {
@@ -186,12 +198,15 @@ namespace Iviz.Controllers
 
         bool? ProcessLineListTintColor(NativeList<float4x2> lineBuffer)
         {
+            var lPoints = points;
+            var lColors = colors;
             Color color = color32;
-            for (int i = 0; i < points.Length / 2; i++)
+            
+            for (int i = 0; i < lPoints.Length / 2; i++)
             {
                 LineWithColor line = new LineWithColor(
-                    points[2 * i + 0].Ros2Unity(), color * colors[2 * i + 0].ToUnityColor(),
-                    points[2 * i + 1].Ros2Unity(), color * colors[2 * i + 1].ToUnityColor()
+                    lPoints[2 * i + 0].Ros2Unity(), color * lColors[2 * i + 0].ToUnityColor(),
+                    lPoints[2 * i + 1].Ros2Unity(), color * lColors[2 * i + 1].ToUnityColor()
                 );
                 if (LineResource.IsElementValid(line))
                 {

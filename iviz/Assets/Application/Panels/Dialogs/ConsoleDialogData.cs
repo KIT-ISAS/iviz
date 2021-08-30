@@ -28,7 +28,12 @@ namespace Iviz.App
         const int MaxMessagesToPrint = 64;
         const int MaxMessages = 50000;
 
-        
+        const string FatalColor = "#ff0000";
+        const string ErrorColor = "#a52a2a";
+        const string WarnColor = "#7F5200";
+        const string InfoColor = "#000080";
+        const string DefaultColor = "#000000";
+
         const string AllString = "[All]";
         const string NoneString = "[None]";
         const string MeString = "[Me]";
@@ -179,25 +184,25 @@ namespace Iviz.App
         {
             if (level >= LogLevel.Fatal)
             {
-                return "#ff0000";
+                return FatalColor;
             }
 
             if (level >= LogLevel.Error)
             {
-                return "#a52a2a";
+                return ErrorColor;
             }
 
             if (level >= LogLevel.Warn)
             {
-                return "#7F5200";
+                return WarnColor;
             }
 
             if (level >= LogLevel.Info)
             {
-                return "#000080";
+                return InfoColor;
             }
 
-            return "#000000";
+            return DefaultColor;
         }
 
         public static int IndexFromLevel(LogLevel level)

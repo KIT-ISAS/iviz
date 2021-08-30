@@ -1,13 +1,16 @@
 using System;
 using External;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public class ARJoystick : MonoBehaviour
     {
-        [SerializeField] Button button = null;
+        [SerializeField] Button closeButton = null;
+        [SerializeField] Button pinDownButton = null;
+        [SerializeField] Button globalButton = null;
         [SerializeField] Joystick joystickX = null;
         [SerializeField] Joystick joystickY = null;
         [SerializeField] Joystick joystickZ = null;
@@ -17,6 +20,8 @@ namespace Iviz.App
         public event Action<Vector3> ChangedPosition;
         public event Action<float> ChangedAngle;
         public event Action PointerUp;
+        public event Action Close;
+        public event Action PinDown;
 
         public bool Visible
         {
@@ -28,7 +33,10 @@ namespace Iviz.App
         {
             Visible = false;
             IsGlobal = true;
-            button.onClick.AddListener(OnButtonClick);
+            globalButton.onClick.AddListener(OnButtonClick);
+            closeButton.onClick.AddListener(() => Close?.Invoke());
+            pinDownButton.onClick.AddListener(() => PinDown?.Invoke());
+
             joystickX.Changed += OnChangedPosition;
             joystickY.Changed += OnChangedPosition;
             joystickZ.Changed += OnChangedPosition;
@@ -44,7 +52,7 @@ namespace Iviz.App
         void OnButtonClick()
         {
             IsGlobal = !IsGlobal;
-            button.GetComponentInChildren<Text>().text = IsGlobal ? "Global" : "Screen";
+            globalButton.GetComponentInChildren<Text>().text = IsGlobal ? "Global" : "Screen";
         }
 
         void OnChangedPosition(Vector2 _)

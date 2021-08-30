@@ -50,7 +50,7 @@ namespace Iviz.App
         [SerializeField] Button addDisplayByTopic = null;
         [SerializeField] Button addDisplay = null;
         [SerializeField] Button showTfTree = null;
-        [SerializeField] Button resetAll = null;
+        [SerializeField] Button enableAR = null;
         [SerializeField] Button showNetwork = null;
         [SerializeField] Button showConsole = null;
         [SerializeField] Button showSettings = null;
@@ -79,10 +79,9 @@ namespace Iviz.App
         [SerializeField] Canvas contentCanvas = null;
         [SerializeField] GameObject moduleListCanvas = null;
         [SerializeField] GameObject dataPanelCanvas = null;
-        
+
         [SerializeField] ARSidePanel arSidePanel = null;
         [SerializeField] Canvas rootCanvas = null;
-
 
 
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
@@ -123,8 +122,7 @@ namespace Iviz.App
             set => menuDialog = value;
         }
 
-        [CanBeNull]
-        public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
+        [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
 
         bool dialogIsDragged;
 
@@ -164,7 +162,9 @@ namespace Iviz.App
 
         //public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
+
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
+
         //public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
         //public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         AnchorToggleButton InteractableButton => anchorCanvas.Interact;
@@ -173,8 +173,9 @@ namespace Iviz.App
         [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public TwistJoystick TwistJoystick => twistJoystick;
         public ARJoystick ARJoystick => arJoystick;
+        public ARSidePanel ARSidePanel => arSidePanel;
         [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
-        [NotNull] TfModuleData TfData => (TfModuleData) moduleDatas[0];
+        [NotNull] TfModuleData TfData => (TfModuleData)moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
         [NotNull] ModuleListButtons Buttons => buttons ?? (buttons = new ModuleListButtons(contentObject));
 
@@ -220,8 +221,8 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
-            ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
+            //ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
+            //ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
 
@@ -288,7 +289,7 @@ namespace Iviz.App
             addDisplayByTopic.onClick.AddListener(availableTopics.Show);
             addDisplay.onClick.AddListener(availableModules.Show);
             showTfTree.onClick.AddListener(tfTreeData.Show);
-            resetAll.onClick.AddListener(ResetAllModules);
+            enableAR.onClick.AddListener(OnEnableAR);
             showNetwork.onClick.AddListener(networkData.Show);
             showConsole.onClick.AddListener(consoleData.Show);
             showSettings.onClick.AddListener(settingsData.Show);
@@ -406,6 +407,19 @@ namespace Iviz.App
             else
             {
                 InitFinished += action;
+            }
+        }
+
+        void OnEnableAR()
+        {
+            if (ARController.Instance == null)
+            {
+                CreateModule(ModuleType.AugmentedReality);
+                AllGuiVisible = false;
+            }
+            else
+            {
+                ARController.Instance.Visible = !ARController.Instance.Visible;
             }
         }
 
@@ -603,6 +617,8 @@ namespace Iviz.App
                 }
 
                 systemData.HostAliases = config.HostAliases;
+                ConnectionManager.Connection.SetHostAliases(
+                    config.HostAliases.Select(alias => (alias.Hostname, alias.Address)));
                 arMarkerData.Configuration = config.MarkersConfiguration;
             }
             catch (Exception e) when
@@ -702,7 +718,7 @@ namespace Iviz.App
             catch (Exception e)
             {
                 Logger.Error($"Error clearing cache", e);
-            }            
+            }
         }
 
         public static int NumSavedFiles => LoadConfigDialogData.SavedFiles.Count();
@@ -863,7 +879,7 @@ namespace Iviz.App
         {
             arMarkerData.Show();
         }
-        
+
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR
@@ -897,14 +913,14 @@ namespace Iviz.App
                     bottomBattery.text = "Full";
                     break;
                 default:
-                    int level = (int) (SystemInfo.batteryLevel * 100);
+                    int level = (int)(SystemInfo.batteryLevel * 100);
                     bottomBattery.text = state == BatteryStatus.Charging
                         ? $"<color=#005500>{level.ToString()}%</color>"
                         : $"{level.ToString()}%";
                     break;
             }
         }
-        
+
         [NotNull]
         static string FormatSpeed(long speedB)
         {
@@ -916,7 +932,7 @@ namespace Iviz.App
 
             long speedKb = speedB / 1024;
             return $"{speedKb.ToString("N0")}kB/s";
-        }        
+        }
 
         void UpdateFpsCounter()
         {

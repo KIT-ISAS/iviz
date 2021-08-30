@@ -8,7 +8,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.Displays
 {
-    public class ARPlaneResource : MonoBehaviour
+    public sealed class ARPlaneResource : MonoBehaviour
     {
         Mesh mesh;
         MeshRenderer meshRenderer;

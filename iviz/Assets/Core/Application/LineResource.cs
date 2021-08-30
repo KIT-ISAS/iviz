@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
@@ -77,6 +78,7 @@ namespace Iviz.Displays
 
         public LineRenderType RenderType { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
                                                                  (t.A - t.B).MaxAbsCoeff() > MinLineLength &&
                                                                  t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
@@ -99,7 +101,7 @@ namespace Iviz.Displays
             lineBuffer.Clear();
             if (lines.Length != 0)
             {
-                foreach (ref LineWithColor t in lines.Ref())
+                foreach (ref readonly LineWithColor t in lines.Ref())
                 {
                     if (!IsElementValid(t))
                     {
@@ -123,7 +125,7 @@ namespace Iviz.Displays
             lineBuffer.EnsureCapacity(lines.Length);
 
             lineBuffer.Clear();
-            foreach (ref LineWithColor t in lines.Ref())
+            foreach (ref readonly LineWithColor t in lines.Ref())
             {
                 if (!IsElementValid(t))
                 {
@@ -196,7 +198,7 @@ namespace Iviz.Displays
                 return false;
             }
 
-            foreach (ref float4x2 t in lineBuffer.Ref())
+            foreach (ref readonly float4x2 t in lineBuffer.Ref())
             {
                 Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
                 if (cA.a < 255)

@@ -86,7 +86,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.RentDisplay<LineResource>(TfListener.RootFrame.Transform);
+            resource = ResourcePool.RentDisplay<LineResource>();
             resource.ElementScale = 0.001f;
             resource.Visible = ARController.InstanceVisible;
 
@@ -139,7 +139,9 @@ namespace Iviz.Displays
         {
             if (resource.Visible)
             {
-                var unityPose = ARController.RelativePoseToOrigin(Transform.AsPose());
+                var unityPose = ARController.ARPoseToUnity(Transform.AsPose());
+                //var relativePose = TfListener.RelativePoseToOrigin(unityPose);    
+                //resource.Transform.SetPose(unityPose);
                 resource.Transform.SetPose(unityPose);
             }
 

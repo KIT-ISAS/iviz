@@ -35,7 +35,7 @@ namespace Iviz.Displays
         bool isDirty;
 
         Mesh mesh;
-        
+
         [SerializeField] MeshRenderer meshRenderer = null;
         [SerializeField] MeshFilter meshFilter = null;
         [CanBeNull] ComputeBuffer pointComputeBuffer;
@@ -74,7 +74,7 @@ namespace Iviz.Displays
             {
                 Logger.Info($"{this}: Device does not support compute buffers in vertices. " +
                             "Point clouds may not appear correctly.");
-                mesh = new Mesh {name = "PointCloud Mesh"};
+                mesh = new Mesh { name = "PointCloud Mesh" };
                 mesh.MarkDynamic();
                 meshFilter.mesh = mesh;
                 MeshRenderer.enabled = true;
@@ -163,9 +163,10 @@ namespace Iviz.Displays
                     {
                         for (int i = 0; i < pointBuffer.Length; i++)
                         {
-                            points.Array[i] = pointBuffer[i].xyz;
+                            var p = pointBuffer[i];
+                            points.Array[i] = p.xyz;
                             indices.Array[i] = i;
-                            uvs.Array[i].x = pointBuffer[i].w;
+                            uvs.Array[i].x = p.w;
                         }
 
                         mesh.SetVertices(points);
@@ -179,9 +180,10 @@ namespace Iviz.Displays
                     {
                         for (int i = 0; i < pointBuffer.Length; i++)
                         {
-                            points.Array[i] = pointBuffer[i].xyz;
+                            var p = pointBuffer[i];
+                            points.Array[i] = p.xyz;
                             indices.Array[i] = i;
-                            colors.Array[i] = PointWithColor.ColorFromFloatBits(pointBuffer[i].w);
+                            colors.Array[i] = PointWithColor.ColorFromFloatBits(p.w);
                         }
 
                         mesh.SetVertices(points);
@@ -201,7 +203,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer)null);
             }
 
             pointBuffer.Dispose();
@@ -228,7 +230,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             if (points.Length != 0)
             {
-                foreach (ref PointWithColor t in points.Ref())
+                foreach (ref readonly PointWithColor t in points.Ref())
                 {
                     if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                     {
@@ -329,7 +331,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer) null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer)null);
             }
 
             if (pointBuffer.Capacity != 0)
@@ -351,7 +353,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, (ComputeBuffer) null);
+            Properties.SetBuffer(PointsId, (ComputeBuffer)null);
 
             //processing = false;
         }

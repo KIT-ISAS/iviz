@@ -69,8 +69,8 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            transform.SetPose(Pose.identity);
-            resource = ResourcePool.RentDisplay<LineResource>(transform);
+            Transform.SetPose(Pose.identity);
+            resource = ResourcePool.RentDisplay<LineResource>(Transform);
             resource.Name = "[Line for Trail]";
             resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;

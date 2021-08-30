@@ -14,7 +14,7 @@ using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
-    public class ARMarkerExecutor
+    public sealed class ARMarkerExecutor
     {
         readonly Dictionary<(ARMarkerType, string), ARExecutableMarker> markers =
             new Dictionary<(ARMarkerType, string), ARExecutableMarker>();
@@ -89,7 +89,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            detectedMarker.MarkerSize = executableMarker.SizeInMm;
+            detectedMarker.MarkerSizeInMm = executableMarker.SizeInMm;
             //Debug.Log("Detected " +  key.Code + " with size " + detectedMarker.MarkerSize);
 
             Msgs.GeometryMsgs.Pose rosMarkerPose;
@@ -164,7 +164,7 @@ namespace Iviz.Controllers
 
         static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] DetectedARMarker marker)
         {
-            float sizeInMm = (float) marker.MarkerSize;
+            float sizeInMm = (float) marker.MarkerSizeInMm;
             float sizeInM = sizeInMm / 1000f;
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
             var imageCorners = marker.Corners

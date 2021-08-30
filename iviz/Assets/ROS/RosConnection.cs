@@ -11,6 +11,7 @@ using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
@@ -27,6 +28,8 @@ namespace Iviz.Ros
         readonly Task task;
         readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
         readonly CancellationTokenSource connectionTs = new CancellationTokenSource();
+
+        DateTime lastConnectionTry = DateTime.MinValue;
 
         protected RosConnection()
         {
@@ -80,7 +83,6 @@ namespace Iviz.Ros
 
         async Task Run()
         {
-            DateTime lastConnectionTry = DateTime.MinValue;
             try
             {
                 while (!connectionTs.IsCancellationRequested)
@@ -130,7 +132,6 @@ namespace Iviz.Ros
             while (toDos.TryDequeue(out var action))
             {
                 await action().AwaitNoThrow(this);
-                //Debug.Log("-1: " + toDos.Count);
             }
         }
 
@@ -139,14 +140,11 @@ namespace Iviz.Ros
         public virtual void Disconnect()
         {
             SetConnectionState(ConnectionState.Disconnected);
-            GC.Collect();
+            lastConnectionTry = DateTime.MinValue;
         }
 
         [NotNull]
-        public override string ToString()
-        {
-            return "[RosConnection]";
-        }
+        public override string ToString() => "[RosConnection]";
     }
 
     public enum RequestType

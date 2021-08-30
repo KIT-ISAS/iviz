@@ -123,7 +123,7 @@ namespace Iviz.App
             {
                 if (ARController.Instance != null && !ARController.Instance.SetupModeEnabled)
                 {
-                    Controller.ShowARJoystick = (move.Enabled = !move.Enabled);
+                    ToggleARJoystick();
                 }
                 else if (move.Enabled)
                 {
@@ -162,6 +162,11 @@ namespace Iviz.App
                 TfListener.Instance.FrameLabelsVisible = (tfText.Enabled = !tfText.Enabled);
 
             Active = true;
+        }
+
+        public void ToggleARJoystick()
+        {
+            Controller.ShowARJoystick = (move.Enabled = !move.Enabled);            
         }
 
         void OnDestroy()

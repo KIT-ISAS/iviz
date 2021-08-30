@@ -21,7 +21,7 @@ namespace Iviz.MarkerDetection
         readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         CancellationToken Token => tokenSource.Token;
-        public event Action<Screenshot, IReadOnlyList<IMarkerCorners>> MarkerDetected;
+        public event Action<Screenshot, IMarkerCorners[]> MarkerDetected;
 
         public int DelayBetweenCapturesInMs { get; set; } = 3000;
         public int DelayBetweenCapturesFastInMs { get; set; } = 500;

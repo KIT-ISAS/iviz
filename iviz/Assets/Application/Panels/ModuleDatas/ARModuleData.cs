@@ -31,7 +31,7 @@ namespace Iviz.App
             controller.ModuleData = this;
             if (constructor.Configuration != null)
             {
-                controller.Config = (ARConfiguration) constructor.Configuration;
+                controller.Config = (ARConfiguration)constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -60,14 +60,14 @@ namespace Iviz.App
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ResetButton.Clicked += () => { controller.ResetSession(); };
-            panel.PublishCaptures.Index = (int) controller.PublicationFrequency;
+            panel.PublishCaptures.Index = (int)controller.PublicationFrequency;
 
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
 
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
-            panel.PublishCaptures.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency) f;
+            panel.PublishCaptures.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency)f;
             //panel.PublishColor.Value = controller.PublishColor;
             //panel.ColorSender.Set(controller.ColorSender);
             //panel.PublishDepth.Value = controller.PublishDepth;
@@ -76,6 +76,9 @@ namespace Iviz.App
 
             //panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
             //panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
+
+            panel.OcclusionQuality.Index = (int)controller.OcclusionQuality;
+            panel.OcclusionQuality.ValueChanged += (f, _) => controller.OcclusionQuality = (OcclusionQualityType)f;
         }
 
         public override void UpdatePanel()

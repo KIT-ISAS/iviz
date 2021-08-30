@@ -251,7 +251,7 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             if (points.Length != 0)
             {
-                foreach (ref PointWithColor t in points.Ref())
+                foreach (ref readonly PointWithColor t in points.Ref())
                 {
                     if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                     {

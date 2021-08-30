@@ -1,64 +1,92 @@
+using System;
 using System.Collections.Generic;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.App
 {
+    public readonly struct ClickHitResult
+    {
+        public GameObject GameObject { get; }
+        public Vector3 Position { get; }
+        public Vector3 Normal { get; }
+
+        ClickHitResult(GameObject gameObject, in Vector3 position, in Vector3 normal)
+        {
+            GameObject = gameObject;
+            Position = position;
+            Normal = normal;
+        }
+
+        public ClickHitResult(RaycastResult r) : this(r.gameObject, r.worldPosition, r.worldNormal)
+        {
+        }
+
+        public ClickHitResult(ARRaycastHit r) : this(r.trackable.gameObject, r.pose.position,
+            ((ARPlane)r.trackable).normal)
+        {
+        }
+
+        public Pose CreatePose()
+        {
+            var side = Mathf.Approximately(Vector3.forward.Cross(Normal).MagnitudeSq(), 0)
+                ? Vector3.right
+                : Vector3.forward;
+            
+            var forward = side.Cross(Normal);
+            
+            return new Pose(Position, Quaternion.LookRotation(forward, Normal));
+        } 
+        
+    }
+
     public sealed class ClickInfo
     {
         readonly Vector2 cursorPosition;
-        
-        bool arHitSet;
-        Pose? arHit;
-        [CanBeNull] List<RaycastResult> cursorHits;
+
+        [CanBeNull] ClickHitResult[] arHits;
+        [CanBeNull] ClickHitResult[] unityHits;
 
         public ClickInfo(in Vector2 cursorPosition) => this.cursorPosition = cursorPosition;
 
-        public bool TryGetARRaycastHit(out Pose pose)
+        public bool TryGetARRaycastResults([NotNull] out ClickHitResult[] hits)
         {
-            if (arHitSet)
+            if (arHits != null)
             {
-                if (arHit != null)
-                {
-                    pose = arHit.Value;
-                    return true;
-                }
+                hits = arHits;
+                return hits.Length != 0;
+            }
 
-                pose = default;
+            if (ARController.Instance == null || !ARController.InstanceVisible)
+            {
+                hits = Array.Empty<ClickHitResult>();
                 return false;
             }
 
-            if (ARController.Instance == null)
-            {
-                pose = default;
-                return false;
-            }
-
-            arHitSet = true;
-                
             var ray = Settings.MainCamera.ScreenPointToRay(cursorPosition);
-            if (ARController.Instance.TryGetRaycastHit(ray, out var newPose))
+            if (!ARController.Instance.TryGetRaycastHits(ray, out var results) || results.Count == 0)
             {
-                pose = newPose;
-                arHit = newPose;
-                return true;
+                hits = Array.Empty<ClickHitResult>();
+                return false;
             }
 
-            pose = default;
-            arHit = null;
-            return false;
+            hits = results.Select(result => new ClickHitResult(result)).ToArray();
+            arHits = hits;
+            return true;
         }
-            
-        public bool TryGetRaycastResults([NotNull] out IReadOnlyCollection<RaycastResult> hits)
+
+        public bool TryGetRaycastResults([NotNull] out ClickHitResult[] hits)
         {
-            if (cursorHits != null)
+            if (unityHits != null)
             {
-                hits = cursorHits;
-                return cursorHits.Count != 0;
+                hits = unityHits;
+                return hits.Length != 0;
             }
 
             var raycaster = Settings.MainCamera.GetComponent<PhysicsRaycaster>();
@@ -71,15 +99,16 @@ namespace Iviz.App
             {
                 position = cursorPosition
             };
-                
-            raycaster.Raycast(eventData, results);
-            cursorHits = results;
-            hits = cursorHits;
 
+            raycaster.Raycast(eventData, results);
             raycaster.eventMask = oldMask;
-            
-            return cursorHits.Count != 0;
+
+            unityHits = results.Count == 0
+                ? Array.Empty<ClickHitResult>()
+                : results.Select(result => new ClickHitResult(result)).ToArray();
+            hits = unityHits;
+
+            return unityHits.Length != 0;
         }
-            
     }
 }

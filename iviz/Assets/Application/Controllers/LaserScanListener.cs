@@ -15,7 +15,7 @@ using Logger = Iviz.Core.Logger;
 namespace Iviz.Controllers
 {
     [DataContract]
-    public class LaserScanConfiguration : JsonToString, IConfiguration
+    public sealed class LaserScanConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.LaserScan;

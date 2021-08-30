@@ -36,7 +36,25 @@ namespace Iviz.Ros
         Sender<Log> logSender;
 
         [NotNull] public static IExternalServiceProvider ServiceProvider => Connection;
-        [NotNull] public static RoslibConnection Connection => connection ?? (connection = new RoslibConnection());
+
+        [NotNull]
+        public static RoslibConnection Connection
+        {
+            get
+            {
+                if (connection != null)
+                {
+                    return connection;
+                }
+
+                if (instance == null)
+                {
+                    throw new ObjectDisposedException("Connection manager has already been disposed");
+                }
+
+                return connection = new RoslibConnection();
+            }
+        }
 
         [CanBeNull] public static string MyId => Connection.MyId;
         public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;

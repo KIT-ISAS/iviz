@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public class TrajectoryDisc : ARWidget, IRecyclable
+    public sealed class TrajectoryDisc : ARWidget, IRecyclable
     {
         [SerializeField] ARButton button = null;
         [SerializeField] float period = 0.1f;

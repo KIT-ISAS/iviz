@@ -1,6 +1,6 @@
 ﻿namespace External
 {
-    public class FixedJoystick : Joystick
+    public sealed class FixedJoystick : Joystick
     {
 
     }
