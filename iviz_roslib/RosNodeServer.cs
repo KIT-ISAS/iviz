@@ -146,7 +146,7 @@ namespace Iviz.Roslib.XmlRpc
         XmlRpcArg GetBusInfo(XmlRpcValue[] _)
         {
             var busInfo = client.GetBusInfoRpc();
-            XmlRpcArg[][] response = Enumerable.Select(busInfo, BusInfoToArg).ToArray();
+            XmlRpcArg[][] response = busInfo.Select(BusInfoToArg).ToArray();
             return OkResponse(response);
         }
 
@@ -205,13 +205,13 @@ namespace Iviz.Roslib.XmlRpc
         XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
         {
             var subscriptions = client.GetSubscriptionsRpc();
-            return OkResponse(new XmlRpcArg(Enumerable.Select(subscriptions, info => (info.Topic, info.Type))));
+            return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type))));
         }
 
         XmlRpcArg GetPublications(XmlRpcValue[] _)
         {
             var publications = client.GetPublicationsRpc();
-            return OkResponse(new XmlRpcArg(Enumerable.Select(publications, info => (info.Topic, info.Type))));
+            return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type))));
         }
 
         XmlRpcArg ParamUpdate(XmlRpcValue[] args)

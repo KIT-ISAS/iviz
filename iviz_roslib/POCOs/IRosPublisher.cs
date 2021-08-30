@@ -138,7 +138,7 @@ namespace Iviz.Roslib
         internal Endpoint? RequestTopicRpc();
     }
     
-    public interface IRosPublisher<in T> : IRosPublisher where T : IMessage
+    public interface IRosPublisher<T> : IRosPublisher where T : IMessage
     {
         /// <summary>
         /// Publishes the given message into the topic. 
@@ -146,7 +146,7 @@ namespace Iviz.Roslib
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
-        public void Publish(T message);
+        public void Publish(in T message);
         
         /// <summary>
         /// Publishes the given message into the topic.  

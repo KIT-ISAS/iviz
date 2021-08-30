@@ -160,7 +160,7 @@ namespace Iviz.Roslib
                 return;
             }
 
-            var tasks = Enumerable.Select(sendersToDelete, async sender =>
+            var tasks = sendersToDelete.Select(async sender =>
             {
                 await sender.DisposeAsync(token).AwaitNoThrow(this);
                 if (senders.Remove(sender))

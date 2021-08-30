@@ -119,7 +119,7 @@ namespace Iviz.Roslib
         /// <param name="message">The message to be published.</param>
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
-        public void Publish(T message)
+        public void Publish(in T message)
         {
             if (message == null)
             {

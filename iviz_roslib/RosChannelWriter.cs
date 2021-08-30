@@ -148,7 +148,7 @@ namespace Iviz.Roslib
         }
 
 
-        public void Write(T msg)
+        public void Write(in T msg)
         {
             Publisher.Publish(msg);
         }

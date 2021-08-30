@@ -133,7 +133,7 @@ namespace Iviz.Roslib
                         .Select(pair => pair.Value)
                         .ToArray();
 
-                    var deleteTasks = Enumerable.Select(toDelete, receiver => receiver.DisposeAsync(token));
+                    var deleteTasks = toDelete.Select(receiver => receiver.DisposeAsync(token));
                     await deleteTasks.WhenAll().AwaitNoThrow(this);
                 }
 
@@ -171,7 +171,7 @@ namespace Iviz.Roslib
             }
 
             TcpReceiverAsync<T>[] toDelete = connectionsByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
-            var tasks = Enumerable.Select(toDelete, receiver =>
+            var tasks = toDelete.Select(receiver =>
             {
                 connectionsByUri.TryRemove(receiver.RemoteUri, out _);
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, receiver.RemoteUri);
@@ -197,7 +197,7 @@ namespace Iviz.Roslib
                 connectionsByUri.Clear();
             }
 
-            await TaskExtensions.WhenAll(receivers.Select(receiver => receiver.DisposeAsync(token)));
+            await receivers.Select(receiver => receiver.DisposeAsync(token)).WhenAll();
             subscriber.RaiseNumPublishersChanged();
         }
 

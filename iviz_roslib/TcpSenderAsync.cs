@@ -364,23 +364,23 @@ namespace Iviz.Roslib
 
                 if (LoopbackReceiver != null)
                 {
-                    SendWithLoopback(queue, startIndex);
+                    SendWithLoopback(queue.Skip(startIndex));
                 }
                 else
                 {
-                    await SendWithSocketAsync(stream, queue, startIndex, writeBuffer);
+                    await SendWithSocketAsync(stream, queue.Skip(startIndex), writeBuffer);
                 }
             }
         }
 
-        void SendWithLoopback(IReadOnlyList<Element> queue, int startIndex)
+        void SendWithLoopback(in RangeEnumerable<Element> queue)
         {
             var loopbackReceiver = LoopbackReceiver ??
                                    throw new NullReferenceException("Can only use this when loopback receiver is set");
 
             try
             {
-                foreach (var (msg, msgLength, msgSignal) in queue.Skip(startIndex))
+                foreach (var (msg, msgLength, msgSignal) in queue)
                 {
                     loopbackReceiver.Post(msg, msgLength);
 
@@ -396,7 +396,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task SendWithSocketAsync(NetworkStream stream, IReadOnlyList<Element> queue, int startIndex,
+        async Task SendWithSocketAsync(NetworkStream stream, RangeEnumerable<Element> queue,
             ResizableRent<byte> writeBuffer)
         {
             void WriteLengthToBuffer(uint i)
@@ -410,7 +410,7 @@ namespace Iviz.Roslib
 
             try
             {
-                foreach (var (msg, msgLength, msgSignal) in queue.Skip(startIndex))
+                foreach (var (msg, msgLength, msgSignal) in queue)
                 {
                     writeBuffer.EnsureCapability(msgLength + 4);
 
