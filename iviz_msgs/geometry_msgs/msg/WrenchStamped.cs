@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class WrenchStamped : IDeserializable<WrenchStamped>, IMessage
     {
         // A wrench with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "wrench")] public Wrench Wrench { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "wrench")] public Wrench Wrench;
     
         /// <summary> Constructor for empty message. </summary>
         public WrenchStamped()

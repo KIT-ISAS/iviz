@@ -105,9 +105,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
     [DataContract]
     public sealed class SelfTestResponse : IResponse, IDeserializable<SelfTestResponse>
     {
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "passed")] public byte Passed { get; set; }
-        [DataMember (Name = "status")] public DiagnosticStatus[] Status { get; set; }
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "passed")] public byte Passed;
+        [DataMember (Name = "status")] public DiagnosticStatus[] Status;
     
         /// <summary> Constructor for empty message. </summary>
         public SelfTestResponse()

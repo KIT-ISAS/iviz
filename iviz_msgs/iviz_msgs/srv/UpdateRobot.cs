@@ -59,10 +59,10 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class UpdateRobotRequest : IRequest<UpdateRobot, UpdateRobotResponse>, IDeserializable<UpdateRobotRequest>
     {
-        [DataMember (Name = "operation")] public int Operation { get; set; }
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "configuration")] public IvizMsgs.RobotConfiguration Configuration { get; set; }
-        [DataMember (Name = "valid_fields")] public string[] ValidFields { get; set; }
+        [DataMember (Name = "operation")] public int Operation;
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "configuration")] public IvizMsgs.RobotConfiguration Configuration;
+        [DataMember (Name = "valid_fields")] public string[] ValidFields;
     
         /// <summary> Constructor for empty message. </summary>
         public UpdateRobotRequest()
@@ -145,8 +145,8 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class UpdateRobotResponse : IResponse, IDeserializable<UpdateRobotResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
     
         /// <summary> Constructor for empty message. </summary>
         public UpdateRobotResponse()

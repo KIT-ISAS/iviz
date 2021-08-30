@@ -14,19 +14,19 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte POINTS = 4;
         public const byte ADD = 0;
         public const byte REMOVE = 1;
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "ns")] public string Ns { get; set; } // namespace, used with id to form a unique id
-        [DataMember (Name = "id")] public int Id { get; set; } // unique id within the namespace
-        [DataMember (Name = "type")] public int Type { get; set; } // CIRCLE/LINE_STRIP/etc.
-        [DataMember (Name = "action")] public int Action { get; set; } // ADD/REMOVE
-        [DataMember (Name = "position")] public GeometryMsgs.Point Position { get; set; } // 2D, in pixel-coords
-        [DataMember (Name = "scale")] public float Scale { get; set; } // the diameter for a circle, etc.
-        [DataMember (Name = "outline_color")] public StdMsgs.ColorRGBA OutlineColor { get; set; }
-        [DataMember (Name = "filled")] public byte Filled { get; set; } // whether to fill in the shape with color
-        [DataMember (Name = "fill_color")] public StdMsgs.ColorRGBA FillColor { get; set; } // color [0.0-1.0]
-        [DataMember (Name = "lifetime")] public duration Lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
-        [DataMember (Name = "points")] public GeometryMsgs.Point[] Points { get; set; } // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
-        [DataMember (Name = "outline_colors")] public StdMsgs.ColorRGBA[] OutlineColors { get; set; } // a color for each line, point, etc.
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "ns")] public string Ns; // namespace, used with id to form a unique id
+        [DataMember (Name = "id")] public int Id; // unique id within the namespace
+        [DataMember (Name = "type")] public int Type; // CIRCLE/LINE_STRIP/etc.
+        [DataMember (Name = "action")] public int Action; // ADD/REMOVE
+        [DataMember (Name = "position")] public GeometryMsgs.Point Position; // 2D, in pixel-coords
+        [DataMember (Name = "scale")] public float Scale; // the diameter for a circle, etc.
+        [DataMember (Name = "outline_color")] public StdMsgs.ColorRGBA OutlineColor;
+        [DataMember (Name = "filled")] public byte Filled; // whether to fill in the shape with color
+        [DataMember (Name = "fill_color")] public StdMsgs.ColorRGBA FillColor; // color [0.0-1.0]
+        [DataMember (Name = "lifetime")] public duration Lifetime; // How long the object should last before being automatically deleted.  0 means forever
+        [DataMember (Name = "points")] public GeometryMsgs.Point[] Points; // used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
+        [DataMember (Name = "outline_colors")] public StdMsgs.ColorRGBA[] OutlineColors; // a color for each line, point, etc.
     
         /// <summary> Constructor for empty message. </summary>
         public ImageMarker()

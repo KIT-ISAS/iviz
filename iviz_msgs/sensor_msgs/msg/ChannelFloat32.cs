@@ -24,10 +24,10 @@ namespace Iviz.Msgs.SensorMsgs
         //   "distance"
         // The channel name should give semantics of the channel (e.g.
         // "intensity" instead of "value").
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
         // The values array should be 1-1 with the elements of the associated
         // PointCloud.
-        [DataMember (Name = "values")] public float[] Values { get; set; }
+        [DataMember (Name = "values")] public float[] Values;
     
         /// <summary> Constructor for empty message. </summary>
         public ChannelFloat32()

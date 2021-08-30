@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class TopicsForTypeRequest : IRequest<TopicsForType, TopicsForTypeResponse>, IDeserializable<TopicsForTypeRequest>
     {
-        [DataMember (Name = "type")] public string Type { get; set; }
+        [DataMember (Name = "type")] public string Type;
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class TopicsForTypeResponse : IResponse, IDeserializable<TopicsForTypeResponse>
     {
-        [DataMember (Name = "topics")] public string[] Topics { get; set; }
+        [DataMember (Name = "topics")] public string[] Topics;
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsForTypeResponse()

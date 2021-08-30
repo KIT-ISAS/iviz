@@ -7,8 +7,8 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Vector2i")]
     public sealed class Vector2i : IDeserializable<Vector2i>, IMessage
     {
-        [DataMember (Name = "x")] public int X { get; set; }
-        [DataMember (Name = "y")] public int Y { get; set; }
+        [DataMember (Name = "x")] public int X;
+        [DataMember (Name = "y")] public int Y;
     
         /// <summary> Constructor for empty message. </summary>
         public Vector2i()

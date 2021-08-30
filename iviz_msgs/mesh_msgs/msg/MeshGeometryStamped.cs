@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshGeometryStamped : IDeserializable<MeshGeometryStamped>, IMessage
     {
         // Mesh Geometry Message
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
-        [DataMember (Name = "mesh_geometry")] public MeshMsgs.MeshGeometry MeshGeometry { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "uuid")] public string Uuid;
+        [DataMember (Name = "mesh_geometry")] public MeshMsgs.MeshGeometry MeshGeometry;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometryStamped()

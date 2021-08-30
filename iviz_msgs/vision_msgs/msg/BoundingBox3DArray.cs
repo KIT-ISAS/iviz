@@ -7,8 +7,8 @@ namespace Iviz.Msgs.VisionMsgs
     [Preserve, DataContract (Name = "vision_msgs/BoundingBox3DArray")]
     public sealed class BoundingBox3DArray : IDeserializable<BoundingBox3DArray>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "boxes")] public VisionMsgs.BoundingBox3D[] Boxes { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "boxes")] public VisionMsgs.BoundingBox3D[] Boxes;
     
         /// <summary> Constructor for empty message. </summary>
         public BoundingBox3DArray()

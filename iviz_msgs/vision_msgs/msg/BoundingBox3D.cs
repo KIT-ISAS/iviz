@@ -11,10 +11,10 @@ namespace Iviz.Msgs.VisionMsgs
         // Dimensions of this box are in meters, and as such, it may be migrated to
         //   another package, such as geometry_msgs, in the future.
         // The 3D position and orientation of the bounding box center
-        [DataMember (Name = "center")] public GeometryMsgs.Pose Center { get; set; }
+        [DataMember (Name = "center")] public GeometryMsgs.Pose Center;
         // The size of the bounding box, in meters, surrounding the object's center
         //   pose.
-        [DataMember (Name = "size")] public GeometryMsgs.Vector3 Size { get; set; }
+        [DataMember (Name = "size")] public GeometryMsgs.Vector3 Size;
     
         /// <summary> Constructor for empty message. </summary>
         public BoundingBox3D()

@@ -8,10 +8,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Include : IDeserializable<Include>, IMessage
     {
         // Reference to an external asset
-        [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the asset
-        [DataMember (Name = "pose")] public Matrix4 Pose { get; set; } // Pose of the asset
-        [DataMember (Name = "material")] public Material Material { get; set; }
-        [DataMember (Name = "package")] public string Package { get; set; } // If uri has a model scheme, this indicates the package to search
+        [DataMember (Name = "uri")] public string Uri; // Uri of the asset
+        [DataMember (Name = "pose")] public Matrix4 Pose; // Pose of the asset
+        [DataMember (Name = "material")] public Material Material;
+        [DataMember (Name = "package")] public string Package; // If uri has a model scheme, this indicates the package to search
     
         /// <summary> Constructor for empty message. </summary>
         public Include()

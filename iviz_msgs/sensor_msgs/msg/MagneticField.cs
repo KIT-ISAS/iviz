@@ -14,15 +14,15 @@ namespace Iviz.Msgs.SensorMsgs
         // A covariance matrix of all zeros will be interpreted as "covariance unknown",
         // and to use the data a covariance will have to be assumed or gotten from some
         // other source
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // timestamp is the time the
         // field was measured
         // frame_id is the location and orientation
         // of the field measurement
-        [DataMember (Name = "magnetic_field")] public GeometryMsgs.Vector3 MagneticField_ { get; set; } // x, y, and z components of the
+        [DataMember (Name = "magnetic_field")] public GeometryMsgs.Vector3 MagneticField_; // x, y, and z components of the
         // field vector in Tesla
         // If your sensor does not output 3 axes,
         // put NaNs in the components not reported.
-        [DataMember (Name = "magnetic_field_covariance")] public double[/*9*/] MagneticFieldCovariance { get; set; } // Row major about x, y, z axes
+        [DataMember (Name = "magnetic_field_covariance")] public double[/*9*/] MagneticFieldCovariance; // Row major about x, y, z axes
         // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>

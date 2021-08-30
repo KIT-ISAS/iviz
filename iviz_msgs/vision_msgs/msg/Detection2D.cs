@@ -12,20 +12,20 @@ namespace Iviz.Msgs.VisionMsgs
         // This is similar to a 2D classification, but includes position information,
         //   allowing a classification result for a specific crop or image point to
         //   to be located in the larger image.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Class probabilities
-        [DataMember (Name = "results")] public ObjectHypothesisWithPose[] Results { get; set; }
+        [DataMember (Name = "results")] public ObjectHypothesisWithPose[] Results;
         // 2D bounding box surrounding the object.
-        [DataMember (Name = "bbox")] public BoundingBox2D Bbox { get; set; }
+        [DataMember (Name = "bbox")] public BoundingBox2D Bbox;
         // The 2D data that generated these results (i.e. region proposal cropped out of
         //   the image). Not required for all use cases, so it may be empty.
-        [DataMember (Name = "source_img")] public SensorMsgs.Image SourceImg { get; set; }
+        [DataMember (Name = "source_img")] public SensorMsgs.Image SourceImg;
         // If true, this message contains object tracking information.
-        [DataMember (Name = "is_tracking")] public bool IsTracking { get; set; }
+        [DataMember (Name = "is_tracking")] public bool IsTracking;
         // ID used for consistency across multiple detection messages. This value will
         //   likely differ from the id field set in each individual ObjectHypothesis.
         // If you set this field, be sure to also set is_tracking to True.
-        [DataMember (Name = "tracking_id")] public string TrackingId { get; set; }
+        [DataMember (Name = "tracking_id")] public string TrackingId;
     
         /// <summary> Constructor for empty message. </summary>
         public Detection2D()

@@ -8,30 +8,30 @@ namespace Iviz.Msgs.RosgraphMsgs
     public sealed class TopicStatistics : IDeserializable<TopicStatistics>, IMessage
     {
         // name of the topic
-        [DataMember (Name = "topic")] public string Topic { get; set; }
+        [DataMember (Name = "topic")] public string Topic;
         // node id of the publisher
-        [DataMember (Name = "node_pub")] public string NodePub { get; set; }
+        [DataMember (Name = "node_pub")] public string NodePub;
         // node id of the subscriber
-        [DataMember (Name = "node_sub")] public string NodeSub { get; set; }
+        [DataMember (Name = "node_sub")] public string NodeSub;
         // the statistics apply to this time window
-        [DataMember (Name = "window_start")] public time WindowStart { get; set; }
-        [DataMember (Name = "window_stop")] public time WindowStop { get; set; }
+        [DataMember (Name = "window_start")] public time WindowStart;
+        [DataMember (Name = "window_stop")] public time WindowStop;
         // number of messages delivered during the window
-        [DataMember (Name = "delivered_msgs")] public int DeliveredMsgs { get; set; }
+        [DataMember (Name = "delivered_msgs")] public int DeliveredMsgs;
         // numbers of messages dropped during the window
-        [DataMember (Name = "dropped_msgs")] public int DroppedMsgs { get; set; }
+        [DataMember (Name = "dropped_msgs")] public int DroppedMsgs;
         // traffic during the window, in bytes
-        [DataMember (Name = "traffic")] public int Traffic { get; set; }
+        [DataMember (Name = "traffic")] public int Traffic;
         // mean/stddev/max period between two messages
-        [DataMember (Name = "period_mean")] public duration PeriodMean { get; set; }
-        [DataMember (Name = "period_stddev")] public duration PeriodStddev { get; set; }
-        [DataMember (Name = "period_max")] public duration PeriodMax { get; set; }
+        [DataMember (Name = "period_mean")] public duration PeriodMean;
+        [DataMember (Name = "period_stddev")] public duration PeriodStddev;
+        [DataMember (Name = "period_max")] public duration PeriodMax;
         // mean/stddev/max age of the message based on the
         // timestamp in the message header. In case the
         // message does not have a header, it will be 0.
-        [DataMember (Name = "stamp_age_mean")] public duration StampAgeMean { get; set; }
-        [DataMember (Name = "stamp_age_stddev")] public duration StampAgeStddev { get; set; }
-        [DataMember (Name = "stamp_age_max")] public duration StampAgeMax { get; set; }
+        [DataMember (Name = "stamp_age_mean")] public duration StampAgeMean;
+        [DataMember (Name = "stamp_age_stddev")] public duration StampAgeStddev;
+        [DataMember (Name = "stamp_age_max")] public duration StampAgeMax;
     
         /// <summary> Constructor for empty message. </summary>
         public TopicStatistics()

@@ -8,10 +8,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshMaterials : IDeserializable<MeshMaterials>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters { get; set; }
-        [DataMember (Name = "materials")] public MeshMsgs.MeshMaterial[] Materials { get; set; }
-        [DataMember (Name = "cluster_materials")] public uint[] ClusterMaterials { get; set; }
-        [DataMember (Name = "vertex_tex_coords")] public MeshMsgs.MeshVertexTexCoords[] VertexTexCoords { get; set; }
+        [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
+        [DataMember (Name = "materials")] public MeshMsgs.MeshMaterial[] Materials;
+        [DataMember (Name = "cluster_materials")] public uint[] ClusterMaterials;
+        [DataMember (Name = "vertex_tex_coords")] public MeshMsgs.MeshVertexTexCoords[] VertexTexCoords;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterials()

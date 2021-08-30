@@ -7,11 +7,11 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/Group")]
     public sealed class Group : IDeserializable<Group>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "type")] public string Type { get; set; }
-        [DataMember (Name = "parameters")] public ParamDescription[] Parameters { get; set; }
-        [DataMember (Name = "parent")] public int Parent { get; set; }
-        [DataMember (Name = "id")] public int Id { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "type")] public string Type;
+        [DataMember (Name = "parameters")] public ParamDescription[] Parameters;
+        [DataMember (Name = "parent")] public int Parent;
+        [DataMember (Name = "id")] public int Id;
     
         /// <summary> Constructor for empty message. </summary>
         public Group()

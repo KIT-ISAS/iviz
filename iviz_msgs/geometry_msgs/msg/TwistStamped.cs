@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class TwistStamped : IDeserializable<TwistStamped>, IMessage
     {
         // A twist with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "twist")] public Twist Twist { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "twist")] public Twist Twist;
     
         /// <summary> Constructor for empty message. </summary>
         public TwistStamped()

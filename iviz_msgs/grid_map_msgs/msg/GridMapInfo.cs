@@ -8,15 +8,15 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GridMapInfo : IDeserializable<GridMapInfo>, IMessage
     {
         // Header (time and frame)
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Resolution of the grid [m/cell].
-        [DataMember (Name = "resolution")] public double Resolution { get; set; }
+        [DataMember (Name = "resolution")] public double Resolution;
         // Length in x-direction [m].
-        [DataMember (Name = "length_x")] public double LengthX { get; set; }
+        [DataMember (Name = "length_x")] public double LengthX;
         // Length in y-direction [m].
-        [DataMember (Name = "length_y")] public double LengthY { get; set; }
+        [DataMember (Name = "length_y")] public double LengthY;
         // Pose of the grid map center in the frame defined in `header` [m].
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
     
         /// <summary> Constructor for empty message. </summary>
         public GridMapInfo()

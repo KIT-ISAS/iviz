@@ -8,10 +8,10 @@ namespace Iviz.Msgs.VisionMsgs
     public sealed class Detection2DArray : IDeserializable<Detection2DArray>, IMessage
     {
         // A list of 2D detections, for a multi-object 2D detector.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // A list of the detected proposals. A multi-proposal detector might generate
         //   this list with many candidate detections generated from a single input.
-        [DataMember (Name = "detections")] public Detection2D[] Detections { get; set; }
+        [DataMember (Name = "detections")] public Detection2D[] Detections;
     
         /// <summary> Constructor for empty message. </summary>
         public Detection2DArray()

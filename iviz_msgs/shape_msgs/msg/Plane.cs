@@ -12,7 +12,7 @@ namespace Iviz.Msgs.ShapeMsgs
         // b := coef[1]
         // c := coef[2]
         // d := coef[3]
-        [DataMember (Name = "coef")] public double[/*4*/] Coef { get; set; }
+        [DataMember (Name = "coef")] public double[/*4*/] Coef;
     
         /// <summary> Constructor for empty message. </summary>
         public Plane()

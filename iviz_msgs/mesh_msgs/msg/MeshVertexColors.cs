@@ -8,7 +8,7 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshVertexColors : IDeserializable<MeshVertexColors>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors { get; set; }
+        [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexColors()

@@ -9,17 +9,17 @@ namespace Iviz.Msgs.IvizMsgs
     {
         public const byte BLEND_DEFAULT = 0;
         public const byte BLEND_ADDITIVE = 1;
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "ambient")] public Color32 Ambient { get; set; }
-        [DataMember (Name = "diffuse")] public Color32 Diffuse { get; set; }
-        [DataMember (Name = "emissive")] public Color32 Emissive { get; set; }
-        [DataMember (Name = "opacity")] public float Opacity { get; set; }
-        [DataMember (Name = "bump_scaling")] public float BumpScaling { get; set; }
-        [DataMember (Name = "shininess")] public float Shininess { get; set; }
-        [DataMember (Name = "shininess_strength")] public float ShininessStrength { get; set; }
-        [DataMember (Name = "reflectivity")] public float Reflectivity { get; set; }
-        [DataMember (Name = "blend_mode")] public byte BlendMode { get; set; }
-        [DataMember (Name = "textures")] public Texture[] Textures { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "ambient")] public Color32 Ambient;
+        [DataMember (Name = "diffuse")] public Color32 Diffuse;
+        [DataMember (Name = "emissive")] public Color32 Emissive;
+        [DataMember (Name = "opacity")] public float Opacity;
+        [DataMember (Name = "bump_scaling")] public float BumpScaling;
+        [DataMember (Name = "shininess")] public float Shininess;
+        [DataMember (Name = "shininess_strength")] public float ShininessStrength;
+        [DataMember (Name = "reflectivity")] public float Reflectivity;
+        [DataMember (Name = "blend_mode")] public byte BlendMode;
+        [DataMember (Name = "textures")] public Texture[] Textures;
     
         /// <summary> Constructor for empty message. </summary>
         public Material()

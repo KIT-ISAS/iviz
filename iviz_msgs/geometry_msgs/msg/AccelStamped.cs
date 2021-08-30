@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class AccelStamped : IDeserializable<AccelStamped>, IMessage
     {
         // An accel with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "accel")] public Accel Accel { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "accel")] public Accel Accel;
     
         /// <summary> Constructor for empty message. </summary>
         public AccelStamped()

@@ -7,23 +7,23 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Dialog")]
     public sealed class Dialog : IDeserializable<Dialog>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "action")] public byte Action { get; set; }
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "lifetime")] public duration Lifetime { get; set; }
-        [DataMember (Name = "scale")] public double Scale { get; set; }
-        [DataMember (Name = "type")] public byte Type { get; set; }
-        [DataMember (Name = "buttons")] public byte Buttons { get; set; }
-        [DataMember (Name = "icon")] public byte Icon { get; set; }
-        [DataMember (Name = "background_color")] public StdMsgs.ColorRGBA BackgroundColor { get; set; }
-        [DataMember (Name = "title")] public string Title { get; set; }
-        [DataMember (Name = "caption")] public string Caption { get; set; }
-        [DataMember (Name = "caption_alignment")] public ushort CaptionAlignment { get; set; }
-        [DataMember (Name = "menu_entries")] public string[] MenuEntries { get; set; }
-        [DataMember (Name = "binding_type")] public byte BindingType { get; set; }
-        [DataMember (Name = "tf_offset")] public GeometryMsgs.Vector3 TfOffset { get; set; }
-        [DataMember (Name = "dialog_displacement")] public GeometryMsgs.Vector3 DialogDisplacement { get; set; }
-        [DataMember (Name = "tf_displacement")] public GeometryMsgs.Vector3 TfDisplacement { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "action")] public byte Action;
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "lifetime")] public duration Lifetime;
+        [DataMember (Name = "scale")] public double Scale;
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "buttons")] public byte Buttons;
+        [DataMember (Name = "icon")] public byte Icon;
+        [DataMember (Name = "background_color")] public StdMsgs.ColorRGBA BackgroundColor;
+        [DataMember (Name = "title")] public string Title;
+        [DataMember (Name = "caption")] public string Caption;
+        [DataMember (Name = "caption_alignment")] public ushort CaptionAlignment;
+        [DataMember (Name = "menu_entries")] public string[] MenuEntries;
+        [DataMember (Name = "binding_type")] public byte BindingType;
+        [DataMember (Name = "tf_offset")] public GeometryMsgs.Vector3 TfOffset;
+        [DataMember (Name = "dialog_displacement")] public GeometryMsgs.Vector3 DialogDisplacement;
+        [DataMember (Name = "tf_displacement")] public GeometryMsgs.Vector3 TfDisplacement;
     
         /// <summary> Constructor for empty message. </summary>
         public Dialog()

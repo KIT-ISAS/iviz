@@ -106,7 +106,7 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GetGridMapInfoResponse : IResponse, IDeserializable<GetGridMapInfoResponse>
     {
         // Grid map info
-        [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info { get; set; }
+        [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info;
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapInfoResponse()

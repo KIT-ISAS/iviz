@@ -7,8 +7,8 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/MeshFeatures")]
     public sealed class MeshFeatures : IDeserializable<MeshFeatures>, IMessage
     {
-        [DataMember (Name = "map_uuid")] public string MapUuid { get; set; }
-        [DataMember (Name = "features")] public MeshMsgs.Feature[] Features { get; set; }
+        [DataMember (Name = "map_uuid")] public string MapUuid;
+        [DataMember (Name = "features")] public MeshMsgs.Feature[] Features;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFeatures()

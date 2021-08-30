@@ -8,16 +8,16 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessage
     {
         //# Definition of a triangle mesh
-        [DataMember (Name = "triangles")] public TriangleIndices[] Triangles { get; set; } // list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
-        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; } // the actual vertices that make up the mesh
+        [DataMember (Name = "triangles")] public TriangleIndices[] Triangles; // list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices; // the actual vertices that make up the mesh
         //optional:
-        [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals { get; set; }
-        [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors { get; set; }
-        [DataMember (Name = "triangle_colors")] public StdMsgs.ColorRGBA[] TriangleColors { get; set; }
-        [DataMember (Name = "vertex_texture_coords")] public GeometryMsgs.Point[] VertexTextureCoords { get; set; }
-        [DataMember (Name = "face_materials")] public MeshMsgs.MeshMaterial[] FaceMaterials { get; set; }
-        [DataMember (Name = "textures")] public SensorMsgs.Image[] Textures { get; set; }
-        [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters { get; set; }
+        [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;
+        [DataMember (Name = "vertex_colors")] public StdMsgs.ColorRGBA[] VertexColors;
+        [DataMember (Name = "triangle_colors")] public StdMsgs.ColorRGBA[] TriangleColors;
+        [DataMember (Name = "vertex_texture_coords")] public GeometryMsgs.Point[] VertexTextureCoords;
+        [DataMember (Name = "face_materials")] public MeshMsgs.MeshMaterial[] FaceMaterials;
+        [DataMember (Name = "textures")] public SensorMsgs.Image[] Textures;
+        [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMesh()

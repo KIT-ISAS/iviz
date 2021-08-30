@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [Preserve, DataContract (Name = "rosbridge_library/TestHeaderArray")]
     public sealed class TestHeaderArray : IDeserializable<TestHeaderArray>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header[] Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header[] Header;
     
         /// <summary> Constructor for empty message. </summary>
         public TestHeaderArray()

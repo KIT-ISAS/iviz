@@ -7,10 +7,10 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/ConfigDescription")]
     public sealed class ConfigDescription : IDeserializable<ConfigDescription>, IMessage
     {
-        [DataMember (Name = "groups")] public Group[] Groups { get; set; }
-        [DataMember (Name = "max")] public Config Max { get; set; }
-        [DataMember (Name = "min")] public Config Min { get; set; }
-        [DataMember (Name = "dflt")] public Config Dflt { get; set; }
+        [DataMember (Name = "groups")] public Group[] Groups;
+        [DataMember (Name = "max")] public Config Max;
+        [DataMember (Name = "min")] public Config Min;
+        [DataMember (Name = "dflt")] public Config Dflt;
     
         /// <summary> Constructor for empty message. </summary>
         public ConfigDescription()

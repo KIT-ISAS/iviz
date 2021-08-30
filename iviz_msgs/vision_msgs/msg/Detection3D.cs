@@ -12,22 +12,22 @@ namespace Iviz.Msgs.VisionMsgs
         // This extends a basic 3D classification by including position information,
         //   allowing a classification result for a specific position in an image to
         //   to be located in the larger image.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Class probabilities. Does not have to include hypotheses for all possible
         //   object ids, the scores for any ids not listed are assumed to be 0.
-        [DataMember (Name = "results")] public ObjectHypothesisWithPose[] Results { get; set; }
+        [DataMember (Name = "results")] public ObjectHypothesisWithPose[] Results;
         // 3D bounding box surrounding the object.
-        [DataMember (Name = "bbox")] public BoundingBox3D Bbox { get; set; }
+        [DataMember (Name = "bbox")] public BoundingBox3D Bbox;
         // The 3D data that generated these results (i.e. region proposal cropped out of
         //   the image). This information is not required for all detectors, so it may
         //   be empty.
-        [DataMember (Name = "source_cloud")] public SensorMsgs.PointCloud2 SourceCloud { get; set; }
+        [DataMember (Name = "source_cloud")] public SensorMsgs.PointCloud2 SourceCloud;
         // If this message was tracking result, this field set true.
-        [DataMember (Name = "is_tracking")] public bool IsTracking { get; set; }
+        [DataMember (Name = "is_tracking")] public bool IsTracking;
         // ID used for consistency across multiple detection messages. This value will
         //   likely differ from the id field set in each individual ObjectHypothesis.
         // If you set this field, be sure to also set is_tracking to True.
-        [DataMember (Name = "tracking_id")] public string TrackingId { get; set; }
+        [DataMember (Name = "tracking_id")] public string TrackingId;
     
         /// <summary> Constructor for empty message. </summary>
         public Detection3D()

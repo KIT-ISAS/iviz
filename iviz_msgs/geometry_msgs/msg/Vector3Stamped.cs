@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class Vector3Stamped : IDeserializable<Vector3Stamped>, IMessage
     {
         // This represents a Vector3 with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "vector")] public Vector3 Vector { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "vector")] public Vector3 Vector;
     
         /// <summary> Constructor for empty message. </summary>
         public Vector3Stamped()

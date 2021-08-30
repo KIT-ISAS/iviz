@@ -9,8 +9,8 @@ namespace Iviz.Msgs.StdMsgs
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
-        [DataMember (Name = "layout")] public MultiArrayLayout Layout { get; set; } // specification of data layout
-        [DataMember (Name = "data")] public ushort[] Data { get; set; } // array of data
+        [DataMember (Name = "layout")] public MultiArrayLayout Layout; // specification of data layout
+        [DataMember (Name = "data")] public ushort[] Data; // array of data
     
         /// <summary> Constructor for empty message. </summary>
         public UInt16MultiArray()

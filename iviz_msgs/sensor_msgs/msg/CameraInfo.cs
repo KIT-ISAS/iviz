@@ -34,7 +34,7 @@ namespace Iviz.Msgs.SensorMsgs
         //                     Image acquisition info                          #
         //######################################################################
         // Time of image acquisition, camera coordinate frame ID
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -55,15 +55,15 @@ namespace Iviz.Msgs.SensorMsgs
         //######################################################################
         // The image dimensions with which the camera was calibrated. Normally
         // this will be the full camera resolution in pixels.
-        [DataMember (Name = "height")] public uint Height { get; set; }
-        [DataMember (Name = "width")] public uint Width { get; set; }
+        [DataMember (Name = "height")] public uint Height;
+        [DataMember (Name = "width")] public uint Width;
         // The distortion model used. Supported models are listed in
         // sensor_msgs/distortion_models.h. For most cameras, "plumb_bob" - a
         // simple model of radial and tangential distortion - is sufficient.
-        [DataMember (Name = "distortion_model")] public string DistortionModel { get; set; }
+        [DataMember (Name = "distortion_model")] public string DistortionModel;
         // The distortion parameters, size depending on the distortion model.
         // For "plumb_bob", the 5 parameters are: (k1, k2, t1, t2, k3).
-        [DataMember] public double[] D { get; set; }
+        [DataMember] public double[] D;
         // Intrinsic camera matrix for the raw (distorted) images.
         //     [fx  0 cx]
         // K = [ 0 fy cy]
@@ -71,12 +71,12 @@ namespace Iviz.Msgs.SensorMsgs
         // Projects 3D points in the camera coordinate frame to 2D pixel
         // coordinates using the focal lengths (fx, fy) and principal point
         // (cx, cy).
-        [DataMember] public double[/*9*/] K { get; set; } // 3x3 row-major matrix
+        [DataMember] public double[/*9*/] K; // 3x3 row-major matrix
         // Rectification matrix (stereo cameras only)
         // A rotation matrix aligning the camera coordinate system to the ideal
         // stereo image plane so that epipolar lines in both stereo images are
         // parallel.
-        [DataMember] public double[/*9*/] R { get; set; } // 3x3 row-major matrix
+        [DataMember] public double[/*9*/] R; // 3x3 row-major matrix
         // Projection/camera matrix
         //     [fx'  0  cx' Tx]
         // P = [ 0  fy' cy' Ty]
@@ -101,7 +101,7 @@ namespace Iviz.Msgs.SensorMsgs
         //         x = u / w
         //         y = v / w
         //  This holds for both images of a stereo pair.
-        [DataMember] public double[/*12*/] P { get; set; } // 3x4 row-major matrix
+        [DataMember] public double[/*12*/] P; // 3x4 row-major matrix
         //######################################################################
         //                      Operational Parameters                         #
         //######################################################################
@@ -115,15 +115,15 @@ namespace Iviz.Msgs.SensorMsgs
         //  (width / binning_x) x (height / binning_y).
         // The default values binning_x = binning_y = 0 is considered the same
         //  as binning_x = binning_y = 1 (no subsampling).
-        [DataMember (Name = "binning_x")] public uint BinningX { get; set; }
-        [DataMember (Name = "binning_y")] public uint BinningY { get; set; }
+        [DataMember (Name = "binning_x")] public uint BinningX;
+        [DataMember (Name = "binning_y")] public uint BinningY;
         // Region of interest (subwindow of full camera resolution), given in
         //  full resolution (unbinned) image coordinates. A particular ROI
         //  always denotes the same window of pixels on the camera sensor,
         //  regardless of binning settings.
         // The default setting of roi (all values 0) is considered the same as
         //  full resolution (roi.width = width, roi.height = height).
-        [DataMember (Name = "roi")] public RegionOfInterest Roi { get; set; }
+        [DataMember (Name = "roi")] public RegionOfInterest Roi;
     
         /// <summary> Constructor for empty message. </summary>
         public CameraInfo()

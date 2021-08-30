@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/UInt64")]
     public sealed class UInt64 : IDeserializable<UInt64>, IMessage
     {
-        [DataMember (Name = "data")] public ulong Data { get; set; }
+        [DataMember (Name = "data")] public ulong Data;
     
         /// <summary> Constructor for empty message. </summary>
         public UInt64()

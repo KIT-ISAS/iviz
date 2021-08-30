@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetSdfRequest : IRequest<GetSdf, GetSdfResponse>, IDeserializable<GetSdfRequest>
     {
         // Retrieves a scene, which can contain one or multiple 3D models and lights
-        [DataMember (Name = "uri")] public string Uri { get; set; } // Uri of the file. Example: package://some_package/file.world
+        [DataMember (Name = "uri")] public string Uri; // Uri of the file. Example: package://some_package/file.world
     
         /// <summary> Constructor for empty message. </summary>
         public GetSdfRequest()
@@ -119,9 +119,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetSdfResponse : IResponse, IDeserializable<GetSdfResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
-        [DataMember (Name = "scene")] public Scene Scene { get; set; } // The scene
-        [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
+        [DataMember (Name = "success")] public bool Success; // Whether the retrieval succeeded
+        [DataMember (Name = "scene")] public Scene Scene; // The scene
+        [DataMember (Name = "message")] public string Message; // An error message if success is false
     
         /// <summary> Constructor for empty message. </summary>
         public GetSdfResponse()

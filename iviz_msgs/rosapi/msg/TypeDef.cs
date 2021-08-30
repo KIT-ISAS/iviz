@@ -7,13 +7,13 @@ namespace Iviz.Msgs.Rosapi
     [Preserve, DataContract (Name = "rosapi/TypeDef")]
     public sealed class TypeDef : IDeserializable<TypeDef>, IMessage
     {
-        [DataMember (Name = "type")] public string Type { get; set; }
-        [DataMember (Name = "fieldnames")] public string[] Fieldnames { get; set; }
-        [DataMember (Name = "fieldtypes")] public string[] Fieldtypes { get; set; }
-        [DataMember (Name = "fieldarraylen")] public int[] Fieldarraylen { get; set; }
-        [DataMember (Name = "examples")] public string[] Examples { get; set; }
-        [DataMember (Name = "constnames")] public string[] Constnames { get; set; }
-        [DataMember (Name = "constvalues")] public string[] Constvalues { get; set; }
+        [DataMember (Name = "type")] public string Type;
+        [DataMember (Name = "fieldnames")] public string[] Fieldnames;
+        [DataMember (Name = "fieldtypes")] public string[] Fieldtypes;
+        [DataMember (Name = "fieldarraylen")] public int[] Fieldarraylen;
+        [DataMember (Name = "examples")] public string[] Examples;
+        [DataMember (Name = "constnames")] public string[] Constnames;
+        [DataMember (Name = "constvalues")] public string[] Constvalues;
     
         /// <summary> Constructor for empty message. </summary>
         public TypeDef()

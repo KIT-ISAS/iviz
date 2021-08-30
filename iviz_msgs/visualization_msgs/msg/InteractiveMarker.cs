@@ -13,20 +13,20 @@ namespace Iviz.Msgs.VisualizationMsgs
         // in the same frame.
         // Otherwise, you might receive feedback in a different frame.
         // For rviz, this will be the current 'fixed frame' set by the user.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Initial pose. Also, defines the pivot point for rotations.
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
         // Short description (< 40 characters).
-        [DataMember (Name = "description")] public string Description { get; set; }
+        [DataMember (Name = "description")] public string Description;
         // Scale to be used for default controls (default=1).
-        [DataMember (Name = "scale")] public float Scale { get; set; }
+        [DataMember (Name = "scale")] public float Scale;
         // All menu and submenu entries associated with this marker.
-        [DataMember (Name = "menu_entries")] public MenuEntry[] MenuEntries { get; set; }
+        [DataMember (Name = "menu_entries")] public MenuEntry[] MenuEntries;
         // List of controls displayed for this marker.
-        [DataMember (Name = "controls")] public InteractiveMarkerControl[] Controls { get; set; }
+        [DataMember (Name = "controls")] public InteractiveMarkerControl[] Controls;
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarker()

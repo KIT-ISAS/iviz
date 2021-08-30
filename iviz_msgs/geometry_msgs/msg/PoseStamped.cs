@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class PoseStamped : IDeserializable<PoseStamped>, IMessage
     {
         // A Pose with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "pose")] public Pose Pose { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "pose")] public Pose Pose;
     
         /// <summary> Constructor for empty message. </summary>
         public PoseStamped()

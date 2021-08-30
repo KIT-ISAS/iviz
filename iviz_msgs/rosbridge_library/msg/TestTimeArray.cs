@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [Preserve, DataContract (Name = "rosbridge_library/TestTimeArray")]
     public sealed class TestTimeArray : IDeserializable<TestTimeArray>, IMessage
     {
-        [DataMember (Name = "times")] public time[] Times { get; set; }
+        [DataMember (Name = "times")] public time[] Times;
     
         /// <summary> Constructor for empty message. </summary>
         public TestTimeArray()

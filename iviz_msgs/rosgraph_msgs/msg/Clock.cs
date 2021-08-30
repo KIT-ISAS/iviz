@@ -10,7 +10,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         // roslib/Clock is used for publishing simulated time in ROS. 
         // This message simply communicates the current time.
         // For more information, see http://www.ros.org/wiki/Clock
-        [DataMember (Name = "clock")] public time Clock_ { get; set; }
+        [DataMember (Name = "clock")] public time Clock_;
     
         /// <summary> Constructor for empty message. </summary>
         public Clock()

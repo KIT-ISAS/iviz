@@ -7,10 +7,10 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Node")]
     public sealed class Node : IDeserializable<Node>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "parent")] public int Parent { get; set; }
-        [DataMember (Name = "transform")] public Matrix4 Transform { get; set; }
-        [DataMember (Name = "meshes")] public int[] Meshes { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "parent")] public int Parent;
+        [DataMember (Name = "transform")] public Matrix4 Transform;
+        [DataMember (Name = "meshes")] public int[] Meshes;
     
         /// <summary> Constructor for empty message. </summary>
         public Node()

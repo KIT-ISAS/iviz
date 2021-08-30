@@ -8,10 +8,10 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class Temperature : IDeserializable<Temperature>, IMessage
     {
         // Single temperature reading.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp is the time the temperature was measured
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // timestamp is the time the temperature was measured
         // frame_id is the location of the temperature reading
-        [DataMember (Name = "temperature")] public double Temperature_ { get; set; } // Measurement of the Temperature in Degrees Celsius
-        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "temperature")] public double Temperature_; // Measurement of the Temperature in Degrees Celsius
+        [DataMember (Name = "variance")] public double Variance; // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public Temperature()

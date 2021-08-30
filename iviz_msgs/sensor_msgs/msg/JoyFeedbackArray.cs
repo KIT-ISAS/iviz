@@ -8,7 +8,7 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IMessage
     {
         // This message publishes values for multiple feedback at once. 
-        [DataMember (Name = "array")] public JoyFeedback[] Array { get; set; }
+        [DataMember (Name = "array")] public JoyFeedback[] Array;
     
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedbackArray()

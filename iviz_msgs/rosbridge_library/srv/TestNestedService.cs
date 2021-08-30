@@ -60,7 +60,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestNestedServiceRequest : IRequest<TestNestedService, TestNestedServiceResponse>, IDeserializable<TestNestedServiceRequest>
     {
         //request definition
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceRequest()
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestNestedServiceResponse : IResponse, IDeserializable<TestNestedServiceResponse>
     {
         //response definition
-        [DataMember (Name = "data")] public StdMsgs.Float64 Data { get; set; }
+        [DataMember (Name = "data")] public StdMsgs.Float64 Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestNestedServiceResponse()

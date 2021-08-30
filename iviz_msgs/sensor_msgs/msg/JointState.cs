@@ -25,11 +25,11 @@ namespace Iviz.Msgs.SensorMsgs
         // All arrays in this message should have the same size, or be empty.
         // This is the only way to uniquely associate the joint name with the correct
         // states.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "name")] public string[] Name { get; set; }
-        [DataMember (Name = "position")] public double[] Position { get; set; }
-        [DataMember (Name = "velocity")] public double[] Velocity { get; set; }
-        [DataMember (Name = "effort")] public double[] Effort { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "name")] public string[] Name;
+        [DataMember (Name = "position")] public double[] Position;
+        [DataMember (Name = "velocity")] public double[] Velocity;
+        [DataMember (Name = "effort")] public double[] Effort;
     
         /// <summary> Constructor for empty message. </summary>
         public JointState()

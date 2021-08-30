@@ -13,17 +13,17 @@ namespace Iviz.Msgs.SensorMsgs
         // taken, the height and width fields should either match the height and
         // width fields for the associated image; or height = width = 0
         // indicates that the full resolution image was captured.
-        [DataMember (Name = "x_offset")] public uint XOffset { get; set; } // Leftmost pixel of the ROI
+        [DataMember (Name = "x_offset")] public uint XOffset; // Leftmost pixel of the ROI
         // (0 if the ROI includes the left edge of the image)
-        [DataMember (Name = "y_offset")] public uint YOffset { get; set; } // Topmost pixel of the ROI
+        [DataMember (Name = "y_offset")] public uint YOffset; // Topmost pixel of the ROI
         // (0 if the ROI includes the top edge of the image)
-        [DataMember (Name = "height")] public uint Height { get; set; } // Height of ROI
-        [DataMember (Name = "width")] public uint Width { get; set; } // Width of ROI
+        [DataMember (Name = "height")] public uint Height; // Height of ROI
+        [DataMember (Name = "width")] public uint Width; // Width of ROI
         // True if a distinct rectified ROI should be calculated from the "raw"
         // ROI in this message. Typically this should be False if the full image
         // is captured (ROI not used), and True if a subwindow is captured (ROI
         // used).
-        [DataMember (Name = "do_rectify")] public bool DoRectify { get; set; }
+        [DataMember (Name = "do_rectify")] public bool DoRectify;
     
         /// <summary> Constructor for empty message. </summary>
         public RegionOfInterest()

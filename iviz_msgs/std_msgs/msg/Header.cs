@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         // time-handling sugar is provided by the client library
         [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
-        [DataMember (Name = "frame_id")] public string? FrameId;
+        [DataMember (Name = "frame_id")] public string FrameId;
     
         /// <summary> Explicit constructor. </summary>
         public Header(uint Seq, time Stamp, string FrameId)

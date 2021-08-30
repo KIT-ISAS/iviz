@@ -7,9 +7,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
     [Preserve, DataContract (Name = "trajectory_msgs/JointTrajectory")]
     public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
-        [DataMember (Name = "points")] public JointTrajectoryPoint[] Points { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "joint_names")] public string[] JointNames;
+        [DataMember (Name = "points")] public JointTrajectoryPoint[] Points;
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectory()

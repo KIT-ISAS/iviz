@@ -59,10 +59,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class TestMultipleRequestFieldsRequest : IRequest<TestMultipleRequestFields, TestMultipleRequestFieldsResponse>, IDeserializable<TestMultipleRequestFieldsRequest>
     {
-        [DataMember (Name = "int")] public int @int { get; set; }
-        [DataMember (Name = "float")] public float @float { get; set; }
-        [DataMember (Name = "string")] public string @string { get; set; }
-        [DataMember (Name = "bool")] public bool @bool { get; set; }
+        [DataMember (Name = "int")] public int @int;
+        [DataMember (Name = "float")] public float @float;
+        [DataMember (Name = "string")] public string @string;
+        [DataMember (Name = "bool")] public bool @bool;
     
         /// <summary> Constructor for empty message. </summary>
         public TestMultipleRequestFieldsRequest()

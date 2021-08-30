@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class PolygonStamped : IDeserializable<PolygonStamped>, IMessage
     {
         // This represents a Polygon with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "polygon")] public Polygon Polygon { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "polygon")] public Polygon Polygon;
     
         /// <summary> Constructor for empty message. </summary>
         public PolygonStamped()

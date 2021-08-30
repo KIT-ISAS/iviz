@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class DeleteParamRequest : IRequest<DeleteParam, DeleteParamResponse>, IDeserializable<DeleteParamRequest>
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
     
         /// <summary> Constructor for empty message. </summary>
         public DeleteParamRequest()

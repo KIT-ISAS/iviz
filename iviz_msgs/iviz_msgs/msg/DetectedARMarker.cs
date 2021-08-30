@@ -9,15 +9,15 @@ namespace Iviz.Msgs.IvizMsgs
     {
         public const byte TYPE_ARUCO = 0;
         public const byte TYPE_QRCODE = 1;
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "type")] public byte Type { get; set; }
-        [DataMember (Name = "code")] public string Code { get; set; }
-        [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners { get; set; } // pixel position with z = 0
-        [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic { get; set; } // row major intrinsic
-        [DataMember (Name = "camera_pose")] public GeometryMsgs.Pose CameraPose { get; set; }
-        [DataMember (Name = "has_extrinsic_pose")] public bool HasExtrinsicPose { get; set; }
-        [DataMember (Name = "marker_size")] public double MarkerSize { get; set; } // size in mm
-        [DataMember (Name = "pose_relative_to_camera")] public GeometryMsgs.Pose PoseRelativeToCamera { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "code")] public string Code;
+        [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners; // pixel position with z = 0
+        [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic; // row major intrinsic
+        [DataMember (Name = "camera_pose")] public GeometryMsgs.Pose CameraPose;
+        [DataMember (Name = "has_extrinsic_pose")] public bool HasExtrinsicPose;
+        [DataMember (Name = "marker_size_in_mm")] public double MarkerSizeInMm;
+        [DataMember (Name = "pose_relative_to_camera")] public GeometryMsgs.Pose PoseRelativeToCamera;
     
         /// <summary> Constructor for empty message. </summary>
         public DetectedARMarker()
@@ -28,7 +28,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Explicit constructor. </summary>
-        public DetectedARMarker(in StdMsgs.Header Header, byte Type, string Code, GeometryMsgs.Vector3[] Corners, double[] CameraIntrinsic, in GeometryMsgs.Pose CameraPose, bool HasExtrinsicPose, double MarkerSize, in GeometryMsgs.Pose PoseRelativeToCamera)
+        public DetectedARMarker(in StdMsgs.Header Header, byte Type, string Code, GeometryMsgs.Vector3[] Corners, double[] CameraIntrinsic, in GeometryMsgs.Pose CameraPose, bool HasExtrinsicPose, double MarkerSizeInMm, in GeometryMsgs.Pose PoseRelativeToCamera)
         {
             this.Header = Header;
             this.Type = Type;
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.CameraIntrinsic = CameraIntrinsic;
             this.CameraPose = CameraPose;
             this.HasExtrinsicPose = HasExtrinsicPose;
-            this.MarkerSize = MarkerSize;
+            this.MarkerSizeInMm = MarkerSizeInMm;
             this.PoseRelativeToCamera = PoseRelativeToCamera;
         }
         
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
             CameraIntrinsic = b.DeserializeStructArray<double>(9);
             CameraPose = new GeometryMsgs.Pose(ref b);
             HasExtrinsicPose = b.Deserialize<bool>();
-            MarkerSize = b.Deserialize<double>();
+            MarkerSizeInMm = b.Deserialize<double>();
             PoseRelativeToCamera = new GeometryMsgs.Pose(ref b);
         }
         
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(CameraIntrinsic, 9);
             CameraPose.RosSerialize(ref b);
             b.Serialize(HasExtrinsicPose);
-            b.Serialize(MarkerSize);
+            b.Serialize(MarkerSizeInMm);
             PoseRelativeToCamera.RosSerialize(ref b);
         }
         
@@ -108,24 +108,24 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/DetectedARMarker";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ef60ffeab928ad1f2483214bd7ea5f4a";
+        [Preserve] public const string RosMd5Sum = "6a580236aac5980b59d2bd3a8bd81ca8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTW/bRhA9a3/FAD7ELmSlTYIANZBDEKetD0WcxAlQBAUxIkfkJuQus7uULP/6vllK" +
-                "VBQYSA+tBQJaLue9+Xozy20Suvnr+nXx8t2HV2/oBf1sltPd23ev3ly+xuUvxvwhXEmgJv+NNmnbi4kp" +
-                "WFdT6SsxtfhOUtgWXazj449SJh+efnr2N74GJyHOZifU21tpqffRJusdbWxq6C77XbWe0/Nnn36FPXcS" +
-                "uLBOyaMtZ4oMfkMdf/aBpvvvPF77KHssPIgxS+9bajgWcruDjB92vsAXvkgoor2TWXaiJ/BT193Hrdgi" +
-                "SMvJrqVIvhidzYx58R//zJ/vf7+gmKrR+1h9c0LvE7uKQ0UIjStOTCsUpLF1I+G8lTVqGxN3vVSUv2qP" +
-                "4gLAm8ZGwlMLOsFtu6Uhwih5NKfrBmdL1pbaTo7wQKIaTD2HZMuh5QB7Hyrr1HwVkL+y44nydRBXCl1d" +
-                "XsDGRSkHLRM8WVcG4ag6ubokM6B/T58owJzcbPw5XqWGtibnlBpOGqzc9kGixsnxAj5+GpNbgBvFEXip" +
-                "Ip3muwKv8Qz90xCk92VDp4j8epsayCw1QmsOlpetKHGJCoD1kYIenX3D7DK1Y+f39CPjwce/oXUTr+Z0" +
-                "3qBnrWYfhxoFhGEf/NpWMF1uM0nZWnGJWrsMHLZGUaNLc/Kb1hhGQOWO4J9j9KVFA6o8P/sZzN0obPV/" +
-                "qfHe8d5LK4i2CkkgPFrnb6qcVRBk0nMpCxXJVW6rdxBFJ4yMob8JCWBlA6BYDAuwShCIW+ZkE1VeIjmf" +
-                "wNHxF1AKaqxo7nuQQeiBXdTB1LZ4hZzKol7MadOIG620RlnReQZsScHWthqRcNRNYKZdcnNKqyeocduO" +
-                "MY/O0DCj6yhlwNmCrla09QNtNCEcwm70PC1liitLJHk/17nbUXy/YTAIKEuMXOsOiglDvzDTrrqdTtvp" +
-                "dPcgrdbdh3BfHlo1lsqv8kY87vNcF4peV7vv46LHCJAPdo+FGsZ89wbm7QBBB5d5D3YPo+Ucyl7JGPvE" +
-                "KH8ezCl+5IItmEM+SvcH7XmQ8A+lu28aj+p5HLy+fT3UXYfgh4LbnzbG/AOGqsO8PggAAA==";
+                "H4sIAAAAAAAAE71UTW/bRhA9e3/FAD7ELmS1TYICNZBDEKetD0WcxA1QBAUxIkfkNuQus7uUTP/6vllK" +
+                "VBQYSA+tBQIid+e9+XozqzEJ3f5587p4+e6PV2/oBf1gVvPZ23ev3ly9xuGPxvwmXEmgJv9NNmnsxcQU" +
+                "rKup9JWYWnwnKYxFF+v4/Qcpkw/PPj7/C7fBSYgnJ6fU2ztpqffRJusdbW1q6D77Xbee00/PP/4Me+4k" +
+                "cGGdkkdbnigy+C11/LcPNJ9/5fHGR9lj4UGMWXnfUsOxkLsdZLrY+QJf+CShiPZe4K3oOnh6iFRBRZCW" +
+                "k91IkXwxeTkx5sV//DO/v//1kmKqJu9T2c0pvU/sKg4VITSuODGtUYnG1o2Ei1Y2KGpM3PVSUb7V5sQl" +
+                "gLeNjYSnFrSA23akIcIoeXSl6wZnS9Ze2k6O8EBaR0w9h2TLoeUAex8q69R8HZC/suOJ8nkQVwpdX13C" +
+                "xkUpBy0TPFlXBuGoArm+IjOgcc+eKsCc3m79BT6lhqhm55QaThqs3PVBosbJ8RI+vpuSW4IbxRF4qSKd" +
+                "5bMCn/Gc4AQhSO/Lhs4Q+c2YGugrNUIbDpZXrShxiQqA9YmCnpx/wewytWPn9/QT48HHv6F1M6/mdNGg" +
+                "Z61mH4caBYRhH/zGVjBdjZmkbK24RK1dBQ6jUdTk0pz+ojWGEVC5I/jnGH1p0YAqD85++HI3Clv9X2p8" +
+                "cK730gqirUISCI82+U6Vsw6CTHouZakiuc5t9Q6i6ISRMfQ3IwGsbAAUG2EJVgkCccuCbKLKSyTnEzg6" +
+                "/gRKQY0VzX0PMgg9sIs6mNoWr5AzWdbLBW0bcZOV1igrOs+ALSnY2lYTEo66Gcy0S25Baf0UNW7bKebJ" +
+                "GRpmdA+lDDhf0vWaRj/QVhPCS9iNnqeVzHFliSTvFzp3O4qvNwwGAWWJkWuoycWEoV+aeUndzW/j/Hb/" +
+                "KK3W3YdwXx5aNZXKr/NGPO7zQheKHle7+2nDYwTIB7vHQg1TvnsD83aAoIPLvAe7x9FyDmWvZIx9YpQ/" +
+                "D+YcP3LBFswhH6X7jfY8SviH0j00jUf1PA5evz4f6q5D8E3B7d+2xvwDk7TzZjcIAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

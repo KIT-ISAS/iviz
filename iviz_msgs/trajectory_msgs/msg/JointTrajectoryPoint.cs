@@ -10,11 +10,11 @@ namespace Iviz.Msgs.TrajectoryMsgs
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
         // or positions[, effort] for the trajectory to be executed.
         // All specified values are in the same order as the joint names in JointTrajectory.msg
-        [DataMember (Name = "positions")] public double[] Positions { get; set; }
-        [DataMember (Name = "velocities")] public double[] Velocities { get; set; }
-        [DataMember (Name = "accelerations")] public double[] Accelerations { get; set; }
-        [DataMember (Name = "effort")] public double[] Effort { get; set; }
-        [DataMember (Name = "time_from_start")] public duration TimeFromStart { get; set; }
+        [DataMember (Name = "positions")] public double[] Positions;
+        [DataMember (Name = "velocities")] public double[] Velocities;
+        [DataMember (Name = "accelerations")] public double[] Accelerations;
+        [DataMember (Name = "effort")] public double[] Effort;
+        [DataMember (Name = "time_from_start")] public duration TimeFromStart;
     
         /// <summary> Constructor for empty message. </summary>
         public JointTrajectoryPoint()

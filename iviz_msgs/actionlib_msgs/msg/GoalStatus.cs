@@ -7,8 +7,8 @@ namespace Iviz.Msgs.ActionlibMsgs
     [Preserve, DataContract (Name = "actionlib_msgs/GoalStatus")]
     public sealed class GoalStatus : IDeserializable<GoalStatus>, IMessage
     {
-        [DataMember (Name = "goal_id")] public GoalID GoalId { get; set; }
-        [DataMember (Name = "status")] public byte Status { get; set; }
+        [DataMember (Name = "goal_id")] public GoalID GoalId;
+        [DataMember (Name = "status")] public byte Status;
         public const byte PENDING = 0; // The goal has yet to be processed by the action server
         public const byte ACTIVE = 1; // The goal is currently being processed by the action server
         public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public const byte LOST = 9; // An action client can determine that a goal is LOST. This should not be
         //    sent over the wire by an action server
         //Allow for the user to associate a string with GoalStatus for debugging
-        [DataMember (Name = "text")] public string Text { get; set; }
+        [DataMember (Name = "text")] public string Text;
     
         /// <summary> Constructor for empty message. </summary>
         public GoalStatus()

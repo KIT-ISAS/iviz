@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [Preserve, DataContract (Name = "rosbridge_library/TestUInt8FixedSizeArray16")]
     public sealed class TestUInt8FixedSizeArray16 : IDeserializable<TestUInt8FixedSizeArray16>, IMessage
     {
-        [DataMember (Name = "data")] public byte[/*16*/] Data { get; set; }
+        [DataMember (Name = "data")] public byte[/*16*/] Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8FixedSizeArray16()

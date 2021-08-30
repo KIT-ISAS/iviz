@@ -8,11 +8,11 @@ namespace Iviz.Msgs.PclMsgs
     public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IMessage
     {
         // Separate header for the polygonal surface
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Vertices of the mesh as a point cloud
-        [DataMember (Name = "cloud")] public SensorMsgs.PointCloud2 Cloud { get; set; }
+        [DataMember (Name = "cloud")] public SensorMsgs.PointCloud2 Cloud;
         // List of polygons
-        [DataMember (Name = "polygons")] public Vertices[] Polygons { get; set; }
+        [DataMember (Name = "polygons")] public Vertices[] Polygons;
     
         /// <summary> Constructor for empty message. </summary>
         public PolygonMesh()

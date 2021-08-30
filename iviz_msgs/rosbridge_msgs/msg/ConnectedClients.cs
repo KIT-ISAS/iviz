@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     [Preserve, DataContract (Name = "rosbridge_msgs/ConnectedClients")]
     public sealed class ConnectedClients : IDeserializable<ConnectedClients>, IMessage
     {
-        [DataMember (Name = "clients")] public ConnectedClient[] Clients { get; set; }
+        [DataMember (Name = "clients")] public ConnectedClient[] Clients;
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClients()

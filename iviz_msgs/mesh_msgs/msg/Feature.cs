@@ -7,8 +7,8 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/Feature")]
     public sealed class Feature : IDeserializable<Feature>, IMessage
     {
-        [DataMember (Name = "location")] public GeometryMsgs.Point Location { get; set; }
-        [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor { get; set; }
+        [DataMember (Name = "location")] public GeometryMsgs.Point Location;
+        [DataMember (Name = "descriptor")] public StdMsgs.Float32[] Descriptor;
     
         /// <summary> Constructor for empty message. </summary>
         public Feature()

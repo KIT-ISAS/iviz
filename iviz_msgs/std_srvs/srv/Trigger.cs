@@ -105,8 +105,8 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; } // indicate successful run of triggered service
-        [DataMember (Name = "message")] public string Message { get; set; } // informational, e.g. for error messages
+        [DataMember (Name = "success")] public bool Success; // indicate successful run of triggered service
+        [DataMember (Name = "message")] public string Message; // informational, e.g. for error messages
     
         /// <summary> Constructor for empty message. </summary>
         public TriggerResponse()

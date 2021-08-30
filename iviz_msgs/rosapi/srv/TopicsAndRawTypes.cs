@@ -105,9 +105,9 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class TopicsAndRawTypesResponse : IResponse, IDeserializable<TopicsAndRawTypesResponse>
     {
-        [DataMember (Name = "topics")] public string[] Topics { get; set; }
-        [DataMember (Name = "types")] public string[] Types { get; set; }
-        [DataMember (Name = "typedefs_full_text")] public string[] TypedefsFullText { get; set; }
+        [DataMember (Name = "topics")] public string[] Topics;
+        [DataMember (Name = "types")] public string[] Types;
+        [DataMember (Name = "typedefs_full_text")] public string[] TypedefsFullText;
     
         /// <summary> Constructor for empty message. </summary>
         public TopicsAndRawTypesResponse()

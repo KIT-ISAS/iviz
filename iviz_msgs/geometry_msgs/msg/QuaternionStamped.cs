@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class QuaternionStamped : IDeserializable<QuaternionStamped>, IMessage
     {
         // This represents an orientation with reference coordinate frame and timestamp.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "quaternion")] public Quaternion Quaternion { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "quaternion")] public Quaternion Quaternion;
     
         /// <summary> Constructor for empty message. </summary>
         public QuaternionStamped()

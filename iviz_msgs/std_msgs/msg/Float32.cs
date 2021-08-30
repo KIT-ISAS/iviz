@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Float32")]
     public sealed class Float32 : IDeserializable<Float32>, IMessage
     {
-        [DataMember (Name = "data")] public float Data { get; set; }
+        [DataMember (Name = "data")] public float Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Float32()

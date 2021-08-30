@@ -8,12 +8,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
     public sealed class MultiDOFJointTrajectoryPoint : IDeserializable<MultiDOFJointTrajectoryPoint>, IMessage
     {
         // Each multi-dof joint can specify a transform (up to 6 DOF)
-        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms { get; set; }
+        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms;
         // There can be a velocity specified for the origin of the joint 
-        [DataMember (Name = "velocities")] public GeometryMsgs.Twist[] Velocities { get; set; }
+        [DataMember (Name = "velocities")] public GeometryMsgs.Twist[] Velocities;
         // There can be an acceleration specified for the origin of the joint 
-        [DataMember (Name = "accelerations")] public GeometryMsgs.Twist[] Accelerations { get; set; }
-        [DataMember (Name = "time_from_start")] public duration TimeFromStart { get; set; }
+        [DataMember (Name = "accelerations")] public GeometryMsgs.Twist[] Accelerations;
+        [DataMember (Name = "time_from_start")] public duration TimeFromStart;
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectoryPoint()

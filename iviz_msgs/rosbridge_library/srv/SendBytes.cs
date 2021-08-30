@@ -59,7 +59,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class SendBytesRequest : IRequest<SendBytes, SendBytesResponse>, IDeserializable<SendBytesRequest>
     {
-        [DataMember (Name = "count")] public long Count { get; set; }
+        [DataMember (Name = "count")] public long Count;
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesRequest()
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class SendBytesResponse : IResponse, IDeserializable<SendBytesResponse>
     {
-        [DataMember (Name = "data")] public string Data { get; set; }
+        [DataMember (Name = "data")] public string Data;
     
         /// <summary> Constructor for empty message. </summary>
         public SendBytesResponse()

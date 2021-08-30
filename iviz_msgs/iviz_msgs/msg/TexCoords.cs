@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/TexCoords")]
     public sealed class TexCoords : IDeserializable<TexCoords>, IMessage
     {
-        [DataMember (Name = "coords")] public Vector3f[] Coords { get; set; }
+        [DataMember (Name = "coords")] public Vector3f[] Coords;
     
         /// <summary> Constructor for empty message. </summary>
         public TexCoords()

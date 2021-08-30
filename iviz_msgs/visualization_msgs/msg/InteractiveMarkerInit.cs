@@ -9,16 +9,16 @@ namespace Iviz.Msgs.VisualizationMsgs
     {
         // Identifying string. Must be unique in the topic namespace
         // that this server works on.
-        [DataMember (Name = "server_id")] public string ServerId { get; set; }
+        [DataMember (Name = "server_id")] public string ServerId;
         // Sequence number.
         // The client will use this to detect if it has missed a subsequent
         // update.  Every update message will have the same sequence number as
         // an init message.  Clients will likely want to unsubscribe from the
         // init topic after a successful initialization to avoid receiving
         // duplicate data.
-        [DataMember (Name = "seq_num")] public ulong SeqNum { get; set; }
+        [DataMember (Name = "seq_num")] public ulong SeqNum;
         // All markers.
-        [DataMember (Name = "markers")] public InteractiveMarker[] Markers { get; set; }
+        [DataMember (Name = "markers")] public InteractiveMarker[] Markers;
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerInit()

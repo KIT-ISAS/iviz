@@ -105,8 +105,8 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class StopCaptureResponse : IResponse, IDeserializable<StopCaptureResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
     
         /// <summary> Constructor for empty message. </summary>
         public StopCaptureResponse()

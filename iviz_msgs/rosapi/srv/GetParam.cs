@@ -59,8 +59,8 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class GetParamRequest : IRequest<GetParam, GetParamResponse>, IDeserializable<GetParamRequest>
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "default")] public string @default { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "default")] public string @default;
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamRequest()
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class GetParamResponse : IResponse, IDeserializable<GetParamResponse>
     {
-        [DataMember (Name = "value")] public string Value { get; set; }
+        [DataMember (Name = "value")] public string Value;
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamResponse()

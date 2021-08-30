@@ -7,15 +7,15 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Feedback")]
     public sealed class Feedback : IDeserializable<Feedback>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "viz_id")] public string VizId { get; set; }
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "feedback_type")] public int FeedbackType { get; set; }
-        [DataMember (Name = "entry_id")] public int EntryId { get; set; }
-        [DataMember (Name = "position")] public GeometryMsgs.Point Position { get; set; }
-        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation { get; set; }
-        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale { get; set; }
-        [DataMember (Name = "trajectory")] public IvizMsgs.Trajectory Trajectory { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "viz_id")] public string VizId;
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "feedback_type")] public int FeedbackType;
+        [DataMember (Name = "entry_id")] public int EntryId;
+        [DataMember (Name = "position")] public GeometryMsgs.Point Position;
+        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
+        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
+        [DataMember (Name = "trajectory")] public IvizMsgs.Trajectory Trajectory;
     
         /// <summary> Constructor for empty message. </summary>
         public Feedback()

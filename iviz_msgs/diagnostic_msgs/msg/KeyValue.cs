@@ -7,8 +7,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
     [Preserve, DataContract (Name = "diagnostic_msgs/KeyValue")]
     public sealed class KeyValue : IDeserializable<KeyValue>, IMessage
     {
-        [DataMember (Name = "key")] public string Key { get; set; } // what to label this value when viewing
-        [DataMember (Name = "value")] public string Value { get; set; } // a value to track over time
+        [DataMember (Name = "key")] public string Key; // what to label this value when viewing
+        [DataMember (Name = "value")] public string Value; // a value to track over time
     
         /// <summary> Constructor for empty message. </summary>
         public KeyValue()

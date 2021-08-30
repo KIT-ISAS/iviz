@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class NodesResponse : IResponse, IDeserializable<NodesResponse>
     {
-        [DataMember (Name = "nodes")] public string[] Nodes_ { get; set; }
+        [DataMember (Name = "nodes")] public string[] Nodes_;
     
         /// <summary> Constructor for empty message. </summary>
         public NodesResponse()

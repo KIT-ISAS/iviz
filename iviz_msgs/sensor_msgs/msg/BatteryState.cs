@@ -35,24 +35,24 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte POWER_SUPPLY_TECHNOLOGY_LIFE = 4;
         public const byte POWER_SUPPLY_TECHNOLOGY_NICD = 5;
         public const byte POWER_SUPPLY_TECHNOLOGY_LIMN = 6;
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "voltage")] public float Voltage { get; set; } // Voltage in Volts (Mandatory)
-        [DataMember (Name = "temperature")] public float Temperature { get; set; } // Temperature in Degrees Celsius (If unmeasured NaN)
-        [DataMember (Name = "current")] public float Current { get; set; } // Negative when discharging (A)  (If unmeasured NaN)
-        [DataMember (Name = "charge")] public float Charge { get; set; } // Current charge in Ah  (If unmeasured NaN)
-        [DataMember (Name = "capacity")] public float Capacity { get; set; } // Capacity in Ah (last full capacity)  (If unmeasured NaN)
-        [DataMember (Name = "design_capacity")] public float DesignCapacity { get; set; } // Capacity in Ah (design capacity)  (If unmeasured NaN)
-        [DataMember (Name = "percentage")] public float Percentage { get; set; } // Charge percentage on 0 to 1 range  (If unmeasured NaN)
-        [DataMember (Name = "power_supply_status")] public byte PowerSupplyStatus { get; set; } // The charging status as reported. Values defined above
-        [DataMember (Name = "power_supply_health")] public byte PowerSupplyHealth { get; set; } // The battery health metric. Values defined above
-        [DataMember (Name = "power_supply_technology")] public byte PowerSupplyTechnology { get; set; } // The battery chemistry. Values defined above
-        [DataMember (Name = "present")] public bool Present { get; set; } // True if the battery is present
-        [DataMember (Name = "cell_voltage")] public float[] CellVoltage { get; set; } // An array of individual cell voltages for each cell in the pack
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "voltage")] public float Voltage; // Voltage in Volts (Mandatory)
+        [DataMember (Name = "temperature")] public float Temperature; // Temperature in Degrees Celsius (If unmeasured NaN)
+        [DataMember (Name = "current")] public float Current; // Negative when discharging (A)  (If unmeasured NaN)
+        [DataMember (Name = "charge")] public float Charge; // Current charge in Ah  (If unmeasured NaN)
+        [DataMember (Name = "capacity")] public float Capacity; // Capacity in Ah (last full capacity)  (If unmeasured NaN)
+        [DataMember (Name = "design_capacity")] public float DesignCapacity; // Capacity in Ah (design capacity)  (If unmeasured NaN)
+        [DataMember (Name = "percentage")] public float Percentage; // Charge percentage on 0 to 1 range  (If unmeasured NaN)
+        [DataMember (Name = "power_supply_status")] public byte PowerSupplyStatus; // The charging status as reported. Values defined above
+        [DataMember (Name = "power_supply_health")] public byte PowerSupplyHealth; // The battery health metric. Values defined above
+        [DataMember (Name = "power_supply_technology")] public byte PowerSupplyTechnology; // The battery chemistry. Values defined above
+        [DataMember (Name = "present")] public bool Present; // True if the battery is present
+        [DataMember (Name = "cell_voltage")] public float[] CellVoltage; // An array of individual cell voltages for each cell in the pack
         // If individual voltages unknown but number of cells known set each to NaN
-        [DataMember (Name = "cell_temperature")] public float[] CellTemperature { get; set; } // An array of individual cell temperatures for each cell in the pack
+        [DataMember (Name = "cell_temperature")] public float[] CellTemperature; // An array of individual cell temperatures for each cell in the pack
         // If individual temperatures unknown but number of cells known set each to NaN
-        [DataMember (Name = "location")] public string Location { get; set; } // The location into which the battery is inserted. (slot number or plug)
-        [DataMember (Name = "serial_number")] public string SerialNumber { get; set; } // The best approximation of the battery serial number
+        [DataMember (Name = "location")] public string Location; // The location into which the battery is inserted. (slot number or plug)
+        [DataMember (Name = "serial_number")] public string SerialNumber; // The best approximation of the battery serial number
     
         /// <summary> Constructor for empty message. </summary>
         public BatteryState()

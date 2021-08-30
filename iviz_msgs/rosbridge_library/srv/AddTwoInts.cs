@@ -59,8 +59,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class AddTwoIntsRequest : IRequest<AddTwoInts, AddTwoIntsResponse>, IDeserializable<AddTwoIntsRequest>
     {
-        [DataMember (Name = "a")] public long A { get; set; }
-        [DataMember (Name = "b")] public long B { get; set; }
+        [DataMember (Name = "a")] public long A;
+        [DataMember (Name = "b")] public long B;
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsRequest()
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class AddTwoIntsResponse : IResponse, IDeserializable<AddTwoIntsResponse>
     {
-        [DataMember (Name = "sum")] public long Sum { get; set; }
+        [DataMember (Name = "sum")] public long Sum;
     
         /// <summary> Constructor for empty message. </summary>
         public AddTwoIntsResponse()

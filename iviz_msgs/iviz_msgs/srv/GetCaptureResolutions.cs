@@ -105,9 +105,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetCaptureResolutionsResponse : IResponse, IDeserializable<GetCaptureResolutionsResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
-        [DataMember (Name = "resolutions")] public Vector2i[] Resolutions { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
+        [DataMember (Name = "resolutions")] public Vector2i[] Resolutions;
     
         /// <summary> Constructor for empty message. </summary>
         public GetCaptureResolutionsResponse()

@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class CaptureScreenshotRequest : IRequest<CaptureScreenshot, CaptureScreenshotResponse>, IDeserializable<CaptureScreenshotRequest>
     {
-        [DataMember (Name = "compress")] public bool Compress { get; set; }
+        [DataMember (Name = "compress")] public bool Compress;
     
         /// <summary> Constructor for empty message. </summary>
         public CaptureScreenshotRequest()
@@ -112,15 +112,15 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class CaptureScreenshotResponse : IResponse, IDeserializable<CaptureScreenshotResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "width")] public int Width { get; set; }
-        [DataMember (Name = "height")] public int Height { get; set; }
-        [DataMember (Name = "bpp")] public int Bpp { get; set; }
-        [DataMember (Name = "intrinsics")] public double[/*9*/] Intrinsics { get; set; }
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
-        [DataMember (Name = "data")] public byte[] Data { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "width")] public int Width;
+        [DataMember (Name = "height")] public int Height;
+        [DataMember (Name = "bpp")] public int Bpp;
+        [DataMember (Name = "intrinsics")] public double[/*9*/] Intrinsics;
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
+        [DataMember (Name = "data")] public byte[] Data;
     
         /// <summary> Constructor for empty message. </summary>
         public CaptureScreenshotResponse()

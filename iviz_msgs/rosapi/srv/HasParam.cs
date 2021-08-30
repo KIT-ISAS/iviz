@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class HasParamRequest : IRequest<HasParam, HasParamResponse>, IDeserializable<HasParamRequest>
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class HasParamResponse : IResponse, IDeserializable<HasParamResponse>
     {
-        [DataMember (Name = "exists")] public bool Exists { get; set; }
+        [DataMember (Name = "exists")] public bool Exists;
     
         /// <summary> Constructor for empty message. </summary>
         public HasParamResponse()

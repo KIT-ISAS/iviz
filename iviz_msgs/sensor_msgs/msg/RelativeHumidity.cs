@@ -9,13 +9,13 @@ namespace Iviz.Msgs.SensorMsgs
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp of the measurement
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // timestamp of the measurement
         // frame_id is the location of the humidity sensor
-        [DataMember (Name = "relative_humidity")] public double RelativeHumidity_ { get; set; } // Expression of the relative humidity
+        [DataMember (Name = "relative_humidity")] public double RelativeHumidity_; // Expression of the relative humidity
         // from 0.0 to 1.0.
         // 0.0 is no partial pressure of water vapor
         // 1.0 represents partial pressure of saturation
-        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "variance")] public double Variance; // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public RelativeHumidity()

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/String")]
     public sealed class String : IDeserializable<String>, IMessage
     {
-        [DataMember (Name = "data")] public string Data { get; set; }
+        [DataMember (Name = "data")] public string Data;
     
         /// <summary> Constructor for empty message. </summary>
         public String()

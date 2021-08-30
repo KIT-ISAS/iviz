@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class LaunchDialogRequest : IRequest<LaunchDialog, LaunchDialogResponse>, IDeserializable<LaunchDialogRequest>
     {
-        [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog { get; set; }
+        [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog;
     
         /// <summary> Constructor for empty message. </summary>
         public LaunchDialogRequest()
@@ -119,9 +119,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class LaunchDialogResponse : IResponse, IDeserializable<LaunchDialogResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
-        [DataMember (Name = "feedback")] public IvizMsgs.Feedback Feedback { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
+        [DataMember (Name = "feedback")] public IvizMsgs.Feedback Feedback;
     
         /// <summary> Constructor for empty message. </summary>
         public LaunchDialogResponse()

@@ -7,8 +7,8 @@ namespace Iviz.Msgs.PclMsgs
     [Preserve, DataContract (Name = "pcl_msgs/PointIndices")]
     public sealed class PointIndices : IDeserializable<PointIndices>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "indices")] public int[] Indices { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "indices")] public int[] Indices;
     
         /// <summary> Constructor for empty message. </summary>
         public PointIndices()

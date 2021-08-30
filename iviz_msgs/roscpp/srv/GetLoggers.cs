@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Roscpp
     [DataContract]
     public sealed class GetLoggersResponse : IResponse, IDeserializable<GetLoggersResponse>
     {
-        [DataMember (Name = "loggers")] public Logger[] Loggers { get; set; }
+        [DataMember (Name = "loggers")] public Logger[] Loggers;
     
         /// <summary> Constructor for empty message. </summary>
         public GetLoggersResponse()

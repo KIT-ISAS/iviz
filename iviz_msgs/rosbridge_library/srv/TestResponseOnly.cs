@@ -105,7 +105,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class TestResponseOnlyResponse : IResponse, IDeserializable<TestResponseOnlyResponse>
     {
-        [DataMember (Name = "data")] public int Data { get; set; }
+        [DataMember (Name = "data")] public int Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestResponseOnlyResponse()

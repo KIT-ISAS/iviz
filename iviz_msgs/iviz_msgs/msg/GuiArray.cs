@@ -7,8 +7,8 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/GuiArray")]
     public sealed class GuiArray : IDeserializable<GuiArray>, IMessage
     {
-        [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs { get; set; }
-        [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets { get; set; }
+        [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
+        [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;
     
         /// <summary> Constructor for empty message. </summary>
         public GuiArray()

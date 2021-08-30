@@ -9,7 +9,7 @@ namespace Iviz.Msgs.SensorMsgs
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
-        [DataMember (Name = "echoes")] public float[] Echoes { get; set; } // Multiple values of ranges or intensities.
+        [DataMember (Name = "echoes")] public float[] Echoes; // Multiple values of ranges or intensities.
         // Each array represents data from the same angle increment.
     
         /// <summary> Constructor for empty message. </summary>

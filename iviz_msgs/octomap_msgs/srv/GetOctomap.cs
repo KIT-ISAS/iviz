@@ -106,7 +106,7 @@ namespace Iviz.Msgs.OctomapMsgs
     [DataContract]
     public sealed class GetOctomapResponse : IResponse, IDeserializable<GetOctomapResponse>
     {
-        [DataMember (Name = "map")] public OctomapMsgs.Octomap Map { get; set; }
+        [DataMember (Name = "map")] public OctomapMsgs.Octomap Map;
     
         /// <summary> Constructor for empty message. </summary>
         public GetOctomapResponse()

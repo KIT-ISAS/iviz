@@ -37,14 +37,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         //    - turtle
         // ID is a number for each menu entry.  Must be unique within the
         // control, and should never be 0.
-        [DataMember (Name = "id")] public uint Id { get; set; }
+        [DataMember (Name = "id")] public uint Id;
         // ID of the parent of this menu entry, if it is a submenu.  If this
         // menu entry is a top-level entry, set parent_id to 0.
-        [DataMember (Name = "parent_id")] public uint ParentId { get; set; }
+        [DataMember (Name = "parent_id")] public uint ParentId;
         // menu / entry title
-        [DataMember (Name = "title")] public string Title { get; set; }
+        [DataMember (Name = "title")] public string Title;
         // Arguments to command indicated by command_type (below)
-        [DataMember (Name = "command")] public string Command { get; set; }
+        [DataMember (Name = "command")] public string Command;
         // Command_type stores the type of response desired when this menu
         // entry is clicked.
         // FEEDBACK: send an InteractiveMarkerFeedback message with menu_entry_id set to this entry's id.
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte FEEDBACK = 0;
         public const byte ROSRUN = 1;
         public const byte ROSLAUNCH = 2;
-        [DataMember (Name = "command_type")] public byte CommandType { get; set; }
+        [DataMember (Name = "command_type")] public byte CommandType;
     
         /// <summary> Constructor for empty message. </summary>
         public MenuEntry()

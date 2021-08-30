@@ -9,8 +9,8 @@ namespace Iviz.Msgs.ActionlibMsgs
     {
         // Stores the statuses for goals that are currently being tracked
         // by an action server
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "status_list")] public GoalStatus[] StatusList { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "status_list")] public GoalStatus[] StatusList;
     
         /// <summary> Constructor for empty message. </summary>
         public GoalStatusArray()

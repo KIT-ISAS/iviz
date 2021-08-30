@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetGeometryRequest : IRequest<GetGeometry, GetGeometryResponse>, IDeserializable<GetGeometryRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetGeometryResponse : IResponse, IDeserializable<GetGeometryResponse>
     {
-        [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped { get; set; }
+        [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped;
     
         /// <summary> Constructor for empty message. </summary>
         public GetGeometryResponse()

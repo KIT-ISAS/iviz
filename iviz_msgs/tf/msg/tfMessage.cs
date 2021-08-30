@@ -7,7 +7,7 @@ namespace Iviz.Msgs.Tf
     [Preserve, DataContract (Name = "tf/tfMessage")]
     public sealed class tfMessage : IDeserializable<tfMessage>, IMessage
     {
-        [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms { get; set; }
+        [DataMember (Name = "transforms")] public GeometryMsgs.TransformStamped[] Transforms;
     
         /// <summary> Constructor for empty message. </summary>
         public tfMessage()

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Matrix4")]
     public sealed class Matrix4 : IDeserializable<Matrix4>, IMessage
     {
-        [DataMember (Name = "m")] public float[/*16*/] M { get; set; } // row major 
+        [DataMember (Name = "m")] public float[/*16*/] M; // row major 
     
         /// <summary> Constructor for empty message. </summary>
         public Matrix4()

@@ -8,15 +8,15 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class Octomap : IDeserializable<Octomap>, IMessage
     {
         // A 3D map in binary format, as Octree
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Flag to denote a binary (only free/occupied) or full occupancy octree (.bt/.ot file)
-        [DataMember (Name = "binary")] public bool Binary { get; set; }
+        [DataMember (Name = "binary")] public bool Binary;
         // Class id of the contained octree 
-        [DataMember (Name = "id")] public string Id { get; set; }
+        [DataMember (Name = "id")] public string Id;
         // Resolution (in m) of the smallest octree nodes
-        [DataMember (Name = "resolution")] public double Resolution { get; set; }
+        [DataMember (Name = "resolution")] public double Resolution;
         // binary serialization of octree, use conversions.h to read and write octrees
-        [DataMember (Name = "data")] public sbyte[] Data { get; set; }
+        [DataMember (Name = "data")] public sbyte[] Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Octomap()

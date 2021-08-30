@@ -8,8 +8,8 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessage
     {
         // Mesh Attribute Type
-        [DataMember (Name = "u")] public float U { get; set; }
-        [DataMember (Name = "v")] public float V { get; set; }
+        [DataMember (Name = "u")] public float U;
+        [DataMember (Name = "v")] public float V;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexTexCoords()

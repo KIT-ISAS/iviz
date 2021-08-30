@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshTexture : IDeserializable<MeshTexture>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
-        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
-        [DataMember (Name = "image")] public SensorMsgs.Image Image { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
+        [DataMember (Name = "texture_index")] public uint TextureIndex;
+        [DataMember (Name = "image")] public SensorMsgs.Image Image;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshTexture()

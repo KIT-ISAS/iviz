@@ -106,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetModulesResponse : IResponse, IDeserializable<GetModulesResponse>
     {
-        [DataMember (Name = "configs")] public string[] Configs { get; set; } // List of module configurations in JSON encoding
+        [DataMember (Name = "configs")] public string[] Configs; // List of module configurations in JSON encoding
     
         /// <summary> Constructor for empty message. </summary>
         public GetModulesResponse()

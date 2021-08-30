@@ -7,10 +7,10 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/GroupState")]
     public sealed class GroupState : IDeserializable<GroupState>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "state")] public bool State { get; set; }
-        [DataMember (Name = "id")] public int Id { get; set; }
-        [DataMember (Name = "parent")] public int Parent { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "state")] public bool State;
+        [DataMember (Name = "id")] public int Id;
+        [DataMember (Name = "parent")] public int Parent;
     
         /// <summary> Constructor for empty message. </summary>
         public GroupState()

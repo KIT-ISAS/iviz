@@ -8,13 +8,13 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshFaceClusterStamped : IDeserializable<MeshFaceClusterStamped>, IMessage
     {
         // header
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // mesh uuid
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
         // Cluster
-        [DataMember (Name = "cluster")] public MeshFaceCluster Cluster { get; set; }
+        [DataMember (Name = "cluster")] public MeshFaceCluster Cluster;
         // overwrite existing labeled faces
-        [DataMember (Name = "override")] public bool @override { get; set; }
+        [DataMember (Name = "override")] public bool @override;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceClusterStamped()

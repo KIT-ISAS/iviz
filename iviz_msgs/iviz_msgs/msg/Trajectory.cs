@@ -7,8 +7,8 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Trajectory")]
     public sealed class Trajectory : IDeserializable<Trajectory>, IMessage
     {
-        [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses { get; set; }
-        [DataMember (Name = "timestamps")] public time[] Timestamps { get; set; }
+        [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
+        [DataMember (Name = "timestamps")] public time[] Timestamps;
     
         /// <summary> Constructor for empty message. </summary>
         public Trajectory()

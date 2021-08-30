@@ -59,7 +59,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     [DataContract]
     public sealed class ReconfigureRequest : IRequest<Reconfigure, ReconfigureResponse>, IDeserializable<ReconfigureRequest>
     {
-        [DataMember (Name = "config")] public Config Config { get; set; }
+        [DataMember (Name = "config")] public Config Config;
     
         /// <summary> Constructor for empty message. </summary>
         public ReconfigureRequest()
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     [DataContract]
     public sealed class ReconfigureResponse : IResponse, IDeserializable<ReconfigureResponse>
     {
-        [DataMember (Name = "config")] public Config Config { get; set; }
+        [DataMember (Name = "config")] public Config Config;
     
         /// <summary> Constructor for empty message. </summary>
         public ReconfigureResponse()

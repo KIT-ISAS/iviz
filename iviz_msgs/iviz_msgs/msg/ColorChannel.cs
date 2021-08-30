@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/ColorChannel")]
     public sealed class ColorChannel : IDeserializable<ColorChannel>, IMessage
     {
-        [DataMember (Name = "colors")] public Color32[] Colors { get; set; }
+        [DataMember (Name = "colors")] public Color32[] Colors;
     
         /// <summary> Constructor for empty message. </summary>
         public ColorChannel()

@@ -7,8 +7,8 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/VectorField")]
     public sealed class VectorField : IDeserializable<VectorField>, IMessage
     {
-        [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions { get; set; }
-        [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors { get; set; }
+        [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions;
+        [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors;
     
         /// <summary> Constructor for empty message. </summary>
         public VectorField()

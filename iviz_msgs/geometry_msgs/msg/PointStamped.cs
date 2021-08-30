@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class PointStamped : IDeserializable<PointStamped>, IMessage
     {
         // This represents a Point with reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "point")] public Point Point { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "point")] public Point Point;
     
         /// <summary> Constructor for empty message. </summary>
         public PointStamped()

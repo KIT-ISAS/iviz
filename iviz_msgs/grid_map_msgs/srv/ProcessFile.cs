@@ -60,9 +60,9 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class ProcessFileRequest : IRequest<ProcessFile, ProcessFileResponse>, IDeserializable<ProcessFileRequest>
     {
         // Absolute file path.
-        [DataMember (Name = "file_path")] public string FilePath { get; set; }
+        [DataMember (Name = "file_path")] public string FilePath;
         // For ROS bags: topic name that should be processed (optional).
-        [DataMember (Name = "topic_name")] public string TopicName { get; set; }
+        [DataMember (Name = "topic_name")] public string TopicName;
     
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileRequest()
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class ProcessFileResponse : IResponse, IDeserializable<ProcessFileResponse>
     {
         // True if file processing was successful.
-        [DataMember (Name = "success")] public bool Success { get; set; }
+        [DataMember (Name = "success")] public bool Success;
     
         /// <summary> Constructor for empty message. </summary>
         public ProcessFileResponse()

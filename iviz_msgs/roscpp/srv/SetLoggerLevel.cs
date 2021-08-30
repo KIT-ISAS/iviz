@@ -59,8 +59,8 @@ namespace Iviz.Msgs.Roscpp
     [DataContract]
     public sealed class SetLoggerLevelRequest : IRequest<SetLoggerLevel, SetLoggerLevelResponse>, IDeserializable<SetLoggerLevelRequest>
     {
-        [DataMember (Name = "logger")] public string Logger { get; set; }
-        [DataMember (Name = "level")] public string Level { get; set; }
+        [DataMember (Name = "logger")] public string Logger;
+        [DataMember (Name = "level")] public string Level;
     
         /// <summary> Constructor for empty message. </summary>
         public SetLoggerLevelRequest()

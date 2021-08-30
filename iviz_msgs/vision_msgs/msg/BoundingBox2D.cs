@@ -13,11 +13,11 @@ namespace Iviz.Msgs.VisionMsgs
         //   for a rotated bounding box, it can be calculated using Bresenham's line
         //   algorithm.
         // The 2D position (in pixels) and orientation of the bounding box center.
-        [DataMember (Name = "center")] public GeometryMsgs.Pose2D Center { get; set; }
+        [DataMember (Name = "center")] public GeometryMsgs.Pose2D Center;
         // The size (in pixels) of the bounding box surrounding the object relative
         //   to the pose of its center.
-        [DataMember (Name = "size_x")] public double SizeX { get; set; }
-        [DataMember (Name = "size_y")] public double SizeY { get; set; }
+        [DataMember (Name = "size_x")] public double SizeX;
+        [DataMember (Name = "size_y")] public double SizeY;
     
         /// <summary> Constructor for empty message. </summary>
         public BoundingBox2D()

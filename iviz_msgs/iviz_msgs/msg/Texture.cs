@@ -36,15 +36,15 @@ namespace Iviz.Msgs.IvizMsgs
         public const byte WRAP_CLAMP = 1;
         public const byte WRAP_MIRROR = 2;
         public const byte WRAP_DECAL = 3;
-        [DataMember (Name = "path")] public string Path { get; set; }
-        [DataMember (Name = "index")] public int Index { get; set; }
-        [DataMember (Name = "type")] public byte Type { get; set; }
-        [DataMember (Name = "mapping")] public byte Mapping { get; set; }
-        [DataMember (Name = "uv_index")] public int UvIndex { get; set; }
-        [DataMember (Name = "blend_factor")] public float BlendFactor { get; set; }
-        [DataMember (Name = "operation")] public byte Operation { get; set; }
-        [DataMember (Name = "wrap_mode_u")] public byte WrapModeU { get; set; }
-        [DataMember (Name = "wrap_mode_v")] public byte WrapModeV { get; set; }
+        [DataMember (Name = "path")] public string Path;
+        [DataMember (Name = "index")] public int Index;
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "mapping")] public byte Mapping;
+        [DataMember (Name = "uv_index")] public int UvIndex;
+        [DataMember (Name = "blend_factor")] public float BlendFactor;
+        [DataMember (Name = "operation")] public byte Operation;
+        [DataMember (Name = "wrap_mode_u")] public byte WrapModeU;
+        [DataMember (Name = "wrap_mode_v")] public byte WrapModeV;
     
         /// <summary> Constructor for empty message. </summary>
         public Texture()

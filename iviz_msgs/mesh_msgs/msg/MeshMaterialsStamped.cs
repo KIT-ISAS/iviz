@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshMaterialsStamped : IDeserializable<MeshMaterialsStamped>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
-        [DataMember (Name = "mesh_materials")] public MeshMsgs.MeshMaterials MeshMaterials { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "uuid")] public string Uuid;
+        [DataMember (Name = "mesh_materials")] public MeshMsgs.MeshMaterials MeshMaterials;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterialsStamped()

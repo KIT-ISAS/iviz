@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetUUIDResponse : IResponse, IDeserializable<GetUUIDResponse>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetUUIDResponse()

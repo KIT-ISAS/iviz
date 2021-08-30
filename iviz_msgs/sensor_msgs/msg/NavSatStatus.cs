@@ -15,14 +15,14 @@ namespace Iviz.Msgs.SensorMsgs
         public const sbyte STATUS_FIX = 0; // unaugmented fix
         public const sbyte STATUS_SBAS_FIX = 1; // with satellite-based augmentation
         public const sbyte STATUS_GBAS_FIX = 2; // with ground-based augmentation
-        [DataMember (Name = "status")] public sbyte Status { get; set; }
+        [DataMember (Name = "status")] public sbyte Status;
         // Bits defining which Global Navigation Satellite System signals were
         // used by the receiver.
         public const ushort SERVICE_GPS = 1;
         public const ushort SERVICE_GLONASS = 2;
         public const ushort SERVICE_COMPASS = 4; // includes BeiDou.
         public const ushort SERVICE_GALILEO = 8;
-        [DataMember (Name = "service")] public ushort Service { get; set; }
+        [DataMember (Name = "service")] public ushort Service;
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatStatus()

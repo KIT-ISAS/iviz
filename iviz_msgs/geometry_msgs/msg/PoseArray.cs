@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class PoseArray : IDeserializable<PoseArray>, IMessage
     {
         // An array of poses with a header for global reference.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "poses")] public Pose[] Poses { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "poses")] public Pose[] Poses;
     
         /// <summary> Constructor for empty message. </summary>
         public PoseArray()

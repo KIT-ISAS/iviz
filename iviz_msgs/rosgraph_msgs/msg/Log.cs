@@ -22,12 +22,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "level")] public byte Level;
-        [DataMember (Name = "name")] public string? Name; // name of the node
-        [DataMember (Name = "msg")] public string? Msg; // message 
-        [DataMember (Name = "file")] public string? File; // file the message came from
-        [DataMember (Name = "function")] public string? Function; // function the message came from
+        [DataMember (Name = "name")] public string Name; // name of the node
+        [DataMember (Name = "msg")] public string Msg; // message 
+        [DataMember (Name = "file")] public string File; // file the message came from
+        [DataMember (Name = "function")] public string Function; // function the message came from
         [DataMember (Name = "line")] public uint Line; // line the message came from
-        [DataMember (Name = "topics")] public string[]? Topics; // topic names that the node publishes
+        [DataMember (Name = "topics")] public string[] Topics; // topic names that the node publishes
     
         /// <summary> Explicit constructor. </summary>
         public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             File = b.DeserializeString();
             Function = b.DeserializeString();
             Line = b.Deserialize<uint>();
-            Topics = b.SkipStringArray(); // modified!
+            Topics = b.DeserializeStringArray();
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)

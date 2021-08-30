@@ -7,8 +7,8 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/TriangleMeshStamped")]
     public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "mesh")] public MeshMsgs.TriangleMesh Mesh;
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleMeshStamped()

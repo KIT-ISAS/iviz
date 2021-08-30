@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetVertexCostsRequest : IRequest<GetVertexCosts, GetVertexCostsResponse>, IDeserializable<GetVertexCostsRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetVertexCostsResponse : IResponse, IDeserializable<GetVertexCostsResponse>
     {
-        [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped { get; set; }
+        [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped;
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexCostsResponse()

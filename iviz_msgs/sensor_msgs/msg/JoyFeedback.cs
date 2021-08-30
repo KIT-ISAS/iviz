@@ -11,13 +11,13 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte TYPE_LED = 0;
         public const byte TYPE_RUMBLE = 1;
         public const byte TYPE_BUZZER = 2;
-        [DataMember (Name = "type")] public byte Type { get; set; }
+        [DataMember (Name = "type")] public byte Type;
         // This will hold an id number for each type of each feedback.
         // Example, the first led would be id=0, the second would be id=1
-        [DataMember (Name = "id")] public byte Id { get; set; }
+        [DataMember (Name = "id")] public byte Id;
         // Intensity of the feedback, from 0.0 to 1.0, inclusive.  If device is
         // actually binary, driver should treat 0<=x<0.5 as off, 0.5<=x<=1 as on.
-        [DataMember (Name = "intensity")] public float Intensity { get; set; }
+        [DataMember (Name = "intensity")] public float Intensity;
     
         /// <summary> Constructor for empty message. </summary>
         public JoyFeedback()

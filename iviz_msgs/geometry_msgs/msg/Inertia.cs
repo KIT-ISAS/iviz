@@ -8,19 +8,19 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class Inertia : IDeserializable<Inertia>, IMessage
     {
         // Mass [kg]
-        [DataMember (Name = "m")] public double M { get; set; }
+        [DataMember (Name = "m")] public double M;
         // Center of mass [m]
-        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com { get; set; }
+        [DataMember (Name = "com")] public GeometryMsgs.Vector3 Com;
         // Inertia Tensor [kg-m^2]
         //     | ixx ixy ixz |
         // I = | ixy iyy iyz |
         //     | ixz iyz izz |
-        [DataMember (Name = "ixx")] public double Ixx { get; set; }
-        [DataMember (Name = "ixy")] public double Ixy { get; set; }
-        [DataMember (Name = "ixz")] public double Ixz { get; set; }
-        [DataMember (Name = "iyy")] public double Iyy { get; set; }
-        [DataMember (Name = "iyz")] public double Iyz { get; set; }
-        [DataMember (Name = "izz")] public double Izz { get; set; }
+        [DataMember (Name = "ixx")] public double Ixx;
+        [DataMember (Name = "ixy")] public double Ixy;
+        [DataMember (Name = "ixz")] public double Ixz;
+        [DataMember (Name = "iyy")] public double Iyy;
+        [DataMember (Name = "iyz")] public double Iyz;
+        [DataMember (Name = "izz")] public double Izz;
     
         /// <summary> Constructor for empty message. </summary>
         public Inertia()

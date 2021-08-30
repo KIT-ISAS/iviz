@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [Preserve, DataContract (Name = "rosbridge_library/Num")]
     public sealed class Num : IDeserializable<Num>, IMessage
     {
-        [DataMember (Name = "num")] public long Num_ { get; set; }
+        [DataMember (Name = "num")] public long Num_;
     
         /// <summary> Constructor for empty message. </summary>
         public Num()

@@ -11,12 +11,12 @@ namespace Iviz.Msgs.VisionMsgs
         //
         // This result does not contain any position information. It is designed for
         //   classifiers, which simply provide probabilities given a source image.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Class probabilities
-        [DataMember (Name = "results")] public ObjectHypothesis[] Results { get; set; }
+        [DataMember (Name = "results")] public ObjectHypothesis[] Results;
         // The 3D data that generated these results (i.e. region proposal cropped out of
         //   the image). Not required for all detectors, so it may be empty.
-        [DataMember (Name = "source_cloud")] public SensorMsgs.PointCloud2 SourceCloud { get; set; }
+        [DataMember (Name = "source_cloud")] public SensorMsgs.PointCloud2 SourceCloud;
     
         /// <summary> Constructor for empty message. </summary>
         public Classification3D()

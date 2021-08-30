@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class PoseWithCovarianceStamped : IDeserializable<PoseWithCovarianceStamped>, IMessage
     {
         // This expresses an estimated pose with a reference coordinate frame and timestamp
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "pose")] public PoseWithCovariance Pose { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "pose")] public PoseWithCovariance Pose;
     
         /// <summary> Constructor for empty message. </summary>
         public PoseWithCovarianceStamped()

@@ -11,14 +11,14 @@ namespace Iviz.Msgs.VisionMsgs
         //
         // This result does not contain any position information. It is designed for
         //   classifiers, which simply provide class probabilities given a source image.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // A list of class probabilities. This list need not provide a probability for
         //   every possible class, just ones that are nonzero, or above some
         //   user-defined threshold.
-        [DataMember (Name = "results")] public ObjectHypothesis[] Results { get; set; }
+        [DataMember (Name = "results")] public ObjectHypothesis[] Results;
         // The 2D data that generated these results (i.e. region proposal cropped out of
         //   the image). Not required for all use cases, so it may be empty.
-        [DataMember (Name = "source_img")] public SensorMsgs.Image SourceImg { get; set; }
+        [DataMember (Name = "source_img")] public SensorMsgs.Image SourceImg;
     
         /// <summary> Constructor for empty message. </summary>
         public Classification2D()

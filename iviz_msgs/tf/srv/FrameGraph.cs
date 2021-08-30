@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Tf
     [DataContract]
     public sealed class FrameGraphResponse : IResponse, IDeserializable<FrameGraphResponse>
     {
-        [DataMember (Name = "dot_graph")] public string DotGraph { get; set; }
+        [DataMember (Name = "dot_graph")] public string DotGraph;
     
         /// <summary> Constructor for empty message. </summary>
         public FrameGraphResponse()

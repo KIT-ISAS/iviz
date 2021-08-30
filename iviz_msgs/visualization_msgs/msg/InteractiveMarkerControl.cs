@@ -11,11 +11,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         // Identifying string for this control.
         // You need to assign a unique value to this to receive feedback from the GUI
         // on what actions the user performs on this control (e.g. a button click).
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
         // Defines the local coordinate frame (relative to the pose of the parent
         // interactive marker) in which is being rotated and translated.
         // Default: Identity
-        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation { get; set; }
+        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
         // Orientation mode: controls how orientation changes.
         // INHERIT: Follow orientation of interactive marker
         // FIXED: Keep orientation fixed at initial state
@@ -23,7 +23,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte INHERIT = 0;
         public const byte FIXED = 1;
         public const byte VIEW_FACING = 2;
-        [DataMember (Name = "orientation_mode")] public byte OrientationMode { get; set; }
+        [DataMember (Name = "orientation_mode")] public byte OrientationMode;
         // Interaction mode for this control
         // 
         // NONE: This control is only meant for visualization; no context menu.
@@ -47,10 +47,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte MOVE_3D = 7;
         public const byte ROTATE_3D = 8;
         public const byte MOVE_ROTATE_3D = 9;
-        [DataMember (Name = "interaction_mode")] public byte InteractionMode { get; set; }
+        [DataMember (Name = "interaction_mode")] public byte InteractionMode;
         // If true, the contained markers will also be visible
         // when the gui is not in interactive mode.
-        [DataMember (Name = "always_visible")] public bool AlwaysVisible { get; set; }
+        [DataMember (Name = "always_visible")] public bool AlwaysVisible;
         // Markers to be displayed as custom visual representation.
         // Leave this empty to use the default control handles.
         //
@@ -59,15 +59,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         //   but will be transformed into the local frame of the interactive marker.
         // - If the header of a marker is empty, its pose will be interpreted as 
         //   relative to the pose of the parent interactive marker.
-        [DataMember (Name = "markers")] public Marker[] Markers { get; set; }
+        [DataMember (Name = "markers")] public Marker[] Markers;
         // In VIEW_FACING mode, set this to true if you don't want the markers
         // to be aligned with the camera view point. The markers will show up
         // as in INHERIT mode.
-        [DataMember (Name = "independent_marker_orientation")] public bool IndependentMarkerOrientation { get; set; }
+        [DataMember (Name = "independent_marker_orientation")] public bool IndependentMarkerOrientation;
         // Short description (< 40 characters) of what this control does,
         // e.g. "Move the robot". 
         // Default: A generic description based on the interaction mode
-        [DataMember (Name = "description")] public string Description { get; set; }
+        [DataMember (Name = "description")] public string Description;
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerControl()

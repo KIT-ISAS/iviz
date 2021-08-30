@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetLabeledClustersRequest : IRequest<GetLabeledClusters, GetLabeledClustersResponse>, IDeserializable<GetLabeledClustersRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetLabeledClustersResponse : IResponse, IDeserializable<GetLabeledClustersResponse>
     {
-        [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters { get; set; }
+        [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters;
     
         /// <summary> Constructor for empty message. </summary>
         public GetLabeledClustersResponse()

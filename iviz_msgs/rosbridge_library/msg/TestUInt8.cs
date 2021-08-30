@@ -7,7 +7,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [Preserve, DataContract (Name = "rosbridge_library/TestUInt8")]
     public sealed class TestUInt8 : IDeserializable<TestUInt8>, IMessage
     {
-        [DataMember (Name = "data")] public byte[] Data { get; set; }
+        [DataMember (Name = "data")] public byte[] Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestUInt8()

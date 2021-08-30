@@ -10,15 +10,15 @@ namespace Iviz.Msgs.IvizMsgs
         public const byte POINT = 0;
         public const byte DIRECTIONAL = 1;
         public const byte SPOT = 2;
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "type")] public byte Type { get; set; }
-        [DataMember (Name = "cast_shadows")] public bool CastShadows { get; set; }
-        [DataMember (Name = "diffuse")] public Color32 Diffuse { get; set; }
-        [DataMember (Name = "range")] public float Range { get; set; }
-        [DataMember (Name = "position")] public Vector3f Position { get; set; }
-        [DataMember (Name = "direction")] public Vector3f Direction { get; set; }
-        [DataMember (Name = "inner_angle")] public float InnerAngle { get; set; }
-        [DataMember (Name = "outer_angle")] public float OuterAngle { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "cast_shadows")] public bool CastShadows;
+        [DataMember (Name = "diffuse")] public Color32 Diffuse;
+        [DataMember (Name = "range")] public float Range;
+        [DataMember (Name = "position")] public Vector3f Position;
+        [DataMember (Name = "direction")] public Vector3f Direction;
+        [DataMember (Name = "inner_angle")] public float InnerAngle;
+        [DataMember (Name = "outer_angle")] public float OuterAngle;
     
         /// <summary> Constructor for empty message. </summary>
         public Light()

@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class Accel : IDeserializable<Accel>, IMessage
     {
         // This expresses acceleration in free space broken into its linear and angular parts.
-        [DataMember (Name = "linear")] public Vector3 Linear { get; set; }
-        [DataMember (Name = "angular")] public Vector3 Angular { get; set; }
+        [DataMember (Name = "linear")] public Vector3 Linear;
+        [DataMember (Name = "angular")] public Vector3 Angular;
     
         /// <summary> Constructor for empty message. </summary>
         public Accel()

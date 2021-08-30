@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetModelTextureRequest : IRequest<GetModelTexture, GetModelTextureResponse>, IDeserializable<GetModelTextureRequest>
     {
-        [DataMember (Name = "uri")] public string Uri { get; set; }
+        [DataMember (Name = "uri")] public string Uri;
     
         /// <summary> Constructor for empty message. </summary>
         public GetModelTextureRequest()
@@ -118,9 +118,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetModelTextureResponse : IResponse, IDeserializable<GetModelTextureResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image;
+        [DataMember (Name = "message")] public string Message;
     
         /// <summary> Constructor for empty message. </summary>
         public GetModelTextureResponse()

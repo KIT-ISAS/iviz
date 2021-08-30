@@ -8,10 +8,10 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshVertexCostsStamped : IDeserializable<MeshVertexCostsStamped>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
-        [DataMember (Name = "type")] public string Type { get; set; }
-        [DataMember (Name = "mesh_vertex_costs")] public MeshMsgs.MeshVertexCosts MeshVertexCosts { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "uuid")] public string Uuid;
+        [DataMember (Name = "type")] public string Type;
+        [DataMember (Name = "mesh_vertex_costs")] public MeshMsgs.MeshVertexCosts MeshVertexCosts;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCostsStamped()

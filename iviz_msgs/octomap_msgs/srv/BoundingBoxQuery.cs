@@ -61,9 +61,9 @@ namespace Iviz.Msgs.OctomapMsgs
     {
         // Clear a region specified by a global axis-aligned bounding box in stored OctoMap
         // minimum corner point of axis-aligned bounding box in global frame
-        [DataMember (Name = "min")] public GeometryMsgs.Point Min { get; set; }
+        [DataMember (Name = "min")] public GeometryMsgs.Point Min;
         // maximum corner point of axis-aligned bounding box in global frame
-        [DataMember (Name = "max")] public GeometryMsgs.Point Max { get; set; }
+        [DataMember (Name = "max")] public GeometryMsgs.Point Max;
     
         /// <summary> Constructor for empty message. </summary>
         public BoundingBoxQueryRequest()

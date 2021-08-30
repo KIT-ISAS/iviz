@@ -8,11 +8,11 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class OctomapWithPose : IDeserializable<OctomapWithPose>, IMessage
     {
         // A 3D map in binary format, as Octree
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // The pose of the octree with respect to the header frame 
-        [DataMember (Name = "origin")] public GeometryMsgs.Pose Origin { get; set; }
+        [DataMember (Name = "origin")] public GeometryMsgs.Pose Origin;
         // The actual octree msg
-        [DataMember (Name = "octomap")] public OctomapMsgs.Octomap Octomap { get; set; }
+        [DataMember (Name = "octomap")] public OctomapMsgs.Octomap Octomap;
     
         /// <summary> Constructor for empty message. </summary>
         public OctomapWithPose()

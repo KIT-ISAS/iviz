@@ -7,8 +7,8 @@ namespace Iviz.Msgs.PclMsgs
     [Preserve, DataContract (Name = "pcl_msgs/ModelCoefficients")]
     public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "values")] public float[] Values { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "values")] public float[] Values;
     
         /// <summary> Constructor for empty message. </summary>
         public ModelCoefficients()

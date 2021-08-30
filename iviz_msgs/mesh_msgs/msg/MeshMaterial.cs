@@ -7,9 +7,9 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/MeshMaterial")]
     public sealed class MeshMaterial : IDeserializable<MeshMaterial>, IMessage
     {
-        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
-        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; }
-        [DataMember (Name = "has_texture")] public bool HasTexture { get; set; }
+        [DataMember (Name = "texture_index")] public uint TextureIndex;
+        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
+        [DataMember (Name = "has_texture")] public bool HasTexture;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshMaterial()

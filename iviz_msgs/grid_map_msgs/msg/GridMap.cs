@@ -8,19 +8,19 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GridMap : IDeserializable<GridMap>, IMessage
     {
         // Grid map header
-        [DataMember (Name = "info")] public GridMapInfo Info { get; set; }
+        [DataMember (Name = "info")] public GridMapInfo Info;
         // Grid map layer names.
-        [DataMember (Name = "layers")] public string[] Layers { get; set; }
+        [DataMember (Name = "layers")] public string[] Layers;
         // Grid map basic layer names (optional). The basic layers
         // determine which layers from `layers` need to be valid
         // in order for a cell of the grid map to be valid.
-        [DataMember (Name = "basic_layers")] public string[] BasicLayers { get; set; }
+        [DataMember (Name = "basic_layers")] public string[] BasicLayers;
         // Grid map data.
-        [DataMember (Name = "data")] public StdMsgs.Float32MultiArray[] Data { get; set; }
+        [DataMember (Name = "data")] public StdMsgs.Float32MultiArray[] Data;
         // Row start index (default 0).
-        [DataMember (Name = "outer_start_index")] public ushort OuterStartIndex { get; set; }
+        [DataMember (Name = "outer_start_index")] public ushort OuterStartIndex;
         // Column start index (default 0).
-        [DataMember (Name = "inner_start_index")] public ushort InnerStartIndex { get; set; }
+        [DataMember (Name = "inner_start_index")] public ushort InnerStartIndex;
     
         /// <summary> Constructor for empty message. </summary>
         public GridMap()

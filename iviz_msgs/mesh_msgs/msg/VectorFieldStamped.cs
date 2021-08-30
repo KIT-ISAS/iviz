@@ -7,8 +7,8 @@ namespace Iviz.Msgs.MeshMsgs
     [Preserve, DataContract (Name = "mesh_msgs/VectorFieldStamped")]
     public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;
     
         /// <summary> Constructor for empty message. </summary>
         public VectorFieldStamped()

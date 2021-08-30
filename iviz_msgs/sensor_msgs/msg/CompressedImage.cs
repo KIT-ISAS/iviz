@@ -8,16 +8,16 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessage
     {
         // This message contains a compressed image
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
         // +y should point down in the image
         // +z should point into to plane of the image
-        [DataMember (Name = "format")] public string Format { get; set; } // Specifies the format of the data
+        [DataMember (Name = "format")] public string Format; // Specifies the format of the data
         //   Acceptable values:
         //     jpeg, png
-        [DataMember (Name = "data")] public byte[] Data { get; set; } // Compressed image buffer
+        [DataMember (Name = "data")] public byte[] Data; // Compressed image buffer
     
         /// <summary> Constructor for empty message. </summary>
         public CompressedImage()

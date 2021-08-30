@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Time")]
     public sealed class Time : IDeserializable<Time>, IMessage
     {
-        [DataMember (Name = "data")] public time Data { get; set; }
+        [DataMember (Name = "data")] public time Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Time()

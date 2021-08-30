@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Int64")]
     public sealed class Int64 : IDeserializable<Int64>, IMessage
     {
-        [DataMember (Name = "data")] public long Data { get; set; }
+        [DataMember (Name = "data")] public long Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Int64()

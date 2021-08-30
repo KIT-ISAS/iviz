@@ -20,13 +20,13 @@ namespace Iviz.Msgs.SensorMsgs
         // estimate), please set element 0 of the associated covariance matrix to -1
         // If you are interpreting this message, please check for a value of -1 in the first element of each 
         // covariance matrix, and disregard the associated estimate.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation { get; set; }
-        [DataMember (Name = "orientation_covariance")] public double[/*9*/] OrientationCovariance { get; set; } // Row major about x, y, z axes
-        [DataMember (Name = "angular_velocity")] public GeometryMsgs.Vector3 AngularVelocity { get; set; }
-        [DataMember (Name = "angular_velocity_covariance")] public double[/*9*/] AngularVelocityCovariance { get; set; } // Row major about x, y, z axes
-        [DataMember (Name = "linear_acceleration")] public GeometryMsgs.Vector3 LinearAcceleration { get; set; }
-        [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance { get; set; } // Row major x, y z 
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
+        [DataMember (Name = "orientation_covariance")] public double[/*9*/] OrientationCovariance; // Row major about x, y, z axes
+        [DataMember (Name = "angular_velocity")] public GeometryMsgs.Vector3 AngularVelocity;
+        [DataMember (Name = "angular_velocity_covariance")] public double[/*9*/] AngularVelocityCovariance; // Row major about x, y, z axes
+        [DataMember (Name = "linear_acceleration")] public GeometryMsgs.Vector3 LinearAcceleration;
+        [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance; // Row major x, y z 
     
         /// <summary> Constructor for empty message. </summary>
         public Imu()

@@ -8,12 +8,12 @@ namespace Iviz.Msgs.VisualizationMsgs
     public sealed class InteractiveMarkerPose : IDeserializable<InteractiveMarkerPose>, IMessage
     {
         // Time/frame info.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Initial pose. Also, defines the pivot point for rotations.
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         // Identifying string. Must be globally unique in
         // the topic that this message is sent through.
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerPose()

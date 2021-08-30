@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Byte")]
     public sealed class Byte : IDeserializable<Byte>, IMessage
     {
-        [DataMember (Name = "data")] public byte Data { get; set; }
+        [DataMember (Name = "data")] public byte Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Byte()

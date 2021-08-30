@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class ServiceNodeRequest : IRequest<ServiceNode, ServiceNodeResponse>, IDeserializable<ServiceNodeRequest>
     {
-        [DataMember (Name = "service")] public string Service { get; set; }
+        [DataMember (Name = "service")] public string Service;
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceNodeRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class ServiceNodeResponse : IResponse, IDeserializable<ServiceNodeResponse>
     {
-        [DataMember (Name = "node")] public string Node { get; set; }
+        [DataMember (Name = "node")] public string Node;
     
         /// <summary> Constructor for empty message. </summary>
         public ServiceNodeResponse()

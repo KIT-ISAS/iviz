@@ -16,18 +16,18 @@ namespace Iviz.Msgs.SensorMsgs
         // camera depth sensors such as stereo or time-of-flight.
         // Time of sensor data acquisition, and the coordinate frame ID (for 3d
         // points).
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // 2D structure of the point cloud. If the cloud is unordered, height is
         // 1 and width is the length of the point cloud.
-        [DataMember (Name = "height")] public uint Height { get; set; }
-        [DataMember (Name = "width")] public uint Width { get; set; }
+        [DataMember (Name = "height")] public uint Height;
+        [DataMember (Name = "width")] public uint Width;
         // Describes the channels and their layout in the binary data blob.
-        [DataMember (Name = "fields")] public PointField[] Fields { get; set; }
-        [DataMember (Name = "is_bigendian")] public bool IsBigendian { get; set; } // Is this data bigendian?
-        [DataMember (Name = "point_step")] public uint PointStep { get; set; } // Length of a point in bytes
-        [DataMember (Name = "row_step")] public uint RowStep { get; set; } // Length of a row in bytes
-        [DataMember (Name = "data")] public byte[] Data { get; set; } // Actual point data, size is (row_step*height)
-        [DataMember (Name = "is_dense")] public bool IsDense { get; set; } // True if there are no invalid points
+        [DataMember (Name = "fields")] public PointField[] Fields;
+        [DataMember (Name = "is_bigendian")] public bool IsBigendian; // Is this data bigendian?
+        [DataMember (Name = "point_step")] public uint PointStep; // Length of a point in bytes
+        [DataMember (Name = "row_step")] public uint RowStep; // Length of a row in bytes
+        [DataMember (Name = "data")] public byte[] Data; // Actual point data, size is (row_step*height)
+        [DataMember (Name = "is_dense")] public bool IsDense; // True if there are no invalid points
     
         /// <summary> Constructor for empty message. </summary>
         public PointCloud2()

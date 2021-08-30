@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessage
     {
         //Cluster
-        [DataMember (Name = "face_indices")] public uint[] FaceIndices { get; set; }
+        [DataMember (Name = "face_indices")] public uint[] FaceIndices;
         //optional
-        [DataMember (Name = "label")] public string Label { get; set; }
+        [DataMember (Name = "label")] public string Label;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshFaceCluster()

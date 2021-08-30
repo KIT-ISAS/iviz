@@ -59,8 +59,8 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetTextureRequest : IRequest<GetTexture, GetTextureResponse>, IDeserializable<GetTextureRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
-        [DataMember (Name = "texture_index")] public uint TextureIndex { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
+        [DataMember (Name = "texture_index")] public uint TextureIndex;
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureRequest()
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetTextureResponse : IResponse, IDeserializable<GetTextureResponse>
     {
-        [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture { get; set; }
+        [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture;
     
         /// <summary> Constructor for empty message. </summary>
         public GetTextureResponse()

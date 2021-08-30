@@ -59,7 +59,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class TestRequestAndResponseRequest : IRequest<TestRequestAndResponse, TestRequestAndResponseResponse>, IDeserializable<TestRequestAndResponseRequest>
     {
-        [DataMember (Name = "data")] public int Data { get; set; }
+        [DataMember (Name = "data")] public int Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseRequest()
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class TestRequestAndResponseResponse : IResponse, IDeserializable<TestRequestAndResponseResponse>
     {
-        [DataMember (Name = "data")] public int Data { get; set; }
+        [DataMember (Name = "data")] public int Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestAndResponseResponse()

@@ -59,7 +59,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     [DataContract]
     public sealed class TestRequestOnlyRequest : IRequest<TestRequestOnly, TestRequestOnlyResponse>, IDeserializable<TestRequestOnlyRequest>
     {
-        [DataMember (Name = "data")] public int Data { get; set; }
+        [DataMember (Name = "data")] public int Data;
     
         /// <summary> Constructor for empty message. </summary>
         public TestRequestOnlyRequest()

@@ -8,14 +8,14 @@ namespace Iviz.Msgs.VisualizationMsgs
     public sealed class InteractiveMarkerFeedback : IDeserializable<InteractiveMarkerFeedback>, IMessage
     {
         // Time/frame info.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Identifying string. Must be unique in the topic namespace.
-        [DataMember (Name = "client_id")] public string ClientId { get; set; }
+        [DataMember (Name = "client_id")] public string ClientId;
         // Feedback message sent back from the GUI, e.g.
         // when the status of an interactive marker was modified by the user.
         // Specifies which interactive marker and control this message refers to
-        [DataMember (Name = "marker_name")] public string MarkerName { get; set; }
-        [DataMember (Name = "control_name")] public string ControlName { get; set; }
+        [DataMember (Name = "marker_name")] public string MarkerName;
+        [DataMember (Name = "control_name")] public string ControlName;
         // Type of the event
         // KEEP_ALIVE: sent while dragging to keep up control of the marker
         // MENU_SELECT: a menu entry has been selected
@@ -27,19 +27,19 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte BUTTON_CLICK = 3;
         public const byte MOUSE_DOWN = 4;
         public const byte MOUSE_UP = 5;
-        [DataMember (Name = "event_type")] public byte EventType { get; set; }
+        [DataMember (Name = "event_type")] public byte EventType;
         // Current pose of the marker
         // Note: Has to be valid for all feedback types.
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         // Contains the ID of the selected menu entry
         // Only valid for MENU_SELECT events.
-        [DataMember (Name = "menu_entry_id")] public uint MenuEntryId { get; set; }
+        [DataMember (Name = "menu_entry_id")] public uint MenuEntryId;
         // If event_type is BUTTON_CLICK, MOUSE_DOWN, or MOUSE_UP, mouse_point
         // may contain the 3 dimensional position of the event on the
         // control.  If it does, mouse_point_valid will be true.  mouse_point
         // will be relative to the frame listed in the header.
-        [DataMember (Name = "mouse_point")] public GeometryMsgs.Point MousePoint { get; set; }
-        [DataMember (Name = "mouse_point_valid")] public bool MousePointValid { get; set; }
+        [DataMember (Name = "mouse_point")] public GeometryMsgs.Point MousePoint;
+        [DataMember (Name = "mouse_point_valid")] public bool MousePointValid;
     
         /// <summary> Constructor for empty message. </summary>
         public InteractiveMarkerFeedback()

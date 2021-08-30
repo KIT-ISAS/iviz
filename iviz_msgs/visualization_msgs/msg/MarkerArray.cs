@@ -7,7 +7,7 @@ namespace Iviz.Msgs.VisualizationMsgs
     [Preserve, DataContract (Name = "visualization_msgs/MarkerArray")]
     public sealed class MarkerArray : IDeserializable<MarkerArray>, IMessage
     {
-        [DataMember (Name = "markers")] public Marker[] Markers { get; set; }
+        [DataMember (Name = "markers")] public Marker[] Markers;
     
         /// <summary> Constructor for empty message. </summary>
         public MarkerArray()

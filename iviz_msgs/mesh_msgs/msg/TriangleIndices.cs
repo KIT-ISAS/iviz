@@ -8,7 +8,7 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class TriangleIndices : IDeserializable<TriangleIndices>, IMessage
     {
         // Definition of a triangle's vertices
-        [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices { get; set; }
+        [DataMember (Name = "vertex_indices")] public uint[/*3*/] VertexIndices;
     
         /// <summary> Constructor for empty message. </summary>
         public TriangleIndices()

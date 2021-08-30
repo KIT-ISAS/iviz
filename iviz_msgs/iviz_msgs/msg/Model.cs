@@ -7,12 +7,12 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Model")]
     public sealed class Model : IDeserializable<Model>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "filename")] public string Filename { get; set; }
-        [DataMember (Name = "orientation_hint")] public string OrientationHint { get; set; }
-        [DataMember (Name = "meshes")] public Mesh[] Meshes { get; set; }
-        [DataMember (Name = "materials")] public Material[] Materials { get; set; }
-        [DataMember (Name = "nodes")] public Node[] Nodes { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "filename")] public string Filename;
+        [DataMember (Name = "orientation_hint")] public string OrientationHint;
+        [DataMember (Name = "meshes")] public Mesh[] Meshes;
+        [DataMember (Name = "materials")] public Material[] Materials;
+        [DataMember (Name = "nodes")] public Node[] Nodes;
     
         /// <summary> Constructor for empty message. </summary>
         public Model()

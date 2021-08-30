@@ -7,11 +7,11 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/ParamDescription")]
     public sealed class ParamDescription : IDeserializable<ParamDescription>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "type")] public string Type { get; set; }
-        [DataMember (Name = "level")] public uint Level { get; set; }
-        [DataMember (Name = "description")] public string Description { get; set; }
-        [DataMember (Name = "edit_method")] public string EditMethod { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "type")] public string Type;
+        [DataMember (Name = "level")] public uint Level;
+        [DataMember (Name = "description")] public string Description;
+        [DataMember (Name = "edit_method")] public string EditMethod;
     
         /// <summary> Constructor for empty message. </summary>
         public ParamDescription()

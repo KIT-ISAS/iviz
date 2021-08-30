@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class TwistWithCovarianceStamped : IDeserializable<TwistWithCovarianceStamped>, IMessage
     {
         // This represents an estimated twist with reference coordinate frame and timestamp.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "twist")] public TwistWithCovariance Twist { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "twist")] public TwistWithCovariance Twist;
     
         /// <summary> Constructor for empty message. </summary>
         public TwistWithCovarianceStamped()

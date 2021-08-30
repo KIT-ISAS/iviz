@@ -14,9 +14,9 @@ namespace Iviz.Msgs.ShapeMsgs
         public const byte CYLINDER = 3;
         public const byte CONE = 4;
         // The type of the shape
-        [DataMember (Name = "type")] public byte Type { get; set; }
+        [DataMember (Name = "type")] public byte Type;
         // The dimensions of the shape
-        [DataMember (Name = "dimensions")] public double[] Dimensions { get; set; }
+        [DataMember (Name = "dimensions")] public double[] Dimensions;
         // The meaning of the shape dimensions: each constant defines the index in the 'dimensions' array
         // For the BOX type, the X, Y, and Z dimensions are the length of the corresponding
         // sides of the box.

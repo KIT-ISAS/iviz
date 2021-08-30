@@ -8,8 +8,8 @@ namespace Iviz.Msgs.GeometryMsgs
     public sealed class AccelWithCovarianceStamped : IDeserializable<AccelWithCovarianceStamped>, IMessage
     {
         // This represents an estimated accel with reference coordinate frame and timestamp.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "accel")] public AccelWithCovariance Accel { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "accel")] public AccelWithCovariance Accel;
     
         /// <summary> Constructor for empty message. </summary>
         public AccelWithCovarianceStamped()

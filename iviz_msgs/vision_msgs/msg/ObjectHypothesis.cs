@@ -11,10 +11,10 @@ namespace Iviz.Msgs.VisionMsgs
         // The unique ID of the object class. To get additional information about
         //   this ID, such as its human-readable class name, listeners should perform a
         //   lookup in a metadata database. See vision_msgs/VisionInfo.msg for more detail.
-        [DataMember (Name = "id")] public string Id { get; set; }
+        [DataMember (Name = "id")] public string Id;
         // The probability or confidence value of the detected object. By convention,
         //   this value should lie in the range [0-1].
-        [DataMember (Name = "score")] public double Score { get; set; }
+        [DataMember (Name = "score")] public double Score;
     
         /// <summary> Constructor for empty message. </summary>
         public ObjectHypothesis()

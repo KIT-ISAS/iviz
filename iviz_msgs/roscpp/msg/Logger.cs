@@ -7,8 +7,8 @@ namespace Iviz.Msgs.Roscpp
     [Preserve, DataContract (Name = "roscpp/Logger")]
     public sealed class Logger : IDeserializable<Logger>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "level")] public string Level { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "level")] public string Level;
     
         /// <summary> Constructor for empty message. </summary>
         public Logger()

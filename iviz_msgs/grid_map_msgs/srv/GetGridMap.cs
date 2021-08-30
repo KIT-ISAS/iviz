@@ -60,17 +60,17 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GetGridMapRequest : IRequest<GetGridMap, GetGridMapResponse>, IDeserializable<GetGridMapRequest>
     {
         // Frame id of the submap position request.
-        [DataMember (Name = "frame_id")] public string FrameId { get; set; }
+        [DataMember (Name = "frame_id")] public string FrameId;
         // Requested submap position in x-direction [m].
-        [DataMember (Name = "position_x")] public double PositionX { get; set; }
+        [DataMember (Name = "position_x")] public double PositionX;
         // Requested submap position in y-direction [m].
-        [DataMember (Name = "position_y")] public double PositionY { get; set; }
+        [DataMember (Name = "position_y")] public double PositionY;
         // Requested submap length in x-direction [m].
-        [DataMember (Name = "length_x")] public double LengthX { get; set; }
+        [DataMember (Name = "length_x")] public double LengthX;
         // Requested submap width in y-direction [m].
-        [DataMember (Name = "length_y")] public double LengthY { get; set; }
+        [DataMember (Name = "length_y")] public double LengthY;
         // Requested layers. If empty, get all layers.
-        [DataMember (Name = "layers")] public string[] Layers { get; set; }
+        [DataMember (Name = "layers")] public string[] Layers;
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapRequest()
@@ -156,7 +156,7 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GetGridMapResponse : IResponse, IDeserializable<GetGridMapResponse>
     {
         // Submap
-        [DataMember (Name = "map")] public GridMapMsgs.GridMap Map { get; set; }
+        [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
     
         /// <summary> Constructor for empty message. </summary>
         public GetGridMapResponse()

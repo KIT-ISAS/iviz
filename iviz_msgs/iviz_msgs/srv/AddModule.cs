@@ -60,8 +60,8 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class AddModuleRequest : IRequest<AddModule, AddModuleResponse>, IDeserializable<AddModuleRequest>
     {
         // Adds a module by type
-        [DataMember (Name = "module_type")] public string ModuleType { get; set; } // Module type
-        [DataMember (Name = "id")] public string Id { get; set; } // Requested id to identify this module, or empty to autogenerate
+        [DataMember (Name = "module_type")] public string ModuleType; // Module type
+        [DataMember (Name = "id")] public string Id; // Requested id to identify this module, or empty to autogenerate
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleRequest()
@@ -126,9 +126,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class AddModuleResponse : IResponse, IDeserializable<AddModuleResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; } // Whether the retrieval succeeded
-        [DataMember (Name = "message")] public string Message { get; set; } // An error message if success is false
-        [DataMember (Name = "id")] public string Id { get; set; } // An id identifying this module, or empty if error
+        [DataMember (Name = "success")] public bool Success; // Whether the retrieval succeeded
+        [DataMember (Name = "message")] public string Message; // An error message if success is false
+        [DataMember (Name = "id")] public string Id; // An id identifying this module, or empty if error
     
         /// <summary> Constructor for empty message. </summary>
         public AddModuleResponse()

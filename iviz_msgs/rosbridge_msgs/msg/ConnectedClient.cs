@@ -7,8 +7,8 @@ namespace Iviz.Msgs.RosbridgeMsgs
     [Preserve, DataContract (Name = "rosbridge_msgs/ConnectedClient")]
     public sealed class ConnectedClient : IDeserializable<ConnectedClient>, IMessage
     {
-        [DataMember (Name = "ip_address")] public string IpAddress { get; set; }
-        [DataMember (Name = "connection_time")] public time ConnectionTime { get; set; }
+        [DataMember (Name = "ip_address")] public string IpAddress;
+        [DataMember (Name = "connection_time")] public time ConnectionTime;
     
         /// <summary> Constructor for empty message. </summary>
         public ConnectedClient()

@@ -7,8 +7,8 @@ namespace Iviz.Msgs.GeometryMsgs
     [Preserve, DataContract (Name = "geometry_msgs/InertiaStamped")]
     public sealed class InertiaStamped : IDeserializable<InertiaStamped>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "inertia")] public Inertia Inertia { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "inertia")] public Inertia Inertia;
     
         /// <summary> Constructor for empty message. </summary>
         public InertiaStamped()

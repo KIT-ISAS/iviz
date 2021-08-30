@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class GetParamNamesResponse : IResponse, IDeserializable<GetParamNamesResponse>
     {
-        [DataMember (Name = "names")] public string[] Names { get; set; }
+        [DataMember (Name = "names")] public string[] Names;
     
         /// <summary> Constructor for empty message. </summary>
         public GetParamNamesResponse()

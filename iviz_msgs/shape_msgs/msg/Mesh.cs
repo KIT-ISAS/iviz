@@ -9,9 +9,9 @@ namespace Iviz.Msgs.ShapeMsgs
     {
         // Definition of a mesh
         // list of triangles; the index values refer to positions in vertices[]
-        [DataMember (Name = "triangles")] public MeshTriangle[] Triangles { get; set; }
+        [DataMember (Name = "triangles")] public MeshTriangle[] Triangles;
         // the actual vertices that make up the mesh
-        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; }
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
     
         /// <summary> Constructor for empty message. </summary>
         public Mesh()

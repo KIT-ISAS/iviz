@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IMessage
     {
         // Mesh Geometry Message
-        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices { get; set; }
-        [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals { get; set; }
-        [DataMember (Name = "faces")] public MeshMsgs.TriangleIndices[] Faces { get; set; }
+        [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
+        [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;
+        [DataMember (Name = "faces")] public MeshMsgs.TriangleIndices[] Faces;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshGeometry()

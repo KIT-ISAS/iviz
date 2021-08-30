@@ -8,10 +8,10 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class TimeReference : IDeserializable<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // stamp is system time for which measurement was valid
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // stamp is system time for which measurement was valid
         // frame_id is not used 
-        [DataMember (Name = "time_ref")] public time TimeRef { get; set; } // corresponding time from this external source
-        [DataMember (Name = "source")] public string Source { get; set; } // (optional) name of time source
+        [DataMember (Name = "time_ref")] public time TimeRef; // corresponding time from this external source
+        [DataMember (Name = "source")] public string Source; // (optional) name of time source
     
         /// <summary> Constructor for empty message. </summary>
         public TimeReference()

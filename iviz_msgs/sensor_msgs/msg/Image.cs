@@ -10,7 +10,7 @@ namespace Iviz.Msgs.SensorMsgs
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
         //
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // Header timestamp should be acquisition time of image
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -19,16 +19,16 @@ namespace Iviz.Msgs.SensorMsgs
         // If the frame_id here and the frame_id of the CameraInfo
         // message associated with the image conflict
         // the behavior is undefined
-        [DataMember (Name = "height")] public uint Height { get; set; } // image height, that is, number of rows
-        [DataMember (Name = "width")] public uint Width { get; set; } // image width, that is, number of columns
+        [DataMember (Name = "height")] public uint Height; // image height, that is, number of rows
+        [DataMember (Name = "width")] public uint Width; // image width, that is, number of columns
         // The legal values for encoding are in file src/image_encodings.cpp
         // If you want to standardize a new string format, join
         // ros-users@lists.sourceforge.net and send an email proposing a new encoding.
-        [DataMember (Name = "encoding")] public string Encoding { get; set; } // Encoding of pixels -- channel meaning, ordering, size
+        [DataMember (Name = "encoding")] public string Encoding; // Encoding of pixels -- channel meaning, ordering, size
         // taken from the list of strings in include/sensor_msgs/image_encodings.h
-        [DataMember (Name = "is_bigendian")] public byte IsBigendian { get; set; } // is this data bigendian?
-        [DataMember (Name = "step")] public uint Step { get; set; } // Full row length in bytes
-        [DataMember (Name = "data")] public byte[] Data { get; set; } // actual matrix data, size is (step * rows)
+        [DataMember (Name = "is_bigendian")] public byte IsBigendian; // is this data bigendian?
+        [DataMember (Name = "step")] public uint Step; // Full row length in bytes
+        [DataMember (Name = "data")] public byte[] Data; // actual matrix data, size is (step * rows)
     
         /// <summary> Constructor for empty message. </summary>
         public Image()

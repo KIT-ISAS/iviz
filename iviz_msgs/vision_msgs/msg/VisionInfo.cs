@@ -18,10 +18,10 @@ namespace Iviz.Msgs.VisionMsgs
         // Each vision pipeline should publish its VisionInfo messages to its own topic,
         //   in a manner similar to CameraInfo.
         // Used for sequencing
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Name of the vision pipeline. This should be a value that is meaningful to an
         //   outside user.
-        [DataMember (Name = "method")] public string Method { get; set; }
+        [DataMember (Name = "method")] public string Method;
         // Location where the metadata database is stored. The recommended location is
         //   as an XML string on the ROS parameter server, but the exact implementation
         //   and information is left up to the user.
@@ -36,13 +36,13 @@ namespace Iviz.Msgs.VisionMsgs
         //   database could be as simple as a map from ID to class name, or it could
         //   include information such as object meshes or colors to use for
         //   visualization.
-        [DataMember (Name = "database_location")] public string DatabaseLocation { get; set; }
+        [DataMember (Name = "database_location")] public string DatabaseLocation;
         // Metadata database version. This counter is incremented
         //   each time the pipeline begins using a new version of the database (useful
         //   in the case of online training or user modifications).
         //   The counter value can be monitored by listeners to ensure that the pipeline
         //   and the listener are using the same metadata.
-        [DataMember (Name = "database_version")] public int DatabaseVersion { get; set; }
+        [DataMember (Name = "database_version")] public int DatabaseVersion;
     
         /// <summary> Constructor for empty message. </summary>
         public VisionInfo()

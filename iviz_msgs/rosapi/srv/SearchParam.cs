@@ -59,7 +59,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class SearchParamRequest : IRequest<SearchParam, SearchParamResponse>, IDeserializable<SearchParamRequest>
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
+        [DataMember (Name = "name")] public string Name;
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class SearchParamResponse : IResponse, IDeserializable<SearchParamResponse>
     {
-        [DataMember (Name = "global_name")] public string GlobalName { get; set; }
+        [DataMember (Name = "global_name")] public string GlobalName;
     
         /// <summary> Constructor for empty message. </summary>
         public SearchParamResponse()

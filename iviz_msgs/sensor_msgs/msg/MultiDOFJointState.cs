@@ -26,11 +26,11 @@ namespace Iviz.Msgs.SensorMsgs
         // All arrays in this message should have the same size, or be empty.
         // This is the only way to uniquely associate the joint name with the correct
         // states.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
-        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms { get; set; }
-        [DataMember (Name = "twist")] public GeometryMsgs.Twist[] Twist { get; set; }
-        [DataMember (Name = "wrench")] public GeometryMsgs.Wrench[] Wrench { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "joint_names")] public string[] JointNames;
+        [DataMember (Name = "transforms")] public GeometryMsgs.Transform[] Transforms;
+        [DataMember (Name = "twist")] public GeometryMsgs.Twist[] Twist;
+        [DataMember (Name = "wrench")] public GeometryMsgs.Wrench[] Wrench;
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointState()

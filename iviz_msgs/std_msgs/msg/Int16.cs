@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Int16")]
     public sealed class Int16 : IDeserializable<Int16>, IMessage
     {
-        [DataMember (Name = "data")] public short Data { get; set; }
+        [DataMember (Name = "data")] public short Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Int16()

@@ -9,16 +9,16 @@ namespace Iviz.Msgs.StereoMsgs
     {
         // Separate header for compatibility with current TimeSynchronizer.
         // Likely to be removed in a later release, use image.header instead.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Floating point disparity image. The disparities are pre-adjusted for any
         // x-offset between the principal points of the two cameras (in the case
         // that they are verged). That is: d = x_l - x_r - (cx_l - cx_r)
-        [DataMember (Name = "image")] public SensorMsgs.Image Image { get; set; }
+        [DataMember (Name = "image")] public SensorMsgs.Image Image;
         // Stereo geometry. For disparity d, the depth from the camera is Z = fT/d.
-        [DataMember (Name = "f")] public float F { get; set; } // Focal length, pixels
-        [DataMember] public float T { get; set; } // Baseline, world units
+        [DataMember (Name = "f")] public float F; // Focal length, pixels
+        [DataMember] public float T; // Baseline, world units
         // Subwindow of (potentially) valid disparity values.
-        [DataMember (Name = "valid_window")] public SensorMsgs.RegionOfInterest ValidWindow { get; set; }
+        [DataMember (Name = "valid_window")] public SensorMsgs.RegionOfInterest ValidWindow;
         // The range of disparities searched.
         // In the disparity image, any disparity less than min_disparity is invalid.
         // The disparity search range defines the horopter, or 3D volume that the
@@ -26,11 +26,11 @@ namespace Iviz.Msgs.StereoMsgs
         //     Z_min = fT / max_disparity
         //     Z_max = fT / min_disparity
         // could not be found.
-        [DataMember (Name = "min_disparity")] public float MinDisparity { get; set; }
-        [DataMember (Name = "max_disparity")] public float MaxDisparity { get; set; }
+        [DataMember (Name = "min_disparity")] public float MinDisparity;
+        [DataMember (Name = "max_disparity")] public float MaxDisparity;
         // Smallest allowed disparity increment. The smallest achievable depth range
         // resolution is delta_Z = (Z^2/fT)*delta_d.
-        [DataMember (Name = "delta_d")] public float DeltaD { get; set; }
+        [DataMember (Name = "delta_d")] public float DeltaD;
     
         /// <summary> Constructor for empty message. </summary>
         public DisparityImage()

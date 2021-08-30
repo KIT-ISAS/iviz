@@ -7,15 +7,15 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Mesh")]
     public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "vertices")] public Vector3f[] Vertices { get; set; }
-        [DataMember (Name = "normals")] public Vector3f[] Normals { get; set; }
-        [DataMember (Name = "tangents")] public Vector3f[] Tangents { get; set; }
-        [DataMember (Name = "bi_tangents")] public Vector3f[] BiTangents { get; set; }
-        [DataMember (Name = "tex_coords")] public TexCoords[] TexCoords { get; set; }
-        [DataMember (Name = "color_channels")] public ColorChannel[] ColorChannels { get; set; }
-        [DataMember (Name = "faces")] public Triangle[] Faces { get; set; }
-        [DataMember (Name = "material_index")] public uint MaterialIndex { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "vertices")] public Vector3f[] Vertices;
+        [DataMember (Name = "normals")] public Vector3f[] Normals;
+        [DataMember (Name = "tangents")] public Vector3f[] Tangents;
+        [DataMember (Name = "bi_tangents")] public Vector3f[] BiTangents;
+        [DataMember (Name = "tex_coords")] public TexCoords[] TexCoords;
+        [DataMember (Name = "color_channels")] public ColorChannel[] ColorChannels;
+        [DataMember (Name = "faces")] public Triangle[] Faces;
+        [DataMember (Name = "material_index")] public uint MaterialIndex;
     
         /// <summary> Constructor for empty message. </summary>
         public Mesh()

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.PclMsgs
     public sealed class Vertices : IDeserializable<Vertices>, IMessage
     {
         // List of point indices
-        [DataMember (Name = "vertices")] public uint[] Vertices_ { get; set; }
+        [DataMember (Name = "vertices")] public uint[] Vertices_;
     
         /// <summary> Constructor for empty message. </summary>
         public Vertices()

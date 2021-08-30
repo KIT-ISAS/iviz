@@ -8,7 +8,7 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class MeshVertexCosts : IDeserializable<MeshVertexCosts>, IMessage
     {
         // Mesh Attribute Message
-        [DataMember (Name = "costs")] public float[] Costs { get; set; }
+        [DataMember (Name = "costs")] public float[] Costs;
     
         /// <summary> Constructor for empty message. </summary>
         public MeshVertexCosts()

@@ -7,7 +7,7 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/Bool")]
     public sealed class Bool : IDeserializable<Bool>, IMessage
     {
-        [DataMember (Name = "data")] public bool Data { get; set; }
+        [DataMember (Name = "data")] public bool Data;
     
         /// <summary> Constructor for empty message. </summary>
         public Bool()

@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetVertexColorsRequest : IRequest<GetVertexColors, GetVertexColorsResponse>, IDeserializable<GetVertexColorsRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetVertexColorsResponse : IResponse, IDeserializable<GetVertexColorsResponse>
     {
-        [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped { get; set; }
+        [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped;
     
         /// <summary> Constructor for empty message. </summary>
         public GetVertexColorsResponse()

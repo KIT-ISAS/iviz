@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/DetectedARMarkerArray")]
     public sealed class DetectedARMarkerArray : IDeserializable<DetectedARMarkerArray>, IMessage
     {
-        [DataMember (Name = "markers")] public DetectedARMarker[] Markers { get; set; }
+        [DataMember (Name = "markers")] public DetectedARMarker[] Markers;
     
         /// <summary> Constructor for empty message. </summary>
         public DetectedARMarkerArray()
@@ -78,25 +78,25 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/DetectedARMarkerArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "77cdae4e43f4daab309e1a8859b678c6";
+        [Preserve] public const string RosMd5Sum = "38745a121d365c2cc5cc1b47928542b2";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UXW/TShB9zv6KkfpAi9LABYREJR4qwuX2AdGWgoQqZG3sib0Xe9fsrpO6v54z68Qh" +
-                "VSV4gEaWsl7POTNz5mPOkfPIxenle+2/sb/+Sk06BKVe/+Gfev/x3QmZlbnNmlCGJ/M7vtWij0xXX87f" +
-                "ZqeXn958oNf09Ke7i8s3H+ZvcfmPUv+xLthTlf4Gm9i3rEL0xpaUu4JVya7h6PvB2We4cv759Yuv+Oot" +
-                "EpxMDqg1N1xT64KJxllam1jRbfK7rJ2OL19cv4K9btjrzFghDyafCNK7NZT633ka7+94PHeBt1h4YKUW" +
-                "ztVU6ZDxzQYyfNj42iifBXPLk+RETuCnprmPW7CZ51pHs+IsumxwNvlblQuxGLwP6qsD+hi1LbQvCKHp" +
-                "QkdNSwhSmbJif1zzCtqGqJuWC0pfpUZhBuBVZQLhKRmV0HXdUxdgFB2K0zSdNbmWkpqG9/BAQg1NrfbR" +
-                "5F2tPeydL4wV86VH/sKOJ/D3jm3OdDY/gY0NnHciEzwZm3vWQfrkbE6qQ/2ePxOAOrhau2O8coneGp1T" +
-                "rHSUYPmm9RwkTh1O4OPxkNwM3BCH4aUIdJjuMryGI9RPQuDW5RUdIvLzPlZos1gxrbQ3elGzEOdQAKyP" +
-                "BPTo6Cdmm6ittm5LPzDufPwOrR15JafjCjWrJfvQlRAQhq13K1PAdNEnkrw2bCPVZuG175WgBpfq4F/R" +
-                "GEZApYrgX4fgcoMCFGl+tjOYqpGZ4m91473jvW0tz1IqJIHwaJW+SecsPSOTVuc8kyY5S2V1Fk3RsEbG" +
-                "6L8RCWBhPKBYDDOwsmc0N0/JRCocB7IugqPR30DJ0FjQum1Bhkb32gYZTCmLE8ghz8rZlNYV28FKNEod" +
-                "nWbA5ORNaYoBCUfNCNa0SW5KcfkMGtf1EPPgDAVTso5iAhzN6GxJvetoLQnh4Dej52jBY1ypRaJzU5m7" +
-                "DcXdDYNBgCwh6FJ2UIgY+pkad9XNeOrH0+2DlFp2H8I93ZVqkMot00bcr/NUFopcF5vvw6LHCJDzZotF" +
-                "Nwz5bg3URYeG9jbx7uweppdTKNtOxthHDfnTYI7xIxdswRTyXrq/KM+DhL+T7r5p3NNzP3h5+77TXYbg" +
-                "lw23Pa2V+gGfU9qFywgAAA==";
+                "H4sIAAAAAAAAE71UTW/bRhA9e3/FAD7ELmS1TYICNZCDEaWtD0Ecxw0QGAGx4o7IbchdZncpmf71fbOU" +
+                "qMgwkB4aCwS0XM6bNx9vZsGJy8Tm4vqtDl843H6mNh+iUq/+5596++HPc7Jre1+0sYo/Lx5wq+WQmG4+" +
+                "Xb0pLq7/fv2OXtEv39y9v379bvEGl78q9Rdrw4Hq/DfapKFjFVOwrqLSG1YV+5ZTGEayj6Dy4cXty8/4" +
+                "GhwSPDo6ps7ecUOdjzZZ72hjU033mXfVeJ1+e3n7O+x1y0EX1onzaMsjQQa/QaX+8YGm+weMVz7yDgsG" +
+                "VmrpfUO1jgXfbSHjhy3XtvJFtPcMtqJtwfSYUwEVgRud7JqL5IuR5ehHtSwmM7KPZVfH9CFpZ3QwhNC0" +
+                "0UnTCpWobVVzOGt4jaLGpNuODeWv0pw4B/CmtpHwVIwW6KYZqI8wSh5dadve2VJLL23LB3ggrSNNnQ7J" +
+                "ln2jA+x9MNaJ+Sogf/GOJ/LXnl3JdLk4h42LXPZSJjBZVwbWUQRyuSDVo3EvngtAHd9s/BleuYKoJnJK" +
+                "tU4SLN91gaPEqeM5OH4ak5vDN4rDYDGRTvJdgdd4SiBBCNz5sqYTRH41pBr6SjXTWgerlw2L4xIVgNdn" +
+                "Anp2+o1nl1077fzO/ehxz/Ff3LrJr+R0VqNnjWQf+woFhGEX/NoamC6H7KRsLLtEjV0GHQYlqJFSHf8h" +
+                "NYYRULkj+Ncx+tKiASYPzm74cjcKa36UGh+d6520AkurkATCo3X+JspZBUYmnS55LiK5zG31DqJoWSNj" +
+                "6G9CAmhsABQbYQ6vHBji5hnZRMZzJOcTfLT6C1wyaixo3XVwBqEH7aIMprTFC+SE59V8Rpua3WglNcqK" +
+                "zjNgSwq2smZEgqidwJq2yc0orZ6jxk0zxjySoWFK9lDKgNM5Xa5o8D1tJCEcwnb0PC15iitLJHk/k7nb" +
+                "uni4YTAIKEuMuoKaXEwY+rmaltTddBqm0/2TtFp2H8K92LdqLJVf5Y142OeZLBS5Ntvv44bHCJAPdoeF" +
+                "GsZ8dwbqfQ9BB5f97u2eRss5lJ2SMfZJo/x5MKf4kQu2YA75IN3vtOdJwt+X7rFpPKjnYfDy9nVfdxmC" +
+                "7wpud9oo9S9FvTz2xAgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

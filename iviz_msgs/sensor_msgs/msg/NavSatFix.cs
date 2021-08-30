@@ -18,22 +18,22 @@ namespace Iviz.Msgs.SensorMsgs
         //        receiver, usually the location of the antenna.  This is a
         //        Euclidean frame relative to the vehicle, not a reference
         //        ellipsoid.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // satellite fix status information
-        [DataMember (Name = "status")] public NavSatStatus Status { get; set; }
+        [DataMember (Name = "status")] public NavSatStatus Status;
         // Latitude [degrees]. Positive is north of equator; negative is south.
-        [DataMember (Name = "latitude")] public double Latitude { get; set; }
+        [DataMember (Name = "latitude")] public double Latitude;
         // Longitude [degrees]. Positive is east of prime meridian; negative is west.
-        [DataMember (Name = "longitude")] public double Longitude { get; set; }
+        [DataMember (Name = "longitude")] public double Longitude;
         // Altitude [m]. Positive is above the WGS 84 ellipsoid
         // (quiet NaN if no altitude is available).
-        [DataMember (Name = "altitude")] public double Altitude { get; set; }
+        [DataMember (Name = "altitude")] public double Altitude;
         // Position covariance [m^2] defined relative to a tangential plane
         // through the reported position. The components are East, North, and
         // Up (ENU), in row-major order.
         //
         // Beware: this coordinate system exhibits singularities at the poles.
-        [DataMember (Name = "position_covariance")] public double[/*9*/] PositionCovariance { get; set; }
+        [DataMember (Name = "position_covariance")] public double[/*9*/] PositionCovariance;
         // If the covariance of the fix is known, fill it in completely. If the
         // GPS receiver provides the variance of each measurement, put them
         // along the diagonal. If only Dilution of Precision is available,
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte COVARIANCE_TYPE_APPROXIMATED = 1;
         public const byte COVARIANCE_TYPE_DIAGONAL_KNOWN = 2;
         public const byte COVARIANCE_TYPE_KNOWN = 3;
-        [DataMember (Name = "position_covariance_type")] public byte PositionCovarianceType { get; set; }
+        [DataMember (Name = "position_covariance_type")] public byte PositionCovarianceType;
     
         /// <summary> Constructor for empty message. </summary>
         public NavSatFix()

@@ -7,17 +7,17 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/RobotConfiguration")]
     public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IMessage
     {
-        [DataMember (Name = "source_parameter")] public string SourceParameter { get; set; }
-        [DataMember (Name = "saved_robot_name")] public string SavedRobotName { get; set; }
-        [DataMember (Name = "frame_prefix")] public string FramePrefix { get; set; }
-        [DataMember (Name = "frame_suffix")] public string FrameSuffix { get; set; }
-        [DataMember (Name = "attached_to_tf")] public bool AttachedToTf { get; set; }
-        [DataMember (Name = "render_as_occlusion_only")] public bool RenderAsOcclusionOnly { get; set; }
-        [DataMember (Name = "tint")] public StdMsgs.ColorRGBA Tint { get; set; }
-        [DataMember (Name = "metallic")] public float Metallic { get; set; }
-        [DataMember (Name = "smoothness")] public float Smoothness { get; set; }
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "visible")] public bool Visible { get; set; }
+        [DataMember (Name = "source_parameter")] public string SourceParameter;
+        [DataMember (Name = "saved_robot_name")] public string SavedRobotName;
+        [DataMember (Name = "frame_prefix")] public string FramePrefix;
+        [DataMember (Name = "frame_suffix")] public string FrameSuffix;
+        [DataMember (Name = "attached_to_tf")] public bool AttachedToTf;
+        [DataMember (Name = "render_as_occlusion_only")] public bool RenderAsOcclusionOnly;
+        [DataMember (Name = "tint")] public StdMsgs.ColorRGBA Tint;
+        [DataMember (Name = "metallic")] public float Metallic;
+        [DataMember (Name = "smoothness")] public float Smoothness;
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "visible")] public bool Visible;
     
         /// <summary> Constructor for empty message. </summary>
         public RobotConfiguration()

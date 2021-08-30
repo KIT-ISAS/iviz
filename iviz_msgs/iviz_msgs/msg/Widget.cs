@@ -7,15 +7,15 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = "iviz_msgs/Widget")]
     public sealed class Widget : IDeserializable<Widget>, IMessage
     {
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
-        [DataMember (Name = "action")] public byte Action { get; set; }
-        [DataMember (Name = "id")] public string Id { get; set; }
-        [DataMember (Name = "type")] public byte Type { get; set; }
-        [DataMember (Name = "main_color")] public StdMsgs.ColorRGBA MainColor { get; set; }
-        [DataMember (Name = "secondary_color")] public StdMsgs.ColorRGBA SecondaryColor { get; set; }
-        [DataMember (Name = "scale")] public double Scale { get; set; }
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; }
-        [DataMember (Name = "caption")] public string Caption { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        [DataMember (Name = "action")] public byte Action;
+        [DataMember (Name = "id")] public string Id;
+        [DataMember (Name = "type")] public byte Type;
+        [DataMember (Name = "main_color")] public StdMsgs.ColorRGBA MainColor;
+        [DataMember (Name = "secondary_color")] public StdMsgs.ColorRGBA SecondaryColor;
+        [DataMember (Name = "scale")] public double Scale;
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
+        [DataMember (Name = "caption")] public string Caption;
     
         /// <summary> Constructor for empty message. </summary>
         public Widget()

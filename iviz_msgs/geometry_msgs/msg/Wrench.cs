@@ -9,8 +9,8 @@ namespace Iviz.Msgs.GeometryMsgs
     {
         // This represents force in free space, separated into
         // its linear and angular parts.
-        [DataMember (Name = "force")] public Vector3 Force { get; set; }
-        [DataMember (Name = "torque")] public Vector3 Torque { get; set; }
+        [DataMember (Name = "force")] public Vector3 Force;
+        [DataMember (Name = "torque")] public Vector3 Torque;
     
         /// <summary> Constructor for empty message. </summary>
         public Wrench()

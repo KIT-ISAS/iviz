@@ -59,9 +59,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class StartCaptureRequest : IRequest<StartCapture, StartCaptureResponse>, IDeserializable<StartCaptureRequest>
     {
-        [DataMember (Name = "resolution_x")] public int ResolutionX { get; set; }
-        [DataMember (Name = "resolution_y")] public int ResolutionY { get; set; }
-        [DataMember (Name = "with_holograms")] public bool WithHolograms { get; set; }
+        [DataMember (Name = "resolution_x")] public int ResolutionX;
+        [DataMember (Name = "resolution_y")] public int ResolutionY;
+        [DataMember (Name = "with_holograms")] public bool WithHolograms;
     
         /// <summary> Constructor for empty message. </summary>
         public StartCaptureRequest()
@@ -120,8 +120,8 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class StartCaptureResponse : IResponse, IDeserializable<StartCaptureResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "success")] public bool Success;
+        [DataMember (Name = "message")] public string Message;
     
         /// <summary> Constructor for empty message. </summary>
         public StartCaptureResponse()

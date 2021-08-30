@@ -74,7 +74,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // and http://wiki.ros.org/diagnostics/Tutorials/Using%20the%20GenericAnalyzer
         // for examples of the structure of yaml files which are expected to have been
         // loaded into the namespace.
-        [DataMember (Name = "load_namespace")] public string LoadNamespace { get; set; }
+        [DataMember (Name = "load_namespace")] public string LoadNamespace;
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsRequest()
@@ -137,9 +137,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // otherwise. A false return value means that either there is a bond in the
         // aggregator which already used the requested namespace, or the initialization
         // of analyzers failed.
-        [DataMember (Name = "success")] public bool Success { get; set; }
+        [DataMember (Name = "success")] public bool Success;
         // Message with additional information about the success or failure
-        [DataMember (Name = "message")] public string Message { get; set; }
+        [DataMember (Name = "message")] public string Message;
     
         /// <summary> Constructor for empty message. </summary>
         public AddDiagnosticsResponse()

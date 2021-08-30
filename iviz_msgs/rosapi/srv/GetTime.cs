@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
     [DataContract]
     public sealed class GetTimeResponse : IResponse, IDeserializable<GetTimeResponse>
     {
-        [DataMember (Name = "time")] public time Time { get; set; }
+        [DataMember (Name = "time")] public time Time;
     
         /// <summary> Constructor for empty message. </summary>
         public GetTimeResponse()

@@ -7,11 +7,11 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/Config")]
     public sealed class Config : IDeserializable<Config>, IMessage
     {
-        [DataMember (Name = "bools")] public BoolParameter[] Bools { get; set; }
-        [DataMember (Name = "ints")] public IntParameter[] Ints { get; set; }
-        [DataMember (Name = "strs")] public StrParameter[] Strs { get; set; }
-        [DataMember (Name = "doubles")] public DoubleParameter[] Doubles { get; set; }
-        [DataMember (Name = "groups")] public GroupState[] Groups { get; set; }
+        [DataMember (Name = "bools")] public BoolParameter[] Bools;
+        [DataMember (Name = "ints")] public IntParameter[] Ints;
+        [DataMember (Name = "strs")] public StrParameter[] Strs;
+        [DataMember (Name = "doubles")] public DoubleParameter[] Doubles;
+        [DataMember (Name = "groups")] public GroupState[] Groups;
     
         /// <summary> Constructor for empty message. </summary>
         public Config()

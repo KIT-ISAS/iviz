@@ -10,11 +10,11 @@ namespace Iviz.Msgs.ActionlibMsgs
         // The stamp should store the time at which this goal was requested.
         // It is used by an action server when it tries to preempt all
         // goals that were requested before a certain time
-        [DataMember (Name = "stamp")] public time Stamp { get; set; }
+        [DataMember (Name = "stamp")] public time Stamp;
         // The id provides a way to associate feedback and
         // result message with specific goal requests. The id
         // specified must be unique.
-        [DataMember (Name = "id")] public string Id { get; set; }
+        [DataMember (Name = "id")] public string Id;
     
         /// <summary> Constructor for empty message. </summary>
         public GoalID()

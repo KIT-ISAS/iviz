@@ -11,10 +11,10 @@ namespace Iviz.Msgs.SensorMsgs
         // pressure inside of a fluid (air, water, etc).  This also includes
         // atmospheric or barometric pressure.
         // This message is not appropriate for force/pressure contact sensors.
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // timestamp of the measurement
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // timestamp of the measurement
         // frame_id is the location of the pressure sensor
-        [DataMember (Name = "fluid_pressure")] public double FluidPressure_ { get; set; } // Absolute pressure reading in Pascals.
-        [DataMember (Name = "variance")] public double Variance { get; set; } // 0 is interpreted as variance unknown
+        [DataMember (Name = "fluid_pressure")] public double FluidPressure_; // Absolute pressure reading in Pascals.
+        [DataMember (Name = "variance")] public double Variance; // 0 is interpreted as variance unknown
     
         /// <summary> Constructor for empty message. </summary>
         public FluidPressure()

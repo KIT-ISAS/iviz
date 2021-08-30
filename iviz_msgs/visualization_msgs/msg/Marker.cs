@@ -24,27 +24,27 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte MODIFY = 0;
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; } // header for time/frame information
-        [DataMember (Name = "ns")] public string Ns { get; set; } // Namespace to place this object in... used in conjunction with id to create a unique name for the object
-        [DataMember (Name = "id")] public int Id { get; set; } // object ID useful in conjunction with the namespace for manipulating and deleting the object later
-        [DataMember (Name = "type")] public int Type { get; set; } // Type of object
-        [DataMember (Name = "action")] public int Action { get; set; } // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose { get; set; } // Pose of the object
-        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale { get; set; } // Scale of the object 1,1,1 means default (usually 1 meter square)
-        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color { get; set; } // Color [0.0-1.0]
-        [DataMember (Name = "lifetime")] public duration Lifetime { get; set; } // How long the object should last before being automatically deleted.  0 means forever
-        [DataMember (Name = "frame_locked")] public bool FrameLocked { get; set; } // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
+        [DataMember (Name = "header")] public StdMsgs.Header Header; // header for time/frame information
+        [DataMember (Name = "ns")] public string Ns; // Namespace to place this object in... used in conjunction with id to create a unique name for the object
+        [DataMember (Name = "id")] public int Id; // object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        [DataMember (Name = "type")] public int Type; // Type of object
+        [DataMember (Name = "action")] public int Action; // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose; // Pose of the object
+        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale; // Scale of the object 1,1,1 means default (usually 1 meter square)
+        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color; // Color [0.0-1.0]
+        [DataMember (Name = "lifetime")] public duration Lifetime; // How long the object should last before being automatically deleted.  0 means forever
+        [DataMember (Name = "frame_locked")] public bool FrameLocked; // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
-        [DataMember (Name = "points")] public GeometryMsgs.Point[] Points { get; set; }
+        [DataMember (Name = "points")] public GeometryMsgs.Point[] Points;
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
         //number of colors must either be 0 or equal to the number of points
         //NOTE: alpha is not yet used
-        [DataMember (Name = "colors")] public StdMsgs.ColorRGBA[] Colors { get; set; }
+        [DataMember (Name = "colors")] public StdMsgs.ColorRGBA[] Colors;
         // NOTE: only used for text markers
-        [DataMember (Name = "text")] public string Text { get; set; }
+        [DataMember (Name = "text")] public string Text;
         // NOTE: only used for MESH_RESOURCE markers
-        [DataMember (Name = "mesh_resource")] public string MeshResource { get; set; }
-        [DataMember (Name = "mesh_use_embedded_materials")] public bool MeshUseEmbeddedMaterials { get; set; }
+        [DataMember (Name = "mesh_resource")] public string MeshResource;
+        [DataMember (Name = "mesh_use_embedded_materials")] public bool MeshUseEmbeddedMaterials;
     
         /// <summary> Constructor for empty message. </summary>
         public Marker()

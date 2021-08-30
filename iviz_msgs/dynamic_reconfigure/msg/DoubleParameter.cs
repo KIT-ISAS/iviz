@@ -7,8 +7,8 @@ namespace Iviz.Msgs.DynamicReconfigure
     [Preserve, DataContract (Name = "dynamic_reconfigure/DoubleParameter")]
     public sealed class DoubleParameter : IDeserializable<DoubleParameter>, IMessage
     {
-        [DataMember (Name = "name")] public string Name { get; set; }
-        [DataMember (Name = "value")] public double Value { get; set; }
+        [DataMember (Name = "name")] public string Name;
+        [DataMember (Name = "value")] public double Value;
     
         /// <summary> Constructor for empty message. </summary>
         public DoubleParameter()

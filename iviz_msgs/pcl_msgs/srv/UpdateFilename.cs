@@ -59,7 +59,7 @@ namespace Iviz.Msgs.PclMsgs
     [DataContract]
     public sealed class UpdateFilenameRequest : IRequest<UpdateFilename, UpdateFilenameResponse>, IDeserializable<UpdateFilenameRequest>
     {
-        [DataMember (Name = "filename")] public string Filename { get; set; }
+        [DataMember (Name = "filename")] public string Filename;
     
         /// <summary> Constructor for empty message. </summary>
         public UpdateFilenameRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.PclMsgs
     [DataContract]
     public sealed class UpdateFilenameResponse : IResponse, IDeserializable<UpdateFilenameResponse>
     {
-        [DataMember (Name = "success")] public bool Success { get; set; }
+        [DataMember (Name = "success")] public bool Success;
     
         /// <summary> Constructor for empty message. </summary>
         public UpdateFilenameResponse()

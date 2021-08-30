@@ -7,9 +7,9 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = "std_msgs/MultiArrayDimension")]
     public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
     {
-        [DataMember (Name = "label")] public string Label { get; set; } // label of given dimension
-        [DataMember (Name = "size")] public uint Size { get; set; } // size of given dimension (in type units)
-        [DataMember (Name = "stride")] public uint Stride { get; set; } // stride of given dimension
+        [DataMember (Name = "label")] public string Label; // label of given dimension
+        [DataMember (Name = "size")] public uint Size; // size of given dimension (in type units)
+        [DataMember (Name = "stride")] public uint Stride; // stride of given dimension
     
         /// <summary> Constructor for empty message. </summary>
         public MultiArrayDimension()

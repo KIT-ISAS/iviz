@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetMaterialsRequest : IRequest<GetMaterials, GetMaterialsResponse>, IDeserializable<GetMaterialsRequest>
     {
-        [DataMember (Name = "uuid")] public string Uuid { get; set; }
+        [DataMember (Name = "uuid")] public string Uuid;
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsRequest()
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MeshMsgs
     [DataContract]
     public sealed class GetMaterialsResponse : IResponse, IDeserializable<GetMaterialsResponse>
     {
-        [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped { get; set; }
+        [DataMember (Name = "mesh_materials_stamped")] public MeshMsgs.MeshMaterialsStamped MeshMaterialsStamped;
     
         /// <summary> Constructor for empty message. </summary>
         public GetMaterialsResponse()

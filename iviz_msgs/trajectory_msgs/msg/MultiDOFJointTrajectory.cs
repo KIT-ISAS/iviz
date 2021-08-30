@@ -8,13 +8,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
     public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
-        [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // A representation of a multi-dof joint trajectory (each point is a transformation)
         // Each point along the trajectory will include an array of positions/velocities/accelerations
         // that has the same length as the array of joint names, and has the same order of joints as 
         // the joint names array.
-        [DataMember (Name = "joint_names")] public string[] JointNames { get; set; }
-        [DataMember (Name = "points")] public MultiDOFJointTrajectoryPoint[] Points { get; set; }
+        [DataMember (Name = "joint_names")] public string[] JointNames;
+        [DataMember (Name = "points")] public MultiDOFJointTrajectoryPoint[] Points;
     
         /// <summary> Constructor for empty message. </summary>
         public MultiDOFJointTrajectory()
