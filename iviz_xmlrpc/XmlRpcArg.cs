@@ -47,7 +47,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        public XmlRpcArg(Uri[] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(Uri[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -68,7 +68,7 @@ namespace Iviz.XmlRpc
                 : $"<value>{HttpUtility.HtmlEncode(f)}</value>\n";
         }
 
-        public XmlRpcArg(IReadOnlyList<string> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(IReadOnlyList<string> f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -76,7 +76,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg(IReadOnlyList<string[]> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(IReadOnlyList<string[]> f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -88,7 +88,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg(IReadOnlyList<(string, string)> f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        public XmlRpcArg(IReadOnlyList<(string, string)> f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
@@ -147,11 +147,11 @@ namespace Iviz.XmlRpc
                 "</data></array></value>";
         }
 
-        XmlRpcArg(XmlRpcArg[][] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg(XmlRpcArg[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 
-        XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) : this(Enumerable.Select(f, x => new XmlRpcArg(x)).ToArray())
+        XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
         {
         }
 

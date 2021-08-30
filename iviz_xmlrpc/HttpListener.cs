@@ -19,13 +19,13 @@ namespace Iviz.XmlRpc
         const int DefaultTimeoutInMs = 2000;
         const int BackgroundTimeoutInMs = 5000;
 
-        readonly List<(DateTime start, Task task)> backgroundTasks = new List<(DateTime, Task)>();
+        readonly List<(DateTime start, Task task)> backgroundTasks = new();
         readonly TcpListener listener;
 
         bool started;
         bool disposed;
 
-        readonly CancellationTokenSource runningTs = new CancellationTokenSource();
+        readonly CancellationTokenSource runningTs = new();
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Iviz.XmlRpc
                 }
                 catch (Exception e)
                 {
-                    if (e is ObjectDisposedException || e is OperationCanceledException)
+                    if (e is ObjectDisposedException or OperationCanceledException)
                     {
                         break;
                     }
@@ -185,7 +185,7 @@ namespace Iviz.XmlRpc
 
             try
             {
-                await Task.WhenAll(backgroundTasks.Select(tuple => tuple.task)).AwaitFor(timeoutInMs);
+                await backgroundTasks.Select(tuple => tuple.task).WhenAll().AwaitFor(timeoutInMs);
             }
             catch (Exception e)
             {
