@@ -23,7 +23,7 @@ namespace Iviz.Msgs
 
         public time(in DateTime time)
         {
-            TimeSpan diff = time.ToLocalTime() - UnixEpoch;
+            TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
             Secs = (uint) diff.TotalSeconds;
             Nsecs = (uint) (diff.Ticks % 10000000) * 100;
         }
@@ -35,7 +35,7 @@ namespace Iviz.Msgs
 
         public DateTime ToDateTime()
         {
-            return UnixEpoch.ToLocalTime() + ToTimeSpan();
+            return (UnixEpoch + ToTimeSpan()).ToLocalTime();
         }
 
         public TimeSpan ToTimeSpan()

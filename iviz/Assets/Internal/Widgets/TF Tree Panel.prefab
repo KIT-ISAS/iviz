@@ -505,7 +505,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -2.2900085, y: 21.09198}
+  m_AnchoredPosition: {x: -2.290039, y: 21.092041}
   m_SizeDelta: {x: -13.009705, y: 33.943176}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &9072330084919196335
@@ -996,8 +996,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.05999756, y: 61.819946}
-  m_SizeDelta: {x: -11.350006, y: -122.85388}
+  m_AnchoredPosition: {x: 0.060058594, y: 69.6}
+  m_SizeDelta: {x: -11.350098, y: -138.318}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4994521175603142596
 CanvasRenderer:
@@ -1433,7 +1433,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4994521176887897145}
   m_HandleRect: {fileID: 4994521176887897126}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1566,7 +1566,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.00012207031}
   m_SizeDelta: {x: 5.251251, y: 51.549316}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &4994521176887897127
@@ -2137,8 +2137,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.059936523, y: -2.786148}
-  m_SizeDelta: {x: -3.4371338, y: -5.581848}
+  m_AnchoredPosition: {x: 0.059936523, y: 0}
+  m_SizeDelta: {x: -3.4370117, y: -0.0000019073486}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6465444885634552641
 CanvasRenderer:
@@ -2207,7 +2207,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -2547,7 +2547,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -2.156372, y: 54.080017}
+  m_AnchoredPosition: {x: -2.156372, y: 54.08008}
   m_SizeDelta: {x: -4.312439, y: 31.731049}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5812007225028637471
@@ -2691,8 +2691,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 96.62}
-  m_SizeDelta: {x: 0, y: 53.46768}
+  m_AnchoredPosition: {x: 0, y: 104.32}
+  m_SizeDelta: {x: 0, y: 68.868546}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &8360180319550069010
 Canvas:
@@ -3063,7 +3063,7 @@ PrefabInstance:
     - target: {fileID: 3835117570909620687, guid: ee3c7e16ede041b4887621df43318a22,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 5.7359
+      value: 5.73584
       objectReference: {fileID: 0}
     - target: {fileID: 3835117570909620687, guid: ee3c7e16ede041b4887621df43318a22,
         type: 3}
@@ -3275,7 +3275,7 @@ PrefabInstance:
     - target: {fileID: 7119092698242758692, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 2.0800934
+      value: 2.0800781
       objectReference: {fileID: 0}
     - target: {fileID: 7119092698242758692, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
@@ -3392,7 +3392,7 @@ PrefabInstance:
     - target: {fileID: 6524995043497632417, guid: d249c7241f2b5f54fbfc9489a73c5455,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -46.549
+      value: -46.54895
       objectReference: {fileID: 0}
     - target: {fileID: 6524995043497632417, guid: d249c7241f2b5f54fbfc9489a73c5455,
         type: 3}
@@ -3739,7 +3739,7 @@ PrefabInstance:
     - target: {fileID: 7119092698242758692, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -0.0011291504
+      value: -0.0010986328
       objectReference: {fileID: 0}
     - target: {fileID: 7119092698242758692, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}

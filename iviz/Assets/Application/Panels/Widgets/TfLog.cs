@@ -178,7 +178,7 @@ namespace Iviz.App
 
             UpdateFrameText();
         }
-        
+
         void UpdateFrameListAsTree()
         {
             description.Clear();
@@ -238,6 +238,19 @@ namespace Iviz.App
             else
             {
                 string id = SelectedFrame.Id;
+                description.Append("<font=Bold>[")
+                    .Append(id)
+                    .AppendLine(id == TfListener.FixedFrameId
+                        ? "]</font>  <i>[Fixed]</i>"
+                        : "]</font>");
+
+                description.AppendLine(
+                    SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
+                        ? "[no parent]"
+                        : SelectedFrame.Parent.Id);
+                //description.AppendLine(nameText).AppendLine(parentId);
+
+                /*
                 string nameText = id == TfListener.FixedFrameId
                     ? $"<font=Bold>[{id}]</font>  <i>[Fixed]</i>"
                     : $"<font=Bold>[{id}]</font>";
@@ -245,6 +258,7 @@ namespace Iviz.App
                     SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
                         ? "[no parent]"
                         : SelectedFrame.Parent.Id;
+                        */
 
 
                 Pose pose;
@@ -265,20 +279,26 @@ namespace Iviz.App
                 }
 
                 var ((pX, pY, pZ), (rX, rY, rZ, rW)) = pose.Unity2RosPose();
-                string px = pX.ToString("#,0.###", UnityUtils.Culture);
-                string py = pY.ToString("#,0.###", UnityUtils.Culture);
-                string pz = pZ.ToString("#,0.###", UnityUtils.Culture);
+                string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
+                string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
+                string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
 
-                string rx = rX.ToString("#,0.###", UnityUtils.Culture);
-                string ry = rY.ToString("#,0.###", UnityUtils.Culture);
-                string rz = rZ.ToString("#,0.###", UnityUtils.Culture);
-                string rw = rW.ToString("#,0.###", UnityUtils.Culture);
+                string rx = rX == 0 ? "0" : rX.ToString("#,0.###", UnityUtils.Culture);
+                string ry = rY == 0 ? "0" : rY.ToString("#,0.###", UnityUtils.Culture);
+                string rz = rZ == 0 ? "0" : rZ.ToString("#,0.###", UnityUtils.Culture);
+                string rw = rW == 1 ? "1" : rW.ToString("#,0.###", UnityUtils.Culture);
 
-                string poseStr = $"t:[{px}, {py}, {pz}]  r:[{rx}, {ry}, {rz}, {rw}]";
+                //string poseStr = $"{px}, {py}, {pz}\nr:[{rx}, {ry}, {rz}, {rw}]";
 
-                description.AppendLine(nameText).AppendLine(parentId).AppendLine(poseStr);
+                //description.AppendLine(nameText).AppendLine(parentId).AppendLine(poseStr);
+                description.Append(px).Append(", ").Append(py).Append(", ").AppendLine(pz);
+                description.Append("r:[")
+                    .Append(rx).Append(", ")
+                    .Append(ry).Append(", ")
+                    .Append(rz).Append(", ")
+                    .Append(rw).Append("]");
             }
-            
+
             uint newHash = Crc32Calculator.Instance.Compute(description);
             if (newHash == textHash)
             {

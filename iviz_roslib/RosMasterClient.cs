@@ -437,26 +437,6 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    public sealed class TopicTuple
-    {
-        public string Topic { get; }
-        public ReadOnlyCollection<string> Members { get; }
-
-        internal TopicTuple(string topic, IList<string> members)
-        {
-            Topic = topic;
-            Members = members.AsReadOnly();
-        }
-
-        public void Deconstruct(out string topic, out ReadOnlyCollection<string> members) =>
-            (topic, members) = (Topic, Members);
-
-        public override string ToString()
-        {
-            return $"[{Topic} [{string.Join(", ", Members)}]]";
-        }
-    }
-
     public sealed class GetSystemStateResponse : BaseResponse
     {
         static readonly ReadOnlyCollection<TopicTuple> Empty = Array.Empty<TopicTuple>().AsReadOnly();
@@ -531,6 +511,7 @@ namespace Iviz.Roslib.XmlRpc
                 result.Add(new TopicTuple(topic, members));
             }
 
+            result.Sort();
             return result.AsReadOnly();
         }
     }
@@ -675,6 +656,7 @@ namespace Iviz.Roslib.XmlRpc
                 topics.Add((topicName, topicType));
             }
 
+            topics.Sort();
             Topics = topics.AsReadOnly();
         }
     }

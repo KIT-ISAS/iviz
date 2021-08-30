@@ -66,6 +66,9 @@ namespace Iviz.Controllers
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = new DepthCloudConfiguration();
+            
+            depthImageTexture.Colormap = ColormapId.gray;
+            colorImageTexture.Colormap = ColormapId.gray;
         }
 
         bool DepthIsProcessing
@@ -131,6 +134,7 @@ namespace Iviz.Controllers
                 config.ColorTopic = colorTopic;
                 if (string.IsNullOrWhiteSpace(colorTopic))
                 {
+                    colorImageTexture.Reset();
                     return;
                 }
 
@@ -172,6 +176,7 @@ namespace Iviz.Controllers
                 config.DepthTopic = value;
                 if (string.IsNullOrWhiteSpace(depthTopic))
                 {
+                    depthImageTexture.Reset();
                     return;
                 }
 
@@ -216,21 +221,10 @@ namespace Iviz.Controllers
                     : "[No Depth Image]\n";
                 
                 string colorDescription = colorTexture != null
-                    ? $"<b>Color {depthImageTexture.Description}</b>"
+                    ? $"<b>Color {colorImageTexture.Description}</b>"
                     : "[No Color Image]";
 
                 return depthDescription + colorDescription;
-                
-                /*
-                float horizontalFov = projector.Intrinsic.GetHorizontalFovInRad(depthImageTexture.Width);
-                float verticalFov = projector.Intrinsic.GetVerticalFovInRad(depthImageTexture.Height);
-                string intrinsicDescription = horizontalFov != 0
-                    ? "hFOV=" + ((int) (horizontalFov * Mathf.Rad2Deg)).ToString() + " deg " +
-                      "vFOV=" + ((int) (verticalFov * Mathf.Rad2Deg)).ToString() + " deg"
-                    : "[No Intrinsic Data]";
-
-                return depthDescription + colorDescription + intrinsicDescription;
-                */
             }
         }
 
@@ -286,7 +280,6 @@ namespace Iviz.Controllers
             }
 
             lastDepthFormat = format;
-            depthImageTexture.Colormap = ColormapId.gray;
             switch (format)
             {
                 case TextureFormat.RFloat:

@@ -13,8 +13,6 @@ namespace Iviz.App
     /// </summary>
     public sealed class ARModuleData : ModuleData
     {
-        const string NoneString = "(none)";
-
         readonly ARFoundationController controller;
         readonly ARPanelContents panel;
 
@@ -61,26 +59,25 @@ namespace Iviz.App
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
-            panel.ResetButton.Clicked += () =>
-            {
-                controller.ResetSession();
-            };
-            
+            panel.ResetButton.Clicked += () => { controller.ResetSession(); };
+            panel.PublishCaptures.Index = (int) controller.PublicationFrequency;
+
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
-            
+
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
+            panel.PublishCaptures.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency) f;
             //panel.PublishColor.Value = controller.PublishColor;
-            panel.ColorSender.Set(controller.ColorSender);
+            //panel.ColorSender.Set(controller.ColorSender);
             //panel.PublishDepth.Value = controller.PublishDepth;
-            panel.DepthSender.Set(controller.DepthSender);
-            panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
+            //panel.DepthSender.Set(controller.DepthSender);
+            //panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
 
             //panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
             //panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
         }
-        
+
         public override void UpdatePanel()
         {
             panel.Description.Label = controller.Description;

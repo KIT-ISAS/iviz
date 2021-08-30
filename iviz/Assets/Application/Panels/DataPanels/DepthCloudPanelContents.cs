@@ -8,7 +8,7 @@ namespace Iviz.App
         public InputFieldWithHintsWidget Depth { get; private set; }
         public DataLabelWidget Description { get; private set; }
         public ListenerWidget DepthTopic { get; private set; }
-        public ListenerWidget DepthInfoTopic { get; private set; }
+        //public ListenerWidget DepthInfoTopic { get; private set; }
         public InputFieldWithHintsWidget Color { get; private set; }
         public ListenerWidget ColorTopic { get; private set; }
         public ImagePreviewWidget DepthPreview { get; private set; }
@@ -20,7 +20,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("DepthCloud");
             DepthTopic = p.AddListener();
-            DepthInfoTopic = p.AddListener();
+            //DepthInfoTopic = p.AddListener();
             ColorTopic = p.AddListener();
             Frame = p.AddFrame();
             Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;

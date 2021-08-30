@@ -40,21 +40,18 @@ namespace Iviz.Core
         }
 
         [NotNull]
-        public CameraInfo CreateCameraInfoMessage(string cameraFrameId, uint seqId = 0)
-        {
-            return new CameraInfo
+        public CameraInfo CreateCameraInfoMessage(string cameraFrameId, uint seqId) =>
+            new CameraInfo
             {
                 Header = (seqId, Timestamp, cameraFrameId),
                 Width = (uint) Width,
                 Height = (uint) Height,
                 K = Intrinsic.ToArray(),
             };
-        }
 
         [NotNull]
-        public Image CreateImageMessage(string cameraFrameId, uint seqId = 0)
-        {
-            return new Image
+        public Image CreateImageMessage(string cameraFrameId, uint seqId) =>
+            new Image
             {
                 Header = (seqId, Timestamp, cameraFrameId),
                 Width = (uint) Width,
@@ -63,7 +60,6 @@ namespace Iviz.Core
                 Step = (uint) (Bpp * Width),
                 Data = Bytes
             };
-        }
 
         [NotNull]
         static string EncodingFromFormat(ScreenshotFormat format)
@@ -84,8 +80,7 @@ namespace Iviz.Core
                     throw new ArgumentException();
             }
         }
-        
-        [NotNull]
+
         static int BppFromFormat(ScreenshotFormat format)
         {
             switch (format)

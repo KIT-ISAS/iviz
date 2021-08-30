@@ -179,7 +179,7 @@ namespace Iviz.Displays
             {
                 try
                 {
-                    BigGustave.Png png = BigGustave.Png.Open(data);
+                    var png = BigGustave.Png.Open(data);
                     string encoding = EncodingFromPng(png);
                     if (encoding == null)
                     {
@@ -554,6 +554,19 @@ namespace Iviz.Displays
             Material.SetTexture(MainTexID, Texture);
             TextureChanged?.Invoke(Texture);
             return Texture;
+        }
+
+        public void Reset()
+        {
+            if (Texture == null)
+            {
+                return;
+            }
+
+            UnityEngine.Object.Destroy(Texture);
+            Texture = null;
+            Material.SetTexture(MainTexID, Texture);
+            TextureChanged?.Invoke(Texture);
         }
 
         public void Stop()

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
 using Iviz.Tools;
@@ -25,7 +27,15 @@ namespace Iviz.Ros
         public BagListener([NotNull] string path)
         {
             this.path = path;
-            Logger.LogFormat("{0}: Writing rosbag to path {1}", this, path);
+            if (Settings.IsMobile)
+            {
+                string filename = Path.GetFileName(path);
+                Logger.LogFormat("{0}: Writing rosbag to file '{1}' in the app's /bags folder", this, filename);
+            }
+            else
+            {
+                Logger.LogFormat("{0}: Writing rosbag to path {1}", this, path);
+            }
             writer = new RosbagFileWriter(path);
             task = Task.Run(WriteMessagesAsync);
         }
@@ -33,9 +43,17 @@ namespace Iviz.Ros
         public async Task StopAsync()
         {
             messageQueue.CompleteAdding();
-            await task.AwaitNoThrow(this);
+            await task;
             await writer.DisposeAsync();
-            Logger.LogFormat("{0}: Closing rosbag on path {1}", this, path);
+            if (Settings.IsMobile)
+            {
+                string filename = Path.GetFileName(path);
+                Logger.LogFormat("{0}: Closing rosbag file '{1}' in the app's /bags folder", this, filename);
+            }
+            else
+            {
+                Logger.LogFormat("{0}: Closing rosbag on path {1}", this, path);
+            }
         }
 
         internal void EnqueueMessage([NotNull] IMessage msg, [NotNull] IRosConnection connection)
@@ -47,6 +65,10 @@ namespace Iviz.Ros
             catch (InvalidOperationException)
             {
                 // bag is closing! ignore 
+            }
+            catch (Exception e)
+            {
+                Core.Logger.Debug($"{this}: Exception during EnqueueMessage", e);
             }
         }
 
@@ -62,7 +84,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync", e);
             }
         }
 

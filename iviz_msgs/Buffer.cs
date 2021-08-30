@@ -148,6 +148,7 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string[] DeserializeStringArray(uint count)
         {
+            ThrowIfOutOfRange(4 * count);
             string[] val = new string[count];
             for (int i = 0; i < val.Length; i++)
             {
@@ -155,6 +156,27 @@ namespace Iviz.Msgs
             }
 
             return val;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe string[] SkipStringArray()
+        {
+            ThrowIfOutOfRange(4);
+            uint count = *(uint*) ptr;
+            ptr += 4;
+            ThrowIfOutOfRange(4 * count);
+
+            for (uint i = 0; i < count; i++)
+            {
+                ThrowIfOutOfRange(4);
+                uint innerCount = *(uint*) ptr;
+                ptr += 4;
+
+                ThrowIfOutOfRange(innerCount);
+                ptr += innerCount;
+            }
+
+            return Array.Empty<string>();
         }
 
         /*
@@ -300,6 +322,12 @@ namespace Iviz.Msgs
             ThrowIfOutOfRange(4);
             uint count = *(uint*) ptr;
             ptr += 4;
+
+            if (count > 1024 * 1024 * 1024)
+            {
+                throw new BufferException("Implausible message requested more than 1TB elements.");
+            }
+
             return count == 0 ? Array.Empty<T>() : new T[count];
         }
 
@@ -640,7 +668,7 @@ namespace Iviz.Msgs
                 {
                     throw new ArgumentOutOfRangeException(nameof(offset));
                 }
-            }            
+            }
 
             fixed (byte* bPtr = buffer)
             {

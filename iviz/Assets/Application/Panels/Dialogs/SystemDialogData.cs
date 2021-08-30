@@ -128,11 +128,11 @@ namespace Iviz.App
                 else
                 {
                     description.Append("<color=grey><font=Bold><u><link=").Append(pair.Key).Append(">").Append(pair.Key)
-                        .Append("</link></u></font></color>\n      <i>[");
+                        .Append("</link></u></font></color>\n      [");
                 }
 
                 description.Append(topicTypes.TryGetValue(pair.Key, out string type) ? type : "unknown")
-                    .AppendLine("]</i>");
+                    .AppendLine("]");
             }
 
             UpdateTop();

@@ -32,6 +32,7 @@ namespace Iviz.App
         const string AllString = "[All]";
         const string NoneString = "[None]";
         const string MeString = "[Me]";
+        
         static readonly string[] ExtraFields = {AllString, NoneString, MeString};
 
         static readonly string[] LogLevelFields =
