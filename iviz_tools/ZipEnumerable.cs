@@ -53,5 +53,7 @@ namespace Iviz.Tools
 
             return array;
         }
+
+        public SelectEnumerable<ZipEnumerable<TA, TB>, (TA, TB), TC> Select<TC>(Func<(TA, TB), TC> f) => new(this, f);
     }
 }

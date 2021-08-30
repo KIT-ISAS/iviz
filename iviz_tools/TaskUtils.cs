@@ -308,7 +308,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static async Task WhenAll<TA>(this EnumeratorUtils.SelectEnumerable<TA, Task> ts)
+        public static async Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
         {
             List<Exception>? es = null;
             foreach (var t in ts)

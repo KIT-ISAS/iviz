@@ -34,7 +34,7 @@ namespace Iviz.Tools
             }
         }        
         
-        public static void LogDebugFormat<TT, TU>(string format, TU? arg1, TU? arg2)
+        public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (LogDebug != None)
             {
@@ -50,7 +50,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static void LogDebugFormat<TT, TU, TV>(string format, TU? arg1, TV? arg2, TV? arg3)
+        public static void LogDebugFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (LogDebug != None)
             {
@@ -58,7 +58,7 @@ namespace Iviz.Tools
             }
         }
         
-        public static void LogDebugFormat<TT, TU>(string format, TU? arg1, TU? arg2, Exception? arg3)
+        public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogDebug != None)
             {
@@ -95,7 +95,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static void LogFormat<TT, TU>(string format, TU? arg1, TU? arg2)
+        public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (Log != None)
             {
@@ -111,7 +111,7 @@ namespace Iviz.Tools
             }
         }        
 
-        public static void LogFormat<TT, TU, TV>(string format, TU? arg1, TV? arg2, TV? arg3)
+        public static void LogFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (Log != None)
             {
@@ -119,7 +119,7 @@ namespace Iviz.Tools
             }
         }
         
-        public static void LogFormat<TT, TU>(string format, TU? arg1, TU? arg2, Exception? arg3)
+        public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (Log != None)
             {
@@ -156,7 +156,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static void LogErrorFormat<TT, TU>(string format, TU? arg1, TU? arg2)
+        public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (LogError != None)
             {
@@ -172,7 +172,7 @@ namespace Iviz.Tools
             }
         }        
 
-        public static void LogErrorFormat<TT, TU, TV>(string format, TU? arg1, TV? arg2, TV? arg3)
+        public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
             if (LogError != None)
             {
@@ -180,7 +180,7 @@ namespace Iviz.Tools
             }
         }
         
-        public static void LogErrorFormat<TT, TU>(string format, TU? arg1, TU? arg2, Exception? arg3)
+        public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogError != None)
             {
