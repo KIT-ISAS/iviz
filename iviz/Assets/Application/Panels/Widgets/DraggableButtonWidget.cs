@@ -11,6 +11,7 @@ namespace Iviz.App
     {
         [SerializeField] Button button = null;
         [SerializeField] RectTransform targetTransform = null;
+        [SerializeField] RectTransform storeTransform = null;
         [SerializeField] Text buttonText = null;
         [SerializeField] bool allowRevealLeft = true;
         [SerializeField] bool allowRevealRight = true;
@@ -66,6 +67,11 @@ namespace Iviz.App
                 targetTransform = (RectTransform) transform;
             }
 
+            if (storeTransform == null)
+            {
+                storeTransform = (RectTransform) transform.parent;
+            }
+
             if (button == null)
             {
                 button = GameObject.GetComponentInChildren<Button>();
@@ -91,7 +97,7 @@ namespace Iviz.App
             {
                 foreach (var detachable in detachables)
                 {
-                    detachable.transform.SetParent(transform.parent);
+                    detachable.transform.SetParent(storeTransform);
                     detachable.transform.SetAsFirstSibling();
                 }
             }

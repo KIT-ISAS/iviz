@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class ImageDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ImageDialogContents : PanelContents
     {
         [SerializeField] Text text = null;
         [SerializeField] RawImage image = null;
@@ -69,12 +69,6 @@ namespace Iviz.App
             }
         }
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
         void Awake()
         {
             var rect = ((RectTransform)image.transform).rect;
@@ -83,7 +77,7 @@ namespace Iviz.App
             AdjustSize();
         }
 
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             closeButton.ClearSubscribers();
             Material = null;

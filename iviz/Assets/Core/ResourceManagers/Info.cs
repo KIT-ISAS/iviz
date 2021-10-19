@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -16,7 +17,6 @@ namespace Iviz.Resources
         [CanBeNull] T baseObject;
         int id;
 
-
         /// <summary>
         /// Returns or loads a resource of this type.  
         /// </summary>
@@ -33,7 +33,7 @@ namespace Iviz.Resources
                 baseObject = UnityEngine.Resources.Load<T>(resourceName);
                 if (baseObject == null)
                 {
-                    throw new InvalidOperationException($"Cannot find resource '{resourceName}'");
+                    throw new ResourceNotFoundException($"Cannot find resource '{resourceName}'");
                 }
 
                 return baseObject;
@@ -79,7 +79,7 @@ namespace Iviz.Resources
         [NotNull]
         public string Name => Object.name;
 
-        public override string ToString() => Object == null ? "[null]" : Object.ToString();
+        public override string ToString() => Object.ToString();
 
         /// <summary>
         /// Instantiates a clone of the resource.
@@ -87,10 +87,7 @@ namespace Iviz.Resources
         /// <param name="parent">If not null, sets the clone parent to this.</param>
         /// <returns>An instantiated clone.</returns>
         [NotNull]
-        public T Instantiate([CanBeNull] Transform parent = null) =>
-            Object != null
-                ? UnityEngine.Object.Instantiate(Object, parent)
-                : throw new ResourceNotFoundException("Tried to instantiate from a resource that could not be found.");
+        public T Instantiate([CanBeNull] Transform parent = null) => UnityEngine.Object.Instantiate(Object, parent);
 
         public bool Equals(Info<T> other) => other != null && Id == other.Id;
 

@@ -15,6 +15,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
@@ -27,11 +28,6 @@ namespace Iviz.App
     public sealed class ModuleListPanel : MonoBehaviour
     {
         public const int ModuleDataCaptionWidth = 200;
-
-        static readonly Color ConnectedColor = new Color(0.6f, 1f, 0.5f, 0.4f);
-        static readonly Color ConnectedOwnMasterColor = new Color(0.4f, 0.95f, 1f, 0.4f);
-        static readonly Color DisconnectedColor = new Color(0.9f, 0.95f, 1f, 0.4f);
-        static readonly Color ConnectedWarningColor = new Color(1f, 0.8f, 0.3f, 0.4f);
 
         [SerializeField] DataLabelWidget masterUriStr = null;
         [SerializeField] TopButtonWidget dragButton = null;
@@ -83,6 +79,7 @@ namespace Iviz.App
         [SerializeField] ARSidePanel arSidePanel = null;
         [SerializeField] Canvas rootCanvas = null;
 
+        [SerializeField] TMP_Text cameraText = null;
 
         [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
         [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
@@ -124,6 +121,7 @@ namespace Iviz.App
 
         [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
 
+        /*
         bool dialogIsDragged;
 
         public bool DialogIsDragged
@@ -136,6 +134,7 @@ namespace Iviz.App
                 dataPanelCanvas.gameObject.SetActive(!value);
             }
         }
+        */
 
         public ModuleListPanel()
         {
@@ -149,7 +148,10 @@ namespace Iviz.App
             {
                 allGuiVisible = value;
                 HideGuiButton.State = value;
-                contentCanvas.gameObject.SetActive(value);
+                //contentCanvas.gameObject.SetActive(value);
+                moduleListCanvas.gameObject.SetActive(value);
+                dataPanelCanvas.gameObject.SetActive(value);
+                dialogPanelManager.Active = value;
                 arSidePanel.Visible = !value;
             }
         }
@@ -160,7 +162,6 @@ namespace Iviz.App
         public static ModuleListPanel Instance =>
             instance.CheckedNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
 
-        //public static bool Initialized => Instance != null && Instance.initialized;
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
 
         AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
@@ -221,10 +222,9 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            //ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
-            //ConnectionManager.Connection.ConnectionWarningStateChanged -= OnConnectionWarningChanged;
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
+            GameThread.EveryFastTick -= UpdateCameraStats;
 
             foreach (var dialogData in dialogDatas)
             {
@@ -382,6 +382,7 @@ namespace Iviz.App
             ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
+            GameThread.EveryFastTick += UpdateCameraStats;
             UpdateFpsStats();
 
             controllerService = new ControllerService();
@@ -458,13 +459,15 @@ namespace Iviz.App
                 case ConnectionState.Connected:
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = connectedSprite;
-                    topPanel.color = RosServerManager.IsActive ? ConnectedOwnMasterColor : ConnectedColor;
+                    topPanel.color = RosServerManager.IsActive 
+                        ? Resource.Colors.ConnectionPanelOwnMaster 
+                        : Resource.Colors.ConnectionPanelConnected;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = disconnectedSprite;
-                    topPanel.color = DisconnectedColor;
+                    topPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
                     status.sprite = connectingSprite;
@@ -476,10 +479,10 @@ namespace Iviz.App
         void OnConnectionWarningChanged(bool value)
         {
             topPanel.color = value
-                ? ConnectedWarningColor
+                ? Resource.Colors.ConnectionPanelWarning
                 : RosServerManager.IsActive
-                    ? ConnectedOwnMasterColor
-                    : ConnectedColor;
+                    ? Resource.Colors.ConnectionPanelOwnMaster
+                    : Resource.Colors.ConnectionPanelConnected;
         }
 
         void RotateSprite()
@@ -880,6 +883,27 @@ namespace Iviz.App
             arMarkerData.Show();
         }
 
+        void UpdateCameraStats()
+        {
+            var description = BuilderPool.Rent();
+            try
+            {
+                description.Append(ARController.InstanceVisible
+                    ? "<font=Bold>AR View</font>\n"
+                    : "<font=Bold>Virtual View</font>\n"
+                );
+
+                var currentCamera = Settings.MainCameraTransform;
+                var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
+                TfLog.FormatPose(cameraPose, description);
+                cameraText.SetText(description);
+            }
+            finally
+            {
+                BuilderPool.Return(description);
+            }                
+        }
+        
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR
@@ -892,11 +916,12 @@ namespace Iviz.App
             frameCounter = 0;
 
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
-            bottomBandwidth.text = $"↓{FormatSpeed(downB)} ↑{FormatSpeed(upB)}";
+            bottomBandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
 
-            if (ConnectionManager.Connection.BagListener != null)
+            var bagListener = ConnectionManager.Connection.BagListener;
+            if (bagListener != null)
             {
-                long bagSizeMb = ConnectionManager.Connection.BagListener.Length / (1024 * 1024);
+                long bagSizeMb = bagListener.Length / (1024 * 1024);
                 recordBagText.text = $"{bagSizeMb.ToString()} MB";
             }
 
@@ -922,7 +947,7 @@ namespace Iviz.App
         }
 
         [NotNull]
-        static string FormatSpeed(long speedB)
+        static string FormatBandwidth(long speedB)
         {
             if (speedB >= 1024 * 1024)
             {

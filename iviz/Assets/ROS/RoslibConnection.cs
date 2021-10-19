@@ -28,7 +28,7 @@ namespace Iviz.Ros
         internal const int InvalidId = -1;
 
         static readonly Action<string> LogInternalIfHololens =
-            Settings.IsHololens ? (Action<string>) Core.Logger.Internal : Logger.LogDebug;
+            Settings.IsHololens ? (Action<string>)Core.Logger.Internal : Logger.LogDebug;
 
         static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
         readonly ConcurrentDictionary<int, IRosPublisher> publishers = new ConcurrentDictionary<int, IRosPublisher>();
@@ -105,7 +105,7 @@ namespace Iviz.Ros
 
                     if (bagListener != null)
                     {
-                        await bagListener.StopAsync();
+                        await bagListener.DisposeAsync();
                     }
 
                     bagListener = value;
@@ -198,7 +198,7 @@ namespace Iviz.Ros
                     {
                         AddHostsParamFromArg(hosts);
                     }
-                    
+
                     AddConfigHostAliases();
 
                     LogInternalIfHololens("--- Advertising services...");
@@ -235,7 +235,7 @@ namespace Iviz.Ros
                     watchdogTask = WatchdogTask(Client.RosMasterClient, token);
                     ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
-                
+
                 Core.Logger.Debug("*** Connected!");
 
                 Core.Logger.Internal("<b>Connected!</b>");
@@ -321,7 +321,7 @@ namespace Iviz.Ros
 
         void AddConfigHostAliases()
         {
-            foreach ((string hostname, string address) in hostAliases) 
+            foreach ((string hostname, string address) in hostAliases)
             {
                 if (hostname == null || address == null)
                 {
@@ -329,8 +329,8 @@ namespace Iviz.Ros
                 }
 
                 ConnectionUtils.GlobalResolver[hostname] = address;
-            }                    
-        } 
+            }
+        }
 
         static async void LogConnectionCheck(CancellationToken token)
         {
@@ -600,7 +600,7 @@ namespace Iviz.Ros
                     Core.Logger.Error($"Failed to advertise topic '{advertiser.Topic}'");
                     return;
                 }
-                
+
                 publishers[id] = publisher;
                 PublishedTopics = Client.PublishedTopics;
             }
@@ -804,7 +804,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic);
+            var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
             await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
         }

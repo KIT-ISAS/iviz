@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Roslib;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace Iviz.Ros
     {
         [NotNull] string Topic { get; }
         [NotNull] string Type { get; }
+        RosTransportHint TransportHint { get; set; }
         RosListenerStats Stats { get; }
         (int Active, int Total) NumPublishers { get; }
         int MaxQueueSize { set; }
@@ -27,7 +29,7 @@ namespace Iviz.Ros
         void SetSuspend(bool value);
         void Reset();
         void SetPause(bool value);
-        void WriteDescriptionTo(StringBuilder b);
+        void WriteDescriptionTo([NotNull] StringBuilder b);
     }
 
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
@@ -45,7 +47,25 @@ namespace Iviz.Ros
         int totalMsgCounter;
         int recentMsgs;
 
-        Listener([NotNull] string topic)
+        RosTransportHint transportHint;
+
+        public RosTransportHint TransportHint
+        {
+            get => transportHint;
+            set
+            {
+                if (transportHint == value)
+                {
+                    return;
+                }
+
+                transportHint = value;
+                Reset();
+            }
+        }
+
+
+        Listener([NotNull] string topic, RosTransportHint transportHint)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -54,13 +74,15 @@ namespace Iviz.Ros
 
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
+            this.transportHint = transportHint;
 
             Logger.Info($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
 
             GameThread.EverySecond += UpdateStats;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Action<T> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Action<T> handler,
+            RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = true;
@@ -69,7 +91,8 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler) : this(topic)
+        public Listener([NotNull] string topic, [NotNull] Func<T, bool> handler,
+            RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
             callbackInGameThread = false;
@@ -130,7 +153,7 @@ namespace Iviz.Ros
             }
             else
             {
-                Unsuspend(); 
+                Unsuspend();
             }
         }
 
@@ -235,7 +258,7 @@ namespace Iviz.Ros
             Interlocked.Exchange(ref recentMsgs, 0);
         }
 
-        public void WriteDescriptionTo([NotNull] StringBuilder description)
+        public void WriteDescriptionTo(StringBuilder description)
         {
             (int numActivePublishers, int numPublishers) = NumPublishers;
             if (numPublishers == -1)
@@ -249,7 +272,7 @@ namespace Iviz.Ros
             else
             {
                 description.Append($"{numActivePublishers.ToString()}/{numPublishers.ToString()}↓");
-            }            
+            }
         }
 
 

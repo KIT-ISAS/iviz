@@ -14,6 +14,7 @@ namespace Iviz.App
         public InputFieldWithHintsWidget SourceParameter { get; private set; }
         public DropdownWidget SavedRobotName { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
+        CollapsibleWidget Material { get; set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
         public SliderWidget Metallic { get; private set; }
@@ -37,6 +38,14 @@ namespace Iviz.App
             Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
             Save = p.AddToggle("Save this Robot Locally");
+
+            Material = p.AddCollapsibleWidget("Visuals")
+                .Attach(Tint)
+                .Attach(Alpha)
+                .Attach(Metallic)
+                .Attach(Smoothness)
+                .UpdateSize();
+            
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

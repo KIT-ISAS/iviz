@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class MarkerDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class MarkerDialogContents : PanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] Button reset = null;
@@ -24,14 +24,8 @@ namespace Iviz.App
         {
             reset.onClick.AddListener(RaiseResetAll);
         }
-
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
             ResetAll = null;

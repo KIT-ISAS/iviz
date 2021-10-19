@@ -29,6 +29,7 @@ namespace Iviz.Controllers
         [DataMember] public bool AngleVisible { get; set; } = true;
         [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
+        [DataMember] public bool PreferUdp { get; set; } = true;
         [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
         [DataMember] public float ScaleMultiplierPow10 { get; set; } = 0;
@@ -69,8 +70,22 @@ namespace Iviz.Controllers
                 VectorScale = value.VectorScale;
                 Color = value.Color;
                 TrailTime = value.TrailTime;
+                PreferUdp = value.PreferUdp;
             }
         }
+        
+        public bool PreferUdp
+        {
+            get => config.PreferUdp;
+            set
+            {
+                config.PreferUdp = value;
+                if (Listener != null)
+                {
+                    Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+                }
+            }
+        }        
 
         public override bool Visible
         {
@@ -231,29 +246,30 @@ namespace Iviz.Controllers
         {
             frameNode.name = $"[{config.Topic}]";
 
+            var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             switch (config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    Listener = new Listener<PoseStamped>(config.Topic, Handler);
+                    Listener = new Listener<PoseStamped>(config.Topic, Handler, transportHint);
                     goto case Msgs.GeometryMsgs.Pose.RosMessageType;
 
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler);
+                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler, transportHint);
                     }
 
                     axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
                     break;
 
                 case PointStamped.RosMessageType:
-                    Listener = new Listener<PointStamped>(config.Topic, Handler);
+                    Listener = new Listener<PointStamped>(config.Topic, Handler, transportHint);
                     goto case Point.RosMessageType;
 
                 case Point.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Point>(config.Topic, Handler);
+                        Listener = new Listener<Point>(config.Topic, Handler, transportHint);
                     }
 
                     sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
@@ -263,13 +279,13 @@ namespace Iviz.Controllers
                     break;
 
                 case WrenchStamped.RosMessageType:
-                    Listener = new Listener<WrenchStamped>(config.Topic, Handler);
+                    Listener = new Listener<WrenchStamped>(config.Topic, Handler, transportHint);
                     goto case Wrench.RosMessageType;
 
                 case Wrench.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Wrench>(config.Topic, Handler);
+                        Listener = new Listener<Wrench>(config.Topic, Handler, transportHint);
                     }
 
                     axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
@@ -286,13 +302,13 @@ namespace Iviz.Controllers
                     break;
 
                 case TwistStamped.RosMessageType:
-                    Listener = new Listener<TwistStamped>(config.Topic, Handler);
+                    Listener = new Listener<TwistStamped>(config.Topic, Handler, transportHint);
                     goto case Twist.RosMessageType;
 
                 case Twist.RosMessageType:
                     if (Listener == null)
                     {
-                        Listener = new Listener<Twist>(config.Topic, Handler);
+                        Listener = new Listener<Twist>(config.Topic, Handler, transportHint);
                     }
 
                     axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
@@ -309,7 +325,7 @@ namespace Iviz.Controllers
                     break;
 
                 case Odometry.RosMessageType:
-                    Listener = new Listener<Odometry>(config.Topic, Handler);
+                    Listener = new Listener<Odometry>(config.Topic, Handler, transportHint);
                     axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
                     childNode = FrameNode.Instantiate("ChildNode");
                     arrow = ResourcePool.RentDisplay<ArrowResource>(childNode.Transform);

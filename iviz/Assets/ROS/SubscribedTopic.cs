@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 
 namespace Iviz.Ros
@@ -32,36 +33,38 @@ namespace Iviz.Ros
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
-        readonly HashSet<Listener<T>> listeners = new HashSet<Listener<T>>();
+        readonly ConcurrentSet<Listener<T>> listeners = new ConcurrentSet<Listener<T>>();
         [NotNull] readonly string topic;
         [CanBeNull] string subscriberId;
 
         [CanBeNull] BagListener bagListener;
         [CanBeNull] string bagId;
 
-        public SubscribedTopic([NotNull] string topic)
+        public RosTransportHint TransportHint { get; }
+        
+        public SubscribedTopic([NotNull] string topic, RosTransportHint transportHint)
         {
             this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            TransportHint = transportHint;
         }
 
         public IRosSubscriber Subscriber { get; private set; }
 
         public void Add(IListener subscriber)
         {
-            listeners.Add((Listener<T>) subscriber);
+            listeners.Add((Listener<T>)subscriber);
         }
 
         public void Remove(IListener subscriber)
         {
-            listeners.Remove((Listener<T>) subscriber);
+            listeners.Remove((Listener<T>)subscriber);
         }
 
-        public async Task SubscribeAsync(RosClient client, IListener listener,
-            CancellationToken token)
+        public async Task SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
         {
             if (listener != null)
             {
-                listeners.Add((Listener<T>) listener);
+                listeners.Add((Listener<T>)listener);
             }
 
             token.ThrowIfCancellationRequested();
@@ -72,7 +75,8 @@ namespace Iviz.Ros
                     try
                     {
                         IRosSubscriber subscriber;
-                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token);
+                        (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token,
+                            transportHint: TransportHint);
                         if (bagListener != null)
                         {
                             bagId = subscriber.Subscribe(bagListener.EnqueueMessage);

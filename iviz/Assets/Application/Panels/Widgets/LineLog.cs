@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Text;
+using Iviz.Core;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using TMPro;
@@ -12,14 +13,14 @@ namespace Iviz.App
     {
         [SerializeField] TMP_Text text2 = null;
 
-        static readonly char[] Separators = {'\n'};
+        static readonly char[] Separators = { '\n' };
 
         readonly List<string> lines = new List<string>();
-        readonly StringBuilder description = new StringBuilder(65535);
 
         const int MaxLines = 100;
 
         bool active = true;
+
         public bool Active
         {
             get => active;
@@ -49,7 +50,6 @@ namespace Iviz.App
             {
                 lines.Add(str);
             }
-
         }
 
         public void Flush()
@@ -65,18 +65,25 @@ namespace Iviz.App
                 lines.RemoveRange(0, overflow);
             }
 
-            description.Clear();
-            if (lines.Count != 0)
+            var description = BuilderPool.Rent();
+            try
             {
-                description.Append(lines[0]);
-                foreach (string line in lines.Skip(1))
+                if (lines.Count != 0)
                 {
-                    description.Append('\n');
-                    description.Append(line);
+                    description.Append(lines[0]);
+                    foreach (string line in lines.Skip(1))
+                    {
+                        description.Append('\n');
+                        description.Append(line);
+                    }
                 }
+
+                text2.SetText(description);
             }
-            
-            text2.SetText(description);
+            finally
+            {
+                BuilderPool.Return(description);
+            }
         }
 
         public void ClearSubscribers()

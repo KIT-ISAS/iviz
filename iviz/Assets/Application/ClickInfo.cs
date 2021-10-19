@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -13,22 +14,22 @@ namespace Iviz.App
 {
     public readonly struct ClickHitResult
     {
-        public GameObject GameObject { get; }
+        [NotNull] public GameObject GameObject { get; }
         public Vector3 Position { get; }
         public Vector3 Normal { get; }
 
-        ClickHitResult(GameObject gameObject, in Vector3 position, in Vector3 normal)
+        ClickHitResult([NotNull] GameObject gameObject, in Vector3 position, in Vector3 normal)
         {
             GameObject = gameObject;
             Position = position;
             Normal = normal;
         }
 
-        public ClickHitResult(RaycastResult r) : this(r.gameObject, r.worldPosition, r.worldNormal)
+        public ClickHitResult(in RaycastResult r) : this(r.gameObject, r.worldPosition, r.worldNormal)
         {
         }
 
-        public ClickHitResult(ARRaycastHit r) : this(r.trackable.gameObject, r.pose.position,
+        public ClickHitResult(in ARRaycastHit r) : this(r.trackable.gameObject, r.pose.position,
             ((ARPlane)r.trackable).normal)
         {
         }
@@ -76,7 +77,9 @@ namespace Iviz.App
                 return false;
             }
 
-            hits = results.Select(result => new ClickHitResult(result)).ToArray();
+            hits = results
+                .Where(result => result.trackable is ARPlane)
+                .Select(result => new ClickHitResult(result)).ToArray();
             arHits = hits;
             return true;
         }

@@ -553,6 +553,10 @@ namespace Iviz.Core
         [NotNull]
         public static T EnsureComponent<T>([NotNull] this GameObject gameObject) where T : Component =>
             gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
+
+        [NotNull]
+        public static T Instantiate<T>([NotNull] this Info<GameObject> o, [CanBeNull] Transform parent = null) =>
+            o.Instantiate(parent).GetComponent<T>();
     }
 
     public static class MeshUtils

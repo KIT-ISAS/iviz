@@ -11,8 +11,6 @@ namespace Iviz.App
         [SerializeField] bool hideModuleList = true;
         bool isDragging;
         
-        public event Action StartedDragging;
-        
         void Awake()
         {
             if (targetTransform == null)
@@ -25,11 +23,10 @@ namespace Iviz.App
         {
             if (!isDragging)
             {
-                StartedDragging?.Invoke();
                 isDragging = true;
                 if (hideModuleList)
                 {
-                    ModuleListPanel.Instance.DialogIsDragged = true;
+                    ModuleListPanel.Instance.DialogPanelManager.DetachSelectedPanel();
                 }
             }
 

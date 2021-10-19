@@ -11,8 +11,6 @@ namespace Iviz.App
     public sealed class SenderWidget : MonoBehaviour, IWidget
     {
         const int Size = 200;
-
-        static readonly Color EnabledColor = new Color(0.59f, 0.79f, 0.90f, 0.90f);
         
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
@@ -36,8 +34,8 @@ namespace Iviz.App
 
                 sender = value;
                 panel.color = value != null 
-                    ? EnabledColor 
-                    : Resource.Colors.DisabledPanelColor;
+                    ? Resource.Colors.EnabledSender 
+                    : Resource.Colors.DisabledPanel;
                 
                 if (value != null)
                 {
@@ -69,9 +67,8 @@ namespace Iviz.App
             Sender = newSender;
             if (newSender == null)
             {
-                string messageType = BuiltIns.GetMessageType(typeof(T));
                 text.text = "<i>Empty</i>\n" +
-                            $"<b>{messageType}</b>";
+                            $"<b>{BuiltIns.GetMessageType(typeof(T))}</b>";
             }
         }
 

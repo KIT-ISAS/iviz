@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class SettingsDialogContents : MonoBehaviour, IDialogPanelContents
+    public class SettingsDialogContents : PanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
 
@@ -55,13 +55,7 @@ namespace Iviz.App
             }
         }
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             qualityInView.ClearSubscribers();
             qualityInAr.ClearSubscribers();

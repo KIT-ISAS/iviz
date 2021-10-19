@@ -5,6 +5,7 @@ using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -12,8 +13,6 @@ namespace Iviz.Core
     {
         const string NullMessage = "[null message]";
         const string NullException = "[null exception]";
-
-        static readonly ConcurrentBag<StringBuilder> BuilderPool = new ConcurrentBag<StringBuilder>();
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
 
@@ -36,7 +35,7 @@ namespace Iviz.Core
         }
 
         [Obsolete]
-        public static void Error(Exception e)
+        public static void Error(Exception _)
         {
         }
 
@@ -64,17 +63,16 @@ namespace Iviz.Core
 
         public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
         {
-            StringBuilder str = BuilderPool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
+            var str = BuilderPool.Rent();
             try
             {
                 InternalImpl(msg, e, str);
             }
             finally
             {
-                BuilderPool.Add(str);
+                BuilderPool.Return(str);
             }
         }
-
 
         static void InternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, [NotNull] StringBuilder str)
         {
@@ -129,18 +127,20 @@ namespace Iviz.Core
                     UnityEngine.Debug.LogError(msg);
                     break;
             }
+            
+            Console.WriteLine(msg);
         }
 
         static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e)
         {
-            StringBuilder str = BuilderPool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
+            var str = BuilderPool.Rent();
             try
             {
                 ExternalImpl(msg, level, e, str);
             }
             finally
             {
-                BuilderPool.Add(str);
+                BuilderPool.Return(str);
             }
         }
 
@@ -181,6 +181,23 @@ namespace Iviz.Core
             {
                 UnityEngine.Debug.LogWarning(message);
             }
+        }
+    }
+
+    public static class BuilderPool
+    {
+        static readonly ConcurrentBag<StringBuilder> Pool = new ConcurrentBag<StringBuilder>();
+
+        [NotNull]
+        public static StringBuilder Rent()
+        {
+            return Pool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
+        }
+
+        public static void Return([NotNull] StringBuilder str)
+        {
+            str.Clear();
+            Pool.Add(str);
         }
     }
 

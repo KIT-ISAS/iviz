@@ -46,7 +46,7 @@ namespace Iviz.Displays
 
             float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(node.Transform.position).z;
             
-            float size = 0.25f * distanceToCam;
+            float size = 0.25f * Mathf.Abs(distanceToCam);
             float clampedSize = Mathf.Max(size, 2);
 
             float baseFrameSize = TfListener.Instance.FrameSize;

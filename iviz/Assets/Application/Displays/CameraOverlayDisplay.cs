@@ -1,25 +1,24 @@
 using Iviz.Controllers;
 using Iviz.Displays;
+using Iviz.Resources;
 using UnityEngine;
 
 namespace Application.Displays
 {
     public class CameraOverlayDisplay : MonoBehaviour
     {
+        static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
+        
         AxisFrameResource resource;
         [SerializeField] Camera parentCamera;
         [SerializeField] Camera grandparentCamera;
         
-        static readonly Color ColorX = new Color(0.9f, 0.4f, 0, 1);
-        static readonly Color ColorY = new Color(0, 0.9f, 0.6f, 1);
-        static readonly Color ColorZ = new Color(0.6f, 0, 0.9f, 1);
-
         void Start()
         {
             resource = GetComponent<AxisFrameResource>();
-            resource.ColorX = ColorX;
-            resource.ColorY = ColorY;
-            resource.ColorZ = ColorZ;
+            resource.ColorX = Resource.Colors.CameraOverlayAxisX;
+            resource.ColorY = Resource.Colors.CameraOverlayAxisY;
+            resource.ColorZ = Resource.Colors.CameraOverlayAxisZ;
 
             resource.AxisLength = 0.001f;
             resource.Layer = gameObject.layer;
@@ -35,11 +34,9 @@ namespace Application.Displays
             grandparentCamera = parentCamera.transform.parent.GetComponentInParent<Camera>();
         }
 
-        static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
-
         void LateUpdate()
         {
-            var isParentEnabled = grandparentCamera.enabled;
+            bool isParentEnabled = grandparentCamera.enabled;
             if (resource.Visible != isParentEnabled)
             {
                 parentCamera.enabled = isParentEnabled;

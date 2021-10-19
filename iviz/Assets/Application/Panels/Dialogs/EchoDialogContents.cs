@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public sealed class EchoDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class EchoDialogContents : DetachablePanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] ToggleButtonWidget pause = null;
@@ -21,13 +21,7 @@ namespace Iviz.App
         public TMP_Text Messages => messages;
         public TMP_Text KBytes => kbytes;
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
             Topics.ClearSubscribers();

@@ -49,5 +49,7 @@ namespace Iviz.Displays
         public GameObject SystemInfo = null;
         public GameObject ARMarkerPanel = null;
         public GameObject ARMarkers = null;
+        
+        public GameObject Collapsible = null;
     }
 }

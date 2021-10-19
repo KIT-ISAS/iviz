@@ -8,10 +8,6 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
     {
-        static readonly Color BaseColorX = Color.red.WithSaturation(0.7f);
-        static readonly Color BaseColorY = Color.green.WithSaturation(0.7f);
-        static readonly Color BaseColorZ = Color.blue.WithSaturation(0.7f);
-
         static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};
 
         readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];
@@ -121,9 +117,9 @@ namespace Iviz.Displays
 
             AxisLength = 0.25f;
 
-            ColorX = BaseColorX;
-            ColorY = BaseColorY;
-            ColorZ = BaseColorZ;
+            ColorX = Resource.Colors.AxisX;
+            ColorY = Resource.Colors.AxisY;
+            ColorZ = Resource.Colors.AxisZ;
         }
 
         void UpdateFrameMesh(float newFrameAxisLength, float newFrameAxisWidth)
@@ -159,9 +155,9 @@ namespace Iviz.Displays
 
             OverrideMaterial(null);
             AxisLength = 0.25f;
-            ColorX = BaseColorX;
-            ColorY = BaseColorY;
-            ColorZ = BaseColorZ;
+            ColorX = Resource.Colors.AxisX;
+            ColorY = Resource.Colors.AxisY;
+            ColorZ = Resource.Colors.AxisZ;
             OcclusionOnly = false;
             Tint = Color.white;
             Emissive = 0;

@@ -19,14 +19,13 @@ namespace Iviz.App
         public ToggleWidget AutoFocus { get; private set; }
 
         public ARMarkerWidget ARMarkers { get; private set; }
-        public SenderWidget MarkerSender { get; private set; }
-        public DropdownWidget PublishCaptures { get; private set; }
+        public DropdownWidget PublishFrequency { get; private set; }
 
-        //public ToggleWidget PublishColor { get; private set; }
-        //public SenderWidget ColorSender { get; private set; }
-        //public ToggleWidget PublishDepth { get; private set; }
-        //public SenderWidget DepthSender { get; private set; }
-        //public SenderWidget DepthConfidenceSender { get; private set; }
+        public SenderWidget MarkerSender { get; private set; }
+        public SenderWidget ColorSender { get; private set; }
+        public SenderWidget DepthSender { get; private set; }
+        public SenderWidget DepthConfidenceSender { get; private set; }
+        CollapsibleWidget publishers;
 
 
         void Awake()
@@ -42,8 +41,8 @@ namespace Iviz.App
 
             AutoFocus = p.AddToggle("Enable AutoFocus");
 
-            PublishCaptures = p.AddDropdown("Publish AR camera images");
-            PublishCaptures.Options = new[]
+            PublishFrequency = p.AddDropdown("Publish AR camera images");
+            PublishFrequency.Options = new[]
             {
                 "Off",
                 "5 FPS",
@@ -64,11 +63,16 @@ namespace Iviz.App
 
             ARMarkers = p.AddARMarker();
             MarkerSender = p.AddSender();
-            //PublishColor = p.AddToggle("Publish Color");
-            //PublishDepth = p.AddToggle("Publish Depth");
-            //ColorSender = p.AddSender();
-            //DepthSender = p.AddSender();
-            //DepthConfidenceSender = p.AddSender();
+            ColorSender = p.AddSender();
+            DepthSender = p.AddSender();
+            DepthConfidenceSender = p.AddSender();
+
+            publishers = p.AddCollapsibleWidget("Publishers")
+                .Attach(MarkerSender)
+                .Attach(ColorSender)
+                .Attach(DepthSender)
+                .Attach(DepthConfidenceSender)
+                .UpdateSize();
 
             p.UpdateSize();
             gameObject.SetActive(false);

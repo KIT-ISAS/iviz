@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using Iviz.Resources;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class TfDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class TfDialogContents : DetachablePanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TfLog tfLog = null;
@@ -12,13 +14,7 @@ namespace Iviz.App
         public TfLog TfLog => tfLog;
         public ToggleWidget ShowOnlyUsed => showOnlyUsed;
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
             TfLog.ClearSubscribers();

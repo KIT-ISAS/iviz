@@ -21,6 +21,7 @@ namespace Iviz.App
         public SliderWidget Max { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
+        CollapsibleWidget billboard;
 
         void Awake()
         {
@@ -42,6 +43,13 @@ namespace Iviz.App
             BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);
             BillboardFollowsCamera = p.AddToggle("Billboard Points To You");
             BillboardOffset = p.AddVector3Slider("Billboard Offset");
+
+            billboard = p.AddCollapsibleWidget("Billboard")
+                .Attach(ShowBillboard)
+                .Attach(BillboardSize)
+                .Attach(BillboardFollowsCamera)
+                .Attach(BillboardOffset)
+                .UpdateSize();
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();

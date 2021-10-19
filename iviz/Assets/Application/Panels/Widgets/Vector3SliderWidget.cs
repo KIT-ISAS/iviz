@@ -84,8 +84,8 @@ namespace Iviz.App
                 inputX.Interactable = value;
                 inputY.Interactable = value;
                 inputZ.Interactable = value;
-                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
-                panel.color = value ? Resource.Colors.EnabledPanelColor : Resource.Colors.DisabledPanelColor;
+                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                panel.color = value ? Resource.Colors.EnabledPanel : Resource.Colors.DisabledPanel;
             }
         }
 

@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
@@ -18,6 +19,7 @@ namespace Iviz.Ros
         [DataMember] public int MessagesPerSecond { get; }
         [DataMember] public int BytesPerSecond { get; }
         
+        [NotNull]
         public override string ToString()
         {
             return BuiltIns.ToJsonString(this);

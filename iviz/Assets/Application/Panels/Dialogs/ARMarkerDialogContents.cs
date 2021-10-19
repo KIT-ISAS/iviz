@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class ARMarkerDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ARMarkerDialogContents : PanelContents
     {
         static readonly string[] TypesStr = {"Aruco", "QR", "Unset"};
         static readonly string[] ActionsStr = Enum.GetNames(typeof(ARMarkerAction));
@@ -115,13 +115,7 @@ namespace Iviz.App
             }
         }
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
             CodesEndEdit = null;

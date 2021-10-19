@@ -45,6 +45,7 @@ namespace Iviz.Resources
         public Info<GameObject> InputWithHints { get; }
         public Info<GameObject> MarkerWidget { get; }
         public Info<GameObject> Mover { get; }
+        public Info<GameObject> CollapsibleWidget { get; }
 
         public Info<GameObject> DataPanel { get; }
         
@@ -100,6 +101,8 @@ namespace Iviz.Resources
             DataPanel = new Info<GameObject>(assetHolder.DataPanel);
             ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel);
             ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers);
+            
+            CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Iviz.Core;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -15,20 +16,19 @@ namespace Iviz.App
     public sealed class MarkerDialogData : DialogData
     {
         [NotNull] readonly MarkerDialogContents panel;
-        readonly StringBuilder description = new StringBuilder(65536);
         public override IDialogPanelContents Panel => panel;
 
         public MarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<MarkerDialogContents>(DialogPanelType.Marker);
         }
-        
+
         [CanBeNull] IMarkerDialogListener Listener { get; set; }
 
         public override void SetupPanel()
         {
             ResetPanelPosition();
-            
+
             if (Listener == null)
             {
                 throw new InvalidOperationException("Cannot setup panel without a listener!");
@@ -36,10 +36,7 @@ namespace Iviz.App
 
             panel.Label.Label = $"<b>Topic:</b>: {Listener.Topic}";
             panel.Close.Clicked += Close;
-            panel.ResetAll += () =>
-            {
-                Listener.Reset();
-            };
+            panel.ResetAll += () => { Listener.Reset(); };
 
             UpdatePanel();
         }
@@ -51,16 +48,23 @@ namespace Iviz.App
                 return;
             }
 
-            description.Length = 0;
-            Listener.GenerateLog(description);
-            panel.Text.SetText(description);
+            var description = BuilderPool.Rent();
+            try
+            {
+                Listener.GenerateLog(description);
+                panel.Text.SetText(description);
+            }
+            finally
+            {
+                BuilderPool.Return(description);
+            }
         }
 
-        
+
         public void Show([NotNull] IMarkerDialogListener listener)
         {
             Listener = listener ?? throw new ArgumentNullException(nameof(listener));
             Show();
-        }        
+        }
     }
 }

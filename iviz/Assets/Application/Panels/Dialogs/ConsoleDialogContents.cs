@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class ConsoleDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ConsoleDialogContents : DetachablePanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] ToggleButtonWidget pause = null;
@@ -24,13 +24,7 @@ namespace Iviz.App
         public TMP_Text Text => text;
         public Text BottomText => bottomText;
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
             FromField.ClearSubscribers();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -78,7 +79,7 @@ namespace Iviz.Core
 
                 lastSecondRunTime = GameTime;
             }
-            
+
             if (GameTime - lastTickRunTime > 0.1f)
             {
                 try
@@ -91,7 +92,7 @@ namespace Iviz.Core
                 }
 
                 lastTickRunTime = GameTime;
-            }            
+            }
 
             while (actionsQueue.TryDequeue(out Action action))
             {
@@ -222,6 +223,15 @@ namespace Iviz.Core
 
             Instance.actionsQueue.Enqueue(action);
         }
+
+        /// <summary>
+        /// Puts this async action in a queue to be run on the main thread.
+        /// If it is already on the main thread, it will run on the next frame - though the run order of async tasks is not very well defined.
+        /// The return type is treated as async void. 
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        /// <exception cref="ArgumentNullException">If action is null.</exception>
+        public static void Post([NotNull] Func<Task> action) => Post(() => { action(); });
 
         public static void PostInListenerQueue([NotNull] Action action)
         {

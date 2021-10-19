@@ -41,7 +41,7 @@ namespace Iviz.App
             set
             {
                 toggle.interactable = value;
-                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
+                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 

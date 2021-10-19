@@ -21,20 +21,22 @@ namespace Iviz.App
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                
+
                 name = "DataLabel:" + value;
                 label.text = value;
             }
         }
+
         public bool Interactable
         {
             get => interactable;
             set
             {
                 interactable = value;
-                label.color = value ? Resource.Colors.EnabledFontColor : Resource.Colors.DisabledFontColor;
+                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
+
         public bool HasRichText
         {
             get => label.supportRichText;
@@ -64,7 +66,7 @@ namespace Iviz.App
             HasRichText = b;
             return this;
         }
-        
+
         [NotNull]
         public DataLabelWidget SetAlignment(TextAnchor t)
         {

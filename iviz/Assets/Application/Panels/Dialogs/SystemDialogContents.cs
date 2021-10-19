@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class SystemDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class SystemDialogContents : DetachablePanelContents
     {
         [SerializeField] Button topics = null;
         [SerializeField] Button services = null;
@@ -122,13 +122,7 @@ namespace Iviz.App
             }
         }
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             ModeChanged = null;
             Close.ClearSubscribers();

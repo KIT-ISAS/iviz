@@ -19,9 +19,6 @@ namespace Iviz.Displays
 
     public sealed class GridResource : MarkerResource, IRecyclable
     {
-        static readonly Color GreenLineColor = new Color(0, 0.5f, 0);
-        static readonly Color RedLineColor = new Color(0.5f, 0, 0);
-
         //Mesh mesh;
         MeshRenderer meshRenderer;
 
@@ -281,13 +278,13 @@ namespace Iviz.Displays
             foreach (MeshMarkerResource resource in horizontals)
             {
                 resource.transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth) * 0.1f;
-                resource.Color = GreenLineColor;
+                resource.Color = Resource.Colors.GridGreenLine;
             }
 
             foreach (MeshMarkerResource resource in verticals)
             {
                 resource.transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize) * 0.1f;
-                resource.Color = RedLineColor;
+                resource.Color = Resource.Colors.GridRedLine;
             }
 
             lastX = int.MaxValue;

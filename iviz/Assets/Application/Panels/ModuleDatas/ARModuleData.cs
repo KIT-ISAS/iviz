@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -26,7 +27,7 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(ModuleType.AugmentedReality);
 
-            controller = Resource.Controllers.AR.Instantiate().GetComponent<ARFoundationController>();
+            controller = Resource.Controllers.AR.Instantiate<ARFoundationController>();
 
             controller.ModuleData = this;
             if (constructor.Configuration != null)
@@ -60,22 +61,17 @@ namespace Iviz.App
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ResetButton.Clicked += () => { controller.ResetSession(); };
-            panel.PublishCaptures.Index = (int)controller.PublicationFrequency;
+            panel.PublishFrequency.Index = (int)controller.PublicationFrequency;
 
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
 
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
-            panel.PublishCaptures.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency)f;
-            //panel.PublishColor.Value = controller.PublishColor;
-            //panel.ColorSender.Set(controller.ColorSender);
-            //panel.PublishDepth.Value = controller.PublishDepth;
-            //panel.DepthSender.Set(controller.DepthSender);
-            //panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
-
-            //panel.PublishColor.ValueChanged += f => controller.PublishColor = f;
-            //panel.PublishDepth.ValueChanged += f => controller.PublishDepth = f;
+            panel.PublishFrequency.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency)f;
+            panel.ColorSender.Set(controller.ColorSender);
+            panel.DepthSender.Set(controller.DepthSender);
+            panel.DepthConfidenceSender.Set(controller.DepthConfidenceSender);
 
             panel.OcclusionQuality.Index = (int)controller.OcclusionQuality;
             panel.OcclusionQuality.ValueChanged += (f, _) => controller.OcclusionQuality = (OcclusionQualityType)f;

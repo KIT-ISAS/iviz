@@ -12,9 +12,6 @@ namespace Iviz.App
     {
         const int Size = 200;
 
-        static readonly Color EnabledColor = new Color(0.71f, 0.98f, 1, 0.733f);
-        static readonly StringBuilder CachedStr = new StringBuilder(100);
-
         [SerializeField] Text text = null;
         [SerializeField] Image panel = null;
         [CanBeNull] IListener listener;
@@ -40,41 +37,40 @@ namespace Iviz.App
         }
 
         [CanBeNull] string Topic => Listener?.Topic;
-
-        (int Active, int Total) NumPublishers =>
-            (!ConnectionManager.IsConnected || Listener == null) ? (-1, -1) : Listener.NumPublishers;
-
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
-        long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0; 
-        int Dropped => Listener?.Stats.Dropped ?? 0;
-        bool Subscribed => Listener?.Subscribed ?? false;
-
+        long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
 
         void UpdateStats()
         {
             if (listener == null)
             {
                 text.text = "[No Topic Set]\n<b>Off</b>";
-                panel.color = Resource.Colors.DisabledPanelColor;
+                panel.color = Resource.Colors.DisabledPanel;
                 return;
             }
             
-            
-            CachedStr.Length = 0;
-            CachedStr.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
+            var description = BuilderPool.Rent();
+            try
+            {
+                description.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
 
-            listener.WriteDescriptionTo(CachedStr);
+                listener.WriteDescriptionTo(description);
 
-            string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            CachedStr.Append(" | ")
-                .Append(MessagesPerSecond)
-                .Append(" Hz | ")
-                .Append(kbPerSecond)
-                .Append(" kB/s</b>");
+                string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
+                description.Append(" | ")
+                    .Append(MessagesPerSecond)
+                    .Append(" Hz | ")
+                    .Append(kbPerSecond)
+                    .Append(" kB/s</b>");
 
-            text.text = CachedStr.ToString();
+                text.text = description.ToString();
+            }
+            finally
+            {
+                BuilderPool.Return(description);
+            }
 
-            panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
+            panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
         }
 
         public void OnClick()
@@ -85,7 +81,7 @@ namespace Iviz.App
             }
 
             listener.SetSuspend(listener.Subscribed);
-            panel.color = listener.Subscribed ? EnabledColor : Resource.Colors.DisabledPanelColor;
+            panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
         }
 
         public void ClearSubscribers()

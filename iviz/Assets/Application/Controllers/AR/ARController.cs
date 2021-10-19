@@ -100,9 +100,9 @@ namespace Iviz.Controllers
         public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
         public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
 
-        protected Sender<Image> ColorSender { get; private set; }
-        protected Sender<Image> DepthSender { get; private set; }
-        protected Sender<Image> DepthConfidenceSender { get; private set; }
+        public Sender<Image> ColorSender { get; private set; }
+        public Sender<Image> DepthSender { get; private set; }
+        public Sender<Image> DepthConfidenceSender { get; private set; }
         protected Sender<CameraInfo> ColorInfoSender { get; private set; }
         protected Sender<CameraInfo> DepthInfoSender { get; private set; }
 

@@ -10,8 +10,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class ItemListDialogContents : MonoBehaviour, IDialogPanelContents,
-        IReadOnlyList<ItemListDialogContents.ItemEntry>
+    public class ItemListDialogContents : PanelContents, IReadOnlyList<ItemListDialogContents.ItemEntry>
     {
         static float baseButtonHeight;
 
@@ -215,12 +214,6 @@ namespace Iviz.App
             }
         }
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
         protected virtual void Start()
         {
             closeButton.Clicked += RaiseClose;
@@ -257,7 +250,7 @@ namespace Iviz.App
             t.sizeDelta = new Vector2(t.sizeDelta.x, sizeDelta + 45);
         }
 
-        public virtual void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             ItemClicked = null;
             CloseClicked = null;

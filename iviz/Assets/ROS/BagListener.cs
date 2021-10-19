@@ -15,14 +15,14 @@ namespace Iviz.Ros
 {
     public sealed class BagListener
     {
-        readonly AsyncCollection<(IMessage, IRosConnection)> messageQueue =
-            new AsyncCollection<(IMessage, IRosConnection)>();
+        readonly AsyncCollection<(IMessage, IRosConnection, time)> messageQueue =
+            new AsyncCollection<(IMessage, IRosConnection, time)>();
 
-        readonly RosbagFileWriter writer;
         readonly Task task;
         readonly string path;
+        bool disposed;
 
-        public long Length => writer.Length;
+        public long Length { get; private set; }
 
         public BagListener([NotNull] string path)
         {
@@ -36,15 +36,20 @@ namespace Iviz.Ros
             {
                 Logger.LogFormat("{0}: Writing rosbag to path {1}", this, path);
             }
-            writer = new RosbagFileWriter(path);
             task = Task.Run(WriteMessagesAsync);
         }
 
-        public async Task StopAsync()
+        public async Task DisposeAsync()
         {
+            if (disposed)
+            {
+                Logger.LogError("Tried to close rosbag file twice");
+                return;
+            }
+
+            disposed = true; 
             messageQueue.CompleteAdding();
             await task;
-            await writer.DisposeAsync();
             if (Settings.IsMobile)
             {
                 string filename = Path.GetFileName(path);
@@ -60,7 +65,7 @@ namespace Iviz.Ros
         {
             try
             {
-                messageQueue.Add((msg, connection));
+                messageQueue.Add((msg, connection, time.Now()));
             }
             catch (InvalidOperationException)
             {
@@ -74,17 +79,29 @@ namespace Iviz.Ros
 
         async Task WriteMessagesAsync()
         {
+            RosbagFileWriter writer = null;
+            
             try
             {
-                while (await messageQueue.OutputAvailableAsync())
+                writer = await RosbagFileWriter.CreateAsync(path);
+                while (true)
                 {
-                    var (message, connection) = await messageQueue.TakeAsync();
-                    await writer.WriteAsync(message, connection, time.Now());
+                    var (message, connection, time) = await messageQueue.TakeAsync();
+                    await writer.WriteAsync(message, connection, time);
+                    Length = writer.Length;
                 }
             }
             catch (Exception e)
             {
                 Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync", e);
+            }
+            finally
+            {
+                if (writer != null)
+                {
+                    await writer.DisposeAsync().AwaitNoThrow(this);
+                    Length = writer.Length;
+                }
             }
         }
 

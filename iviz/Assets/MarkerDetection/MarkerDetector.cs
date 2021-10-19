@@ -55,7 +55,6 @@ namespace Iviz.MarkerDetection
         {
             CvContext cvContext = null;
 
-            //bool round = false;
             try
             {
                 SemaphoreSlim signal = new SemaphoreSlim(0);
@@ -72,7 +71,9 @@ namespace Iviz.MarkerDetection
                         continue;
                     }
 
-                    await Task.Delay(lastRoundFound != null ? DelayBetweenCapturesFastInMs : DelayBetweenCapturesInMs,
+                    await Task.Delay(lastRoundFound != null
+                            ? DelayBetweenCapturesFastInMs
+                            : DelayBetweenCapturesInMs,
                         Token);
 
                     Screenshot screenshot = null;
@@ -191,7 +192,7 @@ namespace Iviz.MarkerDetection
             catch (OperationCanceledException)
             {
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //Debug.LogError(e);
             }

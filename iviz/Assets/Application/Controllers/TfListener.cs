@@ -11,6 +11,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -171,7 +172,7 @@ namespace Iviz.Controllers
         }
 
         public static TfListener Instance { get; private set; }
-        [NotNull] public Sender<TFMessage> Publisher { get; } 
+        [NotNull] public Sender<TFMessage> Publisher { get; }
         [NotNull] public Sender<PoseStamped> TapPublisher { get; }
 
         public IListener ListenerStatic { get; private set; }
@@ -203,6 +204,7 @@ namespace Iviz.Controllers
                 ParentConnectorVisible = value.ParentConnectorVisible;
                 KeepAllFrames = value.KeepAllFrames;
                 FixedFrameId = value.FixedFrameId;
+                PreferUdp = value.PreferUdp;
             }
         }
 
@@ -290,6 +292,19 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool PreferUdp
+        {
+            get => config.PreferUdp;
+            set
+            {
+                config.PreferUdp = value;
+                if (Listener != null)
+                {
+                    Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+                }
+            }
+        }
+
         static bool IsFrameUsableAsHint(TfFrame frame)
         {
             return frame != RootFrame && frame != UnityFrame && frame != OriginFrame;
@@ -297,7 +312,8 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic);
+            Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
+                PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
             ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
         }
 
@@ -479,7 +495,7 @@ namespace Iviz.Controllers
         [NotNull]
         TfFrame CreateFrameObject([NotNull] string id, [CanBeNull] Transform parent, [CanBeNull] TfFrame parentFrame)
         {
-            TfFrame frame = Resource.Displays.TfFrame.Instantiate(parent).GetComponent<TfFrame>();
+            TfFrame frame = Resource.Displays.TfFrame.Instantiate<TfFrame>(parent);
             frame.Setup(id);
             frame.Visible = config.Visible;
             frame.FrameSize = config.FrameSize;
@@ -555,7 +571,7 @@ namespace Iviz.Controllers
 
         static void HighlightPose(in Pose pose) =>
             ResourcePool.RentDisplay<PoseHighlighter>().HighlightPose(pose);
-        
+
         public static void HighlightFrame([NotNull] string frameId)
         {
             if (!Instance.frames.ContainsKey(frameId))

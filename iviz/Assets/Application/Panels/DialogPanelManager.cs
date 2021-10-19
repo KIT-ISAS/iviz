@@ -30,14 +30,21 @@ namespace Iviz.App
         readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType =
             new Dictionary<DialogPanelType, IDialogPanelContents>();
 
-        DialogData selectedDialogData;
+        [CanBeNull] DialogData selectedDialogData;
         Canvas parentCanvas;
         bool started;
 
-        bool Active
+        public bool Active
         {
             get => parentCanvas.enabled;
-            set => parentCanvas.enabled = value;
+            set
+            {
+                //parentCanvas.enabled = value;
+                if (selectedDialogData != null)
+                {
+                    selectedDialogData.Panel.Active = value;
+                } 
+            }
         }
 
         void Awake()
@@ -69,7 +76,7 @@ namespace Iviz.App
                 panel.Active = false;
             }
 
-            Active = false;
+            Active = true;
             gameObject.SetActive(true);
             started = true;
 
@@ -85,7 +92,7 @@ namespace Iviz.App
                 throw new NullReferenceException("Requested a panel from source null!");
             }
 
-            var panel = source.Instantiate(transform).GetComponent<T>();
+            var panel = source.Instantiate<T>(transform);
             if (panel == null)
             {
                 throw new NullReferenceException($"Panel '{source}' does not have a module of type {typeof(T)}");
@@ -138,7 +145,7 @@ namespace Iviz.App
                 : throw new InvalidOperationException("Panel type does not match!");
         }
 
-        void SelectPanelFor(DialogData newSelected)
+        void SelectPanelFor([CanBeNull] DialogData newSelected)
         {
             if (!started)
             {
@@ -151,13 +158,13 @@ namespace Iviz.App
             }
 
             HideSelectedPanel();
-            if (newSelected != null)
+            if (newSelected != null && !newSelected.Detached)
             {
                 ShowPanel(newSelected);
             }
         }
 
-        void ShowPanel(DialogData newSelected)
+        void ShowPanel([NotNull] DialogData newSelected)
         {
             selectedDialogData = newSelected;
             try
@@ -170,27 +177,40 @@ namespace Iviz.App
             }
 
             selectedDialogData.Panel.Active = true;
-            Active = true;
+            //Active = true;
         }
 
         void HideSelectedPanel()
         {
-            if (selectedDialogData == null)
+            if (selectedDialogData != null)
             {
-                return;
+                HidePanel(selectedDialogData);
+                selectedDialogData = null;
             }
+        }
 
-            selectedDialogData.Panel.Active = false;
-            selectedDialogData.CleanupPanel();
-            selectedDialogData.Panel.ClearSubscribers();
-            selectedDialogData = null;
-            Active = false;
-            ModuleListPanel.Instance.DialogIsDragged = false;
+        static void HidePanel([NotNull] DialogData dialogData)
+        {
+            dialogData.Panel.Active = false;
+            dialogData.CleanupPanel();
+            dialogData.Panel.ClearSubscribers();
+            //Active = false;
         }
 
 
         public void HidePanelFor([CanBeNull] DialogData deselected)
         {
+            if (deselected == null)
+            {
+                return;
+            }
+            
+            if (deselected.Detached)
+            {
+                HidePanel(deselected);
+                deselected.Detached = false;
+            }
+
             if (selectedDialogData == deselected)
             {
                 HideSelectedPanel();
@@ -208,6 +228,17 @@ namespace Iviz.App
                 SelectPanelFor(selected);
             }
         }
+
+        public void DetachSelectedPanel()
+        {
+            if (selectedDialogData == null)
+            {
+                return;
+            }
+            
+            selectedDialogData.Detached = true;
+            selectedDialogData = null;
+        } 
 
         [NotNull]
         public override string ToString()

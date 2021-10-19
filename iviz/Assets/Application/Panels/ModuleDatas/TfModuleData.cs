@@ -4,6 +4,7 @@ using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -37,6 +38,7 @@ namespace Iviz.App
             {
                 listener.Config.Topic = Topic;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -58,43 +60,30 @@ namespace Iviz.App
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.Sender.Set(listener.Publisher);
             panel.TapSender.Set(listener.TapPublisher);
+            panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.HideButton.Clicked += ToggleVisible;
-            panel.ShowFrameLabels.ValueChanged += f =>
-            {
-                listener.FrameLabelsVisible = f;
-            };
-            panel.FrameSize.ValueChanged += f =>
-            {
-                listener.FrameSize = f;
-            };
-            panel.ConnectToParent.ValueChanged += f =>
-            {
-                listener.ParentConnectorVisible = f;
-            };
-            panel.KeepAllFrames.ValueChanged += f =>
-            {
-                listener.KeepAllFrames = f;
-            };
-            panel.ResetButton.Clicked += () =>
-            {
-                listener.ResetController();
-            };
+            panel.ShowFrameLabels.ValueChanged += f => listener.FrameLabelsVisible = f;
+            panel.FrameSize.ValueChanged += f => listener.FrameSize = f;
+            panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
+            panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
+            panel.ResetButton.Clicked += () => listener.ResetController();
+            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
         }
-        
+
         public override void Close()
         {
             // do nothing!
         }
-        
+
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(TfConfiguration.Visible):
                         listener.FramesVisible = config.Visible;
@@ -113,10 +102,10 @@ namespace Iviz.App
                         break;
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
+
             ResetPanel();
         }
 

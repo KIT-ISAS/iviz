@@ -847,9 +847,9 @@ namespace Iviz.Displays
 
             foreach (Msgs.IvizMsgs.Light source in scene.Lights)
             {
-                GameObject lightObject = new GameObject("Light:" + source.Name);
+                var lightObject = new GameObject("Light:" + source.Name);
                 lightObject.transform.parent = node.transform;
-                UnityEngine.Light light = lightObject.AddComponent<UnityEngine.Light>();
+                var light = lightObject.AddComponent<UnityEngine.Light>();
                 light.color = source.Diffuse.ToColor32();
                 light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
                 lightObject.transform.localPosition = source.Position.Ros2Unity();

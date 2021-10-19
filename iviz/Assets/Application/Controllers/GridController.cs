@@ -22,9 +22,9 @@ namespace Iviz.Controllers
         [DataMember] public ModuleType ModuleType => ModuleType.Grid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
-        [DataMember] public SerializableColor GridColor { get; set; } = GridController.DefaultColor * 0.25f;
+        [DataMember] public SerializableColor GridColor { get; set; } = Resource.Colors.GridLine;
 
-        [DataMember] public SerializableColor InteriorColor { get; set; } = GridController.DefaultColor;
+        [DataMember] public SerializableColor InteriorColor { get; set; } = Resource.Colors.GridInterior;
 
         //[DataMember] public float GridLineWidth { get; set; } = 0.025f;
         //[DataMember] public float GridCellSize { get; set; } = 1;
@@ -39,22 +39,13 @@ namespace Iviz.Controllers
 
     public sealed class GridController : IController
     {
-        public static readonly Color DefaultColor = (0.6f * Color.white).WithAlpha(1);
-
-        const int ProbeRefreshTimeInSec = 5;
-
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
 
-        //Point? lastTapPosition;
-        //uint clickedSeq;
-
         public IModuleData ModuleData { get; }
 
         readonly GridConfiguration config = new GridConfiguration();
-
-        //public Sender<PointStamped> SenderPoint { get; private set; }
 
         public GridConfiguration Config
         {

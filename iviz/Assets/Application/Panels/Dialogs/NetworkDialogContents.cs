@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class NetworkDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class NetworkDialogContents : DetachablePanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] TMP_Text text = null;
@@ -13,13 +13,7 @@ namespace Iviz.App
         //public Text Text => text;
         public TMP_Text Text => text;
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
         }

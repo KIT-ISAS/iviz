@@ -5,7 +5,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ConnectionDialogData"/> 
     /// </summary>
-    public sealed class ConnectionDialogContents : MonoBehaviour, IDialogPanelContents
+    public sealed class ConnectionDialogContents : PanelContents
     {
         [SerializeField] InputFieldWithHintsWidget masterUri = null;
         [SerializeField] InputFieldWithHintsWidget myUri = null;
@@ -25,12 +25,6 @@ namespace Iviz.App
         public LineLog LineLog => lineLog;
         public ToggleButtonWidget ServerMode => serverMode;
 
-        public bool Active
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
         void Awake()
         {
             serverMode.InactiveText = "Master Off";
@@ -38,7 +32,7 @@ namespace Iviz.App
             serverMode.State = false;
         }
 
-        public void ClearSubscribers()
+        public override void ClearSubscribers()
         {
             MasterUri.ClearSubscribers();
             MyUri.ClearSubscribers();

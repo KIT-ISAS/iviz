@@ -44,7 +44,6 @@ namespace Iviz.App
 
         PoseDisplayType poseDisplay;
 
-        readonly StringBuilder description = new StringBuilder(65536);
         uint? descriptionHash;
         uint? textHash;
 
@@ -126,7 +125,7 @@ namespace Iviz.App
 
             poseAs.ValueChanged += (i, _) =>
             {
-                poseDisplay = (PoseDisplayType) i;
+                poseDisplay = (PoseDisplayType)i;
                 UpdateFrameText();
             };
         }
@@ -181,20 +180,27 @@ namespace Iviz.App
 
         void UpdateFrameListAsTree()
         {
-            description.Clear();
-            new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
-
-            description.AppendLine().AppendLine();
-            uint newHash = Crc32Calculator.Instance.Compute(description);
-            if (newHash == descriptionHash)
+            var description = BuilderPool.Rent();
+            try
             {
-                return;
-            }
+                new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
 
-            descriptionHash = newHash;
-            tfText.SetText(description);
-            RectTransform cTransform = (RectTransform) content.transform;
-            cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+                description.AppendLine().AppendLine();
+                uint newHash = Crc32Calculator.Instance.Compute(description);
+                if (newHash == descriptionHash)
+                {
+                    return;
+                }
+
+                descriptionHash = newHash;
+                tfText.SetText(description);
+                RectTransform cTransform = (RectTransform)content.transform;
+                cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+            }
+            finally
+            {
+                BuilderPool.Return(description);
+            }
         }
 
         void UpdateFrameListAsList()
@@ -202,25 +208,32 @@ namespace Iviz.App
             nodes.Clear();
             new TfNode(TfListener.OriginFrame, SelectedFrame).AddTo(nodes);
 
-            description.Clear();
-            nodes.Sort();
-            foreach (var node in nodes)
+            var description = BuilderPool.Rent();
+            try
             {
-                node.WriteSingle(description);
-            }
+                nodes.Sort();
+                foreach (var node in nodes)
+                {
+                    node.WriteSingle(description);
+                }
 
-            description.AppendLine().AppendLine();
-            uint newHash = Crc32Calculator.Instance.Compute(description);
-            if (newHash == descriptionHash)
+                description.AppendLine().AppendLine();
+                uint newHash = Crc32Calculator.Instance.Compute(description);
+                if (newHash == descriptionHash)
+                {
+                    return;
+                }
+
+                descriptionHash = newHash;
+                tfText.SetText(description);
+
+                RectTransform cTransform = (RectTransform)content.transform;
+                cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+            }
+            finally
             {
-                return;
+                BuilderPool.Return(description);
             }
-
-            descriptionHash = newHash;
-            tfText.SetText(description);
-
-            RectTransform cTransform = (RectTransform) content.transform;
-            cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
         }
 
         public void UpdateFrameText()
@@ -230,84 +243,81 @@ namespace Iviz.App
                 return;
             }
 
-            description.Clear();
-            if (SelectedFrame == null)
+            var description = BuilderPool.Rent();
+            try
             {
-                description.Append("<color=grey>[none]</color>");
-            }
-            else
-            {
-                string id = SelectedFrame.Id;
-                description.Append("<font=Bold>[")
-                    .Append(id)
-                    .AppendLine(id == TfListener.FixedFrameId
-                        ? "]</font>  <i>[Fixed]</i>"
-                        : "]</font>");
-
-                description.AppendLine(
-                    SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
-                        ? "[no parent]"
-                        : SelectedFrame.Parent.Id);
-                //description.AppendLine(nameText).AppendLine(parentId);
-
-                /*
-                string nameText = id == TfListener.FixedFrameId
-                    ? $"<font=Bold>[{id}]</font>  <i>[Fixed]</i>"
-                    : $"<font=Bold>[{id}]</font>";
-                string parentId =
-                    SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
-                        ? "[no parent]"
-                        : SelectedFrame.Parent.Id;
-                        */
-
-
-                Pose pose;
-                switch (poseDisplay)
+                if (SelectedFrame == null)
                 {
-                    case PoseDisplayType.ToRoot:
-                        pose = SelectedFrame.OriginWorldPose;
-                        break;
-                    case PoseDisplayType.ToFixed:
-                        pose = TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose);
-                        break;
-                    case PoseDisplayType.ToParent:
-                        pose = SelectedFrame.Transform.AsLocalPose();
-                        break;
-                    default:
-                        pose = Pose.identity; // shouldn't happen
-                        break;
+                    description.Append("<color=grey>[none]</color>");
+                }
+                else
+                {
+                    string id = SelectedFrame.Id;
+                    description.Append("<font=Bold>[")
+                        .Append(id)
+                        .AppendLine(id == TfListener.FixedFrameId
+                            ? "]</font>  <i>[Fixed]</i>"
+                            : "]</font>");
+
+                    description.AppendLine(
+                        SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
+                            ? "[no parent]"
+                            : SelectedFrame.Parent.Id);
+
+                    Pose pose;
+                    switch (poseDisplay)
+                    {
+                        case PoseDisplayType.ToRoot:
+                            pose = SelectedFrame.OriginWorldPose;
+                            break;
+                        case PoseDisplayType.ToFixed:
+                            pose = TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose);
+                            break;
+                        case PoseDisplayType.ToParent:
+                            pose = SelectedFrame.Transform.AsLocalPose();
+                            break;
+                        default:
+                            pose = Pose.identity; // shouldn't happen
+                            break;
+                    }
+                    
+                    FormatPose(pose, description);
                 }
 
-                var ((pX, pY, pZ), (rX, rY, rZ, rW)) = pose.Unity2RosPose();
-                string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
-                string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
-                string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
+                uint newHash = Crc32Calculator.Instance.Compute(description);
+                if (newHash == textHash)
+                {
+                    return;
+                }
 
-                string rx = rX == 0 ? "0" : rX.ToString("#,0.###", UnityUtils.Culture);
-                string ry = rY == 0 ? "0" : rY.ToString("#,0.###", UnityUtils.Culture);
-                string rz = rZ == 0 ? "0" : rZ.ToString("#,0.###", UnityUtils.Culture);
-                string rw = rW == 1 ? "1" : rW.ToString("#,0.###", UnityUtils.Culture);
-
-                //string poseStr = $"{px}, {py}, {pz}\nr:[{rx}, {ry}, {rz}, {rw}]";
-
-                //description.AppendLine(nameText).AppendLine(parentId).AppendLine(poseStr);
-                description.Append(px).Append(", ").Append(py).Append(", ").AppendLine(pz);
-                description.Append("r:[")
-                    .Append(rx).Append(", ")
-                    .Append(ry).Append(", ")
-                    .Append(rz).Append(", ")
-                    .Append(rw).Append("]");
+                textHash = newHash;
+                tfName.SetText(description);
             }
-
-            uint newHash = Crc32Calculator.Instance.Compute(description);
-            if (newHash == textHash)
+            finally
             {
-                return;
+                BuilderPool.Return(description);
             }
-
-            textHash = newHash;
-            tfName.SetText(description);
         }
+
+        public static void FormatPose(in Pose unityPose, [NotNull] StringBuilder description)
+        {
+            var ((pX, pY, pZ), (rX, rY, rZ, rW)) = unityPose.Unity2RosPose();
+            string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
+            string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
+            string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
+
+            string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
+            string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
+            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
+            string rw = rW == 1 ? "1" : rW.ToString("#,0.##", UnityUtils.Culture);
+
+            description.Append(px).Append(", ").Append(py).Append(", ").AppendLine(pz);
+            description.Append("r:[")
+                .Append(rx).Append(", ")
+                .Append(ry).Append(", ")
+                .Append(rz).Append(", ")
+                .Append(rw).Append("]");            
+        } 
 
         public void UpdateFrameButtons()
         {

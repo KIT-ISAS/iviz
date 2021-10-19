@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -8,8 +10,6 @@ namespace Iviz.Resources
 {
     public sealed class FontInfo
     {
-        static readonly StringBuilder CachedStr = new StringBuilder(50);
-
         readonly Font font;
         readonly int dotWidth;
         readonly int arrowWidth;
@@ -31,52 +31,56 @@ namespace Iviz.Resources
             }
 
             int usableWidth = maxWidth - dotWidth;
-            
-            int totalWidth = 0;
-            foreach (var c in str)
-            {
-                totalWidth += CharWidth(c);
-            }
+
+            int totalWidth = str.Sum(CharWidth);
 
             if (totalWidth <= usableWidth)
             {
                 return str;
             }
 
-            CachedStr.Length = 0;
-            int usedWidth = 0;
-            int numLines = 0;
-            for (int i = 0; i < str.Length; i++)
+            var description = BuilderPool.Rent();
+            try
             {
-                int charWidth = CharWidth(str[i]);
-                if (usedWidth + charWidth > usableWidth)
+                description.Length = 0;
+                int usedWidth = 0;
+                int numLines = 0;
+                for (int i = 0; i < str.Length; i++)
                 {
-                    if (i >= str.Length - 2)
+                    int charWidth = CharWidth(str[i]);
+                    if (usedWidth + charWidth > usableWidth)
                     {
-                        CachedStr.Append(str[i]);
-                        continue;
-                    }
+                        if (i >= str.Length - 2)
+                        {
+                            description.Append(str[i]);
+                            continue;
+                        }
 
-                    if (numLines != maxLines - 1)
-                    {
-                        CachedStr.Append("...\n→ ").Append(str[i]);
-                        usedWidth = arrowWidth;
-                        numLines = 1;
+                        if (numLines != maxLines - 1)
+                        {
+                            description.Append("...\n→ ").Append(str[i]);
+                            usedWidth = arrowWidth;
+                            numLines = 1;
+                        }
+                        else
+                        {
+                            description.Append("...");
+                            return description.ToString();
+                        }
                     }
                     else
                     {
-                        CachedStr.Append("...");
-                        return CachedStr.ToString();
+                        description.Append(str[i]);
+                        usedWidth += charWidth;
                     }
                 }
-                else
-                {
-                    CachedStr.Append(str[i]);
-                    usedWidth += charWidth;
-                }
-            }
 
-            return CachedStr.ToString();
+                return description.ToString();
+            }
+            finally
+            {
+                BuilderPool.Return(description);
+            }
         }
 
         int CharWidth(char c)

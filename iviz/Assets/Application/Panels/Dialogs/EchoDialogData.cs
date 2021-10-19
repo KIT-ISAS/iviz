@@ -27,7 +27,6 @@ namespace Iviz.App
             new ConcurrentQueue<(string, IMessage)>();
 
         readonly List<TopicEntry> entries = new List<TopicEntry>();
-        readonly StringBuilder messageBuffer = new StringBuilder(65536);
         IListener listener;
         bool queueIsDirty;
         bool isPaused;
@@ -55,7 +54,7 @@ namespace Iviz.App
             return true;
         }
 
-        void CreateListener(string topicName, string rosMsgType, [NotNull] Type csType)
+        void CreateListener([NotNull] string topicName, [CanBeNull] string rosMsgType, [NotNull] Type csType)
         {
             if (listener != null)
             {
@@ -75,14 +74,14 @@ namespace Iviz.App
             {
                 Func<IMessage, bool> handler = Handler;
                 Type listenerType = typeof(Listener<>).MakeGenericType(csType);
-                listener = (IListener) Activator.CreateInstance(listenerType, topicName, handler);
+                listener = (IListener)Activator.CreateInstance(listenerType, topicName, handler);
             }
         }
 
         void CreateTopicList()
         {
             var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
-            
+
             entries.Clear();
             entries.Add(TopicEntry.Empty);
 
@@ -131,21 +130,20 @@ namespace Iviz.App
                 }
 
                 queueIsDirty = false;
-                messageBuffer.Length = 0;
                 dialog.Text.text = "";
             };
 
             UpdateOptions();
-            
+
             isPaused = dialog.Pause.State;
             listener?.SetSuspend(isPaused);
-            
+
             dialog.Pause.Clicked += () =>
             {
                 dialog.Pause.State = !dialog.Pause.State;
                 isPaused = dialog.Pause.State;
                 listener?.SetSuspend(isPaused);
-            };            
+            };
         }
 
         void UpdateOptions()
@@ -166,9 +164,17 @@ namespace Iviz.App
             }
             else
             {
-                messageBuffer.Length = 0;
-                listener.WriteDescriptionTo(messageBuffer);
-                dialog.Publishers.SetText(messageBuffer);
+                var description = BuilderPool.Rent();
+                try
+                {
+                    listener.WriteDescriptionTo(description);
+                    dialog.Publishers.SetText(description);
+                }
+                finally
+                {
+                    BuilderPool.Return(description);
+                }
+
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
                 long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
                 dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
@@ -182,24 +188,31 @@ namespace Iviz.App
                 return;
             }
 
-            messageBuffer.Length = 0;
-            foreach (var (timeFormatted, msg) in messageQueue)
+            var description = BuilderPool.Rent();
+            try
             {
-                string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
-                    new ClampJsonConverter(MaxMessageLength));
-                messageBuffer.Append("<b>").Append(timeFormatted).Append("</b> ");
-                messageBuffer.Append(msgAsText).AppendLine();
-            }
+                foreach (var (timeFormatted, msg) in messageQueue)
+                {
+                    string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
+                        new ClampJsonConverter(MaxMessageLength));
+                    description.Append("<b>").Append(timeFormatted).Append("</b> ");
+                    description.Append(msgAsText).AppendLine();
+                }
 
-            if (messageBuffer.Length > MaxMessages * MaxMessageLength)
+                if (description.Length > MaxMessages * MaxMessageLength)
+                {
+                    description.Remove(0, MaxMessages * MaxMessageLength - description.Length);
+                }
+
+                dialog.Text.SetText(description);
+                queueIsDirty = false;
+            }
+            finally
             {
-                messageBuffer.Remove(0, MaxMessages * MaxMessageLength - messageBuffer.Length);
+                BuilderPool.Return(description);
             }
-
-            dialog.Text.SetText(messageBuffer);
-            queueIsDirty = false;
         }
-        
+
         sealed class TopicEntry : IComparable<TopicEntry>
         {
             public static readonly TopicEntry Empty = new TopicEntry();
@@ -233,6 +246,6 @@ namespace Iviz.App
                     ? 0
                     : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
             }
-        }        
+        }
     }
 }
