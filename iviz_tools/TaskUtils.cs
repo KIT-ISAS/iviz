@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -310,6 +311,11 @@ namespace Iviz.Tools
 
         public static async Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
         {
+            if (ts.Count == 0)
+            {
+                return;
+            }
+
             List<Exception>? es = null;
             foreach (var t in ts)
             {
@@ -341,7 +347,7 @@ namespace Iviz.Tools
             }
             catch (Exception e)
             {
-                es ??= new List<Exception> {e};
+                es ??= new List<Exception> { e };
             }
 
             try
@@ -380,18 +386,6 @@ namespace Iviz.Tools
                 return;
             }
 
-            /*
-            var timeout = new TaskCompletionSource<object?>();
-            var timeoutTask = timeout.Task;
-            using var registration = token.Register(() => timeout.SetResult(null));
-
-            Task resultTask = await (task, timeoutTask).WhenAny();
-            if (resultTask == timeoutTask)
-            {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException("Operation timed out");
-            }
-            */
             const int maxTokenWait = 5000;
             var timeoutTask = Task.Delay(maxTokenWait, token);
             await await (task, timeoutTask).WhenAny();
@@ -410,19 +404,6 @@ namespace Iviz.Tools
             {
                 return await task;
             }
-
-            /*
-            var timeout = new TaskCompletionSource<object?>();
-            var timeoutTask = timeout.Task;
-            using var registration = token.Register(() => timeout.TrySetResult(null));
-
-            Task resultTask = await (task, timeoutTask).WhenAny();
-            if (resultTask == timeoutTask)
-            {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException("Operation timed out");
-            }
-            */
 
             const int maxTokenWait = 5000;
             var timeoutTask = Task.Delay(maxTokenWait, token);
@@ -470,6 +451,10 @@ namespace Iviz.Tools
                 throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
             }
 #else
+            Task connectionTask = IPAddress.TryParse(hostname, out var address)
+                ? client.ConnectAsync(address, port)
+                : client.ConnectAsync(hostname, port);
+
             if (timeoutInMs == -1)
             {
                 if (!token.CanBeCanceled)
@@ -477,11 +462,10 @@ namespace Iviz.Tools
                     throw new InvalidOperationException("Either a timeout or a cancellable token should be provided");
                 }
 
-                await client.ConnectAsync(hostname, port).AwaitWithToken(token);
+                await connectionTask.AwaitWithToken(token);
             }
             else
             {
-                Task connectionTask = client.ConnectAsync(hostname, port);
                 if (!await connectionTask.AwaitFor(timeoutInMs, token))
                 {
                     token.ThrowIfCancellationRequested();
@@ -489,6 +473,22 @@ namespace Iviz.Tools
                 }
             }
 #endif
+        }
+
+        public static void TryConnect(this UdpClient client, string hostname, int port)
+        {
+            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
+            {
+                hostname = resolvedHostname;
+            }
+
+            if (IPAddress.TryParse(hostname, out var address))
+            {
+                client.Connect(new IPEndPoint(address, port));
+                return;
+            }
+
+            client.Connect(hostname, port);
         }
 
         public static bool CheckIfAlive(this Socket? socket) =>

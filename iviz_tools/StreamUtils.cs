@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,36 +10,25 @@ namespace Iviz.Tools
 {
     public static class StreamUtils
     {
-        public static async ValueTask<bool> ReadChunkAsync(this NetworkStream stream, byte[] buffer, int toRead,
+        public static ValueTask<bool> ReadChunkAsync(this TcpClient client, byte[] buffer, int toRead,
             CancellationToken token)
+        {
+            var socket = client.Client;
+            if (socket.Available >= toRead)
+            {
+                int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
+                return new ValueTask<bool>(received == toRead);
+            }
+
+            return DoReadChunkAsync(socket, buffer, toRead, token);
+        }
+
+        static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
         {
             int numRead = 0;
             while (numRead < toRead)
             {
-#if !NETSTANDARD2_0
-                int readNow = await stream.ReadAsync(buffer.AsMemory(numRead, toRead - numRead), token);
-#else
-                int readNow;
-                if (stream.DataAvailable)
-                {
-                    token.ThrowIfCancellationRequested();
-                    readNow = stream.Read(buffer, numRead, toRead - numRead);
-                }
-                else
-                {
-                    Task<int> readTask = stream.ReadAsync(buffer, numRead, toRead - numRead, token);
-                    var tokenTaskSource = new TaskCompletionSource<object?>();
-                    Action whenComplete = () => tokenTaskSource.TrySetResult(null);
-
-                    using var registration = token.Register(whenComplete);
-                    readTask.GetAwaiter().OnCompleted(whenComplete);
-                    
-                    await tokenTaskSource.Task;
-                    token.ThrowIfCancellationRequested();
-                    readNow = await readTask;
-                }
-
-#endif
+                int readNow = await ReadChunkAsync(socket, buffer, numRead, toRead - numRead, token);
                 if (readNow == 0)
                 {
                     return false;
@@ -50,14 +40,14 @@ namespace Iviz.Tools
             return true;
         }
 
-        public static async ValueTask<bool> ReadAndIgnoreAsync(this NetworkStream stream, int toRead,
+        public static async ValueTask<bool> ReadAndIgnoreAsync(this TcpClient client, int toRead,
             CancellationToken token)
         {
             const int bufferSize = 4096;
             if (toRead <= bufferSize)
             {
                 using var buffer = new Rent<byte>(toRead);
-                return await ReadChunkAsync(stream, buffer.Array, toRead, token);
+                return await ReadChunkAsync(client, buffer.Array, toRead, token);
             }
             else
             {
@@ -65,7 +55,7 @@ namespace Iviz.Tools
                 using var buffer = new Rent<byte>(toRead);
                 while (remaining > bufferSize)
                 {
-                    if (!await ReadChunkAsync(stream, buffer.Array, bufferSize, token))
+                    if (!await ReadChunkAsync(client, buffer.Array, bufferSize, token))
                     {
                         return false;
                     }
@@ -73,33 +63,98 @@ namespace Iviz.Tools
                     remaining -= bufferSize;
                 }
 
-                return await ReadChunkAsync(stream, buffer.Array, remaining, token);
+                return await ReadChunkAsync(client, buffer.Array, remaining, token);
             }
         }
 
-        public static async Task WriteChunkAsync(this NetworkStream stream, byte[] buffer, int count,
+
+        public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, byte[] buffer, CancellationToken token)
+        {
+            return ReadChunkAsync(udpClient.Client, buffer, 0, buffer.Length, token);
+        }
+
+        static readonly AsyncCallback ReceiveCallbackDel =
+            result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
+
+        static readonly Action<object?> WhenComplete = tcs =>
+            ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
+
+        static ValueTask<int> ReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
             CancellationToken token)
         {
-#if !NETSTANDARD2_0
-            await stream.WriteAsync(buffer.AsMemory(0, count), token);
-#else
-            var tokenTaskSource = new TaskCompletionSource<object?>();
-            var tokenTask = tokenTaskSource.Task;
-            using var registration = token.Register(() => tokenTaskSource.TrySetResult(null));
-
-            Task writeTask = stream.WriteAsync(buffer, 0, count, token);
-            Task resultTask = await (writeTask, tokenTask).WhenAny();
-            if (resultTask == tokenTask)
+            if (socket.Available != 0)
             {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException("Writing operation timed out");
+                int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
+                return new ValueTask<int>(received);
             }
 
-            await writeTask;
-#endif
+            return DoReadChunkAsync(socket, buffer, offset, toRead, token);
         }
 
-        public static async Task WriteHeaderAsync(this NetworkStream stream, string[] contents, CancellationToken token)
+        static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
+            CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<IAsyncResult>();
+
+            socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, ReceiveCallbackDel, tcs);
+
+            if (!tcs.Task.IsCompleted)
+            {
+                using var registration = token.Register(WhenComplete, tcs);
+                var result = await tcs.Task;
+                return socket.EndReceive(result);
+            }
+            else
+            {
+                var result = await tcs.Task;
+                return socket.EndReceive(result);
+            }
+        }
+
+        public static async Task WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
+            CancellationToken token)
+        {
+            var socket = client.Client;
+            int numWritten = 0;
+            while (numWritten < toWrite)
+            {
+                int writeNow = await DoWriteChunkAsync(socket, buffer, numWritten, toWrite - numWritten, token);
+                if (writeNow == 0)
+                {
+                    return;
+                }
+
+                numWritten += writeNow;
+            }
+        }
+
+        public static Task WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
+            CancellationToken token)
+        {
+            return DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token).AsTask();
+        }
+
+        static async ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
+            CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<IAsyncResult>();
+
+            socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, ReceiveCallbackDel, tcs);
+
+            if (!tcs.Task.IsCompleted)
+            {
+                using var registration = token.Register(WhenComplete, tcs);
+                var result = await tcs.Task;
+                return socket.EndSend(result);
+            }
+            else
+            {
+                var result = await tcs.Task;
+                return socket.EndReceive(result);
+            }
+        }
+
+        public static async Task WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
@@ -107,20 +162,33 @@ namespace Iviz.Tools
             using var writer = new BinaryWriter(new MemoryStream(array.Array));
 
             writer.Write(totalLength);
-            foreach (string t in contents)
+            WriteHeaderEntries(writer, contents);
+            await client.WriteChunkAsync(array.Array, array.Length, token);
+        }
+
+        public static byte[] WriteHeaderToArray(string[] contents)
+        {
+            int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
+
+            byte[] array = new byte[totalLength];
+            using var writer = new BinaryWriter(new MemoryStream(array));
+            WriteHeaderEntries(writer, contents);
+            return array;
+        }
+
+        static void WriteHeaderEntries(BinaryWriter writer, string[] contents)
+        {
+            foreach (string entry in contents)
             {
-                byte[] bytes = Defaults.UTF8.GetBytes(t);
+                byte[] bytes = Defaults.UTF8.GetBytes(entry);
                 writer.Write(bytes.Length);
                 writer.Write(bytes);
             }
+        }
 
-            await stream.WriteChunkAsync(array.Array, array.Length, token);
-        }    
-        
         public static async Task WriteChunkAsync(this StreamWriter writer, string text, CancellationToken token,
             int timeoutInMs = -1)
         {
-
 #if !NETSTANDARD2_0
             using CancellationTokenSource tokenSource = !token.CanBeCanceled
                 ? new CancellationTokenSource()
