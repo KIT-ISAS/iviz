@@ -234,15 +234,9 @@ namespace Iviz.MsgsGen.Dynamic
         {
         }
 
-        public static bool IsDynamic<T>()
-        {
-            return typeof(DynamicMessage) == typeof(T);
-        }
+        public static bool IsDynamic<T>() => typeof(DynamicMessage) == typeof(T);
 
-        public static bool IsGenericMessage<T>()
-        {
-            return typeof(IMessage) == typeof(T);
-        }
+        public static bool IsGenericMessage<T>() => typeof(IMessage) == typeof(T);
 
         [Preserve] public const string RosMessageType = "*";
 
