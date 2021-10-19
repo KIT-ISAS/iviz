@@ -210,7 +210,15 @@ namespace Iviz.XmlRpc
         internal static XmlRpcValue ProcessResponse(string inData)
         {
             XmlDocument document = new();
-            document.LoadXml(inData);
+            try
+            {
+                document.LoadXml(inData);
+            }
+            catch (XmlException e)
+            {
+                throw new ParseException("XML response could not be parsed", e);
+            }
+
             XmlNode? root = document.FirstChild;
             while (root != null && root.Name != "methodResponse")
             {

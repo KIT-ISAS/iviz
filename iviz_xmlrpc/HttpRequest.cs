@@ -83,7 +83,7 @@ namespace Iviz.XmlRpc
                     using (var headerBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(header.Length)))
                     {
                         int headerSize = Defaults.UTF8.GetBytes(header, 0, header.Length, headerBytes.Array, 0);
-                        await stream.WriteChunkAsync(headerBytes.Array, headerSize, token);
+                        await client.WriteChunkAsync(headerBytes.Array, headerSize, token);
                     }
 
                     await stream.WriteAsync(payloadBytes.Array, 0, length, token).AwaitWithToken(token);
@@ -97,22 +97,20 @@ namespace Iviz.XmlRpc
             using (var contentBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(content.Length)))
             {
                 int contentSize = Defaults.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
-                await stream.WriteChunkAsync(contentBytes.Array, contentSize, token);
+                await client.WriteChunkAsync(contentBytes.Array, contentSize, token);
             }
 
             await stream.FlushAsync(token).AwaitWithToken(token);
             return content.Length;
         }
 
-        static async Task<int> ReadHeaderAsync(NetworkStream stream, byte[] buffer, CancellationToken token)
+        static async Task<int> ReadHeaderAsync(TcpClient client, byte[] buffer, CancellationToken token)
         {
             byte[] singleByte = new byte[1];
             int pos = 0;
             while (pos < buffer.Length)
             {
-                buffer[pos] = stream.DataAvailable
-                    ? (byte) stream.ReadByte()
-                    : await stream.ReadChunkAsync(singleByte, 1, token)
+                buffer[pos] = await client.ReadChunkAsync(singleByte, 1, token)
                         ? singleByte[0]
                         : throw new IOException("Partner closed connection");
 
@@ -187,7 +185,7 @@ namespace Iviz.XmlRpc
                 }
             }
 
-            if (length == null || length < 0)
+            if (length is null or < 0)
             {
                 throw new ParseException("Content-Length not found in HTTP header");
             }
@@ -197,11 +195,11 @@ namespace Iviz.XmlRpc
 
         internal Task<(string, int, bool)> GetResponseAsync(CancellationToken token)
         {
-            return ReadIncomingDataAsync(client.GetStream(), true, token);
+            return ReadIncomingDataAsync(client, true, token);
         }
 
         internal static async Task<(string inData, int length, bool shouldClose)>
-            ReadIncomingDataAsync(NetworkStream stream, bool isRequest, CancellationToken token)
+            ReadIncomingDataAsync(TcpClient client, bool isRequest, CancellationToken token)
         {
             const int maxHeaderSize = 4096;
             int headerLength;
@@ -211,13 +209,13 @@ namespace Iviz.XmlRpc
 
             using (var headerBytes = new Rent<byte>(maxHeaderSize))
             {
-                headerLength = await ReadHeaderAsync(stream, headerBytes.Array, token);
+                headerLength = await ReadHeaderAsync(client, headerBytes.Array, token);
                 using var reader = new StreamReader(new MemoryStream(headerBytes.Array, 0, headerLength));
                 (contentLength, encodingStr, connectionClose) = ParseHeader(reader, isRequest);
             }
 
             using var content = new Rent<byte>(contentLength);
-            if (!await stream.ReadChunkAsync(content.Array, content.Length, token))
+            if (!await client.ReadChunkAsync(content.Array, content.Length, token))
             {
                 throw new IOException("Partner closed connection");
             }

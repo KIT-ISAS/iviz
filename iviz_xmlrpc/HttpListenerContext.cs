@@ -42,7 +42,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
         public async Task<string> GetRequestAsync(CancellationToken token = default)
         {
-            return (await HttpRequest.ReadIncomingDataAsync(client.GetStream(), false, token)).inData;
+            return (await HttpRequest.ReadIncomingDataAsync(client, false, token)).inData;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Iviz.XmlRpc
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
                          msgOut;
 
-            using StreamWriter writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
+            using var writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
             await writer.WriteChunkAsync(str, token, timeoutInMs);
         }
 
