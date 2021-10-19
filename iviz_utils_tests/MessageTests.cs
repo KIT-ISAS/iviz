@@ -1,18 +1,13 @@
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MsgsGen;
 using Iviz.MsgsGen.Dynamic;
-using Iviz.Roslib;
-using Iviz.Roslib.XmlRpc;
+using Iviz.Tools;
 using NUnit.Framework;
-using Iviz.XmlRpc;
 using Buffer = Iviz.Msgs.Buffer;
-using String = Iviz.Msgs.StdMsgs.String;
 
 namespace Iviz.UtilsTests
 {

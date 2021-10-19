@@ -186,7 +186,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_false";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Twist>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -203,7 +203,6 @@ namespace Iviz.UtilsTests
             
             var state = subscriber.Subscriber.GetState();
             Assert.True(state.Receivers.Count > 0);
-            Assert.False(state.Receivers[0].IsConnected);
             Assert.False(state.Receivers[0].IsAlive);
             Assert.NotNull(state.Receivers[0].ErrorDescription);
         }
