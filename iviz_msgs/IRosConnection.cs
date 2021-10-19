@@ -21,7 +21,7 @@ namespace Iviz.Msgs
         /// <summary>
         /// List of TCPROS header entries in the form of strings a=b
         /// </summary>
-        IReadOnlyCollection<string> TcpHeader { get; }
+        IReadOnlyCollection<string> RosHeader { get; }
     }
 
     /// <summary>
@@ -50,10 +50,10 @@ namespace Iviz.Msgs
         {
             [DataMember] public string Topic { get; }
             [DataMember] public string Type { get; }
-            [DataMember] public IReadOnlyCollection<string> TcpHeader { get; }
+            [DataMember] public IReadOnlyCollection<string> RosHeader { get; }
 
-            public RosConnectionImpl(string topic, string type, IReadOnlyCollection<string> tcpHeader) =>
-                (Topic, Type, TcpHeader) = (topic, type, tcpHeader);
+            public RosConnectionImpl(string topic, string type, IReadOnlyCollection<string> rosHeader) =>
+                (Topic, Type, RosHeader) = (topic, type, rosHeader);
         }
     }
 }
