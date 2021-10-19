@@ -11,7 +11,7 @@ namespace Iviz.Rosbag.Writer
     /// <summary>
     /// Writer for Rosbag files.
     /// Usage: Construct, call <see cref="Write"/> to add messages, and close it with <see cref="Dispose"/>.
-    /// Don't forget to dispose, the file cannot be read without it.
+    /// Don't forget to dispose, the file cannot be read by other apps without it.
     /// </summary>
     public sealed class RosbagFileWriter : IDisposable
 #if !NETSTANDARD2_0
@@ -46,9 +46,10 @@ namespace Iviz.Rosbag.Writer
 
         /// <summary>
         /// Creates a rosbag file that writes on the given stream.
+        /// Use <see cref="CreateAsync(Stream, bool)"/> instead if you want to use async operations.
         /// </summary>
         /// <param name="stream">A writable and seekable stream</param>
-        /// <param name="leaveOpen">Whether the stream should be left open after disposing this file</param>
+        /// <param name="leaveOpen">Whether the stream should be left open after disposing this writer</param>
         /// <exception cref="ArgumentNullException">Thrown if stream is null</exception>
         /// <exception cref="ArgumentException">Thrown if the stream is not writable</exception>
         public RosbagFileWriter(Stream stream, bool leaveOpen = false)
@@ -67,16 +68,17 @@ namespace Iviz.Rosbag.Writer
 
         /// <summary>
         /// Creates a rosbag file on the given path.
-        /// Use <see cref="CreateAsync"/> instead if you want to use async operations.
+        /// Use <see cref="CreateAsync(string)"/> instead if you want to use async operations.
         /// </summary>
         /// <param name="path">The path where the file should be written</param>
-        public RosbagFileWriter(string path) : this(new FileStream(path, FileMode.Create), false)
+        public RosbagFileWriter(string path) : this(new FileStream(path, FileMode.Create))
         {
         }
 
-        RosbagFileWriter(Stream writer)
+        RosbagFileWriter(bool leaveOpen, Stream writer)
         {
             this.writer = writer;
+            this.leaveOpen = leaveOpen;
         }
 
         /// <summary>
@@ -87,12 +89,26 @@ namespace Iviz.Rosbag.Writer
         public static async ValueTask<RosbagFileWriter> CreateAsync(string path)
         {
             var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
-            var writer = new RosbagFileWriter(stream);
+            var writer = new RosbagFileWriter(false, stream);
 
             await writer.WriteMagicAsync();
             await writer.WriteHeaderRecordAsync(0, 0, 0);
             return writer;
         }
+        
+        /// <summary>
+        /// Creates a rosbag file using a stream that allows async operations.
+        /// </summary>
+        /// <param name="stream">The stream where the file should be written</param>
+        /// <param name="leaveOpen">Whether the stream should be left open after disposing this writer</param>
+        /// <returns>An awaitable task</returns>
+        public static async ValueTask<RosbagFileWriter> CreateAsync(Stream stream, bool leaveOpen = false)
+        {
+            var writer = new RosbagFileWriter(leaveOpen, stream);
+            await writer.WriteMagicAsync();
+            await writer.WriteHeaderRecordAsync(0, 0, 0);
+            return writer;
+        }        
 
         void WriteMagic() => writer.WriteValue(RosbagMagic);
 
@@ -289,8 +305,6 @@ namespace Iviz.Rosbag.Writer
             {
                 return;
             }
-
-            //Console.WriteLine("** Index start " + writer.Position);
 
             var op = new OpCodeHeaderEntry(OpCode.IndexData);
             var ver = new IntHeaderEntry("ver", 1);
@@ -560,7 +574,7 @@ namespace Iviz.Rosbag.Writer
             {
                 //Console.WriteLine("**  Adding connection " + connections.Count);
                 connectionId = connections[connection] = connections.Count;
-                WriteConnectionRecord(connectionId, connection.Topic, connection.TcpHeader);
+                WriteConnectionRecord(connectionId, connection.Topic, connection.RosHeader);
             }
 
             var messageList =
@@ -601,7 +615,7 @@ namespace Iviz.Rosbag.Writer
             {
                 //Console.WriteLine("**  Adding connection " + connections.Count);
                 connectionId = connections[connection] = connections.Count;
-                await WriteConnectionRecordAsync(connectionId, connection.Topic, connection.TcpHeader);
+                await WriteConnectionRecordAsync(connectionId, connection.Topic, connection.RosHeader);
             }
 
             var messageList =
@@ -640,7 +654,7 @@ namespace Iviz.Rosbag.Writer
                 //Console.WriteLine("** Writing connections");
                 foreach (var pair in connections)
                 {
-                    WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.TcpHeader);
+                    WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
                 }
 
                 //Console.WriteLine("** Writing chunk infos");
@@ -678,7 +692,7 @@ namespace Iviz.Rosbag.Writer
                 //Console.WriteLine("** Writing connections");
                 foreach (var pair in connections)
                 {
-                    await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.TcpHeader);
+                    await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
                 }
 
                 //Console.WriteLine("** Writing chunk infos");

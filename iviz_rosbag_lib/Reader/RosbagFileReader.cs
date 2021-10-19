@@ -9,7 +9,7 @@ namespace Iviz.Rosbag.Reader
     public sealed class RosbagFileReader : IDisposable, IEnumerable<MessageData>
     {
         const string RosbagMagic = "#ROSBAG V2.0\n";
-        
+
         internal const int RosbagMagicLength = 13;
 
         readonly Stream reader;
