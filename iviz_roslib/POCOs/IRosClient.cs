@@ -12,35 +12,38 @@ namespace Iviz.Roslib
 #endif
     {
         string CallerId { get; }
-        
+
         string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
 
         string Advertise(string topic, DynamicMessage generator, out IRosPublisher<DynamicMessage> publisher);
 
-        ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic, CancellationToken token = default)
+        ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
+            CancellationToken token = default)
             where T : IMessage;
 
         ValueTask<(string id, IRosPublisher<DynamicMessage> publisher)> AdvertiseAsync(string topic,
             DynamicMessage generator, CancellationToken token = default);
 
         string Advertise(string topic, Type msgType, out IRosPublisher publisher);
-        
+
         ValueTask<(string id, IRosPublisher publisher)> AdvertiseAsync(string topic, Type msgType,
             CancellationToken token = default);
-        
+
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay = true) where T : IMessage, IDeserializable<T>, new();
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp)
+            where T : IMessage, IDeserializable<T>, new();
 
         string Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
-            bool requestNoDelay = true);
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp);
 
         ValueTask<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
-                CancellationToken token = default)
+                RosTransportHint transportHint = RosTransportHint.OnlyTcp, CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new();
 
         ValueTask<(string id, IRosSubscriber subscriber)>
             SubscribeAsync(string topic, Action<IMessage> callback, bool requestNoDelay = true,
+                RosTransportHint transportHint = RosTransportHint.OnlyTcp,
                 CancellationToken token = default);
 
         bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)

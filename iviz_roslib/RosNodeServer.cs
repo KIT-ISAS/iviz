@@ -10,6 +10,9 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
+    /// <summary>
+    /// Manages queries from other ROS nodes or the master through XMLRPC 
+    /// </summary>
     internal sealed class RosNodeServer
     {
         static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
@@ -127,15 +130,11 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg)
-        {
-            return (StatusCode.Success, "ok", arg);
-        }
+        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "ok", arg);
 
-        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg)
-        {
-            return (StatusCode.Error, msg, 0);
-        }
+        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
+
+        static (int code, string msg, XmlRpcArg arg) FailureResponse(string msg) => (StatusCode.Failure, msg, 0);
 
         static XmlRpcArg GetBusStats(XmlRpcValue[] _)
         {
@@ -162,7 +161,12 @@ namespace Iviz.Roslib.XmlRpc
                     BusInfo.DirectionType.Out => "o",
                     _ => ""
                 },
-                info.Transport,
+                info.TransportType switch
+                {
+                    TransportType.Tcp => RosUtils.ProtocolTcpRosName,
+                    TransportType.Udp => RosUtils.ProtocolUdpRosName,
+                    _ => ""
+                },
                 info.Topic,
                 info.Connected ? 1 : 0
             };
@@ -177,7 +181,7 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (client.ShutdownAction == null)
             {
-                return (StatusCode.Failure, "No shutdown handler set", 0);
+                return FailureResponse("Shutdown failed. No callback set by the client.");
             }
 
             if (args.Length < 2 ||
@@ -187,7 +191,7 @@ namespace Iviz.Roslib.XmlRpc
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            client.ShutdownAction(callerId, reason, out _, out _);
+            client.ShutdownAction(callerId, reason);
 
             return DefaultOkResponse;
         }
@@ -223,13 +227,13 @@ namespace Iviz.Roslib.XmlRpc
 
             if (args.Length < 3 ||
                 !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string parameterKey))
+                !args[1].TryGetString(out string parameterKey) ||
+                args[2].IsEmpty)
             {
                 return ErrorResponse("Failed to parse arguments");
             }
 
-
-            client.ParamUpdateAction(callerId, parameterKey, args[2], out _, out _);
+            client.ParamUpdateAction(callerId, parameterKey, args[2]);
 
             return DefaultOkResponse;
         }
@@ -289,35 +293,104 @@ namespace Iviz.Roslib.XmlRpc
 
             if (protocols.Length == 0)
             {
-                return (StatusCode.Failure, "No compatible protocols found", 0);
+                return FailureResponse("No compatible protocols found");
             }
 
-            bool success = protocols.Any(entry =>
-                entry.TryGetArray(out XmlRpcValue[] protocol) &&
-                protocol.Length != 0 &&
-                protocol[0].TryGetString(out string protocolName) &&
-                protocolName == "TCPROS"
-            );
+            bool requestsTcp;
+            RpcUdpTopicRequest? requestsUdp;
 
-            if (!success)
+            // just take whatever is in place 0
+            // we assume that the subscriber decides the priority
+            
+            var protocol = protocols[0];
+            if (!protocol.TryGetArray(out XmlRpcValue[] entries))
             {
-                return (StatusCode.Failure, "Client only supports TCPROS", 0);
+                return ErrorResponse("Expected array of arrays");
             }
 
-            Endpoint? endpoint;
+            if (entries.Length == 0)
+            {
+                return ErrorResponse("Array is empty");
+            }
+
+            if (!entries[0].TryGetString(out var protocolType))
+            {
+                return ErrorResponse("Expected string as the first protocol entry");
+            }
+
+            if (protocolType == RosUtils.ProtocolTcpRosName)
+            {
+                requestsTcp = true;
+                requestsUdp = null;
+            }
+            else if (protocolType == RosUtils.ProtocolUdpRosName)
+            {
+                if (entries.Length < 5
+                    || !entries[1].TryGetBase64(out byte[] rosHeader)
+                    || !entries[2].TryGetString(out string hostname)
+                    || !entries[3].TryGetInteger(out int port)
+                    || !entries[4].TryGetInteger(out int maxPacketSize))
+                {
+                    return ErrorResponse("Failed to parse UDP entries");
+                }
+
+                if (port is < 0 or >= ushort.MaxValue)
+                {
+                    return ErrorResponse($"Invalid port: {port.ToString()}");
+                }
+
+                if (maxPacketSize <= 12 /* ros udp header size */)
+                {
+                    return ErrorResponse($"Invalid UDP max packet size: {maxPacketSize.ToString()}");
+                }
+
+                requestsTcp = false;
+                requestsUdp = new RpcUdpTopicRequest(rosHeader, hostname, port, maxPacketSize);
+            }
+            else
+            {
+                return ErrorResponse($"Unknown transport protocol name '{protocolType}'");
+            }
+
             try
             {
-                endpoint = client.RequestTopicRpc(callerId, topic);
+                var result = client.TryRequestTopicRpc(callerId, topic, requestsTcp, requestsUdp,
+                    out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse);
+
+                return result switch
+                {
+                    TopicRequestRpcResult.Success when tcpResponse is var (hostname, port) =>
+                        OkResponse(new XmlRpcArg[]
+                            { RosUtils.ProtocolTcpRosName, hostname, port }),
+
+                    TopicRequestRpcResult.Success when
+                        udpResponse is var (hostname, port, connectionId, maxPacketSize, header) =>
+                        OkResponse(new XmlRpcArg[]
+                            { RosUtils.ProtocolUdpRosName, hostname, port, connectionId, maxPacketSize, header }),
+
+                    TopicRequestRpcResult.Disposing =>
+                        ErrorResponse("Internal error [client shutting down]"),
+
+                    TopicRequestRpcResult.NoSuchTopic =>
+                        FailureResponse($"Client does not publish topic '{topic}'"),
+
+                    TopicRequestRpcResult.NoSuitableProtocol =>
+                        FailureResponse("Publisher does not support any of the proposed protocols"),
+
+                    _ =>
+                        ErrorResponse("Unknown error")
+                };
+            }
+            catch (RosInvalidHeaderException e)
+            {
+                Logger.LogErrorFormat("{0}: Header error in RequestTopic: {1}", this, e);
+                return ErrorResponse($"Error while parsing ROS header: {e.Message}");
             }
             catch (Exception e)
             {
                 Logger.LogErrorFormat("{0}: Error in RequestTopic: {1}", this, e);
-                return (StatusCode.Error, $"Unknown error: {e.Message}", 0);
+                return ErrorResponse($"Internal error: {e.Message}");
             }
-
-            return endpoint?.Hostname == null
-                ? (StatusCode.Error, "Internal error [duplicate request]", 0)
-                : OkResponse(new XmlRpcArg[] {"TCPROS", endpoint.Value.Hostname, endpoint.Value.Port});
         }
 
         XmlRpcArg SystemMulticall(XmlRpcValue[] args)
@@ -390,5 +463,13 @@ namespace Iviz.Roslib.XmlRpc
 
             return responses.ToArray();
         }
+    }
+
+    public enum TopicRequestRpcResult
+    {
+        Success,
+        NoSuchTopic,
+        Disposing,
+        NoSuitableProtocol,
     }
 }

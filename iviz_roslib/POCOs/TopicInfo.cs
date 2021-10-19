@@ -73,7 +73,7 @@ namespace Iviz.Roslib
                 generator
             )
         {
-        }        
+        }
 
         public TopicInfo(string callerId, string topic, DynamicMessage generator)
             : this(

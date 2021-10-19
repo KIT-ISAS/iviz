@@ -6,7 +6,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Encapsulates information about the connection from which a message originates 
     /// </summary>
-    public interface IRosTcpReceiver : IRosConnection
+    public interface IRosReceiverInfo : IRosConnection
     {
         /// <summary>
         /// The ROS uri of the publisher

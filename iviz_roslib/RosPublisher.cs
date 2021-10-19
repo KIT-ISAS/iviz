@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
 
 namespace Iviz.Roslib
@@ -15,7 +18,7 @@ namespace Iviz.Roslib
     {
         readonly RosClient client;
         readonly List<string> ids = new();
-        readonly TcpSenderManager<T> manager;
+        readonly SenderManager<T> manager;
         readonly CancellationTokenSource runningTs = new();
         int totalPublishers;
         bool disposed;
@@ -23,7 +26,7 @@ namespace Iviz.Roslib
         internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
         {
             this.client = client;
-            manager = new TcpSenderManager<T>(this, topicInfo) {ForceTcpNoDelay = true};
+            manager = new SenderManager<T>(this, topicInfo) { ForceTcpNoDelay = true };
         }
 
         /// <summary>
@@ -94,7 +97,7 @@ namespace Iviz.Roslib
 
             message.RosValidate();
             AssertIsAlive();
-            manager.Publish((T) message);
+            manager.Publish((T)message);
         }
 
         ValueTask<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
@@ -109,7 +112,7 @@ namespace Iviz.Roslib
                 throw new RosInvalidMessageTypeException("Type does not match publisher.");
             }
 
-            return PublishAsync((T) message, policy, token);
+            return PublishAsync((T)message, policy, token);
         }
 
 
@@ -121,7 +124,7 @@ namespace Iviz.Roslib
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
         public void Publish(in T message)
         {
-            if (message == null)
+            if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
@@ -158,9 +161,31 @@ namespace Iviz.Roslib
             }
         }
 
-        Endpoint? IRosPublisher.RequestTopicRpc()
+        TopicRequestRpcResult IRosPublisher.RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
+            out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
         {
-            return disposed ? null : new Endpoint(client.CallerUri.Host, manager.Endpoint.Port);
+            if (disposed)
+            {
+                tcpResponse = null;
+                udpResponse = null;
+                return TopicRequestRpcResult.Disposing;
+            }
+
+            if (requestsTcp)
+            {
+                tcpResponse = new Endpoint(client.CallerUri.Host, manager.Endpoint.Port);
+                udpResponse = null;
+                return TopicRequestRpcResult.Success;
+            }
+
+            if (requestsUdp == null)
+            {
+                throw new InvalidOperationException("Either UDP or TCP needs to be requested");
+            }
+
+            tcpResponse = null;
+            udpResponse = manager.CreateUdpConnection(requestsUdp, client.CallerUri.Host);
+            return TopicRequestRpcResult.Success;
         }
 
         void IDisposable.Dispose()
@@ -178,7 +203,9 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             ids.Clear();
+
             await manager.DisposeAsync(token).AwaitNoThrow(this);
+
             NumSubscribersChanged = null;
             runningTs.Dispose();
         }

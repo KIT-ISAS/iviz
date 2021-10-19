@@ -14,7 +14,7 @@ namespace Iviz.Roslib
     internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
     {
         readonly Func<T, Task> callback;
-        readonly HashSet<ServiceRequestAsync<T>> requests = new();
+        readonly HashSet<ServiceRequest<T>> requests = new();
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
         readonly Task task;
@@ -64,7 +64,7 @@ namespace Iviz.Roslib
                         continue;
                     }
 
-                    var sender = new ServiceRequestAsync<T>(serviceInfo, client, new Endpoint(endPoint), callback);
+                    var sender = new ServiceRequest<T>(serviceInfo, client, new Endpoint(endPoint), callback);
                     requests.Add(sender);
 
                     await CleanupAsync(tokenSource.Token);
@@ -85,7 +85,7 @@ namespace Iviz.Roslib
 
         async Task CleanupAsync(CancellationToken token)
         {
-            ServiceRequestAsync<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
+            ServiceRequest<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
             var tasks = toRemove.Select(async request =>
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",

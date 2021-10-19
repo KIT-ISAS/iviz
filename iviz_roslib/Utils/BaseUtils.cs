@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Iviz.Msgs;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
 
 namespace Iviz.Roslib.Utils
@@ -17,8 +18,6 @@ namespace Iviz.Roslib.Utils
         public static readonly Random Random = new();
 
         public const string GenericExceptionFormat = "{0}: {1}";
-
-        static readonly Func<(byte b1, byte b2), byte> And = b => (byte) (b.b1 & b.b2);
 
         public static bool HasPrefix(this string check, string prefix)
         {
@@ -86,7 +85,7 @@ namespace Iviz.Roslib.Utils
 
             for (int i = 0; i < size; i++)
             {
-                Logger.Log($"[{i}]: {(int) bytes[start + i]} --> {(char) bytes[start + i]}");
+                Logger.Log($"[{i}]: {(int)bytes[start + i]} --> {(char)bytes[start + i]}");
             }
         }
 
@@ -119,10 +118,46 @@ namespace Iviz.Roslib.Utils
             return false;
         }
 
-        internal static List<string> ParseHeader(in Rent<byte> readBuffer)
+        /// <summary>
+        ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
+        /// </summary>
+        /// <param name="str">String to calculate the hash from</param>
+        /// <returns>A hash integer</returns>
+        public static int GetDeterministicHashCode(this string str)
         {
-            return ParseHeader(readBuffer.Array, readBuffer.Length);
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                    {
+                        break;
+                    }
+
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + hash2 * 1566083941;
+            }
         }
+    }
+
+    public static class RosUtils
+    {
+        public const string ProtocolTcpRosName = "TCPROS";
+        public const string ProtocolUdpRosName = "UDPROS";
+
+        static readonly Func<(byte b1, byte b2), byte> And = b => (byte)(b.b1 & b.b2);
+
+        internal static List<string> ParseHeader(in Rent<byte> readBuffer) =>
+            ParseHeader(readBuffer.Array, readBuffer.Length);
+
+        internal static List<string> ParseHeader(byte[] readBuffer) => 
+            ParseHeader(readBuffer, readBuffer.Length);
 
         internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
         {
@@ -164,32 +199,53 @@ namespace Iviz.Roslib.Utils
             return contents;
         }
 
-        /// <summary>
-        ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
-        /// </summary>
-        /// <param name="str">String to calculate the hash from</param>
-        /// <returns>A hash integer</returns>
-        public static int GetDeterministicHashCode(this string str)
+        public static Dictionary<string, string> CreateHeaderDictionary(List<string> fields)
         {
-            unchecked
+            Dictionary<string, string> values = new();
+            foreach (string entry in fields)
             {
-                int hash1 = (5381 << 16) + 5381;
-                int hash2 = hash1;
-
-                for (int i = 0; i < str.Length; i += 2)
+                int index = entry.IndexOf('=');
+                if (index < 0)
                 {
-                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                    if (i == str.Length - 1)
-                    {
-                        break;
-                    }
-
-                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                    throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
                 }
 
-                return hash1 + hash2 * 1566083941;
+                string key = entry.Substring(0, index);
+                values[key] = entry.Substring(index + 1);
             }
+
+            return values;
         }
+        
+
+        internal static TopicInfo<T> GenerateDynamicTopicInfo<T>(string callerId, string topicName, string[] responses) where T : IMessage
+        {
+            const string typePrefix = "type=";
+            const string definitionPrefix = "message_definition=";
+
+            string? dynamicMsgName = responses.FirstOrDefault(
+                entry => entry.HasPrefix(typePrefix))?.Substring(typePrefix.Length);
+            string? dynamicDependencies = responses.FirstOrDefault(
+                entry => entry.HasPrefix(definitionPrefix))?.Substring(definitionPrefix.Length);
+            if (dynamicMsgName == null || dynamicDependencies == null)
+            {
+                throw new RosHandshakeException(
+                    "Partner did not send type and definition, required to instantiate dynamic messages.");
+            }
+
+            Type? lookupMsgName;
+            object? lookupGenerator;
+            if (DynamicMessage.IsGenericMessage<T>()
+                && (lookupMsgName = BuiltIns.TryGetTypeFromMessageName(dynamicMsgName)) != null
+                && (lookupGenerator = Activator.CreateInstance(lookupMsgName)) != null)
+            {
+                return new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
+            }
+
+            DynamicMessage generator =
+                DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
+            return new TopicInfo<T>(callerId, topicName, generator);
+        }        
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {
@@ -217,7 +273,7 @@ namespace Iviz.Roslib.Utils
         }
     }
 
-    public sealed class ConcurrentSet<T> : IEnumerable<T> where T : notnull
+    public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
     {
         readonly ConcurrentDictionary<T, object?> backend = new();
         public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
@@ -226,5 +282,6 @@ namespace Iviz.Roslib.Utils
         public bool Remove(T s) => backend.TryRemove(s, out _);
         public int Count => backend.Count;
         public void Clear() => backend.Clear();
+        public T[] ToArray() => backend.Keys.ToArray();
     }
 }

@@ -8,19 +8,27 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
+    public enum RosTransportHint
+    {
+        PreferTcp,
+        PreferUdp,
+        OnlyTcp,
+        OnlyUdp,
+    }
+
     /// <summary>
     /// Manager for a subscription to a ROS topic.
     /// </summary>
     public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        static readonly Action<T, IRosTcpReceiver>[] EmptyCallback = Array.Empty<Action<T, IRosTcpReceiver>>();
+        static readonly Action<T, IRosReceiverInfo>[] EmptyCallback = Array.Empty<Action<T, IRosReceiverInfo>>();
 
-        readonly Dictionary<string, Action<T, IRosTcpReceiver>> callbacksById = new();
+        readonly Dictionary<string, Action<T, IRosReceiverInfo>> callbacksById = new();
         readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
-        readonly TcpReceiverManager<T> manager;
+        readonly ReceiverManager<T> manager;
 
-        Action<T, IRosTcpReceiver>[] callbacks = EmptyCallback; // cache to iterate through callbacks quickly
+        Action<T, IRosReceiverInfo>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
         int totalSubscribers;
         bool disposed;
 
@@ -29,7 +37,7 @@ namespace Iviz.Roslib
             get => manager.IsPaused;
             set => manager.IsPaused = value;
         }
-        
+
         public CancellationToken CancellationToken => runningTs.Token;
 
         /// <summary>
@@ -63,20 +71,21 @@ namespace Iviz.Roslib
             set => manager.TimeoutInMs = value;
         }
 
-        internal RosSubscriber(RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay, int timeoutInMs)
+        internal RosSubscriber(RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay, int timeoutInMs,
+            RosTransportHint transportHint)
         {
             this.client = client;
-            manager = new TcpReceiverManager<T>(this, client, topicInfo, requestNoDelay)
-                {TimeoutInMs = timeoutInMs};
+            manager = new ReceiverManager<T>(this, client, topicInfo, requestNoDelay, transportHint)
+                { TimeoutInMs = timeoutInMs };
         }
 
-        internal void MessageCallback(in T msg, IRosTcpReceiver receiver)
+        internal void MessageCallback(in T msg, IRosReceiverInfo receiverInfo)
         {
-            foreach (var callback in callbacks)
+            foreach (var callback in cachedCallbacks)
             {
                 try
                 {
-                    callback(msg, receiver);
+                    callback(msg, receiverInfo);
                 }
                 catch (Exception e)
                 {
@@ -123,9 +132,6 @@ namespace Iviz.Roslib
             return PublisherUpdateRcpAsync(publisherUris, token);
         }
 
-        /// <summary>
-        /// Disposes this subscriber. This should only be called by RosClient.
-        /// </summary>
         void IDisposable.Dispose()
         {
             Dispose();
@@ -141,7 +147,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = EmptyCallback;
+            cachedCallbacks = EmptyCallback;
             NumPublishersChanged = null;
             manager.Stop();
             runningTs.Dispose();
@@ -157,7 +163,7 @@ namespace Iviz.Roslib
             disposed = true;
             runningTs.Cancel();
             callbacksById.Clear();
-            callbacks = EmptyCallback;
+            cachedCallbacks = EmptyCallback;
             NumPublishersChanged = null;
             await manager.StopAsync(token);
             runningTs.Dispose();
@@ -168,11 +174,12 @@ namespace Iviz.Roslib
             return type == typeof(T);
         }
 
-        string IRosSubscriber.Subscribe(Action<IMessage> callback) => Subscribe(msg => callback(msg));
+        string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
+            Subscribe(msg => callback(msg));
 
-        string IRosSubscriber.Subscribe(Action<IMessage, IRosTcpReceiver> callback) =>
+        string IRosSubscriber.Subscribe(Action<IMessage, IRosReceiverInfo> callback) =>
             Subscribe((msg, receiver) => callback(msg, receiver));
-        
+
 
         /// <summary>
         /// Generates a new subscriber id with the given callback function.
@@ -192,11 +199,11 @@ namespace Iviz.Roslib
 
             string id = GenerateId();
             callbacksById.Add(id, (t, _) => callback(t));
-            callbacks = callbacksById.Values.ToArray();
+            cachedCallbacks = callbacksById.Values.ToArray();
             return id;
         }
-        
-        public string Subscribe(Action<T, IRosTcpReceiver> callback)
+
+        public string Subscribe(Action<T, IRosReceiverInfo> callback)
         {
             if (callback is null)
             {
@@ -207,7 +214,7 @@ namespace Iviz.Roslib
 
             string id = GenerateId();
             callbacksById.Add(id, callback);
-            callbacks = callbacksById.Values.ToArray();
+            cachedCallbacks = callbacksById.Values.ToArray();
             return id;
         }
 
@@ -234,7 +241,7 @@ namespace Iviz.Roslib
             }
 
             bool removed = callbacksById.Remove(id);
-            callbacks = callbacksById.Values.ToArray();
+            cachedCallbacks = callbacksById.Values.ToArray();
 
             if (callbacksById.Count == 0)
             {
@@ -260,11 +267,11 @@ namespace Iviz.Roslib
             bool removed = callbacksById.Remove(id);
             if (callbacksById.Count != 0)
             {
-                callbacks = callbacksById.Values.ToArray();
+                cachedCallbacks = callbacksById.Values.ToArray();
             }
             else
             {
-                callbacks = EmptyCallback;
+                cachedCallbacks = EmptyCallback;
                 Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
                 Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
                 await (disposeTask, unsubscribeTask).WhenAll();
@@ -287,17 +294,12 @@ namespace Iviz.Roslib
 
         internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
-            Task.Run( () => PublisherUpdateRcpAsync(publisherUris, token), token).AwaitNoThrow(this);
+            Task.Run(() => PublisherUpdateRcpAsync(publisherUris, token), token).AwaitNoThrow(this);
         }
 
-        bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T> receiver)
-        {
-            return manager.TryGetLoopbackReceiver(endPoint, out receiver);
-        }
+        bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T>? receiver) =>
+            manager.TryGetLoopbackReceiver(endPoint, out receiver);
 
-        public override string ToString()
-        {
-            return $"[Subscriber {Topic} [{TopicType}] ]";
-        }
+        public override string ToString() => $"[Subscriber {Topic} [{TopicType}] ]";
     }
 }

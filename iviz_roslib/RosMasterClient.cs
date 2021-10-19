@@ -20,7 +20,7 @@ namespace Iviz.Roslib.XmlRpc
     }
 
     /// <summary>
-    /// Implements communication to the ROS master API.
+    /// Manages queries to the ROS master through XMLRPC.
     /// </summary>
     public sealed class RosMasterClient : IDisposable
     {
@@ -416,24 +416,20 @@ namespace Iviz.Roslib.XmlRpc
         }
     }
 
-    public abstract class BaseResponse
+    public abstract class BaseResponse : JsonToString
     {
         bool hasParseError;
+        protected int responseCode;
 
-        public int Code { get; protected set; }
         public string StatusMessage { get; protected set; } = "";
-        public bool IsValid => Code == StatusCode.Success && !hasParseError;
+        public bool IsValid => responseCode == StatusCode.Success && !hasParseError;
+        public bool IsFailure => responseCode == StatusCode.Failure;
 
         protected void MarkError()
         {
             Logger.LogFormat("[{0}]: Failed to parse response", GetType().Name);
-            Code = StatusCode.Error;
+            responseCode = StatusCode.Error;
             hasParseError = true;
-        }
-
-        public override string ToString()
-        {
-            return $"[{GetType().Name}]";
         }
     }
 
@@ -456,10 +452,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -520,7 +516,7 @@ namespace Iviz.Roslib.XmlRpc
     {
         internal DefaultResponse(XmlRpcValue[]? _)
         {
-            Code = StatusCode.Success;
+            responseCode = StatusCode.Success;
         }
     }
 
@@ -539,10 +535,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -582,10 +578,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -627,10 +623,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -678,10 +674,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -726,10 +722,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -761,10 +757,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -806,10 +802,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -839,10 +835,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }
@@ -873,10 +869,10 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            Code = code;
+            responseCode = code;
             StatusMessage = statusMessage;
 
-            if (Code == StatusCode.Error)
+            if (responseCode == StatusCode.Error)
             {
                 return;
             }

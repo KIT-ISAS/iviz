@@ -151,24 +151,24 @@ namespace Iviz.Roslib
 
     public class RosQueueOverflowException : RosQueueException
     {
-        public RosQueueOverflowException(string message, IRosTcpSender sender) : base(message, sender)
+        public RosQueueOverflowException(string message, IRosSenderInfo senderInfo) : base(message, senderInfo)
         {
         }
     }
 
     public class RosQueueException : RoslibException
     {
-        public IRosTcpSender Sender { get; }
+        public IRosSenderInfo SenderInfo { get; }
 
-        public RosQueueException(string message, IRosTcpSender sender) : base(message)
+        public RosQueueException(string message, IRosSenderInfo senderInfo) : base(message)
         {
-            Sender = sender;
+            SenderInfo = senderInfo;
         }
 
-        public RosQueueException(string message, Exception innerException, IRosTcpSender sender) : base(message,
+        public RosQueueException(string message, Exception innerException, IRosSenderInfo senderInfo) : base(message,
             innerException)
         {
-            Sender = sender;
+            SenderInfo = senderInfo;
         }
     }
 

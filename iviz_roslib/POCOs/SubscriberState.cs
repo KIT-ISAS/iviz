@@ -9,15 +9,18 @@ namespace Iviz.Roslib
     [DataContract]
     public sealed class SubscriberReceiverState : JsonToString
     {
-        [DataMember] public bool IsAlive { get; internal set; }
-        [DataMember] public bool IsConnected { get; internal set; }
+        [DataMember] public TransportType? TransportType { get; internal set; }
+        [DataMember] public ReceiverStatus Status { get; internal set; }
         [DataMember] public bool RequestNoDelay { get; internal set; }
         [DataMember] public Endpoint? EndPoint { get; internal set; }
         [DataMember] public Uri RemoteUri { get; }
         [DataMember] public Endpoint? RemoteEndpoint { get; internal set; }
         [DataMember] public long NumReceived { get; internal set; }
+        [DataMember] public long NumDropped { get; internal set; }
         [DataMember] public long BytesReceived { get; internal set; }
         [DataMember] public string? ErrorDescription { get; internal set; }
+
+        public bool IsAlive => Status == ReceiverStatus.Connected;
 
         internal SubscriberReceiverState(Uri remoteUri)
         {

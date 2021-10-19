@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.XmlRpc
 {
+    /// <summary>
+    /// Manages queries to other ROS nodes through XMLRPC 
+    /// </summary>
     public sealed class RosNodeClient
     {
-        public const string ProtocolTcpRosName = "TCPROS";
-        public const string ProtocolUdpRosName = "UDPROS";
-        
-        static readonly string[][] SupportedProtocols = {new[] {ProtocolTcpRosName}};
+        static readonly string[] TcpProtocolEntry = { RosUtils.ProtocolTcpRosName };
+        static readonly XmlRpcArg[] SupportedProtocolsOnlyTcp = { TcpProtocolEntry };
 
         public string CallerId { get; }
         public Uri CallerUri { get; }
@@ -20,44 +23,79 @@ namespace Iviz.Roslib.XmlRpc
         public RosNodeClient(string callerId, Uri callerUri, Uri partnerUri, int timeoutInMs = 2000) =>
             (CallerId, CallerUri, Uri, TimeoutInMs) = (callerId, callerUri, partnerUri, timeoutInMs);
 
-        public RequestTopicResponse RequestTopic(string topic)
+        public RequestTopicResponse RequestTopic(string topic, RosTransportHint transportHint,
+            RpcUdpTopicRequest? udpTopicRequest)
         {
-            XmlRpcArg[] args = {CallerId, topic, SupportedProtocols};
+            var args = CreateRequestTopicArgs(topic, transportHint, udpTopicRequest);
             var response = MethodCall("requestTopic", args);
             return new RequestTopicResponse(response);
         }
 
-        public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic, CancellationToken token)
+        public async ValueTask<RequestTopicResponse> RequestTopicAsync(string topic,
+            RosTransportHint transportHint, RpcUdpTopicRequest? udpTopicRequest,
+            CancellationToken token)
         {
-            XmlRpcArg[] args = {CallerId, topic, SupportedProtocols};
+            var args = CreateRequestTopicArgs(topic, transportHint, udpTopicRequest);
             var response = await MethodCallAsync("requestTopic", args, token);
             return new RequestTopicResponse(response);
         }
 
+        XmlRpcArg[] CreateRequestTopicArgs(string topic, RosTransportHint transportHint,
+            RpcUdpTopicRequest? udpTopicRequest)
+        {
+            if (transportHint != RosTransportHint.OnlyTcp && udpTopicRequest == null)
+            {
+                throw new ArgumentException("Udp hint selected but not requested");
+            }
+
+            XmlRpcArg[] udpProtocolEntry;
+            if (udpTopicRequest != null)
+            {
+                var (header, hostname, remotePort, maxPacketSize) = udpTopicRequest;
+                udpProtocolEntry = new XmlRpcArg[]
+                    { RosUtils.ProtocolUdpRosName, header, hostname, remotePort, maxPacketSize };
+            }
+            else
+            {
+                udpProtocolEntry = Array.Empty<XmlRpcArg>();
+            }
+
+            var supportedProtocols = transportHint switch
+            {
+                RosTransportHint.OnlyTcp => SupportedProtocolsOnlyTcp,
+                RosTransportHint.OnlyUdp => new XmlRpcArg[] { udpProtocolEntry },
+                RosTransportHint.PreferTcp => new XmlRpcArg[] { TcpProtocolEntry, udpProtocolEntry },
+                RosTransportHint.PreferUdp => new XmlRpcArg[] { udpProtocolEntry, TcpProtocolEntry },
+                _ => throw new ArgumentOutOfRangeException(nameof(transportHint), transportHint, null)
+            };
+
+            return new XmlRpcArg[] { CallerId, topic, supportedProtocols };
+        }
+
         public GetMasterUriResponse GetMasterUri()
         {
-            XmlRpcArg[] args = {CallerId};
+            XmlRpcArg[] args = { CallerId };
             var response = MethodCall("getMasterUri", args);
             return new GetMasterUriResponse(response);
         }
 
         public async ValueTask<GetMasterUriResponse> GetMasterUriAsync(CancellationToken token = default)
         {
-            XmlRpcArg[] args = {CallerId};
+            XmlRpcArg[] args = { CallerId };
             var response = await MethodCallAsync("getMasterUri", args, token);
             return new GetMasterUriResponse(response);
         }
 
         public GetPidResponse GetPid()
         {
-            XmlRpcArg[] args = {CallerId};
+            XmlRpcArg[] args = { CallerId };
             var response = MethodCall("getPid", args);
             return new GetPidResponse(response);
         }
 
         public async ValueTask<GetPidResponse> GetPidAsync(CancellationToken token = default)
         {
-            XmlRpcArg[] args = {CallerId};
+            XmlRpcArg[] args = { CallerId };
             var response = await MethodCallAsync("getPid", args, token);
             return new GetPidResponse(response);
         }
@@ -102,141 +140,126 @@ namespace Iviz.Roslib.XmlRpc
 
             return result;
         }
-        
+
         public override string ToString()
         {
             return $"[RosNodeClient {Uri}]";
         }
+    }
 
-        public sealed class ProtocolResponse
+    public sealed class RequestTopicResponse : BaseResponse
+    {
+        public Endpoint? TcpResponse { get; }
+        public RpcUdpTopicResponse? UdpResponse { get; }
+
+        internal RequestTopicResponse(XmlRpcValue[] a)
         {
-            public string Type { get; }
-            public string Hostname { get; }
-            public int Port { get; }
-
-            public ProtocolResponse(string type, string hostname, int port) =>
-                (Type, Hostname, Port) = (type, hostname, port);
-        }
-
-        public sealed class RequestTopicResponse : BaseResponse
-        {
-            public ProtocolResponse? Protocol { get; }
-
-            public RequestTopicResponse(XmlRpcValue[] a)
+            if (a.Length < 3 ||
+                !a[0].TryGetInteger(out int code) ||
+                !a[1].TryGetString(out string statusMessage))
             {
-                if (a.Length != 3 ||
-                    !a[0].TryGetInteger(out int code) ||
-                    !a[1].TryGetString(out string statusMessage))
-                {
-                    MarkError();
-                    return;
-                }
+                MarkError();
+                return;
+            }
 
-                Code = code;
-                StatusMessage = statusMessage;
+            responseCode = code;
+            StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
-                {
-                    return;
-                }
+            if (responseCode == StatusCode.Error)
+            {
+                return;
+            }
 
-                if (!a[2].TryGetArray(out XmlRpcValue[] protocols))
-                {
-                    MarkError();
-                    return;
-                }
+            if (!a[2].TryGetArray(out XmlRpcValue[] protocolInfo))
+            {
+                MarkError();
+                return;
+            }
 
-                if (protocols.Length == 0)
-                {
-                    Code = StatusCode.Error;
-                    return;
-                }
+            if (protocolInfo.Length == 0)
+            {
+                Logger.LogDebugFormat("[{0}]: Request for topic yielded no valid protocols", GetType().Name);
+                responseCode = StatusCode.Error;
+                return;
+            }
 
-                if (protocols[0].TryGetString(out string tmpType))
-                {
-                    if (protocols.Length < 3 ||
-                        !protocols[1].TryGetString(out string hostname) ||
-                        !protocols[2].TryGetInteger(out int port))
+            if (!protocolInfo[0].TryGetString(out string type))
+            {
+                MarkError();
+                return;
+            }
+
+            switch (type)
+            {
+                case RosUtils.ProtocolTcpRosName:
+                    if (protocolInfo.Length < 3
+                        || !protocolInfo[1].TryGetString(out string hostname)
+                        || !protocolInfo[2].TryGetInteger(out int port))
                     {
                         MarkError();
                         return;
                     }
 
-                    Protocol = new ProtocolResponse(tmpType, hostname, port);
-                }
-                else if (protocols[0].TryGetArray(out XmlRpcValue[] innerProtocols))
-                {
-                    if (innerProtocols.Length < 3 ||
-                        !innerProtocols[0].TryGetString(out string type) ||
-                        !innerProtocols[1].TryGetString(out string hostname) ||
-                        !innerProtocols[2].TryGetInteger(out int port))
+                    TcpResponse = new Endpoint(hostname, port);
+                    break;
+                case RosUtils.ProtocolUdpRosName:
+                    if (protocolInfo.Length < 6
+                        || !protocolInfo[1].TryGetString(out hostname)
+                        || !protocolInfo[2].TryGetInteger(out port)
+                        || !protocolInfo[3].TryGetInteger(out int connectionId)
+                        || !protocolInfo[4].TryGetInteger(out int maxPacketSize)
+                        || !protocolInfo[5].TryGetBase64(out byte[] header))
                     {
                         MarkError();
                         return;
                     }
 
-                    Protocol = new ProtocolResponse(type, hostname, port);
-                }
-                else
-                {
-                    MarkError();
-                }
+                    UdpResponse = new RpcUdpTopicResponse(hostname, port, connectionId, maxPacketSize, header);
+                    break;
             }
         }
+    }
 
-        public sealed class GetMasterUriResponse : BaseResponse
+    public sealed class GetMasterUriResponse : BaseResponse
+    {
+        public Uri? Uri { get; }
+
+        internal GetMasterUriResponse(XmlRpcValue[] a)
         {
-            public Uri? Uri { get; }
-
-            public GetMasterUriResponse(XmlRpcValue[] a)
+            if (a.Length != 3
+                || !a[0].TryGetInteger(out int code)
+                || !a[1].TryGetString(out string statusMessage)
+                || !a[2].TryGetString(out string uriStr)
+                || !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
-                if (a.Length != 3 ||
-                    !a[0].TryGetInteger(out int code) ||
-                    !a[1].TryGetString(out string statusMessage) ||
-                    !a[2].TryGetString(out string uriStr) ||
-                    !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
-                {
-                    MarkError();
-                    return;
-                }
-
-                Code = code;
-                StatusMessage = statusMessage;
-
-                if (Code == StatusCode.Error)
-                {
-                    return;
-                }
-
-                Uri = uri;
+                MarkError();
+                return;
             }
+
+            responseCode = code;
+            StatusMessage = statusMessage;
+            Uri = responseCode == StatusCode.Error ? null : uri;
         }
+    }
 
-        public sealed class GetPidResponse : BaseResponse
+    public sealed class GetPidResponse : BaseResponse
+    {
+        public int Pid { get; }
+
+        internal GetPidResponse(XmlRpcValue[] a)
         {
-            public int Pid { get; }
-
-            public GetPidResponse(XmlRpcValue[] a)
+            if (a.Length != 3
+                || !a[0].TryGetInteger(out int code)
+                || !a[1].TryGetString(out string statusMessage)
+                || !a[2].TryGetInteger(out int pid))
             {
-                if (a.Length != 3 ||
-                    !a[0].TryGetInteger(out int code) ||
-                    !a[1].TryGetString(out string statusMessage) ||
-                    !a[2].TryGetInteger(out int pid))
-                {
-                    MarkError();
-                    return;
-                }
-
-                Code = code;
-                StatusMessage = statusMessage;
-
-                if (Code == StatusCode.Error)
-                {
-                    return;
-                }
-
-                Pid = pid;
+                MarkError();
+                return;
             }
+
+            responseCode = code;
+            StatusMessage = statusMessage;
+            Pid = pid;
         }
     }
 }

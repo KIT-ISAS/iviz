@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.Roslib.Utils;
 
@@ -7,6 +8,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Full info about a ROS service and its service type, including dependencies.
     /// </summary>
+    [DataContract]
     internal sealed class ServiceInfo<T> : JsonToString where T : IService
     {
         readonly T? generator;
@@ -14,22 +16,22 @@ namespace Iviz.Roslib
         /// <summary>
         /// ROS name of this node.
         /// </summary>
-        public string CallerId { get; }
+        [DataMember] public string CallerId { get; }
 
         /// <summary>
         /// Name of this service.
         /// </summary>
-        public string Service { get; }
+        [DataMember] public string Service { get; }
 
         /// <summary>
         /// MD5 hash of the compact representation of the message.
         /// </summary>
-        public string Md5Sum { get; }
+        [DataMember] public string Md5Sum { get; }
 
         /// <summary>
         /// Full ROS message type.
         /// </summary>
-        public string Type { get; }
+        [DataMember] public string Type { get; }
 
         /// <summary>
         /// Instance of the message used to generate others of the same type.

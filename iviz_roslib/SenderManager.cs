@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
@@ -7,16 +8,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib.Utils;
+using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpSenderManager<TMessage> where TMessage : IMessage
+    internal sealed class SenderManager<TMessage> where TMessage : IMessage
     {
         const int DefaultTimeoutInMs = 5000;
 
-        readonly ConcurrentSet<TcpSenderAsync<TMessage>> senders = new();
+        readonly AsyncLock mutex = new();
+        readonly HashSet<IProtocolSender<TMessage>> senders = new();
+        IProtocolSender<TMessage>[] cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
+
         readonly RosPublisher<TMessage> publisher;
         readonly TopicInfo<TMessage> topicInfo;
         readonly CancellationTokenSource tokenSource = new();
@@ -32,7 +37,7 @@ namespace Iviz.Roslib
         bool forceTcpNoDelay;
         bool disposed;
 
-        public Endpoint Endpoint => new((IPEndPoint) listener.LocalEndpoint);
+        public Endpoint Endpoint => new((IPEndPoint)listener.LocalEndpoint);
 
         public bool ForceTcpNoDelay
         {
@@ -45,9 +50,10 @@ namespace Iviz.Roslib
                     return;
                 }
 
-                foreach (var sender in senders)
+                var tcpSenders = cachedSenders.OfType<TcpSender<TMessage>>();
+                foreach (var tcpSender in tcpSenders)
                 {
-                    sender.TcpNoDelay = true;
+                    tcpSender.TcpNoDelay = true;
                 }
             }
         }
@@ -80,28 +86,28 @@ namespace Iviz.Roslib
                 }
 
                 maxQueueSizeInBytes = value;
-                foreach (TcpSenderAsync<TMessage> sender in senders)
+                foreach (var sender in cachedSenders)
                 {
                     sender.MaxQueueSizeInBytes = value;
                 }
             }
         }
 
-        public TcpSenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
+        public SenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
         {
             this.publisher = publisher;
             this.topicInfo = topicInfo;
 
-            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
+            listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
             listener.Start();
 
-            task = TaskUtils.StartLongTask(RunLoop);
+            task = TaskUtils.StartLongTask(RunTcpReceiverLoop);
 
             Logger.LogDebugFormat("{0}: Starting at :{1}", this, Endpoint.Port.ToString());
         }
 
 
-        async Task RunLoop()
+        async Task RunTcpReceiverLoop()
         {
             try
             {
@@ -119,19 +125,22 @@ namespace Iviz.Roslib
                         continue;
                     }
 
-                    var sender = new TcpSenderAsync<TMessage>(client, topicInfo, latchedMessage);
+                    var sender = new TcpSender<TMessage>(client, topicInfo, latchedMessage);
                     if (ForceTcpNoDelay)
                     {
                         sender.TcpNoDelay = true;
                     }
-                    
+
                     if (publisher.TryGetLoopbackReceiver(sender.RemoteEndpoint, out var loopbackReceiver))
                     {
                         sender.LoopbackReceiver = loopbackReceiver;
                     }
 
-                    senders.Add(sender);
-                    await CleanupAsync(tokenSource.Token);
+                    using (await mutex.LockAsync(tokenSource.Token))
+                    {
+                        senders.Add(sender);
+                        await CleanupAsync(tokenSource.Token);
+                    }
                 }
             }
             catch (Exception e)
@@ -149,28 +158,53 @@ namespace Iviz.Roslib
 
         async Task CleanupAsync(CancellationToken token)
         {
-            if (senders.Count == 0)
+            var allSenders = senders.ToArray();
+            if (allSenders.All(deadSender => deadSender.IsAlive))
             {
+                cachedSenders = senders.ToArray();
                 return;
             }
 
-            var sendersToDelete = senders.Where(sender => !sender.IsAlive).ToArray();
-            if (sendersToDelete.Length == 0)
-            {
-                return;
-            }
+            var sendersToDelete = allSenders.Where(deadSender => !deadSender.IsAlive).ToArray();
 
-            var tasks = sendersToDelete.Select(async sender =>
+            var tasks = sendersToDelete.Select(async deadSender =>
             {
-                await sender.DisposeAsync(token).AwaitNoThrow(this);
-                if (senders.Remove(sender))
-                {
-                    Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, sender);
-                }
-            });
+                await deadSender.DisposeAsync(token).AwaitNoThrow(this);
+            }).ToArray();
+
             await tasks.WhenAll().AwaitNoThrow(this);
 
+            foreach (var deadSender in sendersToDelete)
+            {
+                senders.Remove(deadSender);
+                Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, deadSender);
+            }
+
             publisher.RaiseNumConnectionsChanged();
+
+            cachedSenders = senders.ToArray();
+        }
+
+        public RpcUdpTopicResponse CreateUdpConnection(RpcUdpTopicRequest request, string hostname)
+        {
+            var newSender = new UdpSender<TMessage>(request, topicInfo, latchedMessage, out byte[] responseHeader);
+
+            if (publisher.TryGetLoopbackReceiver(newSender.RemoteEndpoint, out var loopbackReceiver))
+            {
+                newSender.LoopbackReceiver = loopbackReceiver;
+            }
+
+            Task.Run(async () =>
+            {
+                using (await mutex.LockAsync(tokenSource.Token))
+                {
+                    senders.Add(newSender);
+                    cachedSenders = senders.ToArray();
+                    await CleanupAsync(tokenSource.Token);
+                }
+            }).WaitNoThrow(this);
+
+            return new RpcUdpTopicResponse(hostname, newSender.Endpoint.Port, 0, request.MaxPacketSize, responseHeader);
         }
 
         public void Publish(in TMessage msg)
@@ -180,7 +214,7 @@ namespace Iviz.Roslib
                 latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            foreach (var sender in senders)
+            foreach (var sender in cachedSenders)
             {
                 sender.Publish(msg);
             }
@@ -193,12 +227,7 @@ namespace Iviz.Roslib
                 latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            if (senders.Count == 0)
-            {
-                return false;
-            }
-
-            await senders.Select(sender => sender.PublishAndWaitAsync(msg, token)).WhenAll();
+            await cachedSenders.Select(sender => sender.PublishAndWaitAsync(msg, token)).WhenAll();
             return true;
         }
 
@@ -217,7 +246,7 @@ namespace Iviz.Roslib
             disposed = true;
             tokenSource.Cancel();
 
-            using (TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
+            using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
             {
                 await client.ConnectAsync(IPAddress.Loopback, Endpoint.Port);
             }
@@ -230,20 +259,12 @@ namespace Iviz.Roslib
 
             await senders.Select(sender => sender.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
             senders.Clear();
+
+            cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
             latchedMessage = default;
         }
 
-        public ReadOnlyCollection<PublisherSenderState> GetStates()
-        {
-            return new(
-                senders.Select(sender => sender.State).ToArray()
-            );
-        }
-
-        public ReadOnlyCollection<IRosTcpSender> GetConnections()
-        {
-            return senders.Cast<IRosTcpSender>().ToArray().AsReadOnly();
-        }
+        public PublisherSenderState[] GetStates() => cachedSenders.Select(sender => sender.State).ToArray();
 
         public override string ToString()
         {

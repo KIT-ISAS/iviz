@@ -319,10 +319,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -346,10 +346,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -379,10 +379,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -406,10 +406,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -439,10 +439,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -472,10 +472,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                Code = code;
+                base.responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (Code == StatusCode.Error)
+                if (base.responseCode == StatusCode.Error)
                 {
                     return;
                 }

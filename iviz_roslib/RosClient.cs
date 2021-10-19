@@ -33,22 +33,18 @@ namespace Iviz.Roslib
         readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic = new();
         readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
         readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName = new();
-        readonly ConcurrentDictionary<string, IServiceRequestManager> advertisedServicesByName = new();
+        readonly ConcurrentDictionary<string, IServiceRequestManager> publishedServicesByName = new();
 
         readonly string namespacePrefix;
 
-        public delegate void ShutdownActionCall(
-            string callerId, string reason,
-            out int status, out string response);
+        public delegate void ShutdownActionCall(string callerId, string reason);
 
         /// <summary>
         /// Handler of 'shutdown' XMLRPC calls from the slave API
         /// </summary>
         public ShutdownActionCall? ShutdownAction { get; set; }
 
-        public delegate void ParamUpdateActionCall(
-            string callerId, string parameterKey, XmlRpcValue parameterValue,
-            out int status, out string response);
+        public delegate void ParamUpdateActionCall(string callerId, string parameterKey, XmlRpcValue parameterValue);
 
         /// <summary>
         /// Handler of 'paramUpdate' XMLRPC calls from the slave API
@@ -215,8 +211,8 @@ namespace Iviz.Roslib
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
         /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
         public RosClient(Uri? masterUri = null, string? callerId = null, Uri? callerUri = null,
-            bool ensureCleanSlate = true, string? namespaceOverride = null) : this(masterUri, callerId, callerUri,
-            namespaceOverride)
+            bool ensureCleanSlate = true, string? namespaceOverride = null) :
+            this(masterUri, callerId, callerUri, namespaceOverride)
         {
             try
             {
@@ -254,18 +250,20 @@ namespace Iviz.Roslib
 
             Logger.LogDebugFormat("** {0}: Initialized.", this);
 
-            if (ensureCleanSlate)
+            if (!ensureCleanSlate)
             {
-                try
-                {
-                    EnsureCleanSlate();
-                }
-                catch (Exception)
-                {
-                    Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", this);
-                    listener.Dispose();
-                    throw;
-                }
+                return;
+            }
+
+            try
+            {
+                EnsureCleanSlate();
+            }
+            catch (Exception)
+            {
+                Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", this);
+                listener.Dispose();
+                throw;
             }
         }
 
@@ -281,9 +279,10 @@ namespace Iviz.Roslib
         /// Leave empty to generate one automatically.
         /// </param>
         /// <param name="callerUri">
-        /// URI of this node.
+        /// URI of this node. 
         /// Other clients will use this address to connect to this node.
-        /// Leave empty to generate one automatically. </param>
+        /// Leave empty to generate one automatically.
+        /// </param>
         /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
         /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
         /// <param name="token">An optional cancellation token.</param>        
@@ -328,18 +327,20 @@ namespace Iviz.Roslib
 
             Logger.LogFormat("** {0}: Initialized.", client);
 
-            if (ensureCleanSlate)
+            if (!ensureCleanSlate)
             {
-                try
-                {
-                    await client.EnsureCleanSlateAsync(token);
-                }
-                catch (Exception)
-                {
-                    Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", client);
-                    await client.listener.DisposeAsync();
-                    throw;
-                }
+                return client;
+            }
+
+            try
+            {
+                await client.EnsureCleanSlateAsync(token);
+            }
+            catch (Exception)
+            {
+                Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", client);
+                await client.listener.DisposeAsync();
+                throw;
             }
 
             return client;
@@ -347,6 +348,7 @@ namespace Iviz.Roslib
 
         /// <summary>
         /// Constructs and connects a ROS client. Same as calling new() directly.
+        /// This constructor exists only to have a sync equivalent to <see cref="CreateAsync"/> (which you should use in async contexts).
         /// </summary>
         /// <param name="masterUri">
         /// URI to the master node. Example: new Uri("http://localhost:11311").
@@ -387,12 +389,25 @@ namespace Iviz.Roslib
             string? callerId = null,
             string? callerUri = null,
             bool ensureCleanSlate = true) :
-            this(masterUri != null ? new Uri(masterUri) : null,
-                callerId,
-                callerUri != null ? new Uri(callerUri) : null,
-                ensureCleanSlate
-            )
+            this(TryToCreateUri(masterUri, true), callerId, TryToCreateUri(callerUri, false), ensureCleanSlate)
         {
+        }
+
+        static Uri? TryToCreateUri(string? uri, bool isMaster)
+        {
+            if (uri == null)
+            {
+                return null;
+            }
+
+            if (!Uri.TryCreate(uri, UriKind.Absolute, out Uri? validatedUri))
+            {
+                throw new ArgumentException("Argument '" + uri + "' cannot be parsed as an URI. " + (isMaster
+                    ? "Try something like http://localhost:11311"
+                    : "Try something like http://your_ip:1024, or http://your_ip:0 to use as a random port."));
+            }
+
+            return validatedUri;
         }
 
         /// <summary>
@@ -402,7 +417,7 @@ namespace Iviz.Roslib
         public static string CreateCallerId()
         {
             string seed = EnvironmentCallerHostname + Assembly.GetCallingAssembly().GetName().Name;
-            return $"iviz_{seed.GetDeterministicHashCode():x8}";
+            return $"iviz_{seed.GetDeterministicHashCode().ToString("x8")}";
         }
 
         /// <summary>
@@ -426,12 +441,12 @@ namespace Iviz.Roslib
             string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
-                return new Uri($"http://{envHostname}:{usingPort}/");
+                return new Uri($"http://{envHostname}:{usingPort.ToString()}/");
             }
 
-            return BaseUtils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
-                   BaseUtils.GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
-                   new Uri($"http://{Dns.GetHostName()}:{usingPort}/");
+            return RosUtils.GetUriFromInterface(NetworkInterfaceType.Wireless80211, usingPort) ??
+                   RosUtils.GetUriFromInterface(NetworkInterfaceType.Ethernet, usingPort) ??
+                   new Uri($"http://{Dns.GetHostName()}:{usingPort.ToString()}/");
         }
 
 
@@ -453,7 +468,7 @@ namespace Iviz.Roslib
             string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
-                return new Uri($"http://{envHostname}:{usingPort}/");
+                return new Uri($"http://{envHostname}:{usingPort.ToString()}/");
             }
 
             IPAddress? masterAddress =
@@ -473,14 +488,14 @@ namespace Iviz.Roslib
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
 
             bool CanAccessMaster(UnicastIPAddressInformation info) =>
-                BaseUtils.IsInSameSubnet(info.Address, masterAddress, info.IPv4Mask);
+                RosUtils.IsInSameSubnet(info.Address, masterAddress, info.IPv4Mask);
 
             IPAddress? myAddress = candidates
                 .Select(info => (info, success: CanAccessMaster(info)))
                 .FirstOrDefault(tuple => tuple.success)
                 .info?.Address;
 
-            return myAddress == null ? null : new Uri($"http://{myAddress}:{usingPort}/");
+            return myAddress == null ? null : new Uri($"http://{myAddress}:{usingPort.ToString()}/");
         }
 
         /// <summary>
@@ -496,17 +511,17 @@ namespace Iviz.Roslib
             string? envHostname = EnvironmentCallerHostname;
             if (envHostname != null)
             {
-                candidates.Add(new Uri($"http://{envHostname}:{usingPort}/"));
+                candidates.Add(new Uri($"http://{envHostname}:{usingPort.ToString()}/"));
             }
 
-            candidates.Add(new Uri($"http://{Dns.GetHostName()}:{usingPort}/"));
+            candidates.Add(new Uri($"http://{Dns.GetHostName()}:{usingPort.ToString()}/"));
 
             IEnumerable<Uri> GetInfosAsUri() =>
                 NetworkInterface.GetAllNetworkInterfaces()
                     .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
                     .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
                     .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                    .Select(info => new Uri($"http://{info.Address}:{usingPort}/")).ToArray();
+                    .Select(info => new Uri($"http://{info.Address}:{usingPort.ToString()}/")).ToArray();
 
             candidates.AddRange(GetInfosAsUri());
 
@@ -665,10 +680,10 @@ namespace Iviz.Roslib
 
         public async Task CheckOwnUriAsync(CancellationToken token = default)
         {
-            RosNodeClient.GetPidResponse response;
+            GetPidResponse response;
             try
             {
-                response = await CreateTalker(CallerUri).GetPidAsync(token);
+                response = await CreateNodeClient(CallerUri).GetPidAsync(token);
             }
             catch (Exception e)
             {
@@ -696,20 +711,18 @@ namespace Iviz.Roslib
             }
         }
 
-        internal RosNodeClient CreateTalker(Uri otherUri)
-        {
-            return new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
-        }
+        internal RosNodeClient CreateNodeClient(Uri otherUri) =>
+            new(CallerId, CallerUri, otherUri, (int)RpcNodeTimeout.TotalMilliseconds);
 
         (string id, RosSubscriber<T> subscriber)
             CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback,
-                IDeserializable<T> generator)
+                IDeserializable<T> generator, RosTransportHint transportHint)
             where T : IMessage
         {
             TopicInfo<T> topicInfo = new(CallerId, topic, generator);
             int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
-            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
+            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
             string id = subscription.Subscribe(firstCallback);
 
             subscribersByTopic[topic] = subscription;
@@ -729,13 +742,14 @@ namespace Iviz.Roslib
         async ValueTask<(string id, RosSubscriber<T> subscriber)>
             CreateSubscriberAsync<T>(string topic, bool requestNoDelay, Action<T> firstCallback,
                 IDeserializable<T> generator,
+                RosTransportHint transportHint,
                 CancellationToken token)
             where T : IMessage
         {
             TopicInfo<T> topicInfo = new(CallerId, topic, generator);
             int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
-            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs);
+            RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
 
             string id = subscription.Subscribe(firstCallback);
 
@@ -794,7 +808,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe<T>(string topic, Action<T> callback, out RosSubscriber<T> subscriber,
-            bool requestNoDelay = true)
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (callback is null)
@@ -806,7 +820,7 @@ namespace Iviz.Roslib
             if (!TryGetSubscriber(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
                 string id;
-                (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new T());
+                (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new T(), transportHint);
                 return id;
             }
 
@@ -818,15 +832,15 @@ namespace Iviz.Roslib
         }
 
         string IRosClient.Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay)
+            bool requestNoDelay, RosTransportHint transportHint)
         {
-            string id = Subscribe(topic, callback, out RosSubscriber<T> newSubscriber, requestNoDelay);
+            string id = Subscribe(topic, callback, out RosSubscriber<T> newSubscriber, requestNoDelay, transportHint);
             subscriber = newSubscriber;
             return id;
         }
 
         public string Subscribe(string topic, Action<IMessage> callback, out RosSubscriber<IMessage> subscriber,
-            bool requestNoDelay = true)
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp)
         {
             if (callback is null)
             {
@@ -837,7 +851,8 @@ namespace Iviz.Roslib
             if (!TryGetSubscriber(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
                 string id;
-                (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new DynamicMessage());
+                (id, subscriber) = CreateSubscriber(resolvedTopic, requestNoDelay, callback, new DynamicMessage(),
+                    transportHint);
                 return id;
             }
 
@@ -849,9 +864,10 @@ namespace Iviz.Roslib
         }
 
         string IRosClient.Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
-            bool requestNoDelay)
+            bool requestNoDelay, RosTransportHint transportHint)
         {
-            string id = Subscribe(topic, callback, out RosSubscriber<IMessage> newSubscriber, requestNoDelay);
+            string id = Subscribe(topic, callback, out RosSubscriber<IMessage> newSubscriber, requestNoDelay,
+                transportHint);
             subscriber = newSubscriber;
             return id;
         }
@@ -869,7 +885,7 @@ namespace Iviz.Roslib
         /// <param name="requestNoDelay">Whether a request of NoDelay should be sent.</param>
         /// <returns>A token that can be used to unsubscribe from this topic.</returns>
         public string Subscribe(string topic, Action<IMessage> callback, Type msgType, out IRosSubscriber subscriber,
-            bool requestNoDelay = true)
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp)
         {
             if (callback == null)
             {
@@ -893,7 +909,7 @@ namespace Iviz.Roslib
                 }
 
                 object? subscriberObj = method.Invoke(this, flags, null,
-                    new object[] { resolvedTopic, requestNoDelay }, BuiltIns.Culture);
+                    new object[] { resolvedTopic, requestNoDelay, transportHint }, BuiltIns.Culture);
 
                 subscriber = (IRosSubscriber?)subscriberObj ??
                              throw new RosInvalidMessageTypeException("Failed to call 'CreateSubscriber'!");
@@ -923,7 +939,8 @@ namespace Iviz.Roslib
         /// <param name="token">An optional cancellation token</param>
         /// <returns>A pair containing a token that can be used to unsubscribe from this topic, and the subscriber object.</returns>
         public ValueTask<(string id, RosSubscriber<T> subscriber)> SubscribeAsync<T>(
-            string topic, Action<T> callback, bool requestNoDelay = true, CancellationToken token = default)
+            string topic, Action<T> callback, bool requestNoDelay = true,
+            RosTransportHint transportHint = RosTransportHint.OnlyTcp, CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (callback is null)
@@ -934,7 +951,7 @@ namespace Iviz.Roslib
             string resolvedTopic = ResolveResourceName(topic);
             if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
-                return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new T(), token);
+                return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new T(), transportHint, token);
             }
 
             var newSubscriber = baseSubscriber as RosSubscriber<T>;
@@ -945,13 +962,15 @@ namespace Iviz.Roslib
         }
 
         async ValueTask<(string id, IRosSubscriber<T> subscriber)>
-            IRosClient.SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay, CancellationToken token)
+            IRosClient.SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay,
+                RosTransportHint transportHint, CancellationToken token)
         {
-            return await SubscribeAsync(topic, callback, requestNoDelay, token);
+            return await SubscribeAsync(topic, callback, requestNoDelay, transportHint, token);
         }
 
         public ValueTask<(string id, RosSubscriber<IMessage> subscriber)> SubscribeAsync(
-            string topic, Action<IMessage> callback, bool requestNoDelay = true, CancellationToken token = default)
+            string topic, Action<IMessage> callback, bool requestNoDelay = true,
+            RosTransportHint transportHint = RosTransportHint.OnlyTcp, CancellationToken token = default)
         {
             if (callback is null)
             {
@@ -961,7 +980,8 @@ namespace Iviz.Roslib
             string resolvedTopic = ResolveResourceName(topic);
             if (!TryGetSubscriberImpl(resolvedTopic, out IRosSubscriber baseSubscriber))
             {
-                return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new DynamicMessage(), token);
+                return CreateSubscriberAsync(resolvedTopic, requestNoDelay, callback, new DynamicMessage(),
+                    transportHint, token);
             }
 
             var newSubscriber = baseSubscriber as RosSubscriber<IMessage>;
@@ -972,9 +992,10 @@ namespace Iviz.Roslib
         }
 
         async ValueTask<(string id, IRosSubscriber subscriber)> IRosClient.SubscribeAsync(
-            string topic, Action<IMessage> callback, bool requestNoDelay, CancellationToken token)
+            string topic, Action<IMessage> callback, bool requestNoDelay, RosTransportHint transportHint,
+            CancellationToken token)
         {
-            return await SubscribeAsync(topic, callback, requestNoDelay, token);
+            return await SubscribeAsync(topic, callback, requestNoDelay, transportHint, token);
         }
 
 
@@ -1581,16 +1602,19 @@ namespace Iviz.Roslib
             }
         }
 
-        internal Endpoint? RequestTopicRpc(string remoteCallerId, string topic)
+        internal TopicRequestRpcResult TryRequestTopicRpc(string remoteCallerId, string topic, bool requestsTcp,
+            RpcUdpTopicRequest? requestsUdp, out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse)
         {
-            if (!TryGetPublisher(topic, out IRosPublisher publisher))
+            if (TryGetPublisher(topic, out IRosPublisher publisher))
             {
-                Logger.LogDebugFormat("{0}: '{1} is requesting topic '{2}' but we don't publish it", this,
-                    remoteCallerId, topic);
-                return null;
+                return publisher.RequestTopicRpc(requestsTcp, requestsUdp, out tcpResponse, out udpResponse);
             }
 
-            return publisher.RequestTopicRpc();
+            Logger.LogDebugFormat("{0}: '{1} is requesting topic '{2}' but we don't publish it", this, remoteCallerId,
+                topic);
+            tcpResponse = null;
+            udpResponse = null;
+            return TopicRequestRpcResult.NoSuchTopic;
         }
 
         /// <summary>
@@ -1645,8 +1669,8 @@ namespace Iviz.Roslib
                 receiver.Dispose();
             }
 
-            IServiceRequestManager[] serviceManagers = advertisedServicesByName.Values.ToArray();
-            advertisedServicesByName.Clear();
+            IServiceRequestManager[] serviceManagers = publishedServicesByName.Values.ToArray();
+            publishedServicesByName.Clear();
 
             EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
             {
@@ -1683,7 +1707,8 @@ namespace Iviz.Roslib
             SubscriberState state = GetSubscriberStatistics();
             foreach (var topic in state.Topics)
             {
-                foreach (var receiver in topic.Receivers)
+                var receiverStates = topic.Receivers.Where(subscriber => subscriber.TransportType != null);
+                foreach (var receiver in receiverStates)
                 {
                     busInfos.Add(new BusInfo(busInfos.Count, topic.Topic, receiver));
                 }
@@ -1707,13 +1732,13 @@ namespace Iviz.Roslib
                             continue;
                         }
 
-                        if (!response.IsValid)
+                        if (!response.IsValid || response.Uri == null)
                         {
                             continue;
                         }
 
-                        BusInfo busInfo = new(busInfos.Count, response.Uri, BusInfo.DirectionType.Out,
-                            topic.Topic, sender.IsAlive);
+                        var busInfo = new BusInfo(busInfos.Count, response.Uri, BusInfo.DirectionType.Out,
+                            topic.Topic, sender.TransportType, sender.IsAlive);
                         busInfos.Add(busInfo);
                     }
                 }
@@ -1827,7 +1852,7 @@ namespace Iviz.Roslib
 
             if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
-                if (!(baseExistingReceiver is ServiceCallerAsync<T> existingReceiver))
+                if (!(baseExistingReceiver is ServiceCaller<T> existingReceiver))
                 {
                     throw new RosInvalidMessageTypeException(
                         $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
@@ -1868,7 +1893,7 @@ namespace Iviz.Roslib
             ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
             if (persistent)
             {
-                ServiceCallerAsync<T> serviceCaller = new(serviceInfo);
+                ServiceCaller<T> serviceCaller = new(serviceInfo);
                 try
                 {
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
@@ -1887,7 +1912,7 @@ namespace Iviz.Roslib
 
             try
             {
-                using var serviceCaller = new ServiceCallerAsync<T>(serviceInfo);
+                using var serviceCaller = new ServiceCaller<T>(serviceInfo);
                 await serviceCaller.StartAsync(serviceUri, persistent, token);
                 await serviceCaller.ExecuteAsync(service, token);
                 return service;
@@ -1910,7 +1935,7 @@ namespace Iviz.Roslib
 
         bool ServiceAlreadyAdvertised<T>(string serviceName) where T : IService
         {
-            if (!advertisedServicesByName.TryGetValue(serviceName, out var existingSender))
+            if (!publishedServicesByName.TryGetValue(serviceName, out var existingSender))
             {
                 return false;
             }
@@ -1973,7 +1998,7 @@ namespace Iviz.Roslib
 
             var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
 
-            advertisedServicesByName.TryAdd(resolvedServiceName, advertisedService);
+            publishedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 
             try
             {
@@ -1981,7 +2006,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                advertisedServicesByName.TryRemove(resolvedServiceName, out _);
+                publishedServicesByName.TryRemove(resolvedServiceName, out _);
                 throw new RosRpcException($"Failed to advertise service '{serviceName}'", e);
             }
 
@@ -2008,12 +2033,12 @@ namespace Iviz.Roslib
         {
             string resolvedServiceName = ResolveResourceName(name);
 
-            if (!advertisedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
+            if (!publishedServicesByName.TryGetValue(resolvedServiceName, out var advertisedService))
             {
                 return false;
             }
 
-            advertisedServicesByName.TryRemove(resolvedServiceName, out _);
+            publishedServicesByName.TryRemove(resolvedServiceName, out _);
 
             await advertisedService.DisposeAsync(token);
             await RosMasterClient.UnregisterServiceAsync(resolvedServiceName, advertisedService.Uri, token);

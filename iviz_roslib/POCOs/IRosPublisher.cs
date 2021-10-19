@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Roslib.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -135,7 +136,8 @@ namespace Iviz.Roslib
         /// <returns>The awaitable dispose task.</returns>
         public Task DisposeAsync(CancellationToken token);
         
-        internal Endpoint? RequestTopicRpc();
+        internal TopicRequestRpcResult RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
+            out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse);
     }
     
     public interface IRosPublisher<T> : IRosPublisher where T : IMessage
