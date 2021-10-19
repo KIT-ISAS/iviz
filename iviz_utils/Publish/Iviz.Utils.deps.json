@@ -15,6 +15,7 @@
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.MsgsWrapper": "1.0.0",
           "Iviz.Ntp": "1.0.0",
+          "Iviz.Octree": "1.0.0",
           "Iviz.Rosbag.Lib": "1.0.0",
           "Iviz.Roslib": "1.0.0",
           "Iviz.Rosmaster.Lib": "1.0.0",
@@ -207,6 +208,14 @@
           "Microsoft.NETCore.Targets": "1.1.0"
         }
       },
+      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+        "runtime": {
+          "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll": {
+            "assemblyVersion": "4.0.4.1",
+            "fileVersion": "4.0.0.0"
+          }
+        }
+      },
       "System.Runtime.Extensions/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0",
@@ -240,11 +249,14 @@
           "System.Runtime": "4.3.0"
         }
       },
-      "System.Threading.Tasks.Extensions/4.4.0": {
+      "System.Threading.Tasks.Extensions/4.5.4": {
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
+        },
         "runtime": {
           "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {
-            "assemblyVersion": "4.1.1.0",
-            "fileVersion": "4.6.25519.3"
+            "assemblyVersion": "4.2.0.1",
+            "fileVersion": "4.6.28619.1"
           }
         }
       },
@@ -266,8 +278,7 @@
       },
       "Iviz.Msgs/1.0.0": {
         "dependencies": {
-          "Newtonsoft.Json": "12.0.3",
-          "System.Buffers": "4.5.1"
+          "Iviz.Tools": "1.0.0"
         },
         "runtime": {
           "Iviz.Msgs.dll": {}
@@ -297,11 +308,15 @@
       },
       "Iviz.Ntp/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0",
-          "System.Threading.Tasks.Extensions": "4.4.0"
+          "Iviz.Tools": "1.0.0"
         },
         "runtime": {
           "Iviz.Ntp.dll": {}
+        }
+      },
+      "Iviz.Octree/1.0.0": {
+        "runtime": {
+          "Iviz.Octree.dll": {}
         }
       },
       "Iviz.Rosbag.Lib/1.0.0": {
@@ -309,8 +324,7 @@
           "Iviz.Msgs": "1.0.0",
           "Iviz.MsgsGen.Dynamic.Lib": "1.0.0",
           "System.Buffers": "4.5.1",
-          "System.Collections.Concurrent": "4.3.0",
-          "System.Threading.Tasks.Extensions": "4.4.0"
+          "System.Collections.Concurrent": "4.3.0"
         },
         "runtime": {
           "Iviz.Rosbag.Lib.dll": {}
@@ -323,8 +337,7 @@
           "Iviz.MsgsGen.Lib": "1.0.0",
           "Iviz.XmlRpc": "1.0.0",
           "Nito.AsyncEx.Coordination": "5.1.0",
-          "Nito.AsyncEx.Tasks": "5.1.0",
-          "System.Threading.Tasks.Extensions": "4.4.0"
+          "Nito.AsyncEx.Tasks": "5.1.0"
         },
         "runtime": {
           "Iviz.Roslib.dll": {}
@@ -349,6 +362,16 @@
           "Iviz.TfManager.dll": {}
         }
       },
+      "Iviz.Tools/1.0.0": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.3",
+          "System.Buffers": "4.5.1",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        },
+        "runtime": {
+          "Iviz.Tools.dll": {}
+        }
+      },
       "Iviz.Urdf/1.0.0": {
         "dependencies": {
           "Iviz.Msgs": "1.0.0",
@@ -360,9 +383,8 @@
       },
       "Iviz.XmlRpc/1.0.0": {
         "dependencies": {
-          "Iviz.Msgs": "1.0.0",
-          "Nito.AsyncEx.Coordination": "5.1.0",
-          "System.Threading.Tasks.Extensions": "4.4.0"
+          "Iviz.Tools": "1.0.0",
+          "Nito.AsyncEx.Coordination": "5.1.0"
         },
         "runtime": {
           "Iviz.XmlRpc.dll": {}
@@ -530,6 +552,13 @@
       "path": "system.runtime/4.3.0",
       "hashPath": "system.runtime.4.3.0.nupkg.sha512"
     },
+    "System.Runtime.CompilerServices.Unsafe/4.5.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-3TIsJhD1EiiT0w2CcDMN/iSSwnNnsrnbzeVHSKkaEgV85txMprmuO+Yq2AdSbeVGcg28pdNDTPK87tJhX7VFHw==",
+      "path": "system.runtime.compilerservices.unsafe/4.5.3",
+      "hashPath": "system.runtime.compilerservices.unsafe.4.5.3.nupkg.sha512"
+    },
     "System.Runtime.Extensions/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -558,12 +587,12 @@
       "path": "system.threading.tasks/4.3.0",
       "hashPath": "system.threading.tasks.4.3.0.nupkg.sha512"
     },
-    "System.Threading.Tasks.Extensions/4.4.0": {
+    "System.Threading.Tasks.Extensions/4.5.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-SPKfFGbpQsK5Srz2Kq3URgvC90yoOyBE8H1quDA2+MAJ2HAzFmV3biOgPv2Ck3mPAvdKngo3QHi2BNwUQDRVvA==",
-      "path": "system.threading.tasks.extensions/4.4.0",
-      "hashPath": "system.threading.tasks.extensions.4.4.0.nupkg.sha512"
+      "sha512": "sha512-zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg==",
+      "path": "system.threading.tasks.extensions/4.5.4",
+      "hashPath": "system.threading.tasks.extensions.4.5.4.nupkg.sha512"
     },
     "BigGustave/1.0.0": {
       "type": "project",
@@ -600,6 +629,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Iviz.Octree/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Iviz.Rosbag.Lib/1.0.0": {
       "type": "project",
       "serviceable": false,
@@ -616,6 +650,11 @@
       "sha512": ""
     },
     "Iviz.TfManager/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Iviz.Tools/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
