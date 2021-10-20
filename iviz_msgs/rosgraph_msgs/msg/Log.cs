@@ -52,7 +52,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             File = b.DeserializeString();
             Function = b.DeserializeString();
             Line = b.Deserialize<uint>();
-            Topics = b.DeserializeStringArray();
+            Topics = b.SkipStringArray();
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
