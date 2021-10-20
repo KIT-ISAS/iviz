@@ -19,63 +19,6 @@ namespace Iviz.Roslib.Utils
 
         public const string GenericExceptionFormat = "{0}: {1}";
 
-        public static bool HasPrefix(this string check, string prefix)
-        {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (prefix is null)
-            {
-                throw new ArgumentNullException(nameof(prefix));
-            }
-
-            if (check.Length < prefix.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < prefix.Length; i++)
-            {
-                if (check[i] != prefix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool HasSuffix(this string check, string suffix)
-        {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (suffix is null)
-            {
-                throw new ArgumentNullException(nameof(suffix));
-            }
-
-            if (check.Length < suffix.Length)
-            {
-                return false;
-            }
-
-            int offset = check.Length - suffix.Length;
-            for (int i = 0; i < suffix.Length; i++)
-            {
-                if (check[offset + i] != suffix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public static void PrintBuffer(byte[] bytes, int start, int size)
         {
             if (bytes == null)
@@ -156,7 +99,7 @@ namespace Iviz.Roslib.Utils
         internal static List<string> ParseHeader(in Rent<byte> readBuffer) =>
             ParseHeader(readBuffer.Array, readBuffer.Length);
 
-        internal static List<string> ParseHeader(byte[] readBuffer) => 
+        internal static List<string> ParseHeader(byte[] readBuffer) =>
             ParseHeader(readBuffer, readBuffer.Length);
 
         internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
@@ -216,9 +159,10 @@ namespace Iviz.Roslib.Utils
 
             return values;
         }
-        
 
-        internal static TopicInfo<T> GenerateDynamicTopicInfo<T>(string callerId, string topicName, string[] responses) where T : IMessage
+
+        internal static TopicInfo<T> GenerateDynamicTopicInfo<T>(string callerId, string topicName,
+            IReadOnlyCollection<string> responses) where T : IMessage
         {
             const string typePrefix = "type=";
             const string definitionPrefix = "message_definition=";
@@ -245,7 +189,7 @@ namespace Iviz.Roslib.Utils
             DynamicMessage generator =
                 DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
             return new TopicInfo<T>(callerId, topicName, generator);
-        }        
+        }
 
         public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
         {

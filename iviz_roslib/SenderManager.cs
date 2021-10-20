@@ -268,7 +268,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[TcpSenderManager '{Topic}']";
+            return $"[SenderManager '{Topic}']";
         }
     }
 

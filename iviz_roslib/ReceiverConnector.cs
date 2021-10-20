@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -28,11 +27,13 @@ namespace Iviz.Roslib
         readonly RosTransportHint transportHint;
 
         ReceiverStatus status;
-        string? errorDescription;
+        public ErrorMessage? ErrorDescription { get; private set; }
 
         CancellationToken Token => tokenSource.Token;
         public Uri RemoteUri => client.Uri;
         public bool IsAlive => !task.IsCompleted;
+
+        bool disposed;
 
         public sealed class Response
         {
@@ -55,7 +56,6 @@ namespace Iviz.Roslib
             this.client = client;
             this.onConnectionSucceeded = onConnectionSucceeded;
             this.transportHint = transportHint;
-            status = ReceiverStatus.ConnectingRpc;
 
             if (udpRequest != null)
             {
@@ -66,52 +66,61 @@ namespace Iviz.Roslib
                 this.udpRequest = udpRequest.WithPort(port);
             }
 
-            task = Task.Run(KeepReconnecting);
+            status = ReceiverStatus.ConnectingRpc;
+            task = Task.Run(async () => await KeepReconnecting().AwaitNoThrow(this));
         }
 
         async Task KeepReconnecting()
         {
-            for (int numTry = 0; numTry < MaxConnectionRetries; numTry++)
+            int numTry;
+            for (numTry = 0; numTry < MaxConnectionRetries; numTry++)
             {
+                Logger.LogDebugFormat("{0}: Attempting connection...", this);
                 var response = await RequestTopic();
+
                 if (response != null)
                 {
                     if (!response.IsValid)
                     {
-                        errorDescription = response.StatusMessage;
+                        ErrorDescription = new ErrorMessage(response.StatusMessage);
                         break;
                     }
 
                     if (response.IsFailure)
                     {
-                        errorDescription = response.StatusMessage;
+                        ErrorDescription = new ErrorMessage(response.StatusMessage);
                         break;
                     }
 
                     if (response.TcpResponse is { Port: <= 0 or > ushort.MaxValue })
                     {
-                        errorDescription = $"Received invalid TCP port {response.TcpResponse.Value.Port.ToString()}";
+                        ErrorDescription = new ErrorMessage(
+                            $"Received invalid TCP port {response.TcpResponse.Value.Port.ToString()}");
                         break;
                     }
 
                     if (response.UdpResponse is { Port: <= 0 or > ushort.MaxValue })
                     {
-                        errorDescription = $"Received invalid UDP port {response.UdpResponse.Port.ToString()}";
+                        ErrorDescription = new ErrorMessage(
+                            $"Received invalid UDP port {response.UdpResponse.Port.ToString()}");
                         break;
                     }
 
-                    if (response.UdpResponse is { MaxPacketSize: <= 12 or > ushort.MaxValue })
+                    if (response.UdpResponse is { MaxPacketSize: <= UdpRosParams.HeaderLength or > ushort.MaxValue })
                     {
-                        errorDescription =
-                            $"Received invalid max packet size {response.UdpResponse.MaxPacketSize.ToString()}";
+                        ErrorDescription = new ErrorMessage(
+                            $"Received invalid max packet size {response.UdpResponse.MaxPacketSize.ToString()}");
                         break;
                     }
 
-                    errorDescription = "";
+                    ErrorDescription = null;
                     status = ReceiverStatus.Connected;
+                    Logger.LogDebugFormat("{0}: Connection succeeded.", this);
                     onConnectionSucceeded(this, new Response(response.TcpResponse, response.UdpResponse, udpClient));
                     return;
                 }
+
+                Logger.LogDebugFormat("{0}: Connection failed! Reason: {1}", this, ErrorDescription);
 
                 try
                 {
@@ -125,13 +134,13 @@ namespace Iviz.Roslib
                 }
             }
 
-            if (errorDescription == null)
+            if (numTry == MaxConnectionRetries)
             {
                 status = ReceiverStatus.OutOfRetries;
-                errorDescription = $"Giving up after {MaxConnectionRetries.ToString()} tries";
+                ErrorDescription = new ErrorMessage($"Giving up after {MaxConnectionRetries.ToString()} tries");
             }
 
-            Logger.Log($"{this}: Removing connection with '{RemoteUri}' - {errorDescription}");
+            Logger.LogDebugFormat("{0}: Removing connection - {1}", this, ErrorDescription);
             udpClient?.Dispose();
             status = ReceiverStatus.Dead;
         }
@@ -142,18 +151,15 @@ namespace Iviz.Roslib
             {
                 return await client.RequestTopicAsync(topic, transportHint, udpRequest, Token);
             }
-            catch (Exception e) when (e is OperationCanceledException)
-            {
-            }
-            catch (Exception e) when (e is TimeoutException or XmlRpcException or SocketException or IOException)
-            {
-                Logger.LogDebugFormat("{0}: Connection request to publisher {1} failed: {2}", this, RemoteUri, e);
-                errorDescription = e.Message;
-            }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Connection request to publisher {1} failed: {2}", this, RemoteUri, e);
-                errorDescription = e.Message;
+                ErrorDescription = e switch
+                {
+                    OperationCanceledException => null,
+                    ObjectDisposedException => null,
+                    XmlRpcException => new ErrorMessage(e.InnerException?.CheckMessage() ?? e.Message),
+                    _ => new ErrorMessage(e.Message)
+                };
             }
 
             return null;
@@ -161,19 +167,26 @@ namespace Iviz.Roslib
 
         public async Task DisposeAsync(CancellationToken token)
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             tokenSource.Cancel();
             await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
             tokenSource.Dispose();
+            Logger.LogDebugFormat("{0}: Disposing!", this);
         }
 
         public SubscriberReceiverState State => new(RemoteUri)
         {
             Status = status,
             TransportType = null,
-            ErrorDescription = errorDescription
+            ErrorDescription = ErrorDescription
         };
 
-        public override string ToString() => $"[ReceiverConnector Uri='{RemoteUri}']";
+        public override string ToString() => $"[ReceiverConnector '{topic}' Uri='{RemoteUri}']";
 
         static int WaitTimeInMsFromTry(int numTry) => BaseUtils.Random.Next(0, 1000) +
                                                       numTry switch

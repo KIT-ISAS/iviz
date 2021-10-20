@@ -10,9 +10,10 @@ namespace Iviz.Roslib
         bool IsPaused { set; }
         bool IsConnected { get; }
         Task DisposeAsync(CancellationToken token);
-        Endpoint? Endpoint { get; }
+        Endpoint Endpoint { get; }
         Uri RemoteUri { get; }
         SubscriberReceiverState State { get; }
         ReceiverStatus Status { get; }
+        ErrorMessage? ErrorDescription { get; }
     }
 }

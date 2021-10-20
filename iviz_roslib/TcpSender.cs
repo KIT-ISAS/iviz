@@ -17,9 +17,9 @@ using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpSender<T> : IProtocolSender<T> where T : IMessage
+    internal sealed class TcpSender<T> : IProtocolSender<T>, IRosSenderInfo where T : IMessage
     {
-        const int MaxSizeInPacketsWithoutConstraint = 2;
+        const int MaxPacketsWithoutConstraint = 2;
 
         readonly SemaphoreSlim signal = new(0);
         readonly ConcurrentQueue<(T msg, TaskCompletionSource? signal)> messageQueue = new();
@@ -29,11 +29,6 @@ namespace Iviz.Roslib
         readonly byte[] lengthBuffer = new byte[4];
         readonly TcpClient tcpClient;
 
-        readonly Endpoint endpoint;
-        string[]? rosHeader;
-
-        string? remoteCallerId;
-
         long bytesDropped;
         long bytesSent;
         bool disposed;
@@ -41,7 +36,11 @@ namespace Iviz.Roslib
         long numDropped;
         long numSent;
 
+        public IReadOnlyCollection<string> RosHeader { get; private set; } = Array.Empty<string>();
+        public string? RemoteCallerId { get; private set; }
+        public Endpoint Endpoint { get; }
         public Endpoint RemoteEndpoint { get; }
+        public TransportType TransportType => TransportType.Tcp;
         public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -52,7 +51,8 @@ namespace Iviz.Roslib
             set => tcpClient.NoDelay = value;
         }
 
-        string Topic => topicInfo.Topic;
+        public string Topic => topicInfo.Topic;
+        public string Type => topicInfo.Type;
         bool IsRunning => !task.IsCompleted;
         public bool IsAlive => IsRunning && tcpClient.Client.CheckIfAlive();
         public int MaxQueueSizeInBytes { get; set; } = 50000;
@@ -61,8 +61,8 @@ namespace Iviz.Roslib
             new()
             {
                 IsAlive = IsAlive,
-                Endpoint = endpoint,
-                RemoteId = remoteCallerId ?? "",
+                Endpoint = Endpoint,
+                RemoteId = RemoteCallerId ?? "",
                 RemoteEndpoint = RemoteEndpoint,
                 CurrentQueueSize = messageQueue.Count,
                 MaxQueueSize = MaxQueueSizeInBytes,
@@ -77,7 +77,7 @@ namespace Iviz.Roslib
             this.topicInfo = topicInfo;
 
             tcpClient = client;
-            endpoint = new Endpoint((IPEndPoint)tcpClient.Client.LocalEndPoint!);
+            Endpoint = new Endpoint((IPEndPoint)tcpClient.Client.LocalEndPoint!);
             RemoteEndpoint = new Endpoint((IPEndPoint)tcpClient.Client.RemoteEndPoint!);
             task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
         }
@@ -140,7 +140,7 @@ namespace Iviz.Roslib
                 $"message_definition={topicInfo.MessageDependencies}",
             };
 
-            rosHeader = contents;
+            RosHeader = contents;
             return tcpClient.WriteHeaderAsync(contents, runningTs.Token);
         }
 
@@ -167,7 +167,7 @@ namespace Iviz.Roslib
             var values = RosUtils.CreateHeaderDictionary(fields);
             if (values.TryGetValue("callerid", out string? receivedId))
             {
-                remoteCallerId = receivedId;
+                RemoteCallerId = receivedId;
             }
             else
             {
@@ -270,32 +270,19 @@ namespace Iviz.Roslib
             foreach (var (_, msgSignal) in messageQueue)
             {
                 msgSignal?.TrySetException(new RosQueueException(
-                    $"Connection for '{remoteCallerId}' is shutting down", CreateConnectionInfo()));
+                    $"Connection for '{RemoteCallerId}' is shutting down", this));
             }
         }
 
         RosQueueException CreateQueueException(Exception e) =>
-            new($"An unexpected exception was thrown while sending to node '{remoteCallerId}'", e,
-                CreateConnectionInfo());
+            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
 
         RosQueueOverflowException CreateOverflowException() =>
-            new($"Message could not be sent to node '{remoteCallerId}'", CreateConnectionInfo());
-
-        IRosSenderInfo CreateConnectionInfo() => new RosSenderInfo(
-            Topic,
-            topicInfo.Type,
-            TransportType.Tcp,
-            remoteCallerId,
-            RemoteEndpoint,
-            endpoint,
-            rosHeader ?? Array.Empty<string>(),
-            State,
-            IsAlive
-        );
+            new($"Message could not be sent to node '{RemoteCallerId}'", this);
 
         async Task ProcessLoop(NullableMessage<T> latchedMsg)
         {
-            using ResizableRent<byte> writeBuffer = new(4);
+            using ByteBufferRent writeBuffer = new(4);
 
             await ProcessHandshake(latchedMsg.HasValue);
 
@@ -312,26 +299,27 @@ namespace Iviz.Roslib
 
                 int totalQueueSizeInBytes = ReadFromQueue(queue);
 
-                int startIndex, newBytesDropped;
-                if (queue.Count <= MaxSizeInPacketsWithoutConstraint ||
+                int startIndex;
+                if (queue.Count <= MaxPacketsWithoutConstraint ||
                     totalQueueSizeInBytes < MaxQueueSizeInBytes)
                 {
                     startIndex = 0;
-                    newBytesDropped = 0;
                 }
                 else
                 {
                     DiscardOldMessages(queue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
-                        out startIndex, out newBytesDropped);
+                        out startIndex, out int newBytesDropped);
+
+                    numDropped += startIndex;
+                    bytesDropped += newBytesDropped;
+
+                    var discarded = queue.Take(startIndex);
+                    foreach (var e in discarded)
+                    {
+                        e.signal?.TrySetException(CreateOverflowException());
+                    }
                 }
 
-                numDropped += startIndex;
-                bytesDropped += newBytesDropped;
-
-                foreach (var (_, _, msgSignal) in queue.Take(startIndex))
-                {
-                    msgSignal?.TrySetException(CreateOverflowException());
-                }
 
                 if (LoopbackReceiver != null)
                 {
@@ -364,8 +352,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task SendWithSocketAsync(RangeEnumerable<Element> queue,
-            ResizableRent<byte> writeBuffer)
+        async Task SendWithSocketAsync(RangeEnumerable<Element> queue, ByteBufferRent writeBuffer)
         {
             void WriteLengthToBuffer(int i)
             {
@@ -401,7 +388,7 @@ namespace Iviz.Roslib
         void SetExceptionsInMessages(IEnumerable<Element> queue, Exception e)
         {
             var entries = queue
-                .Select(element => element.Signal)
+                .Select(element => element.signal)
                 .Where(msgSignal => msgSignal != null && !msgSignal.Task.IsCompleted);
             foreach (var msgSignal in entries)
             {
@@ -459,18 +446,18 @@ namespace Iviz.Roslib
             int c = queue.Count - 1;
 
             int remainingBytes = maxQueueSizeInBytes;
-            for (int i = 0; i < MaxSizeInPacketsWithoutConstraint; i++)
+            for (int i = 0; i < MaxPacketsWithoutConstraint; i++)
             {
-                remainingBytes -= queue[c - i].MessageLength;
+                remainingBytes -= queue[c - i].messageLength;
             }
 
-            int consideredPackets = MaxSizeInPacketsWithoutConstraint;
+            int consideredPackets = MaxPacketsWithoutConstraint;
             if (remainingBytes > 0)
             {
                 // start discarding old messages
-                for (int i = MaxSizeInPacketsWithoutConstraint; i < queue.Count; i++)
+                for (int i = MaxPacketsWithoutConstraint; i < queue.Count; i++)
                 {
-                    int currentMsgLength = queue[c - i].MessageLength;
+                    int currentMsgLength = queue[c - i].messageLength;
                     if (currentMsgLength > remainingBytes)
                     {
                         break;
@@ -485,19 +472,19 @@ namespace Iviz.Roslib
             bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
         }
 
-        public override string ToString() => $"[TcpSender '{Topic}' :{endpoint.Port.ToString()} >>'{remoteCallerId}']";
+        public override string ToString() => $"[TcpSender '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
 
         readonly struct Element
         {
-            T Message { get; }
-            public int MessageLength { get; }
-            public TaskCompletionSource? Signal { get; }
+            readonly T message;
+            public readonly int messageLength;
+            public readonly TaskCompletionSource? signal;
 
-            public Element(T message, int msgLength, TaskCompletionSource? signal) =>
-                (Message, MessageLength, Signal) = (message, msgLength, signal);
+            public Element(T message, int messageLength, TaskCompletionSource? signal) =>
+                (this.message, this.messageLength, this.signal) = (message, messageLength, signal);
 
-            public void Deconstruct(out T message, out int msgLength, out TaskCompletionSource? signal) =>
-                (message, msgLength, signal) = (Message, MessageLength, Signal);
+            public void Deconstruct(out T outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
+                (outMessage, outMessageLength, outSignal) = (message, messageLength, signal);
         }
     }
 }

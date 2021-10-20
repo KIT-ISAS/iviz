@@ -110,6 +110,7 @@ namespace Iviz.Roslib
                         }
 
                         var rosNodeClient = client.CreateNodeClient(remoteUri);
+                        Logger.LogDebugFormat("{0}: Adding connector for '{1}'", this, remoteUri);
                         var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
                             udpTopicRequest, OnConnectionSucceeded);
                         connectorsByUri[remoteUri] = receiverConnector;
@@ -172,6 +173,7 @@ namespace Iviz.Roslib
                         udpTopicRequest, OnConnectionSucceeded);
 
                     connectorsByUri[remoteUri] = receiverConnector;
+                    Logger.LogDebugFormat("{0}: Adding connector for '{1}' (retry!)", this, remoteUri);
                 }
             }
             catch (OperationCanceledException)
@@ -198,7 +200,8 @@ namespace Iviz.Roslib
             var deleteTasks = receiversToDelete.Select(receiver =>
             {
                 receiversByUri.TryRemove(receiver.RemoteUri, out _);
-                Logger.LogDebugFormat("{0}: Removing connection with uri '{1}' - dead x_x", this, receiver.RemoteUri);
+                Logger.LogDebugFormat("{0}: Removing connection with uri '{1}' - dead x_x: {2}", this,
+                    receiver.RemoteUri, receiver.ErrorDescription);
                 return receiver.DisposeAsync(token);
             });
 
@@ -208,7 +211,8 @@ namespace Iviz.Roslib
             var connectorTasks = connectorsToDelete.Select(connector =>
             {
                 connectorsByUri.TryRemove(connector.RemoteUri, out _);
-                Logger.LogDebugFormat("{0}: Removing connector with uri '{1}' - dead x_x", this, connector.RemoteUri);
+                Logger.LogDebugFormat("{0}: Removing connector with uri '{1}' - dead x_x: {2}", this,
+                    connector.RemoteUri, connector.ErrorDescription);
                 return connector.DisposeAsync(token);
             });
 
@@ -274,6 +278,6 @@ namespace Iviz.Roslib
             return states.AsReadOnly();
         }
 
-        public override string ToString() => $"[TcpReceiverManager '{Topic}']";
+        public override string ToString() => $"[ReceiverManager '{Topic}']";
     }
 }

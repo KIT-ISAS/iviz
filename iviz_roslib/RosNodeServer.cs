@@ -301,7 +301,7 @@ namespace Iviz.Roslib.XmlRpc
 
             // just take whatever is in place 0
             // we assume that the subscriber decides the priority
-            
+
             var protocol = protocols[0];
             if (!protocol.TryGetArray(out XmlRpcValue[] entries))
             {
@@ -339,7 +339,7 @@ namespace Iviz.Roslib.XmlRpc
                     return ErrorResponse($"Invalid port: {port.ToString()}");
                 }
 
-                if (maxPacketSize <= 12 /* ros udp header size */)
+                if (maxPacketSize <= UdpRosParams.HeaderLength)
                 {
                     return ErrorResponse($"Invalid UDP max packet size: {maxPacketSize.ToString()}");
                 }
@@ -396,7 +396,7 @@ namespace Iviz.Roslib.XmlRpc
         XmlRpcArg SystemMulticall(XmlRpcValue[] args)
         {
             if (args.Length != 1 ||
-                !args[0].TryGetArray(out XmlRpcValue[] calls))
+                !args[0].TryGetArray(out var calls))
             {
                 return ErrorResponse("Failed to parse arguments");
             }

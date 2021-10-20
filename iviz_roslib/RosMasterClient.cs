@@ -394,22 +394,20 @@ namespace Iviz.Roslib.XmlRpc
             using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
             ts.CancelAfter(TimeoutInMs);
 
-            XmlRpcValue tmp;
+            XmlRpcValue rpcValue;
             try
             {
                 XmlRpcConnection freeConnection = rpcConnections.Min()!;
-                //XmlRpcConnection freeConnection = rpcConnection;
-                //using XmlRpcConnection freeConnection = new XmlRpcConnection("Rpc#0", MasterUri);
-                tmp = await freeConnection.MethodCallAsync(CallerUri, function, args, ts.Token);
+                rpcValue = await freeConnection.MethodCallAsync(CallerUri, function, args, ts.Token);
             }
             catch (OperationCanceledException) when (!token.IsCancellationRequested)
             {
                 throw new TimeoutException($"Call to '{function}' timed out");
             }
 
-            if (!tmp.TryGetArray(out XmlRpcValue[] result))
+            if (!rpcValue.TryGetArray(out XmlRpcValue[] result))
             {
-                throw new ParseException($"Rpc Response: Expected type object[], got {tmp}");
+                throw new ParseException($"Rpc Response: Expected type object[], got {rpcValue}");
             }
 
             return result;

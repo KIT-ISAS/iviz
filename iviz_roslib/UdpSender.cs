@@ -16,20 +16,22 @@ using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?
 
 namespace Iviz.Roslib
 {
-    internal sealed class UdpSender<T> : IProtocolSender<T> where T : IMessage
+    internal sealed class UdpSender<T> : IProtocolSender<T>, IRosSenderInfo where T : IMessage
     {
         readonly CancellationTokenSource runningTs = new();
         readonly AsyncCollection<(T msg, TaskCompletionSource? signal)?> messageQueue = new();
         readonly TopicInfo<T> topicInfo;
         readonly UdpClient udpClient;
-        readonly List<string> rosHeader;
-        readonly string remoteCallerId;
         readonly int maxPackageSize;
         readonly Task task;
-        
-        
+
+        public IReadOnlyCollection<string> RosHeader { get; }
+        public string RemoteCallerId { get; }
         public Endpoint RemoteEndpoint { get; }
         public Endpoint Endpoint { get; }
+        public string Topic => topicInfo.Topic;
+        public string Type => topicInfo.Type;
+        public TransportType TransportType => TransportType.Udp;
 
         long bytesDropped;
         long bytesSent;
@@ -46,20 +48,21 @@ namespace Iviz.Roslib
         {
             set { } // nyi
         }
-        
+
         public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
         public UdpSender(RpcUdpTopicRequest request, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg,
             out byte[] responseHeader)
         {
-            const int ownMaxPackageSize = 1500 - 20 /* IP header */ - 8 /* UDP header */;
+            const int ownMaxPackageSize = UdpRosParams.DefaultMTU - UdpRosParams.IpUdpHeadersLength;
 
             this.topicInfo = topicInfo;
             maxPackageSize = Math.Min(request.MaxPacketSize, ownMaxPackageSize);
             RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
 
-            rosHeader = RosUtils.ParseHeader(request.Header);
+            var rosHeader = RosUtils.ParseHeader(request.Header);
             var fields = RosUtils.CreateHeaderDictionary(rosHeader);
+            RosHeader = rosHeader;
 
             if (fields.Count < 4)
             {
@@ -68,7 +71,7 @@ namespace Iviz.Roslib
 
             if (fields.TryGetValue("callerid", out string? receivedId))
             {
-                remoteCallerId = receivedId;
+                RemoteCallerId = receivedId;
             }
             else
             {
@@ -121,7 +124,7 @@ namespace Iviz.Roslib
 
             responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-            task = TaskUtils.StartLongTask(() => StartSession(latchedMsg));
+            task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
         }
 
         async Task StartSession(NullableMessage<T> latchedMsg)
@@ -132,16 +135,22 @@ namespace Iviz.Roslib
             {
                 await ProcessLoop(latchedMsg);
             }
-            catch (Exception e) when (e is OperationCanceledException or ObjectDisposedException)
-            {
-            }
-            catch (Exception e) when (e is IOException or TimeoutException or SocketException)
-            {
-                Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
-            }
             catch (Exception e)
             {
-                Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                switch (e)
+                {
+                    case OperationCanceledException:
+                    case ObjectDisposedException:
+                        break;
+                    case IOException:
+                    case TimeoutException:
+                    case SocketException:
+                        Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                    default:
+                        Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                }
             }
 
             udpClient.Dispose();
@@ -162,11 +171,9 @@ namespace Iviz.Roslib
                 }
 
                 var (_, msgSignal) = pair.Value;
-                msgSignal?.TrySetException(new RosQueueException(
-                    $"Connection for '{remoteCallerId}' is shutting down", CreateConnectionInfo()));
+                msgSignal?.TrySetException(
+                    new RosQueueException($"Connection for '{RemoteCallerId}' is shutting down", this));
             }
-
-            Logger.Log(this + ": Dead!!");
         }
 
         async Task ProcessLoop(NullableMessage<T> latchedMsg)
@@ -176,10 +183,8 @@ namespace Iviz.Roslib
                 Publish(latchedMsg.Value);
             }
 
-            const int udpRosHeaderLength = 12;
-
             using var writeBuffer = new Rent<byte>(maxPackageSize);
-            for (int i = 0; i < udpRosHeaderLength; i++)
+            for (int i = 0; i < UdpRosParams.HeaderLength; i++)
             {
                 writeBuffer[i] = 0;
             }
@@ -192,7 +197,7 @@ namespace Iviz.Roslib
 
                 // 4 bytes connection id (here always 0)
                 // 1 byte op code (2 - keepalive)
-                array[4] = UdpOpCode.Ping;
+                array[4] = UdpRosParams.OpCodePing;
                 // 1 byte msgId
                 array[5] = msgId++;
                 // 2 bytes block id (0, unfragmented)
@@ -211,7 +216,7 @@ namespace Iviz.Roslib
                 // 4 bytes connection id (here always 0)
                 // 1 byte op code (0 - unfragmented datagram)
                 // 1 byte msgId
-                array[4] = UdpOpCode.Data0;
+                array[4] = UdpRosParams.OpCodeData0;
                 array[5] = msgId++;
                 // 2 bytes block id (0, unfragmented)
                 // 4 bytes message length
@@ -249,7 +254,8 @@ namespace Iviz.Roslib
                 if (pair is null)
                 {
                     WriteKeepAlive();
-                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, udpRosHeaderLength, runningTs.Token);
+                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, UdpRosParams.HeaderLength,
+                        runningTs.Token);
                     continue;
                 }
 
@@ -265,7 +271,7 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                if (msgLength > maxPackageSize - udpRosHeaderLength)
+                if (msgLength > maxPackageSize - UdpRosParams.HeaderLength)
                 {
                     msgSignal?.TrySetException(CreateQueueOverflowException());
                     numDropped++;
@@ -275,10 +281,10 @@ namespace Iviz.Roslib
 
                 try
                 {
-                    msg.SerializeToArray(writeBuffer.Array, udpRosHeaderLength);
+                    msg.SerializeToArray(writeBuffer.Array, UdpRosParams.HeaderLength);
                     WriteLengthToBuffer(msgLength);
 
-                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, msgLength + udpRosHeaderLength,
+                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, msgLength + UdpRosParams.HeaderLength,
                         runningTs.Token);
 
                     numSent++;
@@ -313,11 +319,10 @@ namespace Iviz.Roslib
         }
 
         RosQueueException CreateQueueException(Exception e) =>
-            new($"An unexpected exception was thrown while sending to node '{remoteCallerId}'", e,
-                CreateConnectionInfo());
+            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
 
         RosQueueOverflowException CreateQueueOverflowException() =>
-            new($"Package size was larger than the maximum. Fragmentation not implemented yet", CreateConnectionInfo());
+            new($"Package size was larger than the maximum. Fragmentation not implemented yet", this);
 
         public PublisherSenderState State =>
             new()
@@ -325,7 +330,7 @@ namespace Iviz.Roslib
                 IsAlive = IsAlive,
                 TransportType = TransportType.Udp,
                 Endpoint = Endpoint,
-                RemoteId = remoteCallerId,
+                RemoteId = RemoteCallerId,
                 RemoteEndpoint = RemoteEndpoint,
                 CurrentQueueSize = 0,
                 MaxQueueSize = 0,
@@ -335,18 +340,6 @@ namespace Iviz.Roslib
                 BytesDropped = bytesDropped
             };
 
-        IRosSenderInfo CreateConnectionInfo() => new RosSenderInfo(
-            topicInfo.Topic,
-            topicInfo.Type,
-            TransportType.Udp,
-            remoteCallerId,
-            RemoteEndpoint,
-            Endpoint,
-            rosHeader,
-            State,
-            IsAlive
-        );
-
         public void Publish(in T message)
         {
             if (!IsAlive)
@@ -354,7 +347,7 @@ namespace Iviz.Roslib
                 numDropped++;
                 return;
             }
-            
+
             messageQueue.Add((message, null));
         }
 
@@ -374,6 +367,6 @@ namespace Iviz.Roslib
         }
 
         public override string ToString() =>
-            $"[UdpSender '{topicInfo.Topic}' :{Endpoint.Port.ToString()} >>'{remoteCallerId}']";
+            $"[UdpSender '{topicInfo.Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
     }
 }

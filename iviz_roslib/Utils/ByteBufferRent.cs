@@ -8,17 +8,16 @@ namespace Iviz.Roslib.Utils
     /// Class used by the senders and listeners. Basically keeps a rented array,
     /// and if the rent is too small, releases it and rents a larger one.
     /// </summary>
-    /// <typeparam name="T">The size of the rent. Must be unmanaged.</typeparam>
-    internal sealed class ResizableRent<T> : IDisposable where T : unmanaged
+    internal sealed class ByteBufferRent : IDisposable 
     {
         bool disposed;
-        Rent<T> buffer;
+        Rent<byte> buffer;
 
-        public T[] Array => buffer.Array;
+        public byte[] Array => buffer.Array;
 
-        public ResizableRent(int size)
+        public ByteBufferRent(int size)
         {
-            buffer = new Rent<T>(size);
+            buffer = new Rent<byte>(size);
         }
 
         public void EnsureCapability(int size)
@@ -34,7 +33,7 @@ namespace Iviz.Roslib.Utils
             }
 
             buffer.Dispose();
-            buffer = new Rent<T>(size);
+            buffer = new Rent<byte>(size);
         }
 
         public void Dispose()

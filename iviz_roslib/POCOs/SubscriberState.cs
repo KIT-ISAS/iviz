@@ -18,7 +18,7 @@ namespace Iviz.Roslib
         [DataMember] public long NumReceived { get; internal set; }
         [DataMember] public long NumDropped { get; internal set; }
         [DataMember] public long BytesReceived { get; internal set; }
-        [DataMember] public string? ErrorDescription { get; internal set; }
+        [DataMember] public ErrorMessage? ErrorDescription { get; internal set; }
 
         public bool IsAlive => Status == ReceiverStatus.Connected;
 

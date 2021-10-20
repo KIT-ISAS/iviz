@@ -13,46 +13,36 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
-    internal static class UdpOpCode
-    {
-        public const byte Data0 = 0;
-        public const byte DataN = 1;
-        public const byte Ping = 2;
-        public const byte Err = 3;
-    }
-    
-    internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T> where T : IMessage
+    internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, IRosReceiverInfo where T : IMessage
     {
         const int DisposeTimeoutInMs = 2000;
-        const int MaxPacketSize = 1500;
 
-        readonly Endpoint remoteEndpoint;
         readonly UdpClient udpClient;
 
-        readonly string[] rosHeader = Array.Empty<string>();
         readonly TopicInfo<T> topicInfo;
         readonly CancellationTokenSource runningTs = new();
         readonly Task task = Task.CompletedTask;
         readonly ReceiverManager<T> manager;
-        readonly Endpoint endpoint;
 
         long numReceived;
         long numDropped;
         long bytesReceived;
-        string? errorDescription;
 
         bool disposed;
 
-        IRosReceiverInfo? cachedConnectionInfo;
-
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
+        public ErrorMessage? ErrorDescription { get; private set; }
         public bool IsAlive => true;
         public bool IsPaused { get; set; }
         public bool IsConnected => true;
-        public Endpoint? Endpoint => endpoint;
+        public Endpoint Endpoint { get; }
+        public Endpoint RemoteEndpoint { get; }
         public Uri RemoteUri { get; }
         public ReceiverStatus Status { get; private set; }
+        public IReadOnlyCollection<string> RosHeader { get; } = Array.Empty<string>();
+        public string Topic => topicInfo.Topic;
+        public string Type => topicInfo.Type;
 
         public UdpReceiver(ReceiverManager<T> manager, RpcUdpTopicResponse response, UdpClient udpClient, Uri remoteUri,
             TopicInfo<T> topicInfo)
@@ -60,7 +50,7 @@ namespace Iviz.Roslib
             this.manager = manager;
 
             var (remoteHostname, remotePort, _, _, header) = response;
-            remoteEndpoint = new Endpoint(remoteHostname, remotePort);
+            RemoteEndpoint = new Endpoint(remoteHostname, remotePort);
             RemoteUri = remoteUri;
             this.udpClient = udpClient;
             this.topicInfo = topicInfo;
@@ -68,13 +58,13 @@ namespace Iviz.Roslib
             var udpEndpoint = (IPEndPoint?)udpClient.Client.LocalEndPoint;
             if (udpEndpoint == null)
             {
-                errorDescription = "Failed to bind to local socket";
+                ErrorDescription = new ErrorMessage("Failed to bind to local socket");
                 Status = ReceiverStatus.Dead;
                 udpClient.Dispose();
                 return;
             }
 
-            endpoint = new Endpoint(udpEndpoint);
+            Endpoint = new Endpoint(udpEndpoint);
 
             List<string> responseHeader;
             try
@@ -83,18 +73,18 @@ namespace Iviz.Roslib
             }
             catch (RosInvalidHeaderException e)
             {
-                errorDescription = e.Message;
+                ErrorDescription = new ErrorMessage(e.Message);
                 Status = ReceiverStatus.Dead;
                 udpClient.Dispose();
                 return;
             }
 
-            rosHeader = responseHeader.ToArray();
+            RosHeader = responseHeader.ToArray();
 
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
             if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
             {
-                errorDescription = $"Partner sent error message: [{message}]";
+                ErrorDescription = new ErrorMessage($"Partner sent error message: [{message}]");
                 Status = ReceiverStatus.Dead;
                 udpClient.Dispose();
                 return;
@@ -105,18 +95,18 @@ namespace Iviz.Roslib
                 try
                 {
                     this.topicInfo =
-                        RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, rosHeader);
+                        RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
                 }
                 catch (RosHandshakeException e)
                 {
-                    errorDescription = e.Message;
+                    ErrorDescription = new ErrorMessage(e.Message);
                     Status = ReceiverStatus.Dead;
                     udpClient.Dispose();
                     return;
                 }
             }
 
-            task = Task.Run(StartSession);
+            task = Task.Run(async () => await StartSession().AwaitNoThrow(this));
         }
 
         public SubscriberReceiverState State => new(RemoteUri)
@@ -125,11 +115,11 @@ namespace Iviz.Roslib
             TransportType = TransportType.Udp,
             RequestNoDelay = false,
             EndPoint = Endpoint,
-            RemoteEndpoint = remoteEndpoint,
+            RemoteEndpoint = RemoteEndpoint,
             NumReceived = numReceived,
             BytesReceived = bytesReceived,
             NumDropped = numDropped,
-            ErrorDescription = errorDescription
+            ErrorDescription = ErrorDescription
         };
 
         public async Task DisposeAsync(CancellationToken token)
@@ -153,23 +143,29 @@ namespace Iviz.Roslib
             {
                 await ProcessLoop();
             }
-            catch (Exception e) when (e is ObjectDisposedException or OperationCanceledException)
-            {
-            }
-            catch (Exception e) when (e is IOException or SocketException or TimeoutException)
-            {
-                Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
-            }
-            catch (Exception e) when (e is RoslibException)
-            {
-                errorDescription = e.Message;
-                Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
-            }
             catch (Exception e)
             {
-                Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                switch (e)
+                {
+                    case ObjectDisposedException:
+                    case OperationCanceledException:
+                        break;
+                    case IOException:
+                    case SocketException:
+                    case TimeoutException:
+                        ErrorDescription = new ErrorMessage(e.CheckMessage());
+                        Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                    case RoslibException:
+                        ErrorDescription = new ErrorMessage(e.Message);
+                        Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                    default:
+                        Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
+                        break;
+                }
             }
-
+            
             Status = ReceiverStatus.Dead;
             udpClient.Dispose();
 
@@ -180,54 +176,58 @@ namespace Iviz.Roslib
             catch (ObjectDisposedException)
             {
             }
-            
+
             Logger.LogDebugFormat("{0}: Stopped!", this);
         }
 
         async Task ProcessLoop()
         {
-            const int udpRosHeaderLength = 12;
-            
             Status = ReceiverStatus.Running;
-            cachedConnectionInfo = CreateConnectionInfo();
 
-            using var readBuffer = new Rent<byte>(MaxPacketSize);
+            using var readBuffer = new Rent<byte>(UdpRosParams.DefaultMTU);
 
             while (KeepRunning)
             {
                 int received = await udpClient.ReadChunkAsync(readBuffer.Array, runningTs.Token);
 
-                numReceived++;
-                bytesReceived += received;
-
                 byte opCode = readBuffer[4];
-                if (opCode != UdpOpCode.Data0)
+                if (opCode == UdpRosParams.OpCodePing)
                 {
                     continue;
                 }
-                
-                if (received < udpRosHeaderLength)
+
+                numReceived++;
+                bytesReceived += received;
+
+                if (opCode != UdpRosParams.OpCodeData0)
                 {
-                    // status packet
+                    continue;
+                }
+
+                if (received < UdpRosParams.HeaderLength)
+                {
+                    // incomplete packet
+                    numDropped++;
                     continue;
                 }
 
                 int packageSize = BitConverter.ToInt32(readBuffer.Array, 8);
-                if (packageSize + udpRosHeaderLength > received)
+                if (packageSize + UdpRosParams.HeaderLength > received)
                 {
-                    // incomplete
+                    // incomplete packet
                     numDropped++;
                     continue;
                 }
 
                 if (!IsPaused)
                 {
-                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, packageSize, udpRosHeaderLength);
-                    manager.MessageCallback(message, cachedConnectionInfo);
+                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, packageSize,
+                        UdpRosParams.HeaderLength);
+                    manager.MessageCallback(message, this);
                 }
             }
         }
-        
+
         public static RpcUdpTopicRequest CreateRequest(string hostname, TopicInfo<T> topicInfo)
         {
             string[] contents =
@@ -240,7 +240,7 @@ namespace Iviz.Roslib
             };
 
             byte[] header = StreamUtils.WriteHeaderToArray(contents);
-            return new RpcUdpTopicRequest(header, hostname, 0 /* will be set later */, MaxPacketSize);
+            return new RpcUdpTopicRequest(header, hostname, 0 /* will be set later */, UdpRosParams.DefaultMTU);
         }
 
         void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
@@ -250,31 +250,19 @@ namespace Iviz.Roslib
                 return;
             }
 
-            cachedConnectionInfo ??= CreateConnectionInfo();
-
             numReceived++;
-            bytesReceived += rcvLength + 12;
+            bytesReceived += rcvLength + UdpRosParams.HeaderLength;
 
             if (!IsPaused)
             {
-                manager.MessageCallback(message, cachedConnectionInfo);
+                manager.MessageCallback(message, this);
             }
         }
 
-        IRosReceiverInfo CreateConnectionInfo() => new RosReceiverInfo(
-            RemoteUri,
-            remoteEndpoint,
-            endpoint,
-            topicInfo.Topic,
-            topicInfo.Type,
-            rosHeader
-        );
-        
         public override string ToString()
         {
             return $"[UdpReceiver for '{topicInfo.Topic}' PartnerUri={RemoteUri} " +
-                   $"PartnerSocket={remoteEndpoint.Hostname}:{remoteEndpoint.Port.ToString()}]";
+                   $"PartnerSocket={RemoteEndpoint.Hostname}:{RemoteEndpoint.Port.ToString()}]";
         }
-        
     }
 }
