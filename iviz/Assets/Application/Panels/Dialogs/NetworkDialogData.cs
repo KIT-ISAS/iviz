@@ -106,7 +106,8 @@ namespace Iviz.App
                 {
                     if (receiver.EndPoint == null &&
                         receiver.RemoteEndpoint == null &&
-                        receiver.ErrorDescription == null)
+                        receiver.ErrorDescription == null &&
+                        receiver.Status == ReceiverStatus.UnknownError)
                     {
                         builder.Append("<color=#808080><b>←</b> [")
                             .Append(receiver.RemoteUri.Host).Append(":")
@@ -118,20 +119,13 @@ namespace Iviz.App
                     builder.Append("  [");
                     if (receiver.RemoteUri == client.CallerUri)
                     {
-                        builder.Append("<i>Me</i>] [");
+                        builder.Append("<i>Me</i> @ ");
                     }
 
-                    builder.Append(receiver.RemoteUri.Host);
-                    builder.Append(":").Append(receiver.RemoteUri.Port).Append("]");
+                    builder.Append(receiver.RemoteUri.Host).Append("]");
 
                     switch (receiver.Status)
                     {
-                        case ReceiverStatus.ConnectingTcp:
-                            builder.Append(" <color=#000080ff>(Connecting to TCP listener...)</color>");
-                            break;
-                        case ReceiverStatus.ConnectingRpc:
-                            builder.Append(" <color=#000080ff>(Connecting to node...)</color>");
-                            break;
                         case ReceiverStatus.Running:
                             if (receiver.TransportType != null)
                             {
@@ -144,6 +138,12 @@ namespace Iviz.App
                             long kbytes = receiver.BytesReceived / 1000;
                             builder.Append(" | ").Append(kbytes.ToString("N0")).Append("kB");
                             break;
+                        case ReceiverStatus.ConnectingRpc:
+                            builder.Append(" (Connecting)");
+                            break;
+                        case ReceiverStatus.ConnectingTcp:
+                            builder.Append(" (Connecting to TCP listener)");
+                            break;
                         case ReceiverStatus.OutOfRetries:
                             builder.Append(" <color=#ff0000ff>(unreachable)</color>");
                             break;
@@ -154,9 +154,10 @@ namespace Iviz.App
 
                     if (receiver.ErrorDescription != null)
                     {
+                        var (time, description) = receiver.ErrorDescription;
                         builder.AppendLine();
-                        builder.Append("    <color=#a52a2aff> Reason: ").Append(receiver.ErrorDescription)
-                            .Append("</color>");
+                        builder.Append("    <color=#a52a2aff><b>[").Append(time.ToString("HH:mm:ss"))
+                            .Append("]</b> ").Append(description).Append("</color>");
                     }
 
                     builder.AppendLine();
@@ -196,22 +197,21 @@ namespace Iviz.App
                     builder.Append("  ");
                     if (sender.RemoteId == client.CallerId)
                     {
-                        builder.Append("[<i>Me</i>] ");
+                        builder.Append("[<i>Me</i> @ ");
                     }
                     else
                     {
-                        builder.Append("[").Append(sender.RemoteId).Append("] ");
+                        builder.Append("[").Append(sender.RemoteId).Append(" @ ");
                     }
-
-                    builder.Append(sender.TransportType == TransportType.Tcp
-                        ? "TCP "
-                        : "UDP "
-                    );
-
 
                     builder.Append(sender.RemoteEndpoint != null
                         ? sender.RemoteEndpoint.Value.Hostname
                         : "(Unknown address)");
+
+                    builder.Append(sender.TransportType == TransportType.Tcp
+                        ? "] TCP"
+                        : "] UDP"
+                    );
 
                     if (isAlive)
                     {

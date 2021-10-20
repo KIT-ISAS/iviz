@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Iviz.Tools;
 using Iviz.Core;
 using Iviz.Resources;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
+using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {

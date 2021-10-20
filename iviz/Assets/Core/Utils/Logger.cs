@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
-using Iviz.Roslib;
+using Iviz.Tools;
 using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -97,7 +95,7 @@ namespace Iviz.Core
                             .Append("<color=red>")
                             .Append(childException.GetType().Name)
                             .Append("</color> ")
-                            .Append(childException.Message);
+                            .Append(childException.CheckMessage());
                     }
 
                     childException = childException.InnerException;
@@ -127,8 +125,6 @@ namespace Iviz.Core
                     UnityEngine.Debug.LogError(msg);
                     break;
             }
-            
-            Console.WriteLine(msg);
         }
 
         static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e)
@@ -163,7 +159,7 @@ namespace Iviz.Core
                     {
                         str.AppendLine();
                         str.Append("[").Append(childException.GetType().Name).Append("] ")
-                            .Append(childException.Message);
+                            .Append(childException.CheckMessage());
                     }
 
                     childException = childException.InnerException;

@@ -7,12 +7,10 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-using Object = UnityEngine.Object;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
 
