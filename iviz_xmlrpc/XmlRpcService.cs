@@ -147,7 +147,7 @@ namespace Iviz.XmlRpc
                     List<(string, XmlRpcValue)> structValue = new();
                     foreach (XmlNode? member in primitive.ChildNodes)
                     {
-                        if (member is not {Name: "member"})
+                        if (member is not { Name: "member" })
                         {
                             continue;
                         }
@@ -367,7 +367,7 @@ namespace Iviz.XmlRpc
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
 
-                XmlRpcArg response = (XmlRpcArg) method(args);
+                XmlRpcArg response = (XmlRpcArg)method(args);
 
                 string outData = "<?xml version=\"1.0\"?>\n" +
                                  "<methodResponse>\n" +
@@ -442,7 +442,7 @@ namespace Iviz.XmlRpc
                             args = Array.Empty<XmlRpcValue>();
                             break;
                         }
-                        
+
                         args = new XmlRpcValue[child.ChildNodes.Count];
                         for (int i = 0; i < child.ChildNodes.Count; i++)
                         {

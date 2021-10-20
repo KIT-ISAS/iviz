@@ -93,7 +93,7 @@ namespace Iviz.XmlRpc
                 "Content-Length: 0\r\n" +
                 "\r\n";
 
-            using StreamWriter writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
+            using var writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
             await writer.WriteChunkAsync(errorMsg, token, timeoutInMs);
         }
     }

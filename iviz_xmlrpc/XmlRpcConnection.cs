@@ -71,7 +71,7 @@ namespace Iviz.XmlRpc
             {
                 Interlocked.Decrement(ref queueSize);
 
-                if (request is {IsAlive: false})
+                if (request is { IsAlive: false })
                 {
                     request.Dispose();
                     request = null;
@@ -80,12 +80,7 @@ namespace Iviz.XmlRpc
                 DateTime start = DateTime.Now;
                 try
                 {
-                    if (request == null)
-                    {
-                        var newRequest = await EnsureValidRequester(callerUri, token);
-                        token.ThrowIfCancellationRequested();
-                        request = newRequest;
-                    }
+                    request ??= await EnsureValidRequester(callerUri, token);
 
                     int deltaSent = await request.SendRequestAsync(outData, true, true, token);
 
@@ -118,7 +113,7 @@ namespace Iviz.XmlRpc
                 finally
                 {
                     DateTime end = DateTime.Now;
-                    int msDiff = (int) (end - start).TotalMilliseconds;
+                    int msDiff = (int)(end - start).TotalMilliseconds;
                     if (msDiff > 5000)
                     {
                         // bad stuff. this is way higher than the timeout. it means that the 
@@ -127,7 +122,7 @@ namespace Iviz.XmlRpc
                         Logger.LogErrorFormat("{0}: Request FAILED with {1} ms for '{2}' XXXXXXXXXXX", this, msDiff,
                             method);
                     }
-                    
+
                     AddToQueue(msDiff);
                 }
             }
@@ -137,12 +132,15 @@ namespace Iviz.XmlRpc
 
         async Task<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
         {
+            const int waitTime = 750;
+
             Logger.LogDebugFormat("{0}: Starting new connection", this);
 
-            while (true)
+            while (true) // keep retrying until we're connected or token expires
             {
                 token.ThrowIfCancellationRequested();
 
+                DateTime start = DateTime.Now;
                 HttpRequest? newRequest = null;
                 try
                 {
@@ -154,18 +152,20 @@ namespace Iviz.XmlRpc
                 {
                     newRequest?.Dispose();
 
-                    switch (e)
+                    if (e is OperationCanceledException
+                        or SocketException { ErrorCode: 61 or 10061 or 64 or 10064 }) // connection refused, host down
                     {
-                        case OperationCanceledException:
-                            throw;
-                        case IOException:
-                        case SocketException:
-                            Logger.LogDebugFormat("{0} XmlRpc error: {1}", this, e);
-                            break;
-                        default:
-                            Logger.LogFormat("{0} XmlRpc error: {1}", this, e);
-                            break;
+                        throw; // stop retrying
                     }
+
+                    Logger.LogDebugFormat("{0} XmlRpc error: {1}", this, e);
+                }
+
+                DateTime end = DateTime.Now;
+                int msDiff = (int)(end - start).TotalMilliseconds;
+                if (msDiff < waitTime)
+                {
+                    await Task.Delay(waitTime - msDiff, token);
                 }
             }
         }
@@ -190,16 +190,8 @@ namespace Iviz.XmlRpc
             request?.Dispose();
         }
 
-        public override string ToString()
-        {
-            return $"[XmlRpcConnection {name} uri={remoteUri}]";
-        }
+        public override string ToString() => $"[XmlRpcConnection {name} uri={remoteUri}]";
 
-        public int CompareTo(XmlRpcConnection? other)
-        {
-            if (ReferenceEquals(this, other)) return 0;
-            if (ReferenceEquals(null, other)) return 1;
-            return queueSize.CompareTo(other.queueSize);
-        }
+        public int CompareTo(XmlRpcConnection? other) => other is null ? 1 : queueSize - other.queueSize;
     }
 }
