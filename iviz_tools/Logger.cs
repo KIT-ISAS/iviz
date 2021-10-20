@@ -219,10 +219,10 @@ namespace Iviz.Tools
             bool firstException = true;
             while (subException != null)
             {
-                if (!(subException is AggregateException))
+                if (subException is not AggregateException)
                 {
                     str.Append(firstException ? "\n[" : "\n   [");
-                    str.Append(subException.GetType().Name).Append("] ").Append(subException.Message);
+                    str.Append(subException.GetType().Name).Append("] ").Append(subException.CheckMessage());
                     firstException = false;
                 }
 

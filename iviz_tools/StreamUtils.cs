@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -214,6 +215,79 @@ namespace Iviz.Tools
                 }
             }
 #endif
+        }
+
+
+        public static bool HasPrefix(this string check, string prefix)
+        {
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
+
+            if (prefix is null)
+            {
+                throw new ArgumentNullException(nameof(prefix));
+            }
+
+            if (check.Length < prefix.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < prefix.Length; i++)
+            {
+                if (check[i] != prefix[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool HasSuffix(this string check, string suffix)
+        {
+            if (check is null)
+            {
+                throw new ArgumentNullException(nameof(check));
+            }
+
+            if (suffix is null)
+            {
+                throw new ArgumentNullException(nameof(suffix));
+            }
+
+            if (check.Length < suffix.Length)
+            {
+                return false;
+            }
+
+            int offset = check.Length - suffix.Length;
+            for (int i = 0; i < suffix.Length; i++)
+            {
+                if (check[offset + i] != suffix[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static string CheckMessage(this Exception e)
+        {
+            // fix mono bug!
+            if (e is not SocketException se || !se.Message.HasPrefix("mono-io-layer-error"))
+            {
+                return e.Message;
+            }
+
+            int fixedErrorCode = (se.ErrorCode is <= (int)SocketError.Success or >= (int)SocketError.OperationAborted)
+                ? se.ErrorCode
+                : se.ErrorCode + 10000;
+
+            return new SocketException(fixedErrorCode).Message;
         }
     }
 }
