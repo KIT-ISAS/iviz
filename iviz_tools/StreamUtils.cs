@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -155,6 +156,35 @@ namespace Iviz.Tools
             }
         }
 
+        public static async Task WriteChunkAsync(this TcpClient client, string text, CancellationToken token,
+            int timeoutInMs = -1)
+        {
+            using var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(text.Length));
+            int length = Defaults.UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
+
+            if (timeoutInMs == -1)
+            {
+                await WriteChunkAsync(client, bytes.Array, length, token);
+                return;
+            }
+
+            try
+            {
+                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+                linkedTokenSource.CancelAfter(timeoutInMs);
+                await WriteChunkAsync(client, bytes.Array, length, linkedTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                if (token.IsCancellationRequested)
+                {
+                    throw;
+                }
+                
+                throw new TimeoutException("Writing operation timed out");
+            }
+        }
+
         public static async Task WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
@@ -186,37 +216,6 @@ namespace Iviz.Tools
                 writer.Write(bytes);
             }
         }
-
-        public static async Task WriteChunkAsync(this StreamWriter writer, string text, CancellationToken token,
-            int timeoutInMs = -1)
-        {
-#if !NETSTANDARD2_0
-            using CancellationTokenSource tokenSource = !token.CanBeCanceled
-                ? new CancellationTokenSource()
-                : CancellationTokenSource.CreateLinkedTokenSource(token);
-            if (timeoutInMs != -1)
-            {
-                tokenSource.CancelAfter(timeoutInMs);
-            }
-
-            await writer.WriteAsync(text.AsMemory(), tokenSource.Token);
-#else
-            if (timeoutInMs == -1)
-            {
-                await writer.WriteAsync(text).AwaitWithToken(token);
-            }
-            else
-            {
-                Task connectionTask = writer.WriteAsync(text);
-                if (!await connectionTask.AwaitFor(timeoutInMs, token))
-                {
-                    token.ThrowIfCancellationRequested();
-                    throw new TimeoutException("Writing operation timed out");
-                }
-            }
-#endif
-        }
-
 
         public static bool HasPrefix(this string check, string prefix)
         {

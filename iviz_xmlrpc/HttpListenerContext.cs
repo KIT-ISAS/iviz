@@ -55,7 +55,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public async Task RespondAsync(string msgOut, int timeoutInMs = 2000, CancellationToken token = default)
+        public Task RespondAsync(string msgOut, int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (msgOut is null)
             {
@@ -70,8 +70,7 @@ namespace Iviz.XmlRpc
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
                          msgOut;
 
-            using var writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
-            await writer.WriteChunkAsync(str, token, timeoutInMs);
+            return client.WriteChunkAsync(str, token, timeoutInMs);
         }
 
         /// <summary>
@@ -83,7 +82,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public async Task RespondWithUnexpectedErrorAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        public Task RespondWithUnexpectedErrorAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             const string errorMsg =
                 "HTTP/1.0 500 Internal Server Error\r\n" +
@@ -93,8 +92,7 @@ namespace Iviz.XmlRpc
                 "Content-Length: 0\r\n" +
                 "\r\n";
 
-            using var writer = new StreamWriter(client.GetStream(), Defaults.UTF8);
-            await writer.WriteChunkAsync(errorMsg, token, timeoutInMs);
+            return client.WriteChunkAsync(errorMsg, token, timeoutInMs);
         }
     }
 }

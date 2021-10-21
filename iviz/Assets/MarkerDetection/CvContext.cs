@@ -28,8 +28,8 @@ namespace Iviz.MarkerDetection
     {
         static bool loggerSet;
         readonly IntPtr mContextPtr;
-        readonly int imageSize;
         readonly IntPtr imagePtr;
+        readonly int imageSize;
         bool disposed;
 
         ArucoDictionaryName dictionaryName;
@@ -542,17 +542,6 @@ namespace Iviz.MarkerDetection
         DictApriltag36H11
     };
 
-    public sealed class ArucoMarkerPose
-    {
-        public int Id { get; }
-        public Pose Pose { get; }
-
-        public ArucoMarkerPose(int id, in Pose pose) => (Id, Pose) = (id, pose);
-
-        [NotNull]
-        public override string ToString() => "{\"Id\":" + Id + ", \"Pose\":" + Pose + "}";
-    }
-
     public interface IMarkerCorners
     {
         ReadOnlyCollection<Vector2f> Corners { get; }
@@ -573,17 +562,6 @@ namespace Iviz.MarkerDetection
         [NotNull]
         public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
-    }
-
-    public sealed class QrMarkerPose
-    {
-        public string Code { get; }
-        public Pose Pose { get; }
-
-        internal QrMarkerPose(string code, in Pose pose) => (Code, Pose) = (code, pose);
-
-        [NotNull]
-        public override string ToString() => $"{{\"Code\":{Code}, \"Pose\":{Pose}}}";
     }
 
     public sealed class QrMarkerCorners : IMarkerCorners
