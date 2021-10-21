@@ -30,7 +30,7 @@ namespace Iviz.Ros
         static readonly Action<string> LogInternalIfHololens =
             Settings.IsHololens ? (Action<string>)Core.Logger.Internal : Logger.LogDebug;
 
-        static readonly ReadOnlyCollection<string> EmptyParameters = Array.Empty<string>().AsReadOnly();
+        static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
         readonly ConcurrentDictionary<int, IRosPublisher> publishers = new ConcurrentDictionary<int, IRosPublisher>();
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new Dictionary<string, IAdvertisedService>();
@@ -38,9 +38,9 @@ namespace Iviz.Ros
 
         readonly List<(string, string)> hostAliases = new List<(string, string)>();
 
-        [NotNull] ReadOnlyCollection<string> cachedParameters = EmptyParameters;
-        [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
-        [NotNull] ReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
+        [NotNull] IReadOnlyCollection<string> cachedParameters = EmptyParameters;
+        [NotNull] IReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
+        [NotNull] IReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
         [CanBeNull] SystemState cachedSystemState;
         [CanBeNull] RosClient client;
         [CanBeNull] BagListener bagListener;
@@ -169,7 +169,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
 #if LOG_ENABLED
-                //Logger.LogDebug = Core.Logger.Debug;
+                Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -440,14 +440,6 @@ namespace Iviz.Ros
         {
             Core.Logger.Debug("[NtpChecker] Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
-
-            /*
-            for (int i = 0; i < 20; i++)
-            {
-                var ts = await NtpQuery.GetNetworkTimeOffsetOneShotAsync(hostname, token);
-                Debug.Log(new TimeSpan(mean).TotalMilliseconds);
-            }
-            */
 
             TimeSpan offset;
             try
@@ -956,7 +948,7 @@ namespace Iviz.Ros
         }
 
         [NotNull]
-        public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopicTypes(
+        public IReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
@@ -968,12 +960,13 @@ namespace Iviz.Ros
         }
 
         [ItemNotNull]
-        public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(
+        public async ValueTask<IReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(
             int timeoutInMs = 2000,
             CancellationToken token = default)
         {
-            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            if (!Connected || token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
             {
+                cachedPublishedTopics = EmptyTopics;
                 return EmptyTopics;
             }
 
@@ -982,24 +975,22 @@ namespace Iviz.Ros
                 using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
                 {
                     tokenSource.CancelAfter(timeoutInMs);
-                    return cachedPublishedTopics = Connected
-                        ? (await Client.GetSystemPublishedTopicsAsync(tokenSource.Token))
-                        : EmptyTopics;
+                    cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(tokenSource.Token);
                 }
             }
             catch (OperationCanceledException)
             {
-                return EmptyTopics;
             }
             catch (Exception e)
             {
                 Core.Logger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync()", e);
-                return EmptyTopics;
             }
+
+            return cachedPublishedTopics;
         }
 
         [NotNull]
-        public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
+        public IReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
@@ -1011,12 +1002,13 @@ namespace Iviz.Ros
         }
 
         [ItemNotNull]
-        async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
+        async ValueTask<IReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
             int timeoutInMs = 2000,
             CancellationToken token = default)
         {
-            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            if (!Connected || token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
             {
+                cachedTopics = EmptyTopics;
                 return EmptyTopics;
             }
 
@@ -1025,20 +1017,18 @@ namespace Iviz.Ros
                 using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
                 {
                     tokenSource.CancelAfter(timeoutInMs);
-                    return cachedTopics = Connected
-                        ? await Client.GetSystemTopicTypesAsync(tokenSource.Token)
-                        : EmptyTopics;
+                    cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
                 }
             }
             catch (OperationCanceledException)
             {
-                return EmptyTopics;
             }
             catch (Exception e)
             {
                 Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync()", e);
-                return EmptyTopics;
             }
+
+            return cachedTopics;
         }
 
         [NotNull, ItemNotNull]
@@ -1133,15 +1123,19 @@ namespace Iviz.Ros
 
         async Task GetSystemStateAsync()
         {
+            if (!Connected)
+            {
+                cachedSystemState = null;
+                return;
+            }
+
+            const int timeoutInMs = 2000;
             try
             {
                 using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionTs.Token))
                 {
-                    const int timeoutInMs = 2000;
                     tokenSource.CancelAfter(timeoutInMs);
-                    cachedSystemState = Connected
-                        ? await Client.GetSystemStateAsync(tokenSource.Token)
-                        : null;
+                    cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
                 }
             }
             catch (OperationCanceledException)
