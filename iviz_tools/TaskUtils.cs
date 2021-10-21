@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +16,8 @@ namespace Iviz.Tools
             // todo: do something here?
             return Task.Run(task, token);
         }
+
+        static readonly Action<object?> SetResult = o => ((TaskCompletionSource<object?>)o!).TrySetResult(null);
 
         /// <summary>
         /// Waits for the task to complete.
@@ -47,10 +47,8 @@ namespace Iviz.Tools
             tokenSource.CancelAfter(timeoutInMs);
 
             var timeout = new TaskCompletionSource<object?>();
-            var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
-
-            Task result = await (task, timeoutTask).WhenAny();
+            using var registration = tokenSource.Token.Register(SetResult, timeout);
+            Task result = await (task, timeout.Task).WhenAny();
             return result == task;
         }
 
@@ -77,7 +75,7 @@ namespace Iviz.Tools
 
             var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(() => timeout.TrySetResult(null));
+            using var registration = tokenSource.Token.Register(SetResult, timeout);
 
             Task result = await (task, timeoutTask).WhenAny();
 
@@ -98,13 +96,6 @@ namespace Iviz.Tools
         /// <returns>Whether the task ran to completion</returns>
         public static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
 
-#if !NETSTANDARD2_0
-        public static bool RanToCompletion(this ValueTask task)
-        {
-            return task.IsCompletedSuccessfully;
-        }
-#endif
-
         public static void WaitNoThrow(this Task? t, object caller)
         {
             if (t == null)
@@ -123,28 +114,6 @@ namespace Iviz.Tools
                     Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
                 }
             }
-        }
-
-        public static T WaitNoThrow<T>(this Task<T>? t, object caller)
-        {
-            if (t == null)
-            {
-                return default!;
-            }
-
-            try
-            {
-                return t.GetAwaiter().GetResult();
-            }
-            catch (Exception e)
-            {
-                if (e is not OperationCanceledException)
-                {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-                }
-            }
-
-            return default!;
         }
 
         public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
@@ -188,10 +157,6 @@ namespace Iviz.Tools
             {
                 t.GetAwaiter().GetResult();
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
             catch (AggregateException e) when (e.InnerException != null)
             {
                 ExceptionDispatchInfo.Capture(e.InnerException)?.Throw();
@@ -208,10 +173,6 @@ namespace Iviz.Tools
             try
             {
                 return t.GetAwaiter().GetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
             }
             catch (AggregateException e) when (e.InnerException != null)
             {
@@ -239,29 +200,7 @@ namespace Iviz.Tools
                 }
             }
         }
-
-        public static async ValueTask<T?> AwaitNoThrow<T>(this Task<T>? t, object caller) where T : class
-        {
-            if (t == null)
-            {
-                return default;
-            }
-
-            try
-            {
-                return await t;
-            }
-            catch (Exception e)
-            {
-                if (e is not OperationCanceledException)
-                {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-                }
-            }
-
-            return default;
-        }
-
+        
         public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller) where T : class
         {
             try
@@ -278,37 +217,7 @@ namespace Iviz.Tools
 
             return default;
         }
-
-#if !NETSTANDARD2_0
-        public static async Task AwaitNoThrow(this ValueTask t, object caller)
-        {
-            if (t.RanToCompletion())
-            {
-                return;
-            }
-
-            try
-            {
-                await t;
-            }
-            catch (Exception e)
-            {
-                if (e is not OperationCanceledException)
-                {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
-                }
-            }
-        }
-#endif
-
-        public static void ThrowIfCanceled(this CancellationToken t, Task task)
-        {
-            if (t.IsCancellationRequested)
-            {
-                throw new TaskCanceledException(task);
-            }
-        }
-
+        
         public static async Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
         {
             if (ts.Count == 0)
@@ -375,123 +284,5 @@ namespace Iviz.Tools
                     ? new ValueTask<Task>(t2)
                     : new ValueTask<Task>(Task.WhenAny(t1, t2));
         }
-
-        public static async Task AwaitWithToken(this Task task, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (task.IsCompleted)
-            {
-                await task;
-                return;
-            }
-
-            const int maxTokenWait = 5000;
-            var timeoutTask = Task.Delay(maxTokenWait, token);
-            await await (task, timeoutTask).WhenAny();
-            if (!task.IsCompleted)
-            {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException("Operation timed out");
-            }
-        }
-
-        public static async Task<T> AwaitWithToken<T>(this Task<T> task, CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (task.IsCompleted)
-            {
-                return await task;
-            }
-
-            const int maxTokenWait = 5000;
-            var timeoutTask = Task.Delay(maxTokenWait, token);
-            await (task, timeoutTask).WhenAny();
-            if (task.IsCompleted)
-            {
-                return await task;
-            }
-
-            token.ThrowIfCancellationRequested();
-            throw new TimeoutException("Operation timed out");
-        }
-    }
-
-    public static class ConnectionUtils
-    {
-        public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);
-
-        public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
-            CancellationToken token, int timeoutInMs = -1)
-        {
-            token.ThrowIfCancellationRequested();
-
-            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
-            {
-                hostname = resolvedHostname;
-            }
-
-#if NET5_0_OR_GREATER
-            using var tokenSource = !token.CanBeCanceled
-                ? new CancellationTokenSource()
-                : CancellationTokenSource.CreateLinkedTokenSource(token);
-            if (timeoutInMs != -1)
-            {
-                tokenSource.CancelAfter(timeoutInMs);
-            }
-
-            try
-            {
-                await client.ConnectAsync(hostname, port, tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
-            }
-#else
-            Task connectionTask = IPAddress.TryParse(hostname, out var address)
-                ? client.ConnectAsync(address, port)
-                : client.ConnectAsync(hostname, port);
-
-            if (timeoutInMs == -1)
-            {
-                if (!token.CanBeCanceled)
-                {
-                    throw new InvalidOperationException("Either a timeout or a cancellable token should be provided");
-                }
-
-                await connectionTask.AwaitWithToken(token);
-            }
-            else
-            {
-                if (!await connectionTask.AwaitFor(timeoutInMs, token))
-                {
-                    token.ThrowIfCancellationRequested();
-                    throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
-                }
-            }
-#endif
-        }
-
-        public static void TryConnect(this UdpClient client, string hostname, int port)
-        {
-            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
-            {
-                hostname = resolvedHostname;
-            }
-
-            if (IPAddress.TryParse(hostname, out var address))
-            {
-                client.Connect(new IPEndPoint(address, port));
-                return;
-            }
-
-            client.Connect(hostname, port);
-        }
-
-        public static bool CheckIfAlive(this Socket? socket) =>
-            socket != null && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;
     }
 }
