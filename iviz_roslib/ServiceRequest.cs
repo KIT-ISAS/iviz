@@ -240,7 +240,7 @@ namespace Iviz.Roslib
                             Task resultTask = await (userTask, timeoutTask).WhenAny();
                             if (resultTask == timeoutTask)
                             {
-                                runningTs.Token.ThrowIfCanceled(timeoutTask);
+                                runningTs.Token.ThrowIfCancellationRequested();
                                 throw new RosServiceRequestTimeout("User callback took too long!");
                             }
 
