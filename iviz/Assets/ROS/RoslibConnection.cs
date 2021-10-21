@@ -441,14 +441,6 @@ namespace Iviz.Ros
             Core.Logger.Debug("[NtpChecker] Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
 
-            /*
-            for (int i = 0; i < 20; i++)
-            {
-                var ts = await NtpQuery.GetNetworkTimeOffsetOneShotAsync(hostname, token);
-                Debug.Log(new TimeSpan(mean).TotalMilliseconds);
-            }
-            */
-
             TimeSpan offset;
             try
             {
