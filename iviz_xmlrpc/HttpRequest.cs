@@ -24,8 +24,7 @@ namespace Iviz.XmlRpc
         {
             this.callerUri = callerUri ?? throw new ArgumentNullException(nameof(callerUri));
             this.remoteUri = remoteUri ?? throw new ArgumentNullException(nameof(remoteUri));
-            client = new TcpClient(AddressFamily.InterNetworkV6)
-                {Client = {DualMode = true}, ReceiveTimeout = 3000, SendTimeout = 3000, NoDelay = true};
+            client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true }, NoDelay = true };
         }
 
         public Task StartAsync(CancellationToken token)
@@ -69,12 +68,11 @@ namespace Iviz.XmlRpc
                 "Content-Type: text/xml; charset=utf-8\r\n" +
                 "\r\n";
 
-            return (header, dstBytes, (int) outputStream.Position);
+            return (header, dstBytes, (int)outputStream.Position);
         }
 
         internal async Task<int> SendRequestAsync(string msgIn, bool keepAlive, bool gzipped, CancellationToken token)
         {
-            var stream = client.GetStream();
             if (gzipped)
             {
                 (string header, var payloadBytes, int length) = CreateRequestGzipped(msgIn, keepAlive);
@@ -86,21 +84,18 @@ namespace Iviz.XmlRpc
                         await client.WriteChunkAsync(headerBytes.Array, headerSize, token);
                     }
 
-                    await stream.WriteAsync(payloadBytes.Array, 0, length, token).AwaitWithToken(token);
-                    await stream.FlushAsync(token).AwaitWithToken(token);
+                    await client.WriteChunkAsync(payloadBytes.Array, length, token);
                 }
 
                 return length;
             }
 
             string content = CreateRequest(msgIn, keepAlive);
-            using (var contentBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(content.Length)))
-            {
-                int contentSize = Defaults.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
-                await client.WriteChunkAsync(contentBytes.Array, contentSize, token);
-            }
 
-            await stream.FlushAsync(token).AwaitWithToken(token);
+            using var contentBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(content.Length));
+            int contentSize = Defaults.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
+            await client.WriteChunkAsync(contentBytes.Array, contentSize, token);
+
             return content.Length;
         }
 
@@ -111,8 +106,8 @@ namespace Iviz.XmlRpc
             while (pos < buffer.Length)
             {
                 buffer[pos] = await client.ReadChunkAsync(singleByte, 1, token)
-                        ? singleByte[0]
-                        : throw new IOException("Partner closed connection");
+                    ? singleByte[0]
+                    : throw new IOException("Partner closed connection");
 
                 if (pos > 4 &&
                     buffer[pos] == '\n' &&
@@ -201,7 +196,7 @@ namespace Iviz.XmlRpc
         internal static async Task<(string inData, int length, bool shouldClose)>
             ReadIncomingDataAsync(TcpClient client, bool isRequest, CancellationToken token)
         {
-            const int maxHeaderSize = 4096;
+            const int maxHeaderSize = 8192;
             int headerLength;
             int contentLength;
             string? encodingStr;
@@ -247,7 +242,7 @@ namespace Iviz.XmlRpc
                 using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
                 decompressionStream.CopyTo(outputStream);
-                return Defaults.UTF8.GetString(outputBytes.Array, 0, (int) outputStream.Position);
+                return Defaults.UTF8.GetString(outputBytes.Array, 0, (int)outputStream.Position);
             }
             catch (NotSupportedException)
             {
@@ -257,7 +252,7 @@ namespace Iviz.XmlRpc
                 using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
                 decompressionStream.CopyTo(outputStream);
-                return Defaults.UTF8.GetString(outputStream.GetBuffer(), 0, (int) outputStream.Position);
+                return Defaults.UTF8.GetString(outputStream.GetBuffer(), 0, (int)outputStream.Position);
             }
         }
 
