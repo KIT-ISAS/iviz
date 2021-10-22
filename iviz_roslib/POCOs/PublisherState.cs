@@ -5,9 +5,13 @@ using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib
 {
+    /// <summary>
+    /// The type of transport protocol being used
+    /// </summary>
     public enum TransportType
     {
-        Tcp, Udp
+        Tcp, 
+        Udp
     }
     
     [DataContract]
@@ -15,9 +19,9 @@ namespace Iviz.Roslib
     {
         [DataMember] public bool IsAlive { get; internal set; }
         [DataMember] public TransportType TransportType { get; internal set; }
-        [DataMember] public Endpoint? Endpoint { get; internal set; }
+        [DataMember] public Endpoint Endpoint { get; internal set; }
         [DataMember] public string RemoteId { get; internal set; } = "";
-        [DataMember] public Endpoint? RemoteEndpoint { get; internal set; }
+        [DataMember] public Endpoint RemoteEndpoint { get; internal set; }
         [DataMember] public int CurrentQueueSize { get; internal set; }
         [DataMember] public int MaxQueueSize { get; internal set; }
         [DataMember] public long NumSent { get; internal set; }

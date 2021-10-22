@@ -12,9 +12,9 @@ namespace Iviz.Roslib
         [DataMember] public TransportType? TransportType { get; internal set; }
         [DataMember] public ReceiverStatus Status { get; internal set; }
         [DataMember] public bool RequestNoDelay { get; internal set; }
-        [DataMember] public Endpoint? EndPoint { get; internal set; }
+        [DataMember] public Endpoint EndPoint { get; internal set; }
         [DataMember] public Uri RemoteUri { get; }
-        [DataMember] public Endpoint? RemoteEndpoint { get; internal set; }
+        [DataMember] public Endpoint RemoteEndpoint { get; internal set; }
         [DataMember] public long NumReceived { get; internal set; }
         [DataMember] public long NumDropped { get; internal set; }
         [DataMember] public long BytesReceived { get; internal set; }
