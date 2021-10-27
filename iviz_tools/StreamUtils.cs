@@ -75,10 +75,10 @@ namespace Iviz.Tools
             return ReadChunkAsync(udpClient.Client, buffer, 0, buffer.Length, token);
         }
 
-        static readonly AsyncCallback ReceiveCallbackDel =
+        static readonly AsyncCallback OnComplete =
             result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
 
-        static readonly Action<object?> WhenComplete = tcs =>
+        static readonly Action<object?> OnCanceled = tcs =>
             ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
 
         static ValueTask<int> ReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
@@ -98,11 +98,11 @@ namespace Iviz.Tools
         {
             var tcs = new TaskCompletionSource<IAsyncResult>();
 
-            socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, ReceiveCallbackDel, tcs);
+            socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
             if (!tcs.Task.IsCompleted)
             {
-                using var registration = token.Register(WhenComplete, tcs);
+                using var registration = token.Register(OnCanceled, tcs);
                 var result = await tcs.Task;
                 return socket.EndReceive(result);
             }
@@ -141,18 +141,16 @@ namespace Iviz.Tools
         {
             var tcs = new TaskCompletionSource<IAsyncResult>();
 
-            socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, ReceiveCallbackDel, tcs);
+            socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, OnComplete, tcs);
 
-            if (!tcs.Task.IsCompleted)
+            if (tcs.Task.IsCompleted)
             {
-                using var registration = token.Register(WhenComplete, tcs);
-                var result = await tcs.Task;
-                return socket.EndSend(result);
+                return socket.EndSend(await tcs.Task);
             }
-            else
+
+            using (token.Register(OnCanceled, tcs))
             {
-                var result = await tcs.Task;
-                return socket.EndReceive(result);
+                return socket.EndSend(await tcs.Task);
             }
         }
 
@@ -180,7 +178,7 @@ namespace Iviz.Tools
                 {
                     throw;
                 }
-                
+
                 throw new TimeoutException("Writing operation timed out");
             }
         }

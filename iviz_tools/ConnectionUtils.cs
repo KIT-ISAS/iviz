@@ -11,110 +11,68 @@ namespace Iviz.Tools
     {
         public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-        static readonly AsyncCallback ConnectCallbackDel =
+        static readonly AsyncCallback OnComplete =
             result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
-        
-        static readonly Action<object?> WhenComplete = tcs =>
+
+        static readonly Action<object?> OnCanceled = tcs =>
             ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
+
+        static readonly Action<object?> OnTimeout = tcs =>
+            ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetException(new TimeoutException());
 
         public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
             CancellationToken token, int timeoutInMs = -1)
         {
             token.ThrowIfCancellationRequested();
 
-            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
-            {
-                hostname = resolvedHostname;
-            }
+            string resolvedHostname = GlobalResolver.TryGetValue(hostname, out string? newHostname)
+                ? newHostname
+                : hostname;
 
-            /*
-#if NET5_0_OR_GREATER
-            using var tokenSource = !token.CanBeCanceled
-                ? new CancellationTokenSource()
-                : CancellationTokenSource.CreateLinkedTokenSource(token);
-            if (timeoutInMs != -1)
-            {
-                tokenSource.CancelAfter(timeoutInMs);
-            }
-
-            try
-            {
-                await client.ConnectAsync(hostname, port, tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                token.ThrowIfCancellationRequested();
-                throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
-            }
-#else
-            Task connectionTask = IPAddress.TryParse(hostname, out var address)
-                ? client.ConnectAsync(address, port)
-                : client.ConnectAsync(hostname, port);
-
-            if (timeoutInMs == -1)
-            {
-                if (!token.CanBeCanceled)
-                {
-                    throw new InvalidOperationException("Either a timeout or a cancellable token should be provided");
-                }
-
-                await connectionTask.AwaitWithToken(token);
-            }
-            else
-            {
-                if (!await connectionTask.AwaitFor(timeoutInMs, token))
-                {
-                    token.ThrowIfCancellationRequested();
-                    throw new TimeoutException($"Connection request to '{hostname}:{port}' timed out");
-                }
-            }
-#endif
-*/
-            
             var tcs = new TaskCompletionSource<IAsyncResult>();
             var socket = client.Client;
 
-            socket.BeginConnect(hostname, port, ConnectCallbackDel, tcs);
+            socket.BeginConnect(resolvedHostname, port, OnComplete, tcs);
 
-            if (!tcs.Task.IsCompleted)
+            if (tcs.Task.IsCompleted)
             {
-                if (timeoutInMs != -1)
+                socket.EndConnect(await tcs.Task);
+                return;
+            }
+
+            if (timeoutInMs == -1)
+            {
+                using (token.Register(OnCanceled, tcs))
                 {
-                    using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-                    linkedTokenSource.CancelAfter(timeoutInMs);
-                    using var registration = linkedTokenSource.Token.Register(WhenComplete, tcs);
                     socket.EndConnect(await tcs.Task);
-                }
-                else
-                {
-                    using var registration = token.Register(WhenComplete, tcs);
-                    socket.EndConnect(await tcs.Task);
+                    return;
                 }
             }
-            else
+
+            using var timeoutTs = new CancellationTokenSource(timeoutInMs);
+            using (token.Register(OnCanceled, tcs))
+            using (timeoutTs.Token.Register(OnTimeout, tcs))
             {
-                socket.EndReceive(await tcs.Task);
+                socket.EndConnect(await tcs.Task);
             }
-            
         }
 
         public static void TryConnect(this UdpClient client, string hostname, int port)
         {
-            if (GlobalResolver.TryGetValue(hostname, out string? resolvedHostname))
-            {
-                hostname = resolvedHostname;
-            }
+            string resolvedHostname = GlobalResolver.TryGetValue(hostname, out string? newHostname)
+                ? newHostname
+                : hostname;
 
-            if (IPAddress.TryParse(hostname, out var address))
+            if (IPAddress.TryParse(resolvedHostname, out var address))
             {
                 client.Connect(new IPEndPoint(address, port));
                 return;
             }
 
-            client.Connect(hostname, port);
+            client.Connect(resolvedHostname, port);
         }
 
         public static bool CheckIfAlive(this Socket? socket) =>
-            socket != null && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0) && socket.Connected;
+            socket is { Connected: true } && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
     }
 }

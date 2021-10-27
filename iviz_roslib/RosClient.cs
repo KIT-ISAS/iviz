@@ -1690,15 +1690,11 @@ namespace Iviz.Roslib
             RosMasterClient.Dispose();
         }
 
-        public SubscriberState GetSubscriberStatistics()
-        {
-            return new(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
-        }
+        public SubscriberState GetSubscriberStatistics() =>
+            new(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
 
-        public PublisherState GetPublisherStatistics()
-        {
-            return new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
-        }
+        public PublisherState GetPublisherStatistics() =>
+            new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
 
         internal List<BusInfo> GetBusInfoRpc()
         {

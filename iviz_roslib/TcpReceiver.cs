@@ -167,7 +167,7 @@ namespace Iviz.Roslib
                 return null;
             }
 
-            if (newTcpClient.Client?.RemoteEndPoint != null && newTcpClient.Client?.LocalEndPoint != null)
+            if (newTcpClient.Client is { RemoteEndPoint: { }, LocalEndPoint: { } })
             {
                 return newTcpClient;
             }

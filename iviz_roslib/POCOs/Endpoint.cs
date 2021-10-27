@@ -30,6 +30,6 @@ namespace Iviz.Roslib
 
         public void Deconstruct(out string hostname, out int port) => (hostname, port) = (Hostname, Port);
 
-        public override string ToString() => $"[Endpoint '{Hostname}':{Port}]";
+        public override string ToString() => $"[Endpoint '{Hostname}':{Port.ToString()}]";
     }
 }
