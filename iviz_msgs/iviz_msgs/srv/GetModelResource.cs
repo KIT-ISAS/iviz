@@ -75,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetModelResourceRequest(ref Buffer b)
+        internal GetModelResourceRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uri);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetModelResourceResponse(ref Buffer b)
+        internal GetModelResourceResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Model = new Model(ref b);
@@ -174,15 +167,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += Model.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + Model.RosMessageLength + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

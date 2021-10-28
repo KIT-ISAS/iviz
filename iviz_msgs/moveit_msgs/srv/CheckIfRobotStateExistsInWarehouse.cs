@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CheckIfRobotStateExistsInWarehouseRequest(ref Buffer b)
+        internal CheckIfRobotStateExistsInWarehouseRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -109,15 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Robot is null) throw new System.NullReferenceException(nameof(Robot));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Robot);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Robot);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CheckIfRobotStateExistsInWarehouseResponse(ref Buffer b)
+        internal CheckIfRobotStateExistsInWarehouseResponse(ref Buffer b)
         {
             Exists = b.Deserialize<bool>();
         }

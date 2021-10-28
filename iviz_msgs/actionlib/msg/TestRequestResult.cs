@@ -23,7 +23,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestRequestResult(ref Buffer b)
+        internal TestRequestResult(ref Buffer b)
         {
             TheResult = b.Deserialize<int>();
             IsSimpleServer = b.Deserialize<bool>();

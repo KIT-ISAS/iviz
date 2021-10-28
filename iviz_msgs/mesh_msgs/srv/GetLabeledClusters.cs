@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetLabeledClustersRequest(ref Buffer b)
+        internal GetLabeledClustersRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -133,7 +126,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetLabeledClustersResponse(ref Buffer b)
+        internal GetLabeledClustersResponse(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
@@ -171,17 +164,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Clusters)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Clusters);
     
         public override string ToString() => Extensions.ToString(this);
     }

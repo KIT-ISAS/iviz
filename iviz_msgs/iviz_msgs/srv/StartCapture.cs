@@ -77,7 +77,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public StartCaptureRequest(ref Buffer b)
+        internal StartCaptureRequest(ref Buffer b)
         {
             ResolutionX = b.Deserialize<int>();
             ResolutionY = b.Deserialize<int>();
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public StartCaptureResponse(ref Buffer b)
+        internal StartCaptureResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -168,14 +168,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

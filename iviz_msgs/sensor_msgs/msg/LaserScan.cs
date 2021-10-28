@@ -55,9 +55,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LaserScan(ref Buffer b)
+        internal LaserScan(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             AngleMin = b.Deserialize<float>();
             AngleMax = b.Deserialize<float>();
             AngleIncrement = b.Deserialize<float>();

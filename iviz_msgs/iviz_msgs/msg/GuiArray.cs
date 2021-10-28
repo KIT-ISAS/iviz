@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GuiArray(ref Buffer b)
+        internal GuiArray(ref Buffer b)
         {
             Dialogs = b.DeserializeArray<IvizMsgs.Dialog>();
             for (int i = 0; i < Dialogs.Length; i++)
@@ -75,21 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                foreach (var i in Dialogs)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Widgets)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetArraySize(Dialogs) + BuiltIns.GetArraySize(Widgets);
     
         public string RosType => RosMessageType;
     

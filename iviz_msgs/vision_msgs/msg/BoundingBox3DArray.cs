@@ -24,9 +24,9 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingBox3DArray(ref Buffer b)
+        internal BoundingBox3DArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Boxes = b.DeserializeArray<VisionMsgs.BoundingBox3D>();
             for (int i = 0; i < Boxes.Length; i++)
             {
@@ -64,15 +64,7 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                size += 80 * Boxes.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + 80 * Boxes.Length;
     
         public string RosType => RosMessageType;
     

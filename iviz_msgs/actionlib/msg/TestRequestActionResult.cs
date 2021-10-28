@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestRequestActionResult(ref Buffer b)
+        internal TestRequestActionResult(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.Actionlib
             Result.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += Header.RosMessageLength;
-                size += Status.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + Header.RosMessageLength + Status.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CaptureScreenshotRequest(ref Buffer b)
+        internal CaptureScreenshotRequest(ref Buffer b)
         {
             Compress = b.Deserialize<bool>();
         }
@@ -145,16 +145,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CaptureScreenshotResponse(ref Buffer b)
+        internal CaptureScreenshotResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Width = b.Deserialize<int>();
             Height = b.Deserialize<int>();
             Bpp = b.Deserialize<int>();
             Intrinsics = b.DeserializeStructArray<double>(9);
-            Pose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Pose);
             Data = b.DeserializeStructArray<byte>();
         }
         
@@ -177,7 +177,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Height);
             b.Serialize(Bpp);
             b.SerializeStructArray(Intrinsics, 9);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.SerializeStructArray(Data, 0);
         }
         
@@ -197,9 +197,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 149;
-                size += BuiltIns.UTF8.GetByteCount(Message);
+                size += BuiltIns.GetStringSize(Message);
                 size += Header.RosMessageLength;
-                size += 1 * Data.Length;
+                size += Data.Length;
                 return size;
             }
         }

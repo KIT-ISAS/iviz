@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Polygon(ref Buffer b)
+        internal Polygon(ref Buffer b)
         {
             Points = b.DeserializeStructArray<Point32>();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Points is null) throw new System.NullReferenceException(nameof(Points));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 12 * Points.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 12 * Points.Length;
     
         public string RosType => RosMessageType;
     

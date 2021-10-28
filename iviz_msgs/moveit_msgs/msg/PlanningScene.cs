@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlanningScene(ref Buffer b)
+        internal PlanningScene(ref Buffer b)
         {
             Name = b.DeserializeString();
             RobotState = new RobotState(ref b);
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.MoveitMsgs
             FixedFrameTransforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
             for (int i = 0; i < FixedFrameTransforms.Length; i++)
             {
-                FixedFrameTransforms[i] = new GeometryMsgs.TransformStamped(ref b);
+                GeometryMsgs.TransformStamped.Deserialize(ref b, out FixedFrameTransforms[i]);
             }
             AllowedCollisionMatrix = new AllowedCollisionMatrix(ref b);
             LinkPadding = b.DeserializeArray<LinkPadding>();
@@ -152,26 +152,14 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 25;
-                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.GetStringSize(Name);
                 size += RobotState.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(RobotModelName);
-                foreach (var i in FixedFrameTransforms)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(RobotModelName);
+                size += BuiltIns.GetArraySize(FixedFrameTransforms);
                 size += AllowedCollisionMatrix.RosMessageLength;
-                foreach (var i in LinkPadding)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in LinkScale)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in ObjectColors)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(LinkPadding);
+                size += BuiltIns.GetArraySize(LinkScale);
+                size += BuiltIns.GetArraySize(ObjectColors);
                 size += World.RosMessageLength;
                 return size;
             }

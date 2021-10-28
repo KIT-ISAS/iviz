@@ -51,9 +51,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PointCloud2(ref Buffer b)
+        internal PointCloud2(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             Fields = b.DeserializeArray<PointField>();
@@ -111,11 +111,8 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 26;
                 size += Header.RosMessageLength;
-                foreach (var i in Fields)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += 1 * Data.Length;
+                size += BuiltIns.GetArraySize(Fields);
+                size += Data.Length;
                 return size;
             }
         }

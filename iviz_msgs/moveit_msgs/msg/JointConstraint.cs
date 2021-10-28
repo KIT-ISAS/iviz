@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public JointConstraint(ref Buffer b)
+        internal JointConstraint(ref Buffer b)
         {
             JointName = b.DeserializeString();
             Position = b.Deserialize<double>();
@@ -70,14 +70,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (JointName is null) throw new System.NullReferenceException(nameof(JointName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 36;
-                size += BuiltIns.UTF8.GetByteCount(JointName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 36 + BuiltIns.GetStringSize(JointName);
     
         public string RosType => RosMessageType;
     

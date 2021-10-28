@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PickupActionFeedback(ref Buffer b)
+        internal PickupActionFeedback(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

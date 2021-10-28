@@ -39,10 +39,10 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public OrientationConstraint(ref Buffer b)
+        internal OrientationConstraint(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Orientation = new GeometryMsgs.Quaternion(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Orientation);
             LinkName = b.DeserializeString();
             AbsoluteXAxisTolerance = b.Deserialize<double>();
             AbsoluteYAxisTolerance = b.Deserialize<double>();
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Orientation.RosSerialize(ref b);
+            b.Serialize(Orientation);
             b.Serialize(LinkName);
             b.Serialize(AbsoluteXAxisTolerance);
             b.Serialize(AbsoluteYAxisTolerance);
@@ -80,15 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 68;
-                size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(LinkName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 68 + Header.RosMessageLength + BuiltIns.GetStringSize(LinkName);
     
         public string RosType => RosMessageType;
     

@@ -66,7 +66,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestEmptyRequest(ref Buffer b)
+        internal TestEmptyRequest(ref Buffer b)
         {
         }
         
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestEmptyResponse(ref Buffer b)
+        internal TestEmptyResponse(ref Buffer b)
         {
         }
         

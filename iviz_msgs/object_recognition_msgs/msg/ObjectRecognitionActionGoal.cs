@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectRecognitionActionGoal(ref Buffer b)
+        internal ObjectRecognitionActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);

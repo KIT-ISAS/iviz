@@ -24,7 +24,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ShapeResult(ref Buffer b)
+        internal ShapeResult(ref Buffer b)
         {
             InteriorAngle = b.Deserialize<float>();
             Apothem = b.Deserialize<float>();

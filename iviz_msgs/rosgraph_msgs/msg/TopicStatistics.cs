@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TopicStatistics(ref Buffer b)
+        internal TopicStatistics(ref Buffer b)
         {
             Topic = b.DeserializeString();
             NodePub = b.DeserializeString();
@@ -122,9 +122,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             get {
                 int size = 88;
-                size += BuiltIns.UTF8.GetByteCount(Topic);
-                size += BuiltIns.UTF8.GetByteCount(NodePub);
-                size += BuiltIns.UTF8.GetByteCount(NodeSub);
+                size += BuiltIns.GetStringSize(Topic);
+                size += BuiltIns.GetStringSize(NodePub);
+                size += BuiltIns.GetStringSize(NodeSub);
                 return size;
             }
         }

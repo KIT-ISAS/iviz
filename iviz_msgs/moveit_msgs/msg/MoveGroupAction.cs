@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MoveGroupAction(ref Buffer b)
+        internal MoveGroupAction(ref Buffer b)
         {
             ActionGoal = new MoveGroupActionGoal(ref b);
             ActionResult = new MoveGroupActionResult(ref b);

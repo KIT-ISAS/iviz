@@ -76,7 +76,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetObjectInformationRequest(ref Buffer b)
+        internal GetObjectInformationRequest(ref Buffer b)
         {
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
         }
@@ -106,14 +106,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Type.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Type.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Type.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -137,7 +130,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetObjectInformationResponse(ref Buffer b)
+        internal GetObjectInformationResponse(ref Buffer b)
         {
             Information = new ObjectRecognitionMsgs.ObjectInformation(ref b);
         }
@@ -167,14 +160,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Information.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Information.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Information.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

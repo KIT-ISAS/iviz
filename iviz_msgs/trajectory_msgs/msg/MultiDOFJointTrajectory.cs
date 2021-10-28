@@ -32,9 +32,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MultiDOFJointTrajectory(ref Buffer b)
+        internal MultiDOFJointTrajectory(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             JointNames = b.DeserializeStringArray();
             Points = b.DeserializeArray<MultiDOFJointTrajectoryPoint>();
             for (int i = 0; i < Points.Length; i++)
@@ -84,15 +84,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
             get {
                 int size = 8;
                 size += Header.RosMessageLength;
-                size += 4 * JointNames.Length;
-                foreach (string s in JointNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in Points)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(JointNames);
+                size += BuiltIns.GetArraySize(Points);
                 return size;
             }
         }

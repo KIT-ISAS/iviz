@@ -29,9 +29,9 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GridCells(ref Buffer b)
+        internal GridCells(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             CellWidth = b.Deserialize<float>();
             CellHeight = b.Deserialize<float>();
             Cells = b.DeserializeStructArray<GeometryMsgs.Point>();
@@ -64,15 +64,7 @@ namespace Iviz.Msgs.NavMsgs
             if (Cells is null) throw new System.NullReferenceException(nameof(Cells));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += Header.RosMessageLength;
-                size += 24 * Cells.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + Header.RosMessageLength + 24 * Cells.Length;
     
         public string RosType => RosMessageType;
     

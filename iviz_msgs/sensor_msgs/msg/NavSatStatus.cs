@@ -37,7 +37,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public NavSatStatus(ref Buffer b)
+        internal NavSatStatus(ref Buffer b)
         {
             Status = b.Deserialize<sbyte>();
             Service = b.Deserialize<ushort>();

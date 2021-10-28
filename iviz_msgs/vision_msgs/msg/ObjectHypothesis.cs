@@ -30,7 +30,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectHypothesis(ref Buffer b)
+        internal ObjectHypothesis(ref Buffer b)
         {
             Id = b.DeserializeString();
             Score = b.Deserialize<double>();
@@ -61,14 +61,7 @@ namespace Iviz.Msgs.VisionMsgs
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Id);
     
         public string RosType => RosMessageType;
     

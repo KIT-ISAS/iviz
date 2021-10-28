@@ -40,16 +40,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Feedback(ref Buffer b)
+        internal Feedback(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             VizId = b.DeserializeString();
             Id = b.DeserializeString();
             FeedbackType = b.Deserialize<int>();
             EntryId = b.Deserialize<int>();
-            Position = new GeometryMsgs.Point(ref b);
-            Orientation = new GeometryMsgs.Quaternion(ref b);
-            Scale = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out Position);
+            b.Deserialize(out Orientation);
+            b.Deserialize(out Scale);
             Trajectory = new IvizMsgs.Trajectory(ref b);
         }
         
@@ -70,9 +70,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
             b.Serialize(FeedbackType);
             b.Serialize(EntryId);
-            Position.RosSerialize(ref b);
-            Orientation.RosSerialize(ref b);
-            Scale.RosSerialize(ref b);
+            b.Serialize(Position);
+            b.Serialize(Orientation);
+            b.Serialize(Scale);
             Trajectory.RosSerialize(ref b);
         }
         
@@ -93,8 +93,8 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 96;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(VizId);
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(VizId);
+                size += BuiltIns.GetStringSize(Id);
                 size += Trajectory.RosMessageLength;
                 return size;
             }

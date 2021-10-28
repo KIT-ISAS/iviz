@@ -24,7 +24,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LookupTransformResult(ref Buffer b)
+        internal LookupTransformResult(ref Buffer b)
         {
             Transform = new GeometryMsgs.TransformStamped(ref b);
             Error = new Tf2Msgs.TF2Error(ref b);
@@ -56,15 +56,7 @@ namespace Iviz.Msgs.Tf2Msgs
             Error.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Transform.RosMessageLength;
-                size += Error.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Transform.RosMessageLength + Error.RosMessageLength;
     
         public string RosType => RosMessageType;
     

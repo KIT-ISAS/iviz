@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -24,7 +25,8 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Color32(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Color32(ref Buffer b)
         {
             b.Deserialize(out this);
         }

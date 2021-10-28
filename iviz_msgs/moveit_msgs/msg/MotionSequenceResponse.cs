@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MotionSequenceResponse(ref Buffer b)
+        internal MotionSequenceResponse(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             SequenceStart = new RobotState(ref b);
@@ -82,18 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 16;
-                size += SequenceStart.RosMessageLength;
-                foreach (var i in PlannedTrajectories)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 16 + SequenceStart.RosMessageLength + BuiltIns.GetArraySize(PlannedTrajectories);
     
         public string RosType => RosMessageType;
     

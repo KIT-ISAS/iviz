@@ -24,9 +24,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Feature(ref Buffer b)
+        internal Feature(ref Buffer b)
         {
-            Location = new GeometryMsgs.Point(ref b);
+            b.Deserialize(out Location);
             Descriptor = b.DeserializeArray<StdMsgs.Float32>();
             for (int i = 0; i < Descriptor.Length; i++)
             {
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Location.RosSerialize(ref b);
+            b.Serialize(Location);
             b.SerializeArray(Descriptor, 0);
         }
         
@@ -64,14 +64,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 28;
-                size += 4 * Descriptor.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 28 + 4 * Descriptor.Length;
     
         public string RosType => RosMessageType;
     

@@ -34,9 +34,9 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Classification3D(ref Buffer b)
+        internal Classification3D(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Results = b.DeserializeArray<ObjectHypothesis>();
             for (int i = 0; i < Results.Length; i++)
             {
@@ -83,10 +83,7 @@ namespace Iviz.Msgs.VisionMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                foreach (var i in Results)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Results);
                 size += SourceCloud.RosMessageLength;
                 return size;
             }

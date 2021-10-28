@@ -23,7 +23,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectRecognitionResult(ref Buffer b)
+        internal ObjectRecognitionResult(ref Buffer b)
         {
             RecognizedObjects = new ObjectRecognitionMsgs.RecognizedObjectArray(ref b);
         }
@@ -53,14 +53,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             RecognizedObjects.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += RecognizedObjects.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + RecognizedObjects.RosMessageLength;
     
         public string RosType => RosMessageType;
     

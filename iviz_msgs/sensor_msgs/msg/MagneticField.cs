@@ -40,10 +40,10 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MagneticField(ref Buffer b)
+        internal MagneticField(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            MagneticField_ = new GeometryMsgs.Vector3(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out MagneticField_);
             MagneticFieldCovariance = b.DeserializeStructArray<double>(9);
         }
         
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            MagneticField_.RosSerialize(ref b);
+            b.Serialize(MagneticField_);
             b.SerializeStructArray(MagneticFieldCovariance, 9);
         }
         
@@ -74,14 +74,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (MagneticFieldCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(MagneticFieldCovariance), MagneticFieldCovariance.Length, 9);
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 96;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 96 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

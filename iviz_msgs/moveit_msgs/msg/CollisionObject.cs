@@ -65,9 +65,9 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CollisionObject(ref Buffer b)
+        internal CollisionObject(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Id = b.DeserializeString();
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
             Primitives = b.DeserializeArray<ShapeMsgs.SolidPrimitive>();
@@ -152,17 +152,11 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 29;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(Id);
                 size += Type.RosMessageLength;
-                foreach (var i in Primitives)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Primitives);
                 size += 56 * PrimitivePoses.Length;
-                foreach (var i in Meshes)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Meshes);
                 size += 56 * MeshPoses.Length;
                 size += 32 * Planes.Length;
                 size += 56 * PlanePoses.Length;

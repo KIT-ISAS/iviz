@@ -50,11 +50,11 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ContactInformation(ref Buffer b)
+        internal ContactInformation(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Position = new GeometryMsgs.Point(ref b);
-            Normal = new GeometryMsgs.Vector3(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Position);
+            b.Deserialize(out Normal);
             Depth = b.Deserialize<double>();
             ContactBody1 = b.DeserializeString();
             BodyType1 = b.Deserialize<uint>();
@@ -75,8 +75,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Position.RosSerialize(ref b);
-            Normal.RosSerialize(ref b);
+            b.Serialize(Position);
+            b.Serialize(Normal);
             b.Serialize(Depth);
             b.Serialize(ContactBody1);
             b.Serialize(BodyType1);
@@ -99,8 +99,8 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 72;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(ContactBody1);
-                size += BuiltIns.UTF8.GetByteCount(ContactBody2);
+                size += BuiltIns.GetStringSize(ContactBody1);
+                size += BuiltIns.GetStringSize(ContactBody2);
                 return size;
             }
         }

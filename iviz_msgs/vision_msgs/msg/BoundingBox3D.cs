@@ -29,10 +29,10 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingBox3D(ref Buffer b)
+        internal BoundingBox3D(ref Buffer b)
         {
-            Center = new GeometryMsgs.Pose(ref b);
-            Size = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out Center);
+            b.Deserialize(out Size);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -47,8 +47,8 @@ namespace Iviz.Msgs.VisionMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Center.RosSerialize(ref b);
-            Size.RosSerialize(ref b);
+            b.Serialize(Center);
+            b.Serialize(Size);
         }
         
         public void Dispose()

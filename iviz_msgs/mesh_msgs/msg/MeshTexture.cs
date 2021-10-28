@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshTexture(ref Buffer b)
+        internal MeshTexture(ref Buffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.MeshMsgs
             Image.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                size += Image.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Uuid) + Image.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -84,7 +84,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPlanRequest(ref Buffer b)
+        internal GetPlanRequest(ref Buffer b)
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
@@ -120,15 +120,7 @@ namespace Iviz.Msgs.NavMsgs
             Goal.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Start.RosMessageLength;
-                size += Goal.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Start.RosMessageLength + Goal.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -151,7 +143,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPlanResponse(ref Buffer b)
+        internal GetPlanResponse(ref Buffer b)
         {
             Plan = new NavMsgs.Path(ref b);
         }
@@ -181,14 +173,7 @@ namespace Iviz.Msgs.NavMsgs
             Plan.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Plan.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Plan.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

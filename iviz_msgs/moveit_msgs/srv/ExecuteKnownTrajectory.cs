@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteKnownTrajectoryRequest(ref Buffer b)
+        internal ExecuteKnownTrajectoryRequest(ref Buffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
             WaitForExecution = b.Deserialize<bool>();
@@ -112,14 +112,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Trajectory.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 1;
-                size += Trajectory.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 1 + Trajectory.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -143,7 +136,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteKnownTrajectoryResponse(ref Buffer b)
+        internal ExecuteKnownTrajectoryResponse(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }

@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ConnectedClients(ref Buffer b)
+        internal ConnectedClients(ref Buffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
             for (int i = 0; i < Clients.Length; i++)
@@ -60,17 +60,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Clients)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Clients);
     
         public string RosType => RosMessageType;
     

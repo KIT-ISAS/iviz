@@ -15,7 +15,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ShapeFeedback(ref Buffer b)
+        internal ShapeFeedback(ref Buffer b)
         {
         }
         

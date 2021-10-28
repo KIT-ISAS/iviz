@@ -32,11 +32,11 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public WorkspaceParameters(ref Buffer b)
+        internal WorkspaceParameters(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            MinCorner = new GeometryMsgs.Vector3(ref b);
-            MaxCorner = new GeometryMsgs.Vector3(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out MinCorner);
+            b.Deserialize(out MaxCorner);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -52,8 +52,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            MinCorner.RosSerialize(ref b);
-            MaxCorner.RosSerialize(ref b);
+            b.Serialize(MinCorner);
+            b.Serialize(MaxCorner);
         }
         
         public void Dispose()
@@ -64,14 +64,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 48;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 48 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

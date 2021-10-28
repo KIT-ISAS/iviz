@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LoadMapRequest(ref Buffer b)
+        internal LoadMapRequest(ref Buffer b)
         {
             Filename = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Filename is null) throw new System.NullReferenceException(nameof(Filename));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Filename);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Filename);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -132,7 +125,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LoadMapResponse(ref Buffer b)
+        internal LoadMapResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

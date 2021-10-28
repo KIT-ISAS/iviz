@@ -25,10 +25,10 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public OrientedBoundingBox(ref Buffer b)
+        internal OrientedBoundingBox(ref Buffer b)
         {
-            Pose = new GeometryMsgs.Pose(ref b);
-            Extents = new GeometryMsgs.Point32(ref b);
+            b.Deserialize(out Pose);
+            b.Deserialize(out Extents);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Pose.RosSerialize(ref b);
-            Extents.RosSerialize(ref b);
+            b.Serialize(Pose);
+            b.Serialize(Extents);
         }
         
         public void Dispose()

@@ -45,12 +45,12 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Material(ref Buffer b)
+        internal Material(ref Buffer b)
         {
             Name = b.DeserializeString();
-            Ambient = new Color32(ref b);
-            Diffuse = new Color32(ref b);
-            Emissive = new Color32(ref b);
+            b.Deserialize(out Ambient);
+            b.Deserialize(out Diffuse);
+            b.Deserialize(out Emissive);
             Opacity = b.Deserialize<float>();
             BumpScaling = b.Deserialize<float>();
             Shininess = b.Deserialize<float>();
@@ -77,9 +77,9 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
-            Ambient.RosSerialize(ref b);
-            Diffuse.RosSerialize(ref b);
-            Emissive.RosSerialize(ref b);
+            b.Serialize(Ambient);
+            b.Serialize(Diffuse);
+            b.Serialize(Emissive);
             b.Serialize(Opacity);
             b.Serialize(BumpScaling);
             b.Serialize(Shininess);
@@ -104,18 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 41;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                foreach (var i in Textures)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 41 + BuiltIns.GetStringSize(Name) + BuiltIns.GetArraySize(Textures);
     
         public string RosType => RosMessageType;
     

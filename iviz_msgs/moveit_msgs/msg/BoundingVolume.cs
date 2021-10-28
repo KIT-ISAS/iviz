@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingVolume(ref Buffer b)
+        internal BoundingVolume(ref Buffer b)
         {
             Primitives = b.DeserializeArray<ShapeMsgs.SolidPrimitive>();
             for (int i = 0; i < Primitives.Length; i++)
@@ -96,15 +96,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 16;
-                foreach (var i in Primitives)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Primitives);
                 size += 56 * PrimitivePoses.Length;
-                foreach (var i in Meshes)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Meshes);
                 size += 56 * MeshPoses.Length;
                 return size;
             }

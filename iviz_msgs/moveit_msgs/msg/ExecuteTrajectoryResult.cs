@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteTrajectoryResult(ref Buffer b)
+        internal ExecuteTrajectoryResult(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }

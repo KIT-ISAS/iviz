@@ -24,10 +24,10 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TwistStamped(ref Buffer b)
+        internal TwistStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Twist = new Twist(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Twist);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Twist.RosSerialize(ref b);
+            b.Serialize(Twist);
         }
         
         public void Dispose()
@@ -54,14 +54,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 48;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 48 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

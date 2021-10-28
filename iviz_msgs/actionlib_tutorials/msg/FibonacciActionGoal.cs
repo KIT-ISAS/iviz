@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public FibonacciActionGoal(ref Buffer b)
+        internal FibonacciActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             Goal.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                size += GoalId.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + GoalId.RosMessageLength;
     
         public string RosType => RosMessageType;
     

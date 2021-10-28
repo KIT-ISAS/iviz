@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GripperTranslation(ref Buffer b)
+        internal GripperTranslation(ref Buffer b)
         {
             Direction = new GeometryMsgs.Vector3Stamped(ref b);
             DesiredDistance = b.Deserialize<float>();
@@ -66,14 +66,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Direction.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += Direction.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + Direction.RosMessageLength;
     
         public string RosType => RosMessageType;
     

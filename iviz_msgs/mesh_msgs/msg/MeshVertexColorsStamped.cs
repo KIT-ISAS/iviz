@@ -28,9 +28,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshVertexColorsStamped(ref Buffer b)
+        internal MeshVertexColorsStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();
             MeshVertexColors = new MeshMsgs.MeshVertexColors(ref b);
         }
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += BuiltIns.GetStringSize(Uuid);
                 size += MeshVertexColors.RosMessageLength;
                 return size;
             }

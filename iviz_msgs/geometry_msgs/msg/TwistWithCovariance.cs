@@ -29,9 +29,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TwistWithCovariance(ref Buffer b)
+        internal TwistWithCovariance(ref Buffer b)
         {
-            Twist = new Twist(ref b);
+            b.Deserialize(out Twist);
             Covariance = b.DeserializeStructArray<double>(36);
         }
         
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Twist.RosSerialize(ref b);
+            b.Serialize(Twist);
             b.SerializeStructArray(Covariance, 36);
         }
         

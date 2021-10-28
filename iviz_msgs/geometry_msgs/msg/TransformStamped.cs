@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -28,11 +29,17 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TransformStamped(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal TransformStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            ChildFrameId = b.DeserializeString();
-            Transform = new Transform(ref b);
+            Deserialize(ref b, out this);
+        }
+        
+        internal static void Deserialize(ref Buffer b, out TransformStamped h)
+        {
+            StdMsgs.Header.Deserialize(ref b, out h.Header);
+            h.ChildFrameId = b.DeserializeString();
+            b.Deserialize(out h.Transform);
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
@@ -59,7 +66,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(ChildFrameId ?? string.Empty);
-            Transform.RosSerialize(ref b);
+            b.Serialize(Transform);
         }
         
         public readonly void Dispose()
@@ -70,15 +77,7 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        public readonly int RosMessageLength
-        {
-            get {
-                int size = 60;
-                size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(ChildFrameId ?? string.Empty);
-                return size;
-            }
-        }
+        public readonly int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(ChildFrameId);
     
         public readonly string RosType => RosMessageType;
     

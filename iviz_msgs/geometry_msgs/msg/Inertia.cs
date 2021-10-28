@@ -41,10 +41,10 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Inertia(ref Buffer b)
+        internal Inertia(ref Buffer b)
         {
             M = b.Deserialize<double>();
-            Com = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out Com);
             Ixx = b.Deserialize<double>();
             Ixy = b.Deserialize<double>();
             Ixz = b.Deserialize<double>();
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(M);
-            Com.RosSerialize(ref b);
+            b.Serialize(Com);
             b.Serialize(Ixx);
             b.Serialize(Ixy);
             b.Serialize(Ixz);

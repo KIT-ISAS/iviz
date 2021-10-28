@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Trajectory(ref Buffer b)
+        internal Trajectory(ref Buffer b)
         {
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
             Timestamps = b.DeserializeStructArray<time>();
@@ -57,15 +57,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Timestamps is null) throw new System.NullReferenceException(nameof(Timestamps));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += 56 * Poses.Length;
-                size += 8 * Timestamps.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;
     
         public string RosType => RosMessageType;
     

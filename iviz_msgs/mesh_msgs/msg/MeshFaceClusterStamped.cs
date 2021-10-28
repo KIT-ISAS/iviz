@@ -33,9 +33,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshFaceClusterStamped(ref Buffer b)
+        internal MeshFaceClusterStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
             @override = b.Deserialize<bool>();
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 5;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += BuiltIns.GetStringSize(Uuid);
                 size += Cluster.RosMessageLength;
                 return size;
             }

@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Model(ref Buffer b)
+        internal Model(ref Buffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();
@@ -112,21 +112,12 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 24;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Filename);
-                size += BuiltIns.UTF8.GetByteCount(OrientationHint);
-                foreach (var i in Meshes)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Materials)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Nodes)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Filename);
+                size += BuiltIns.GetStringSize(OrientationHint);
+                size += BuiltIns.GetArraySize(Meshes);
+                size += BuiltIns.GetArraySize(Materials);
+                size += BuiltIns.GetArraySize(Nodes);
                 return size;
             }
         }

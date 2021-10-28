@@ -25,9 +25,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PoseWithCovarianceStamped(ref Buffer b)
+        internal PoseWithCovarianceStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Pose = new PoseWithCovariance(ref b);
         }
         
@@ -57,14 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Pose.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 344;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 344 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

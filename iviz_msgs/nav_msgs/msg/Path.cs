@@ -25,9 +25,9 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Path(ref Buffer b)
+        internal Path(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();
             for (int i = 0; i < Poses.Length; i++)
             {
@@ -65,18 +65,7 @@ namespace Iviz.Msgs.NavMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                foreach (var i in Poses)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Poses);
     
         public string RosType => RosMessageType;
     

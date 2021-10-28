@@ -34,13 +34,13 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GridMapInfo(ref Buffer b)
+        internal GridMapInfo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Resolution = b.Deserialize<double>();
             LengthX = b.Deserialize<double>();
             LengthY = b.Deserialize<double>();
-            Pose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Pose);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Serialize(Resolution);
             b.Serialize(LengthX);
             b.Serialize(LengthY);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
         }
         
         public void Dispose()
@@ -70,14 +70,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 80;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 80 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

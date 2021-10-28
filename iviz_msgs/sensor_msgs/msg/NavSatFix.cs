@@ -64,9 +64,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public NavSatFix(ref Buffer b)
+        internal NavSatFix(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);
             Latitude = b.Deserialize<double>();
             Longitude = b.Deserialize<double>();
@@ -108,14 +108,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (PositionCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(PositionCovariance), PositionCovariance.Length, 9);
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 100;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 100 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetVertexCostsRequest(ref Buffer b)
+        internal GetVertexCostsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -133,7 +126,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetVertexCostsResponse(ref Buffer b)
+        internal GetVertexCostsResponse(ref Buffer b)
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
         }
@@ -163,14 +156,7 @@ namespace Iviz.Msgs.MeshMsgs
             MeshVertexCostsStamped.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += MeshVertexCostsStamped.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + MeshVertexCostsStamped.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

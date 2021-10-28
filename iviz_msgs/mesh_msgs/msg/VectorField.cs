@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public VectorField(ref Buffer b)
+        internal VectorField(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
             Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();
@@ -57,15 +57,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Vectors is null) throw new System.NullReferenceException(nameof(Vectors));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += 24 * Positions.Length;
-                size += 24 * Vectors.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + 24 * Positions.Length + 24 * Vectors.Length;
     
         public string RosType => RosMessageType;
     

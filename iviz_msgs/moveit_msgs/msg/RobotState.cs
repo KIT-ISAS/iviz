@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RobotState(ref Buffer b)
+        internal RobotState(ref Buffer b)
         {
             JointState = new SensorMsgs.JointState(ref b);
             MultiDofJointState = new SensorMsgs.MultiDOFJointState(ref b);
@@ -90,10 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
                 int size = 5;
                 size += JointState.RosMessageLength;
                 size += MultiDofJointState.RosMessageLength;
-                foreach (var i in AttachedCollisionObjects)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(AttachedCollisionObjects);
                 return size;
             }
         }

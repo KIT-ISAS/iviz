@@ -36,7 +36,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public InteractiveMarkerInit(ref Buffer b)
+        internal InteractiveMarkerInit(ref Buffer b)
         {
             ServerId = b.DeserializeString();
             SeqNum = b.Deserialize<ulong>();
@@ -79,18 +79,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(ServerId);
-                foreach (var i in Markers)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 16 + BuiltIns.GetStringSize(ServerId) + BuiltIns.GetArraySize(Markers);
     
         public string RosType => RosMessageType;
     

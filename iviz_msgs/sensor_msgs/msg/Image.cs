@@ -50,9 +50,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Image(ref Buffer b)
+        internal Image(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             Encoding = b.DeserializeString();
@@ -97,8 +97,8 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 21;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Encoding);
-                size += 1 * Data.Length;
+                size += BuiltIns.GetStringSize(Encoding);
+                size += Data.Length;
                 return size;
             }
         }

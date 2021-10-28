@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlaceAction(ref Buffer b)
+        internal PlaceAction(ref Buffer b)
         {
             ActionGoal = new PlaceActionGoal(ref b);
             ActionResult = new PlaceActionResult(ref b);

@@ -45,7 +45,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GoalStatus(ref Buffer b)
+        internal GoalStatus(ref Buffer b)
         {
             GoalId = new GoalID(ref b);
             Status = b.Deserialize<byte>();
@@ -80,15 +80,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Text is null) throw new System.NullReferenceException(nameof(Text));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += GoalId.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Text);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + GoalId.RosMessageLength + BuiltIns.GetStringSize(Text);
     
         public string RosType => RosMessageType;
     

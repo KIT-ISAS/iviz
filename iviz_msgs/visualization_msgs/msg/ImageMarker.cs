@@ -55,18 +55,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ImageMarker(ref Buffer b)
+        internal ImageMarker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Ns = b.DeserializeString();
             Id = b.Deserialize<int>();
             Type = b.Deserialize<int>();
             Action = b.Deserialize<int>();
-            Position = new GeometryMsgs.Point(ref b);
+            b.Deserialize(out Position);
             Scale = b.Deserialize<float>();
-            OutlineColor = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out OutlineColor);
             Filled = b.Deserialize<byte>();
-            FillColor = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out FillColor);
             Lifetime = b.Deserialize<duration>();
             Points = b.DeserializeStructArray<GeometryMsgs.Point>();
             OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
@@ -89,11 +89,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
-            Position.RosSerialize(ref b);
+            b.Serialize(Position);
             b.Serialize(Scale);
-            OutlineColor.RosSerialize(ref b);
+            b.Serialize(OutlineColor);
             b.Serialize(Filled);
-            FillColor.RosSerialize(ref b);
+            b.Serialize(FillColor);
             b.Serialize(Lifetime);
             b.SerializeStructArray(Points, 0);
             b.SerializeStructArray(OutlineColors, 0);
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 93;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Ns);
+                size += BuiltIns.GetStringSize(Ns);
                 size += 24 * Points.Length;
                 size += 16 * OutlineColors.Length;
                 return size;

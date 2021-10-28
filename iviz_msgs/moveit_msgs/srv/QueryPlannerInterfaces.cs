@@ -66,7 +66,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public QueryPlannerInterfacesRequest(ref Buffer b)
+        internal QueryPlannerInterfacesRequest(ref Buffer b)
         {
         }
         
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public QueryPlannerInterfacesResponse(ref Buffer b)
+        internal QueryPlannerInterfacesResponse(ref Buffer b)
         {
             PlannerInterfaces = b.DeserializeArray<PlannerInterfaceDescription>();
             for (int i = 0; i < PlannerInterfaces.Length; i++)
@@ -159,17 +159,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in PlannerInterfaces)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(PlannerInterfaces);
     
         public override string ToString() => Extensions.ToString(this);
     }

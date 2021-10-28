@@ -81,7 +81,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public UpdateModuleRequest(ref Buffer b)
+        internal UpdateModuleRequest(ref Buffer b)
         {
             Id = b.DeserializeString();
             Fields = b.DeserializeStringArray();
@@ -124,13 +124,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                size += 4 * Fields.Length;
-                foreach (string s in Fields)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += BuiltIns.UTF8.GetByteCount(Config);
+                size += BuiltIns.GetStringSize(Id);
+                size += BuiltIns.GetArraySize(Fields);
+                size += BuiltIns.GetStringSize(Config);
                 return size;
             }
         }
@@ -158,7 +154,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public UpdateModuleResponse(ref Buffer b)
+        internal UpdateModuleResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -189,14 +185,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

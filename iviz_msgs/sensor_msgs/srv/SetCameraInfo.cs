@@ -81,7 +81,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetCameraInfoRequest(ref Buffer b)
+        internal SetCameraInfoRequest(ref Buffer b)
         {
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
@@ -111,14 +111,7 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += CameraInfo.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + CameraInfo.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -143,7 +136,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetCameraInfoResponse(ref Buffer b)
+        internal SetCameraInfoResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             StatusMessage = b.DeserializeString();
@@ -174,14 +167,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (StatusMessage is null) throw new System.NullReferenceException(nameof(StatusMessage));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(StatusMessage);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(StatusMessage);
     
         public override string ToString() => Extensions.ToString(this);
     }

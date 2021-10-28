@@ -23,7 +23,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public FibonacciResult(ref Buffer b)
+        internal FibonacciResult(ref Buffer b)
         {
             Sequence = b.DeserializeStructArray<int>();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             if (Sequence is null) throw new System.NullReferenceException(nameof(Sequence));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Sequence.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 4 * Sequence.Length;
     
         public string RosType => RosMessageType;
     

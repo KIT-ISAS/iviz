@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlaceLocation(ref Buffer b)
+        internal PlaceLocation(ref Buffer b)
         {
             Id = b.DeserializeString();
             PostPlacePosture = new TrajectoryMsgs.JointTrajectory(ref b);
@@ -102,16 +102,12 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(Id);
                 size += PostPlacePosture.RosMessageLength;
                 size += PlacePose.RosMessageLength;
                 size += PrePlaceApproach.RosMessageLength;
                 size += PostPlaceRetreat.RosMessageLength;
-                size += 4 * AllowedTouchObjects.Length;
-                foreach (string s in AllowedTouchObjects)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(AllowedTouchObjects);
                 return size;
             }
         }

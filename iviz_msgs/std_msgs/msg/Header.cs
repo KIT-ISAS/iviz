@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
@@ -32,11 +33,17 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Header(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Header(ref Buffer b)
         {
-            Seq = b.Deserialize<uint>();
-            Stamp = b.Deserialize<time>();
-            FrameId = b.DeserializeString();
+            Deserialize(ref b, out this);
+        }
+        
+        internal static void Deserialize(ref Buffer b, out Header h)
+        {
+            h.Seq = b.Deserialize<uint>();
+            h.Stamp = b.Deserialize<time>();
+            h.FrameId = b.DeserializeString();
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
@@ -74,14 +81,7 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        public readonly int RosMessageLength
-        {
-            get {
-                int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(FrameId ?? string.Empty);
-                return size;
-            }
-        }
+        public readonly int RosMessageLength => 16 + BuiltIns.GetStringSize(FrameId);
     
         public readonly string RosType => RosMessageType;
     

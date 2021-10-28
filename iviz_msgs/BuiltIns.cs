@@ -47,9 +47,9 @@ namespace Iviz.Msgs
 
     public static class BuiltIns
     {
-        public static UTF8Encoding UTF8 => Defaults.UTF8;
+        public static readonly UTF8Encoding UTF8 = Defaults.UTF8;
 
-        public static CultureInfo Culture => Defaults.Culture;
+        public static readonly CultureInfo Culture = Defaults.Culture;
         
         static string GetClassStringConstant(Type type, string name)
         {
@@ -220,53 +220,6 @@ namespace Iviz.Msgs
             return Type.GetType(guessName);
         }
 
-        public static void DisposeElements<T>(this UniqueRef<T> tt) where T : IDisposable
-        {
-            foreach (var t in tt)
-            {
-                t.Dispose();
-            }
-        }
-
-        public static void DisposeElements<T>(this SharedRef<T> tt) where T : IDisposable
-        {
-            foreach (var t in tt)
-            {
-                t.Dispose();
-            }
-        }
-
-        public static void DisposeElements<T>(this T[] tt) where T : IDisposable
-        {
-        }
-
-        public static UniqueRef<StringRef> AsRef(this string[] tt, UniqueRef<StringRef> _)
-        {
-            var uref = new UniqueRef<StringRef>(tt.Length);
-            for (int i = 0; i < tt.Length; i++)
-            {
-                uref[i] = tt[i];
-            }
-
-            return uref;
-        }
-
-        public static string[] AsRef(this string[] tt, string[] _)
-        {
-            return tt;
-        }
-
-        public static string[] AsArray(this UniqueRef<StringRef> tt)
-        {
-            var array = new string[tt.Length];
-            for (int i = 0; i < tt.Length; i++)
-            {
-                array[i] = tt[i];
-            }
-
-            return array;
-        }
-
         public static Rent<byte> AsRent(this string text)
         {
             var bytes = new Rent<byte>(UTF8.GetByteCount(text));
@@ -313,5 +266,45 @@ namespace Iviz.Msgs
         {
             return Buffer.Deserialize(generator, bytes, size, offset);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int GetArraySize<T>(T[]? array) where T : IMessage
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+            
+            int size = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += array[i].RosMessageLength;
+            }
+
+            return size;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int GetArraySize(string[]? array)
+        {
+            if (array == null)
+            {
+                return 0;
+            }
+            
+            int size = 4 * array.Length;
+            for (int i = 0; i < array.Length; i++)
+            {
+                size += UTF8.GetByteCount(array[i]);
+            }
+
+            return size;
+        }        
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int GetStringSize(string? s)
+        {
+            return s == null ? 0 : UTF8.GetByteCount(s);            
+        } 
     }
 }

@@ -40,7 +40,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TypeDef(ref Buffer b)
+        internal TypeDef(ref Buffer b)
         {
             Type = b.DeserializeString();
             Fieldnames = b.DeserializeStringArray();
@@ -111,33 +111,13 @@ namespace Iviz.Msgs.Rosapi
         {
             get {
                 int size = 28;
-                size += BuiltIns.UTF8.GetByteCount(Type);
-                size += 4 * Fieldnames.Length;
-                foreach (string s in Fieldnames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Fieldtypes.Length;
-                foreach (string s in Fieldtypes)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetStringSize(Type);
+                size += BuiltIns.GetArraySize(Fieldnames);
+                size += BuiltIns.GetArraySize(Fieldtypes);
                 size += 4 * Fieldarraylen.Length;
-                size += 4 * Examples.Length;
-                foreach (string s in Examples)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Constnames.Length;
-                foreach (string s in Constnames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Constvalues.Length;
-                foreach (string s in Constvalues)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(Examples);
+                size += BuiltIns.GetArraySize(Constnames);
+                size += BuiltIns.GetArraySize(Constvalues);
                 return size;
             }
         }

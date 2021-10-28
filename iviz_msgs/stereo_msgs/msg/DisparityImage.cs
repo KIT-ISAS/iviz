@@ -53,9 +53,9 @@ namespace Iviz.Msgs.StereoMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DisparityImage(ref Buffer b)
+        internal DisparityImage(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Image = new SensorMsgs.Image(ref b);
             F = b.Deserialize<float>();
             T = b.Deserialize<float>();
@@ -99,15 +99,7 @@ namespace Iviz.Msgs.StereoMsgs
             ValidWindow.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 37;
-                size += Header.RosMessageLength;
-                size += Image.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
     
         public string RosType => RosMessageType;
     

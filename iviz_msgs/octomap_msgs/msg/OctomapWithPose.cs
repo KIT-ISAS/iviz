@@ -29,10 +29,10 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public OctomapWithPose(ref Buffer b)
+        internal OctomapWithPose(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Origin = new GeometryMsgs.Pose(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Origin);
             Octomap = new OctomapMsgs.Octomap(ref b);
         }
         
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.OctomapMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Origin.RosSerialize(ref b);
+            b.Serialize(Origin);
             Octomap.RosSerialize(ref b);
         }
         
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.OctomapMsgs
             Octomap.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 56;
-                size += Header.RosMessageLength;
-                size += Octomap.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 56 + Header.RosMessageLength + Octomap.RosMessageLength;
     
         public string RosType => RosMessageType;
     

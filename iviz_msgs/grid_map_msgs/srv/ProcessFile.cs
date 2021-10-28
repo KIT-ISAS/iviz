@@ -79,7 +79,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ProcessFileRequest(ref Buffer b)
+        internal ProcessFileRequest(ref Buffer b)
         {
             FilePath = b.DeserializeString();
             TopicName = b.DeserializeString();
@@ -111,15 +111,7 @@ namespace Iviz.Msgs.GridMapMsgs
             if (TopicName is null) throw new System.NullReferenceException(nameof(TopicName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(FilePath);
-                size += BuiltIns.UTF8.GetByteCount(TopicName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(FilePath) + BuiltIns.GetStringSize(TopicName);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -142,7 +134,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ProcessFileResponse(ref Buffer b)
+        internal ProcessFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

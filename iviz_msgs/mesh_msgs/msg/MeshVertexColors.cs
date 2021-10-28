@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshVertexColors(ref Buffer b)
+        internal MeshVertexColors(ref Buffer b)
         {
             VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (VertexColors is null) throw new System.NullReferenceException(nameof(VertexColors));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 16 * VertexColors.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 16 * VertexColors.Length;
     
         public string RosType => RosMessageType;
     

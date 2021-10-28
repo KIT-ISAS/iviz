@@ -109,7 +109,7 @@ namespace Iviz.MsgsGen
 
             lines.Add("");
 
-            IEnumerable<string> deserializer = ClassInfo.CreateConstructors(variables, name, false, false);
+            IEnumerable<string> deserializer = ClassInfo.CreateConstructors(variables, name, false, false, false);
             foreach (string entry in deserializer)
             {
                 lines.Add($"    {entry}");

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Scene(ref Buffer b)
+        internal Scene(ref Buffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();
@@ -92,16 +92,10 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Filename);
-                foreach (var i in Includes)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Lights)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Filename);
+                size += BuiltIns.GetArraySize(Includes);
+                size += BuiltIns.GetArraySize(Lights);
                 return size;
             }
         }

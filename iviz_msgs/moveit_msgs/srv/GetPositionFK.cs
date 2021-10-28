@@ -84,9 +84,9 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPositionFKRequest(ref Buffer b)
+        internal GetPositionFKRequest(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             FkLinkNames = b.DeserializeStringArray();
             RobotState = new RobotState(ref b);
         }
@@ -128,11 +128,7 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                size += 4 * FkLinkNames.Length;
-                foreach (string s in FkLinkNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(FkLinkNames);
                 size += RobotState.RosMessageLength;
                 return size;
             }
@@ -167,7 +163,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPositionFKResponse(ref Buffer b)
+        internal GetPositionFKResponse(ref Buffer b)
         {
             PoseStamped = b.DeserializeArray<GeometryMsgs.PoseStamped>();
             for (int i = 0; i < PoseStamped.Length; i++)
@@ -216,22 +212,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                foreach (var i in PoseStamped)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += 4 * FkLinkNames.Length;
-                foreach (string s in FkLinkNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetArraySize(PoseStamped) + BuiltIns.GetArraySize(FkLinkNames);
     
         public override string ToString() => Extensions.ToString(this);
     }

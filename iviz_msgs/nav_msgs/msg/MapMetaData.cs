@@ -36,13 +36,13 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MapMetaData(ref Buffer b)
+        internal MapMetaData(ref Buffer b)
         {
             MapLoadTime = b.Deserialize<time>();
             Resolution = b.Deserialize<float>();
             Width = b.Deserialize<uint>();
             Height = b.Deserialize<uint>();
-            Origin = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Origin);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.NavMsgs
             b.Serialize(Resolution);
             b.Serialize(Width);
             b.Serialize(Height);
-            Origin.RosSerialize(ref b);
+            b.Serialize(Origin);
         }
         
         public void Dispose()

@@ -75,7 +75,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetGridMapRequest(ref Buffer b)
+        internal SetGridMapRequest(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
@@ -105,14 +105,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Map.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Map.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -127,7 +120,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetGridMapResponse(ref Buffer b)
+        internal SetGridMapResponse(ref Buffer b)
         {
         }
         

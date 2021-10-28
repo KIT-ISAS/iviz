@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ConstraintEvalResult(ref Buffer b)
+        internal ConstraintEvalResult(ref Buffer b)
         {
             Result = b.Deserialize<bool>();
             Distance = b.Deserialize<double>();

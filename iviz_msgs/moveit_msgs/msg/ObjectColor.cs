@@ -26,10 +26,10 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectColor(ref Buffer b)
+        internal ObjectColor(ref Buffer b)
         {
             Id = b.DeserializeString();
-            Color = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out Color);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Id);
-            Color.RosSerialize(ref b);
+            b.Serialize(Color);
         }
         
         public void Dispose()
@@ -57,14 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 20;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                return size;
-            }
-        }
+        public int RosMessageLength => 20 + BuiltIns.GetStringSize(Id);
     
         public string RosType => RosMessageType;
     

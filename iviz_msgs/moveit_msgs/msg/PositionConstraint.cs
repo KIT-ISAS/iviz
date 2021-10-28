@@ -36,11 +36,11 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PositionConstraint(ref Buffer b)
+        internal PositionConstraint(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             LinkName = b.DeserializeString();
-            TargetPointOffset = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out TargetPointOffset);
             ConstraintRegion = new BoundingVolume(ref b);
             Weight = b.Deserialize<double>();
         }
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(LinkName);
-            TargetPointOffset.RosSerialize(ref b);
+            b.Serialize(TargetPointOffset);
             ConstraintRegion.RosSerialize(ref b);
             b.Serialize(Weight);
         }
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 36;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(LinkName);
+                size += BuiltIns.GetStringSize(LinkName);
                 size += ConstraintRegion.RosMessageLength;
                 return size;
             }

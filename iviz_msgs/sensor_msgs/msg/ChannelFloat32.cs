@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ChannelFloat32(ref Buffer b)
+        internal ChannelFloat32(ref Buffer b)
         {
             Name = b.DeserializeString();
             Values = b.DeserializeStructArray<float>();
@@ -76,15 +76,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Values is null) throw new System.NullReferenceException(nameof(Values));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += 4 * Values.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + 4 * Values.Length;
     
         public string RosType => RosMessageType;
     

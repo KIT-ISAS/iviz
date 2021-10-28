@@ -36,21 +36,21 @@ namespace Iviz.MsgsGen
 
         static readonly Dictionary<string, int> BuiltInsSizes = new Dictionary<string, int>
         {
-            {"bool", 1},
-            {"int8", 1},
-            {"uint8", 1},
-            {"int16", 2},
-            {"uint16", 2},
-            {"int32", 4},
-            {"uint32", 4},
-            {"int64", 8},
-            {"uint64", 8},
-            {"float32", 4},
-            {"float64", 8},
-            {"time", 8},
-            {"duration", 8},
-            {"char", 1},
-            {"byte", 1}
+            { "bool", 1 },
+            { "int8", 1 },
+            { "uint8", 1 },
+            { "int16", 2 },
+            { "uint16", 2 },
+            { "int32", 4 },
+            { "uint32", 4 },
+            { "int64", 8 },
+            { "uint64", 8 },
+            { "float32", 4 },
+            { "float64", 8 },
+            { "time", 8 },
+            { "duration", 8 },
+            { "char", 1 },
+            { "byte", 1 }
         };
 
         static readonly HashSet<string> BuiltInTypes = new HashSet<string>
@@ -193,7 +193,7 @@ namespace Iviz.MsgsGen
             Name = messageName;
             fullMessageText = messageDefinition.Replace("\r\n", "\n");
 
-            var lines = fullMessageText.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var lines = fullMessageText.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             elements = MsgParser.ParseFile(lines, Name).ToArray();
             Elements = new ReadOnlyCollection<IElement>(elements);
             variables = elements.OfType<VariableElement>().ToArray();
@@ -231,8 +231,8 @@ namespace Iviz.MsgsGen
 
                 package = messageName.Substring(0, lastSlash);
                 messageName = messageName.Substring(lastSlash + 1);
-            }        
-            
+            }
+
             if (messageName == null)
             {
                 throw new ArgumentNullException(nameof(messageName));
@@ -373,7 +373,9 @@ namespace Iviz.MsgsGen
                     }
                     else if (variable.IsDynamicSizeArray)
                     {
-                        fieldsWithSize.Add($"size += {size} * {variable.CsFieldName}.Length;");
+                        fieldsWithSize.Add(size == 1 
+                            ? $"{variable.CsFieldName}.Length"
+                            : $"{size} * {variable.CsFieldName}.Length");
                         fieldSize += 4;
                     }
                     else
@@ -392,26 +394,15 @@ namespace Iviz.MsgsGen
                         else if (variable.CsClassName == "string")
                         {
                             fieldSize += 4;
-                            if (UseShared)
-                            {
-                                fieldsWithSize.Add(forceStruct
-                                    ? $"size += {variable.CsFieldName}?.Length ?? 0;"
-                                    : $"size += {variable.CsFieldName}.Length;");
-                            }
-                            else
-                            {
-                                fieldsWithSize.Add(forceStruct
-                                    ? $"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName} ?? string.Empty);"
-                                    : $"size += BuiltIns.UTF8.GetByteCount({variable.CsFieldName});");
-                            }
+                            fieldsWithSize.Add($"BuiltIns.GetStringSize({variable.CsFieldName})");
                         }
                         else if (variable.ClassIsBlittable)
                         {
-                            fieldsWithSize.Add($"size += {variable.CsClassName}.RosFixedMessageLength;");
+                            fieldsWithSize.Add($"{variable.CsClassName}.RosFixedMessageLength");
                         }
                         else
                         {
-                            fieldsWithSize.Add($"size += {variable.CsFieldName}.RosMessageLength;");
+                            fieldsWithSize.Add($"{variable.CsFieldName}.RosMessageLength");
                         }
                     }
                     else
@@ -423,79 +414,50 @@ namespace Iviz.MsgsGen
 
                         if (variable.ClassInfo != null && variable.ClassInfo.FixedSize != UnknownSizeAtCompileTime)
                         {
-                            fieldsWithSize.Add(
-                                $"size += {variable.ClassInfo.FixedSize} * {variable.CsFieldName}.Length;");
+                            fieldsWithSize.Add($"{variable.ClassInfo.FixedSize} * {variable.CsFieldName}.Length");
                         }
                         else if (variable.ClassIsBlittable)
                         {
                             fieldsWithSize.Add(
-                                $"size += {variable.CsClassName}.RosFixedMessageLength * {variable.CsFieldName}.Length;");
+                                $" {variable.CsClassName}.RosFixedMessageLength * {variable.CsFieldName}.Length");
                         }
                         else
                         {
-                            string ind;
-                            if (forceStruct)
-                            {
-                                fieldsWithSize.Add($"if ({variable.CsFieldName} != null)");
-                                fieldsWithSize.Add($"{{");
-                                ind = "    ";
-                            }
-                            else
-                            {
-                                ind = "";
-                            }
-
-                            if (variable.CsClassName == "string")
-                            {
-                                if (UseShared)
-                                {
-                                    fieldsWithSize.Add($"{ind}size += 4 * {variable.CsFieldName}.Length;");
-                                    fieldsWithSize.Add($"{ind}foreach (StringRef s in {variable.CsFieldName})");
-                                    fieldsWithSize.Add($"{ind}{{");
-                                    fieldsWithSize.Add($"{ind}    size += s.Length;");
-                                    fieldsWithSize.Add($"{ind}}}");
-                                }
-                                else
-                                {
-                                    fieldsWithSize.Add($"{ind}size += 4 * {variable.CsFieldName}.Length;");
-                                    fieldsWithSize.Add($"{ind}foreach (string s in {variable.CsFieldName})");
-                                    fieldsWithSize.Add($"{ind}{{");
-                                    fieldsWithSize.Add($"{ind}    size += BuiltIns.UTF8.GetByteCount(s);");
-                                    fieldsWithSize.Add($"{ind}}}");
-                                }
-                            }
-                            else
-                            {
-                                fieldsWithSize.Add($"{ind}foreach (var i in {variable.CsFieldName})");
-                                fieldsWithSize.Add($"{ind}{{");
-                                fieldsWithSize.Add($"{ind}    size += i.RosMessageLength;");
-                                fieldsWithSize.Add($"{ind}}}");
-                            }
-
-                            if (forceStruct)
-                            {
-                                fieldsWithSize.Add($"}}");
-                            }
+                            fieldsWithSize.Add($"BuiltIns.GetArraySize({variable.CsFieldName})");
                         }
                     }
                 }
             }
 
-            var lines = new List<string>();
-            lines.Add($"public {readOnlyId}int RosMessageLength");
-            lines.Add("{");
-            lines.Add("    get {");
-            lines.Add($"        int size = {fieldSize};");
-            foreach (string entry in fieldsWithSize)
+            switch (fieldsWithSize.Count)
             {
-                lines.Add($"        {entry}");
+                case 0:
+                    return new[]
+                    {
+                        $"public {readOnlyId}int RosMessageLength => {fieldSize};"
+                    };
+                case 1:
+                    return new[]
+                    {
+                        $"public {readOnlyId}int RosMessageLength => {fieldSize} + {fieldsWithSize[0]};"
+                    };
+                case 2:
+                    return new[]
+                    {
+                        $"public {readOnlyId}int RosMessageLength => {fieldSize} + {fieldsWithSize[0]} + {fieldsWithSize[1]};"
+                    };
+                default:
+                    var lines = new List<string>();
+                    lines.Add($"public {readOnlyId}int RosMessageLength");
+                    lines.Add("{");
+                    lines.Add("    get {");
+                    lines.Add($"        int size = {fieldSize};");
+                    lines.AddRange(fieldsWithSize.Select(entry => $"        size += {entry};"));
+                    lines.Add("        return size;");
+                    lines.Add("    }");
+                    lines.Add("}");
+                    return lines;
             }
-
-            lines.Add("        return size;");
-            lines.Add("    }");
-            lines.Add("}");
-
-            return lines;
         }
 
         static string ParamToArg(VariableElement v)
@@ -523,7 +485,7 @@ namespace Iviz.MsgsGen
         }
 
         internal static IEnumerable<string> CreateConstructors(IReadOnlyCollection<VariableElement> variables,
-            string name, bool forceStruct, bool structIsBlittable)
+            string name, bool forceStruct, bool structIsBlittable, bool isAction)
         {
             var lines = new List<string>();
 
@@ -637,7 +599,12 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("/// <summary> Constructor with buffer. </summary>");
-            lines.Add($"public {name}(ref Buffer b)");
+            if (forceStruct)
+            {
+                lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
+            }
+
+            lines.Add($"internal {name}(ref Buffer b)");
             lines.Add("{");
             if (structIsBlittable)
             {
@@ -648,7 +615,17 @@ namespace Iviz.MsgsGen
             }
             else
             {
+                if (forceStruct)
+                {
+                    lines.Add("    Deserialize(ref b, out this);");
+                    lines.Add("}");
+                    lines.Add("");
+                    lines.Add($"internal static void Deserialize(ref Buffer b, out {name} h)");
+                    lines.Add("{");
+                }
+
                 const string suffix = UseShared ? "S" : "";
+                string prefix = forceStruct ? "h." : "";
                 foreach (VariableElement variable in variables)
                 {
                     if (BuiltInTypes.Contains(variable.RosClassName))
@@ -657,19 +634,19 @@ namespace Iviz.MsgsGen
                         {
                             case VariableElement.NotAnArray:
                                 lines.Add(variable.CsClassName == "string"
-                                    ? $"    {variable.CsFieldName} = b.DeserializeString{suffix}();"
-                                    : $"    {variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
+                                    ? $"    {prefix}{variable.CsFieldName} = b.DeserializeString{suffix}();"
+                                    : $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
                                 break;
                             case VariableElement.DynamicSizeArray:
                                 lines.Add(variable.CsClassName == "string"
-                                    ? $"    {variable.CsFieldName} = b.DeserializeStringArray{suffix}();"
-                                    : $"    {variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>();");
+                                    ? $"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray{suffix}();"
+                                    : $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>();");
                                 break;
                             default:
                                 lines.Add(
                                     variable.CsClassName == "string"
-                                        ? $"    {variable.CsFieldName} = b.DeserializeStringArray{suffix}({variable.ArraySize});"
-                                        : $"    {variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
+                                        ? $"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray{suffix}({variable.ArraySize});"
+                                        : $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
                                 break;
                         }
                     }
@@ -680,24 +657,38 @@ namespace Iviz.MsgsGen
                             case VariableElement.NotAnArray:
                                 if (variable.ClassInfo != null && variable.ClassInfo.FixedSize == 0)
                                 {
-                                    lines.Add($"    {variable.CsFieldName} = {variable.CsClassName}.Singleton;");
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = {variable.CsClassName}.Singleton;");
+                                }
+                                else if (variable.ClassIsBlittable)
+                                {
+                                    lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
+                                }
+                                else if (variable.ClassIsStruct && !isAction)
+                                {
+                                    lines.Add(
+                                        $"    {variable.CsClassName}.Deserialize(ref b, out {prefix}{variable.CsFieldName});");
                                 }
                                 else
                                 {
-                                    lines.Add($"    {variable.CsFieldName} = new {variable.CsClassName}(ref b);");
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = new {variable.CsClassName}(ref b);");
                                 }
 
                                 break;
                             case VariableElement.DynamicSizeArray when variable.ClassIsBlittable:
                                 lines.Add(
-                                    $"    {variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>();");
+                                    $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>();");
                                 break;
                             case VariableElement.DynamicSizeArray:
                                 lines.Add(
-                                    $"    {variable.CsFieldName} = b.DeserializeArray{suffix}<{variable.CsClassName}>();");
+                                    $"    {prefix}{variable.CsFieldName} = b.DeserializeArray{suffix}<{variable.CsClassName}>();");
                                 lines.Add($"    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                                 lines.Add("    {");
-                                lines.Add($"        {variable.CsFieldName}[i] = new {variable.CsClassName}(ref b);");
+                                lines.Add(variable.ClassIsStruct && !isAction
+                                    ? $"        {variable.CsClassName}.Deserialize(ref b, out {prefix}{variable.CsFieldName}[i]);"
+                                    : $"        {prefix}{variable.CsFieldName}[i] = new {variable.CsClassName}(ref b);");
+
                                 lines.Add("    }");
                                 break;
                             default:
@@ -705,16 +696,17 @@ namespace Iviz.MsgsGen
                                 if (variable.ClassIsBlittable)
                                 {
                                     lines.Add(
-                                        $"    {variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
+                                        $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
                                 }
                                 else
                                 {
                                     lines.Add(
-                                        $"    {variable.CsFieldName} = b.DeserializeArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
+                                        $"    {prefix}{variable.CsFieldName} = b.DeserializeArray{suffix}<{variable.CsClassName}>({variable.ArraySize});");
                                     lines.Add($"    for (int i = 0; i < {variable.ArraySize}; i++)");
                                     lines.Add("    {");
-                                    lines.Add(
-                                        $"        {variable.CsFieldName}[i] = new {variable.CsClassName}(ref b);");
+                                    lines.Add(variable.ClassIsStruct && !isAction
+                                        ? $"        {variable.CsClassName}.Deserialize(ref b, out {prefix}{variable.CsFieldName}[i]);"
+                                        : $"        {prefix}{variable.CsFieldName}[i] = new {variable.CsClassName}(ref b);");
                                     lines.Add("    }");
                                 }
 
@@ -868,7 +860,9 @@ namespace Iviz.MsgsGen
                     {
                         if (!variable.IsArray)
                         {
-                            lines.Add($"    {variable.CsFieldName}.RosSerialize(ref b);");
+                            lines.Add(variable.ClassIsBlittable
+                                ? $"    b.Serialize({variable.CsFieldName});"
+                                : $"    {variable.CsFieldName}.RosSerialize(ref b);");
                         }
                         else
                         {
@@ -1006,6 +1000,7 @@ namespace Iviz.MsgsGen
             if (ForceStruct)
             {
                 str.AppendLine("using System.Runtime.InteropServices;");
+                str.AppendLine("using System.Runtime.CompilerServices;");
             }
 
             str.AppendLine("using System.Runtime.Serialization;");
@@ -1113,7 +1108,8 @@ namespace Iviz.MsgsGen
                 lines.Add("");
             }
 
-            var constructors = CreateConstructors(variables, Name, ForceStruct, IsBlittable);
+            var constructors = CreateConstructors(variables, Name, ForceStruct, IsBlittable,
+                actionMessageType != ActionMessageType.None);
             foreach (string entry in constructors)
             {
                 lines.Add($"    {entry}");
@@ -1164,7 +1160,7 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("    public override string ToString() => Extensions.ToString(this);");
-            
+
             if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
             {
                 lines.Add("    /// Custom iviz code");

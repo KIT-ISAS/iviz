@@ -30,7 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Node(ref Buffer b)
+        internal Node(ref Buffer b)
         {
             Name = b.DeserializeString();
             Parent = b.Deserialize<int>();
@@ -68,15 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Meshes is null) throw new System.NullReferenceException(nameof(Meshes));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 76;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += 4 * Meshes.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 76 + BuiltIns.GetStringSize(Name) + 4 * Meshes.Length;
     
         public string RosType => RosMessageType;
     

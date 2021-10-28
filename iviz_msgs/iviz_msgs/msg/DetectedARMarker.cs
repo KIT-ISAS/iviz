@@ -42,17 +42,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DetectedARMarker(ref Buffer b)
+        internal DetectedARMarker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Type = b.Deserialize<byte>();
             Code = b.DeserializeString();
             Corners = b.DeserializeStructArray<GeometryMsgs.Vector3>(4);
             CameraIntrinsic = b.DeserializeStructArray<double>(9);
-            CameraPose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out CameraPose);
             HasExtrinsicPose = b.Deserialize<bool>();
             MarkerSizeInMm = b.Deserialize<double>();
-            PoseRelativeToCamera = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out PoseRelativeToCamera);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -72,10 +72,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Code);
             b.SerializeStructArray(Corners, 4);
             b.SerializeStructArray(CameraIntrinsic, 9);
-            CameraPose.RosSerialize(ref b);
+            b.Serialize(CameraPose);
             b.Serialize(HasExtrinsicPose);
             b.Serialize(MarkerSizeInMm);
-            PoseRelativeToCamera.RosSerialize(ref b);
+            b.Serialize(PoseRelativeToCamera);
         }
         
         public void Dispose()
@@ -96,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 198;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Code);
+                size += BuiltIns.GetStringSize(Code);
                 size += 24 * Corners.Length;
                 return size;
             }

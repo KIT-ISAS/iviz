@@ -89,7 +89,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AddDiagnosticsRequest(ref Buffer b)
+        internal AddDiagnosticsRequest(ref Buffer b)
         {
             LoadNamespace = b.DeserializeString();
         }
@@ -118,14 +118,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (LoadNamespace is null) throw new System.NullReferenceException(nameof(LoadNamespace));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(LoadNamespace);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(LoadNamespace);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -155,7 +148,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AddDiagnosticsResponse(ref Buffer b)
+        internal AddDiagnosticsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -186,14 +179,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

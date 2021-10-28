@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Grasp(ref Buffer b)
+        internal Grasp(ref Buffer b)
         {
             Id = b.DeserializeString();
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
@@ -143,18 +143,14 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 20;
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(Id);
                 size += PreGraspPosture.RosMessageLength;
                 size += GraspPosture.RosMessageLength;
                 size += GraspPose.RosMessageLength;
                 size += PreGraspApproach.RosMessageLength;
                 size += PostGraspRetreat.RosMessageLength;
                 size += PostPlaceRetreat.RosMessageLength;
-                size += 4 * AllowedTouchObjects.Length;
-                foreach (string s in AllowedTouchObjects)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(AllowedTouchObjects);
                 return size;
             }
         }

@@ -26,7 +26,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MultiArrayDimension(ref Buffer b)
+        internal MultiArrayDimension(ref Buffer b)
         {
             Label = b.DeserializeString();
             Size = b.Deserialize<uint>();
@@ -59,14 +59,7 @@ namespace Iviz.Msgs.StdMsgs
             if (Label is null) throw new System.NullReferenceException(nameof(Label));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Label);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Label);
     
         public string RosType => RosMessageType;
     

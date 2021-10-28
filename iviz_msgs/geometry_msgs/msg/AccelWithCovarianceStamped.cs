@@ -25,9 +25,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AccelWithCovarianceStamped(ref Buffer b)
+        internal AccelWithCovarianceStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Accel = new AccelWithCovariance(ref b);
         }
         
@@ -57,14 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Accel.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 336;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 336 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

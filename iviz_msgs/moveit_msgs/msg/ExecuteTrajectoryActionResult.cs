@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteTrajectoryActionResult(ref Buffer b)
+        internal ExecuteTrajectoryActionResult(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Result.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                size += Status.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + Status.RosMessageLength;
     
         public string RosType => RosMessageType;
     

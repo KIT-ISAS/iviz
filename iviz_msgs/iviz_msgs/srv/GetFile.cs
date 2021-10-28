@@ -75,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetFileRequest(ref Buffer b)
+        internal GetFileRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uri);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetFileResponse(ref Buffer b)
+        internal GetFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Bytes = b.DeserializeStructArray<byte>();
@@ -173,15 +166,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 9;
-                size += 1 * Bytes.Length;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 9 + Bytes.Length + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

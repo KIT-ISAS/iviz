@@ -38,7 +38,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PointField(ref Buffer b)
+        internal PointField(ref Buffer b)
         {
             Name = b.DeserializeString();
             Offset = b.Deserialize<uint>();
@@ -73,14 +73,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 13;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                return size;
-            }
-        }
+        public int RosMessageLength => 13 + BuiltIns.GetStringSize(Name);
     
         public string RosType => RosMessageType;
     

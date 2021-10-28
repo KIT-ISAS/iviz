@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MotionSequenceRequest(ref Buffer b)
+        internal MotionSequenceRequest(ref Buffer b)
         {
             Items = b.DeserializeArray<MotionSequenceItem>();
             for (int i = 0; i < Items.Length; i++)
@@ -62,17 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Items)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Items);
     
         public string RosType => RosMessageType;
     

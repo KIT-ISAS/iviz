@@ -74,7 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LaunchDialogRequest(ref Buffer b)
+        internal LaunchDialogRequest(ref Buffer b)
         {
             Dialog = new IvizMsgs.Dialog(ref b);
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             Dialog.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Dialog.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Dialog.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LaunchDialogResponse(ref Buffer b)
+        internal LaunchDialogResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -174,15 +167,7 @@ namespace Iviz.Msgs.IvizMsgs
             Feedback.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                size += Feedback.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message) + Feedback.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

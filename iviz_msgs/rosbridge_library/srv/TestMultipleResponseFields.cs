@@ -66,7 +66,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestMultipleResponseFieldsRequest(ref Buffer b)
+        internal TestMultipleResponseFieldsRequest(ref Buffer b)
         {
         }
         
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestMultipleResponseFieldsResponse(ref Buffer b)
+        internal TestMultipleResponseFieldsResponse(ref Buffer b)
         {
             @int = b.Deserialize<int>();
             @float = b.Deserialize<float>();
@@ -161,14 +161,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (@string is null) throw new System.NullReferenceException(nameof(@string));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 13;
-                size += BuiltIns.UTF8.GetByteCount(@string);
-                return size;
-            }
-        }
+        public int RosMessageLength => 13 + BuiltIns.GetStringSize(@string);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -42,7 +42,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestRequestGoal(ref Buffer b)
+        internal TestRequestGoal(ref Buffer b)
         {
             TerminateStatus = b.Deserialize<int>();
             IgnoreCancel = b.Deserialize<bool>();
@@ -85,14 +85,7 @@ namespace Iviz.Msgs.Actionlib
             if (ResultText is null) throw new System.NullReferenceException(nameof(ResultText));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 38;
-                size += BuiltIns.UTF8.GetByteCount(ResultText);
-                return size;
-            }
-        }
+        public int RosMessageLength => 38 + BuiltIns.GetStringSize(ResultText);
     
         public string RosType => RosMessageType;
     

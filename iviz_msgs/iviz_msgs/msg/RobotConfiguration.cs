@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RobotConfiguration(ref Buffer b)
+        internal RobotConfiguration(ref Buffer b)
         {
             SourceParameter = b.DeserializeString();
             SavedRobotName = b.DeserializeString();
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
             FrameSuffix = b.DeserializeString();
             AttachedToTf = b.Deserialize<bool>();
             RenderAsOcclusionOnly = b.Deserialize<bool>();
-            Tint = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out Tint);
             Metallic = b.Deserialize<float>();
             Smoothness = b.Deserialize<float>();
             Id = b.DeserializeString();
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(FrameSuffix);
             b.Serialize(AttachedToTf);
             b.Serialize(RenderAsOcclusionOnly);
-            Tint.RosSerialize(ref b);
+            b.Serialize(Tint);
             b.Serialize(Metallic);
             b.Serialize(Smoothness);
             b.Serialize(Id);
@@ -103,11 +103,11 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 47;
-                size += BuiltIns.UTF8.GetByteCount(SourceParameter);
-                size += BuiltIns.UTF8.GetByteCount(SavedRobotName);
-                size += BuiltIns.UTF8.GetByteCount(FramePrefix);
-                size += BuiltIns.UTF8.GetByteCount(FrameSuffix);
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(SourceParameter);
+                size += BuiltIns.GetStringSize(SavedRobotName);
+                size += BuiltIns.GetStringSize(FramePrefix);
+                size += BuiltIns.GetStringSize(FrameSuffix);
+                size += BuiltIns.GetStringSize(Id);
                 return size;
             }
         }

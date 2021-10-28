@@ -48,7 +48,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TriangleMesh(ref Buffer b)
+        internal TriangleMesh(ref Buffer b)
         {
             Triangles = b.DeserializeArray<TriangleIndices>();
             for (int i = 0; i < Triangles.Length; i++)
@@ -148,14 +148,8 @@ namespace Iviz.Msgs.MeshMsgs
                 size += 16 * TriangleColors.Length;
                 size += 24 * VertexTextureCoords.Length;
                 size += 21 * FaceMaterials.Length;
-                foreach (var i in Textures)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Clusters)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Textures);
+                size += BuiltIns.GetArraySize(Clusters);
                 return size;
             }
         }

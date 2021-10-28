@@ -33,7 +33,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ParamDescription(ref Buffer b)
+        internal ParamDescription(ref Buffer b)
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();
@@ -77,10 +77,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             get {
                 int size = 20;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Type);
-                size += BuiltIns.UTF8.GetByteCount(Description);
-                size += BuiltIns.UTF8.GetByteCount(EditMethod);
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Type);
+                size += BuiltIns.GetStringSize(Description);
+                size += BuiltIns.GetStringSize(EditMethod);
                 return size;
             }
         }

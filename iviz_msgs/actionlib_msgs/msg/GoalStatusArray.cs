@@ -26,9 +26,9 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GoalStatusArray(ref Buffer b)
+        internal GoalStatusArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             StatusList = b.DeserializeArray<GoalStatus>();
             for (int i = 0; i < StatusList.Length; i++)
             {
@@ -66,18 +66,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                foreach (var i in StatusList)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(StatusList);
     
         public string RosType => RosMessageType;
     

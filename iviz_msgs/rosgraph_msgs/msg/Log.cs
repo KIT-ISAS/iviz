@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
@@ -43,16 +44,22 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Log(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Log(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Level = b.Deserialize<byte>();
-            Name = b.DeserializeString();
-            Msg = b.DeserializeString();
-            File = b.DeserializeString();
-            Function = b.DeserializeString();
-            Line = b.Deserialize<uint>();
-            Topics = b.SkipStringArray();
+            Deserialize(ref b, out this);
+        }
+        
+        internal static void Deserialize(ref Buffer b, out Log h)
+        {
+            StdMsgs.Header.Deserialize(ref b, out h.Header);
+            h.Level = b.Deserialize<byte>();
+            h.Name = b.DeserializeString();
+            h.Msg = b.DeserializeString();
+            h.File = b.DeserializeString();
+            h.Function = b.DeserializeString();
+            h.Line = b.Deserialize<uint>();
+            h.Topics = b.SkipStringArray();
         }
         
         public readonly ISerializable RosDeserialize(ref Buffer b)
@@ -107,18 +114,11 @@ namespace Iviz.Msgs.RosgraphMsgs
             get {
                 int size = 25;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Name ?? string.Empty);
-                size += BuiltIns.UTF8.GetByteCount(Msg ?? string.Empty);
-                size += BuiltIns.UTF8.GetByteCount(File ?? string.Empty);
-                size += BuiltIns.UTF8.GetByteCount(Function ?? string.Empty);
-                if (Topics != null)
-                {
-                    size += 4 * Topics.Length;
-                    foreach (string s in Topics)
-                    {
-                        size += BuiltIns.UTF8.GetByteCount(s);
-                    }
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Msg);
+                size += BuiltIns.GetStringSize(File);
+                size += BuiltIns.GetStringSize(Function);
+                size += BuiltIns.GetArraySize(Topics);
                 return size;
             }
         }

@@ -77,7 +77,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetParamRequest(ref Buffer b)
+        internal SetParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Value = b.DeserializeString();
@@ -109,15 +109,7 @@ namespace Iviz.Msgs.Rosapi
             if (Value is null) throw new System.NullReferenceException(nameof(Value));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Value);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Value);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -132,7 +124,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetParamResponse(ref Buffer b)
+        internal SetParamResponse(ref Buffer b)
         {
         }
         

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MotionSequenceItem(ref Buffer b)
+        internal MotionSequenceItem(ref Buffer b)
         {
             Req = new MotionPlanRequest(ref b);
             BlendRadius = b.Deserialize<double>();
@@ -60,14 +60,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Req.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += Req.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + Req.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RenameRobotStateInWarehouseRequest(ref Buffer b)
+        internal RenameRobotStateInWarehouseRequest(ref Buffer b)
         {
             OldName = b.DeserializeString();
             NewName = b.DeserializeString();
@@ -119,9 +119,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(OldName);
-                size += BuiltIns.UTF8.GetByteCount(NewName);
-                size += BuiltIns.UTF8.GetByteCount(Robot);
+                size += BuiltIns.GetStringSize(OldName);
+                size += BuiltIns.GetStringSize(NewName);
+                size += BuiltIns.GetStringSize(Robot);
                 return size;
             }
         }
@@ -139,7 +139,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RenameRobotStateInWarehouseResponse(ref Buffer b)
+        internal RenameRobotStateInWarehouseResponse(ref Buffer b)
         {
         }
         

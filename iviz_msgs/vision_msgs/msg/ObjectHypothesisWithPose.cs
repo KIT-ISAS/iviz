@@ -41,7 +41,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectHypothesisWithPose(ref Buffer b)
+        internal ObjectHypothesisWithPose(ref Buffer b)
         {
             Id = b.DeserializeString();
             Score = b.Deserialize<double>();
@@ -76,14 +76,7 @@ namespace Iviz.Msgs.VisionMsgs
             Pose.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 356;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                return size;
-            }
-        }
+        public int RosMessageLength => 356 + BuiltIns.GetStringSize(Id);
     
         public string RosType => RosMessageType;
     

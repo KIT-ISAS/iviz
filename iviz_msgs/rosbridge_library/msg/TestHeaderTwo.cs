@@ -21,9 +21,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestHeaderTwo(ref Buffer b)
+        internal TestHeaderTwo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -49,14 +49,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

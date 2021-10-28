@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshVertexCosts(ref Buffer b)
+        internal MeshVertexCosts(ref Buffer b)
         {
             Costs = b.DeserializeStructArray<float>();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Costs is null) throw new System.NullReferenceException(nameof(Costs));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Costs.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 4 * Costs.Length;
     
         public string RosType => RosMessageType;
     

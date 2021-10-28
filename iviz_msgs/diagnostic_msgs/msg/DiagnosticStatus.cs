@@ -40,7 +40,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DiagnosticStatus(ref Buffer b)
+        internal DiagnosticStatus(ref Buffer b)
         {
             Level = b.Deserialize<byte>();
             Name = b.DeserializeString();
@@ -93,13 +93,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             get {
                 int size = 17;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                size += BuiltIns.UTF8.GetByteCount(HardwareId);
-                foreach (var i in Values)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Message);
+                size += BuiltIns.GetStringSize(HardwareId);
+                size += BuiltIns.GetArraySize(Values);
                 return size;
             }
         }

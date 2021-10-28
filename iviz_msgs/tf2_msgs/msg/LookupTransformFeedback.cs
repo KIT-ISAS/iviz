@@ -13,7 +13,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LookupTransformFeedback(ref Buffer b)
+        internal LookupTransformFeedback(ref Buffer b)
         {
         }
         

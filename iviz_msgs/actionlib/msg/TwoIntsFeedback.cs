@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TwoIntsFeedback(ref Buffer b)
+        internal TwoIntsFeedback(ref Buffer b)
         {
         }
         

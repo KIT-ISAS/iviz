@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Float64(ref Buffer b)
+        internal Float64(ref Buffer b)
         {
             Data = b.Deserialize<double>();
         }

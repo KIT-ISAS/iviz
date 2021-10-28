@@ -76,7 +76,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPositionIKRequest(ref Buffer b)
+        internal GetPositionIKRequest(ref Buffer b)
         {
             IkRequest = new PositionIKRequest(ref b);
         }
@@ -106,14 +106,7 @@ namespace Iviz.Msgs.MoveitMsgs
             IkRequest.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += IkRequest.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + IkRequest.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -141,7 +134,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetPositionIKResponse(ref Buffer b)
+        internal GetPositionIKResponse(ref Buffer b)
         {
             Solution = new RobotState(ref b);
             ErrorCode = new MoveItErrorCodes(ref b);
@@ -175,14 +168,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Solution.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Solution.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

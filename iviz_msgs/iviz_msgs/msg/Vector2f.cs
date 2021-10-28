@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
@@ -20,7 +21,8 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Vector2f(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Vector2f(ref Buffer b)
         {
             b.Deserialize(out this);
         }

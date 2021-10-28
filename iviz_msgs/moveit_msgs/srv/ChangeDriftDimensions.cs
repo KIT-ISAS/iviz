@@ -92,7 +92,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ChangeDriftDimensionsRequest(ref Buffer b)
+        internal ChangeDriftDimensionsRequest(ref Buffer b)
         {
             DriftXTranslation = b.Deserialize<bool>();
             DriftYTranslation = b.Deserialize<bool>();
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.MoveitMsgs
             DriftXRotation = b.Deserialize<bool>();
             DriftYRotation = b.Deserialize<bool>();
             DriftZRotation = b.Deserialize<bool>();
-            TransformJogFrameToDriftFrame = new GeometryMsgs.Transform(ref b);
+            b.Deserialize(out TransformJogFrameToDriftFrame);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(DriftXRotation);
             b.Serialize(DriftYRotation);
             b.Serialize(DriftZRotation);
-            TransformJogFrameToDriftFrame.RosSerialize(ref b);
+            b.Serialize(TransformJogFrameToDriftFrame);
         }
         
         public void Dispose()
@@ -157,7 +157,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ChangeDriftDimensionsResponse(ref Buffer b)
+        internal ChangeDriftDimensionsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

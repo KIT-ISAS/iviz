@@ -50,10 +50,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public InteractiveMarker(ref Buffer b)
+        internal InteractiveMarker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Pose = new GeometryMsgs.Pose(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
             Name = b.DeserializeString();
             Description = b.DeserializeString();
             Scale = b.Deserialize<float>();
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.Serialize(Name);
             b.Serialize(Description);
             b.Serialize(Scale);
@@ -117,16 +117,10 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 76;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Description);
-                foreach (var i in MenuEntries)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Controls)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Description);
+                size += BuiltIns.GetArraySize(MenuEntries);
+                size += BuiltIns.GetArraySize(Controls);
                 return size;
             }
         }

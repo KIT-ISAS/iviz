@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
@@ -24,7 +25,8 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ColorRGBA(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ColorRGBA(ref Buffer b)
         {
             b.Deserialize(out this);
         }

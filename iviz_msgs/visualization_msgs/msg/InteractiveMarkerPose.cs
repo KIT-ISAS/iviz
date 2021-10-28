@@ -30,10 +30,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public InteractiveMarkerPose(ref Buffer b)
+        internal InteractiveMarkerPose(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Pose = new GeometryMsgs.Pose(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
             Name = b.DeserializeString();
         }
         
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.Serialize(Name);
         }
         
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 60;
-                size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                return size;
-            }
-        }
+        public int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(Name);
     
         public string RosType => RosMessageType;
     

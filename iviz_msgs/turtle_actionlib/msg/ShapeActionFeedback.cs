@@ -27,7 +27,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ShapeActionFeedback(ref Buffer b)
+        internal ShapeActionFeedback(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.TurtleActionlib
             Feedback.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += Status.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
     
         public string RosType => RosMessageType;
     

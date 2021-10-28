@@ -111,9 +111,9 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetCartesianPathRequest(ref Buffer b)
+        internal GetCartesianPathRequest(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             StartState = new RobotState(ref b);
             GroupName = b.DeserializeString();
             LinkName = b.DeserializeString();
@@ -168,8 +168,8 @@ namespace Iviz.Msgs.MoveitMsgs
                 int size = 29;
                 size += Header.RosMessageLength;
                 size += StartState.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
-                size += BuiltIns.UTF8.GetByteCount(LinkName);
+                size += BuiltIns.GetStringSize(GroupName);
+                size += BuiltIns.GetStringSize(LinkName);
                 size += 56 * Waypoints.Length;
                 size += PathConstraints.RosMessageLength;
                 return size;
@@ -210,7 +210,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetCartesianPathResponse(ref Buffer b)
+        internal GetCartesianPathResponse(ref Buffer b)
         {
             StartState = new RobotState(ref b);
             Solution = new RobotTrajectory(ref b);
@@ -250,15 +250,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += StartState.RosMessageLength;
-                size += Solution.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + StartState.RosMessageLength + Solution.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

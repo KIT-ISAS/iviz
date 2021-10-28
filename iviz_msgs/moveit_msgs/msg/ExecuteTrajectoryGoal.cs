@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteTrajectoryGoal(ref Buffer b)
+        internal ExecuteTrajectoryGoal(ref Buffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
         }
@@ -53,14 +53,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Trajectory.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Trajectory.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Trajectory.RosMessageLength;
     
         public string RosType => RosMessageType;
     

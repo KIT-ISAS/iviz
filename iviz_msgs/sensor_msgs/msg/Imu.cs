@@ -49,14 +49,14 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Imu(ref Buffer b)
+        internal Imu(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Orientation = new GeometryMsgs.Quaternion(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Orientation);
             OrientationCovariance = b.DeserializeStructArray<double>(9);
-            AngularVelocity = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out AngularVelocity);
             AngularVelocityCovariance = b.DeserializeStructArray<double>(9);
-            LinearAcceleration = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out LinearAcceleration);
             LinearAccelerationCovariance = b.DeserializeStructArray<double>(9);
         }
         
@@ -73,11 +73,11 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Orientation.RosSerialize(ref b);
+            b.Serialize(Orientation);
             b.SerializeStructArray(OrientationCovariance, 9);
-            AngularVelocity.RosSerialize(ref b);
+            b.Serialize(AngularVelocity);
             b.SerializeStructArray(AngularVelocityCovariance, 9);
-            LinearAcceleration.RosSerialize(ref b);
+            b.Serialize(LinearAcceleration);
             b.SerializeStructArray(LinearAccelerationCovariance, 9);
         }
         
@@ -95,14 +95,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (LinearAccelerationCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(LinearAccelerationCovariance), LinearAccelerationCovariance.Length, 9);
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 296;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 296 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

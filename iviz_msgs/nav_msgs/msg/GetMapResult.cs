@@ -22,7 +22,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMapResult(ref Buffer b)
+        internal GetMapResult(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.NavMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Map.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Map.RosMessageLength;
     
         public string RosType => RosMessageType;
     

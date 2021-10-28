@@ -27,9 +27,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Temperature(ref Buffer b)
+        internal Temperature(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Temperature_ = b.Deserialize<double>();
             Variance = b.Deserialize<double>();
         }
@@ -59,14 +59,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 16;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 16 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

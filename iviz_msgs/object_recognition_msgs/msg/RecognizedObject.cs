@@ -57,9 +57,9 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RecognizedObject(ref Buffer b)
+        internal RecognizedObject(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
             Confidence = b.Deserialize<float>();
             PointClouds = b.DeserializeArray<SensorMsgs.PointCloud2>();
@@ -120,10 +120,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
                 int size = 12;
                 size += Header.RosMessageLength;
                 size += Type.RosMessageLength;
-                foreach (var i in PointClouds)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(PointClouds);
                 size += BoundingMesh.RosMessageLength;
                 size += 24 * BoundingContours.Length;
                 size += Pose.RosMessageLength;

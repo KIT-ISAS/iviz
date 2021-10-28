@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestUInt8(ref Buffer b)
+        internal TestUInt8(ref Buffer b)
         {
             Data = b.DeserializeStructArray<byte>();
         }
@@ -51,14 +51,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 1 * Data.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Data.Length;
     
         public string RosType => RosMessageType;
     

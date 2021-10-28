@@ -64,16 +64,16 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public InteractiveMarkerFeedback(ref Buffer b)
+        internal InteractiveMarkerFeedback(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             ClientId = b.DeserializeString();
             MarkerName = b.DeserializeString();
             ControlName = b.DeserializeString();
             EventType = b.Deserialize<byte>();
-            Pose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Pose);
             MenuEntryId = b.Deserialize<uint>();
-            MousePoint = new GeometryMsgs.Point(ref b);
+            b.Deserialize(out MousePoint);
             MousePointValid = b.Deserialize<bool>();
         }
         
@@ -94,9 +94,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(MarkerName);
             b.Serialize(ControlName);
             b.Serialize(EventType);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.Serialize(MenuEntryId);
-            MousePoint.RosSerialize(ref b);
+            b.Serialize(MousePoint);
             b.Serialize(MousePointValid);
         }
         
@@ -116,9 +116,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 98;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(ClientId);
-                size += BuiltIns.UTF8.GetByteCount(MarkerName);
-                size += BuiltIns.UTF8.GetByteCount(ControlName);
+                size += BuiltIns.GetStringSize(ClientId);
+                size += BuiltIns.GetStringSize(MarkerName);
+                size += BuiltIns.GetStringSize(ControlName);
                 return size;
             }
         }

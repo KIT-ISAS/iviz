@@ -34,10 +34,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Table(ref Buffer b)
+        internal Table(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
-            Pose = new GeometryMsgs.Pose(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
+            b.Deserialize(out Pose);
             ConvexHull = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.SerializeStructArray(ConvexHull, 0);
         }
         
@@ -67,15 +67,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             if (ConvexHull is null) throw new System.NullReferenceException(nameof(ConvexHull));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 60;
-                size += Header.RosMessageLength;
-                size += 24 * ConvexHull.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 60 + Header.RosMessageLength + 24 * ConvexHull.Length;
     
         public string RosType => RosMessageType;
     

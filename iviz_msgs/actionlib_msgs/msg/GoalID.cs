@@ -30,7 +30,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GoalID(ref Buffer b)
+        internal GoalID(ref Buffer b)
         {
             Stamp = b.Deserialize<time>();
             Id = b.DeserializeString();
@@ -61,14 +61,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Id);
     
         public string RosType => RosMessageType;
     

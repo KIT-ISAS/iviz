@@ -28,9 +28,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TimeReference(ref Buffer b)
+        internal TimeReference(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             TimeRef = b.Deserialize<time>();
             Source = b.DeserializeString();
         }
@@ -61,15 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Source is null) throw new System.NullReferenceException(nameof(Source));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Source);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + Header.RosMessageLength + BuiltIns.GetStringSize(Source);
     
         public string RosType => RosMessageType;
     

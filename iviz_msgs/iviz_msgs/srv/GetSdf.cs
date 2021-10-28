@@ -75,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetSdfRequest(ref Buffer b)
+        internal GetSdfRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Uri is null) throw new System.NullReferenceException(nameof(Uri));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uri);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetSdfResponse(ref Buffer b)
+        internal GetSdfResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Scene = new Scene(ref b);
@@ -174,15 +167,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += Scene.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + Scene.RosMessageLength + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }
