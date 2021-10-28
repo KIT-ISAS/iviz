@@ -165,7 +165,7 @@ namespace Iviz.Roslib
                         break;
                 }
             }
-            
+
             Status = ReceiverStatus.Dead;
             udpClient.Dispose();
 
@@ -182,8 +182,9 @@ namespace Iviz.Roslib
 
         async Task ProcessLoop()
         {
-            Status = ReceiverStatus.Running;
+            var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
 
+            Status = ReceiverStatus.Running;
             using var readBuffer = new Rent<byte>(UdpRosParams.DefaultMTU);
 
             while (KeepRunning)
@@ -221,7 +222,7 @@ namespace Iviz.Roslib
 
                 if (!IsPaused)
                 {
-                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, packageSize,
+                    T message = generator.DeserializeFromArray(readBuffer.Array, packageSize,
                         UdpRosParams.HeaderLength);
                     manager.MessageCallback(message, this);
                 }
