@@ -94,7 +94,7 @@ namespace Iviz.Tools
         /// </summary>
         /// <param name="task">The task to be checked</param>
         /// <returns>Whether the task ran to completion</returns>
-        public static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
+        static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
 
         public static void WaitNoThrow(this Task? t, object caller)
         {
@@ -200,7 +200,7 @@ namespace Iviz.Tools
                 }
             }
         }
-        
+
         public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller) where T : class
         {
             try
@@ -217,62 +217,18 @@ namespace Iviz.Tools
 
             return default;
         }
-        
-        public static async Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
+
+        public static Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
         {
-            if (ts.Count == 0)
-            {
-                return;
-            }
-
-            List<Exception>? es = null;
-            foreach (var t in ts)
-            {
-                try
-                {
-                    await t;
-                }
-                catch (Exception e)
-                {
-                    es ??= new List<Exception>();
-                    es.Add(e);
-                }
-            }
-
-            if (es != null)
-            {
-                throw new AggregateException(es);
-            }
+            return Task.WhenAll(ts.ToArray());
         }
 
-        public static async Task WhenAll(this (Task, Task) ts)
+        public static Task WhenAll(this (Task, Task) ts)
         {
-            List<Exception>? es = null;
             var (task1, task2) = ts;
-
-            try
-            {
-                await task1;
-            }
-            catch (Exception e)
-            {
-                es ??= new List<Exception> { e };
-            }
-
-            try
-            {
-                await task2;
-            }
-            catch (Exception e)
-            {
-                es ??= new List<Exception>();
-                es.Add(e);
-            }
-
-            if (es != null)
-            {
-                throw new AggregateException(es);
-            }
+            return task1.RanToCompletion() && task2.RanToCompletion() 
+                ? Task.CompletedTask 
+                : Task.WhenAll(task1, task2);
         }
 
         public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)

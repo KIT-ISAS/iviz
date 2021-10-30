@@ -16,13 +16,13 @@ namespace Iviz.Tools
             CancellationToken token)
         {
             var socket = client.Client;
-            if (socket.Available >= toRead)
+            if (socket.Available < toRead)
             {
-                int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-                return new ValueTask<bool>(received == toRead);
+                return DoReadChunkAsync(socket, buffer, toRead, token);
             }
-
-            return DoReadChunkAsync(socket, buffer, toRead, token);
+            
+            int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
+            return new ValueTask<bool>(received == toRead);
         }
 
         static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -78,19 +78,19 @@ namespace Iviz.Tools
         static readonly AsyncCallback OnComplete =
             result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
 
-        static readonly Action<object?> OnCanceled = tcs =>
+        public static readonly Action<object?> OnCanceled = tcs =>
             ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
 
         static ValueTask<int> ReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
             CancellationToken token)
         {
-            if (socket.Available != 0)
+            if (socket.Available == 0)
             {
-                int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-                return new ValueTask<int>(received);
+                return DoReadChunkAsync(socket, buffer, offset, toRead, token);
             }
-
-            return DoReadChunkAsync(socket, buffer, offset, toRead, token);
+            
+            int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
+            return new ValueTask<int>(received);
         }
 
         static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
@@ -100,16 +100,14 @@ namespace Iviz.Tools
 
             socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
-            if (!tcs.Task.IsCompleted)
+            if (tcs.Task.IsCompleted)
             {
-                using var registration = token.Register(OnCanceled, tcs);
-                var result = await tcs.Task;
-                return socket.EndReceive(result);
+                return socket.EndReceive(await tcs.Task);
             }
-            else
+
+            using (token.Register(OnCanceled, tcs))
             {
-                var result = await tcs.Task;
-                return socket.EndReceive(result);
+                return socket.EndReceive(await tcs.Task);
             }
         }
 
