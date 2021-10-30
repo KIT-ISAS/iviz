@@ -24,7 +24,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AveragingGoal(ref Buffer b)
+        internal AveragingGoal(ref Buffer b)
         {
             Edges = b.Deserialize<int>();
             Radius = b.Deserialize<float>();

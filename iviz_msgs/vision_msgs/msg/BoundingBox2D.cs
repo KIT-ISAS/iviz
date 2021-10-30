@@ -34,7 +34,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingBox2D(ref Buffer b)
+        internal BoundingBox2D(ref Buffer b)
         {
             Center = new GeometryMsgs.Pose2D(ref b);
             SizeX = b.Deserialize<double>();

@@ -82,7 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public UpdateRobotRequest(ref Buffer b)
+        internal UpdateRobotRequest(ref Buffer b)
         {
             Operation = b.Deserialize<int>();
             Id = b.DeserializeString();
@@ -128,13 +128,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Id);
+                size += BuiltIns.GetStringSize(Id);
                 size += Configuration.RosMessageLength;
-                size += 4 * ValidFields.Length;
-                foreach (string s in ValidFields)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(ValidFields);
                 return size;
             }
         }
@@ -162,7 +158,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public UpdateRobotResponse(ref Buffer b)
+        internal UpdateRobotResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -193,14 +189,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

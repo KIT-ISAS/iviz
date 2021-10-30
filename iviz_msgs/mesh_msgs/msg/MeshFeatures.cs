@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshFeatures(ref Buffer b)
+        internal MeshFeatures(ref Buffer b)
         {
             MapUuid = b.DeserializeString();
             Features = b.DeserializeArray<MeshMsgs.Feature>();
@@ -66,18 +66,7 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(MapUuid);
-                foreach (var i in Features)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(MapUuid) + BuiltIns.GetArraySize(Features);
     
         public string RosType => RosMessageType;
     

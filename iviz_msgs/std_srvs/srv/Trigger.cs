@@ -66,7 +66,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TriggerRequest(ref Buffer b)
+        internal TriggerRequest(ref Buffer b)
         {
         }
         
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TriggerResponse(ref Buffer b)
+        internal TriggerResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -153,14 +153,7 @@ namespace Iviz.Msgs.StdSrvs
             if (Message is null) throw new System.NullReferenceException(nameof(Message));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(Message);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);
     
         public override string ToString() => Extensions.ToString(this);
     }

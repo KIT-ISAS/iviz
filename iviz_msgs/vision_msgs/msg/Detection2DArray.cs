@@ -27,9 +27,9 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Detection2DArray(ref Buffer b)
+        internal Detection2DArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Detections = b.DeserializeArray<Detection2D>();
             for (int i = 0; i < Detections.Length; i++)
             {
@@ -67,18 +67,7 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                foreach (var i in Detections)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Detections);
     
         public string RosType => RosMessageType;
     

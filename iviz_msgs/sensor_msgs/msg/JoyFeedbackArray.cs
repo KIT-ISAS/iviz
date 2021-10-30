@@ -23,7 +23,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public JoyFeedbackArray(ref Buffer b)
+        internal JoyFeedbackArray(ref Buffer b)
         {
             Array = b.DeserializeArray<JoyFeedback>();
             for (int i = 0; i < Array.Length; i++)
@@ -61,14 +61,7 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 6 * Array.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 6 * Array.Length;
     
         public string RosType => RosMessageType;
     

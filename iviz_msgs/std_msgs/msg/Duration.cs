@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Duration(ref Buffer b)
+        internal Duration(ref Buffer b)
         {
             Data = b.Deserialize<duration>();
         }

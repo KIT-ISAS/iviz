@@ -24,10 +24,10 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Accel(ref Buffer b)
+        internal Accel(ref Buffer b)
         {
-            Linear = new Vector3(ref b);
-            Angular = new Vector3(ref b);
+            b.Deserialize(out Linear);
+            b.Deserialize(out Angular);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -42,8 +42,8 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Linear.RosSerialize(ref b);
-            Angular.RosSerialize(ref b);
+            b.Serialize(Linear);
+            b.Serialize(Angular);
         }
         
         public void Dispose()

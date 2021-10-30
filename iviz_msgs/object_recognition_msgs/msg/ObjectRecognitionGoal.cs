@@ -25,7 +25,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectRecognitionGoal(ref Buffer b)
+        internal ObjectRecognitionGoal(ref Buffer b)
         {
             UseRoi = b.Deserialize<bool>();
             FilterLimits = b.DeserializeStructArray<float>();
@@ -56,14 +56,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             if (FilterLimits is null) throw new System.NullReferenceException(nameof(FilterLimits));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += 4 * FilterLimits.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + 4 * FilterLimits.Length;
     
         public string RosType => RosMessageType;
     

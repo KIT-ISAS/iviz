@@ -74,9 +74,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestNestedServiceRequest(ref Buffer b)
+        internal TestNestedServiceRequest(ref Buffer b)
         {
-            Pose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Pose);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         public void RosSerialize(ref Buffer b)
         {
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
         }
         
         public void Dispose()
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestNestedServiceResponse(ref Buffer b)
+        internal TestNestedServiceResponse(ref Buffer b)
         {
             Data = new StdMsgs.Float64(ref b);
         }

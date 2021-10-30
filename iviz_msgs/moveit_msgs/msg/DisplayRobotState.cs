@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DisplayRobotState(ref Buffer b)
+        internal DisplayRobotState(ref Buffer b)
         {
             State = new RobotState(ref b);
             HighlightLinks = b.DeserializeArray<ObjectColor>();
@@ -69,18 +69,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += State.RosMessageLength;
-                foreach (var i in HighlightLinks)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + State.RosMessageLength + BuiltIns.GetArraySize(HighlightLinks);
     
         public string RosType => RosMessageType;
     

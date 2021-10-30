@@ -28,7 +28,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Mesh(ref Buffer b)
+        internal Mesh(ref Buffer b)
         {
             Triangles = b.DeserializeArray<MeshTriangle>();
             for (int i = 0; i < Triangles.Length; i++)
@@ -69,15 +69,7 @@ namespace Iviz.Msgs.ShapeMsgs
             if (Vertices is null) throw new System.NullReferenceException(nameof(Vertices));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += 12 * Triangles.Length;
-                size += 24 * Vertices.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + 12 * Triangles.Length + 24 * Vertices.Length;
     
         public string RosType => RosMessageType;
     

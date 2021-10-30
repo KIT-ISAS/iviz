@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlanningOptions(ref Buffer b)
+        internal PlanningOptions(ref Buffer b)
         {
             PlanningSceneDiff = new PlanningScene(ref b);
             PlanOnly = b.Deserialize<bool>();
@@ -101,14 +101,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningSceneDiff.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 27;
-                size += PlanningSceneDiff.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 27 + PlanningSceneDiff.RosMessageLength;
     
         public string RosType => RosMessageType;
     

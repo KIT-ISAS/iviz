@@ -66,7 +66,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetUUIDRequest(ref Buffer b)
+        internal GetUUIDRequest(ref Buffer b)
         {
         }
         
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetUUIDResponse(ref Buffer b)
+        internal GetUUIDResponse(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -149,14 +149,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }

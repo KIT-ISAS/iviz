@@ -50,7 +50,7 @@ namespace Iviz.Controllers
 
         uint feedbackSeq = 0;
 
-        [CanBeNull] public ISender FeedbackSender { get; private set; }
+        [CanBeNull] public Sender<Feedback> FeedbackSender { get; private set; }
 
         public GuiDialogConfiguration Config
         {

@@ -29,11 +29,11 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CostSource(ref Buffer b)
+        internal CostSource(ref Buffer b)
         {
             CostDensity = b.Deserialize<double>();
-            AabbMin = new GeometryMsgs.Vector3(ref b);
-            AabbMax = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out AabbMin);
+            b.Deserialize(out AabbMax);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -49,8 +49,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(CostDensity);
-            AabbMin.RosSerialize(ref b);
-            AabbMax.RosSerialize(ref b);
+            b.Serialize(AabbMin);
+            b.Serialize(AabbMax);
         }
         
         public void Dispose()

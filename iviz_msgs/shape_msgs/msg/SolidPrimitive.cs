@@ -52,7 +52,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SolidPrimitive(ref Buffer b)
+        internal SolidPrimitive(ref Buffer b)
         {
             Type = b.Deserialize<byte>();
             Dimensions = b.DeserializeStructArray<double>();
@@ -83,14 +83,7 @@ namespace Iviz.Msgs.ShapeMsgs
             if (Dimensions is null) throw new System.NullReferenceException(nameof(Dimensions));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += 8 * Dimensions.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + 8 * Dimensions.Length;
     
         public string RosType => RosMessageType;
     

@@ -31,9 +31,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshVertexCostsStamped(ref Buffer b)
+        internal MeshVertexCostsStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();
             Type = b.DeserializeString();
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
@@ -74,8 +74,8 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 8;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                size += BuiltIns.UTF8.GetByteCount(Type);
+                size += BuiltIns.GetStringSize(Uuid);
+                size += BuiltIns.GetStringSize(Type);
                 size += MeshVertexCosts.RosMessageLength;
                 return size;
             }

@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Texture(ref Buffer b)
+        internal Texture(ref Buffer b)
         {
             Path = b.DeserializeString();
             Index = b.Deserialize<int>();
@@ -112,14 +112,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Path is null) throw new System.NullReferenceException(nameof(Path));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 21;
-                size += BuiltIns.UTF8.GetByteCount(Path);
-                return size;
-            }
-        }
+        public int RosMessageLength => 21 + BuiltIns.GetStringSize(Path);
     
         public string RosType => RosMessageType;
     

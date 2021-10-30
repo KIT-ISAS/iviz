@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ApplyPlanningSceneRequest(ref Buffer b)
+        internal ApplyPlanningSceneRequest(ref Buffer b)
         {
             Scene = new PlanningScene(ref b);
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Scene.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Scene.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Scene.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -133,7 +126,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ApplyPlanningSceneResponse(ref Buffer b)
+        internal ApplyPlanningSceneResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshMaterials(ref Buffer b)
+        internal MeshMaterials(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
@@ -101,10 +101,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
             get {
                 int size = 16;
-                foreach (var i in Clusters)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Clusters);
                 size += 21 * Materials.Length;
                 size += 4 * ClusterMaterials.Length;
                 size += 8 * VertexTexCoords.Length;

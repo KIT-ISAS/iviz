@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlaceGoal(ref Buffer b)
+        internal PlaceGoal(ref Buffer b)
         {
             GroupName = b.DeserializeString();
             AttachedObjectName = b.DeserializeString();
@@ -143,20 +143,13 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 34;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
-                size += BuiltIns.UTF8.GetByteCount(AttachedObjectName);
-                foreach (var i in PlaceLocations)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += BuiltIns.UTF8.GetByteCount(SupportSurfaceName);
+                size += BuiltIns.GetStringSize(GroupName);
+                size += BuiltIns.GetStringSize(AttachedObjectName);
+                size += BuiltIns.GetArraySize(PlaceLocations);
+                size += BuiltIns.GetStringSize(SupportSurfaceName);
                 size += PathConstraints.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(PlannerId);
-                size += 4 * AllowedTouchObjects.Length;
-                foreach (string s in AllowedTouchObjects)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetStringSize(PlannerId);
+                size += BuiltIns.GetArraySize(AllowedTouchObjects);
                 size += PlanningOptions.RosMessageLength;
                 return size;
             }

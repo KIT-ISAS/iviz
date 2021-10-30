@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TwoIntsActionGoal(ref Buffer b)
+        internal TwoIntsActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.Actionlib
             Goal.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 16;
-                size += Header.RosMessageLength;
-                size += GoalId.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 16 + Header.RosMessageLength + GoalId.RosMessageLength;
     
         public string RosType => RosMessageType;
     

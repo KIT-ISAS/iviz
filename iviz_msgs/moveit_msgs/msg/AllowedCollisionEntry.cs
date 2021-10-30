@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AllowedCollisionEntry(ref Buffer b)
+        internal AllowedCollisionEntry(ref Buffer b)
         {
             Enabled = b.DeserializeStructArray<bool>();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Enabled is null) throw new System.NullReferenceException(nameof(Enabled));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 1 * Enabled.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Enabled.Length;
     
         public string RosType => RosMessageType;
     

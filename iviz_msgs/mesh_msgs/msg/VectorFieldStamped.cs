@@ -24,9 +24,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public VectorFieldStamped(ref Buffer b)
+        internal VectorFieldStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         
@@ -56,15 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
             VectorField.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += VectorField.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + VectorField.RosMessageLength;
     
         public string RosType => RosMessageType;
     

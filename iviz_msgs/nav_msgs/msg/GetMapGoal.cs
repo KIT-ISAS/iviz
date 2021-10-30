@@ -15,7 +15,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMapGoal(ref Buffer b)
+        internal GetMapGoal(ref Buffer b)
         {
         }
         

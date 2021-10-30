@@ -24,7 +24,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DoubleParameter(ref Buffer b)
+        internal DoubleParameter(ref Buffer b)
         {
             Name = b.DeserializeString();
             Value = b.Deserialize<double>();
@@ -55,14 +55,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(Name);
     
         public string RosType => RosMessageType;
     

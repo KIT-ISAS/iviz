@@ -41,15 +41,15 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Light(ref Buffer b)
+        internal Light(ref Buffer b)
         {
             Name = b.DeserializeString();
             Type = b.Deserialize<byte>();
             CastShadows = b.Deserialize<bool>();
-            Diffuse = new Color32(ref b);
+            b.Deserialize(out Diffuse);
             Range = b.Deserialize<float>();
-            Position = new Vector3f(ref b);
-            Direction = new Vector3f(ref b);
+            b.Deserialize(out Position);
+            b.Deserialize(out Direction);
             InnerAngle = b.Deserialize<float>();
             OuterAngle = b.Deserialize<float>();
         }
@@ -69,10 +69,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Type);
             b.Serialize(CastShadows);
-            Diffuse.RosSerialize(ref b);
+            b.Serialize(Diffuse);
             b.Serialize(Range);
-            Position.RosSerialize(ref b);
-            Direction.RosSerialize(ref b);
+            b.Serialize(Position);
+            b.Serialize(Direction);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
         }
@@ -86,14 +86,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 46;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                return size;
-            }
-        }
+        public int RosMessageLength => 46 + BuiltIns.GetStringSize(Name);
     
         public string RosType => RosMessageType;
     

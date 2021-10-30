@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RegionOfInterest(ref Buffer b)
+        internal RegionOfInterest(ref Buffer b)
         {
             XOffset = b.Deserialize<uint>();
             YOffset = b.Deserialize<uint>();

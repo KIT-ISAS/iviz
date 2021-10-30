@@ -66,7 +66,7 @@ namespace Iviz.Msgs.Tf
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public FrameGraphRequest(ref Buffer b)
+        internal FrameGraphRequest(ref Buffer b)
         {
         }
         
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.Tf
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public FrameGraphResponse(ref Buffer b)
+        internal FrameGraphResponse(ref Buffer b)
         {
             DotGraph = b.DeserializeString();
         }
@@ -149,14 +149,7 @@ namespace Iviz.Msgs.Tf
             if (DotGraph is null) throw new System.NullReferenceException(nameof(DotGraph));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(DotGraph);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(DotGraph);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -31,7 +31,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TF2Error(ref Buffer b)
+        internal TF2Error(ref Buffer b)
         {
             Error = b.Deserialize<byte>();
             ErrorString = b.DeserializeString();
@@ -62,14 +62,7 @@ namespace Iviz.Msgs.Tf2Msgs
             if (ErrorString is null) throw new System.NullReferenceException(nameof(ErrorString));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 5;
-                size += BuiltIns.UTF8.GetByteCount(ErrorString);
-                return size;
-            }
-        }
+        public int RosMessageLength => 5 + BuiltIns.GetStringSize(ErrorString);
     
         public string RosType => RosMessageType;
     

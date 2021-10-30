@@ -1,3 +1,4 @@
+using Iviz.App.ARDialogs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
@@ -12,34 +13,34 @@ namespace Iviz.Displays
     {
         const float HighlightDuration = 1.0f;
 
-        MeshMarkerResource resource;
-        TextMarkerResource label;
+        MeshMarkerResource flatSphere;
+        Tooltip tooltip;
 
         float? highlightFrameStart;
 
-        protected override IDisplay Display => resource;
+        protected override IDisplay Display => flatSphere;
 
         void Awake()
         {
             Transform.parent = null;
 
-            resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, Transform);
-            resource.CastsShadows = false;
-            resource.EmissiveColor = Color.white;
+            flatSphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, Transform);
+            flatSphere.ShadowsEnabled = false;
+            flatSphere.EmissiveColor = Color.white;
             //resource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
-            resource.Layer = LayerType.IgnoreRaycast;
+            flatSphere.Layer = LayerType.IgnoreRaycast;
 
-            label = ResourcePool.RentDisplay<TextMarkerResource>(Transform);
-            label.AlwaysVisible = true;
-            label.Layer = LayerType.IgnoreRaycast;
+            tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
+            tooltip.Layer = LayerType.IgnoreRaycast;
+            tooltip.UseAnimation = false;
         }
-
 
         public void HighlightPose(in Pose absolutePose)
         {
             highlightFrameStart = Time.time;
-            resource.Tint = Color.white.WithAlpha(0.3f);
-            label.Color = Color.white;
+            flatSphere.Tint = Color.white.WithAlpha(0.3f);
+            tooltip.CaptionColor = Color.white;
+            tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
 
             float distanceToCam = Settings.MainCameraTransform
                 .InverseTransformDirection(absolutePose.position - Settings.MainCameraTransform.position).z;
@@ -47,23 +48,24 @@ namespace Iviz.Displays
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * Mathf.Max(1, size);
-            float labelSize = baseFrameSize * size;
+            float labelSize = baseFrameSize * size * 0.375f / 2;
 
             //float frameSize = TfListener.Instance.FrameSize;
-            resource.Transform.localScale = new Vector3(frameSize, frameSize * 0.1f, frameSize);
+            flatSphere.Transform.localScale = new Vector3(frameSize, frameSize * 0.1f, frameSize);
 
             //float size = Mathf.Min(distanceToCam, MaxDistanceForScale) / MaxDistanceForScale * LabelScaleAtMaxDistance;
-            label.ElementSize = labelSize;
+            tooltip.Scale = labelSize;
 
             Transform.SetPose(absolutePose);
-            label.BillboardOffset = (frameSize * 0.3f + labelSize) * Vector3.up;
+            tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
+            tooltip.PointToCamera();
 
             var (pX, pY, pZ) = TfListener.RelativePositionToFixedFrame(Transform.position).Unity2RosVector3();
             string px = pX.ToString("#,0.0", UnityUtils.Culture);
             string py = pY.ToString("#,0.0", UnityUtils.Culture);
             string pz = pZ.ToString("#,0.0", UnityUtils.Culture);
 
-            label.Text = $"{px}, {py}, {pz}";
+            tooltip.Caption = $"{px}, {py}, {pz}";
         }
 
         void Update()
@@ -82,8 +84,9 @@ namespace Iviz.Displays
             }
 
             alpha = Mathf.Sqrt(alpha);
-            label.Color = Color.white.WithAlpha(alpha);
-            resource.Tint = Color.white.WithAlpha(0.3f * alpha);
+            tooltip.CaptionColor = Color.white.WithAlpha(alpha);
+            tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+            flatSphere.Tint = Color.white.WithAlpha(0.3f * alpha);
         }
 
         public override void Suspend()
@@ -94,11 +97,11 @@ namespace Iviz.Displays
 
         public override void SplitForRecycle()
         {
-            resource.CastsShadows = true;
-            resource.EmissiveColor = Color.black;
-            resource.OverrideMaterial(null);
-            resource.ReturnToPool(Resource.Displays.Sphere);
-            label.ReturnToPool();
+            flatSphere.ShadowsEnabled = true;
+            flatSphere.EmissiveColor = Color.black;
+            flatSphere.OverrideMaterial(null);
+            flatSphere.ReturnToPool(Resource.Displays.Sphere);
+            tooltip.ReturnToPool();
         }
     }
 }

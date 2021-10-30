@@ -49,7 +49,7 @@ namespace Iviz.Ros
 
         void ISender.Publish(IMessage msg)
         {
-            Publish((T) msg);
+            Publish((T)msg);
         }
 
         public void Stop()
@@ -65,7 +65,6 @@ namespace Iviz.Ros
             totalMsgCounter++;
             lastMsgCounter++;
             lastMsgBytes += msg.RosMessageLength;
-
         }
 
         public void Reset()
@@ -93,15 +92,7 @@ namespace Iviz.Ros
             NumSubscribers = Connection.GetNumSubscribers(this);
         }
 
-        public bool TryGetResolvedTopicName([NotNull] out string topicName)
-        {
-            return ConnectionManager.Connection.TryGetResolvedTopicName(this, out topicName);
-        }
-
         [NotNull]
-        public override string ToString()
-        {
-            return $"[Sender {Topic} [{Type}]]";
-        }
+        public override string ToString() => $"[Sender {Topic} [{Type}]]";
     }
 }

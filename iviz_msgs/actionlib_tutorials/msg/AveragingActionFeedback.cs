@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AveragingActionFeedback(ref Buffer b)
+        internal AveragingActionFeedback(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             Feedback.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += Status.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
     
         public string RosType => RosMessageType;
     

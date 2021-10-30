@@ -74,7 +74,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ReconfigureRequest(ref Buffer b)
+        internal ReconfigureRequest(ref Buffer b)
         {
             Config = new Config(ref b);
         }
@@ -104,14 +104,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             Config.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Config.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Config.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -134,7 +127,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ReconfigureResponse(ref Buffer b)
+        internal ReconfigureResponse(ref Buffer b)
         {
             Config = new Config(ref b);
         }
@@ -164,14 +157,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             Config.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Config.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Config.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

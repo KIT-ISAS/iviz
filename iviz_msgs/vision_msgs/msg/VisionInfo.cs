@@ -61,9 +61,9 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public VisionInfo(ref Buffer b)
+        internal VisionInfo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Method = b.DeserializeString();
             DatabaseLocation = b.DeserializeString();
             DatabaseVersion = b.Deserialize<int>();
@@ -102,8 +102,8 @@ namespace Iviz.Msgs.VisionMsgs
             get {
                 int size = 12;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Method);
-                size += BuiltIns.UTF8.GetByteCount(DatabaseLocation);
+                size += BuiltIns.GetStringSize(Method);
+                size += BuiltIns.GetStringSize(DatabaseLocation);
                 return size;
             }
         }

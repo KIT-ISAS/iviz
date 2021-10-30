@@ -91,7 +91,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetGridMapRequest(ref Buffer b)
+        internal GetGridMapRequest(ref Buffer b)
         {
             FrameId = b.DeserializeString();
             PositionX = b.Deserialize<double>();
@@ -135,19 +135,7 @@ namespace Iviz.Msgs.GridMapMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 40;
-                size += BuiltIns.UTF8.GetByteCount(FrameId);
-                size += 4 * Layers.Length;
-                foreach (string s in Layers)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 40 + BuiltIns.GetStringSize(FrameId) + BuiltIns.GetArraySize(Layers);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -171,7 +159,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetGridMapResponse(ref Buffer b)
+        internal GetGridMapResponse(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
@@ -201,14 +189,7 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Map.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Map.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

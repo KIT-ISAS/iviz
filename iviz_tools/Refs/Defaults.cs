@@ -5,8 +5,8 @@ namespace Iviz.Tools
 {
     public static class Defaults
     {
-        public static UTF8Encoding UTF8 { get; } = new(false);
+        public static readonly UTF8Encoding UTF8 = new(false);
 
-        public static CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
+        public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
     }
 }

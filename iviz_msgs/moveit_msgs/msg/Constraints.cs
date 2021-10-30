@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Constraints(ref Buffer b)
+        internal Constraints(ref Buffer b)
         {
             Name = b.DeserializeString();
             JointConstraints = b.DeserializeArray<JointConstraint>();
@@ -117,23 +117,11 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 20;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                foreach (var i in JointConstraints)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in PositionConstraints)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in OrientationConstraints)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in VisibilityConstraints)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetArraySize(JointConstraints);
+                size += BuiltIns.GetArraySize(PositionConstraints);
+                size += BuiltIns.GetArraySize(OrientationConstraints);
+                size += BuiltIns.GetArraySize(VisibilityConstraints);
                 return size;
             }
         }

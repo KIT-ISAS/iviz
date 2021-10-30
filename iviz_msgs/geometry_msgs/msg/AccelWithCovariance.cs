@@ -30,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AccelWithCovariance(ref Buffer b)
+        internal AccelWithCovariance(ref Buffer b)
         {
             Accel = new Accel(ref b);
             Covariance = b.DeserializeStructArray<double>(36);

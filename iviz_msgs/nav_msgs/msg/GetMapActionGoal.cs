@@ -27,7 +27,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMapActionGoal(ref Buffer b)
+        internal GetMapActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);
@@ -63,15 +63,7 @@ namespace Iviz.Msgs.NavMsgs
             Goal.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += GoalId.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + GoalId.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TrajectoryConstraints(ref Buffer b)
+        internal TrajectoryConstraints(ref Buffer b)
         {
             Constraints = b.DeserializeArray<Constraints>();
             for (int i = 0; i < Constraints.Length; i++)
@@ -61,17 +61,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Constraints)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Constraints);
     
         public string RosType => RosMessageType;
     

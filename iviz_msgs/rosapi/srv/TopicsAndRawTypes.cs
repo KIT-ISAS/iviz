@@ -66,7 +66,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TopicsAndRawTypesRequest(ref Buffer b)
+        internal TopicsAndRawTypesRequest(ref Buffer b)
         {
         }
         
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TopicsAndRawTypesResponse(ref Buffer b)
+        internal TopicsAndRawTypesResponse(ref Buffer b)
         {
             Topics = b.DeserializeStringArray();
             Types = b.DeserializeStringArray();
@@ -177,21 +177,9 @@ namespace Iviz.Msgs.Rosapi
         {
             get {
                 int size = 12;
-                size += 4 * Topics.Length;
-                foreach (string s in Topics)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Types.Length;
-                foreach (string s in Types)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * TypedefsFullText.Length;
-                foreach (string s in TypedefsFullText)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(Topics);
+                size += BuiltIns.GetArraySize(Types);
+                size += BuiltIns.GetArraySize(TypedefsFullText);
                 return size;
             }
         }

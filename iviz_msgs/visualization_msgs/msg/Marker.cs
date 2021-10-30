@@ -77,16 +77,16 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Marker(ref Buffer b)
+        internal Marker(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Ns = b.DeserializeString();
             Id = b.Deserialize<int>();
             Type = b.Deserialize<int>();
             Action = b.Deserialize<int>();
-            Pose = new GeometryMsgs.Pose(ref b);
-            Scale = new GeometryMsgs.Vector3(ref b);
-            Color = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out Pose);
+            b.Deserialize(out Scale);
+            b.Deserialize(out Color);
             Lifetime = b.Deserialize<duration>();
             FrameLocked = b.Deserialize<bool>();
             Points = b.DeserializeStructArray<GeometryMsgs.Point>();
@@ -113,9 +113,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(Action);
-            Pose.RosSerialize(ref b);
-            Scale.RosSerialize(ref b);
-            Color.RosSerialize(ref b);
+            b.Serialize(Pose);
+            b.Serialize(Scale);
+            b.Serialize(Color);
             b.Serialize(Lifetime);
             b.Serialize(FrameLocked);
             b.SerializeStructArray(Points, 0);
@@ -143,11 +143,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             get {
                 int size = 138;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Ns);
+                size += BuiltIns.GetStringSize(Ns);
                 size += 24 * Points.Length;
                 size += 16 * Colors.Length;
-                size += BuiltIns.UTF8.GetByteCount(Text);
-                size += BuiltIns.UTF8.GetByteCount(MeshResource);
+                size += BuiltIns.GetStringSize(Text);
+                size += BuiltIns.GetStringSize(MeshResource);
                 return size;
             }
         }

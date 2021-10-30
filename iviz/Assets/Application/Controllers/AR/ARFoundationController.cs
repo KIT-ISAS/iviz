@@ -362,7 +362,6 @@ namespace Iviz.Controllers
         {
             if (worldAnchor != null)
             {
-                //Destroy(worldAnchor.Anchor);
                 anchorManager.RemoveAnchor(worldAnchor.Anchor);
                 worldAnchor = null;
             }

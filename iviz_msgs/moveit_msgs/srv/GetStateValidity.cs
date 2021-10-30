@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetStateValidityRequest(ref Buffer b)
+        internal GetStateValidityRequest(ref Buffer b)
         {
             RobotState = new RobotState(ref b);
             GroupName = b.DeserializeString();
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 4;
                 size += RobotState.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
+                size += BuiltIns.GetStringSize(GroupName);
                 size += Constraints.RosMessageLength;
                 return size;
             }
@@ -157,7 +157,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetStateValidityResponse(ref Buffer b)
+        internal GetStateValidityResponse(ref Buffer b)
         {
             Valid = b.Deserialize<bool>();
             Contacts = b.DeserializeArray<ContactInformation>();
@@ -225,10 +225,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 13;
-                foreach (var i in Contacts)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Contacts);
                 size += 56 * CostSources.Length;
                 size += 9 * ConstraintResult.Length;
                 return size;

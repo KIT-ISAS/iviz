@@ -95,7 +95,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GraspPlanningRequest(ref Buffer b)
+        internal GraspPlanningRequest(ref Buffer b)
         {
             GroupName = b.DeserializeString();
             Target = new CollisionObject(ref b);
@@ -163,21 +163,11 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
+                size += BuiltIns.GetStringSize(GroupName);
                 size += Target.RosMessageLength;
-                size += 4 * SupportSurfaces.Length;
-                foreach (string s in SupportSurfaces)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in CandidateGrasps)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in MovableObstacles)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(SupportSurfaces);
+                size += BuiltIns.GetArraySize(CandidateGrasps);
+                size += BuiltIns.GetArraySize(MovableObstacles);
                 return size;
             }
         }
@@ -208,7 +198,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GraspPlanningResponse(ref Buffer b)
+        internal GraspPlanningResponse(ref Buffer b)
         {
             Grasps = b.DeserializeArray<Grasp>();
             for (int i = 0; i < Grasps.Length; i++)
@@ -250,17 +240,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                foreach (var i in Grasps)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetArraySize(Grasps);
     
         public override string ToString() => Extensions.ToString(this);
     }

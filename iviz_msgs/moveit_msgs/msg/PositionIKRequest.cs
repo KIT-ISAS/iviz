@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PositionIKRequest(ref Buffer b)
+        internal PositionIKRequest(ref Buffer b)
         {
             GroupName = b.DeserializeString();
             RobotState = new MoveitMsgs.RobotState(ref b);
@@ -148,20 +148,13 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 29;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
+                size += BuiltIns.GetStringSize(GroupName);
                 size += RobotState.RosMessageLength;
                 size += Constraints.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(IkLinkName);
+                size += BuiltIns.GetStringSize(IkLinkName);
                 size += PoseStamped.RosMessageLength;
-                size += 4 * IkLinkNames.Length;
-                foreach (string s in IkLinkNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in PoseStampedVector)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(IkLinkNames);
+                size += BuiltIns.GetArraySize(PoseStampedVector);
                 return size;
             }
         }

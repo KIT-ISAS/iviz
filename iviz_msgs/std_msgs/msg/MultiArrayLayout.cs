@@ -46,7 +46,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MultiArrayLayout(ref Buffer b)
+        internal MultiArrayLayout(ref Buffer b)
         {
             Dim = b.DeserializeArray<MultiArrayDimension>();
             for (int i = 0; i < Dim.Length; i++)
@@ -86,17 +86,7 @@ namespace Iviz.Msgs.StdMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                foreach (var i in Dim)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetArraySize(Dim);
     
         public string RosType => RosMessageType;
     

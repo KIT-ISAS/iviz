@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LinkPadding(ref Buffer b)
+        internal LinkPadding(ref Buffer b)
         {
             LinkName = b.DeserializeString();
             Padding = b.Deserialize<double>();
@@ -57,14 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(LinkName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(LinkName);
     
         public string RosType => RosMessageType;
     

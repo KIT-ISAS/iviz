@@ -104,25 +104,13 @@ namespace Iviz.App
 
                 foreach (var receiver in stat.Receivers)
                 {
-                    if (receiver.EndPoint == null &&
-                        receiver.RemoteEndpoint == null &&
-                        receiver.ErrorDescription == null &&
-                        receiver.Status == ReceiverStatus.UnknownError)
-                    {
-                        builder.Append("<color=#808080><b>←</b> [")
-                            .Append(receiver.RemoteUri.Host).Append(":")
-                            .Append(receiver.RemoteUri.Port).Append("] (Unreachable)</color>")
-                            .AppendLine();
-                        continue;
-                    }
-
                     builder.Append("  [");
                     if (receiver.RemoteUri == client.CallerUri)
                     {
                         builder.Append("<i>Me</i> @ ");
                     }
 
-                    builder.Append(receiver.RemoteUri.Host).Append("]");
+                    builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port).Append(']');
 
                     switch (receiver.Status)
                     {
@@ -204,8 +192,8 @@ namespace Iviz.App
                         builder.Append("[").Append(sender.RemoteId).Append(" @ ");
                     }
 
-                    builder.Append(sender.RemoteEndpoint != null
-                        ? sender.RemoteEndpoint.Value.Hostname
+                    builder.Append(sender.RemoteEndpoint != default
+                        ? sender.RemoteEndpoint.Hostname
                         : "(Unknown address)");
 
                     builder.Append(sender.TransportType == TransportType.Tcp

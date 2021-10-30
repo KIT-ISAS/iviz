@@ -74,7 +74,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public NodeDetailsRequest(ref Buffer b)
+        internal NodeDetailsRequest(ref Buffer b)
         {
             Node = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.Rosapi
             if (Node is null) throw new System.NullReferenceException(nameof(Node));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Node);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Node);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -139,7 +132,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public NodeDetailsResponse(ref Buffer b)
+        internal NodeDetailsResponse(ref Buffer b)
         {
             Subscribing = b.DeserializeStringArray();
             Publishing = b.DeserializeStringArray();
@@ -190,21 +183,9 @@ namespace Iviz.Msgs.Rosapi
         {
             get {
                 int size = 12;
-                size += 4 * Subscribing.Length;
-                foreach (string s in Subscribing)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Publishing.Length;
-                foreach (string s in Publishing)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Services.Length;
-                foreach (string s in Services)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(Subscribing);
+                size += BuiltIns.GetArraySize(Publishing);
+                size += BuiltIns.GetArraySize(Services);
                 return size;
             }
         }

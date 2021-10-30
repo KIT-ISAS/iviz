@@ -76,7 +76,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMotionPlanRequest(ref Buffer b)
+        internal GetMotionPlanRequest(ref Buffer b)
         {
             MotionPlanRequest = new MotionPlanRequest(ref b);
         }
@@ -106,14 +106,7 @@ namespace Iviz.Msgs.MoveitMsgs
             MotionPlanRequest.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += MotionPlanRequest.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + MotionPlanRequest.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -136,7 +129,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMotionPlanResponse(ref Buffer b)
+        internal GetMotionPlanResponse(ref Buffer b)
         {
             MotionPlanResponse = new MotionPlanResponse(ref b);
         }
@@ -166,14 +159,7 @@ namespace Iviz.Msgs.MoveitMsgs
             MotionPlanResponse.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += MotionPlanResponse.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + MotionPlanResponse.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

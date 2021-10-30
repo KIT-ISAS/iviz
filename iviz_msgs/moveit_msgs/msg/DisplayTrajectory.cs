@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public DisplayTrajectory(ref Buffer b)
+        internal DisplayTrajectory(ref Buffer b)
         {
             ModelId = b.DeserializeString();
             Trajectory = b.DeserializeArray<RobotTrajectory>();
@@ -82,11 +82,8 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(ModelId);
-                foreach (var i in Trajectory)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(ModelId);
+                size += BuiltIns.GetArraySize(Trajectory);
                 size += TrajectoryStart.RosMessageLength;
                 return size;
             }

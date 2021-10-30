@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ColorChannel(ref Buffer b)
+        internal ColorChannel(ref Buffer b)
         {
             Colors = b.DeserializeStructArray<Color32>();
         }
@@ -51,14 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Colors is null) throw new System.NullReferenceException(nameof(Colors));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Colors.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 4 * Colors.Length;
     
         public string RosType => RosMessageType;
     

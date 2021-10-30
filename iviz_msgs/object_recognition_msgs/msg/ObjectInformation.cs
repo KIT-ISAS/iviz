@@ -35,7 +35,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectInformation(ref Buffer b)
+        internal ObjectInformation(ref Buffer b)
         {
             Name = b.DeserializeString();
             GroundTruthMesh = new ShapeMsgs.Mesh(ref b);
@@ -76,7 +76,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         {
             get {
                 int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.GetStringSize(Name);
                 size += GroundTruthMesh.RosMessageLength;
                 size += GroundTruthPointCloud.RosMessageLength;
                 return size;

@@ -11,6 +11,7 @@ using Iviz.Resources;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Buffer = System.Buffer;
 using Color32 = UnityEngine.Color32;
@@ -89,7 +90,7 @@ namespace Iviz.Displays
                     ? mesh.ColorChannels[0].Colors
                     : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
 
-                var material = msg.Materials[(int) mesh.MaterialIndex];
+                var material = msg.Materials[(int)mesh.MaterialIndex];
                 Msgs.IvizMsgs.Texture diffuseTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_DIFFUSE);
                 Msgs.IvizMsgs.Texture bumpTexture =
@@ -217,7 +218,7 @@ namespace Iviz.Displays
             Bounds? ammBounds = amm.Children
                 .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform))
                 .CombineBounds();
-            
+
             if (ammBounds != null)
             {
                 ammCollider.center = ammBounds.Value.center;
@@ -258,11 +259,19 @@ namespace Iviz.Displays
         static Vector3 Assimp2Unity(in Vector3f vector3) =>
             new Vector3(vector3.X, vector3.Y, vector3.Z);
 
-        static void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)
+        static unsafe void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)
             where TA : unmanaged
             where TB : unmanaged
         {
-            Buffer.BlockCopy(src, 0, dst, 0, sizeToCopy);
+            if (dst.Length * sizeof(TB) < sizeToCopy || src.Length * sizeof(TA) < sizeToCopy)
+            {
+                throw new ArgumentException("Potential buffer overflow");
+            }
+
+            fixed (void* srcPtr = src, dstPtr = dst)
+            {
+                UnsafeUtility.MemCpy(dstPtr, srcPtr, sizeToCopy);
+            }
         }
     }
 }

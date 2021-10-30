@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MoveGroupSequenceGoal(ref Buffer b)
+        internal MoveGroupSequenceGoal(ref Buffer b)
         {
             Request = new MotionSequenceRequest(ref b);
             PlanningOptions = new PlanningOptions(ref b);
@@ -61,15 +61,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningOptions.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Request.RosMessageLength;
-                size += PlanningOptions.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Request.RosMessageLength + PlanningOptions.RosMessageLength;
     
         public string RosType => RosMessageType;
     

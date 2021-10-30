@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Mesh(ref Buffer b)
+        internal Mesh(ref Buffer b)
         {
             Name = b.DeserializeString();
             Vertices = b.DeserializeStructArray<Vector3f>();
@@ -119,19 +119,13 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 36;
-                size += BuiltIns.UTF8.GetByteCount(Name);
+                size += BuiltIns.GetStringSize(Name);
                 size += 12 * Vertices.Length;
                 size += 12 * Normals.Length;
                 size += 12 * Tangents.Length;
                 size += 12 * BiTangents.Length;
-                foreach (var i in TexCoords)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in ColorChannels)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(TexCoords);
+                size += BuiltIns.GetArraySize(ColorChannels);
                 size += 12 * Faces.Length;
                 return size;
             }

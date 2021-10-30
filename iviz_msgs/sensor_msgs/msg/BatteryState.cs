@@ -85,9 +85,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BatteryState(ref Buffer b)
+        internal BatteryState(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Voltage = b.Deserialize<float>();
             Temperature = b.Deserialize<float>();
             Current = b.Deserialize<float>();
@@ -154,8 +154,8 @@ namespace Iviz.Msgs.SensorMsgs
                 size += Header.RosMessageLength;
                 size += 4 * CellVoltage.Length;
                 size += 4 * CellTemperature.Length;
-                size += BuiltIns.UTF8.GetByteCount(Location);
-                size += BuiltIns.UTF8.GetByteCount(SerialNumber);
+                size += BuiltIns.GetStringSize(Location);
+                size += BuiltIns.GetStringSize(SerialNumber);
                 return size;
             }
         }

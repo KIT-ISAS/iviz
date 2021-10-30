@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetModulesRequest(ref Buffer b)
+        internal GetModulesRequest(ref Buffer b)
         {
         }
         
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetModulesResponse(ref Buffer b)
+        internal GetModulesResponse(ref Buffer b)
         {
             Configs = b.DeserializeStringArray();
         }
@@ -154,18 +154,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Configs.Length;
-                foreach (string s in Configs)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Configs);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -22,7 +22,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MarkerArray(ref Buffer b)
+        internal MarkerArray(ref Buffer b)
         {
             Markers = b.DeserializeArray<Marker>();
             for (int i = 0; i < Markers.Length; i++)
@@ -60,17 +60,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Markers)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Markers);
     
         public string RosType => RosMessageType;
     

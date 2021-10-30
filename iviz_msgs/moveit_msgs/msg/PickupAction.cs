@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PickupAction(ref Buffer b)
+        internal PickupAction(ref Buffer b)
         {
             ActionGoal = new PickupActionGoal(ref b);
             ActionResult = new PickupActionResult(ref b);

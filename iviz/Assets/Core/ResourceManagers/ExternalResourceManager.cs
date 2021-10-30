@@ -701,7 +701,7 @@ namespace Iviz.Displays
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + 32))
                 {
                     BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, 32, buffer.Array, 0);
-                    Msgs.Buffer.Serialize(msg.Model, buffer.Array, 32);
+                    msg.Model.SerializeToArray(buffer.Array, 32);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
 
@@ -769,7 +769,7 @@ namespace Iviz.Displays
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + 32))
                 {
                     BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, 32, buffer.Array, 0);
-                    Msgs.Buffer.Serialize(msg.Scene, buffer.Array, 32);
+                    msg.Scene.SerializeToArray(buffer.Array, 32);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 }

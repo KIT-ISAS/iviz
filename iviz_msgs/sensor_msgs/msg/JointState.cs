@@ -51,9 +51,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public JointState(ref Buffer b)
+        internal JointState(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Name = b.DeserializeStringArray();
             Position = b.DeserializeStructArray<double>();
             Velocity = b.DeserializeStructArray<double>();
@@ -100,11 +100,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 16;
                 size += Header.RosMessageLength;
-                size += 4 * Name.Length;
-                foreach (string s in Name)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(Name);
                 size += 8 * Position.Length;
                 size += 8 * Velocity.Length;
                 size += 8 * Effort.Length;

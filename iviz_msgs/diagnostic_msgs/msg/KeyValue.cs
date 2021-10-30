@@ -25,7 +25,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public KeyValue(ref Buffer b)
+        internal KeyValue(ref Buffer b)
         {
             Key = b.DeserializeString();
             Value = b.DeserializeString();
@@ -57,15 +57,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Value is null) throw new System.NullReferenceException(nameof(Value));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Key);
-                size += BuiltIns.UTF8.GetByteCount(Value);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Value);
     
         public string RosType => RosMessageType;
     

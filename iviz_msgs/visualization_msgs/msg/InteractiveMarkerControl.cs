@@ -91,10 +91,10 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public InteractiveMarkerControl(ref Buffer b)
+        internal InteractiveMarkerControl(ref Buffer b)
         {
             Name = b.DeserializeString();
-            Orientation = new GeometryMsgs.Quaternion(ref b);
+            b.Deserialize(out Orientation);
             OrientationMode = b.Deserialize<byte>();
             InteractionMode = b.Deserialize<byte>();
             AlwaysVisible = b.Deserialize<bool>();
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
-            Orientation.RosSerialize(ref b);
+            b.Serialize(Orientation);
             b.Serialize(OrientationMode);
             b.Serialize(InteractionMode);
             b.Serialize(AlwaysVisible);
@@ -149,12 +149,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             get {
                 int size = 48;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                foreach (var i in Markers)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += BuiltIns.UTF8.GetByteCount(Description);
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetArraySize(Markers);
+                size += BuiltIns.GetStringSize(Description);
                 return size;
             }
         }

@@ -34,7 +34,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Config(ref Buffer b)
+        internal Config(ref Buffer b)
         {
             Bools = b.DeserializeArray<BoolParameter>();
             for (int i = 0; i < Bools.Length; i++)
@@ -124,26 +124,11 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             get {
                 int size = 20;
-                foreach (var i in Bools)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Ints)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Strs)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Doubles)
-                {
-                    size += i.RosMessageLength;
-                }
-                foreach (var i in Groups)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Bools);
+                size += BuiltIns.GetArraySize(Ints);
+                size += BuiltIns.GetArraySize(Strs);
+                size += BuiltIns.GetArraySize(Doubles);
+                size += BuiltIns.GetArraySize(Groups);
                 return size;
             }
         }

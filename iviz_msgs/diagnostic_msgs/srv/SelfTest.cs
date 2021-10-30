@@ -66,7 +66,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SelfTestRequest(ref Buffer b)
+        internal SelfTestRequest(ref Buffer b)
         {
         }
         
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SelfTestResponse(ref Buffer b)
+        internal SelfTestResponse(ref Buffer b)
         {
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();
@@ -168,18 +168,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 9;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                foreach (var i in Status)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 9 + BuiltIns.GetStringSize(Id) + BuiltIns.GetArraySize(Status);
     
         public override string ToString() => Extensions.ToString(this);
     }

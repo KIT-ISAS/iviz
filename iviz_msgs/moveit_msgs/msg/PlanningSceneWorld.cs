@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlanningSceneWorld(ref Buffer b)
+        internal PlanningSceneWorld(ref Buffer b)
         {
             CollisionObjects = b.DeserializeArray<CollisionObject>();
             for (int i = 0; i < CollisionObjects.Length; i++)
@@ -69,18 +69,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Octomap.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in CollisionObjects)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += Octomap.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(CollisionObjects) + Octomap.RosMessageLength;
     
         public string RosType => RosMessageType;
     

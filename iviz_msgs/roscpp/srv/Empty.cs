@@ -66,7 +66,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public EmptyRequest(ref Buffer b)
+        internal EmptyRequest(ref Buffer b)
         {
         }
         
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public EmptyResponse(ref Buffer b)
+        internal EmptyResponse(ref Buffer b)
         {
         }
         

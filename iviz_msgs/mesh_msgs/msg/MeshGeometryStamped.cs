@@ -28,9 +28,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshGeometryStamped(ref Buffer b)
+        internal MeshGeometryStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
             get {
                 int size = 4;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
+                size += BuiltIns.GetStringSize(Uuid);
                 size += MeshGeometry.RosMessageLength;
                 return size;
             }

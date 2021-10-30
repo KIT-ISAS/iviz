@@ -32,7 +32,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Group(ref Buffer b)
+        internal Group(ref Buffer b)
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();
@@ -84,12 +84,9 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             get {
                 int size = 20;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Type);
-                foreach (var i in Parameters)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Type);
+                size += BuiltIns.GetArraySize(Parameters);
                 return size;
             }
         }

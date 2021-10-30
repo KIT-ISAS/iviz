@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MeshFaceCluster(ref Buffer b)
+        internal MeshFaceCluster(ref Buffer b)
         {
             FaceIndices = b.DeserializeStructArray<uint>();
             Label = b.DeserializeString();
@@ -59,15 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Label is null) throw new System.NullReferenceException(nameof(Label));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += 4 * FaceIndices.Length;
-                size += BuiltIns.UTF8.GetByteCount(Label);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + 4 * FaceIndices.Length + BuiltIns.GetStringSize(Label);
     
         public string RosType => RosMessageType;
     

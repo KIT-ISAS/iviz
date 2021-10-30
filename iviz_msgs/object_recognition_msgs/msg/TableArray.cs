@@ -25,9 +25,9 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TableArray(ref Buffer b)
+        internal TableArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Tables = b.DeserializeArray<ObjectRecognitionMsgs.Table>();
             for (int i = 0; i < Tables.Length; i++)
             {
@@ -65,18 +65,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                foreach (var i in Tables)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Tables);
     
         public string RosType => RosMessageType;
     

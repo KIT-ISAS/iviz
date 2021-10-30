@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AllowedCollisionMatrix(ref Buffer b)
+        internal AllowedCollisionMatrix(ref Buffer b)
         {
             EntryNames = b.DeserializeStringArray();
             EntryValues = b.DeserializeArray<AllowedCollisionEntry>();
@@ -100,21 +100,10 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 16;
-                size += 4 * EntryNames.Length;
-                foreach (string s in EntryNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in EntryValues)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += 4 * DefaultEntryNames.Length;
-                foreach (string s in DefaultEntryNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 1 * DefaultEntryValues.Length;
+                size += BuiltIns.GetArraySize(EntryNames);
+                size += BuiltIns.GetArraySize(EntryValues);
+                size += BuiltIns.GetArraySize(DefaultEntryNames);
+                size += DefaultEntryValues.Length;
                 return size;
             }
         }

@@ -74,7 +74,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SearchParamRequest(ref Buffer b)
+        internal SearchParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.Rosapi
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Name);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -133,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SearchParamResponse(ref Buffer b)
+        internal SearchParamResponse(ref Buffer b)
         {
             GlobalName = b.DeserializeString();
         }
@@ -162,14 +155,7 @@ namespace Iviz.Msgs.Rosapi
             if (GlobalName is null) throw new System.NullReferenceException(nameof(GlobalName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(GlobalName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(GlobalName);
     
         public override string ToString() => Extensions.ToString(this);
     }

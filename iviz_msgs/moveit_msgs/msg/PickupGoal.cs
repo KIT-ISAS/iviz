@@ -79,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PickupGoal(ref Buffer b)
+        internal PickupGoal(ref Buffer b)
         {
             TargetName = b.DeserializeString();
             GroupName = b.DeserializeString();
@@ -164,26 +164,15 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 42;
-                size += BuiltIns.UTF8.GetByteCount(TargetName);
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
-                size += BuiltIns.UTF8.GetByteCount(EndEffector);
-                foreach (var i in PossibleGrasps)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += BuiltIns.UTF8.GetByteCount(SupportSurfaceName);
-                size += 4 * AttachedObjectTouchLinks.Length;
-                foreach (string s in AttachedObjectTouchLinks)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetStringSize(TargetName);
+                size += BuiltIns.GetStringSize(GroupName);
+                size += BuiltIns.GetStringSize(EndEffector);
+                size += BuiltIns.GetArraySize(PossibleGrasps);
+                size += BuiltIns.GetStringSize(SupportSurfaceName);
+                size += BuiltIns.GetArraySize(AttachedObjectTouchLinks);
                 size += PathConstraints.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(PlannerId);
-                size += 4 * AllowedTouchObjects.Length;
-                foreach (string s in AllowedTouchObjects)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetStringSize(PlannerId);
+                size += BuiltIns.GetArraySize(AllowedTouchObjects);
                 size += PlanningOptions.RosMessageLength;
                 return size;
             }

@@ -31,7 +31,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ConfigDescription(ref Buffer b)
+        internal ConfigDescription(ref Buffer b)
         {
             Groups = b.DeserializeArray<Group>();
             for (int i = 0; i < Groups.Length; i++)
@@ -85,10 +85,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             get {
                 int size = 4;
-                foreach (var i in Groups)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Groups);
                 size += Max.RosMessageLength;
                 size += Min.RosMessageLength;
                 size += Dflt.RosMessageLength;

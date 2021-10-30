@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RobotTrajectory(ref Buffer b)
+        internal RobotTrajectory(ref Buffer b)
         {
             JointTrajectory = new TrajectoryMsgs.JointTrajectory(ref b);
             MultiDofJointTrajectory = new TrajectoryMsgs.MultiDOFJointTrajectory(ref b);
@@ -59,15 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
             MultiDofJointTrajectory.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += JointTrajectory.RosMessageLength;
-                size += MultiDofJointTrajectory.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + JointTrajectory.RosMessageLength + MultiDofJointTrajectory.RosMessageLength;
     
         public string RosType => RosMessageType;
     

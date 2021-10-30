@@ -66,7 +66,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetLoggersRequest(ref Buffer b)
+        internal GetLoggersRequest(ref Buffer b)
         {
         }
         
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetLoggersResponse(ref Buffer b)
+        internal GetLoggersResponse(ref Buffer b)
         {
             Loggers = b.DeserializeArray<Logger>();
             for (int i = 0; i < Loggers.Length; i++)
@@ -158,17 +158,7 @@ namespace Iviz.Msgs.Roscpp
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Loggers)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Loggers);
     
         public override string ToString() => Extensions.ToString(this);
     }

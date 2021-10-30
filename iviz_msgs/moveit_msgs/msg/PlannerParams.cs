@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlannerParams(ref Buffer b)
+        internal PlannerParams(ref Buffer b)
         {
             Keys = b.DeserializeStringArray();
             Values = b.DeserializeStringArray();
@@ -82,21 +82,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 12;
-                size += 4 * Keys.Length;
-                foreach (string s in Keys)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Values.Length;
-                foreach (string s in Values)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * Descriptions.Length;
-                foreach (string s in Descriptions)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(Keys);
+                size += BuiltIns.GetArraySize(Values);
+                size += BuiltIns.GetArraySize(Descriptions);
                 return size;
             }
         }

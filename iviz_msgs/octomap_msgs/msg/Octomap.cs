@@ -36,9 +36,9 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Octomap(ref Buffer b)
+        internal Octomap(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Binary = b.Deserialize<bool>();
             Id = b.DeserializeString();
             Resolution = b.Deserialize<double>();
@@ -79,8 +79,8 @@ namespace Iviz.Msgs.OctomapMsgs
             get {
                 int size = 17;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                size += 1 * Data.Length;
+                size += BuiltIns.GetStringSize(Id);
+                size += Data.Length;
                 return size;
             }
         }

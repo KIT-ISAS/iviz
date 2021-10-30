@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public KinematicSolverInfo(ref Buffer b)
+        internal KinematicSolverInfo(ref Buffer b)
         {
             JointNames = b.DeserializeStringArray();
             Limits = b.DeserializeArray<MoveitMsgs.JointLimits>();
@@ -87,20 +87,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 12;
-                size += 4 * JointNames.Length;
-                foreach (string s in JointNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in Limits)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += 4 * LinkNames.Length;
-                foreach (string s in LinkNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(JointNames);
+                size += BuiltIns.GetArraySize(Limits);
+                size += BuiltIns.GetArraySize(LinkNames);
                 return size;
             }
         }

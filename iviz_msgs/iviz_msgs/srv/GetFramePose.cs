@@ -75,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetFramePoseRequest(ref Buffer b)
+        internal GetFramePoseRequest(ref Buffer b)
         {
             Frames = b.DeserializeStringArray();
         }
@@ -108,18 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Frames.Length;
-                foreach (string s in Frames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Frames);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -145,7 +134,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetFramePoseResponse(ref Buffer b)
+        internal GetFramePoseResponse(ref Buffer b)
         {
             IsValid = b.DeserializeStructArray<bool>();
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
@@ -177,15 +166,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += 1 * IsValid.Length;
-                size += 56 * Poses.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + IsValid.Length + 56 * Poses.Length;
     
         public override string ToString() => Extensions.ToString(this);
     }

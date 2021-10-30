@@ -39,16 +39,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Widget(ref Buffer b)
+        internal Widget(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Action = b.Deserialize<byte>();
             Id = b.DeserializeString();
             Type = b.Deserialize<byte>();
-            MainColor = new StdMsgs.ColorRGBA(ref b);
-            SecondaryColor = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out MainColor);
+            b.Deserialize(out SecondaryColor);
             Scale = b.Deserialize<double>();
-            Pose = new GeometryMsgs.Pose(ref b);
+            b.Deserialize(out Pose);
             Caption = b.DeserializeString();
         }
         
@@ -68,10 +68,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Action);
             b.Serialize(Id);
             b.Serialize(Type);
-            MainColor.RosSerialize(ref b);
-            SecondaryColor.RosSerialize(ref b);
+            b.Serialize(MainColor);
+            b.Serialize(SecondaryColor);
             b.Serialize(Scale);
-            Pose.RosSerialize(ref b);
+            b.Serialize(Pose);
             b.Serialize(Caption);
         }
         
@@ -90,8 +90,8 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 106;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                size += BuiltIns.UTF8.GetByteCount(Caption);
+                size += BuiltIns.GetStringSize(Id);
+                size += BuiltIns.GetStringSize(Caption);
                 return size;
             }
         }

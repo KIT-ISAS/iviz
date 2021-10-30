@@ -225,8 +225,7 @@ namespace Iviz.Roslib
 
             return length;
         }
-
-
+        
         Task SendHeader(TcpClient client)
         {
             string[] contents =
@@ -254,7 +253,6 @@ namespace Iviz.Roslib
                 throw new IOException("Connection closed during handshake");
             }
 
-
             List<string> responseHeader = RosUtils.ParseHeader(readBuffer.Array, receivedLength);
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
             if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
@@ -270,53 +268,9 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task ProcessLoop(TcpClient client)
+        async Task ProcessMessages(TcpClient client)
         {
-            await ProcessHandshake(client);
-
-            Status = ReceiverStatus.Running;
-
-            bool hasFixedSize = BuiltIns.TryGetFixedSize<T>(out int fixedSize);
-            await (hasFixedSize
-                ? ProcessLoopFixed(client, fixedSize)
-                : ProcessLoopVariable(client));
-        }
-
-        async Task ProcessLoopFixed(TcpClient client, int fixedSize)
-        {
-            int fixedSizeWithHeader = 4 + fixedSize;
-            using var readBuffer = new Rent<byte>(fixedSizeWithHeader);
-
-            while (KeepRunning)
-            {
-                bool success = await client.ReadChunkAsync(readBuffer.Array, fixedSizeWithHeader, runningTs.Token);
-                if (!success)
-                {
-                    Logger.LogDebugFormat("{0}: Partner closed connection", this);
-                    return;
-                }
-
-                int receivedSize = BitConverter.ToInt32(readBuffer.Array, 0);
-                if (receivedSize != fixedSize)
-                {
-                    throw new RosInvalidPackageSizeException(
-                        $"Receiver expected packet with fixed size of {fixedSize} bytes, " +
-                        $"but got a packet of size {receivedSize}!");
-                }
-
-                numReceived++;
-                bytesReceived += fixedSizeWithHeader;
-
-                if (!IsPaused)
-                {
-                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, fixedSizeWithHeader, 4);
-                    manager.MessageCallback(message, this);
-                }
-            }
-        }
-
-        async Task ProcessLoopVariable(TcpClient client)
-        {
+            var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
             using ByteBufferRent readBuffer = new(4);
             while (KeepRunning)
             {
@@ -335,12 +289,21 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += rcvLength + 4;
 
-                if (!isPaused)
+                if (isPaused)
                 {
-                    T message = topicInfo.Generator.DeserializeFromArray(readBuffer.Array, rcvLength);
-                    manager.MessageCallback(message, this);
+                    continue;
                 }
+                
+                T message = generator.DeserializeFromArray(readBuffer.Array, rcvLength);
+                manager.MessageCallback(message, this);
             }
+        }
+        
+        async Task ProcessLoop(TcpClient client)
+        {
+            await ProcessHandshake(client);
+            Status = ReceiverStatus.Running;
+            await ProcessMessages(client);
         }
 
         void ILoopbackReceiver<T>.Post(in T message, int rcvLength)

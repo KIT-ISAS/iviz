@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ExecuteTrajectoryFeedback(ref Buffer b)
+        internal ExecuteTrajectoryFeedback(ref Buffer b)
         {
             State = b.DeserializeString();
         }
@@ -52,14 +52,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (State is null) throw new System.NullReferenceException(nameof(State));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(State);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(State);
     
         public string RosType => RosMessageType;
     

@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ListRobotStatesInWarehouseRequest(ref Buffer b)
+        internal ListRobotStatesInWarehouseRequest(ref Buffer b)
         {
             Regex = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -109,15 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Robot is null) throw new System.NullReferenceException(nameof(Robot));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Regex);
-                size += BuiltIns.UTF8.GetByteCount(Robot);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Regex) + BuiltIns.GetStringSize(Robot);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -140,7 +132,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ListRobotStatesInWarehouseResponse(ref Buffer b)
+        internal ListRobotStatesInWarehouseResponse(ref Buffer b)
         {
             States = b.DeserializeStringArray();
         }
@@ -173,18 +165,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * States.Length;
-                foreach (string s in States)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(States);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -52,9 +52,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MultiDOFJointState(ref Buffer b)
+        internal MultiDOFJointState(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             JointNames = b.DeserializeStringArray();
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Twist = b.DeserializeStructArray<GeometryMsgs.Twist>();
@@ -110,11 +110,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 16;
                 size += Header.RosMessageLength;
-                size += 4 * JointNames.Length;
-                foreach (string s in JointNames)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(JointNames);
                 size += 56 * Transforms.Length;
                 size += 48 * Twist.Length;
                 size += 48 * Wrench.Length;

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ObjectType(ref Buffer b)
+        internal ObjectType(ref Buffer b)
         {
             Key = b.DeserializeString();
             Db = b.DeserializeString();
@@ -78,15 +78,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             if (Db is null) throw new System.NullReferenceException(nameof(Db));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Key);
-                size += BuiltIns.UTF8.GetByteCount(Db);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Db);
     
         public string RosType => RosMessageType;
     

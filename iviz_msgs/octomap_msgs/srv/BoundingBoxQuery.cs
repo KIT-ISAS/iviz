@@ -78,10 +78,10 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingBoxQueryRequest(ref Buffer b)
+        internal BoundingBoxQueryRequest(ref Buffer b)
         {
-            Min = new GeometryMsgs.Point(ref b);
-            Max = new GeometryMsgs.Point(ref b);
+            b.Deserialize(out Min);
+            b.Deserialize(out Max);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -96,8 +96,8 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Min.RosSerialize(ref b);
-            Max.RosSerialize(ref b);
+            b.Serialize(Min);
+            b.Serialize(Max);
         }
         
         public void Dispose()
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public BoundingBoxQueryResponse(ref Buffer b)
+        internal BoundingBoxQueryResponse(ref Buffer b)
         {
         }
         

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MoveGroupSequenceResult(ref Buffer b)
+        internal MoveGroupSequenceResult(ref Buffer b)
         {
             Response = new MotionSequenceResponse(ref b);
         }
@@ -53,14 +53,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Response.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Response.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Response.RosMessageLength;
     
         public string RosType => RosMessageType;
     

@@ -67,7 +67,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMapRequest(ref Buffer b)
+        internal GetMapRequest(ref Buffer b)
         {
         }
         
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMapResponse(ref Buffer b)
+        internal GetMapResponse(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
@@ -151,14 +151,7 @@ namespace Iviz.Msgs.NavMsgs
             Map.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Map.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Map.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -1,6 +1,7 @@
 /* This file was created automatically, do not edit! */
 
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
@@ -23,7 +24,8 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Point(ref Buffer b)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Point(ref Buffer b)
         {
             b.Deserialize(out this);
         }

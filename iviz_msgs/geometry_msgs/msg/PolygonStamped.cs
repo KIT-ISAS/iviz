@@ -25,9 +25,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PolygonStamped(ref Buffer b)
+        internal PolygonStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Polygon = new Polygon(ref b);
         }
         
@@ -57,15 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Polygon.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += Polygon.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + Polygon.RosMessageLength;
     
         public string RosType => RosMessageType;
     

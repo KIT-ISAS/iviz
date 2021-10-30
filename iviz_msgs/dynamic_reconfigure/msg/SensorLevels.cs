@@ -18,7 +18,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SensorLevels(ref Buffer b)
+        internal SensorLevels(ref Buffer b)
         {
         }
         

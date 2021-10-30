@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MotionPlanRequest(ref Buffer b)
+        internal MotionPlanRequest(ref Buffer b)
         {
             WorkspaceParameters = new WorkspaceParameters(ref b);
             StartState = new RobotState(ref b);
@@ -145,14 +145,11 @@ namespace Iviz.Msgs.MoveitMsgs
                 int size = 40;
                 size += WorkspaceParameters.RosMessageLength;
                 size += StartState.RosMessageLength;
-                foreach (var i in GoalConstraints)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(GoalConstraints);
                 size += PathConstraints.RosMessageLength;
                 size += TrajectoryConstraints.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(PlannerId);
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
+                size += BuiltIns.GetStringSize(PlannerId);
+                size += BuiltIns.GetStringSize(GroupName);
                 return size;
             }
         }

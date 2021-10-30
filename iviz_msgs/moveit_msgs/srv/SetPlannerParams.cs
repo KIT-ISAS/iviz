@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetPlannerParamsRequest(ref Buffer b)
+        internal SetPlannerParamsRequest(ref Buffer b)
         {
             PlannerConfig = b.DeserializeString();
             Group = b.DeserializeString();
@@ -128,8 +128,8 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 9;
-                size += BuiltIns.UTF8.GetByteCount(PlannerConfig);
-                size += BuiltIns.UTF8.GetByteCount(Group);
+                size += BuiltIns.GetStringSize(PlannerConfig);
+                size += BuiltIns.GetStringSize(Group);
                 size += Params.RosMessageLength;
                 return size;
             }
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetPlannerParamsResponse(ref Buffer b)
+        internal SetPlannerParamsResponse(ref Buffer b)
         {
         }
         

@@ -74,7 +74,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ServiceTypeRequest(ref Buffer b)
+        internal ServiceTypeRequest(ref Buffer b)
         {
             Service = b.DeserializeString();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.Rosapi
             if (Service is null) throw new System.NullReferenceException(nameof(Service));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Service);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Service);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -133,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ServiceTypeResponse(ref Buffer b)
+        internal ServiceTypeResponse(ref Buffer b)
         {
             Type = b.DeserializeString();
         }
@@ -162,14 +155,7 @@ namespace Iviz.Msgs.Rosapi
             if (Type is null) throw new System.NullReferenceException(nameof(Type));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Type);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Type);
     
         public override string ToString() => Extensions.ToString(this);
     }

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Int64MultiArray(ref Buffer b)
+        internal Int64MultiArray(ref Buffer b)
         {
             Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<long>();
@@ -60,15 +60,7 @@ namespace Iviz.Msgs.StdMsgs
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Layout.RosMessageLength;
-                size += 8 * Data.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Layout.RosMessageLength + 8 * Data.Length;
     
         public string RosType => RosMessageType;
     

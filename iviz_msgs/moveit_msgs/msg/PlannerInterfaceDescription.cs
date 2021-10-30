@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PlannerInterfaceDescription(ref Buffer b)
+        internal PlannerInterfaceDescription(ref Buffer b)
         {
             Name = b.DeserializeString();
             PlannerIds = b.DeserializeStringArray();
@@ -63,19 +63,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += 4 * PlannerIds.Length;
-                foreach (string s in PlannerIds)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetArraySize(PlannerIds);
     
         public string RosType => RosMessageType;
     

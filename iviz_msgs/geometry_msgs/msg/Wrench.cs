@@ -25,10 +25,10 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Wrench(ref Buffer b)
+        internal Wrench(ref Buffer b)
         {
-            Force = new Vector3(ref b);
-            Torque = new Vector3(ref b);
+            b.Deserialize(out Force);
+            b.Deserialize(out Torque);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            Force.RosSerialize(ref b);
-            Torque.RosSerialize(ref b);
+            b.Serialize(Force);
+            b.Serialize(Torque);
         }
         
         public void Dispose()

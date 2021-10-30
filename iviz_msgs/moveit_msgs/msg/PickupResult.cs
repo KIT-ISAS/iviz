@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PickupResult(ref Buffer b)
+        internal PickupResult(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             TrajectoryStart = new RobotState(ref b);
@@ -105,15 +105,8 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 20;
                 size += TrajectoryStart.RosMessageLength;
-                foreach (var i in TrajectoryStages)
-                {
-                    size += i.RosMessageLength;
-                }
-                size += 4 * TrajectoryDescriptions.Length;
-                foreach (string s in TrajectoryDescriptions)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(TrajectoryStages);
+                size += BuiltIns.GetArraySize(TrajectoryDescriptions);
                 size += Grasp.RosMessageLength;
                 return size;
             }

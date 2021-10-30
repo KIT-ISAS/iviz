@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetRobotStateFromWarehouseRequest(ref Buffer b)
+        internal GetRobotStateFromWarehouseRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -109,15 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Robot is null) throw new System.NullReferenceException(nameof(Robot));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Robot);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Robot);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -140,7 +132,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetRobotStateFromWarehouseResponse(ref Buffer b)
+        internal GetRobotStateFromWarehouseResponse(ref Buffer b)
         {
             State = new MoveitMsgs.RobotState(ref b);
         }
@@ -170,14 +162,7 @@ namespace Iviz.Msgs.MoveitMsgs
             State.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += State.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + State.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

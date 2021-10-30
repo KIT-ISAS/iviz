@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ConnectedClient(ref Buffer b)
+        internal ConnectedClient(ref Buffer b)
         {
             IpAddress = b.DeserializeString();
             ConnectionTime = b.Deserialize<time>();
@@ -55,14 +55,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
             if (IpAddress is null) throw new System.NullReferenceException(nameof(IpAddress));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 12;
-                size += BuiltIns.UTF8.GetByteCount(IpAddress);
-                return size;
-            }
-        }
+        public int RosMessageLength => 12 + BuiltIns.GetStringSize(IpAddress);
     
         public string RosType => RosMessageType;
     

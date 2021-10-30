@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public AttachedCollisionObject(ref Buffer b)
+        internal AttachedCollisionObject(ref Buffer b)
         {
             LinkName = b.DeserializeString();
             Object = new CollisionObject(ref b);
@@ -94,13 +94,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 16;
-                size += BuiltIns.UTF8.GetByteCount(LinkName);
+                size += BuiltIns.GetStringSize(LinkName);
                 size += Object.RosMessageLength;
-                size += 4 * TouchLinks.Length;
-                foreach (string s in TouchLinks)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetArraySize(TouchLinks);
                 size += DetachPosture.RosMessageLength;
                 return size;
             }

@@ -113,12 +113,13 @@ namespace Iviz.Controllers
         {
             TfListener.Publish($"/isas/{tfName}", Transform.AsPose());
             sender.Publish(new Joy
-            {
-                Header = (seq++, "/isas/vr_station"),
-                Buttons = button == null 
+            (
+                (seq++, "/isas/vr_station"),
+                Array.Empty<float>(),
+                button == null 
                     ? Array.Empty<int>() 
                     : Indices[(button.State() ? 1 : 0) + (button.AltState() ? 2 : 0)]
-            });
+            ));
             
             if (!canInteract)
             {

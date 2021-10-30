@@ -30,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Pose2D(ref Buffer b)
+        internal Pose2D(ref Buffer b)
         {
             X = b.Deserialize<double>();
             Y = b.Deserialize<double>();

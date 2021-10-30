@@ -74,7 +74,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestArrayRequestRequest(ref Buffer b)
+        internal TestArrayRequestRequest(ref Buffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }
@@ -103,14 +103,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (@int is null) throw new System.NullReferenceException(nameof(@int));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * @int.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 4 * @int.Length;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -125,7 +118,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestArrayRequestResponse(ref Buffer b)
+        internal TestArrayRequestResponse(ref Buffer b)
         {
         }
         

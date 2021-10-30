@@ -77,7 +77,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetLoggerLevelRequest(ref Buffer b)
+        internal SetLoggerLevelRequest(ref Buffer b)
         {
             Logger = b.DeserializeString();
             Level = b.DeserializeString();
@@ -109,15 +109,7 @@ namespace Iviz.Msgs.Roscpp
             if (Level is null) throw new System.NullReferenceException(nameof(Level));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Logger);
-                size += BuiltIns.UTF8.GetByteCount(Level);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Logger) + BuiltIns.GetStringSize(Level);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -132,7 +124,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetLoggerLevelResponse(ref Buffer b)
+        internal SetLoggerLevelResponse(ref Buffer b)
         {
         }
         

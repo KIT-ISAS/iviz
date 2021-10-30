@@ -50,9 +50,9 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Detection3D(ref Buffer b)
+        internal Detection3D(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Results = b.DeserializeArray<ObjectHypothesisWithPose>();
             for (int i = 0; i < Results.Length; i++)
             {
@@ -108,12 +108,9 @@ namespace Iviz.Msgs.VisionMsgs
             get {
                 int size = 89;
                 size += Header.RosMessageLength;
-                foreach (var i in Results)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Results);
                 size += SourceCloud.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(TrackingId);
+                size += BuiltIns.GetStringSize(TrackingId);
                 return size;
             }
         }

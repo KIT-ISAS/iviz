@@ -22,12 +22,12 @@ namespace Iviz.Msgs.Tf
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public tfMessage(ref Buffer b)
+        internal tfMessage(ref Buffer b)
         {
             Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
             for (int i = 0; i < Transforms.Length; i++)
             {
-                Transforms[i] = new GeometryMsgs.TransformStamped(ref b);
+                GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
             }
         }
         
@@ -55,17 +55,7 @@ namespace Iviz.Msgs.Tf
             if (Transforms is null) throw new System.NullReferenceException(nameof(Transforms));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Transforms)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Transforms);
     
         public string RosType => RosMessageType;
     

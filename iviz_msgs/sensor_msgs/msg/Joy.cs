@@ -28,9 +28,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Joy(ref Buffer b)
+        internal Joy(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Axes = b.DeserializeStructArray<float>();
             Buttons = b.DeserializeStructArray<int>();
         }

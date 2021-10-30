@@ -66,7 +66,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ServicesRequest(ref Buffer b)
+        internal ServicesRequest(ref Buffer b)
         {
         }
         
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public ServicesResponse(ref Buffer b)
+        internal ServicesResponse(ref Buffer b)
         {
             Services_ = b.DeserializeStringArray();
         }
@@ -153,18 +153,7 @@ namespace Iviz.Msgs.Rosapi
             }
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Services_.Length;
-                foreach (string s in Services_)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Services_);
     
         public override string ToString() => Extensions.ToString(this);
     }

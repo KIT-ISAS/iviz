@@ -153,9 +153,9 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public CameraInfo(ref Buffer b)
+        internal CameraInfo(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Height = b.Deserialize<uint>();
             Width = b.Deserialize<uint>();
             DistortionModel = b.DeserializeString();
@@ -216,7 +216,7 @@ namespace Iviz.Msgs.SensorMsgs
             get {
                 int size = 281;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(DistortionModel);
+                size += BuiltIns.GetStringSize(DistortionModel);
                 size += 8 * D.Length;
                 return size;
             }

@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMotionSequenceRequest(ref Buffer b)
+        internal GetMotionSequenceRequest(ref Buffer b)
         {
             Request = new MotionSequenceRequest(ref b);
         }
@@ -105,14 +105,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Request.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Request.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Request.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -136,7 +129,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetMotionSequenceResponse(ref Buffer b)
+        internal GetMotionSequenceResponse(ref Buffer b)
         {
             Response = new MotionSequenceResponse(ref b);
         }
@@ -166,14 +159,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Response.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Response.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Response.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

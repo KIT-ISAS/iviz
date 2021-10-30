@@ -27,7 +27,7 @@ namespace Iviz.Core
         public byte[] Bytes { get; }
 
         public Screenshot(ScreenshotFormat format, int width, int height, in Intrinsic intrinsic, in Pose cameraPose,
-            byte[] bytes)
+            [NotNull] byte[] bytes)
         {
             Format = format;
             Timestamp = time.Now();
@@ -36,7 +36,7 @@ namespace Iviz.Core
             Bpp = BppFromFormat(format);
             Intrinsic = intrinsic;
             CameraPose = cameraPose;
-            Bytes = bytes;
+            Bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
         }
 
         [NotNull]
@@ -44,22 +44,22 @@ namespace Iviz.Core
             new CameraInfo
             {
                 Header = (seqId, Timestamp, cameraFrameId),
-                Width = (uint) Width,
-                Height = (uint) Height,
+                Width = (uint)Width,
+                Height = (uint)Height,
                 K = Intrinsic.ToArray(),
             };
 
         [NotNull]
         public Image CreateImageMessage(string cameraFrameId, uint seqId) =>
-            new Image
-            {
-                Header = (seqId, Timestamp, cameraFrameId),
-                Width = (uint) Width,
-                Height = (uint) Height,
-                Encoding = EncodingFromFormat(Format),
-                Step = (uint) (Bpp * Width),
-                Data = Bytes
-            };
+            new Image(
+                (seqId, Timestamp, cameraFrameId),
+                (uint)Height,
+                (uint)Width,
+                EncodingFromFormat(Format),
+                0,
+                (uint)(Bpp * Width),
+                Bytes
+            );
 
         [NotNull]
         static string EncodingFromFormat(ScreenshotFormat format)
@@ -85,15 +85,14 @@ namespace Iviz.Core
         {
             switch (format)
             {
-                case ScreenshotFormat.Bgra:
-                    return 4;
-                case ScreenshotFormat.Rgb:
-                    return 3;
                 case ScreenshotFormat.Mono8:
                     return 1;
                 case ScreenshotFormat.Mono16:
                     return 2;
+                case ScreenshotFormat.Rgb:
+                    return 3;
                 case ScreenshotFormat.Float:
+                case ScreenshotFormat.Bgra:
                     return 4;
                 default:
                     throw new ArgumentException();

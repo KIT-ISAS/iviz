@@ -78,7 +78,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetMapRequest(ref Buffer b)
+        internal SetMapRequest(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
@@ -112,15 +112,7 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Map.RosMessageLength;
-                size += InitialPose.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Map.RosMessageLength + InitialPose.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -142,7 +134,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SetMapResponse(ref Buffer b)
+        internal SetMapResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

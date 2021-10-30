@@ -22,7 +22,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public String(ref Buffer b)
+        internal String(ref Buffer b)
         {
             Data = b.DeserializeString();
         }
@@ -51,14 +51,7 @@ namespace Iviz.Msgs.StdMsgs
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Data);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);
     
         public string RosType => RosMessageType;
     

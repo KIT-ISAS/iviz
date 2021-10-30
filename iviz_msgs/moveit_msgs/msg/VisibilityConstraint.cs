@@ -76,7 +76,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public VisibilityConstraint(ref Buffer b)
+        internal VisibilityConstraint(ref Buffer b)
         {
             TargetRadius = b.Deserialize<double>();
             TargetPose = new GeometryMsgs.PoseStamped(ref b);
@@ -122,15 +122,7 @@ namespace Iviz.Msgs.MoveitMsgs
             SensorPose.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 37;
-                size += TargetPose.RosMessageLength;
-                size += SensorPose.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 37 + TargetPose.RosMessageLength + SensorPose.RosMessageLength;
     
         public string RosType => RosMessageType;
     

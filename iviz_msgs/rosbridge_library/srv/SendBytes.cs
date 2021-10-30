@@ -73,7 +73,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SendBytesRequest(ref Buffer b)
+        internal SendBytesRequest(ref Buffer b)
         {
             Count = b.Deserialize<long>();
         }
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SendBytesResponse(ref Buffer b)
+        internal SendBytesResponse(ref Buffer b)
         {
             Data = b.DeserializeString();
         }
@@ -156,14 +156,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += BuiltIns.UTF8.GetByteCount(Data);
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);
     
         public override string ToString() => Extensions.ToString(this);
     }

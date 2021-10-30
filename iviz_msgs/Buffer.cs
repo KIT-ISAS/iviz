@@ -216,7 +216,10 @@ namespace Iviz.Msgs
         {
             ThrowIfOutOfRange(count * (uint) sizeof(T));
             list.Clear();
-            if (list.Capacity < count) list.Capacity = (int) count;
+            if (list.Capacity < count)
+            {
+                list.Capacity = (int) count;
+            }
 
             T* tPtr = (T*) ptr;
             for (int i = 0; i < count; i++)
@@ -373,9 +376,9 @@ namespace Iviz.Msgs
                 ThrowIfWrongSize(val, count);
             }
 
-            foreach (T t in val)
+            for (int i = 0; i < val.Length; i++)
             {
-                t.RosSerialize(ref this);
+                val[i].RosSerialize(ref this);
             }
         }
 
@@ -433,7 +436,7 @@ namespace Iviz.Msgs
 
             fixed (byte* bPtr = buffer)
             {
-                Buffer b = new Buffer(bPtr + offset, bPtr + offset + size);
+                var b = new Buffer(bPtr + offset, bPtr + offset + size);
                 return (T) generator.RosDeserialize(ref b);
             }
         }
@@ -493,7 +496,7 @@ namespace Iviz.Msgs
 
             fixed (byte* bPtr = buffer)
             {
-                Buffer b = new Buffer(bPtr + offset, bPtr + offset + size);
+                var b = new Buffer(bPtr + offset, bPtr + offset + size);
                 return generator.RosDeserialize(ref b);
             }
         }
@@ -505,7 +508,7 @@ namespace Iviz.Msgs
         /// <param name="buffer">The destination byte array.</param>
         /// <param name="offset">Optional offset at which to start writing</param>
         /// <returns>The number of bytes written.</returns>
-        public static unsafe uint Serialize<T>(in T message, byte[] buffer, int offset = 0) where T : ISerializable
+        internal static unsafe uint Serialize<T>(in T message, byte[] buffer, int offset = 0) where T : ISerializable
         {
             if (buffer == null)
             {

@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public JointLimits(ref Buffer b)
+        internal JointLimits(ref Buffer b)
         {
             JointName = b.DeserializeString();
             HasPositionLimits = b.Deserialize<bool>();
@@ -88,14 +88,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (JointName is null) throw new System.NullReferenceException(nameof(JointName));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 39;
-                size += BuiltIns.UTF8.GetByteCount(JointName);
-                return size;
-            }
-        }
+        public int RosMessageLength => 39 + BuiltIns.GetStringSize(JointName);
     
         public string RosType => RosMessageType;
     

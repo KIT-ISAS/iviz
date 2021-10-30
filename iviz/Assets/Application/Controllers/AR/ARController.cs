@@ -484,7 +484,7 @@ namespace Iviz.Controllers
                 MarkerExecutor.Process(marker);
             }
 
-            MarkerSender.Publish(new DetectedARMarkerArray {Markers = array});
+            MarkerSender.Publish(new DetectedARMarkerArray(array));
 
             foreach (var corners in markers)
             {

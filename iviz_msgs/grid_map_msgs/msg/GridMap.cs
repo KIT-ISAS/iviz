@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GridMap(ref Buffer b)
+        internal GridMap(ref Buffer b)
         {
             Info = new GridMapInfo(ref b);
             Layers = b.DeserializeStringArray();
@@ -108,20 +108,9 @@ namespace Iviz.Msgs.GridMapMsgs
             get {
                 int size = 16;
                 size += Info.RosMessageLength;
-                size += 4 * Layers.Length;
-                foreach (string s in Layers)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                size += 4 * BasicLayers.Length;
-                foreach (string s in BasicLayers)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
-                foreach (var i in Data)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Layers);
+                size += BuiltIns.GetArraySize(BasicLayers);
+                size += BuiltIns.GetArraySize(Data);
                 return size;
             }
         }

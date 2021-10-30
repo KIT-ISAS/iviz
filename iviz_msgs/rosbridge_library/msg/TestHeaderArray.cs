@@ -22,12 +22,12 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestHeaderArray(ref Buffer b)
+        internal TestHeaderArray(ref Buffer b)
         {
             Header = b.DeserializeArray<StdMsgs.Header>();
             for (int i = 0; i < Header.Length; i++)
             {
-                Header[i] = new StdMsgs.Header(ref b);
+                StdMsgs.Header.Deserialize(ref b, out Header[i]);
             }
         }
         
@@ -55,17 +55,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             if (Header is null) throw new System.NullReferenceException(nameof(Header));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                foreach (var i in Header)
-                {
-                    size += i.RosMessageLength;
-                }
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + BuiltIns.GetArraySize(Header);
     
         public string RosType => RosMessageType;
     

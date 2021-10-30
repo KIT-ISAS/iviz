@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public MotionPlanResponse(ref Buffer b)
+        internal MotionPlanResponse(ref Buffer b)
         {
             TrajectoryStart = new RobotState(ref b);
             GroupName = b.DeserializeString();
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.MoveitMsgs
             get {
                 int size = 16;
                 size += TrajectoryStart.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(GroupName);
+                size += BuiltIns.GetStringSize(GroupName);
                 size += Trajectory.RosMessageLength;
                 return size;
             }

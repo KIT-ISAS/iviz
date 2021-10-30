@@ -76,7 +76,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetTextureRequest(ref Buffer b)
+        internal GetTextureRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
@@ -107,14 +107,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Uuid);
-                return size;
-            }
-        }
+        public int RosMessageLength => 8 + BuiltIns.GetStringSize(Uuid);
     
         public override string ToString() => Extensions.ToString(this);
     }
@@ -137,7 +130,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public GetTextureResponse(ref Buffer b)
+        internal GetTextureResponse(ref Buffer b)
         {
             Texture = new MeshMsgs.MeshTexture(ref b);
         }
@@ -167,14 +160,7 @@ namespace Iviz.Msgs.MeshMsgs
             Texture.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Texture.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Texture.RosMessageLength;
     
         public override string ToString() => Extensions.ToString(this);
     }

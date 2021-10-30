@@ -73,7 +73,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestRequestOnlyRequest(ref Buffer b)
+        internal TestRequestOnlyRequest(ref Buffer b)
         {
             Data = b.Deserialize<int>();
         }
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TestRequestOnlyResponse(ref Buffer b)
+        internal TestRequestOnlyResponse(ref Buffer b)
         {
         }
         

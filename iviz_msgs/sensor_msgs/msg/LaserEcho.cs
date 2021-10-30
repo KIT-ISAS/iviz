@@ -25,7 +25,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public LaserEcho(ref Buffer b)
+        internal LaserEcho(ref Buffer b)
         {
             Echoes = b.DeserializeStructArray<float>();
         }
@@ -54,14 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Echoes is null) throw new System.NullReferenceException(nameof(Echoes));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 4 * Echoes.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 4 * Echoes.Length;
     
         public string RosType => RosMessageType;
     

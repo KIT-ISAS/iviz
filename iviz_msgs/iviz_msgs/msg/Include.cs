@@ -32,7 +32,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Include(ref Buffer b)
+        internal Include(ref Buffer b)
         {
             Uri = b.DeserializeString();
             Pose = new Matrix4(ref b);
@@ -76,9 +76,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             get {
                 int size = 72;
-                size += BuiltIns.UTF8.GetByteCount(Uri);
+                size += BuiltIns.GetStringSize(Uri);
                 size += Material.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Package);
+                size += BuiltIns.GetStringSize(Package);
                 return size;
             }
         }

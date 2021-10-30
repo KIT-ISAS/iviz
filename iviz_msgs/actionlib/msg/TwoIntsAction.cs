@@ -29,7 +29,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TwoIntsAction(ref Buffer b)
+        internal TwoIntsAction(ref Buffer b)
         {
             ActionGoal = new TwoIntsActionGoal(ref b);
             ActionResult = new TwoIntsActionResult(ref b);

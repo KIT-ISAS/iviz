@@ -25,9 +25,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public PoseArray(ref Buffer b)
+        internal PoseArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Poses = b.DeserializeStructArray<Pose>();
         }
         
@@ -56,15 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += Header.RosMessageLength;
-                size += 56 * Poses.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;
     
         public string RosType => RosMessageType;
     

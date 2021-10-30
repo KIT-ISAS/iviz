@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SaveRobotStateToWarehouseRequest(ref Buffer b)
+        internal SaveRobotStateToWarehouseRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -120,8 +120,8 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             get {
                 int size = 8;
-                size += BuiltIns.UTF8.GetByteCount(Name);
-                size += BuiltIns.UTF8.GetByteCount(Robot);
+                size += BuiltIns.GetStringSize(Name);
+                size += BuiltIns.GetStringSize(Robot);
                 size += State.RosMessageLength;
                 return size;
             }
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public SaveRobotStateToWarehouseResponse(ref Buffer b)
+        internal SaveRobotStateToWarehouseResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Int16(ref Buffer b)
+        internal Int16(ref Buffer b)
         {
             Data = b.Deserialize<short>();
         }

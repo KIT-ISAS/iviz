@@ -31,9 +31,9 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public RecognizedObjectArray(ref Buffer b)
+        internal RecognizedObjectArray(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Objects = b.DeserializeArray<ObjectRecognitionMsgs.RecognizedObject>();
             for (int i = 0; i < Objects.Length; i++)
             {
@@ -79,10 +79,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             get {
                 int size = 8;
                 size += Header.RosMessageLength;
-                foreach (var i in Objects)
-                {
-                    size += i.RosMessageLength;
-                }
+                size += BuiltIns.GetArraySize(Objects);
                 size += 4 * Cooccurrence.Length;
                 return size;
             }

@@ -25,9 +25,9 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public WrenchStamped(ref Buffer b)
+        internal WrenchStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Wrench = new Wrench(ref b);
         }
         
@@ -57,14 +57,7 @@ namespace Iviz.Msgs.GeometryMsgs
             Wrench.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 48;
-                size += Header.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 48 + Header.RosMessageLength;
     
         public string RosType => RosMessageType;
     

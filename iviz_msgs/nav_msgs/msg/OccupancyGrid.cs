@@ -32,9 +32,9 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public OccupancyGrid(ref Buffer b)
+        internal OccupancyGrid(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
             Data = b.DeserializeStructArray<sbyte>();
         }
@@ -67,15 +67,7 @@ namespace Iviz.Msgs.NavMsgs
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 80;
-                size += Header.RosMessageLength;
-                size += 1 * Data.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;
     
         public string RosType => RosMessageType;
     

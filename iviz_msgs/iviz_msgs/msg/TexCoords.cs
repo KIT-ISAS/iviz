@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TexCoords(ref Buffer b)
+        internal TexCoords(ref Buffer b)
         {
             Coords = b.DeserializeStructArray<Vector3f>();
         }
@@ -51,14 +51,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Coords is null) throw new System.NullReferenceException(nameof(Coords));
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 4;
-                size += 12 * Coords.Length;
-                return size;
-            }
-        }
+        public int RosMessageLength => 4 + 12 * Coords.Length;
     
         public string RosType => RosMessageType;
     

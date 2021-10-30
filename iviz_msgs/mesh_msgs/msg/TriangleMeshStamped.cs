@@ -24,9 +24,9 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public TriangleMeshStamped(ref Buffer b)
+        internal TriangleMeshStamped(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Mesh = new MeshMsgs.TriangleMesh(ref b);
         }
         
@@ -56,15 +56,7 @@ namespace Iviz.Msgs.MeshMsgs
             Mesh.RosValidate();
         }
     
-        public int RosMessageLength
-        {
-            get {
-                int size = 0;
-                size += Header.RosMessageLength;
-                size += Mesh.RosMessageLength;
-                return size;
-            }
-        }
+        public int RosMessageLength => 0 + Header.RosMessageLength + Mesh.RosMessageLength;
     
         public string RosType => RosMessageType;
     

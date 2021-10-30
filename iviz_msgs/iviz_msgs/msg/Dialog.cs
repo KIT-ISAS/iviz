@@ -57,9 +57,9 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// <summary> Constructor with buffer. </summary>
-        public Dialog(ref Buffer b)
+        internal Dialog(ref Buffer b)
         {
-            Header = new StdMsgs.Header(ref b);
+            StdMsgs.Header.Deserialize(ref b, out Header);
             Action = b.Deserialize<byte>();
             Id = b.DeserializeString();
             Lifetime = b.Deserialize<duration>();
@@ -67,15 +67,15 @@ namespace Iviz.Msgs.IvizMsgs
             Type = b.Deserialize<byte>();
             Buttons = b.Deserialize<byte>();
             Icon = b.Deserialize<byte>();
-            BackgroundColor = new StdMsgs.ColorRGBA(ref b);
+            b.Deserialize(out BackgroundColor);
             Title = b.DeserializeString();
             Caption = b.DeserializeString();
             CaptionAlignment = b.Deserialize<ushort>();
             MenuEntries = b.DeserializeStringArray();
             BindingType = b.Deserialize<byte>();
-            TfOffset = new GeometryMsgs.Vector3(ref b);
-            DialogDisplacement = new GeometryMsgs.Vector3(ref b);
-            TfDisplacement = new GeometryMsgs.Vector3(ref b);
+            b.Deserialize(out TfOffset);
+            b.Deserialize(out DialogDisplacement);
+            b.Deserialize(out TfDisplacement);
         }
         
         public ISerializable RosDeserialize(ref Buffer b)
@@ -98,15 +98,15 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Type);
             b.Serialize(Buttons);
             b.Serialize(Icon);
-            BackgroundColor.RosSerialize(ref b);
+            b.Serialize(BackgroundColor);
             b.Serialize(Title);
             b.Serialize(Caption);
             b.Serialize(CaptionAlignment);
             b.SerializeArray(MenuEntries, 0);
             b.Serialize(BindingType);
-            TfOffset.RosSerialize(ref b);
-            DialogDisplacement.RosSerialize(ref b);
-            TfDisplacement.RosSerialize(ref b);
+            b.Serialize(TfOffset);
+            b.Serialize(DialogDisplacement);
+            b.Serialize(TfDisplacement);
         }
         
         public void Dispose()
@@ -130,14 +130,10 @@ namespace Iviz.Msgs.IvizMsgs
             get {
                 int size = 127;
                 size += Header.RosMessageLength;
-                size += BuiltIns.UTF8.GetByteCount(Id);
-                size += BuiltIns.UTF8.GetByteCount(Title);
-                size += BuiltIns.UTF8.GetByteCount(Caption);
-                size += 4 * MenuEntries.Length;
-                foreach (string s in MenuEntries)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(s);
-                }
+                size += BuiltIns.GetStringSize(Id);
+                size += BuiltIns.GetStringSize(Title);
+                size += BuiltIns.GetStringSize(Caption);
+                size += BuiltIns.GetArraySize(MenuEntries);
                 return size;
             }
         }
