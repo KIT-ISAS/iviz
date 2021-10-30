@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Iviz.Tools
@@ -213,23 +214,30 @@ namespace Iviz.Tools
                 return "[null exception]";
             }
 
-            var str = new StringBuilder(100);
-            Exception? subException = e;
-
-            bool firstException = true;
-            while (subException != null)
+            var str = BuilderPool.Rent();
+            try
             {
-                if (subException is not AggregateException)
+                Exception? subException = e;
+
+                bool firstException = true;
+                while (subException != null)
                 {
-                    str.Append(firstException ? "\n[" : "\n   [");
-                    str.Append(subException.GetType().Name).Append("] ").Append(subException.CheckMessage());
-                    firstException = false;
+                    if (subException is not AggregateException)
+                    {
+                        str.Append(firstException ? "\n[" : "\n   [");
+                        str.Append(subException.GetType().Name).Append("] ").Append(subException.CheckMessage());
+                        firstException = false;
+                    }
+
+                    subException = subException.InnerException;
                 }
 
-                subException = subException.InnerException;
+                return str.ToString();
             }
-
-            return str.ToString();
+            finally
+            {
+                BuilderPool.Return(str);
+            }
         }
     }
 }

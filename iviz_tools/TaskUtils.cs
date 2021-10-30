@@ -13,7 +13,7 @@ namespace Iviz.Tools
     {
         public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
         {
-            // todo: do something here?
+            // need some logging here
             return Task.Run(task, token);
         }
 

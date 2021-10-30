@@ -22,10 +22,6 @@ namespace Iviz.Tools
         public readonly int Length;
         public readonly T[] Array;
 
-#if !NETSTANDARD2_0
-        public Span<T> Span => new(Array, 0, Length);
-#endif
-
         public Rent(int count)
         {
             switch (count)
@@ -53,7 +49,8 @@ namespace Iviz.Tools
 
         public override string ToString()
         {
-            return $"[Rent Type={typeof(T).Name} Length={Length} RealSize={(Array != null ? Array.Length : 0)}]";
+            return $"[Rent Type={typeof(T).Name} Length={Length.ToString()} " +
+                   $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
         }
 
         public RentEnumerator<T> GetEnumerator() => new(Array, Length);

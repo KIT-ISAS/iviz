@@ -16,13 +16,13 @@ namespace Iviz.Tools
             CancellationToken token)
         {
             var socket = client.Client;
-            if (socket.Available >= toRead)
+            if (socket.Available < toRead)
             {
-                int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-                return new ValueTask<bool>(received == toRead);
+                return DoReadChunkAsync(socket, buffer, toRead, token);
             }
-
-            return DoReadChunkAsync(socket, buffer, toRead, token);
+            
+            int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
+            return new ValueTask<bool>(received == toRead);
         }
 
         static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -84,13 +84,13 @@ namespace Iviz.Tools
         static ValueTask<int> ReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
             CancellationToken token)
         {
-            if (socket.Available != 0)
+            if (socket.Available == 0)
             {
-                int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-                return new ValueTask<int>(received);
+                return DoReadChunkAsync(socket, buffer, offset, toRead, token);
             }
-
-            return DoReadChunkAsync(socket, buffer, offset, toRead, token);
+            
+            int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
+            return new ValueTask<int>(received);
         }
 
         static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
@@ -100,18 +100,19 @@ namespace Iviz.Tools
 
             socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
-            if (!tcs.Task.IsCompleted)
+            if (tcs.Task.IsCompleted)
             {
-                using var registration = token.Register(OnCanceled, tcs);
-                var result = await tcs.Task;
-                return socket.EndReceive(result);
+                return socket.EndReceive(await tcs.Task);
             }
-            else
+
+            using (token.Register(OnCanceled, tcs))
             {
-                var result = await tcs.Task;
-                return socket.EndReceive(result);
+                return socket.EndReceive(await tcs.Task);
             }
         }
+
+        public static Task WriteChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token) =>
+            WriteChunkAsync(client, buffer.Array, buffer.Length, token);
 
         public static async Task WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
             CancellationToken token)
@@ -131,10 +132,7 @@ namespace Iviz.Tools
         }
 
         public static Task WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
-            CancellationToken token)
-        {
-            return DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token).AsTask();
-        }
+            CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token).AsTask();
 
         static async ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
             CancellationToken token)
@@ -157,12 +155,11 @@ namespace Iviz.Tools
         public static async Task WriteChunkAsync(this TcpClient client, string text, CancellationToken token,
             int timeoutInMs = -1)
         {
-            using var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(text.Length));
-            int length = Defaults.UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
+            using var bytes = text.AsRent();
 
             if (timeoutInMs == -1)
             {
-                await WriteChunkAsync(client, bytes.Array, length, token);
+                await WriteChunkAsync(client, bytes, token);
                 return;
             }
 
@@ -170,7 +167,7 @@ namespace Iviz.Tools
             {
                 using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
                 linkedTokenSource.CancelAfter(timeoutInMs);
-                await WriteChunkAsync(client, bytes.Array, length, linkedTokenSource.Token);
+                await WriteChunkAsync(client, bytes, linkedTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -192,7 +189,7 @@ namespace Iviz.Tools
 
             writer.Write(totalLength);
             WriteHeaderEntries(writer, contents);
-            await client.WriteChunkAsync(array.Array, array.Length, token);
+            await client.WriteChunkAsync(array, token);
         }
 
         public static byte[] WriteHeaderToArray(string[] contents)
@@ -209,67 +206,10 @@ namespace Iviz.Tools
         {
             foreach (string entry in contents)
             {
-                byte[] bytes = Defaults.UTF8.GetBytes(entry);
+                using var bytes = entry.AsRent();
                 writer.Write(bytes.Length);
-                writer.Write(bytes);
+                writer.Write(bytes.Array, 0, bytes.Length);
             }
-        }
-
-        public static bool HasPrefix(this string check, string prefix)
-        {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (prefix is null)
-            {
-                throw new ArgumentNullException(nameof(prefix));
-            }
-
-            if (check.Length < prefix.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < prefix.Length; i++)
-            {
-                if (check[i] != prefix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool HasSuffix(this string check, string suffix)
-        {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (suffix is null)
-            {
-                throw new ArgumentNullException(nameof(suffix));
-            }
-
-            if (check.Length < suffix.Length)
-            {
-                return false;
-            }
-
-            int offset = check.Length - suffix.Length;
-            for (int i = 0; i < suffix.Length; i++)
-            {
-                if (check[offset + i] != suffix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public static string CheckMessage(this Exception e)
@@ -284,6 +224,7 @@ namespace Iviz.Tools
                 ? se.ErrorCode
                 : se.ErrorCode + 10000;
 
+            // we only need the text, but the only way to get it is to create an exception
             return new SocketException(fixedErrorCode).Message;
         }
     }
