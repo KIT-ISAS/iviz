@@ -895,7 +895,7 @@ namespace Iviz.App
 
                 var currentCamera = Settings.MainCameraTransform;
                 var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
-                TfLog.FormatPose(cameraPose, description);
+                TfLog.FormatPose(cameraPose, description, false);
                 cameraText.SetText(description);
             }
             finally

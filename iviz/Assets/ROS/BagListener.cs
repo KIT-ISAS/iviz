@@ -91,16 +91,20 @@ namespace Iviz.Ros
                     Length = writer.Length;
                 }
             }
+            catch (InvalidOperationException)
+            {
+                // bag is closing! ignore 
+            }
             catch (Exception e)
             {
-                Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync", e);
+                Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
             }
             finally
             {
                 if (writer != null)
                 {
-                    await writer.DisposeAsync().AwaitNoThrow(this);
                     Length = writer.Length;
+                    await writer.DisposeAsync().AwaitNoThrow(this);
                 }
             }
         }

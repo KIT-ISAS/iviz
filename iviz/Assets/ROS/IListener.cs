@@ -180,7 +180,7 @@ namespace Iviz.Ros
                 messageQueue.Enqueue(msg);
                 return;
             }
-
+            
             CallHandlerDirect(msg);
         }
 
