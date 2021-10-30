@@ -223,7 +223,7 @@ namespace Iviz.Roslib
                 if (!IsPaused)
                 {
                     T message = generator.DeserializeFromArray(readBuffer.Array, packageSize,
-                        UdpRosParams.HeaderLength);
+                        UdpRosParams.HeaderLength + 4);
                     manager.MessageCallback(message, this);
                 }
             }
@@ -252,7 +252,7 @@ namespace Iviz.Roslib
             }
 
             numReceived++;
-            bytesReceived += rcvLength + UdpRosParams.HeaderLength;
+            bytesReceived += rcvLength + UdpRosParams.HeaderLength + 4;
 
             if (!IsPaused)
             {

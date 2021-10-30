@@ -96,14 +96,17 @@ namespace Iviz.Roslib
 
         internal void RaiseNumPublishersChanged()
         {
-            try
+            Task.Run(() =>
             {
-                NumPublishersChanged?.Invoke(this);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Exception from RaiseNumPublishersChanged : {1}", this, e);
-            }
+                try
+                {
+                    NumPublishersChanged?.Invoke(this);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Exception from RaiseNumPublishersChanged : {1}", this, e);
+                }
+            }, default);
         }
 
         string GenerateId()

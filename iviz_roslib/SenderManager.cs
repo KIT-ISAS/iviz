@@ -180,7 +180,7 @@ namespace Iviz.Roslib
                 Logger.LogDebugFormat("{0}: Removing connection with '{1}' - dead x_x", this, deadSender);
             }
 
-            publisher.RaiseNumConnectionsChanged();
+            publisher.RaiseNumSubscribersChanged();
 
             cachedSenders = senders.ToArray();
         }
@@ -220,15 +220,29 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task<bool> PublishAndWaitAsync(TMessage msg, CancellationToken token)
+        public Task PublishAndWaitAsync(in TMessage msg, CancellationToken token)
         {
             if (Latching)
             {
                 latchedMessage = new NullableMessage<TMessage>(msg);
             }
 
-            await cachedSenders.Select(sender => sender.PublishAndWaitAsync(msg, token)).WhenAll();
-            return true;
+            var localSenders = cachedSenders;
+            switch (localSenders.Length)
+            {
+                case 0:
+                    return Task.CompletedTask;
+                case 1:
+                    return localSenders[0].PublishAndWaitAsync(msg, token);
+                default:
+                    var tasks = new Task[localSenders.Length];
+                    for (int i = 0; i < localSenders.Length; i++)
+                    {
+                        tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token);
+                    }
+            
+                    return tasks.WhenAll();
+            }
         }
 
         public void Dispose()

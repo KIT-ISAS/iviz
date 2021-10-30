@@ -10,7 +10,7 @@ namespace Iviz.Roslib
         int MaxQueueSizeInBytes { set; }
         Task DisposeAsync(CancellationToken token);
         void Publish(in TMessage msg);
-        Task PublishAndWaitAsync(TMessage message, CancellationToken token);
+        Task PublishAndWaitAsync(in TMessage message, CancellationToken token);
         PublisherSenderState State { get; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,16 +12,12 @@ using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
 
 namespace Iviz.Roslib
 {
     internal sealed class TcpSender<T> : IProtocolSender<T>, IRosSenderInfo where T : IMessage
     {
-        const int MaxPacketsWithoutConstraint = 2;
-
-        readonly SemaphoreSlim signal = new(0);
-        readonly ConcurrentQueue<(T msg, TaskCompletionSource? signal)> messageQueue = new();
+        readonly SenderQueue<T> senderQueue;
         readonly CancellationTokenSource runningTs = new();
         readonly TopicInfo<T> topicInfo;
         readonly Task task;
@@ -55,7 +50,12 @@ namespace Iviz.Roslib
         public string Type => topicInfo.Type;
         bool IsRunning => !task.IsCompleted;
         public bool IsAlive => IsRunning && tcpClient.Client.CheckIfAlive();
-        public int MaxQueueSizeInBytes { get; set; } = 50000;
+
+        public int MaxQueueSizeInBytes
+        {
+            get => senderQueue.MaxQueueSizeInBytes;
+            set => senderQueue.MaxQueueSizeInBytes = value;
+        }
 
         public PublisherSenderState State =>
             new()
@@ -64,7 +64,7 @@ namespace Iviz.Roslib
                 Endpoint = Endpoint,
                 RemoteId = RemoteCallerId ?? "",
                 RemoteEndpoint = RemoteEndpoint,
-                CurrentQueueSize = messageQueue.Count,
+                CurrentQueueSize = senderQueue.Count,
                 MaxQueueSize = MaxQueueSizeInBytes,
                 NumSent = numSent,
                 BytesSent = bytesSent,
@@ -75,7 +75,7 @@ namespace Iviz.Roslib
         public TcpSender(TcpClient client, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg)
         {
             this.topicInfo = topicInfo;
-
+            senderQueue = new SenderQueue<T>(this);
             tcpClient = client;
             Endpoint = new Endpoint((IPEndPoint)tcpClient.Client.LocalEndPoint!);
             RemoteEndpoint = new Endpoint((IPEndPoint)tcpClient.Client.RemoteEndPoint!);
@@ -267,18 +267,8 @@ namespace Iviz.Roslib
             {
             }
 
-            foreach (var (_, msgSignal) in messageQueue)
-            {
-                msgSignal?.TrySetException(new RosQueueException(
-                    $"Connection for '{RemoteCallerId}' is shutting down", this));
-            }
+            senderQueue.FlushRemaining();
         }
-
-        RosQueueException CreateQueueException(Exception e) =>
-            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
-
-        RosQueueOverflowException CreateOverflowException() =>
-            new($"Message could not be sent to node '{RemoteCallerId}'", this);
 
         async Task ProcessLoop(NullableMessage<T> latchedMsg)
         {
@@ -291,68 +281,24 @@ namespace Iviz.Roslib
                 Publish(latchedMsg.Value);
             }
 
-            List<Element> queue = new();
-
             while (KeepRunning)
             {
-                await signal.WaitAsync(runningTs.Token);
+                await senderQueue.WaitAsync(runningTs.Token);
 
-                int totalQueueSizeInBytes = ReadFromQueue(queue);
-
-                int startIndex;
-                if (queue.Count <= MaxPacketsWithoutConstraint ||
-                    totalQueueSizeInBytes < MaxQueueSizeInBytes)
-                {
-                    startIndex = 0;
-                }
-                else
-                {
-                    DiscardOldMessages(queue, totalQueueSizeInBytes, MaxQueueSizeInBytes,
-                        out startIndex, out int newBytesDropped);
-
-                    numDropped += startIndex;
-                    bytesDropped += newBytesDropped;
-
-                    var discarded = queue.Take(startIndex);
-                    foreach (var e in discarded)
-                    {
-                        e.signal?.TrySetException(CreateOverflowException());
-                    }
-                }
-
+                var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
                 if (LoopbackReceiver != null)
                 {
-                    SendWithLoopback(queue.Skip(startIndex), LoopbackReceiver);
+                    senderQueue.SendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
                 }
                 else
                 {
-                    await SendWithSocketAsync(queue.Skip(startIndex), writeBuffer);
+                    await SendWithSocketAsync(queue, writeBuffer);
                 }
             }
         }
 
-        void SendWithLoopback(in RangeEnumerable<Element> queue, ILoopbackReceiver<T> loopbackReceiver)
-        {
-            try
-            {
-                foreach (var (msg, msgLength, msgSignal) in queue)
-                {
-                    loopbackReceiver.Post(msg, msgLength);
-
-                    numSent++;
-                    bytesSent += msgLength + 4;
-                    msgSignal?.TrySetResult(null);
-                }
-            }
-            catch (Exception e)
-            {
-                SetExceptionsInMessages(queue, CreateQueueException(e));
-                throw;
-            }
-        }
-
-        async Task SendWithSocketAsync(RangeEnumerable<Element> queue, ByteBufferRent writeBuffer)
+        async Task SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ByteBufferRent writeBuffer)
         {
             void WriteLengthToBuffer(int i)
             {
@@ -365,8 +311,13 @@ namespace Iviz.Roslib
 
             try
             {
-                foreach (var (msg, msgLength, msgSignal) in queue)
+                foreach (var entry in queue)
                 {
+                    if (entry is not var (msg, msgLength, msgSignal))
+                    {
+                        continue;
+                    }
+
                     writeBuffer.EnsureCapability(msgLength + 4);
 
                     msg.SerializeToArray(writeBuffer.Array, 4);
@@ -374,28 +325,16 @@ namespace Iviz.Roslib
                     await tcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 
                     numSent++;
-                    bytesSent += msgLength + 4;
+                    bytesSent += msgLength + UdpRosParams.HeaderLength + 4;
                     msgSignal?.TrySetResult(null);
                 }
             }
             catch (Exception e)
             {
-                SetExceptionsInMessages(queue, CreateQueueException(e));
+                senderQueue.FlushFrom(queue, e);
                 throw;
             }
         }
-
-        void SetExceptionsInMessages(IEnumerable<Element> queue, Exception e)
-        {
-            var entries = queue
-                .Select(element => element.signal)
-                .Where(msgSignal => msgSignal != null && !msgSignal.Task.IsCompleted);
-            foreach (var msgSignal in entries)
-            {
-                msgSignal?.TrySetException(CreateQueueException(e));
-            }
-        }
-
 
         public void Publish(in T message)
         {
@@ -405,86 +344,21 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Enqueue((message, null));
-            signal.Release();
+            senderQueue.Enqueue(message);
         }
 
-        public async Task PublishAndWaitAsync(T message, CancellationToken token)
+        public Task PublishAndWaitAsync(in T message, CancellationToken token)
         {
-            if (!IsRunning)
+            if (IsRunning)
             {
-                numDropped++;
-                throw new InvalidOperationException("Sender has been disposed.");
+                return senderQueue.EnqueueAsync(message, token);
             }
+            
+            numDropped++;
+            return Task.FromException(new InvalidOperationException("Sender has been disposed."));
 
-            var msgSignal = new TaskCompletionSource();
-            messageQueue.Enqueue((message, msgSignal));
-            signal.Release();
-
-            using var registration = token.Register(() => msgSignal.TrySetCanceled(token));
-            await msgSignal.Task;
-        }
-
-        int ReadFromQueue(List<Element> result)
-        {
-            int totalQueueSizeInBytes = 0;
-
-            result.Clear();
-            while (messageQueue.TryDequeue(out var tuple))
-            {
-                int msgLength = tuple.msg.RosMessageLength;
-                result.Add(new Element(tuple.msg, msgLength, tuple.signal));
-                totalQueueSizeInBytes += msgLength;
-            }
-
-            return totalQueueSizeInBytes;
-        }
-
-        static void DiscardOldMessages(List<Element> queue, int totalQueueSizeInBytes, int maxQueueSizeInBytes,
-            out int numDropped, out int bytesDropped)
-        {
-            int c = queue.Count - 1;
-
-            int remainingBytes = maxQueueSizeInBytes;
-            for (int i = 0; i < MaxPacketsWithoutConstraint; i++)
-            {
-                remainingBytes -= queue[c - i].messageLength;
-            }
-
-            int consideredPackets = MaxPacketsWithoutConstraint;
-            if (remainingBytes > 0)
-            {
-                // start discarding old messages
-                for (int i = MaxPacketsWithoutConstraint; i < queue.Count; i++)
-                {
-                    int currentMsgLength = queue[c - i].messageLength;
-                    if (currentMsgLength > remainingBytes)
-                    {
-                        break;
-                    }
-
-                    remainingBytes -= currentMsgLength;
-                    consideredPackets++;
-                }
-            }
-
-            numDropped = queue.Count - consideredPackets;
-            bytesDropped = totalQueueSizeInBytes - maxQueueSizeInBytes + remainingBytes;
         }
 
         public override string ToString() => $"[TcpSender '{Topic}' :{Endpoint.Port.ToString()} >>'{RemoteCallerId}']";
-
-        readonly struct Element
-        {
-            readonly T message;
-            public readonly int messageLength;
-            public readonly TaskCompletionSource? signal;
-
-            public Element(T message, int messageLength, TaskCompletionSource? signal) =>
-                (this.message, this.messageLength, this.signal) = (message, messageLength, signal);
-
-            public void Deconstruct(out T outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
-                (outMessage, outMessageLength, outSignal) = (message, messageLength, signal);
-        }
     }
 }

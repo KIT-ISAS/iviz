@@ -72,11 +72,10 @@ namespace Iviz.Roslib
         /// all the connections have sent the message, and throws an exception if at least one connection failed.
         /// </param>
         /// <param name="token">An optional cancellation token.</param>
-        /// <returns>False if there are no connections. True if all connections sent the message. Otherwise an exception.</returns>
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public ValueTask<bool> PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public Task PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
@@ -162,11 +161,10 @@ namespace Iviz.Roslib
         /// all the connections have sent the message, and throws an exception if at least one connection failed.
         /// </param>
         /// <param name="token">An optional cancellation token.</param>
-        /// <returns>False if there are no connections. True if all connections sent the message. Otherwise an exception.</returns>
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public Task PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
     }
 
 }

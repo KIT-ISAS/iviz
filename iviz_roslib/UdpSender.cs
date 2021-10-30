@@ -19,7 +19,7 @@ namespace Iviz.Roslib
     internal sealed class UdpSender<T> : IProtocolSender<T>, IRosSenderInfo where T : IMessage
     {
         readonly CancellationTokenSource runningTs = new();
-        readonly AsyncCollection<(T msg, TaskCompletionSource? signal)?> messageQueue = new();
+        readonly SenderQueue<T> senderQueue;
         readonly TopicInfo<T> topicInfo;
         readonly UdpClient udpClient;
         readonly int maxPackageSize;
@@ -40,13 +40,16 @@ namespace Iviz.Roslib
         long numDropped;
         long numSent;
 
+        byte msgId;
+
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
         public bool IsAlive => !task.IsCompleted;
 
         public int MaxQueueSizeInBytes
         {
-            set { } // nyi
+            get => senderQueue.MaxQueueSizeInBytes;
+            set => senderQueue.MaxQueueSizeInBytes = value;
         }
 
         public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
@@ -57,6 +60,8 @@ namespace Iviz.Roslib
             const int ownMaxPackageSize = UdpRosParams.DefaultMTU - UdpRosParams.IpUdpHeadersLength;
 
             this.topicInfo = topicInfo;
+            senderQueue = new SenderQueue<T>(this);
+
             maxPackageSize = Math.Min(request.MaxPacketSize, ownMaxPackageSize);
             RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
 
@@ -162,18 +167,7 @@ namespace Iviz.Roslib
             {
             }
 
-            messageQueue.CompleteAdding();
-            foreach (var pair in messageQueue.GetConsumingEnumerable())
-            {
-                if (pair == null)
-                {
-                    continue;
-                }
-
-                var (_, msgSignal) = pair.Value;
-                msgSignal?.TrySetException(
-                    new RosQueueException($"Connection for '{RemoteCallerId}' is shutting down", this));
-            }
+            senderQueue.FlushRemaining();
         }
 
         async Task ProcessLoop(NullableMessage<T> latchedMsg)
@@ -189,115 +183,103 @@ namespace Iviz.Roslib
                 writeBuffer[i] = 0;
             }
 
-            byte msgId = 0;
-
-            void WriteKeepAlive()
-            {
-                byte[] array = writeBuffer.Array;
-
-                // 4 bytes connection id (here always 0)
-                // 1 byte op code (2 - keepalive)
-                array[4] = UdpRosParams.OpCodePing;
-                // 1 byte msgId
-                array[5] = msgId++;
-                // 2 bytes block id (0, unfragmented)
-                // 4 bytes message length
-                array[8] = 0;
-                array[9] = 0;
-                array[10] = 0;
-                array[11] = 0;
-                // total 12
-            }
-
-            void WriteLengthToBuffer(int msgLength)
-            {
-                byte[] array = writeBuffer.Array;
-
-                // 4 bytes connection id (here always 0)
-                // 1 byte op code (0 - unfragmented datagram)
-                // 1 byte msgId
-                array[4] = UdpRosParams.OpCodeData0;
-                array[5] = msgId++;
-                // 2 bytes block id (0, unfragmented)
-                // 4 bytes message length
-                array[8] = (byte)msgLength;
-                array[9] = (byte)(msgLength >> 8);
-                array[10] = (byte)(msgLength >> 0x10);
-                array[11] = (byte)(msgLength >> 0x18);
-                // total 12
-            }
-
-            async Task KeepAliveMessages()
-            {
-                while (KeepRunning)
-                {
-                    await Task.Delay(3000, runningTs.Token);
-                    await messageQueue.AddAsync(null);
-                }
-            }
-
-            var _ = Task.Run(KeepAliveMessages);
+            _ = Task.Run(KeepAliveMessages);
 
             while (KeepRunning)
             {
-                (T msg, TaskCompletionSource? signal)? pair;
+                await senderQueue.WaitAsync(runningTs.Token);
 
-                try
-                {
-                    pair = await messageQueue.TakeAsync(runningTs.Token);
-                }
-                catch (InvalidOperationException)
-                {
-                    break;
-                }
-
-                if (pair is null)
-                {
-                    WriteKeepAlive();
-                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, UdpRosParams.HeaderLength,
-                        runningTs.Token);
-                    continue;
-                }
-
-                var (msg, msgSignal) = pair.Value;
-                int msgLength = msg.RosMessageLength;
+                var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
                 if (LoopbackReceiver != null)
                 {
-                    LoopbackReceiver.Post(msg, msgLength);
+                    senderQueue.SendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
+                }
+                else
+                {
+                    await SendWithSocketAsync(queue, writeBuffer);
+                }
+            }
+        }
+
+        async Task SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
+        {
+            const int bothHeadersSize = UdpRosParams.HeaderLength + 4;
+
+            try
+            {
+                foreach (var e in queue)
+                {
+                    if (e is not var (msg, msgLength, msgSignal))
+                    {
+                        WriteKeepAlive(writeBuffer.Array);
+                        await udpClient.WriteChunkAsync(writeBuffer.Array, 0, bothHeadersSize, runningTs.Token);
+                        continue;
+                    }
+
+                    if (msgLength > maxPackageSize - bothHeadersSize)
+                    {
+                        msgSignal?.TrySetException(CreateQueueOverflowException());
+                        numDropped++;
+                        bytesDropped += msgLength + bothHeadersSize;
+                        continue;
+                    }
+
+                    WriteLengthToBuffer(msgLength, writeBuffer.Array);
+                    msg.SerializeToArray(writeBuffer.Array, bothHeadersSize);
+
+                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, msgLength + bothHeadersSize, runningTs.Token);
+
                     numSent++;
-                    bytesSent += msgLength + 4;
-                    msgSignal?.TrySetResult(null);
-                    continue;
-                }
-
-                if (msgLength > maxPackageSize - UdpRosParams.HeaderLength)
-                {
-                    msgSignal?.TrySetException(CreateQueueOverflowException());
-                    numDropped++;
-                    bytesDropped += msgLength + 4;
-                    continue;
-                }
-
-                try
-                {
-                    msg.SerializeToArray(writeBuffer.Array, UdpRosParams.HeaderLength);
-                    WriteLengthToBuffer(msgLength);
-
-                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, msgLength + UdpRosParams.HeaderLength,
-                        runningTs.Token);
-
-                    numSent++;
-                    bytesSent += msgLength + 4;
+                    bytesSent += msgLength + bothHeadersSize;
                     msgSignal?.TrySetResult(null);
                 }
-                catch (Exception e)
-                {
-                    msgSignal?.TrySetException(CreateQueueException(e));
-                    numDropped++;
-                    bytesDropped += msgLength + 4;
-                    throw;
-                }
+            }
+            catch (Exception e)
+            {
+                senderQueue.FlushFrom(queue, e);
+                throw;
+            }
+        }
+
+        void WriteKeepAlive(byte[] array)
+        {
+            // 4 bytes connection id (here always 0)
+            // 1 byte op code (2 - keepalive)
+            array[4] = UdpRosParams.OpCodePing;
+            // 1 byte msgId
+            array[5] = msgId++;
+            // 2 bytes block id (0, unfragmented)
+            // 4 bytes message length
+            array[8] = 0;
+            array[9] = 0;
+            array[10] = 0;
+            array[11] = 0;
+            // total 12
+        }
+
+        void WriteLengthToBuffer(int msgLength, byte[] array)
+        {
+            // 4 bytes connection id (here always 0)
+            // 1 byte op code (0 - unfragmented datagram)
+            // 1 byte msgId
+            array[4] = UdpRosParams.OpCodeData0;
+            array[5] = msgId++;
+            // 2 bytes block id (0, unfragmented)
+            // 4 bytes message length
+            array[8] = (byte)msgLength;
+            array[9] = (byte)(msgLength >> 8);
+            array[10] = (byte)(msgLength >> 0x10);
+            array[11] = (byte)(msgLength >> 0x18);
+            // total 12
+        }
+
+        async Task KeepAliveMessages()
+        {
+            while (KeepRunning)
+            {
+                await Task.Delay(3000, runningTs.Token);
+                senderQueue.EnqueueEmpty();
             }
         }
 
@@ -311,7 +293,6 @@ namespace Iviz.Roslib
             disposed = true;
 
             runningTs.Cancel();
-            messageQueue.CompleteAdding();
             udpClient.Dispose();
 
             await task.AwaitNoThrow(5000, this, token);
@@ -332,8 +313,8 @@ namespace Iviz.Roslib
                 Endpoint = Endpoint,
                 RemoteId = RemoteCallerId,
                 RemoteEndpoint = RemoteEndpoint,
-                CurrentQueueSize = 0,
-                MaxQueueSize = 0,
+                CurrentQueueSize = senderQueue.Count,
+                MaxQueueSize = MaxQueueSizeInBytes,
                 NumSent = numSent,
                 BytesSent = bytesSent,
                 NumDropped = numDropped,
@@ -348,22 +329,18 @@ namespace Iviz.Roslib
                 return;
             }
 
-            messageQueue.Add((message, null));
+            senderQueue.Enqueue(message);
         }
 
-        public async Task PublishAndWaitAsync(T message, CancellationToken token)
+        public Task PublishAndWaitAsync(in T message, CancellationToken token)
         {
-            if (!IsAlive)
+            if (IsAlive)
             {
-                numDropped++;
-                throw new InvalidOperationException("Sender has been disposed.");
+                return senderQueue.EnqueueAsync(message, token);
             }
 
-            var msgSignal = new TaskCompletionSource();
-            await messageQueue.AddAsync((message, msgSignal), token);
-
-            using var registration = token.Register(() => msgSignal.TrySetCanceled(token));
-            await msgSignal.Task;
+            numDropped++;
+            return Task.FromException(new InvalidOperationException("Sender has been disposed."));
         }
 
         public override string ToString() =>

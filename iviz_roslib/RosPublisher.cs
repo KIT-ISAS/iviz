@@ -100,7 +100,7 @@ namespace Iviz.Roslib
             manager.Publish((T)message);
         }
 
-        ValueTask<bool> IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -134,7 +134,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public async ValueTask<bool> PublishAsync(T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public Task PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -145,19 +145,15 @@ namespace Iviz.Roslib
             AssertIsAlive();
             message.RosValidate();
 
-
             switch (policy)
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return true;
+                    return Task.CompletedTask;
                 case RosPublishPolicy.WaitUntilSent:
-                {
-                    using var linkedToken = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
-                    return await manager.PublishAndWaitAsync(message, linkedToken.Token);
-                }
+                    return manager.PublishAndWaitAsync(message, token);
                 default:
-                    return false;
+                    return Task.CompletedTask;
             }
         }
 
@@ -298,9 +294,19 @@ namespace Iviz.Roslib
         /// </summary>
         public event Action<RosPublisher<T>>? NumSubscribersChanged;
 
-        internal void RaiseNumConnectionsChanged()
+        internal void RaiseNumSubscribersChanged()
         {
-            NumSubscribersChanged?.Invoke(this);
+            Task.Run(() =>
+            {
+                try
+                {
+                    NumSubscribersChanged?.Invoke(this);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Exception from NumSubscribersChanged : {1}", this, e);
+                }
+            }, default);            
         }
 
         void AssertIsAlive()
