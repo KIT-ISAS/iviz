@@ -1,4 +1,5 @@
 using System;
+using Application.Displays;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -12,22 +13,42 @@ namespace Iviz.App.ARDialogs
     public sealed class Tooltip : ARWidget, IRecyclable
     {
         [SerializeField] TMP_Text text = null;
-        MeshMarkerResource cube;
+        RoundedPlaneResource cube;
 
         protected override void Awake()
         {
             base.Awake();
-            cube = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
+            cube = ResourcePool.RentDisplay<RoundedPlaneResource>(transform);
+            cube.Radius = 3f;
             cube.Layer = LayerType.IgnoreRaycast;
-            cube.CastsShadows = false;
-            MainColor = Color.blue.WithAlpha(0.5f);
+            cube.ShadowsEnabled = false;
+            BackgroundColor = Color.blue;
+            CaptionColor = Color.white;
             Caption = "0.5 m/s";
+        }
+
+        public Color BackgroundColor
+        {
+            get => cube.Color;
+            set => cube.Color = value;
         }
 
         public override Color MainColor
         {
-            get => cube.Color;
-            set => cube.Color = value;
+            get => BackgroundColor;
+            set => BackgroundColor = value;
+        }
+        
+        public Color CaptionColor
+        {
+            get => text.color;
+            set => text.color = value;
+        }
+        
+        public override Color SecondaryColor
+        {
+            get => CaptionColor;
+            set => CaptionColor = value;
         }
 
         public string Caption
@@ -36,8 +57,8 @@ namespace Iviz.App.ARDialogs
             set
             {
                 text.text = value;
-                cube.Transform.localScale = new Vector3(text.preferredWidth + 0.1f, text.preferredHeight + 0.05f, 0.01f);
-                BoxCollider.size = cube.Transform.localScale;
+                cube.Size = new Vector2(text.preferredWidth + 5f, text.preferredHeight + 2f);
+                BoxCollider.size = cube.Bounds.size;
             }
         }
 
@@ -49,13 +70,18 @@ namespace Iviz.App.ARDialogs
 
         void IRecyclable.SplitForRecycle()
         {
-            cube.ReturnToPool(Resource.Displays.Cube);
+            cube.ReturnToPool();
         }
 
+        public void PointToCamera()
+        {
+            Transform.LookAt(2 * Transform.position - Settings.MainCameraTransform.position, Vector3.up);
+        }
+        
         protected override void Update()
         {
             base.Update();
-            Transform.LookAt(2 * Transform.position - Settings.MainCameraTransform.position, Vector3.up);
+            PointToCamera();
         }
     }
 }

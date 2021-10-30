@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,8 +22,8 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
-        [ItemNotNull] protected static readonly ReadOnlyCollection<BriefTopicInfo> EmptyTopics =
-            Array.Empty<BriefTopicInfo>().AsReadOnly();
+        [ItemNotNull]
+        protected static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
 
         readonly SemaphoreSlim signal = new SemaphoreSlim(0);
         readonly Task task;
@@ -38,7 +39,7 @@ namespace Iviz.Ros
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
-        protected ReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
+        protected IReadOnlyCollection<BriefTopicInfo> PublishedTopics { get; set; } = EmptyTopics;
 
         public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
             CancellationToken token)

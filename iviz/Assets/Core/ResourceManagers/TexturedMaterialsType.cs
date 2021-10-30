@@ -15,7 +15,7 @@ namespace Iviz.Resources
 
         public Material Get([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
-            if (diffuse is null)
+            if (diffuse == null && bump == null)
             {
                 throw new ArgumentNullException(nameof(diffuse));
             }
@@ -47,7 +47,7 @@ namespace Iviz.Resources
 
         public Material GetAlpha([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
         {
-            if (diffuse is null)
+            if (diffuse == null && bump == null)
             {
                 throw new ArgumentNullException(nameof(diffuse));
             }

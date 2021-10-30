@@ -80,7 +80,7 @@ namespace Iviz.Controllers
                 }
                 else if (CubesVisible)
                 {
-                    numValid = Enumerable.Sum(gridTiles, grid => grid.NumValidValues);
+                    numValid = gridTiles.Sum(grid => grid.NumValidValues);
                 }
                 else
                 {

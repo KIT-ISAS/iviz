@@ -88,7 +88,7 @@ namespace Iviz.Displays
         {
             resource = ResourcePool.RentDisplay<LineResource>();
             resource.ElementScale = 0.001f;
-            resource.Visible = ARController.InstanceVisible;
+            resource.Visible = ARController.IsVisible;
 
             resource.MaterialOverride = pulseStart != null
                 ? Resource.Materials.LinePulse.Object
@@ -108,7 +108,7 @@ namespace Iviz.Displays
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            OnARCameraViewChanged(ARController.InstanceVisible);
+            OnARCameraViewChanged(ARController.IsVisible);
         }
 
         void Start()
@@ -156,7 +156,7 @@ namespace Iviz.Displays
             {
                 resource.MaterialOverride = Resource.Materials.LineMesh.Object;
                 pulseMaterialSet = false;
-                resource.Visible = !ARController.InstanceVisible;
+                resource.Visible = !ARController.IsVisible;
             }
         }
 

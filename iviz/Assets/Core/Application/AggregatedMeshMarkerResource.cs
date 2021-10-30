@@ -27,7 +27,7 @@ namespace Iviz.Displays
         }        
         
         [NotNull]
-        public IReadOnlyCollection<MeshTrianglesResource> Children
+        public IReadOnlyList<MeshTrianglesResource> Children
         {
             get => children;
             set
@@ -130,10 +130,6 @@ namespace Iviz.Displays
                     }
                 }
             }
-        }        
-
-        public void Suspend()
-        {
         }
 
         void Awake()

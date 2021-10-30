@@ -220,7 +220,7 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ReadOnlyCollection<BriefTopicInfo> topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
+            var topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
             string type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
             
             if (type == null)

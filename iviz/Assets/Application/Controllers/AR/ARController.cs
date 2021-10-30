@@ -82,9 +82,9 @@ namespace Iviz.Controllers
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
         public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
-        public static bool HasARController => Instance != null;
+        public static bool IsActive => Instance != null;
         [CanBeNull] public static ARFoundationController Instance { get; protected set; }
-        public static bool InstanceVisible => Instance != null && Instance.Visible;
+        public static bool IsVisible => Instance != null && Instance.Visible;
 
         readonly ARConfiguration config = new ARConfiguration();
         readonly MarkerDetector detector = new MarkerDetector();
@@ -267,7 +267,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// AR has been enabled / disabled
         /// </summary>
-        public static event Action<bool> ARActiveChanged;
+        public static event Action<bool> ARStateChanged;
 
         /// <summary>
         /// AR camera view has been enabled / disabled
@@ -311,7 +311,7 @@ namespace Iviz.Controllers
 
         protected static void RaiseARActiveChanged()
         {
-            ARActiveChanged?.Invoke(true);
+            ARStateChanged?.Invoke(true);
         }
 
         static int Sign(float f) => f > 0 ? 1 : f < 0 ? -1 : 0;
@@ -496,7 +496,7 @@ namespace Iviz.Controllers
 
         public virtual void StopController()
         {
-            ARActiveChanged?.Invoke(false);
+            ARStateChanged?.Invoke(false);
 
             Visible = false;
             WorldScale = 1;
@@ -529,7 +529,7 @@ namespace Iviz.Controllers
 
         public static void ClearResources()
         {
-            ARActiveChanged = null;
+            ARStateChanged = null;
             ARCameraViewChanged = null;
         }
     }

@@ -86,7 +86,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                bool arEnabled = ARController.InstanceVisible;
+                bool arEnabled = ARController.IsVisible;
                 bool gridVisible = value && (arEnabled && !HideInARMode || !arEnabled);
                 if (!gridVisible)
                 {

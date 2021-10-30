@@ -37,7 +37,7 @@ namespace Iviz.Displays
             }
 
             token.ThrowIfCancellationRequested();
-            GameObject root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
+            var root = new GameObject($"Root:{uriString} [{msg.OrientationHint}]");
 
             try
             {
@@ -58,19 +58,14 @@ namespace Iviz.Displays
         static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
             IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
         {
-            switch (msg.OrientationHint.ToUpperInvariant())
-            {
-                case "Z_UP":
-                    root.transform.localRotation = Quaternion.Euler(0, -90, 0);
-                    break;
-                default:
-                    root.transform.localRotation = Quaternion.Euler(90, 0, 90);
-                    break;
-            }
+            root.transform.localRotation =
+                msg.OrientationHint.ToUpperInvariant() == "Z_UP"
+                    ? Quaternion.Euler(0, -90, 0)
+                    : Quaternion.Euler(90, 0, 90);
 
-            AggregatedMeshMarkerResource amm = root.AddComponent<AggregatedMeshMarkerResource>();
-            List<MeshTrianglesResource> children = new List<MeshTrianglesResource>();
-            List<MeshTrianglesResource> templateMeshes = new List<MeshTrianglesResource>();
+            var marker = root.AddComponent<AggregatedMeshMarkerResource>();
+            var children = new List<MeshTrianglesResource>();
+            var templateMeshes = new List<MeshTrianglesResource>();
 
             foreach (var mesh in msg.Meshes)
             {
@@ -86,21 +81,21 @@ namespace Iviz.Displays
 
                 meshResource.Name = mesh.Name;
 
-                Iviz.Msgs.IvizMsgs.Color32[] meshColors = mesh.ColorChannels.Length != 0
+                var meshColors = mesh.ColorChannels.Length != 0
                     ? mesh.ColorChannels[0].Colors
                     : Array.Empty<Iviz.Msgs.IvizMsgs.Color32>();
 
                 var material = msg.Materials[(int)mesh.MaterialIndex];
-                Msgs.IvizMsgs.Texture diffuseTexture =
+                var diffuseTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_DIFFUSE);
-                Msgs.IvizMsgs.Texture bumpTexture =
+                var bumpTexture =
                     material.Textures.FirstOrDefault(texture => texture.Type == Msgs.IvizMsgs.Texture.TYPE_NORMALS);
 
-                Vector3f[] meshDiffuseTexCoords =
+                var meshDiffuseTexCoords =
                     diffuseTexture != null && diffuseTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[diffuseTexture.UvIndex].Coords
                         : Array.Empty<Vector3f>();
-                Vector3f[] meshBumpTexCoords =
+                var meshBumpTexCoords =
                     bumpTexture != null && bumpTexture.UvIndex < mesh.TexCoords.Length
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
                         : Array.Empty<Vector3f>();
@@ -211,21 +206,21 @@ namespace Iviz.Displays
                 }
             }
 
-            amm.Children = children;
+            marker.Children = children;
 
-            BoxCollider ammCollider = root.EnsureComponent<BoxCollider>();
+            var parentCollider = root.EnsureComponent<BoxCollider>();
 
-            Bounds? ammBounds = amm.Children
-                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform))
-                .CombineBounds();
+            var markerChildren = marker.Children
+                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform));
+            var nullableRootBounds = markerChildren.CombineBounds();
 
-            if (ammBounds != null)
+            if (nullableRootBounds is Bounds rootBounds)
             {
-                ammCollider.center = ammBounds.Value.center;
-                ammCollider.size = ammBounds.Value.size;
+                parentCollider.center = rootBounds.center;
+                parentCollider.size = rootBounds.size;
             }
 
-            return amm;
+            return marker;
         }
 
         [ItemCanBeNull]

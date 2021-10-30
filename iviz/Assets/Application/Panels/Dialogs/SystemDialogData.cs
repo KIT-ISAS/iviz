@@ -151,11 +151,12 @@ namespace Iviz.App
             }
 
             description.Clear();
-            var services = new SortedSet<string>(Enumerable.Select(systemState.Services, service => service.Topic));
+            var services = new SortedSet<string>(systemState.Services.Select(service => service.Topic));
 
             foreach (string service in services)
             {
-                description.Append("<font=Bold><u><link=").Append(service).Append(">").Append(service)
+                description.Append("<font=Bold><u><link=")
+                    .Append(service).Append(">").Append(service)
                     .AppendLine("</link></u></font>");
             }
 
@@ -538,13 +539,13 @@ namespace Iviz.App
                 .SelectMany(topic => topic.Receivers)
                 .Select(receiver => receiver.RemoteUri.Host)
                 .Where(host => !IPAddress.TryParse(host, out _));
-            
+
             hostsBuffer.Clear();
             foreach (string hostname in hostsEnum)
             {
                 hostsBuffer.Add(hostname);
             }
-            
+
             if (hostsBuffer.Count == 0)
             {
                 return;
@@ -596,9 +597,9 @@ namespace Iviz.App
         [DataMember] public string Address { get; set; }
 
         public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
-        
+
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
-        
+
         public static bool operator !=(HostAlias a, HostAlias b) => !a.Equals(b);
 
         public static bool operator ==(HostAlias a, HostAlias b) => a.Equals(b);

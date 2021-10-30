@@ -27,7 +27,7 @@ namespace Iviz.Displays
             arCameraTransform = arCamera.transform;
             Transform.SetParentLocal(TfListener.OriginFrame.Transform);
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            gameObject.SetActive(!ARController.InstanceVisible);
+            gameObject.SetActive(!ARController.IsVisible);
         }
 
         void OnARCameraViewChanged(bool newState)

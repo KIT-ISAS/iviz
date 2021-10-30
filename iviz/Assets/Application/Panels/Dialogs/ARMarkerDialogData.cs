@@ -47,16 +47,16 @@ namespace Iviz.App
         public ARMarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ARMarkerDialogContents>(DialogPanelType.ARMarkers);
-            ARController.ARActiveChanged += OnARActiveChanged;
+            ARController.ARStateChanged += OnARStateChanged;
         }
 
 
         public override void FinalizePanel()
         {
-            ARController.ARActiveChanged -= OnARActiveChanged;
+            ARController.ARStateChanged -= OnARStateChanged;
         }
 
-        void OnARActiveChanged(bool _)
+        void OnARStateChanged(bool _)
         {
             if (ARController.Instance != null)
             {

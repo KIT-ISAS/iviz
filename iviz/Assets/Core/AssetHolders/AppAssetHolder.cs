@@ -54,7 +54,7 @@ namespace Iviz.Displays
         public GameObject PositionDisc3D;
         
         public GameObject TfFrameHighlighter;
-        public GameObject PoseHighlighter;
+        public GameObject ClickedPoseHighlighter;
 
         public Material LineConnectorMaterial;
         public Material TextMaterial;
@@ -67,7 +67,8 @@ namespace Iviz.Displays
         public Material DepthCloud;
         public Material OccupancyGridMat;
         public Material OccupancyGridClipMat;
-        
+
+        public GameObject RoundedPlane;
         
         public AudioClip Click;
         public AudioClip Screenshot;

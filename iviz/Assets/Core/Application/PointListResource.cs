@@ -170,7 +170,7 @@ namespace Iviz.Displays
                         }
 
                         mesh.SetVertices(points);
-                        mesh.SetUVs(0, uvs);
+                        mesh.SetUVs(uvs);
                         mesh.SetIndices(indices, MeshTopology.Points, 0);
                     }
                 }

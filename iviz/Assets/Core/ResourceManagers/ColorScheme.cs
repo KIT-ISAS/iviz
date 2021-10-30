@@ -15,8 +15,8 @@ namespace Iviz.Resources
 
         public Color GridGreenLine { get; } = new Color(0, 0.5f, 0);
         public Color GridRedLine { get; } = new Color(0.5f, 0, 0);
-        public Color GridInterior { get; } = (0.6f * Color.white).WithAlpha(1);
-        public Color GridLine { get; } = (0.25f * 0.6f * Color.white).WithAlpha(1);
+        public Color GridInterior { get; } = Color.white.WithValue(0.6f);
+        public Color GridLine { get; } = Color.white.WithValue(0.25f * 0.6f);
 
         public Color AxisX { get; } = Color.red.WithSaturation(0.7f);
         public Color AxisY { get; } = Color.green.WithSaturation(0.7f);
@@ -33,6 +33,8 @@ namespace Iviz.Resources
         
         public Color EnabledListener { get; } = new Color(0.71f, 0.98f, 1, 0.733f);
         public Color EnabledSender { get; } = new Color(0.59f, 0.79f, 0.90f, 0.90f);
+
+        public Color HighlighterBackground { get; } = Color.blue.WithValue(0.5f).WithSaturation(0.5f);
 
     }
 }

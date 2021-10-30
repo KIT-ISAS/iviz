@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Iviz.Core;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.App

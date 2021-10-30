@@ -54,11 +54,7 @@ namespace Iviz.App
             var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();
             
-            if (moduleData is ARModuleData)
-            {
-                ModuleListPanel.AllGuiVisible = false;
-            }
-            else
+            if (!(moduleData is ARModuleData))
             {
                 moduleData.ShowPanel();
             }

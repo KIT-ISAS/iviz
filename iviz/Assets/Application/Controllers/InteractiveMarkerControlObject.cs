@@ -142,10 +142,10 @@ namespace Iviz.Controllers
         }
 
         static InteractionMode? ValidateInteractionMode(int mode) =>
-            (mode < 0 || mode > (int) InteractionMode.MoveRotate3D) ? null : (InteractionMode?) mode;
+            (mode < 0 || mode > (int)InteractionMode.MoveRotate3D) ? null : (InteractionMode?)mode;
 
         static OrientationMode? ValidateOrientationMode(int mode) =>
-            (mode < 0 || mode > (int) OrientationMode.ViewFacing) ? null : (OrientationMode?) mode;
+            (mode < 0 || mode > (int)OrientationMode.ViewFacing) ? null : (OrientationMode?)mode;
 
         [NotNull]
         IControlMarker EnsureControlDisplayExists()
@@ -210,7 +210,7 @@ namespace Iviz.Controllers
             }
 
             Control.Suspend();
-            ResourcePool.Return(Resource.Displays.InteractiveControl, ((MonoBehaviour) Control).gameObject);
+            ResourcePool.Return(Resource.Displays.InteractiveControl, ((MonoBehaviour)Control).gameObject);
             Control = null;
         }
 
@@ -219,7 +219,7 @@ namespace Iviz.Controllers
         {
             if (interactionMode < 0 || interactionMode > InteractionMode.MoveRotate3D)
             {
-                description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int) interactionMode)
+                description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int)interactionMode)
                     .AppendLine();
                 numErrors++;
                 DisposeControlDisplay();
@@ -271,7 +271,7 @@ namespace Iviz.Controllers
 
             if (orientationMode < 0 || orientationMode > OrientationMode.ViewFacing)
             {
-                description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int) orientationMode)
+                description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int)orientationMode)
                     .AppendLine();
                 numErrors++;
 
@@ -392,7 +392,7 @@ namespace Iviz.Controllers
             }
 
             Control.Suspend();
-            GameObject controlObject = ((MonoBehaviour) Control).gameObject;
+            GameObject controlObject = ((MonoBehaviour)Control).gameObject;
             if (Settings.IsHololens)
             {
                 HololensManager.ResourcePool.Dispose(controlObject);
@@ -445,7 +445,7 @@ namespace Iviz.Controllers
         [NotNull]
         static string InteractionModeToString(int mode)
         {
-            switch ((InteractionMode) mode)
+            switch ((InteractionMode)mode)
             {
                 case InteractionMode.None:
                     return "None";
@@ -475,7 +475,7 @@ namespace Iviz.Controllers
         [NotNull]
         static string OrientationModeToString(int mode)
         {
-            switch ((OrientationMode) mode)
+            switch ((OrientationMode)mode)
             {
                 case OrientationMode.Inherit:
                     return "Inherit";
@@ -490,8 +490,7 @@ namespace Iviz.Controllers
 
         void RecalculateBounds()
         {
-            IEnumerable<(Bounds? Bounds, Transform Transform)> innerBounds = markers.Values
-                .Select(marker => (marker.Bounds, marker.Transform));
+            var innerBounds = markers.Values.Select(marker => (marker.Bounds, marker.Transform));
 
             Bounds? totalBounds =
                 innerBounds.Select(tuple => tuple.Bounds.TransformBound(tuple.Transform)).CombineBounds();

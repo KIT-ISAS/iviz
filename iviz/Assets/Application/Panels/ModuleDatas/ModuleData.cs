@@ -26,7 +26,7 @@ namespace Iviz.App
         }
 
         [NotNull]
-        public string Description
+        string Description
         {
             get
             {
@@ -43,7 +43,7 @@ namespace Iviz.App
         }
 
         [NotNull] public string Topic { get; }
-        [NotNull] public string Type { get; }
+        [NotNull] protected string Type { get; }
         public abstract ModuleType ModuleType { get; }
         [NotNull] public abstract DataPanelContents Panel { get; }
         [NotNull] public abstract IController Controller { get; }

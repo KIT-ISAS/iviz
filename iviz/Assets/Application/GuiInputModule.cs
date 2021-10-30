@@ -251,7 +251,7 @@ namespace Iviz.App
             set
             {
                 config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
-                if (ARController.HasARController)
+                if (ARController.IsActive)
                 {
                     QualitySettings.SetQualityLevel((int) value, true);
                     Settings.RaiseQualityTypeChanged(value);
@@ -265,7 +265,7 @@ namespace Iviz.App
             set
             {
                 config.QualityInView = value;
-                if (ARController.HasARController)
+                if (ARController.IsActive)
                 {
                     return;
                 }

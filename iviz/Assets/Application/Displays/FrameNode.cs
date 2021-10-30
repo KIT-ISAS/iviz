@@ -5,11 +5,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
-    public interface IFrameNodeOwner
-    {
-        string Description { get; }
-    }
-
     /// <summary>
     /// Class for displays that want to attach themselves to a TF frame.
     /// This increases the reference count of the frame, and prevents the TFListener from
@@ -23,8 +18,6 @@ namespace Iviz.Controllers
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
-        IFrameNodeOwner owner;
-        
         [CanBeNull]
         public virtual TfFrame Parent
         {
@@ -109,7 +102,7 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        public static FrameNode Instantiate([NotNull] string name, [CanBeNull] IFrameNodeOwner owner = null)
+        public static FrameNode Instantiate([NotNull] string name)
         {
             if (name == null)
             {
@@ -122,7 +115,6 @@ namespace Iviz.Controllers
                 node.Parent = TfListener.DefaultFrame;
             }
 
-            node.owner = owner;
             return node;
         }
     }

@@ -41,33 +41,33 @@ namespace Iviz.Resources
         public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType { get; }
             = new Dictionary<string, ModuleType>
             {
-                {PointCloud2.RosMessageType, ModuleType.PointCloud},
-                {Image.RosMessageType, ModuleType.Image},
-                {CompressedImage.RosMessageType, ModuleType.Image},
-                {Marker.RosMessageType, ModuleType.Marker},
-                {MarkerArray.RosMessageType, ModuleType.Marker},
-                {InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker},
-                {JointState.RosMessageType, ModuleType.JointState},
-                {LaserScan.RosMessageType, ModuleType.LaserScan},
-                {PoseStamped.RosMessageType, ModuleType.Magnitude},
-                {Pose.RosMessageType, ModuleType.Magnitude},
-                {PointStamped.RosMessageType, ModuleType.Magnitude},
-                {Point.RosMessageType, ModuleType.Magnitude},
-                {WrenchStamped.RosMessageType, ModuleType.Magnitude},
-                {Wrench.RosMessageType, ModuleType.Magnitude},
-                {Odometry.RosMessageType, ModuleType.Magnitude},
-                {TwistStamped.RosMessageType, ModuleType.Magnitude},
-                {Twist.RosMessageType, ModuleType.Magnitude},
-                {OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid},
-                {Path.RosMessageType, ModuleType.Path},
-                {PoseArray.RosMessageType, ModuleType.Path},
-                {PolygonStamped.RosMessageType, ModuleType.Path},
-                {Polygon.RosMessageType, ModuleType.Path},
-                {GridMap.RosMessageType, ModuleType.GridMap},
-                {Octomap.RosMessageType, ModuleType.Octomap},
-                {OctomapWithPose.RosMessageType, ModuleType.Octomap},
-                {Dialog.RosMessageType, ModuleType.GuiDialog},
-                {GuiArray.RosMessageType, ModuleType.GuiDialog},
+                { PointCloud2.RosMessageType, ModuleType.PointCloud },
+                { Image.RosMessageType, ModuleType.Image },
+                { CompressedImage.RosMessageType, ModuleType.Image },
+                { Marker.RosMessageType, ModuleType.Marker },
+                { MarkerArray.RosMessageType, ModuleType.Marker },
+                { InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker },
+                { JointState.RosMessageType, ModuleType.JointState },
+                { LaserScan.RosMessageType, ModuleType.LaserScan },
+                { PoseStamped.RosMessageType, ModuleType.Magnitude },
+                { Pose.RosMessageType, ModuleType.Magnitude },
+                { PointStamped.RosMessageType, ModuleType.Magnitude },
+                { Point.RosMessageType, ModuleType.Magnitude },
+                { WrenchStamped.RosMessageType, ModuleType.Magnitude },
+                { Wrench.RosMessageType, ModuleType.Magnitude },
+                { Odometry.RosMessageType, ModuleType.Magnitude },
+                { TwistStamped.RosMessageType, ModuleType.Magnitude },
+                { Twist.RosMessageType, ModuleType.Magnitude },
+                { OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid },
+                { Path.RosMessageType, ModuleType.Path },
+                { PoseArray.RosMessageType, ModuleType.Path },
+                { PolygonStamped.RosMessageType, ModuleType.Path },
+                { Polygon.RosMessageType, ModuleType.Path },
+                { GridMap.RosMessageType, ModuleType.GridMap },
+                { Octomap.RosMessageType, ModuleType.Octomap },
+                { OctomapWithPose.RosMessageType, ModuleType.Octomap },
+                { Dialog.RosMessageType, ModuleType.GuiDialog },
+                { GuiArray.RosMessageType, ModuleType.GuiDialog },
             }.AsReadOnly();
 
         [NotNull] public static MaterialsType Materials => materials ?? (materials = new MaterialsType());
@@ -75,7 +75,7 @@ namespace Iviz.Resources
         [NotNull] public static DisplaysType Displays => displays ?? (displays = new DisplaysType());
         [NotNull] public static ControllersType Controllers => controllers ?? (controllers = new ControllersType());
         [NotNull] public static WidgetsType Widgets => widgets ?? (widgets = new WidgetsType());
-        public static ColorScheme Colors { get; } = new ColorScheme();
+        [NotNull] public static ColorScheme Colors { get; } = new ColorScheme();
 
         [NotNull]
         public static TexturedMaterialsType TexturedMaterials =>
@@ -89,50 +89,42 @@ namespace Iviz.Resources
         [NotNull]
         public static ExternalResourceManager External => externals ?? (externals = new ExternalResourceManager());
 
-        public static bool IsRobotSaved([NotNull] string robotName)
-        {
-            return Internal.ContainsRobot(robotName) ||
-                   External.ContainsRobot(robotName);
-        }
+        public static bool IsRobotSaved([NotNull] string robotName) =>
+            Internal.ContainsRobot(robotName) ||
+            External.ContainsRobot(robotName);
 
         [NotNull, ItemNotNull]
-        public static IEnumerable<string> GetRobotNames()
-        {
-            return Internal.GetRobotNames().Concat(External.GetRobotNames());
-        }
+        public static IEnumerable<string> GetRobotNames() =>
+            Internal.GetRobotNames().Concat(External.GetRobotNames());
 
-        public static async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(
+        public static ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(
             [NotNull] string robotName,
-            CancellationToken token = default)
-        {
-            return Internal.TryGetRobot(robotName, out string robotDescription)
-                ? (true, robotDescription)
-                : await External.TryGetRobotAsync(robotName, token);
-        }
+            CancellationToken token = default) =>
+            Internal.TryGetRobot(robotName, out string robotDescription)
+                ? new ValueTask<(bool, string)>((true, robotDescription))
+                : External.TryGetRobotAsync(robotName, token);
 
         [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info)
-        {
-            return Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
-        }
+        public static bool TryGetResource([NotNull] string uriString, out GameObjectInfo info) =>
+            Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
 
         [ItemCanBeNull]
-        public static async ValueTask<GameObjectInfo> GetGameObjectResourceAsync([NotNull] string uriString,
-            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
-        {
-            return Internal.TryGet(uriString, out GameObjectInfo info)
-                ? info
-                : await External.TryGetGameObjectAsync(uriString, provider, token);
-        }
+        public static ValueTask<GameObjectInfo> GetGameObjectResourceAsync(
+            [NotNull] string uriString,
+            [CanBeNull] IExternalServiceProvider provider,
+            CancellationToken token) =>
+            Internal.TryGet(uriString, out GameObjectInfo info)
+                ? new ValueTask<GameObjectInfo>(info)
+                : External.TryGetGameObjectAsync(uriString, provider, token);
 
         [ItemCanBeNull]
-        internal static async ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
-            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
-        {
-            return Internal.TryGet(uriString, out Info<Texture2D> info)
-                ? info
-                : await External.TryGetTextureAsync(uriString, provider, token);
-        }
+        internal static ValueTask<Info<Texture2D>> GetTextureResourceAsync(
+            [NotNull] string uriString,
+            [CanBeNull] IExternalServiceProvider provider,
+            CancellationToken token) =>
+            Internal.TryGet(uriString, out Info<Texture2D> info)
+                ? new ValueTask<Info<Texture2D>>(info)
+                : External.TryGetTextureAsync(uriString, provider, token);
 
         public static void ClearResources()
         {

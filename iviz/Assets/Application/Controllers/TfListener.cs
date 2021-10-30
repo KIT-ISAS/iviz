@@ -570,7 +570,7 @@ namespace Iviz.Controllers
         }
 
         static void HighlightPose(in Pose pose) =>
-            ResourcePool.RentDisplay<PoseHighlighter>().HighlightPose(pose);
+            ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(pose);
 
         public static void HighlightFrame([NotNull] string frameId)
         {

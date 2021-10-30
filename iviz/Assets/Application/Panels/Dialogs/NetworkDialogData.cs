@@ -3,6 +3,7 @@ using System.Text;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -86,19 +87,28 @@ namespace Iviz.App
 
                 long totalMessages = 0;
                 long totalBytes = 0;
+                long totalDropped = 0;
                 foreach (var receiver in stat.Receivers)
                 {
                     totalMessages += receiver.NumReceived;
                     totalBytes += receiver.BytesReceived;
+                    totalDropped += receiver.NumDropped;
                 }
 
-                long totalKbytes = totalBytes / 1000;
+                long totalKBytes = totalBytes / 1000;
                 builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
-                    .Append(totalKbytes.ToString("N0")).Append(" kB</b> total").AppendLine();
+                    .Append(totalKBytes.ToString("N0")).Append(" kB total</b>").AppendLine();
+
+                if (totalDropped != 0)
+                {
+                    long percentage = totalDropped * 100 / totalMessages;
+                    builder.Append("<b>Dropped ").Append(totalDropped.ToString("N0")).Append(" msgs (")
+                        .Append(percentage).Append("%)</b>").AppendLine();
+                }
 
                 if (stat.Receivers.Count == 0)
                 {
-                    builder.Append("  (None)").AppendLine().AppendLine();
+                    builder.Append("  (No publishers)").AppendLine().AppendLine();
                     continue;
                 }
 
@@ -175,7 +185,7 @@ namespace Iviz.App
 
                 if (stat.Senders.Count == 0)
                 {
-                    builder.Append("  (None)").AppendLine().AppendLine();
+                    builder.Append("  (No subscribers)").AppendLine().AppendLine();
                     continue;
                 }
 

@@ -4,6 +4,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -69,7 +70,7 @@ namespace Iviz.Ros
             logSender = new Sender<Log>("/rosout");
             Logger.LogExternal += LogMessage;
 
-            logListener = new Listener<Log>("/rosout_agg", Handler);
+            logListener = new Listener<Log>("/rosout_agg", Handler, RosTransportHint.PreferUdp);
         }
 
         static bool Handler(Log msg)

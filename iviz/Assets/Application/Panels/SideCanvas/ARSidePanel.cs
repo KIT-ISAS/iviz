@@ -13,6 +13,7 @@ namespace Iviz.App
         [NotNull] RectTransform Transform => mTransform != null ? mTransform : (mTransform = (RectTransform) transform);
 
         [SerializeField] GameObject divider = null;
+        [SerializeField] Button toggle = null;
         [CanBeNull] LauncherButton selected;
 
         [NotNull]
@@ -77,6 +78,7 @@ namespace Iviz.App
                 {
                     gameObject.SetActive(false);
                     divider.SetActive(false);
+                    toggle.gameObject.SetActive(false);
                     Hide();
                     return;
                 }
@@ -88,6 +90,7 @@ namespace Iviz.App
 
                 gameObject.SetActive(true);
                 divider.SetActive(true);
+                toggle.gameObject.SetActive(true);
                 Setup();
             }
         }
@@ -108,15 +111,17 @@ namespace Iviz.App
 
         void Awake()
         {
-            ARController.ARActiveChanged += OnArEnabledChanged;
+            
+            
+            ARController.ARStateChanged += OnArEnabledChanged;
 
-            openPanel.Clicked += () =>
+            toggle.onClick.AddListener(() =>
             {
                 if (ARController.Instance != null)
                 {
                     ARController.Instance.ModuleData.ShowPanel();
                 }
-            };
+            });
             arVisible.Clicked += () =>
                 Controller.Visible = (arVisible.Enabled = !arVisible.Enabled);
             move.Clicked += () =>
@@ -171,7 +176,7 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            ARController.ARActiveChanged -= OnArEnabledChanged;
+            ARController.ARStateChanged -= OnArEnabledChanged;
         }
 
         void OnArEnabledChanged(bool _)

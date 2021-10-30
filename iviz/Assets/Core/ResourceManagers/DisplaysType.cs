@@ -78,8 +78,10 @@ namespace Iviz.Resources
         public Info<GameObject> PositionDisc { get; }
         public Info<GameObject> ARMarkerHighlighter { get; }
 
-        public Info<GameObject> PoseHighlighter { get; }
+        public Info<GameObject> ClickedPoseHighlighter { get; }
         public Info<GameObject> TfFrameHighlighter { get; }
+
+        public Info<GameObject> RoundedPlane { get; }
 
         public DisplaysType()
         {
@@ -131,8 +133,10 @@ namespace Iviz.Resources
                 PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
                 PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc);
 
-                PoseHighlighter = new Info<GameObject>(appAssetHolder.PoseHighlighter);
+                ClickedPoseHighlighter = new Info<GameObject>(appAssetHolder.ClickedPoseHighlighter);
                 TfFrameHighlighter = new Info<GameObject>(appAssetHolder.TfFrameHighlighter);
+
+                RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane);
 
                 resourceByType = CreateTypeDictionary(this);
             }

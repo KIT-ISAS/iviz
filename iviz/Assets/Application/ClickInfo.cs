@@ -64,7 +64,7 @@ namespace Iviz.App
                 return hits.Length != 0;
             }
 
-            if (ARController.Instance == null || !ARController.InstanceVisible)
+            if (ARController.Instance == null || !ARController.IsVisible)
             {
                 hits = Array.Empty<ClickHitResult>();
                 return false;

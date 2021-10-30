@@ -130,5 +130,7 @@ MonoBehaviour:
   OccupancyGridMat: {fileID: 2100000, guid: e410ed67dcc4542b6bde372d33cd3c6f, type: 2}
   OccupancyGridClipMat: {fileID: 2100000, guid: 66c121943c904442598918986b422f44,
     type: 2}
+  RoundedPlane: {fileID: 1062175728900501377, guid: 9f41191ada4f64586a000ddcde7d2f40,
+    type: 3}
   Click: {fileID: 8300000, guid: 8ef554f74ef29574c82580a0a1b37c22, type: 3}
   Screenshot: {fileID: 8300000, guid: b516c6c7a08544f429fcba475c006d49, type: 3}

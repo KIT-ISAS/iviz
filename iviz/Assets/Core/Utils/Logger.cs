@@ -180,23 +180,6 @@ namespace Iviz.Core
         }
     }
 
-    public static class BuilderPool
-    {
-        static readonly ConcurrentBag<StringBuilder> Pool = new ConcurrentBag<StringBuilder>();
-
-        [NotNull]
-        public static StringBuilder Rent()
-        {
-            return Pool.TryTake(out StringBuilder result) ? result : new StringBuilder(100);
-        }
-
-        public static void Return([NotNull] StringBuilder str)
-        {
-            str.Clear();
-            Pool.Add(str);
-        }
-    }
-
     [Flags]
     public enum LogLevel
     {

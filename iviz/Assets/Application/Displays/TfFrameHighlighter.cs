@@ -1,3 +1,4 @@
+using Iviz.App.ARDialogs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
@@ -5,6 +6,7 @@ using Iviz.Msgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -12,50 +14,54 @@ namespace Iviz.Displays
     {
         const float HighlightDuration = 2.0f;
 
-        AxisFrameResource resource;
-        TextMarkerResource label;
+        [SerializeField] AxisFrameResource axisResource;
+        [SerializeField] Tooltip tooltip;
 
-        FrameNode node;
+        [SerializeField] FrameNode node;
         float? highlightFrameStart;
 
-        protected override IDisplay Display => resource;
+        protected override IDisplay Display => axisResource;
 
         void Awake()
         {
             node = FrameNode.Instantiate("Frame Highlighter");
             node.Transform.SetParentLocal(Transform);
 
-            resource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
-            resource.CastsShadows = false;
-            resource.Emissive = 1;
-            resource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
-            resource.Layer = LayerType.IgnoreRaycast;
+            axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
+            axisResource.CastsShadows = false;
+            axisResource.Emissive = 1;
+            axisResource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
+            axisResource.Layer = LayerType.IgnoreRaycast;
 
-            label = ResourcePool.RentDisplay<TextMarkerResource>(node.Transform);
-            label.AlwaysVisible = true;
-            label.Layer = LayerType.IgnoreRaycast;
+            tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
+            tooltip.Layer = LayerType.IgnoreRaycast;
+            tooltip.UseAnimation = false;
         }
 
         public void HighlightFrame([NotNull] string frameId)
         {
             node.AttachTo(frameId);
             highlightFrameStart = Time.time;
-            resource.Tint = Color.white;
-            label.Color = Color.white;
-            label.Text = frameId;
+            axisResource.Tint = Color.white;
+            tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
+            tooltip.CaptionColor = Color.white;
+            tooltip.Caption = frameId;
 
             float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(node.Transform.position).z;
-            
+
             float size = 0.25f * Mathf.Abs(distanceToCam);
             float clampedSize = Mathf.Max(size, 2);
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * size;
-            
-            resource.AxisLength = frameSize;
-            label.ElementSize = labelSize;
-            label.BillboardOffset = (1.2f * resource.AxisLength + label.ElementSize) * Vector3.up;
+            float labelSize = baseFrameSize * size * 0.375f / 2;
+
+            axisResource.AxisLength = frameSize;
+            tooltip.Scale = labelSize;
+            //tooltip.ElementSize = labelSize;
+            //tooltip.BillboardOffset = (1.2f * resource.AxisLength + tooltip.ElementSize) * Vector3.up;
+            tooltip.Transform.localPosition = 1.3f * (1.2f * axisResource.AxisLength + labelSize) * Vector3.up;
+            tooltip.PointToCamera();
         }
 
         void Update()
@@ -74,15 +80,16 @@ namespace Iviz.Displays
 
             alpha = Mathf.Sqrt(alpha);
             var color = Color.white.WithAlpha(alpha);
-            label.Color = color;
-            resource.Tint = color;
+            axisResource.Tint = color;
+            tooltip.CaptionColor = color;
+            tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
 
             var (pX, pY, pZ) = TfListener.RelativePositionToFixedFrame(node.Transform.position).Unity2RosVector3();
             string px = pX.ToString("#,0.##", UnityUtils.Culture);
             string py = pY.ToString("#,0.##", UnityUtils.Culture);
             string pz = pZ.ToString("#,0.##", UnityUtils.Culture);
 
-            label.Text = $"{node.ParentId}\n{px}, {py}, {pz}";
+            tooltip.Caption = $"<font=Bold>{node.ParentId}</font>\n{px}, {py}, {pz}";
         }
 
         public override void Suspend()
@@ -94,10 +101,10 @@ namespace Iviz.Displays
 
         public override void SplitForRecycle()
         {
-            resource.CastsShadows = true;
-            resource.Emissive = 0;
-            resource.OverrideMaterial(null);
-            label.ReturnToPool();
+            axisResource.CastsShadows = true;
+            axisResource.Emissive = 0;
+            axisResource.OverrideMaterial(null);
+            tooltip.ReturnToPool();
             base.SplitForRecycle();
         }
     }

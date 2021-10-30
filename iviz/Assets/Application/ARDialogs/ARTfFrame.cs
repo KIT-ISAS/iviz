@@ -77,7 +77,7 @@ namespace Iviz.App.ARDialogs
             const float maxDistance = 0.5f;
             const float minDistance = 0.3f;
 
-            if (!ARController.InstanceVisible)
+            if (!ARController.IsVisible)
             {
                 axisFrame.Visible = true;
                 cylinder.Visible = true;

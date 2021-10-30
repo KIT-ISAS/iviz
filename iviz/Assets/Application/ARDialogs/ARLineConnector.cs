@@ -33,7 +33,7 @@ namespace Iviz.App.ARDialogs
             {
                 sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
-                sphere.CastsShadows = false;
+                sphere.ShadowsEnabled = false;
             }
 
             Color = Color.cyan;

@@ -174,13 +174,17 @@ namespace Iviz.Core
             );
         }
 
-        static float SanitizeColor(float f) => float.IsNaN(f) ? 0 : Mathf.Max(Mathf.Min(f, 1), 0);
+        static float SanitizeColor(float f) => float.IsNaN(f) ? 0 : Mathf.Clamp01(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color32 ToUnityColor32(this in ColorRGBA p)
+        public static Color32 ToUnityColor32(this in ColorRGBA c)
         {
-            return (Color32)p.ToUnityColor();
-            // note: Color -> Color32 sanitizes implicitly 
+            return new Color32(
+                (byte) Mathf.Round(Mathf.Clamp01(c.R) * byte.MaxValue), 
+                (byte) Mathf.Round(Mathf.Clamp01(c.G) * byte.MaxValue), 
+                (byte) Mathf.Round(Mathf.Clamp01(c.B) * byte.MaxValue), 
+                (byte) Mathf.Round(Mathf.Clamp01(c.A) * byte.MaxValue));
+            // note: taken from unity Color 
         }
 
         public static ColorRGBA ToRos(this in Color p)

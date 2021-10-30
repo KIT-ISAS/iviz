@@ -28,12 +28,12 @@ namespace Iviz.App.ARDialogs
         float? popupStartTime;
 
         public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
-
         public virtual Color MainColor { get; set; }
         public virtual Color SecondaryColor { get; set; }
 
         public int Layer { get; set; }
-
+        public bool UseAnimation { get; set; } = true;
+        
         float scale = 1;
 
         public float Scale
@@ -42,7 +42,7 @@ namespace Iviz.App.ARDialogs
             set
             {
                 scale = value;
-                if (popupStartTime != null)
+                if (!UseAnimation || popupStartTime != null)
                 {
                     transform.localScale = scale * Vector3.one;
                 }

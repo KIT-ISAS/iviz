@@ -38,6 +38,7 @@ namespace Iviz.Displays
         Material textureMaterial;
         Material textureMaterialAlpha;
         [SerializeField] bool autoSelectMaterial = true;
+        bool shadowsEnabled = true;
 
         [NotNull]
         MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
@@ -81,7 +82,6 @@ namespace Iviz.Displays
             }
         }
 
-
         public Color EmissiveColor
         {
             get => emissiveColor;
@@ -122,12 +122,17 @@ namespace Iviz.Displays
             }
         }
 
-        public bool CastsShadows
+        public bool ShadowsEnabled
         {
-            get => MainRenderer.shadowCastingMode == ShadowCastingMode.On;
-            set => MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
+            get => shadowsEnabled;
+            set
+            {
+                shadowsEnabled = value;
+                MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;   
+                MainRenderer.receiveShadows = value;   
+            }
         }
-
+        
         [NotNull]
         public Mesh Mesh
         {
@@ -213,12 +218,12 @@ namespace Iviz.Displays
             EmissiveColor = Color.black;
             ColliderEnabled = true;
             OcclusionOnly = false;
-            CastsShadows = true;
+            ShadowsEnabled = true;
         }
 
         void SetEffectiveColor()
         {
-            if (MainRenderer == null || OcclusionOnly)
+            if (OcclusionOnly)
             {
                 return;
             }

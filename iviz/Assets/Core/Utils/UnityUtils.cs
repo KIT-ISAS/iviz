@@ -3,13 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IO;
 using Iviz.Tools;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
@@ -291,12 +288,31 @@ namespace Iviz.Core
             return c;
         }
 
+        public static Vector2 WithX(this Vector2 c, float x)
+        {
+            c.x = x;
+            return c;
+        }
+
+        public static Vector2 WithY(this Vector2 c, float y)
+        {
+            c.y = y;
+            return c;
+        }
+
+
         public static Color WithSaturation(this in Color c, float saturation)
         {
             Color.RGBToHSV(c, out float h, out _, out float v);
             return Color.HSVToRGB(h, saturation, v).WithAlpha(c.a);
         }
-
+        
+        public static Color WithValue(this in Color c, float value)
+        {
+            Color.RGBToHSV(c, out float h, out float s, out _);
+            return Color.HSVToRGB(h, s, value).WithAlpha(c.a);
+        }        
+        
         public static bool IsUsable(this in Pose pose)
         {
             const int maxPoseMagnitude = 100000;
@@ -406,7 +422,7 @@ namespace Iviz.Core
             -Vector3.right - Vector3.up - Vector3.forward,
         };
 
-        static Bounds TransformBound(this in Bounds bounds, Pose pose, Vector3 scale)
+        static Bounds TransformBound(this in Bounds bounds, in Pose pose, Vector3 scale)
         {
             if (pose == Pose.identity)
             {
@@ -465,11 +481,6 @@ namespace Iviz.Core
                 new Vector3(1f / x, 1f / y, 1f / z));
         }
 
-        public static Bounds? TransformBound(this in Bounds? bounds, in Pose pose, in Vector3 scale)
-        {
-            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, pose, scale);
-        }
-
         public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, [NotNull] Transform transform)
         {
             if (transform == null)
@@ -499,7 +510,7 @@ namespace Iviz.Core
             }
 
             Bounds? result = null;
-            using (IEnumerator<Bounds?> it = enumOfBounds.GetEnumerator())
+            using (var it = enumOfBounds.GetEnumerator())
             {
                 while (it.MoveNext())
                 {
@@ -516,33 +527,6 @@ namespace Iviz.Core
                     else
                     {
                         result.Value.Encapsulate(bounds.Value);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public static Bounds? CombineBounds([NotNull] this IEnumerable<Bounds> enumOfBounds)
-        {
-            if (enumOfBounds == null)
-            {
-                throw new ArgumentNullException(nameof(enumOfBounds));
-            }
-
-            Bounds? result = null;
-            using (IEnumerator<Bounds> it = enumOfBounds.GetEnumerator())
-            {
-                while (it.MoveNext())
-                {
-                    Bounds bounds = it.Current;
-                    if (result == null)
-                    {
-                        result = bounds;
-                    }
-                    else
-                    {
-                        result.Value.Encapsulate(bounds);
                     }
                 }
             }
@@ -591,9 +575,14 @@ namespace Iviz.Core
             mesh.SetColors(ps.Array, 0, ps.Length);
         }
 
-        public static void SetUVs([NotNull] this Mesh mesh, int channel, in Rent<Vector2> ps)
+        public static void SetUVs([NotNull] this Mesh mesh, in Rent<Vector2> ps)
         {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
+            mesh.SetUVs(0, ps.Array, 0, ps.Length);
+        }
+
+        public static void SetUVs([NotNull] this Mesh mesh, in Rent<Vector3> ps)
+        {
+            mesh.SetUVs(0, ps.Array, 0, ps.Length);
         }
 
         public static void SetUVs([NotNull] this Mesh mesh, int channel, in Rent<Vector3> ps)
@@ -604,63 +593,6 @@ namespace Iviz.Core
         public static void SetTriangles([NotNull] this Mesh mesh, in Rent<int> ps, int subMesh = 0)
         {
             mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
-        }
-    }
-
-    public static class FileUtils
-    {
-        static async Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes, int count,
-            CancellationToken token)
-        {
-            using (FileStream stream = new FileStream(filePath, FileMode.Create,
-                FileAccess.Write, FileShare.None, 4096, true))
-            {
-                await stream.WriteAsync(bytes, 0, count, token);
-            }
-        }
-
-        [NotNull]
-        public static Task WriteAllBytesAsync([NotNull] string filePath, Rent<byte> bytes,
-            CancellationToken token)
-        {
-            return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
-        }
-
-        [NotNull]
-        public static Task WriteAllBytesAsync([NotNull] string filePath, [NotNull] byte[] bytes,
-            CancellationToken token)
-        {
-            return WriteAllBytesAsync(filePath, bytes, bytes.Length, token);
-        }
-
-        public static async ValueTask<Rent<byte>> ReadAllBytesAsync([NotNull] string filePath, CancellationToken token)
-        {
-            using (FileStream stream = new FileStream(filePath, FileMode.Open,
-                FileAccess.Read, FileShare.None, 4096, true))
-            {
-                var rent = new Rent<byte>((int)stream.Length);
-                await stream.ReadAsync(rent.Array, 0, rent.Length, token);
-                return rent;
-            }
-        }
-
-        [NotNull]
-        public static async Task WriteAllTextAsync([NotNull] string filePath, [NotNull] string text,
-            CancellationToken token)
-        {
-            using (var bytes = text.AsRent())
-            {
-                await WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
-            }
-        }
-
-        [ItemNotNull]
-        public static async ValueTask<string> ReadAllTextAsync([NotNull] string filePath, CancellationToken token)
-        {
-            using (var bytes = await ReadAllBytesAsync(filePath, token))
-            {
-                return BuiltIns.UTF8.GetString(bytes.Array, 0, bytes.Length);
-            }
         }
     }
 
@@ -752,6 +684,9 @@ namespace Iviz.Core
 
         public static void Deconstruct(this in Vector4 v, out float x, out float y, out float z, out float w) =>
             (x, y, z, w) = (v.x, v.y, v.z, v.w);
+
+        public static void Deconstruct(this in Bounds b, out Vector3 center, out Vector3 size) =>
+            (center, size) = (b.center, b.size);
 
         public static void Deconstruct(this in Pose p, out Vector3 position, out Quaternion rotation) =>
             (position, rotation) = (p.position, p.rotation);

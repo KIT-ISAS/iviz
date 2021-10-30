@@ -8,6 +8,7 @@ using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.App

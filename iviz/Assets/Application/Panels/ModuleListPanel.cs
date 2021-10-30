@@ -13,6 +13,7 @@ using Iviz.Core;
 using Iviz.MarkerDetection;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TMPro;
@@ -52,6 +53,7 @@ namespace Iviz.App
         [SerializeField] Button showSettings = null;
         [SerializeField] Button showEcho = null;
         [SerializeField] Button showSystem = null;
+        [SerializeField] Button middleHideGuiButton = null;
 
         [SerializeField] Button recordBag = null;
         [SerializeField] Text recordBagText = null;
@@ -121,21 +123,6 @@ namespace Iviz.App
 
         [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
 
-        /*
-        bool dialogIsDragged;
-
-        public bool DialogIsDragged
-        {
-            get => dialogIsDragged;
-            set
-            {
-                dialogIsDragged = value;
-                moduleListCanvas.gameObject.SetActive(!value);
-                dataPanelCanvas.gameObject.SetActive(!value);
-            }
-        }
-        */
-
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -147,10 +134,10 @@ namespace Iviz.App
             set
             {
                 allGuiVisible = value;
-                HideGuiButton.State = value;
-                //contentCanvas.gameObject.SetActive(value);
-                moduleListCanvas.gameObject.SetActive(value);
-                dataPanelCanvas.gameObject.SetActive(value);
+                BottomHideGuiButton.State = value;
+
+                moduleListCanvas.SetActive(value);
+                dataPanelCanvas.SetActive(value);
                 dialogPanelManager.Active = value;
                 arSidePanel.Visible = !value;
             }
@@ -164,10 +151,10 @@ namespace Iviz.App
 
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
 
-        AnchorToggleButton HideGuiButton => anchorCanvas.HideGui;
+        AnchorToggleButton BottomHideGuiButton => anchorCanvas.HideGui;
+        Button LeftHideGuiButton => anchorCanvas.SideHideGui;
+        Button MiddleHideGuiButton => middleHideGuiButton;
 
-        //public AnchorToggleButton ShowARJoystickButton => anchorCanvas.ShowMarker;
-        //public AnchorToggleButton PinControlButton => anchorCanvas.PinMarker;
         AnchorToggleButton InteractableButton => anchorCanvas.Interact;
         public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
@@ -242,7 +229,6 @@ namespace Iviz.App
             GuiDialogListener.ClearResources();
             ARController.ClearResources();
 
-            //parentCanvas = transform.parent.parent.GetComponentInParent<Canvas>();
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
 
@@ -279,8 +265,17 @@ namespace Iviz.App
             save.onClick.AddListener(saveConfigData.Show);
             load.onClick.AddListener(loadConfigData.Show);
 
-            HideGuiButton.Clicked += OnHideGuiButtonClick;
-            HideGuiButton.State = true;
+            BottomHideGuiButton.Clicked += OnHideGuiButtonClick;
+            BottomHideGuiButton.State = true;
+
+            LeftHideGuiButton.onClick.AddListener(OnHideGuiButtonClick);
+            MiddleHideGuiButton.onClick.AddListener(OnHideGuiButtonClick);
+
+            ARController.ARStateChanged += OnARStateChanged;
+
+            BottomHideGuiButton.Visible = !Settings.IsMobile;
+            MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile);
+            UpdateLeftHideVisible();
 
             SceneInteractable = true;
             InteractableButton.Visible = false;
@@ -289,7 +284,7 @@ namespace Iviz.App
             addDisplayByTopic.onClick.AddListener(availableTopics.Show);
             addDisplay.onClick.AddListener(availableModules.Show);
             showTfTree.onClick.AddListener(tfTreeData.Show);
-            enableAR.onClick.AddListener(OnEnableAR);
+            enableAR.onClick.AddListener(OnToggleARClicked);
             showNetwork.onClick.AddListener(networkData.Show);
             showConsole.onClick.AddListener(consoleData.Show);
             showSettings.onClick.AddListener(settingsData.Show);
@@ -297,16 +292,8 @@ namespace Iviz.App
             recordBag.onClick.AddListener(OnStartRecordBag);
             showSystem.onClick.AddListener(systemData.Show);
 
-            /*
-            ShowARJoystickButton.Clicked += () =>
-            {
-                // should be !Visible, but the new Visible hasn't been set yet
-                TwistJoystick.RightJoystickVisible = ARJoystick.Visible;
-            };
-            */
-
             masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
-            masterUriButton.Clicked += () => connectionData.Show();
+            masterUriButton.Clicked += connectionData.Show;
             dragButton.Dragged += OnHideGuiButtonClick;
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
@@ -399,7 +386,7 @@ namespace Iviz.App
             InitFinished = null;
         }
 
-        public static void CallWhenInitialized(Action action)
+        public static void CallAfterInitialized(Action action)
         {
             if (instance != null && instance.initialized)
             {
@@ -411,17 +398,26 @@ namespace Iviz.App
             }
         }
 
-        void OnEnableAR()
+        void OnToggleARClicked()
         {
             if (ARController.Instance == null)
             {
                 CreateModule(ModuleType.AugmentedReality);
-                AllGuiVisible = false;
             }
             else
             {
                 ARController.Instance.Visible = !ARController.Instance.Visible;
             }
+        }
+
+        void OnARStateChanged(bool value)
+        {
+            if (value)
+            {
+                AllGuiVisible = false;
+            }
+            
+            UpdateLeftHideVisible();
         }
 
         void OnStartRecordBag()
@@ -459,8 +455,8 @@ namespace Iviz.App
                 case ConnectionState.Connected:
                     GameThread.EverySecond -= RotateSprite;
                     status.sprite = connectedSprite;
-                    topPanel.color = RosServerManager.IsActive 
-                        ? Resource.Colors.ConnectionPanelOwnMaster 
+                    topPanel.color = RosServerManager.IsActive
+                        ? Resource.Colors.ConnectionPanelOwnMaster
                         : Resource.Colors.ConnectionPanelConnected;
                     SaveSimpleConfiguration();
                     break;
@@ -493,15 +489,15 @@ namespace Iviz.App
         void OnHideGuiButtonClick()
         {
             AllGuiVisible = !AllGuiVisible;
+
+            UpdateLeftHideVisible();
+            
             EventSystem.current.SetSelectedGameObject(null);
         }
 
-        public void SetConnectionData([NotNull] string masterUri, [NotNull] string myUri, string myId)
+        void UpdateLeftHideVisible()
         {
-            connectionData.MasterUri = new Uri(masterUri);
-            connectionData.MyUri = new Uri(myUri);
-            connectionData.MyId = myId;
-            //ConnectionManager.Connection.KeepReconnecting = true;
+            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsVisible && !AllGuiVisible);            
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -513,7 +509,7 @@ namespace Iviz.App
 
             StateConfiguration config = new StateConfiguration
             {
-                Entries = moduleDatas.Select(x => x.Configuration.Id).ToList()
+                Entries = moduleDatas.Select(moduleData => moduleData.Configuration.Id).ToList()
             };
             foreach (var moduleData in moduleDatas)
             {
@@ -741,14 +737,6 @@ namespace Iviz.App
             }
         }
 
-        void ResetAllModules()
-        {
-            foreach (ModuleData module in moduleDatas)
-            {
-                module.ResetController();
-            }
-        }
-
         void CheckIfInteractableNeeded()
         {
             InteractableButton.Visible = ModuleDatas.Any(module => module is IInteractableModuleData);
@@ -771,10 +759,8 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(type));
             }
 
-            ModuleDataConstructor constructor =
-                new ModuleDataConstructor(resource, topic, type, configuration);
-
-            ModuleData moduleData = ModuleData.CreateFromResource(constructor);
+            var constructor = new ModuleDataConstructor(resource, topic, type, configuration);
+            var moduleData = ModuleData.CreateFromResource(constructor);
 
             if (requestedId != null)
             {
@@ -888,7 +874,7 @@ namespace Iviz.App
             var description = BuilderPool.Rent();
             try
             {
-                description.Append(ARController.InstanceVisible
+                description.Append(ARController.IsVisible
                     ? "<font=Bold>AR View</font>\n"
                     : "<font=Bold>Virtual View</font>\n"
                 );
@@ -901,9 +887,9 @@ namespace Iviz.App
             finally
             {
                 BuilderPool.Return(description);
-            }                
+            }
         }
-        
+
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR

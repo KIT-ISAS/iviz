@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class PoseHighlighter : DisplayWrapperResource
+    public class ClickedPoseHighlighter : DisplayWrapperResource
     {
         const float HighlightDuration = 1.0f;
 

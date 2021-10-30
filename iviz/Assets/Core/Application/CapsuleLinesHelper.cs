@@ -159,7 +159,7 @@ namespace Iviz.Displays
                 mesh.SetVertices(points);
                 mesh.SetTriangles(indices);
                 mesh.SetColors(colors);
-                mesh.SetUVs(0, uvs);
+                mesh.SetUVs(uvs);
             }
         }
     }

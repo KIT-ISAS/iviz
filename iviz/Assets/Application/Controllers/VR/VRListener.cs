@@ -29,7 +29,7 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            ModuleListPanel.CallWhenInitialized(Initialize);
+            ModuleListPanel.CallAfterInitialized(Initialize);
         }
 
         void Initialize()

@@ -169,7 +169,7 @@ namespace Iviz.Displays
 
             if (diffuseTexCoords.Length != 0)
             {
-                ownMesh.SetUVs(0, diffuseTexCoords);
+                ownMesh.SetUVs(diffuseTexCoords);
             }
 
             if (bumpTexCoords.Length != 0)

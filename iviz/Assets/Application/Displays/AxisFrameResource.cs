@@ -87,9 +87,9 @@ namespace Iviz.Displays
         {
             set
             {
-                axisObjects[0].CastsShadows = value;
-                axisObjects[1].CastsShadows = value;
-                axisObjects[2].CastsShadows = value;
+                axisObjects[0].ShadowsEnabled = value;
+                axisObjects[1].ShadowsEnabled = value;
+                axisObjects[2].ShadowsEnabled = value;
             }
         }
 
