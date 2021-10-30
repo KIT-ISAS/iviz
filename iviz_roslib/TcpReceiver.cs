@@ -56,10 +56,9 @@ namespace Iviz.Roslib
             task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
         }
 
-        public SubscriberReceiverState State => new(RemoteUri)
+        public SubscriberReceiverState State => new TcpReceiverState(RemoteUri)
         {
             Status = Status,
-            TransportType = TransportType.Tcp,
             RequestNoDelay = requestNoDelay,
             EndPoint = Endpoint,
             RemoteEndpoint = RemoteEndpoint,
@@ -76,8 +75,8 @@ namespace Iviz.Roslib
             if (newTcpClient != null)
             {
                 Logger.LogDebugFormat("{0}: Connected!", this);
-                var maybeEndpoint = (IPEndPoint?)newTcpClient.Client.LocalEndPoint;
-                Endpoint = new Endpoint(maybeEndpoint!);
+                var ipEndpoint = (IPEndPoint)newTcpClient.Client.LocalEndPoint!;
+                Endpoint = new Endpoint(ipEndpoint);
                 tcpClient = newTcpClient;
 
                 try

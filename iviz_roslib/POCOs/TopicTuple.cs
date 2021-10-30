@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 
 namespace Iviz.Roslib.XmlRpc
 {

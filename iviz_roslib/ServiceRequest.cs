@@ -222,7 +222,7 @@ namespace Iviz.Roslib
                     TService serviceMsg;
                     using (var readBuffer = await ReceivePacket(runningTs.Token))
                     {
-                        serviceMsg = (TService) serviceInfo.Generator.Create();
+                        serviceMsg = (TService)serviceInfo.Generator.Create();
                         serviceMsg.Request =
                             serviceMsg.Request.DeserializeFromArray(readBuffer.Array, readBuffer.Length);
                     }
@@ -278,20 +278,22 @@ namespace Iviz.Roslib
                         int msgLength = responseMsg.RosMessageLength;
                         using var writeBuffer = new Rent<byte>(msgLength + 5);
 
-                        WriteHeader(writeBuffer.Array, resultStatus, msgLength);
+                        WriteHeader(writeBuffer, resultStatus, msgLength);
                         responseMsg.SerializeToArray(writeBuffer.Array, 5);
 
-                        await tcpClient.WriteChunkAsync(writeBuffer.Array, writeBuffer.Length, runningTs.Token);
+                        await tcpClient.WriteChunkAsync(writeBuffer, runningTs.Token);
                     }
                     else
                     {
-                        byte[] statusByte = {resultStatus};
-                        await tcpClient.WriteChunkAsync(statusByte, 1, runningTs.Token);
-                        await tcpClient.WriteChunkAsync(BitConverter.GetBytes(errorMessage.Length), 4, runningTs.Token);
+                        using var errorMessageBytes = errorMessage.AsRent();
 
+                        using (var headerBuffer = new Rent<byte>(5))
+                        {
+                            WriteHeader(headerBuffer, resultStatus, errorMessageBytes.Length);
+                            await tcpClient.WriteChunkAsync(headerBuffer, runningTs.Token);
+                        }
 
-                        byte[] tmpBuffer = BuiltIns.UTF8.GetBytes(errorMessage);
-                        await tcpClient.WriteChunkAsync(tmpBuffer, tmpBuffer.Length, runningTs.Token);
+                        await tcpClient.WriteChunkAsync(errorMessageBytes, runningTs.Token);
                     }
                 }
                 catch (Exception e)
@@ -309,13 +311,14 @@ namespace Iviz.Roslib
             tcpClient.Close();
         }
 
-        static void WriteHeader(byte[] lengthArray, byte status, int i)
+        static void WriteHeader(in Rent<byte> rent, byte status, int i)
         {
-            lengthArray[4] = (byte) (i >> 0x18);
-            lengthArray[0] = status;
-            lengthArray[1] = (byte) i;
-            lengthArray[2] = (byte) (i >> 8);
-            lengthArray[3] = (byte) (i >> 0x10);
+            byte[] array = rent.Array;
+            array[4] = (byte)(i >> 0x18);
+            array[0] = status;
+            array[1] = (byte)i;
+            array[2] = (byte)(i >> 8);
+            array[3] = (byte)(i >> 0x10);
         }
 
         public override string ToString()

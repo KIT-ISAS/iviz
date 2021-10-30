@@ -6,10 +6,12 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
+using Buffer = System.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -23,6 +25,7 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource runningTs = new();
         readonly Task task = Task.CompletedTask;
         readonly ReceiverManager<T> manager;
+        readonly int maxPacketSize;
 
         long numReceived;
         long numDropped;
@@ -49,11 +52,13 @@ namespace Iviz.Roslib
         {
             this.manager = manager;
 
-            var (remoteHostname, remotePort, _, _, header) = response;
+            var (remoteHostname, remotePort, _, newMaxPacketSize, header) = response;
+
             RemoteEndpoint = new Endpoint(remoteHostname, remotePort);
             RemoteUri = remoteUri;
             this.udpClient = udpClient;
             this.topicInfo = topicInfo;
+            maxPacketSize = newMaxPacketSize;
 
             var udpEndpoint = (IPEndPoint?)udpClient.Client.LocalEndPoint;
             if (udpEndpoint == null)
@@ -106,20 +111,19 @@ namespace Iviz.Roslib
                 }
             }
 
-            task = Task.Run(async () => await StartSession().AwaitNoThrow(this));
+            task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this));
         }
 
-        public SubscriberReceiverState State => new(RemoteUri)
+        public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
         {
             Status = Status,
-            TransportType = TransportType.Udp,
-            RequestNoDelay = false,
             EndPoint = Endpoint,
             RemoteEndpoint = RemoteEndpoint,
             NumReceived = numReceived,
             BytesReceived = bytesReceived,
             NumDropped = numDropped,
-            ErrorDescription = ErrorDescription
+            ErrorDescription = ErrorDescription,
+            MaxPacketSize = maxPacketSize
         };
 
         public async Task DisposeAsync(CancellationToken token)
@@ -186,6 +190,11 @@ namespace Iviz.Roslib
 
             Status = ReceiverStatus.Running;
             using var readBuffer = new Rent<byte>(UdpRosParams.DefaultMTU);
+            using var resizableBuffer = new ByteBufferRent();
+
+            int expectedBlockNr = 0;
+            int totalBlocks = 0;
+            int offset = 0;
 
             while (KeepRunning)
             {
@@ -200,33 +209,97 @@ namespace Iviz.Roslib
                 numReceived++;
                 bytesReceived += received;
 
-                if (opCode != UdpRosParams.OpCodeData0)
+                int blockNr = readBuffer[6] + (readBuffer[7] << 8);
+                switch (opCode)
                 {
-                    continue;
+                    case UdpRosParams.OpCodeErr:
+                        Logger.LogFormat("{0}: Partner sent UDPROS error code. Disconnecting.", this);
+                        return;
+                    case UdpRosParams.OpCodePing:
+                        continue;
+                    case UdpRosParams.OpCodeData0 when blockNr <= 1:
+                        if (totalBlocks != 0)
+                        {
+                            Logger.LogDebugFormat(
+                                "{0}: Partner started new UDPROS packet, but I was expecting {1}/{2}." +
+                                " Dropping old packet.", this, expectedBlockNr, totalBlocks);
+                            MarkDropped();
+                        }
+
+                        ProcessMessage(generator, readBuffer.Array, received, UdpRosParams.HeaderLength);
+                        continue;
+                    case UdpRosParams.OpCodeData0:
+                        if (totalBlocks != 0)
+                        {
+                            Logger.LogDebugFormat(
+                                "{0}: Partner started new UDPROS packet, but I was expecting {1}/{2}." +
+                                " Dropping packet.", this, expectedBlockNr, totalBlocks);
+                            MarkDropped();
+                        }
+
+                        totalBlocks = blockNr;
+                        resizableBuffer.EnsureCapability(maxPacketSize * totalBlocks);
+
+                        blockNr = 0;
+                        goto case UdpRosParams.OpCodeDataN;
+                    case UdpRosParams.OpCodeDataN when totalBlocks == 0:
+                        continue; // error previously marked, skip this
+                    case UdpRosParams.OpCodeDataN:
+                        if (blockNr == expectedBlockNr)
+                        {
+                            int payload = received - UdpRosParams.HeaderLength;
+                            Buffer.BlockCopy(readBuffer.Array, UdpRosParams.HeaderLength,
+                                resizableBuffer.Array, offset, payload);
+                            offset += payload;
+                            expectedBlockNr++;
+                        }
+                        else
+                        {
+                            Logger.LogDebugFormat(
+                                "{0}: Partner sent UDPROS packet {1}/{2}, but I was expecting {3}/{2}." +
+                                " Dropping packet.", this, blockNr, totalBlocks, expectedBlockNr);
+                            MarkDropped();
+                            continue;
+                        }
+
+                        if (expectedBlockNr == totalBlocks)
+                        {
+                            ProcessMessage(generator, resizableBuffer.Array, offset, 0);
+                            totalBlocks = 0;
+                            expectedBlockNr = 0;
+                            offset = 0;
+                        }
+
+                        break;
                 }
 
-                if (received < UdpRosParams.HeaderLength)
+                void MarkDropped()
                 {
-                    // incomplete packet
                     numDropped++;
-                    continue;
-                }
-
-                int packageSize = BitConverter.ToInt32(readBuffer.Array, 8);
-                if (packageSize + UdpRosParams.HeaderLength > received)
-                {
-                    // incomplete packet
-                    numDropped++;
-                    continue;
-                }
-
-                if (!IsPaused)
-                {
-                    T message = generator.DeserializeFromArray(readBuffer.Array, packageSize,
-                        UdpRosParams.HeaderLength);
-                    manager.MessageCallback(message, this);
+                    totalBlocks = 0;
+                    expectedBlockNr = 0;
+                    offset = 0;
                 }
             }
+        }
+
+        void ProcessMessage(IDeserializable<T> generator, byte[] array, int length, int offset)
+        {
+            if (IsPaused)
+            {
+                return;
+            }
+
+            int packageSize = BitConverter.ToInt32(array, offset);
+            if (offset + 4 + packageSize > length)
+            {
+                // incomplete packet
+                numDropped++;
+                return;
+            }
+
+            T message = generator.DeserializeFromArray(array, offset: offset + 4);
+            manager.MessageCallback(message, this);
         }
 
         public static RpcUdpTopicRequest CreateRequest(string hostname, TopicInfo<T> topicInfo)

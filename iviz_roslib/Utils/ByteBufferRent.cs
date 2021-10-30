@@ -15,7 +15,7 @@ namespace Iviz.Roslib.Utils
 
         public byte[] Array => buffer.Array;
 
-        public ByteBufferRent(int size)
+        public ByteBufferRent(int size = 0)
         {
             buffer = new Rent<byte>(size);
         }

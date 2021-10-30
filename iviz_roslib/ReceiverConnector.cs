@@ -10,6 +10,9 @@ using Iviz.XmlRpc;
 
 namespace Iviz.Roslib
 {
+    /// <summary>
+    /// Class in charge of trying to connect and reconnect over and over to a ROS publisher 
+    /// </summary>
     internal class ReceiverConnector
     {
         const int MaxConnectionRetries = 120;
@@ -67,7 +70,7 @@ namespace Iviz.Roslib
             }
 
             status = ReceiverStatus.ConnectingRpc;
-            task = Task.Run(async () => await KeepReconnecting().AwaitNoThrow(this));
+            task = TaskUtils.StartLongTask(async () => await KeepReconnecting().AwaitNoThrow(this));
         }
 
         async Task KeepReconnecting()
@@ -179,10 +182,9 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Disposing!", this);
         }
 
-        public SubscriberReceiverState State => new(RemoteUri)
+        public SubscriberReceiverState State => new UninitializedReceiverState(RemoteUri)
         {
             Status = status,
-            TransportType = null,
             ErrorDescription = ErrorDescription
         };
 

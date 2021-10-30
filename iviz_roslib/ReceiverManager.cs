@@ -272,7 +272,7 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                states.Add(new SubscriberReceiverState(uri));
+                states.Add(new UninitializedReceiverState(uri));
             }
 
             return states.AsReadOnly();

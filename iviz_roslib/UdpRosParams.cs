@@ -2,7 +2,7 @@ namespace Iviz.Roslib
 {
     internal static class UdpRosParams
     {
-        public const int HeaderLength = 12;
+        public const int HeaderLength = 8;
 
         public const int DefaultMTU = 1500;
         public const int IpUdpHeadersLength = 40 /* IPv6*/ + 8 /* UDP */;

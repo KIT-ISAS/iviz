@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
