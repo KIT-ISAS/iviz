@@ -102,11 +102,15 @@ namespace Iviz.Displays
             {
                 case "32FC":
                 case "32FC1":
+                case "RGBA":
+                case "BGRA":
                 case "RGBA8":
                 case "BGRA8":
                 case "8SC4":
                 case "8UC4":
                     return 4;
+                case "RGB":
+                case "BGR":
                 case "RGB8":
                 case "BGR8":
                 case "8SC3":
@@ -372,9 +376,11 @@ namespace Iviz.Displays
 
             switch (encoding.ToUpperInvariant())
             {
+                case "RGBA":
                 case "RGBA8":
                 case "8SC4":
                 case "8UC4":
+                case "RGB":
                 case "RGB8":
                 case "8SC3":
                 case "8UC3":
@@ -382,7 +388,9 @@ namespace Iviz.Displays
                     Material.DisableKeyword("USE_INTENSITY");
                     Material.DisableKeyword("FLIP_RB");
                     break;
+                case "BGRA":
                 case "BGRA8":
+                case "BGR":
                 case "BGR8":
                     IsMono = false;
                     Material.DisableKeyword("USE_INTENSITY");
@@ -419,6 +427,8 @@ namespace Iviz.Displays
             {
                 case "RGB8":
                 case "BGR8":
+                case "RGB":
+                case "BGR":
                 case "8SC3":
                 case "8UC3":
                     if (!Settings.SupportsRGB24)
@@ -435,6 +445,8 @@ namespace Iviz.Displays
                     break;
                 case "RGBA8":
                 case "BGRA8":
+                case "BGRA":
+                case "RGBA":
                 case "8SC4":
                 case "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);

@@ -19,7 +19,7 @@ namespace Iviz.Rosbag.Writer
 #endif
     {
         const int MaxChunkSize = int.MaxValue / 2; // 1 GB
-        
+
         const string RosbagMagic = "#ROSBAG V2.0\n";
 
         readonly Stream writer;
@@ -37,7 +37,10 @@ namespace Iviz.Rosbag.Writer
         /// <summary>
         /// The current size of the rosbag file.
         /// </summary>
-        public long Length => writer.Length;
+        public long Length => !disposed
+            ? writer.Length
+            : throw new ObjectDisposedException(nameof(writer),
+                "Cannot access Length property after disposing the writer");
 
         /// <summary>
         /// The size of the current chunk.
@@ -95,7 +98,7 @@ namespace Iviz.Rosbag.Writer
             await writer.WriteHeaderRecordAsync(0, 0, 0);
             return writer;
         }
-        
+
         /// <summary>
         /// Creates a rosbag file using a stream that allows async operations.
         /// </summary>
@@ -108,7 +111,7 @@ namespace Iviz.Rosbag.Writer
             await writer.WriteMagicAsync();
             await writer.WriteHeaderRecordAsync(0, 0, 0);
             return writer;
-        }        
+        }
 
         void WriteMagic() => writer.WriteValue(RosbagMagic);
 
@@ -325,7 +328,7 @@ namespace Iviz.Rosbag.Writer
             {
                 writer.WriteValue(time.Secs)
                     .WriteValue(time.Nsecs)
-                    .WriteValue((int) offset);
+                    .WriteValue((int)offset);
             }
 
             //Console.WriteLine("** End position: " + writer.Position);
@@ -360,7 +363,7 @@ namespace Iviz.Rosbag.Writer
             {
                 await writer.WriteValueAsync(time.Secs);
                 await writer.WriteValueAsync(time.Nsecs);
-                await writer.WriteValueAsync((int) offset);
+                await writer.WriteValueAsync((int)offset);
             }
 
             //Console.WriteLine("** End position: " + writer.Position);
@@ -481,7 +484,7 @@ namespace Iviz.Rosbag.Writer
             }
 
             long position = writer.Position;
-            int size = (int) (position - chunkDataStart);
+            int size = (int)(position - chunkDataStart);
 
             writer.Seek(chunkStart.Value, SeekOrigin.Begin);
             WritePartialChunkRecord(size);
@@ -508,7 +511,7 @@ namespace Iviz.Rosbag.Writer
             return true;
         }
 
-        
+
         /// <summary>
         /// Closes the current chunk. The next message will be written in a new chunk.
         /// A chunk is a container for messages. Splitting the rosbag into multiple chunks will make it easier to
@@ -524,7 +527,7 @@ namespace Iviz.Rosbag.Writer
             }
 
             long position = writer.Position;
-            int size = (int) (position - chunkDataStart);
+            int size = (int)(position - chunkDataStart);
 
             writer.Seek(chunkStart.Value, SeekOrigin.Begin);
             await WritePartialChunkRecordAsync(size);
@@ -551,7 +554,7 @@ namespace Iviz.Rosbag.Writer
             return true;
         }
 
-        
+
         /// <summary>
         /// Adds a message to the rosbag file.
         /// </summary>
@@ -627,11 +630,11 @@ namespace Iviz.Rosbag.Writer
 
             await WriteMessageRecordAsync(connectionId, timestamp, message);
             chunkEndTime = timestamp;
-            
+
             if (CurrentChunkLength > MaxChunkSize)
             {
                 await TryCloseChunkAsync();
-            }            
+            }
         }
 
         /// <summary>
@@ -683,6 +686,13 @@ namespace Iviz.Rosbag.Writer
         /// </summary>
         public async Task DisposeAsync()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
             await TryCloseChunkAsync();
 
             if (connections.Count != 0 && chunkInfos.Count != 0)

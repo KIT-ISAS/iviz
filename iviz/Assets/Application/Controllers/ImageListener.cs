@@ -194,10 +194,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Image.RosMessageType:
-                    Listener = new Listener<Image>(config.Topic, Handler);
+                    Listener = new Listener<Image>(config.Topic, Handler) { MaxQueueSize = 1 };
                     break;
                 case CompressedImage.RosMessageType:
-                    Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed);
+                    Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed) { MaxQueueSize = 1 };
                     break;
             }
         }
@@ -238,13 +238,25 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void Handler([NotNull] Image msg)
+        bool Handler([NotNull] Image msg)
         {
-            node.AttachTo(msg.Header);
+            if (IsProcessing)
+            {
+                return false;
+            }
 
-            int width = (int) msg.Width;
-            int height = (int) msg.Height;
-            imageTexture.Set(width, height, msg.Encoding, msg.Data);
+            IsProcessing = true;
+
+            GameThread.PostInListenerQueue(() =>
+            {
+                node.AttachTo(msg.Header);
+
+                int width = (int) msg.Width;
+                int height = (int) msg.Height;
+                imageTexture.Set(width, height, msg.Encoding, msg.Data);
+            });
+
+            return true;
         }
 
         public override void StopController()

@@ -37,7 +37,7 @@ namespace Iviz.App
             }
             else
             {
-                listener.Config = (MarkerConfiguration) constructor.Configuration;
+                listener.Config = (MarkerConfiguration)constructor.Configuration;
             }
 
             listener.StartListening();
@@ -54,6 +54,7 @@ namespace Iviz.App
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
+            panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.Mask.Options = listener.GetMaskEntries();
 
@@ -69,14 +70,8 @@ namespace Iviz.App
                 color.a = f;
                 listener.Tint = color;
             };
-            panel.OcclusionOnlyMode.ValueChanged += f =>
-            {
-                listener.RenderAsOcclusionOnly = f;
-            };
-            panel.TriangleListFlipWinding.ValueChanged += f =>
-            {
-                listener.TriangleListFlipWinding = f;
-            };
+            panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
+            panel.TriangleListFlipWinding.ValueChanged += f => listener.TriangleListFlipWinding = f;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -87,6 +82,7 @@ namespace Iviz.App
                 panel.Mask.Options = listener.GetMaskEntries();
                 panel.Mask.OverrideCaption("---");
             };
+            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

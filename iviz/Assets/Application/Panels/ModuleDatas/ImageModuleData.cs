@@ -12,7 +12,7 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ImagePanelContents"/> 
     /// </summary>
-    public sealed class ImageModuleData : ListenerModuleData, IImageDialogListener
+    public sealed class ImageModuleData : ListenerModuleData
     {
         [NotNull] readonly ImageListener listener;
         [NotNull] readonly ImagePanelContents panel;
@@ -23,9 +23,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
-        Material IImageDialogListener.Material => listener.Material;
-
-        Vector2Int IImageDialogListener.ImageSize => listener.ImageSize;
+        [CanBeNull] ImageDialogData imageDialogData;
 
         public ImageModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
@@ -42,6 +40,7 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
                 listener.Config.Type = Type;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -75,22 +74,10 @@ namespace Iviz.App
             panel.BillboardFollowsCamera.Interactable = listener.EnableBillboard;
             panel.BillboardOffset.Interactable = listener.EnableBillboard;
 
-            panel.Colormap.ValueChanged += (i, _) =>
-            {
-                listener.Colormap = (ColormapId)i;
-            };
-            panel.Min.ValueChanged += f =>
-            {
-                listener.MinIntensity = f;
-            };
-            panel.Max.ValueChanged += f =>
-            {
-                listener.MaxIntensity = f;
-            };
-            panel.FlipMinMax.ValueChanged += f =>
-            {
-                listener.FlipMinMax = f;
-            };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId)i; };
+            panel.Min.ValueChanged += f => { listener.MinIntensity = f; };
+            panel.Max.ValueChanged += f => { listener.MaxIntensity = f; };
+            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
             panel.CloseButton.Clicked += Close;
             panel.ShowBillboard.ValueChanged += f =>
             {
@@ -99,22 +86,18 @@ namespace Iviz.App
                 panel.BillboardOffset.Interactable = f;
                 listener.EnableBillboard = f;
             };
-            panel.BillboardSize.ValueChanged += f =>
-            {
-                listener.BillboardSize = f;
-            };
-            panel.BillboardFollowsCamera.ValueChanged += f =>
-            {
-                listener.BillboardFollowsCamera = f;
-            };
-            panel.BillboardOffset.ValueChanged += f =>
-            {
-                listener.BillboardOffset = f;
-            };
+            panel.BillboardSize.ValueChanged += f => { listener.BillboardSize = f; };
+            panel.BillboardFollowsCamera.ValueChanged += f => { listener.BillboardFollowsCamera = f; };
+            panel.BillboardOffset.ValueChanged += f => { listener.BillboardOffset = f; };
             panel.PreviewWidget.Clicked += () =>
             {
-                ModuleListPanel.ShowImageDialog(this);
-                panel.PreviewWidget.Interactable = false;
+                if (imageDialogData == null)
+                {
+                    imageDialogData = new ColorImageListener(this).DialogData;
+                    imageDialogData.SetupPanel();
+                }
+
+                imageDialogData.Title = listener.Topic;
             };
             panel.HideButton.Clicked += ToggleVisible;
         }
@@ -128,20 +111,21 @@ namespace Iviz.App
             panel.FlipMinMax.Interactable = listener.IsMono;
             panel.Description.Label = $"<b>{listener.Description}</b>";
             panel.PreviewWidget.ToggleImageEnabled();
+            imageDialogData?.ToggleImageEnabled();
         }
 
         public override void AddToState(StateConfiguration config)
         {
             config.Images.Add(listener.Config);
         }
-        
+
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<ImageConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(ImageConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -172,16 +156,31 @@ namespace Iviz.App
                         break;
                     default:
                         Logger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
-            ResetPanel();
-        }              
 
-        void IImageDialogListener.OnDialogClosed()
+            ResetPanel();
+        }
+
+        void OnDialogClosed()
         {
-            panel.PreviewWidget.Interactable = true;
+            imageDialogData = null;
+        }
+
+        public override void Stop()
+        {
+            base.Stop();
+            imageDialogData?.Stop();
+        }
+
+        sealed class ColorImageListener : ImageDialogListener
+        {
+            [NotNull] readonly ImageModuleData moduleData;
+            public ColorImageListener([NotNull] ImageModuleData moduleData) => this.moduleData = moduleData;
+            public override Material Material => moduleData.listener.Material;
+            public override Vector2Int ImageSize => moduleData.listener.ImageSize;
+            protected override void Stop() => moduleData.OnDialogClosed();
         }
     }
 }

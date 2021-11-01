@@ -78,7 +78,7 @@ namespace Iviz.Tools
         static readonly AsyncCallback OnComplete =
             result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
 
-        static readonly Action<object?> OnCanceled = tcs =>
+        public static readonly Action<object?> OnCanceled = tcs =>
             ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
 
         static ValueTask<int> ReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,

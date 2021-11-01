@@ -6,12 +6,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Msgs.RosgraphMsgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Buffer = System.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -325,7 +323,7 @@ namespace Iviz.Roslib
             }
 
             numReceived++;
-            bytesReceived += rcvLength + UdpRosParams.HeaderLength;
+            bytesReceived += rcvLength + UdpRosParams.HeaderLength + 4;
 
             if (!IsPaused)
             {

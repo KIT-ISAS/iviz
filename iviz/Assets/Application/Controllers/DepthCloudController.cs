@@ -66,7 +66,7 @@ namespace Iviz.Controllers
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = new DepthCloudConfiguration();
-            
+
             depthImageTexture.Colormap = ColormapId.gray;
             colorImageTexture.Colormap = ColormapId.gray;
         }
@@ -188,7 +188,8 @@ namespace Iviz.Controllers
                         DepthListener = new Listener<Image>(depthTopic, DepthHandler);
                         break;
                     case CompressedImage.RosMessageType:
-                        DepthListener = new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed);
+                        DepthListener = new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed)
+                            { MaxQueueSize = 1 };
                         break;
                     default:
                         config.DepthTopic = "";
@@ -202,7 +203,7 @@ namespace Iviz.Controllers
                 DepthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
             }
         }
-        
+
         [NotNull]
         public string Description
         {
@@ -219,7 +220,7 @@ namespace Iviz.Controllers
                 string depthDescription = depthTexture != null
                     ? $"<b>Depth {depthImageTexture.Description}</b>\n"
                     : "[No Depth Image]\n";
-                
+
                 string colorDescription = colorTexture != null
                     ? $"<b>Color {colorImageTexture.Description}</b>"
                     : "[No Color Image]";
@@ -228,14 +229,26 @@ namespace Iviz.Controllers
             }
         }
 
-        void DepthHandler([NotNull] Image msg)
+        bool DepthHandler([NotNull] Image msg)
         {
-            node.AttachTo(msg.Header);
-            
-            int width = (int) msg.Width;
-            int height = (int) msg.Height;
-            depthImageTexture.Set(width, height, msg.Encoding, msg.Data);
-            UpdateIntensityBounds();
+            if (DepthIsProcessing)
+            {
+                return false;
+            }
+
+            DepthIsProcessing = true;
+
+            GameThread.PostInListenerQueue(() =>
+            {
+                node.AttachTo(msg.Header);
+                int width = (int)msg.Width;
+                int height = (int)msg.Height;
+                depthImageTexture.Set(width, height, msg.Encoding, msg.Data);
+                UpdateIntensityBounds();
+                DepthIsProcessing = false;
+            });
+
+            return true;
         }
 
         bool DepthHandlerCompressed([NotNull] CompressedImage msg)
@@ -272,8 +285,8 @@ namespace Iviz.Controllers
         {
             TextureFormat? format = depthImageTexture.Texture != null
                 ? depthImageTexture.Texture.format
-                : (TextureFormat?) null;
-            
+                : (TextureFormat?)null;
+
             if (format == lastDepthFormat)
             {
                 return;
@@ -291,11 +304,24 @@ namespace Iviz.Controllers
             }
         }
 
-        void ColorHandler([NotNull] Image msg)
+        bool ColorHandler([NotNull] Image msg)
         {
-            int width = (int) msg.Width;
-            int height = (int) msg.Height;
-            colorImageTexture.Set(width, height, msg.Encoding, msg.Data);
+            if (ColorIsProcessing)
+            {
+                return false;
+            }
+
+            ColorIsProcessing = true;
+
+            GameThread.PostInListenerQueue(() =>
+            {
+                int width = (int)msg.Width;
+                int height = (int)msg.Height;
+                colorImageTexture.Set(width, height, msg.Encoding, msg.Data);
+                ColorIsProcessing = false;
+            });
+
+            return true;
         }
 
         bool ColorHandlerCompressed([NotNull] CompressedImage msg)

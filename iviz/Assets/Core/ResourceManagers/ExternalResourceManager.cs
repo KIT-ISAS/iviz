@@ -45,6 +45,9 @@ namespace Iviz.Displays
 
         const int TimeoutInMs = 10000;
 
+        const int Md5SumLength = 32;
+
+
         [DataContract]
         public class ResourceFiles
         {
@@ -129,6 +132,7 @@ namespace Iviz.Displays
             }
         }
 
+        [NotNull]
         public Task ClearModelCacheAsync(CancellationToken token = default)
         {
             runningTs.Cancel();
@@ -166,6 +170,7 @@ namespace Iviz.Displays
             return WriteResourceFileAsync(token);
         }
 
+        [NotNull]
         Task WriteResourceFileAsync(CancellationToken token)
         {
             return FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
@@ -401,13 +406,13 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>> TryGetModelFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            var msg = new GetModelResource {Request = {Uri = uriString}};
+            var msg = new GetModelResource { Request = { Uri = uriString } };
             try
             {
                 bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
                 if (!hasClient)
                 {
-                    Debug.LogWarning("ExternalResourceManager: Call to model service failed. Reason: Not connected.");
+                    Logger.Debug("ExternalResourceManager: Call to model service failed. Reason: Not connected.");
                     return null;
                 }
 
@@ -474,7 +479,7 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>> TryGetSceneFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token)
         {
-            var msg = new GetSdf {Request = {Uri = uriString}};
+            var msg = new GetSdf { Request = { Uri = uriString } };
             if (await provider.CallServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
@@ -542,7 +547,7 @@ namespace Iviz.Displays
         async ValueTask<Info<Texture2D>> TryGetTextureFromServerAsync([NotNull] string uriString,
             [NotNull] IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
-            var msg = new GetModelTexture {Request = {Uri = uriString}};
+            var msg = new GetModelTexture { Request = { Uri = uriString } };
             if (await provider.CallServiceAsync(TextureServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessTextureResponseAsync(uriString, msg.Response, token);
@@ -562,16 +567,16 @@ namespace Iviz.Displays
         }
 
         [ItemCanBeNull]
-        public async ValueTask<Model> TryGetModelResourceAsync([NotNull] string uriString,
+        public ValueTask<Model> TryGetModelFromFileAsync([NotNull] string uriString,
             CancellationToken token = default)
         {
-            if (!resourceFiles.Models.TryGetValue(uriString, out string localPath)
-                || !File.Exists($"{Settings.ResourcesPath}/{localPath}"))
+            if (resourceFiles.Models.TryGetValue(uriString, out string localPath) 
+                && File.Exists($"{Settings.ResourcesPath}/{localPath}"))
             {
-                return null;
+                return ReadModelFromFileAsync(uriString, localPath, token);
             }
 
-            return await ReadModelFromFileAsync(uriString, localPath, token);
+            return ValueTask2.FromResult((Model)null);
         }
 
         [ItemCanBeNull]
@@ -579,13 +584,15 @@ namespace Iviz.Displays
         {
             using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
             {
-                if (buffer.Length < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Model.RosMd5Sum)
+                if (buffer.Length < Md5SumLength ||
+                    BuiltIns.UTF8.GetString(buffer.Array, 0, Md5SumLength) != Model.RosMd5Sum)
                 {
                     Logger.Warn($"{this}: Resource {uriString} is out of date");
                     return null;
                 }
 
-                return Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - 32, 32);
+                return Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - Md5SumLength,
+                    Md5SumLength);
             }
         }
 
@@ -604,17 +611,13 @@ namespace Iviz.Displays
 
                 obj = await CreateModelObjectAsync(uriString, msg, provider, token);
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (!(e is OperationCanceledException))
             {
                 Logger.Error($"{this}: Loading resource {uriString} failed with error", e);
                 return null;
             }
 
-            Info<GameObject> resource = new Info<GameObject>(obj);
+            var resource = new Info<GameObject>(obj);
             loadedModels[uriString] = resource;
 
             return resource;
@@ -660,13 +663,15 @@ namespace Iviz.Displays
             {
                 using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
                 {
-                    if (buffer.Length < 32 || BuiltIns.UTF8.GetString(buffer.Array, 0, 32) != Scene.RosMd5Sum)
+                    if (buffer.Length < Md5SumLength ||
+                        BuiltIns.UTF8.GetString(buffer.Array, 0, Md5SumLength) != Scene.RosMd5Sum)
                     {
                         Logger.Warn($"{this}: Resource {uriString} is out of date");
                         return null;
                     }
 
-                    var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length - 32, 32);
+                    var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length - Md5SumLength,
+                        Md5SumLength);
                     obj = await CreateSceneNodeAsync(msg, provider, token);
                 }
             }
@@ -689,19 +694,19 @@ namespace Iviz.Displays
         {
             try
             {
-                Debug.Log("ExternalResourceManager: Processing " + uriString);
+                //Debug.Log("ExternalResourceManager: Processing " + uriString);
                 GameObject obj = await CreateModelObjectAsync(uriString, msg.Model, provider, token);
-                Debug.Log("ExternalResourceManager: Finished " + uriString);
+                //Debug.Log("ExternalResourceManager: Finished " + uriString);
 
                 Info<GameObject> info = new Info<GameObject>(obj);
                 loadedModels[uriString] = info;
 
                 string localPath = SanitizeForFilename(uriString);
 
-                using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + 32))
+                using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, 32, buffer.Array, 0);
-                    msg.Model.SerializeToArray(buffer.Array, 32);
+                    BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    msg.Model.SerializeToArray(buffer.Array, Md5SumLength);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
 
@@ -752,8 +757,7 @@ namespace Iviz.Displays
 
         [ItemCanBeNull]
         async ValueTask<Info<GameObject>> ProcessSceneResponseAsync([NotNull] string uriString,
-            [NotNull] GetSdfResponse msg,
-            [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
+            [NotNull] GetSdfResponse msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
         {
             try
             {
@@ -766,10 +770,10 @@ namespace Iviz.Displays
 
                 string localPath = SanitizeForFilename(uriString);
 
-                using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + 32))
+                using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, 32, buffer.Array, 0);
-                    msg.Scene.SerializeToArray(buffer.Array, 32);
+                    BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    msg.Scene.SerializeToArray(buffer.Array, Md5SumLength);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     Logger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 }
@@ -831,7 +835,7 @@ namespace Iviz.Displays
                 var childTransform = child.transform;
                 childTransform.SetParent(node.transform, false);
                 childTransform.localRotation = m.rotation.Ros2Unity();
-                childTransform.localPosition = ((Vector3) m.GetColumn(3)).Ros2Unity();
+                childTransform.localPosition = ((Vector3)m.GetColumn(3)).Ros2Unity();
                 childTransform.localScale = m.lossyScale;
 
                 Info<GameObject> includeResource =
@@ -854,7 +858,7 @@ namespace Iviz.Displays
                 light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
                 lightObject.transform.localPosition = source.Position.Ros2Unity();
                 light.range = source.Range != 0 ? source.Range : 20;
-                switch ((SdfLightType) source.Type)
+                switch ((SdfLightType)source.Type)
                 {
                     default:
                         light.type = LightType.Point;

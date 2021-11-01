@@ -51,6 +51,8 @@ namespace Iviz.Resources
         
         public Info<GameObject> ARMarkerPanel { get; }
         public Info<GameObject> ARMarkerWidget { get; }
+        
+        public Info<GameObject> ImageCanvas { get; }
 
         public WidgetsType()
         {
@@ -103,6 +105,7 @@ namespace Iviz.Resources
             ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers);
             
             CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible);
+            ImageCanvas =  new Info<GameObject>(assetHolder.ImageCanvas);
         }
     }
 }

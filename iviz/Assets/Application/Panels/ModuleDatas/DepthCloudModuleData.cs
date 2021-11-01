@@ -14,10 +14,13 @@ namespace Iviz.App
 {
     public sealed class DepthCloudModuleData : ModuleData
     {
-        static readonly string[] NoneStr = {"<none>"};
+        const string NoneStr = "<none>";
 
         [NotNull] readonly DepthCloudController controller;
         [NotNull] readonly DepthCloudPanelContents panel;
+
+        [CanBeNull] ImageDialogData colorDialogData;
+        [CanBeNull] ImageDialogData depthDialogData;
 
         public override DataPanelContents Panel => panel;
         public override ModuleType ModuleType => ModuleType.DepthCloud;
@@ -32,7 +35,7 @@ namespace Iviz.App
             controller = new DepthCloudController(this);
             if (constructor.Configuration != null)
             {
-                controller.Config = (DepthCloudConfiguration) constructor.Configuration;
+                controller.Config = (DepthCloudConfiguration)constructor.Configuration;
             }
 
             UpdateModuleButton();
@@ -42,6 +45,8 @@ namespace Iviz.App
         {
             base.Stop();
             controller.StopController();
+            colorDialogData?.Stop();
+            depthDialogData?.Stop();
         }
 
         public override void SetupPanel()
@@ -51,7 +56,6 @@ namespace Iviz.App
 
             panel.ColorTopic.Listener = controller.ColorListener;
             panel.DepthTopic.Listener = controller.DepthListener;
-            //panel.DepthInfoTopic.Listener = controller.DepthInfoListener;
 
             panel.Color.Value = controller.ColorTopic;
             panel.Depth.Value = controller.DepthTopic;
@@ -64,52 +68,80 @@ namespace Iviz.App
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
 
-            string[] topics = GetImageTopics().ToArray();
+            var topics = GetImageTopics();
             panel.Color.Hints = topics;
             panel.Depth.Hints = topics;
 
             panel.Color.EndEdit += f =>
             {
-                controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0][0] ? "" : f;
+                controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
                 panel.ColorTopic.Listener = controller.ColorListener;
+
+                if (colorDialogData != null)
+                {
+                    colorDialogData.Title = SanitizeTitle(controller.ColorTopic);
+                }
             };
             panel.Depth.EndEdit += f =>
             {
-                controller.DepthTopic = f.Length == 0 || f[0] == NoneStr[0][0] ? "" : f;
+                controller.DepthTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
                 panel.DepthTopic.Listener = controller.DepthListener;
+
+                if (depthDialogData != null)
+                {
+                    depthDialogData.Title = SanitizeTitle(controller.DepthTopic);
+                }
             };
             panel.ColorPreview.Clicked += () =>
             {
-                ModuleListPanel.ShowImageDialog(new ColorListener(this));
-                panel.ColorPreview.Interactable = false;
+                if (colorDialogData == null)
+                {
+                    colorDialogData = new ColorImageDialogListener(this).DialogData;
+                    colorDialogData.SetupPanel();
+                }
+
+                colorDialogData.Title = SanitizeTitle(controller.ColorTopic);
             };
             panel.DepthPreview.Clicked += () =>
             {
-                ModuleListPanel.ShowImageDialog(new DepthListener(this));
-                panel.DepthPreview.Interactable = false;
+                if (depthDialogData == null)
+                {
+                    depthDialogData = new DepthImageDialogListener(this).DialogData;
+                    depthDialogData.SetupPanel();
+                }
+
+                depthDialogData.Title = SanitizeTitle(controller.DepthTopic);
             };
         }
+
+        [NotNull]
+        static string SanitizeTitle([CanBeNull] string topic) => string.IsNullOrEmpty(topic) ? "[Empty]" : topic;
 
         public override void UpdatePanel()
         {
             base.UpdatePanel();
 
-            string[] topics = GetImageTopics().ToArray();
+            var topics = GetImageTopics();
             panel.Color.Hints = topics;
             panel.Depth.Hints = topics;
             panel.ColorPreview.ToggleImageEnabled();
             panel.DepthPreview.ToggleImageEnabled();
+            colorDialogData?.ToggleImageEnabled();
+            depthDialogData?.ToggleImageEnabled();
             panel.Description.Label = controller.Description;
         }
 
         [NotNull]
-        static IEnumerable<string> GetImageTopics() =>
-            NoneStr.Concat(
-                ConnectionManager.Connection.GetSystemPublishedTopicTypes()
-                    .Where(topicInfo =>
-                        topicInfo.Type == Image.RosMessageType || topicInfo.Type == CompressedImage.RosMessageType)
-                    .Select(topicInfo => topicInfo.Topic)
+        static List<string> GetImageTopics()
+        {
+            var topics = new List<string> { NoneStr };
+            topics.AddRange(ConnectionManager.Connection.GetSystemPublishedTopicTypes()
+                .Where(topicInfo => topicInfo.Type == Image.RosMessageType ||
+                                    topicInfo.Type == CompressedImage.RosMessageType)
+                .Select(topicInfo => topicInfo.Topic)
             );
+            return topics;
+        }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
@@ -142,30 +174,34 @@ namespace Iviz.App
             config.DepthImageProjectors.Add(controller.Config);
         }
 
-        sealed class ColorListener : IImageDialogListener
+        void OnDialogClosed(ImageDialogData listener)
         {
-            readonly DepthCloudController controller;
-            readonly ImagePreviewWidget previewWidget;
-
-            public ColorListener([NotNull] DepthCloudModuleData moduleData) =>
-                (controller, previewWidget) = (moduleData.controller, moduleData.panel.ColorPreview);
-
-            public Material Material => controller.ColorMaterial;
-            public Vector2Int ImageSize => controller.ColorImageSize;
-            public void OnDialogClosed() => previewWidget.Interactable = true;
+            if (listener == colorDialogData)
+            {
+                colorDialogData = null;
+            }
+            else if (listener == depthDialogData)
+            {
+                depthDialogData = null;
+            }
         }
 
-        sealed class DepthListener : IImageDialogListener
+        sealed class ColorImageDialogListener : ImageDialogListener
         {
-            readonly DepthCloudController controller;
-            readonly ImagePreviewWidget previewWidget;
+            [NotNull] readonly DepthCloudModuleData moduleData;
+            public ColorImageDialogListener([NotNull] DepthCloudModuleData moduleData) => this.moduleData = moduleData;
+            public override Material Material => moduleData.controller.ColorMaterial;
+            public override Vector2Int ImageSize => moduleData.controller.ColorImageSize;
+            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
+        }
 
-            public DepthListener([NotNull] DepthCloudModuleData moduleData) =>
-                (controller, previewWidget) = (moduleData.controller, moduleData.panel.DepthPreview);
-
-            public Material Material => controller.DepthMaterial;
-            public Vector2Int ImageSize => controller.DepthImageSize;
-            public void OnDialogClosed() => previewWidget.Interactable = true;
+        sealed class DepthImageDialogListener : ImageDialogListener
+        {
+            [NotNull] readonly DepthCloudModuleData moduleData;
+            public DepthImageDialogListener([NotNull] DepthCloudModuleData moduleData) => this.moduleData = moduleData;
+            public override Material Material => moduleData.controller.DepthMaterial;
+            public override Vector2Int ImageSize => moduleData.controller.DepthImageSize;
+            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
         }
     }
 }
