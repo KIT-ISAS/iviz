@@ -6,7 +6,7 @@ namespace Iviz.Msgs
     /// Attribute that tells the Unity Engine not to strip these fields even if no code accesses them.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class | AttributeTargets.Struct |
-                    AttributeTargets.Method | AttributeTargets.Property)]
+                    AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Constructor)]
     public class PreserveAttribute : Attribute
     {
     }

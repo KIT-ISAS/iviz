@@ -11,11 +11,14 @@ namespace Iviz.Msgs
     {
         readonly int maxStringLength;
         readonly int maxArrayLength;
+        readonly int maxArrayLengthForUnmanaged;
 
-        public ClampJsonConverter(int maxStringLength = 200, int maxArrayLength = 5)
+        public ClampJsonConverter(int maxStringLength = 200, int maxArrayLength = 5,
+            int maxArrayLengthForUnmanaged = 16)
         {
             this.maxStringLength = maxStringLength;
             this.maxArrayLength = maxArrayLength;
+            this.maxArrayLengthForUnmanaged = maxArrayLengthForUnmanaged;
         }
 
         public override bool CanConvert(Type objectType)
@@ -35,33 +38,68 @@ namespace Iviz.Msgs
                     JValue.CreateNull().WriteTo(writer);
                     return;
                 case string str when str.Length < maxStringLength:
-                    JValue.CreateString(str).WriteTo(writer);
+                    writer.WriteValue(str);
                     break;
                 case string str:
                     string shortString =
-                        $"{str.Substring(0, maxStringLength)} <i>... +{str.Length - maxStringLength} chars</i>";
-                    JValue.CreateString(shortString).WriteTo(writer);
-                    break;
-                case Array array when array.Length < maxArrayLength:
-                    JArray shortArray = new();
-                    foreach (object? element in array)
-                    {
-                        shortArray.Add(element == null ? JValue.CreateNull() : JToken.FromObject(element, serializer));
-                    }
-
-                    JToken.FromObject(shortArray, serializer).WriteTo(writer);
+                        $"{str.Substring(0, maxStringLength)} <i>... +{(str.Length - maxStringLength).ToString()} chars</i>";
+                    writer.WriteValue(shortString);
                     break;
                 case Array array:
-                    JValue.CreateComment($"<i>(Showing first {maxArrayLength} of {array.Length})</i>").WriteTo(writer);
-                    JArray longArray = new();
-                    for (int i = 0; i < maxArrayLength; i++)
+                    _ = array switch
                     {
-                        var element = array.GetValue(i);
-                        longArray.Add(element == null ? JValue.CreateNull() : JToken.FromObject(element, serializer));
-                    }
-
-                    JToken.FromObject(longArray, serializer).WriteTo(writer);
+                        int[] i => WriteArray(i, writer.WriteValue),
+                        uint[] i => WriteArray(i, writer.WriteValue),
+                        short[] i => WriteArray(i, writer.WriteValue),
+                        ushort[] i => WriteArray(i, writer.WriteValue),
+                        byte[] i => WriteArray(i, writer.WriteValue),
+                        sbyte[] i => WriteArray(i, writer.WriteValue),
+                        long[] i => WriteArray(i, writer.WriteValue),
+                        ulong[] i => WriteArray(i, writer.WriteValue),
+                        float[] i => WriteArray(i, writer.WriteValue),
+                        double[] i => WriteArray(i, writer.WriteValue),
+                        _ => WriteObjectArray(array)
+                    };
                     break;
+            }
+
+            bool WriteArray<T>(T[] array, Action<T> writerDel)
+            {
+                if (array.Length > maxArrayLengthForUnmanaged)
+                {
+                    JValue.CreateComment(
+                            $"<i>(Showing {maxArrayLengthForUnmanaged.ToString()}/{array.Length.ToString()})</i>")
+                        .WriteTo(writer);
+                }
+
+                writer.WriteStartArray();
+                for (int i = 0; i < Math.Min(array.Length, maxArrayLengthForUnmanaged); i++)
+                {
+                    writerDel(array[i]);
+                }
+
+                writer.WriteEndArray();
+
+                return true;
+            }
+
+            bool WriteObjectArray(Array array)
+            {
+                if (array.Length > maxArrayLength)
+                {
+                    JValue.CreateComment($"<i>(Showing {maxArrayLength.ToString()}/{array.Length.ToString()})</i>")
+                        .WriteTo(writer);
+                }
+
+                var shortArray = new JArray();
+                for (int i = 0; i < Math.Min(array.Length, maxArrayLength); i++)
+                {
+                    object? element = array.GetValue(i);
+                    shortArray.Add(element == null ? JValue.CreateNull() : JToken.FromObject(element, serializer));
+                }
+
+                JToken.FromObject(shortArray, serializer).WriteTo(writer);
+                return true;
             }
         }
 

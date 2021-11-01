@@ -220,13 +220,6 @@ namespace Iviz.Msgs
             return Type.GetType(guessName);
         }
 
-        public static Rent<byte> AsRent(this string text)
-        {
-            var bytes = new Rent<byte>(UTF8.GetByteCount(text));
-            UTF8.GetBytes(text, 0, text.Length, bytes.Array, 0);
-            return bytes;
-        }
-
         public static string ToJsonString(this ISerializable o, bool indented = true)
         {
             return ToJsonString((object) o, indented);
