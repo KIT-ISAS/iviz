@@ -10,6 +10,7 @@ namespace Iviz.Tools
     /// returned once all the shared references are disposed. 
     /// </summary>
     /// <typeparam name="T">The type of the rented array.</typeparam>
+    [Obsolete]
     public sealed class SharedRef<T> : IDisposable
     {
         public T[] Array => reference.Array;

@@ -22,7 +22,7 @@ namespace Iviz.Tools
             }
             
             int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-            return new ValueTask<bool>(received == toRead);
+            return ValueTask2.FromResult(received == toRead);
         }
 
         static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -90,7 +90,7 @@ namespace Iviz.Tools
             }
             
             int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-            return new ValueTask<int>(received);
+            return ValueTask2.FromResult(received);
         }
 
         static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,

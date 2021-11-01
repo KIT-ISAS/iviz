@@ -235,10 +235,17 @@ namespace Iviz.Tools
         {
             var (t1, t2) = ts;
             return t1.IsCompleted
-                ? new ValueTask<Task>(t1)
+                ? ValueTask2.FromResult(t1)
                 : t2.IsCompleted
-                    ? new ValueTask<Task>(t2)
-                    : new ValueTask<Task>(Task.WhenAny(t1, t2));
+                    ? ValueTask2.FromResult(t2)
+                    : Task.WhenAny(t1, t2).AsValueTask();
         }
+    }
+
+    public static class ValueTask2
+    {
+        public static ValueTask<T> FromResult<T>(T t) => new(t);
+        public static ValueTask<T> FromException<T>(Exception e) => new(Task.FromException<T>(e));
+        public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
     }
 }

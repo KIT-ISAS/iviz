@@ -70,15 +70,6 @@ namespace Iviz.Tools
             }
         }
 
-        public void CopyFrom(IEnumerable<T> src)
-        {
-            int i = 0;
-            foreach (T t in src)
-            {
-                Array[i++] = t;
-            }
-        }
-
         int IReadOnlyCollection<T>.Count => Length;
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

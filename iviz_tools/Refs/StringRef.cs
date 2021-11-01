@@ -12,6 +12,7 @@ namespace Iviz.Tools
     /// first cast to a string, in which case the resulting string will be
     /// cached and reused in future casts. 
     /// </summary>
+    [Obsolete]
     public sealed class StringRef : IDisposable, IReadOnlyList<byte>
     {
         public static long NumActive = 0;

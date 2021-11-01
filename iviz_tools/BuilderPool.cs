@@ -9,7 +9,7 @@ namespace Iviz.Tools
 
         public static StringBuilder Rent()
         {
-            return Pool.TryTake(out StringBuilder? result) ? result : new StringBuilder(100);
+            return Pool.TryTake(out StringBuilder? result) ? result : new StringBuilder(65536);
         }
 
         public static void Return(StringBuilder str)

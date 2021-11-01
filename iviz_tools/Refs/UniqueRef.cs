@@ -14,6 +14,7 @@ namespace Iviz.Tools
     /// disposing it will do nothing.
     /// </summary>
     /// <typeparam name="T">The type of the rented array.</typeparam>
+    [Obsolete]
     public sealed class UniqueRef<T> : IDisposable, IReadOnlyList<T>
     {
         static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
