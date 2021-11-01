@@ -17,6 +17,18 @@ namespace Iviz.XmlRpc
     {
         const int DelayQueueSize = 5;
 
+        /// <summary> Socket error: connection refused </summary>
+        const int ErrConnRef = (int)SocketError.ConnectionRefused;
+
+        /// <summary> Socket error: connection refused, workaround for mono bug in mobile </summary>
+        const int ErrConnRefAlt = ErrConnRef - 10000;
+
+        /// <summary> Socket error: host down </summary>
+        const int ErrHostDown = (int)SocketError.HostDown;
+
+        /// <summary> Socket error: host down, workaround for mono bug in mobile </summary>
+        const int ErrHostDownAlt = ErrHostDown - 10000;
+
         readonly Queue<int> delays = new(DelayQueueSize);
         readonly Uri remoteUri;
         readonly AsyncLock mutex = new();
@@ -132,7 +144,7 @@ namespace Iviz.XmlRpc
 
         async Task<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
         {
-            const int waitTime = 750;
+            const int waitTimeInMs = 750;
 
             Logger.LogDebugFormat("{0}: Starting new connection", this);
 
@@ -152,8 +164,8 @@ namespace Iviz.XmlRpc
                 {
                     newRequest?.Dispose();
 
-                    if (e is OperationCanceledException
-                        or SocketException { ErrorCode: 61 or 10061 or 64 or 10064 }) // connection refused, host down
+                    if (e is OperationCanceledException or
+                        SocketException { ErrorCode: ErrConnRef or ErrConnRefAlt or ErrHostDown or ErrHostDownAlt })
                     {
                         throw; // stop retrying
                     }
@@ -163,9 +175,9 @@ namespace Iviz.XmlRpc
 
                 DateTime end = DateTime.Now;
                 int msDiff = (int)(end - start).TotalMilliseconds;
-                if (msDiff < waitTime)
+                if (msDiff < waitTimeInMs)
                 {
-                    await Task.Delay(waitTime - msDiff, token);
+                    await Task.Delay(waitTimeInMs - msDiff, token);
                 }
             }
         }

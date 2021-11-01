@@ -46,15 +46,13 @@ namespace Iviz.XmlRpc
 
         (string, Rent<byte>, int length) CreateRequestGzipped(string msgIn, bool keepAlive = false)
         {
-            using var srcBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(msgIn.Length));
-            int srcLength = Defaults.UTF8.GetBytes(msgIn, 0, msgIn.Length, srcBytes.Array, 0);
-
+            using var srcBytes = msgIn.AsRent();
             var dstBytes = new Rent<byte>(srcBytes.Length);
 
-            using MemoryStream outputStream = new(dstBytes.Array);
-            using (GZipStream compressionStream = new(outputStream, CompressionMode.Compress, true))
+            using var outputStream = new MemoryStream(dstBytes.Array);
+            using (var compressionStream = new GZipStream(outputStream, CompressionMode.Compress, true))
             {
-                compressionStream.Write(srcBytes.Array, 0, srcLength);
+                compressionStream.Write(srcBytes.Array, 0, srcBytes.Length);
             }
 
             string header =
@@ -75,13 +73,12 @@ namespace Iviz.XmlRpc
         {
             if (gzipped)
             {
-                (string header, var payloadBytes, int length) = CreateRequestGzipped(msgIn, keepAlive);
+                var (header, payloadBytes, length) = CreateRequestGzipped(msgIn, keepAlive);
                 using (payloadBytes)
                 {
-                    using (var headerBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(header.Length)))
+                    using (var headerBytes = header.AsRent())
                     {
-                        int headerSize = Defaults.UTF8.GetBytes(header, 0, header.Length, headerBytes.Array, 0);
-                        await client.WriteChunkAsync(headerBytes.Array, headerSize, token);
+                        await client.WriteChunkAsync(headerBytes, token);
                     }
 
                     await client.WriteChunkAsync(payloadBytes.Array, length, token);
@@ -91,10 +88,9 @@ namespace Iviz.XmlRpc
             }
 
             string content = CreateRequest(msgIn, keepAlive);
-
-            using var contentBytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(content.Length));
-            int contentSize = Defaults.UTF8.GetBytes(content, 0, content.Length, contentBytes.Array, 0);
-            await client.WriteChunkAsync(contentBytes.Array, contentSize, token);
+            
+            using var contentBytes = content.AsRent();
+            await client.WriteChunkAsync(contentBytes, token);
 
             return content.Length;
         }
