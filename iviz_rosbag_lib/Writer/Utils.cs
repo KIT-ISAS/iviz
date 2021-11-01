@@ -86,18 +86,14 @@ namespace Iviz.Rosbag.Writer
 
         public static Stream WriteValueUtf8(this Stream stream, string value)
         {
-            int length = BuiltIns.UTF8.GetByteCount(value);
-            using var bytes = new Rent<byte>(length);
-            BuiltIns.UTF8.GetBytes(value, 0, value.Length, bytes.Array, 0);
+            using var bytes = value.AsRent();
             stream.WriteValue(bytes);
             return stream;
         }
 
         public static async Task WriteValueUtf8Async(this Stream stream, string value)
         {
-            int length = BuiltIns.UTF8.GetByteCount(value);
-            using var bytes = new Rent<byte>(length);
-            BuiltIns.UTF8.GetBytes(value, 0, value.Length, bytes.Array, 0);
+            using var bytes = value.AsRent();
             await stream.WriteValueAsync(bytes);
         }
     }
