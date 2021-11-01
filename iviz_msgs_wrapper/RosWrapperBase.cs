@@ -265,12 +265,12 @@ namespace Iviz.MsgsWrapper
             [typeof(Log[])] = InitializeMessageArrayProperty<Log>,
         };
 
-        static string GetPropertyName(MemberInfo property)
+        static string GetPropertyName(MemberInfo property, bool rosIfyName = true)
         {
             string csName = property.GetCustomAttribute<RenameToAttribute>()?.Name
-                   ?? property.GetCustomAttribute<DataMemberAttribute>()?.Name
-                   ?? property.Name;
-            return RosIfy(csName);
+                            ?? property.GetCustomAttribute<DataMemberAttribute>()?.Name
+                            ?? property.Name;
+            return rosIfyName ? RosIfy(csName) : csName;
         }
 
         static string RosIfy(string csName)
@@ -438,7 +438,7 @@ namespace Iviz.MsgsWrapper
                 .Append("\n");
 
             Type fieldType = typeof(MessageField<,>).MakeGenericType(typeof(T), property.PropertyType);
-            IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, propertyName)!;
+            IMessageField<T> field = (IMessageField<T>)Activator.CreateInstance(fieldType, property, propertyName)!;
             bi.Fields.Add(field);
         }
 
@@ -458,7 +458,7 @@ namespace Iviz.MsgsWrapper
                     .AppendLine(propertyName);
 
                 Type fieldType = typeof(MessageArrayField<,>).MakeGenericType(typeof(T), elementType);
-                field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, propertyName)!;
+                field = (IMessageField<T>)Activator.CreateInstance(fieldType, property, propertyName)!;
             }
             else
             {
@@ -466,7 +466,7 @@ namespace Iviz.MsgsWrapper
                 bi.RosDefinition.Append(BuiltIns.GetMessageType(elementType)).Append("[").Append(size).Append("] ")
                     .AppendLine(propertyName);
                 Type fieldType = typeof(MessageFixedArrayField<,>).MakeGenericType(typeof(T), elementType);
-                field = (IMessageField<T>) Activator.CreateInstance(fieldType, property, size, propertyName)!;
+                field = (IMessageField<T>)Activator.CreateInstance(fieldType, property, size, propertyName)!;
             }
 
             bi.Fields.Add(field);
@@ -482,10 +482,10 @@ namespace Iviz.MsgsWrapper
             bi.BufferForMd5.Append(builtInName).Append(" ").Append(propertyName).Append("\n");
 
             Type structType = typeof(StructField<,>).MakeGenericType(typeof(T), underlyingType);
-            IMessageField<T> field = (IMessageField<T>) Activator.CreateInstance(structType, property)!;
+            IMessageField<T> field = (IMessageField<T>)Activator.CreateInstance(structType, property)!;
             bi.Fields.Add(field);
         }
-        
+
         static void InitializeEnumArrayProperty(PropertyInfo property, BuilderInfo bi)
         {
             string propertyName = GetPropertyName(property);
@@ -500,7 +500,7 @@ namespace Iviz.MsgsWrapper
                 bi.BufferForMd5.Append(builtInName).Append("[] ").Append(propertyName).Append("\n");
 
                 Type structType = typeof(StructArrayField<,>).MakeGenericType(typeof(T), underlyingType);
-                field = (IMessageField<T>) Activator.CreateInstance(structType, property, propertyName)!;
+                field = (IMessageField<T>)Activator.CreateInstance(structType, property, propertyName)!;
             }
             else
             {
@@ -509,7 +509,7 @@ namespace Iviz.MsgsWrapper
                 bi.BufferForMd5.Append(builtInName).Append("[").Append(size).Append("] ").Append(propertyName)
                     .Append("\n");
                 Type structType = typeof(StructFixedArrayField<,>).MakeGenericType(typeof(T), underlyingType);
-                field = (IMessageField<T>) Activator.CreateInstance(structType, property, size, propertyName)!;
+                field = (IMessageField<T>)Activator.CreateInstance(structType, property, size, propertyName)!;
             }
 
             bi.Fields.Add(field);
@@ -519,8 +519,8 @@ namespace Iviz.MsgsWrapper
         static void InitializeConstant(BuilderInfo bi, FieldInfo field, string fieldType)
         {
             string entry = fieldType == "string"
-                ? $"{fieldType} {GetPropertyName(field)}=\"{field.GetRawConstantValue()}\""
-                : $"{fieldType} {GetPropertyName(field)}={field.GetRawConstantValue()}";
+                ? $"{fieldType} {GetPropertyName(field, false)}=\"{field.GetRawConstantValue()}\""
+                : $"{fieldType} {GetPropertyName(field, false)}={field.GetRawConstantValue()}";
 
             bi.RosDefinition.AppendLine(entry);
             bi.BufferForMd5.AppendLine(entry);
