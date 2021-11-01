@@ -108,6 +108,7 @@ namespace Iviz.Displays
         protected override void Awake()
         {
             base.Awake();
+            Layer = LayerType.IgnoreRaycast;
             material = Resource.Materials.DepthCloud.Instantiate();
         }
 

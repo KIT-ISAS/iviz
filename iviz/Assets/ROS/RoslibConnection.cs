@@ -169,7 +169,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
 #if LOG_ENABLED
-                Logger.LogDebug = Core.Logger.Debug;
+                //Logger.LogDebug = Core.Logger.Debug;
                 Logger.LogError = Core.Logger.Error;
                 Logger.Log = Core.Logger.Info;
 #endif
@@ -272,7 +272,7 @@ namespace Iviz.Ros
                         Core.Logger.Info("Connection cancelled!");
                         break;
                     default:
-                        Core.Logger.Error("Exception during Connect():", e);
+                        Core.Logger.Error("Exception during Connect(): ", e);
                         break;
                 }
             }
@@ -561,7 +561,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Advertise()", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Advertise(): ", e);
                 }
             });
         }
@@ -782,7 +782,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (!(e is OperationCanceledException))
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Subscribe()", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Subscribe(): ", e);
                 }
             });
         }
@@ -836,7 +836,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (!(e is OperationCanceledException))
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise()", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
                 }
             });
         }
@@ -883,7 +883,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (!(e is OperationCanceledException))
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe()", e);
+                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
                 }
             });
         }
@@ -983,7 +983,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync()", e);
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync(): ", e);
             }
 
             return cachedPublishedTopics;
@@ -1025,7 +1025,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync()", e);
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync(): ", e);
             }
 
             return cachedTopics;
@@ -1055,7 +1055,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList()", e);
+                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
                 }
             }, internalToken);
 
@@ -1105,7 +1105,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetParameter()", e);
+                Core.Logger.Error("Exception during RoslibConnection.GetParameter(): ", e);
                 return (default, "Unknown error");
             }
         }
@@ -1143,7 +1143,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemState()", e);
+                Core.Logger.Error("Exception during RoslibConnection.GetSystemState(): ", e);
             }
         }
 

@@ -180,7 +180,8 @@ namespace Iviz.App
             }
 
             var contentTransform = (RectTransform)content.transform;
-            contentTransform.sizeDelta = new Vector2(contentTransform.sizeDelta.x, y);
+            //contentTransform.sizeDelta = new Vector2(contentTransform.sizeDelta.x, y);
+            contentTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, y);
         }
     }
 }

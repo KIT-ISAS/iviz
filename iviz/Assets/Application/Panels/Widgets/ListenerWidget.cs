@@ -49,7 +49,7 @@ namespace Iviz.App
                 panel.color = Resource.Colors.DisabledPanel;
                 return;
             }
-            
+
             var description = BuilderPool.Rent();
             try
             {
@@ -57,12 +57,25 @@ namespace Iviz.App
 
                 listener.WriteDescriptionTo(description);
 
-                string kbPerSecond = (BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
                 description.Append(" | ")
                     .Append(MessagesPerSecond)
-                    .Append(" Hz | ")
-                    .Append(kbPerSecond)
-                    .Append(" kB/s</b>");
+                    .Append(" Hz | ");
+
+                if (BytesPerSecond < 1024)
+                {
+                    string bPerSecond = BytesPerSecond.ToString("#,0", UnityUtils.Culture);
+                    description.Append(bPerSecond).Append(" B/s</b>");
+                }
+                else if (BytesPerSecond < 1024 * 1024)
+                {
+                    string kbPerSecond = (BytesPerSecond * (1f / 1024)).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(kbPerSecond).Append(" kB/s</b>");
+                }
+                else
+                {
+                    string mbPerSecond = (BytesPerSecond * (1f / 1024 / 1024)).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(mbPerSecond).Append(" MB/s</b>");
+                }
 
                 text.text = description.ToString();
             }

@@ -6,6 +6,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -59,6 +60,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
+            
             node = FrameNode.Instantiate("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
@@ -200,7 +202,7 @@ namespace Iviz.Controllers
                 string root = lastSlash != -1 ? depthTopic.Substring(0, lastSlash) : "";
                 string infoTopic = $"{root}/camera_info";
 
-                DepthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
+                DepthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
             }
         }
 
@@ -240,6 +242,11 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
+                if (!node.IsAlive)
+                {
+                    return; // stopped!
+                }
+                
                 node.AttachTo(msg.Header);
                 int width = (int)msg.Width;
                 int height = (int)msg.Height;
@@ -262,6 +269,11 @@ namespace Iviz.Controllers
 
             void PostProcess()
             {
+                if (!node.IsAlive)
+                {
+                    return; // stopped!
+                }
+
                 node.AttachTo(msg.Header);
                 DepthIsProcessing = false;
                 UpdateIntensityBounds();

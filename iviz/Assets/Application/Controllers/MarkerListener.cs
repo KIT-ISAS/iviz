@@ -29,7 +29,8 @@ namespace Iviz.Controllers
             new Dictionary<(string Ns, int Id), MarkerObject>();
 
         /// Temporary buffer to hold incoming marker messages from the network thread
-        readonly Dictionary<(string Ns, int Id), Marker> markerBuffer = new Dictionary<(string Ns, int Id), Marker>();
+        readonly Dictionary<(string Ns, int Id), Marker>
+            newMarkerBuffer = new Dictionary<(string Ns, int Id), Marker>();
 
         public MarkerListener([NotNull] IModuleData moduleData)
         {
@@ -50,7 +51,8 @@ namespace Iviz.Controllers
                 Tint = value.Tint.ToUnityColor();
                 Visible = value.Visible;
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
-                
+                PreferUdp = value.PreferUdp;
+
                 if (value.VisibleMask.Length != config.VisibleMask.Length)
                 {
                     Logger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length}");
@@ -101,7 +103,7 @@ namespace Iviz.Controllers
 
                 foreach (var marker in markers.Values)
                 {
-                    marker.Visible = value && config.VisibleMask[(int) marker.MarkerType];
+                    marker.Visible = value && config.VisibleMask[(int)marker.MarkerType];
                 }
             }
         }
@@ -120,15 +122,30 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool PreferUdp
+        {
+            get => config.PreferUdp;
+            set
+            {
+                config.PreferUdp = value;
+                if (Listener != null)
+                {
+                    Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+                }
+            }
+        }
+
         public override void StartListening()
         {
+            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+
             switch (config.Type)
             {
                 case Marker.RosMessageType:
-                    Listener = new Listener<Marker>(config.Topic, Handler);
+                    Listener = new Listener<Marker>(config.Topic, Handler, rosTransportHint);
                     break;
                 case MarkerArray.RosMessageType:
-                    Listener = new Listener<MarkerArray>(config.Topic, Handler);
+                    Listener = new Listener<MarkerArray>(config.Topic, Handler, rosTransportHint);
                     break;
             }
 
@@ -168,9 +185,14 @@ namespace Iviz.Controllers
                 throw new ArgumentNullException(nameof(description));
             }
 
-            foreach (var marker in markers.Values.Take(maxToDisplay))
+            int i = 0;
+            foreach (var marker in markers.Values)
             {
                 marker.GenerateLog(description);
+                if (i++ > maxToDisplay)
+                {
+                    break;
+                }
             }
 
             if (markers.Count > maxToDisplay)
@@ -267,11 +289,11 @@ namespace Iviz.Controllers
 
         bool Handler([NotNull] MarkerArray msg)
         {
-            lock (markerBuffer)
+            lock (newMarkerBuffer)
             {
                 foreach (var marker in msg.Markers)
                 {
-                    markerBuffer[IdFromMessage(marker)] = marker;
+                    newMarkerBuffer[IdFromMessage(marker)] = marker;
                 }
             }
 
@@ -280,9 +302,9 @@ namespace Iviz.Controllers
 
         bool Handler([NotNull] Marker marker)
         {
-            lock (markerBuffer)
+            lock (newMarkerBuffer)
             {
-                markerBuffer[IdFromMessage(marker)] = marker;
+                newMarkerBuffer[IdFromMessage(marker)] = marker;
             }
 
             return true;
@@ -293,7 +315,7 @@ namespace Iviz.Controllers
             yield return "---";
             for (int i = 0; i < config.VisibleMask.Length; i++)
             {
-                string name = ((MarkerType) i).ToString();
+                string name = ((MarkerType)i).ToString();
                 yield return config.VisibleMask[i] ? name : $"<color=#A0A0A0>({name})</color>";
             }
         }
@@ -303,7 +325,7 @@ namespace Iviz.Controllers
             bool newVisible = !config.VisibleMask[i];
             config.VisibleMask[i] = newVisible;
 
-            MarkerType markerType = (MarkerType) i;
+            MarkerType markerType = (MarkerType)i;
             foreach (var marker in markers.Values)
             {
                 if (marker.MarkerType == markerType)
@@ -313,32 +335,35 @@ namespace Iviz.Controllers
             }
         }
 
-        async void HandleAsync()
+        void HandleAsync()
         {
-            UniqueRef<Marker> markerList;
-            lock (markerBuffer)
+            // ReSharper disable once InconsistentlySynchronizedField
+            if (newMarkerBuffer.Count == 0)
             {
-                if (markerBuffer.Count == 0)
+                return;
+            }
+
+            RentAndClear<Marker> newMarkers;
+            lock (newMarkerBuffer)
+            {
+                int i = 0;
+                newMarkers = new RentAndClear<Marker>(newMarkerBuffer.Count);
+                foreach (var marker in newMarkerBuffer.Values)
                 {
-                    return;
+                    newMarkers[i++] = marker;
                 }
 
-                markerList = new UniqueRef<Marker>(markerBuffer.Count);
-                markerBuffer.Values.CopyTo(markerList.Array, 0);
-                markerBuffer.Clear();
+                newMarkerBuffer.Clear();
             }
 
-            try
-            {
-                await markerList.Select(HandleAsync).WhenAll();
-            }
-            finally
-            {
-                markerList.Dispose();
-            }
+            using (newMarkers)
+                foreach (var marker in newMarkers)
+                {
+                    HandleAsync(marker);
+                }
         }
 
-        async Task HandleAsync([NotNull] Marker msg)
+        void HandleAsync([NotNull] Marker msg)
         {
             var id = IdFromMessage(msg);
             switch (msg.Action)
@@ -347,34 +372,26 @@ namespace Iviz.Controllers
                     if (msg.Pose.HasNaN())
                     {
                         Logger.Debug("MarkerListener: NaN in pose!");
-                        return;
+                        break;
                     }
 
                     if (msg.Scale.HasNaN())
                     {
                         Logger.Debug("MarkerListener: NaN in scale!");
-                        return;
+                        break;
                     }
 
                     if (msg.Type >= config.VisibleMask.Length)
                     {
                         Logger.Debug($"MarkerListener: Unknown type {msg.Type.ToString()}");
-                        return;
+                        break;
                     }
 
-                    if (!markers.TryGetValue(id, out var markerToAdd))
-                    {
-                        markerToAdd = CreateMarkerObject();
-                        markerToAdd.Parent = TfListener.ListenersFrame;
-                        markerToAdd.OcclusionOnly = RenderAsOcclusionOnly;
-                        markerToAdd.Tint = Tint;
-                        markerToAdd.Visible = Visible && config.VisibleMask[msg.Type];
-                        markerToAdd.Layer = LayerType.IgnoreRaycast;
-                        markerToAdd.TriangleListFlipWinding = TriangleListFlipWinding;
-                        markers[id] = markerToAdd;
-                    }
+                    var markerToUpdate = markers.TryGetValue(id, out var existingMarker)
+                        ? existingMarker
+                        : CreateMarkerObject(id, msg.Type);
 
-                    await markerToAdd.SetAsync(msg).AwaitNoThrow(this);
+                    _ = markerToUpdate.SetAsync(msg).AwaitNoThrow(this);
                     break;
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))
@@ -397,10 +414,18 @@ namespace Iviz.Controllers
             markerToDelete.DestroySelf();
         }
 
-        static MarkerObject CreateMarkerObject()
+        [NotNull]
+        MarkerObject CreateMarkerObject(in (string, int) id, int msgType)
         {
-            var gameObject = new GameObject("MarkerObject");
-            return gameObject.AddComponent<MarkerObject>();
+            var marker = new GameObject("MarkerObject").AddComponent<MarkerObject>();
+            marker.Parent = TfListener.ListenersFrame;
+            marker.OcclusionOnly = RenderAsOcclusionOnly;
+            marker.Tint = Tint;
+            marker.Visible = Visible && config.VisibleMask[msgType];
+            marker.Layer = LayerType.IgnoreRaycast;
+            marker.TriangleListFlipWinding = TriangleListFlipWinding;
+            markers[id] = marker;
+            return marker;
         }
     }
 }

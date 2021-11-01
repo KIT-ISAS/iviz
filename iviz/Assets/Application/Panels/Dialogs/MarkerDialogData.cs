@@ -37,7 +37,7 @@ namespace Iviz.App
 
             panel.Label.Label = $"<b>Topic:</b>: {Listener.Topic}";
             panel.Close.Clicked += Close;
-            panel.ResetAll += () => { Listener.Reset(); };
+            panel.ResetAll += Listener.Reset;
 
             UpdatePanel();
         }

@@ -391,7 +391,6 @@ namespace Iviz.Controllers
 
             while (true)
             {
-                //TfFrame parent = Parent;
                 if (maybeChild is null)
                 {
                     return false;
@@ -408,7 +407,8 @@ namespace Iviz.Controllers
 
         public void SetPose(in Pose newPose)
         {
-            if (pose == newPose)
+            //if (pose == newPose)
+            if (pose.EqualsApprox(newPose))
             {
                 return;
             }

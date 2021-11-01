@@ -20,6 +20,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public bool TriangleListFlipWinding { get; set; } = true;
         [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
         [DataMember, NotNull] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public bool PreferUdp { get; set; } = true;
         [DataMember] public ModuleType ModuleType => ModuleType.Marker;
 
         [DataMember]

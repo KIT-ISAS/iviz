@@ -100,6 +100,13 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
+        // used by EchoDialogData
+        [Preserve]
+        public Listener([NotNull] string topic, [NotNull] Func<IMessage, bool> handler, RosTransportHint transportHint)
+            : this(topic, (T msg) => handler(msg), transportHint)
+        {
+        }
+        
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
@@ -180,7 +187,7 @@ namespace Iviz.Ros
                 messageQueue.Enqueue(msg);
                 return;
             }
-            
+
             CallHandlerDirect(msg);
         }
 

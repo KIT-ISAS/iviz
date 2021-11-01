@@ -96,6 +96,9 @@ namespace Iviz.Controllers
                 billboard.Visible = value && config.EnableBillboard;
             }
         }
+        
+        [NotNull]
+        public string Topic => config.Topic;        
 
         public ColormapId Colormap
         {
@@ -194,10 +197,10 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Image.RosMessageType:
-                    Listener = new Listener<Image>(config.Topic, Handler) { MaxQueueSize = 1 };
+                    Listener = new Listener<Image>(config.Topic, Handler);
                     break;
                 case CompressedImage.RosMessageType:
-                    Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed) { MaxQueueSize = 1 };
+                    Listener = new Listener<CompressedImage>(config.Topic, HandlerCompressed);
                     break;
             }
         }
@@ -213,7 +216,11 @@ namespace Iviz.Controllers
 
             void PostProcess()
             {
-                node.AttachTo(msg.Header);
+                if (node.IsAlive)
+                {
+                    node.AttachTo(msg.Header);
+                }
+
                 IsProcessing = false;
             }
 
@@ -249,11 +256,18 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
+                if (!node.IsAlive)
+                {
+                    IsProcessing = false;
+                    return; // stopped!
+                }
+
                 node.AttachTo(msg.Header);
 
                 int width = (int) msg.Width;
                 int height = (int) msg.Height;
                 imageTexture.Set(width, height, msg.Encoding, msg.Data);
+                IsProcessing = false;
             });
 
             return true;

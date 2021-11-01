@@ -1,22 +1,21 @@
-﻿using UnityEngine;
+﻿using Iviz.Core;
+using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class ImageDialogContents : PanelContents
+    public sealed class ImageDialogContents : DetachablePanelContents
     {
         [SerializeField] Text text = null;
-        [SerializeField] RawImage image = null;
+        [SerializeField] RawImage previewImage = null;
         [SerializeField] TrashButtonWidget closeButton = null;
 
         public Text Text => text;
-        public RawImage Image => image;
+        public RawImage PreviewImage => previewImage;
         public TrashButtonWidget CloseButton => closeButton;
 
-        float maxWidth;
-        float maxHeight;
-
-        public string Label
+        public string Title
         {
             get => text.text;
             set => text.text = value;
@@ -24,16 +23,23 @@ namespace Iviz.App
 
         public Material Material
         {
-            get => image.material;
-            set => image.material = value;
+            get => previewImage.material;
+            set => previewImage.material = value;
         }
 
         Vector2Int imageSize;
+
         public Vector2Int ImageSize
         {
             get => imageSize;
             set
             {
+                if (Mathf.Approximately(imageSize.x, value.x)
+                    && Mathf.Approximately(imageSize.y, value.y))
+                {
+                    return;
+                }
+                
                 imageSize = value;
                 AdjustSize();
             }
@@ -41,41 +47,45 @@ namespace Iviz.App
 
         void AdjustSize()
         {
+            var rect = ((RectTransform)previewImage.transform).rect;
+            float maxWidth = rect.width;
+            float maxHeight = rect.height;
+
             if (maxWidth == 0 || maxHeight == 0)
             {
-                image.transform.localScale = Vector3.one;
+                previewImage.transform.localScale = Vector3.one;
                 return;
             }
+
             if (imageSize.x == 0 || imageSize.y == 0)
             {
-                image.transform.localScale = Vector3.one;
+                previewImage.transform.localScale = Vector3.one;
                 return;
             }
+
             float xScale = maxWidth / imageSize.x;
             float scaledY = imageSize.y * xScale;
 
             float yScale = maxHeight / imageSize.y;
             float scaledX = imageSize.x * yScale;
 
-            if (scaledY < maxHeight)
-            {
-                float newYScale = scaledY / maxHeight;
-                image.transform.localScale = new Vector3(1, newYScale, 1);
-            }
-            else
-            {
-                float newXScale = scaledX / maxWidth;
-                image.transform.localScale = new Vector3(newXScale, 1, 1);
-            }
+            previewImage.transform.localScale = scaledY < maxHeight
+                ? Vector3.one.WithY(scaledY / maxHeight)
+                : Vector3.one.WithX(scaledX / maxWidth);
         }
 
         void Awake()
         {
-            var rect = ((RectTransform)image.transform).rect;
-            maxWidth = rect.width;
-            maxHeight = rect.height;
             AdjustSize();
+
+            scalerWidget.ScaleChanged += AdjustSize;
         }
+        
+        public void ToggleImageEnabled()
+        {
+            previewImage.enabled = false;
+            previewImage.enabled = true;
+        }        
 
         public override void ClearSubscribers()
         {

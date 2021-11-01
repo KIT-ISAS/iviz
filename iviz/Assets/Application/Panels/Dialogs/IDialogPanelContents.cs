@@ -22,17 +22,17 @@ namespace Iviz.App
 
     public abstract class DetachablePanelContents : PanelContents
     {
-        [SerializeField] DialogScalerWidget scalerWidget = null;
-        Image image;
+        [SerializeField] protected DialogScalerWidget scalerWidget = null;
+        Image panelImage;
 
-        Image Image => image != null ? image : (image = GetComponent<Image>());
+        Image PanelImage => panelImage != null ? panelImage : (panelImage = GetComponent<Image>());
 
         public bool Detached
         {
             set
             {
                 scalerWidget.gameObject.SetActive(value);
-                Image.color = value ? Resource.Colors.DetachedPanelColor : Resource.Colors.AttachedPanelColor;
+                PanelImage.color = value ? Resource.Colors.DetachedPanelColor : Resource.Colors.AttachedPanelColor;
             }
         }
     }

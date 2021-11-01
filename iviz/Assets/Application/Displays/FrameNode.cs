@@ -13,6 +13,7 @@ namespace Iviz.Controllers
     /// </summary>
     public abstract class FrameNode : MonoBehaviour
     {
+        bool disposed;
         [CanBeNull] TfFrame parent;
 
         Transform mTransform;
@@ -36,7 +37,7 @@ namespace Iviz.Controllers
 
         void SetParent([CanBeNull] TfFrame newParent, bool attach)
         {
-            if (gameObject == null)
+            if (!IsAlive)
             {
                 return; // destroying!
             }
@@ -89,17 +90,21 @@ namespace Iviz.Controllers
         protected virtual void Stop()
         {
             Parent = null;
+            disposed = true;
         }
 
         public void DestroySelf()
         {
             Stop();
             Destroy(gameObject);
+            disposed = true;
         }
 
         sealed class SimpleFrameNode : FrameNode
         {
         }
+
+        public bool IsAlive => !disposed && this != null;
 
         [NotNull]
         public static FrameNode Instantiate([NotNull] string name)

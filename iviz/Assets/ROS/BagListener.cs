@@ -73,7 +73,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Debug($"{this}: Exception during EnqueueMessage", e);
+                Core.Logger.Debug($"{this}: Exception during EnqueueMessage: ", e);
             }
         }
 

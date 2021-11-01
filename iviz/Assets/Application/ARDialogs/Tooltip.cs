@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Application.Displays;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
@@ -14,6 +15,7 @@ namespace Iviz.App.ARDialogs
     {
         [SerializeField] TMP_Text text = null;
         RoundedPlaneResource cube;
+        uint? prevTextHash;
 
         protected override void Awake()
         {
@@ -22,9 +24,10 @@ namespace Iviz.App.ARDialogs
             cube.Radius = 3f;
             cube.Layer = LayerType.IgnoreRaycast;
             cube.ShadowsEnabled = false;
-            BackgroundColor = Color.blue;
-            CaptionColor = Color.white;
-            Caption = "0.5 m/s";
+            cube.Metallic = 1f;
+            cube.Smoothness = 1f;
+            //BackgroundColor = Color.blue;
+            //CaptionColor = Color.white;
         }
 
         public Color BackgroundColor
@@ -56,10 +59,35 @@ namespace Iviz.App.ARDialogs
             get => text.text;
             set
             {
+                uint hash = Crc32Calculator.Compute(value);
+                if (hash == prevTextHash)
+                {
+                    return;
+                }
+                
+                prevTextHash = hash;
                 text.text = value;
-                cube.Size = new Vector2(text.preferredWidth + 5f, text.preferredHeight + 2f);
-                BoxCollider.size = cube.Bounds.size;
+                UpdateSize();
             }
+        }
+
+        public void SetCaption([NotNull] StringBuilder str)
+        {
+            uint hash = Crc32Calculator.Compute(str);
+            if (hash == prevTextHash)
+            {
+                return;
+            }
+                
+            prevTextHash = hash;
+            text.SetText(str);
+            UpdateSize();
+        }
+
+        void UpdateSize()
+        {
+            cube.Size = new Vector2(text.preferredWidth + 5f, text.preferredHeight + 2f);
+            BoxCollider.size = cube.Bounds.size;
         }
 
         public override void Suspend()

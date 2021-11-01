@@ -78,6 +78,8 @@ namespace Iviz.App
         [SerializeField] GameObject moduleListCanvas = null;
         [SerializeField] GameObject dataPanelCanvas = null;
 
+        [SerializeField] GameObject imageCanvasHolder = null;
+
         [SerializeField] ARSidePanel arSidePanel = null;
         [SerializeField] Canvas rootCanvas = null;
 
@@ -92,8 +94,9 @@ namespace Iviz.App
         DialogData[] dialogDatas;
         DialogData availableModules;
         DialogData availableTopics;
+
         ConnectionDialogData connectionData;
-        ImageDialogData imageData;
+
         LoadConfigDialogData loadConfigData;
         SaveConfigDialogData saveConfigData;
         TfDialogData tfTreeData;
@@ -104,6 +107,8 @@ namespace Iviz.App
         EchoDialogData echoData;
         SystemDialogData systemData;
         ARMarkerDialogData arMarkerData;
+
+        readonly HashSet<ImageDialogData> imageDatas = new HashSet<ImageDialogData>();
 
         public Controllers.ModelService ModelService { get; private set; }
         ControllerService controllerService;
@@ -221,7 +226,7 @@ namespace Iviz.App
 
         [NotNull]
         static string MasterUriToString([CanBeNull] Uri uri) =>
-            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port} →";
+            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port.ToString()} →";
 
         void Start()
         {
@@ -234,7 +239,7 @@ namespace Iviz.App
 
             dialogDatas = new DialogData[]
             {
-                imageData = new ImageDialogData(),
+                //imageData = new ImageDialogData(),
                 tfTreeData = new TfDialogData(),
                 loadConfigData = new LoadConfigDialogData(),
                 saveConfigData = new SaveConfigDialogData(),
@@ -416,7 +421,7 @@ namespace Iviz.App
             {
                 AllGuiVisible = false;
             }
-            
+
             UpdateLeftHideVisible();
         }
 
@@ -491,13 +496,13 @@ namespace Iviz.App
             AllGuiVisible = !AllGuiVisible;
 
             UpdateLeftHideVisible();
-            
+
             EventSystem.current.SetSelectedGameObject(null);
         }
 
         void UpdateLeftHideVisible()
         {
-            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsVisible && !AllGuiVisible);            
+            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsVisible && !AllGuiVisible);
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -854,9 +859,17 @@ namespace Iviz.App
             topicsWithModule.Add(topic);
         }
 
-        public void ShowImageDialog([NotNull] IImageDialogListener caller)
+        [NotNull]
+        public ImageDialogData CreateImageDialog([NotNull] ImageDialogListener caller)
         {
-            imageData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
+            var newImageData = new ImageDialogData(caller, imageCanvasHolder.transform);
+            imageDatas.Add(newImageData);
+            return newImageData;
+        }
+
+        public void DisposeImageDialog([NotNull] ImageDialogData dialogData)
+        {
+            imageDatas.Remove(dialogData);
         }
 
         public void ShowMarkerDialog([NotNull] IMarkerDialogListener caller)

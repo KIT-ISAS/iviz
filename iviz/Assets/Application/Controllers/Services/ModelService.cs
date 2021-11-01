@@ -124,7 +124,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var model = await Resources.Resource.External.TryGetModelResourceAsync(msg.Request.Uri);
+            var model = await Resources.Resource.External.TryGetModelFromFileAsync(msg.Request.Uri);
             if (model != null)
             {
                 msg.Response.Success = true;

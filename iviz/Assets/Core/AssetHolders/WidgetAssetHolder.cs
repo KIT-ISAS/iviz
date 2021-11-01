@@ -51,5 +51,7 @@ namespace Iviz.Displays
         public GameObject ARMarkers = null;
         
         public GameObject Collapsible = null;
+        
+        public GameObject ImageCanvas;
     }
 }

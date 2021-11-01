@@ -123,3 +123,5 @@ MonoBehaviour:
     type: 3}
   Collapsible: {fileID: 2258849891631992087, guid: a3e438c2d3c68400ab1e1eca1867896f,
     type: 3}
+  ImageCanvas: {fileID: 5695383382360246554, guid: 00b524b7bc8454b9b85567116aa52eac,
+    type: 3}

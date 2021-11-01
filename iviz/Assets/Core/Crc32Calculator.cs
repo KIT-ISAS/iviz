@@ -6,19 +6,12 @@ using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
-    public sealed class Crc32Calculator
+    public static class Crc32Calculator
     {
-        public static Crc32Calculator Instance { get; } = new Crc32Calculator();
-
         const uint DefaultPolynomial = 0xedb88320u;
         public const uint DefaultSeed = 0xffffffffu;
 
-        readonly uint[] table;
-
-        Crc32Calculator()
-        {
-            table = InitializeTable();
-        }
+        static readonly uint[] Table = InitializeTable();
 
         [NotNull]
         static uint[] InitializeTable()
@@ -45,36 +38,36 @@ namespace Iviz.Core
             return createTable;
         }
 
-        unsafe uint CalculateHash(uint hash, byte* ptr, int size)
+        static unsafe uint CalculateHash(uint hash, byte* ptr, int size)
         {
             for (; size != 0; size--)
             {
                 uint val = *ptr++;
-                hash = (hash >> 8) ^ table[val ^ hash & 0xff];
+                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
             }
 
             return hash;
         }
         
-        public unsafe uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
+        public static unsafe uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
         {
             T* ptr = &value;
             return CalculateHash(startHash, (byte*) ptr, sizeof(T));
         }
 
-        public uint Compute([NotNull] StringBuilder value, uint startHash = DefaultSeed)
+        public static uint Compute([NotNull] StringBuilder value, uint startHash = DefaultSeed)
         {
             uint hash = startHash;
             for (int i = 0; i < value.Length; i++)
             {
                 uint val = value[i];
-                hash = (hash >> 8) ^ table[val ^ hash & 0xff];
+                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
             }
 
             return hash;
         }
 
-        public unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        public static unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
             {
@@ -82,7 +75,7 @@ namespace Iviz.Core
             }
         }
 
-        public unsafe uint Compute([NotNull] string array, uint startHash = DefaultSeed)
+        public static unsafe uint Compute([NotNull] string array, uint startHash = DefaultSeed)
         {
             fixed (char* ptr = array)
             {
@@ -90,7 +83,7 @@ namespace Iviz.Core
             }
         }
 
-        public unsafe uint Compute<T>(in Rent<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        public static unsafe uint Compute<T>(in Rent<T> array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array.Array)
             {
@@ -99,9 +92,9 @@ namespace Iviz.Core
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint Update(uint hash, byte val)    
+        public static uint Update(uint hash, byte val)    
         {
-            return (hash >> 8) ^ table[val ^ hash & 0xff];
+            return (hash >> 8) ^ Table[val ^ hash & 0xff];
         } 
     }
 }

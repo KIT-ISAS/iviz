@@ -75,15 +75,15 @@ namespace Iviz.Displays
                 return;
             }
 
-            float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
-            if (alpha < 0)
+            float srcAlpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
+            if (srcAlpha < 0)
             {
                 highlightFrameStart = null;
                 this.ReturnToPool();
                 return;
             }
 
-            alpha = Mathf.Sqrt(alpha);
+            float alpha = Mathf.Sqrt(srcAlpha);
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
             flatSphere.Tint = Color.white.WithAlpha(0.3f * alpha);

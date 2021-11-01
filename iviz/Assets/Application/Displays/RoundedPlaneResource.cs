@@ -72,7 +72,7 @@ namespace Application.Displays
                 }
 
                 size = value;
-                RebuildSize();
+                Rebuild();
             }
         }
 
@@ -87,7 +87,7 @@ namespace Application.Displays
                 }
 
                 radius = value;
-                RebuildRadius();
+                Rebuild();
             }
         }
         
@@ -176,36 +176,33 @@ namespace Application.Displays
             }
         }
 
-        void RebuildSize()
+        void Rebuild()
         {
             if (objects == null)
             {
                 CreateObjects();
             }
 
-            objects[0].Transform.localScale = new Vector3(size.x - 2 * radius, 1, size.y);
-            objects[1].Transform.localPosition = new Vector3(-size.x / 2 + radius / 2, 0, 0);
-            objects[1].Transform.localScale = new Vector3(radius, 1, size.y - 2 * radius);
-            objects[2].Transform.localPosition = new Vector3(size.x / 2 - radius / 2, 0, 0);
-            objects[2].Transform.localScale = new Vector3(radius, 1, size.y - 2 * radius);
+            float vRadius = Mathf.Min(radius, Mathf.Min(size.x / 2, size.y / 2));
             
-            objects[3].Transform.localPosition = new Vector3(size.x / 2 - radius, 0, size.y / 2 - radius);
-            objects[4].Transform.localPosition = new Vector3(size.x / 2 - radius, 0, -size.y / 2 + radius);
-            objects[5].Transform.localPosition = new Vector3(-size.x / 2 + radius, 0, -size.y / 2 + radius);
-            objects[6].Transform.localPosition = new Vector3(-size.x / 2 + radius, 0, size.y / 2 - radius);
-        }
-        
-        void RebuildRadius()
-        {
-            RebuildSize();
-
-            var radiusScale = new Vector3(radius, radius, radius);
+            objects[0].Transform.localScale = new Vector3(size.x - 2 * vRadius, 1, size.y);
+            objects[1].Transform.localPosition = new Vector3(-size.x / 2 + vRadius / 2, 0, 0);
+            objects[1].Transform.localScale = new Vector3(vRadius, 1, size.y - 2 * vRadius);
+            objects[2].Transform.localPosition = new Vector3(size.x / 2 - vRadius / 2, 0, 0);
+            objects[2].Transform.localScale = new Vector3(vRadius, 1, size.y - 2 * vRadius);
+            
+            objects[3].Transform.localPosition = new Vector3(size.x / 2 - vRadius, 0, size.y / 2 - vRadius);
+            objects[4].Transform.localPosition = new Vector3(size.x / 2 - vRadius, 0, -size.y / 2 + vRadius);
+            objects[5].Transform.localPosition = new Vector3(-size.x / 2 + vRadius, 0, -size.y / 2 + vRadius);
+            objects[6].Transform.localPosition = new Vector3(-size.x / 2 + vRadius, 0, size.y / 2 - vRadius);
+            
+            var radiusScale = new Vector3(vRadius, vRadius, vRadius);
             objects[3].Transform.localScale = radiusScale;
             objects[4].Transform.localScale = radiusScale;
             objects[5].Transform.localScale = radiusScale;
             objects[6].Transform.localScale = radiusScale;
         }
-
+        
         void CreateObjects()
         {
             objects = new MeshMarkerResource[7];
@@ -237,7 +234,7 @@ namespace Application.Displays
         {
             if (objects == null)
             {
-                RebuildRadius();
+                Rebuild();
             }
         }
 

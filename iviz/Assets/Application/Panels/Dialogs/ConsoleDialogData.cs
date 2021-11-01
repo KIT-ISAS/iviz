@@ -259,17 +259,17 @@ namespace Iviz.App
                 return;
             }
 
+            if (idCode == FromIdCode.None)
+            {
+                dialog.Text.text = "";
+                queueIsDirty = false;
+                return;
+            }
+
             var description = BuilderPool.Rent();
             try
             {
-                if (idCode == FromIdCode.None)
-                {
-                    dialog.Text.text = "";
-                    queueIsDirty = false;
-                    return;
-                }
-
-                using (var messages = new UniqueRef<LogMessage>(messageQueue.Count, true))
+                using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
                 using (var indices = new Rent<int>(MaxMessagesToPrint))
                 {
                     int indexStart = 0;
@@ -311,7 +311,7 @@ namespace Iviz.App
 
                         if (message.Stamp == default)
                         {
-                            description.Append("<b>[] ");
+                            description.Append("<font=Bold>[] ");
                         }
                         else
                         {
@@ -321,14 +321,14 @@ namespace Iviz.App
                                     ? "HH:mm:ss.fff"
                                     : "yy-MM-dd HH:mm:ss.fff");
 
-                            description.Append("<b>[").Append(dateAsStr).Append("] ");
+                            description.Append("<font=Bold>[").Append(dateAsStr).Append("] ");
                         }
 
                         string levelColor = ColorFromLevel(messageLevel);
 
                         description
                             .Append("<color=").Append(levelColor).Append(">")
-                            .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
+                            .Append(message.SourceId ?? "[Me]").Append(": </color></font>");
 
 
                         if (message.SourceId == null || message.Message.Length < MaxMessageLength)

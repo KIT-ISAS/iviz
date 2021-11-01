@@ -35,27 +35,6 @@ namespace Application.Displays
             }
         }
 
-        /*
-        float ColumnWidth
-        {
-            get => columnWidth;
-            set
-            {
-                if (Mathf.Approximately(columnWidth, value))
-                {
-                    return;
-                }
-                
-                for (int i = 0; i < 12; i++)
-                {
-                    objects[i].Transform.localScale = new Vector3(0.25f, 0.25f, 1);
-                }
-            }
-        }
-        */
-        
-
-
         void CreateObjects()
         {
             objects = new MeshMarkerResource[12];
@@ -64,8 +43,8 @@ namespace Application.Displays
                 var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, Transform);
                 resource.Transform.SetParentLocal(Transform);
                 resource.ShadowsEnabled = false;
-                resource.Color = Color.cyan.WithAlpha(0.5f);
-                resource.EmissiveColor = Color.cyan.WithValue(0.5f);
+                resource.Color = Color.cyan.WithAlpha(0.75f);
+                resource.EmissiveColor = Color.white.WithValue(0.5f);
                 objects[i] = resource;
             }
         }
@@ -77,31 +56,31 @@ namespace Application.Displays
                 CreateObjects();
             }
 
-            Vector3 halfSize = size / 2;
-            objects[0].Transform.position = new Vector3(halfSize.x, halfSize.y, 0);
-            objects[1].Transform.position = new Vector3(halfSize.x, -halfSize.y, 0);
-            objects[2].Transform.position = new Vector3(-halfSize.x, -halfSize.y, 0);
-            objects[3].Transform.position = new Vector3(-halfSize.x, halfSize.y, 0);
+            var (halfSizeX, halfSizeY, halfSizeZ) = size / 2;
+            objects[0].Transform.position = new Vector3(halfSizeX, halfSizeY, 0);
+            objects[1].Transform.position = new Vector3(halfSizeX, -halfSizeY, 0);
+            objects[2].Transform.position = new Vector3(-halfSizeX, -halfSizeY, 0);
+            objects[3].Transform.position = new Vector3(-halfSizeX, halfSizeY, 0);
 
             for (int i = 0; i < 4; i++)
             {
                 objects[i].Transform.localScale = new Vector3(columnWidth, columnWidth, size.z);
             }
 
-            objects[4].Transform.position = new Vector3(0, halfSize.y, halfSize.z);
-            objects[5].Transform.position = new Vector3(0, -halfSize.y, halfSize.z);
-            objects[6].Transform.position = new Vector3(0, -halfSize.y, -halfSize.z);
-            objects[7].Transform.position = new Vector3(0, halfSize.y, -halfSize.z);
+            objects[4].Transform.position = new Vector3(0, halfSizeY, halfSizeZ);
+            objects[5].Transform.position = new Vector3(0, -halfSizeY, halfSizeZ);
+            objects[6].Transform.position = new Vector3(0, -halfSizeY, -halfSizeZ);
+            objects[7].Transform.position = new Vector3(0, halfSizeY, -halfSizeZ);
 
             for (int i = 4; i < 8; i++)
             {
                 objects[i].Transform.localScale = new Vector3(size.x, columnWidth, columnWidth);
             }
 
-            objects[8].Transform.position = new Vector3(halfSize.x, 0, halfSize.z);
-            objects[9].Transform.position = new Vector3(-halfSize.x, 0, halfSize.z);
-            objects[10].Transform.position = new Vector3(-halfSize.x, 0, -halfSize.z);
-            objects[11].Transform.position = new Vector3(halfSize.x, 0, -halfSize.z);
+            objects[8].Transform.position = new Vector3(halfSizeX, 0, halfSizeZ);
+            objects[9].Transform.position = new Vector3(-halfSizeX, 0, halfSizeZ);
+            objects[10].Transform.position = new Vector3(-halfSizeX, 0, -halfSizeZ);
+            objects[11].Transform.position = new Vector3(halfSizeX, 0, -halfSizeZ);
             
             for (int i = 8; i < 12; i++)
             {

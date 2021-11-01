@@ -56,7 +56,7 @@ namespace Iviz.App
             {
                 (DialogPanelType.AddModule, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
                 (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
-                (DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
+                //(DialogPanelType.Image, CreatePanel<ImageDialogContents>(Resource.Widgets.ImagePanel)),
                 (DialogPanelType.Tf, CreatePanel<TfDialogContents>(Resource.Widgets.TfPanel)),
                 (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogContents>(Resource.Widgets.SaveAsPanel)),
                 (DialogPanelType.Load, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
@@ -116,7 +116,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during UpdatePanel" + e);
+                Core.Logger.Error($"{this}: Exception during UpdatePanel: " + e);
             }
         }
 
@@ -128,7 +128,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during UpdatePanel" + e);
+                Core.Logger.Error($"{this}: Exception during UpdatePanel: " + e);
             }
         }
 
@@ -173,7 +173,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during SetupPanel" + e);
+                Core.Logger.Error($"{this}: Exception during SetupPanel: " + e);
             }
 
             selectedDialogData.Panel.Active = true;

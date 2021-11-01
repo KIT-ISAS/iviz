@@ -55,8 +55,6 @@ namespace Iviz.Controllers
 
         const string FloatFormat = "#,0.###";
 
-        static Crc32Calculator Crc32 => Crc32Calculator.Instance;
-
         readonly StringBuilder description = new StringBuilder(250);
 
         [CanBeNull] IDisplay resource;
@@ -947,6 +945,8 @@ namespace Iviz.Controllers
                     return "Points";
                 case MarkerType.TriangleList:
                     return "TriangleList";
+                case MarkerType.Invalid:
+                    return "Invalid";
                 //case MarkerType.Image:
                 //    return "Image";
                 default:
@@ -982,15 +982,15 @@ namespace Iviz.Controllers
             return false;
         }
 
-        static uint CalculateMarkerHash([NotNull] Marker msg, bool useSize)
+        static uint CalculateMarkerHash([NotNull] Marker msg, bool useScale)
         {
-            uint hash = Crc32.Compute(msg.Type);
-            hash = Crc32.Compute(msg.Color, hash);
-            hash = Crc32.Compute(msg.Points, hash);
-            hash = Crc32.Compute(msg.Colors, hash);
-            if (useSize)
+            uint hash = Crc32Calculator.Compute(msg.Type);
+            hash = Crc32Calculator.Compute(msg.Color, hash);
+            hash = Crc32Calculator.Compute(msg.Points, hash);
+            hash = Crc32Calculator.Compute(msg.Colors, hash);
+            if (useScale)
             {
-                hash = Crc32.Compute(msg.Scale, hash);
+                hash = Crc32Calculator.Compute(msg.Scale, hash);
             }
 
             return hash;

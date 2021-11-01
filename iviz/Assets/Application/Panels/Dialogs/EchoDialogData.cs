@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using TMPro;
 
 namespace Iviz.App
 {
@@ -17,6 +22,12 @@ namespace Iviz.App
     {
         const int MaxMessageLength = 1000;
         const int MaxMessages = 50;
+
+        static readonly JsonSerializer JsonSerializer = JsonSerializer.CreateDefault(
+            new JsonSerializerSettings
+            {
+                Converters = { new ClampJsonConverter(MaxMessageLength) }
+            });
 
         [NotNull] readonly EchoDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
@@ -34,6 +45,7 @@ namespace Iviz.App
         public EchoDialogData()
         {
             dialog = DialogPanelManager.GetPanelByType<EchoDialogContents>(DialogPanelType.Echo);
+            dialog.Text.vertexBufferAutoSizeReduction = false;
         }
 
         [ContractAnnotation("=> false, type:null; => true, type:notnull")]
@@ -74,7 +86,8 @@ namespace Iviz.App
             {
                 Func<IMessage, bool> handler = Handler;
                 Type listenerType = typeof(Listener<>).MakeGenericType(csType);
-                listener = (IListener)Activator.CreateInstance(listenerType, topicName, handler);
+                listener = (IListener)Activator.CreateInstance(listenerType,
+                    topicName, handler, RosTransportHint.PreferTcp);
             }
         }
 
@@ -189,27 +202,51 @@ namespace Iviz.App
             }
 
             var description = BuilderPool.Rent();
+            var stringWriter = new StringWriter(description, CultureInfo.InvariantCulture);
+            var jsonTextWriter = new BoldJsonWriter(stringWriter) { Formatting = Formatting.Indented };
             try
             {
                 foreach (var (timeFormatted, msg) in messageQueue)
                 {
-                    string msgAsText = JsonConvert.SerializeObject(msg, Formatting.Indented,
-                        new ClampJsonConverter(MaxMessageLength));
-                    description.Append("<b>").Append(timeFormatted).Append("</b> ");
-                    description.Append(msgAsText).AppendLine();
+                    description.Append("<font=Bold>").Append(timeFormatted).Append("</font> ");
+                    JsonSerializer.Serialize(jsonTextWriter, msg, null);
+                    description.AppendLine();
                 }
 
                 if (description.Length > MaxMessages * MaxMessageLength)
                 {
-                    description.Remove(0, MaxMessages * MaxMessageLength - description.Length);
+                    SetText(dialog.Text, description,
+                        description.Length - MaxMessages * MaxMessageLength,
+                        MaxMessages * MaxMessageLength);
+                }
+                else
+                {
+                    dialog.Text.SetText(description);
                 }
 
-                dialog.Text.SetText(description);
                 queueIsDirty = false;
             }
             finally
             {
+                stringWriter.Dispose();
                 BuilderPool.Return(description);
+            }
+        }
+
+        sealed class BoldJsonWriter : JsonTextWriter
+        {
+            public BoldJsonWriter([NotNull] TextWriter textWriter) : base(textWriter)
+            {
+            }
+
+            public override void WritePropertyName(string name)
+            {
+                base.WritePropertyName($"<font=Bold>{name}</font>");
+            }
+
+            public override void WritePropertyName(string name, bool escape)
+            {
+                base.WritePropertyName($"<font=Bold>{name}</font>", escape);
             }
         }
 
@@ -245,6 +282,33 @@ namespace Iviz.App
                 return ReferenceEquals(this, other)
                     ? 0
                     : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
+            }
+        }
+
+        static Action<TMP_Text, StringBuilder, int, int> setTextFn;
+
+        /// <summary> Retrieves private TMP_Text.SetText(StringBuilder, int, int) as delegate </summary>
+        [NotNull]
+        static Action<TMP_Text, StringBuilder, int, int> SetText
+        {
+            get
+            {
+                if (setTextFn != null)
+                {
+                    return setTextFn;
+                }
+
+                var methodInfo = typeof(TMP_Text).GetMethod(nameof(TMP_Text.SetText),
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, new[] { typeof(StringBuilder), typeof(int), typeof(int) }, null);
+                if (methodInfo == null)
+                {
+                    throw new NullReferenceException("Missing SetText in TMP_Text!"); // can't really happen
+                }
+
+                setTextFn = (Action<TMP_Text, StringBuilder, int, int>)methodInfo.CreateDelegate(
+                    typeof(Action<TMP_Text, StringBuilder, int, int>));
+                return setTextFn;
             }
         }
     }

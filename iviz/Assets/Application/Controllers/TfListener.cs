@@ -23,12 +23,13 @@ namespace Iviz.Controllers
     public sealed class TfListener : ListenerController
     {
         const string DefaultTapTopic = "~clicked_pose";
-        public const string DefaultTopic = "/tf";
-        public const string OriginFrameId = "_origin_";
-        public const string MapFrameId = "map";
+        const string OriginFrameId = "[origin]";
+        const string DefaultTopicStatic = "/tf_static";
+
         const int MaxQueueSize = 10000;
 
-        const string DefaultTopicStatic = "/tf_static";
+        public const string DefaultTopic = "/tf";
+        public const string MapFrameId = "map";
 
         uint tapSeq;
         static uint tfSeq;
@@ -385,7 +386,7 @@ namespace Iviz.Controllers
                     }
                     else
                     {
-                        TfFrame parent = GetOrCreateFrame(parentId);
+                        var parent = GetOrCreateFrame(parentId);
                         if (child.SetParent(parent))
                         {
                             child.SetPose(rosTransform.Ros2Unity());

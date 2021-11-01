@@ -129,7 +129,7 @@ namespace Iviz.Controllers
                         markerStr = "<b>1 interactive marker →</b>";
                         break;
                     default:
-                        markerStr = $"<b>{interactiveMarkers.Values.Count} interactive markers →</b>";
+                        markerStr = $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers →</b>";
                         break;
                 }
 

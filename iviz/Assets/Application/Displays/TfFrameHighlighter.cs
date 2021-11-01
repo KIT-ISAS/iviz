@@ -1,9 +1,11 @@
+using System.Text;
 using Iviz.App.ARDialogs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -45,7 +47,7 @@ namespace Iviz.Displays
             axisResource.Tint = Color.white;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
             tooltip.CaptionColor = Color.white;
-            tooltip.Caption = frameId;
+            tooltip.Caption = "";
 
             float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(node.Transform.position).z;
 
@@ -54,13 +56,11 @@ namespace Iviz.Displays
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * size * 0.375f / 2;
+            float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.25f);
 
             axisResource.AxisLength = frameSize;
             tooltip.Scale = labelSize;
-            //tooltip.ElementSize = labelSize;
-            //tooltip.BillboardOffset = (1.2f * resource.AxisLength + tooltip.ElementSize) * Vector3.up;
-            tooltip.Transform.localPosition = 1.3f * (1.2f * axisResource.AxisLength + labelSize) * Vector3.up;
+            tooltip.Transform.localPosition = (1.2f * axisResource.AxisLength + 5 * labelSize) * Vector3.up;
             tooltip.PointToCamera();
         }
 
@@ -71,14 +71,15 @@ namespace Iviz.Displays
                 return;
             }
 
-            float alpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
-            if (alpha < 0)
+            float srcAlpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
+
+            if (srcAlpha < 0)
             {
                 this.ReturnToPool();
                 return;
             }
 
-            alpha = Mathf.Sqrt(alpha);
+            float alpha = Mathf.Sqrt(srcAlpha);
             var color = Color.white.WithAlpha(alpha);
             axisResource.Tint = color;
             tooltip.CaptionColor = color;
@@ -89,7 +90,17 @@ namespace Iviz.Displays
             string py = pY.ToString("#,0.##", UnityUtils.Culture);
             string pz = pZ.ToString("#,0.##", UnityUtils.Culture);
 
-            tooltip.Caption = $"<font=Bold>{node.ParentId}</font>\n{px}, {py}, {pz}";
+            StringBuilder str = BuilderPool.Rent();
+            try
+            {
+                str.Append("<font=Bold>").Append(node.ParentId).Append("</font>\n");
+                str.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
+                tooltip.SetCaption(str);
+            }
+            finally
+            {
+                BuilderPool.Return(str);
+            }
         }
 
         public override void Suspend()

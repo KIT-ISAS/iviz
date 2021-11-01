@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class MarkerDialogContents : PanelContents
+    public sealed class MarkerDialogContents : DetachablePanelContents
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] Button reset = null;

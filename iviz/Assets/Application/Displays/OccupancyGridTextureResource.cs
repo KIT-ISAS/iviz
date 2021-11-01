@@ -181,7 +181,6 @@ namespace Iviz.Displays
         static unsafe (uint hash, int numValidValues)
             Process(sbyte[] src, OccupancyGridResource.Rect bounds, int pitch, sbyte[] dest)
         {
-            Crc32Calculator crc32 = Crc32Calculator.Instance;
             uint hash = Crc32Calculator.DefaultSeed;
             long numValidValues = 0;
 
@@ -194,7 +193,7 @@ namespace Iviz.Displays
                     for (int u = bounds.XMin; u < bounds.XMax; u++, srcPtr++, dstPtr++)
                     {
                         *dstPtr = *srcPtr;
-                        hash = crc32.Update(hash, (byte) *srcPtr);
+                        hash = Crc32Calculator.Update(hash, (byte) *srcPtr);
                         numValidValues += (*srcPtr >> 8) + 1;
                     }
                 }

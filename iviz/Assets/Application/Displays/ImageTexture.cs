@@ -488,7 +488,7 @@ namespace Iviz.Displays
                 NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
             }
 
-            texture.Apply(generateMipmaps, false);
+            texture.Apply(generateMipmaps);
         }
 
         unsafe void CopyR16ToR8(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)

@@ -9,12 +9,10 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
@@ -29,7 +27,6 @@ namespace Iviz.Controllers
         readonly MeshListResource meshCloud;
         readonly NativeList<float4> pointBuffer = new NativeList<float4>();
 
-        bool disposed;
         bool isProcessing;
 
         bool IsProcessing
@@ -303,7 +300,7 @@ namespace Iviz.Controllers
         {
             try
             {
-                if (disposed)
+                if (!node.IsAlive)
                 {
                     // we're dead
                     IsProcessing = false;
@@ -366,7 +363,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        if (disposed)
+                        if (!node.IsAlive)
                         {
                             // we're dead
                             return;
@@ -675,13 +672,11 @@ namespace Iviz.Controllers
         public override void StopController()
         {
             base.StopController();
-            disposed = true;
 
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
             node.DestroySelf();
-
             pointBuffer.Dispose();
         }
     }

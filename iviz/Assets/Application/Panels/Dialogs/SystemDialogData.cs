@@ -213,7 +213,7 @@ namespace Iviz.App
 
         void UpdateTop()
         {
-            uint newHash = Crc32Calculator.Instance.Compute(description);
+            uint newHash = Crc32Calculator.Compute(description);
             if (descriptionHash == newHash)
             {
                 return;

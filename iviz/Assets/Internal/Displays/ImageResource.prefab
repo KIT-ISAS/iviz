@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 324060ae832b2fa4b9586127ccacd339, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parent: {fileID: 0}
   offset: {x: 0, y: 0, z: 0}
+  keepHorizontal: 0
 --- !u!65 &2560784202415664666
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -121,6 +121,12 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5159499938448676022, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36,
+        type: 3}
     - target: {fileID: 5388285313566478080, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_Name
@@ -134,17 +140,17 @@ PrefabInstance:
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
@@ -241,17 +247,17 @@ PrefabInstance:
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.1
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
         type: 3}

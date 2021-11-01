@@ -1,50 +1,51 @@
 ﻿using System;
+using Iviz.Displays;
+using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public interface IImageDialogListener
-    {
-        [NotNull] Material Material { get; }
-        Vector2Int ImageSize { get; }
-        void OnDialogClosed();
-    }
-
     public sealed class ImageDialogData : DialogData
     {
         [NotNull] readonly ImageDialogContents panel;
+        [NotNull] readonly GameObject canvas;
+        [NotNull] readonly ImageDialogListener listener;
+        
         public override IDialogPanelContents Panel => panel;
+        public event Action Closed; 
 
-        [CanBeNull] IImageDialogListener Listener { get; set; }
-
-        public ImageDialogData()
+        public ImageDialogData([NotNull] ImageDialogListener listener, Transform holder)
         {
-            panel = DialogPanelManager.GetPanelByType<ImageDialogContents>(DialogPanelType.Image);
+            this.listener = listener;
+            canvas = ResourcePool.Rent(Resource.Widgets.ImageCanvas, holder);
+            panel = canvas.GetComponentInChildren<ImageDialogContents>();
+            panel.CloseButton.Clicked += () => Closed?.Invoke();
+        }
+
+        public string Title
+        {
+            set => panel.Title = value;
         }
 
         public override void SetupPanel()
         {
-            if (Listener == null)
-            {
-                throw new InvalidOperationException("Cannot setup panel without a listener!");
-            }
-            
-            panel.CloseButton.Clicked += OnCloseClicked;
-            panel.Material = Listener.Material;
-            panel.ImageSize = Listener.ImageSize;
-        }
-        
-        public void Show([NotNull] IImageDialogListener listener)
-        {
-            Listener = listener ?? throw new ArgumentNullException(nameof(listener));
-            Show();
+            panel.Material = listener.Material;
+            panel.ImageSize = listener.ImageSize;
         }
 
-        void OnCloseClicked()
+        public void ToggleImageEnabled()
         {
-            Listener?.OnDialogClosed();
-            Close();
+            panel.ToggleImageEnabled();
+            panel.ImageSize = listener.ImageSize;
+        }
+
+        public void Stop()
+        {
+            Closed = null;
+            panel.ClearSubscribers();
+            ModuleListPanel.Instance.DisposeImageDialog(this);
+            ResourcePool.Return(Resource.Widgets.ImageCanvas, canvas);
         }
     }
 }

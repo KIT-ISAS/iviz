@@ -172,14 +172,12 @@ namespace Iviz.Core
             return Mathf.Approximately(p.position.x, 0)
                    && Mathf.Approximately(p.position.y, 0)
                    && Mathf.Approximately(p.position.z, 0)
-                   && Mathf.Approximately(p.rotation.x, 0)
-                   && Mathf.Approximately(p.rotation.y, 0)
-                   && Mathf.Approximately(p.rotation.z, 0)
                    && Mathf.Approximately(p.rotation.w, 1);
         }
 
         public static bool EqualsApprox(this in Pose p, in Pose q)
         {
+            /*
             return Mathf.Approximately(p.position.x, q.position.x)
                    && Mathf.Approximately(p.position.y, q.position.y)
                    && Mathf.Approximately(p.position.z, q.position.z)
@@ -187,7 +185,24 @@ namespace Iviz.Core
                    && Mathf.Approximately(p.rotation.y, q.rotation.y)
                    && Mathf.Approximately(p.rotation.z, q.rotation.z)
                    && Mathf.Approximately(p.rotation.w, q.rotation.w);
+                   */
+            return EqualsApprox(p.position, q.position) && EqualsApprox(p.rotation, q.rotation);
         }
+
+        static bool EqualsApprox(in Vector3 lhs, in Vector3 rhs)
+        {
+            float num1 = lhs.x - rhs.x;
+            float num2 = lhs.y - rhs.y;
+            float num3 = lhs.z - rhs.z;
+            return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11;
+        }
+
+        static bool EqualsApprox(in Quaternion a, in Quaternion b)
+        {
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;            
+        }
+        
+
 
         public static Vector4 GetColumnIn(this in Matrix4x4 m, int index)
         {

@@ -187,7 +187,7 @@ namespace Iviz.App
                 new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
 
                 description.AppendLine().AppendLine();
-                uint newHash = Crc32Calculator.Instance.Compute(description);
+                uint newHash = Crc32Calculator.Compute(description);
                 if (newHash == descriptionHash)
                 {
                     return;
@@ -196,7 +196,8 @@ namespace Iviz.App
                 descriptionHash = newHash;
                 tfText.SetText(description);
                 RectTransform cTransform = (RectTransform)content.transform;
-                cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tfText.preferredWidth + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tfText.preferredHeight + 10);
             }
             finally
             {
@@ -219,7 +220,7 @@ namespace Iviz.App
                 }
 
                 description.AppendLine().AppendLine();
-                uint newHash = Crc32Calculator.Instance.Compute(description);
+                uint newHash = Crc32Calculator.Compute(description);
                 if (newHash == descriptionHash)
                 {
                     return;
@@ -229,7 +230,9 @@ namespace Iviz.App
                 tfText.SetText(description);
 
                 RectTransform cTransform = (RectTransform)content.transform;
-                cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+                //cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tfText.preferredWidth + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tfText.preferredHeight + 10);
             }
             finally
             {
@@ -285,7 +288,7 @@ namespace Iviz.App
                     FormatPose(pose, description);
                 }
 
-                uint newHash = Crc32Calculator.Instance.Compute(description);
+                uint newHash = Crc32Calculator.Compute(description);
                 if (newHash == textHash)
                 {
                     return;
@@ -302,7 +305,6 @@ namespace Iviz.App
 
         public static void FormatPose(in Pose unityPose, [NotNull] StringBuilder description, bool withRoll = true)
         {
-            //var ((pX, pY, pZ), q) = unityPose.Unity2RosPose();
             var (pX, pY, pZ) = unityPose.position.Unity2RosVector3();
             string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
             string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
@@ -313,20 +315,9 @@ namespace Iviz.App
             double rY = RegularizeAngle(rYr);
             double rZ = RegularizeAngle(rZr);
 
-            //var ((pX, pY, pZ), (rX, rY, rZ, rW)) = unityPose.Unity2RosPose();
-            //string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
-            //string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
-            //string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
-
-            //string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
-            //string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
-            //string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
-            //string rw = rW == 1 ? "1" : rW.ToString("#,0.##", UnityUtils.Culture);
-
             string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
             string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
             string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
-
 
             description.Append(px).Append(", ").Append(py).Append(", ").AppendLine(pz);
             if (withRoll)
@@ -335,8 +326,6 @@ namespace Iviz.App
             }
 
             description.Append("p: ").Append(ry).Append(", y: ").Append(rz);
-            //.Append(rz).Append(", ")
-            //.Append(rw).Append("]");   
         }
 
         static double RegularizeAngle(double angle)

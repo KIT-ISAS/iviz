@@ -55,10 +55,6 @@ namespace Iviz.App
                 {
                     newText = $"<b>➤{frame.Id}</b> <i>[Fixed]</i>";
                 }
-                else if (frame.Id == TfListener.OriginFrameId)
-                {
-                    newText = "➤[origin]";
-                }
                 else
                 {
                     newText = $"<b>➤{frame.Id}</b>";
