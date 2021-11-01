@@ -19,6 +19,11 @@ namespace Iviz.Roslib.XmlRpc
             MaxPacketSize = maxPacketSize;
         }
 
+        public RpcUdpTopicRequest(byte[] header, string hostname, int maxPacketSize) : this(header, hostname, 0,
+            maxPacketSize)
+        {
+        }
+
         public void Deconstruct(out byte[] header, out string hostName, out int port, out int maxPacketSize) =>
             (header, hostName, port, maxPacketSize) = (Header, Hostname, Port, MaxPacketSize);
 

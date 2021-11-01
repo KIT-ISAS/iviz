@@ -248,13 +248,13 @@ namespace Iviz.Roslib.XmlRpc
         {
             if (args.Length < 3 ||
                 !args[1].TryGetString(out string topic) ||
-                !args[2].TryGetArray(out XmlRpcValue[] publishers))
+                !args[2].TryGetArray(out var publishers))
             {
                 return;
             }
 
-            List<Uri> publisherUris = new();
-            foreach (XmlRpcValue publisherObj in publishers)
+            var publisherUris = new List<Uri>();
+            foreach (var publisherObj in publishers)
             {
                 if (!publisherObj.TryGetString(out string publisherStr) ||
                     !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri) ||
@@ -271,11 +271,7 @@ namespace Iviz.Roslib.XmlRpc
             {
                 await client.PublisherUpdateRpcAsync(topic, publisherUris, token);
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 Logger.LogErrorFormat("{0}: Error while updating the publisher list. {1}", this, e);
             }
@@ -286,7 +282,7 @@ namespace Iviz.Roslib.XmlRpc
             if (args.Length < 3 ||
                 !args[0].TryGetString(out string callerId) ||
                 !args[1].TryGetString(out string topic) ||
-                !args[2].TryGetArray(out XmlRpcValue[] protocols))
+                !args[2].TryGetArray(out var protocols))
             {
                 return ErrorResponse("Failed to parse arguments");
             }
@@ -303,7 +299,7 @@ namespace Iviz.Roslib.XmlRpc
             // we assume that the subscriber decides the priority
 
             var protocol = protocols[0];
-            if (!protocol.TryGetArray(out XmlRpcValue[] entries))
+            if (!protocol.TryGetArray(out var entries))
             {
                 return ErrorResponse("Expected array of arrays");
             }
@@ -360,8 +356,7 @@ namespace Iviz.Roslib.XmlRpc
                 return result switch
                 {
                     TopicRequestRpcResult.Success when tcpResponse is var (hostname, port) =>
-                        OkResponse(new XmlRpcArg[]
-                            { RosUtils.ProtocolTcpRosName, hostname, port }),
+                        OkResponse(new XmlRpcArg[] { RosUtils.ProtocolTcpRosName, hostname, port }),
 
                     TopicRequestRpcResult.Success when
                         udpResponse is var (hostname, port, connectionId, maxPacketSize, header) =>

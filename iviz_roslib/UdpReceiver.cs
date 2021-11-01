@@ -10,6 +10,7 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
+using Buffer = System.Buffer;
 
 namespace Iviz.Roslib
 {
@@ -312,7 +313,7 @@ namespace Iviz.Roslib
             };
 
             byte[] header = StreamUtils.WriteHeaderToArray(contents);
-            return new RpcUdpTopicRequest(header, hostname, 0 /* will be set later */, UdpRosParams.DefaultMTU);
+            return new RpcUdpTopicRequest(header, hostname, UdpRosParams.DefaultMTU);
         }
 
         void ILoopbackReceiver<T>.Post(in T message, int rcvLength)

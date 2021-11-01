@@ -8,14 +8,6 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
-    public enum RosTransportHint
-    {
-        PreferTcp,
-        PreferUdp,
-        OnlyTcp,
-        OnlyUdp,
-    }
-
     /// <summary>
     /// Manager for a subscription to a ROS topic.
     /// </summary>
@@ -96,6 +88,11 @@ namespace Iviz.Roslib
 
         internal void RaiseNumPublishersChanged()
         {
+            if (NumPublishersChanged == null)
+            {
+                return;
+            }
+            
             Task.Run(() =>
             {
                 try
@@ -111,9 +108,9 @@ namespace Iviz.Roslib
 
         string GenerateId()
         {
-            string newId = totalSubscribers == 0 ? Topic : $"{Topic}-{totalSubscribers}";
-            totalSubscribers++;
-            return newId;
+            Interlocked.Increment(ref totalSubscribers);
+            int prevNumSubscribers = totalSubscribers - 1;
+            return prevNumSubscribers == 0 ? Topic : $"{Topic}-{prevNumSubscribers.ToString()}";
         }
 
         void AssertIsAlive()

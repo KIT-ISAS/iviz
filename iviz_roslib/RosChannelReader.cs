@@ -266,7 +266,7 @@ namespace Iviz.Roslib
         public ValueTask<T> ReadAsync(CancellationToken token = default)
         {
             ThrowIfNotStarted();
-            return new ValueTask<T>(messageQueue.TakeAsync(token));
+            return messageQueue.TakeAsync(token).AsValueTask();
         }
 
 

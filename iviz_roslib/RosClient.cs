@@ -958,7 +958,7 @@ namespace Iviz.Roslib
             RosSubscriber<T> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
                 $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
                 $"requested type was [{BuiltIns.GetMessageType<T>()}]");
-            return new((subscriber.Subscribe(callback), subscriber));
+            return ValueTask2.FromResult((subscriber.Subscribe(callback), subscriber));
         }
 
         async ValueTask<(string id, IRosSubscriber<T> subscriber)>
@@ -988,7 +988,7 @@ namespace Iviz.Roslib
             RosSubscriber<IMessage> subscriber = newSubscriber ?? throw new RosInvalidMessageTypeException(
                 $"There is already a subscriber for '{topic}' with a different type [{baseSubscriber.TopicType}] - " +
                 $"requested type was [IMessage](generic)");
-            return new((subscriber.Subscribe(callback), subscriber));
+            return ValueTask2.FromResult((subscriber.Subscribe(callback), subscriber));
         }
 
         async ValueTask<(string id, IRosSubscriber subscriber)> IRosClient.SubscribeAsync(
@@ -1407,9 +1407,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="topicId">Token returned by Advertise().</param>
         /// <returns>Whether the unadvertisement succeeded.</returns>
-        public async ValueTask<bool> UnadvertiseAsync(string topicId)
+        public ValueTask<bool> UnadvertiseAsync(string topicId)
         {
-            if (topicId is null)
+            if (topicId == null)
             {
                 throw new ArgumentNullException(nameof(topicId));
             }
@@ -1417,13 +1417,13 @@ namespace Iviz.Roslib
             IRosPublisher? publisher =
                 publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
-            return publisher != null && await publisher.UnadvertiseAsync(topicId);
+            return publisher?.UnadvertiseAsync(topicId) ?? ValueTask2.FromResult(false);
         }
 
-        internal async Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
+        internal Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            await RosMasterClient.UnregisterPublisherAsync(publisher.Topic, token);
+            return RosMasterClient.UnregisterPublisherAsync(publisher.Topic, token).AsTask();
         }
 
         /// <summary>
@@ -1646,20 +1646,42 @@ namespace Iviz.Roslib
             var publishers = publishersByTopic.Values.ToArray();
             publishersByTopic.Clear();
 
-            EnumeratorUtils.AddRange(tasks, publishers.Select(async publisher =>
+            foreach (var publisher in publishers)
             {
-                await publisher.DisposeAsync(innerToken).AwaitNoThrow(this);
-                await RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this);
-            }));
+                /*
+                async Task DisposePublisher()
+                {
+                    await publisher.DisposeAsync(innerToken).AwaitNoThrow(this);
+                    await RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this);
+                } 
+                
+                tasks.Add(DisposePublisher());
+                */
+                tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken)
+                    .AwaitNoThrow(this)
+                    .AsTask());
+            }
 
             var subscribers = subscribersByTopic.Values.ToArray();
             subscribersByTopic.Clear();
 
-            EnumeratorUtils.AddRange(tasks, subscribers.Select(async subscriber =>
+            foreach (var subscriber in subscribers)
             {
-                await subscriber.DisposeAsync(innerToken).AwaitNoThrow(this);
-                await RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this);
-            }));
+                /*
+                async Task DisposeSubscriber()
+                {
+                    await subscriber.DisposeAsync(innerToken).AwaitNoThrow(this);
+                    await RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this);
+                }
+
+                tasks.Add(DisposeSubscriber());
+                */
+                tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken)
+                    .AwaitNoThrow(this)
+                    .AsTask());
+            }
 
             IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
@@ -1672,13 +1694,24 @@ namespace Iviz.Roslib
             IServiceRequestManager[] serviceManagers = publishedServicesByName.Values.ToArray();
             publishedServicesByName.Clear();
 
-            EnumeratorUtils.AddRange(tasks, serviceManagers.Select(async senderManager =>
+            foreach (var serviceManager in serviceManagers)
             {
-                await senderManager.DisposeAsync(innerToken).AwaitNoThrow(this);
-                await RosMasterClient
-                    .UnregisterServiceAsync(senderManager.Service, senderManager.Uri, innerToken)
-                    .AwaitNoThrow(this);
-            }));
+                /*
+                async Task DisposeService()
+                {
+                    await serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this);
+                    await RosMasterClient
+                        .UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
+                        .AwaitNoThrow(this);
+                }
+
+                tasks.Add(DisposeService());
+                */
+                tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
+                    .AwaitNoThrow(this)
+                    .AsTask());
+            }
 
             Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
             Task finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
@@ -1768,7 +1801,7 @@ namespace Iviz.Roslib
             bool persistent = false, CancellationToken token = default)
             where TT : IService, new() where TU : IResponse
         {
-            TT service = new() { Request = request };
+            var service = new TT { Request = request };
             CallService(serviceName, service, persistent, token);
             return (TU)service.Response;
         }
@@ -1805,7 +1838,7 @@ namespace Iviz.Roslib
         public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent,
             int timeoutInMs) where T : IService
         {
-            using CancellationTokenSource timeoutTs = new(timeoutInMs);
+            using var timeoutTs = new CancellationTokenSource(timeoutInMs);
             try
             {
                 return await CallServiceAsync(serviceName, service, persistent, timeoutTs.Token);
@@ -1848,7 +1881,7 @@ namespace Iviz.Roslib
 
             if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var baseExistingReceiver))
             {
-                if (!(baseExistingReceiver is ServiceCaller<T> existingReceiver))
+                if (baseExistingReceiver is not ServiceCaller<T> existingReceiver)
                 {
                     throw new RosInvalidMessageTypeException(
                         $"Existing connection of {resolvedServiceName} with service type {baseExistingReceiver.ServiceType} " +
@@ -1859,7 +1892,7 @@ namespace Iviz.Roslib
                 {
                     existingReceiver.Dispose();
                     subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-                    // continue below
+                    // continues below
                 }
                 else
                 {
@@ -1879,17 +1912,17 @@ namespace Iviz.Roslib
                 }
             }
 
-            LookupServiceResponse response = await RosMasterClient.LookupServiceAsync(resolvedServiceName, token);
+            var response = await RosMasterClient.LookupServiceAsync(resolvedServiceName, token);
             if (!response.IsValid)
             {
                 throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
             }
 
             Uri serviceUri = response.ServiceUrl!;
-            ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName);
+            var serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
             if (persistent)
             {
-                ServiceCaller<T> serviceCaller = new(serviceInfo);
+                var serviceCaller = new ServiceCaller<T>(serviceInfo);
                 try
                 {
                     subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
@@ -1913,7 +1946,7 @@ namespace Iviz.Roslib
                 await serviceCaller.ExecuteAsync(service, token);
                 return service;
             }
-            catch (Exception e) when (!(e is OperationCanceledException || e is RosServiceCallFailed))
+            catch (Exception e) when (e is not (OperationCanceledException or RosServiceCallFailed))
             {
                 throw new RoslibException($"Service call '{resolvedServiceName}' to {serviceUri} failed", e);
             }
@@ -1921,7 +1954,7 @@ namespace Iviz.Roslib
 
         static void ThrowExceptionHelper(Exception e, string name, Uri? uri)
         {
-            if (e is OperationCanceledException || e is RosServiceCallFailed)
+            if (e is OperationCanceledException or RosServiceCallFailed)
             {
                 ExceptionDispatchInfo.Capture(e).Throw();
             }
@@ -2065,9 +2098,9 @@ namespace Iviz.Roslib
         }
 
 #if !NETSTANDARD2_0
-        async ValueTask IAsyncDisposable.DisposeAsync()
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
-            await DisposeAsync();
+            return new ValueTask(DisposeAsync());
         }
 #endif
 

@@ -296,6 +296,11 @@ namespace Iviz.Roslib
 
         internal void RaiseNumSubscribersChanged()
         {
+            if (NumSubscribersChanged == null)
+            {
+                return;
+            }
+            
             Task.Run(() =>
             {
                 try
@@ -319,9 +324,9 @@ namespace Iviz.Roslib
 
         string GenerateId()
         {
-            string newId = totalPublishers == 0 ? Topic : $"{Topic}-{totalPublishers}";
-            totalPublishers++;
-            return newId;
+            Interlocked.Increment(ref totalPublishers);
+            int prevNumPublishers = totalPublishers - 1;
+            return prevNumPublishers == 0 ? Topic : $"{Topic}-{prevNumPublishers.ToString()}";
         }
 
         bool RemoveId(string topicId)
