@@ -16,7 +16,7 @@ namespace Iviz.Displays
 
         public Transform TargetTransform { get; set; }
 
-        public event MovedAction Moved;
+        public event Action Moved;
         public event Action PointerDown;
         public event Action PointerUp;
 
@@ -104,7 +104,7 @@ namespace Iviz.Displays
             else
             {
                 SetTargetPose(new Pose(mTarget.position + deltaPosition - startOffset, mTarget.rotation));
-                Moved?.Invoke(mTarget.AsPose());
+                Moved?.Invoke();
             }
         }
     }

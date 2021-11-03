@@ -163,7 +163,6 @@ namespace Application.Displays
             }
         }
         
-
         public bool OcclusionOnly
         {
             get => objects[0].OcclusionOnly;

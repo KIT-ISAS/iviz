@@ -166,7 +166,7 @@ namespace Iviz.Controllers
             Control.Visible = Visible;
             Interactable = Interactable;
 
-            Control.Moved += (in Pose _) =>
+            Control.Moved += () =>
             {
                 if (parent != null)
                 {

@@ -2,6 +2,7 @@ using System;
 using Iviz.App;
 using Iviz.Controllers;
 using Iviz.Core;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -9,15 +10,22 @@ namespace Iviz.Displays
 {
     public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
     {
-        public Vector3 normal;
+        [SerializeField] Vector3 normal;
+        [SerializeField, CanBeNull] Transform targetTransform;
 
         bool needsStart;
         Vector3 startIntersection;
 
         public bool DoesRotationReset { get; set; }
-        public Transform TargetTransform { get; set; }
+        
+        [CanBeNull]
+        public Transform TargetTransform
+        {
+            get => targetTransform;
+            set => targetTransform = value;
+        }
 
-        public event MovedAction Moved;
+        public event Action Moved;
         public event Action PointerDown;
         public event Action PointerUp;
 
@@ -66,12 +74,6 @@ namespace Iviz.Displays
             return (p, t);
         }
 
-        void SetTargetPose(in Pose pose)
-        {
-            TargetTransform.SetPose(pose);
-        }
-
-
         void IDraggable.OnPointerMove(in Ray pointerRay)
         {
             OnPointerMove(pointerRay);
@@ -79,10 +81,22 @@ namespace Iviz.Displays
 
         void OnPointerMove(in Ray pointerRay)
         {
-            Transform mTransform = transform;
-            Transform mTarget = TargetTransform;
-            Transform mParent = mTransform.parent;
-            Ray normalRay = new Ray(mTransform.position, mParent.TransformDirection(normal));
+            Transform ownTransform = transform;
+            Transform parentTransform = ownTransform.parent;
+
+            if (parentTransform == null)
+            {
+                Debug.LogWarning("The object with the DraggableRotation must have a parent!");
+                return;
+            }
+
+            if (targetTransform == null)
+            {
+                Debug.LogWarning("Target transform of DraggableRotation must be nonnull!");
+                return;
+            }
+
+            Ray normalRay = new Ray(ownTransform.position, parentTransform.TransformDirection(normal));
 
             (Vector3 intersection, float cameraDistance) = PlaneIntersection(normalRay, pointerRay);
             if (cameraDistance < 0)
@@ -90,7 +104,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
+            Vector3 localIntersection = parentTransform.InverseTransformPoint(intersection);
             if (needsStart)
             {
                 needsStart = false;
@@ -105,13 +119,9 @@ namespace Iviz.Displays
 
                 float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg;
 
-                //Debug.Log(startIntersection.normalized + " " + localIntersection.normalized + " " + angle);
-                Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(normalRay.direction));
-                //mTarget.localRotation *= q;
-                SetTargetPose(new Pose(mTarget.position, mTarget.rotation * q));
-                Moved?.Invoke(mTarget.AsPose());
-
-                //startIntersection = mTarget.transform.position + Quaternion.Inverse(q) * (localIntersection - mTarget.transform.position));
+                Quaternion q = Quaternion.AngleAxis(angle, targetTransform.InverseTransformDirection(normalRay.direction));
+                targetTransform.SetPose(new Pose(targetTransform.position, targetTransform.rotation * q));
+                Moved?.Invoke();
             }
 
             if (DoesRotationReset)

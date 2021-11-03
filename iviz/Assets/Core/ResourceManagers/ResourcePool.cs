@@ -111,11 +111,6 @@ namespace Iviz.Displays
 
         public static bool TryReturnDisplay([CanBeNull] IDisplay resource)
         {
-            if (resource == null)
-            {
-                return false;
-            }
-
             if (!(resource is MonoBehaviour behaviour))
             {
                 return false;

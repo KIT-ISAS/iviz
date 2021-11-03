@@ -13,6 +13,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using JetBrains.Annotations;
+using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Transform = UnityEngine.Transform;
@@ -106,44 +107,45 @@ namespace Iviz.Controllers
 
         void OnClick([NotNull] ClickInfo clickInfo, bool isShortClick)
         {
-            if (!clickInfo.TryGetRaycastResults(out var hitResults))
+            if (clickInfo.TryGetRaycastResults(out var hitResults))
             {
-                if (clickInfo.TryGetARRaycastResults(out hitResults))
+                Vector3 hitPoint = hitResults[0].Position;
+                bool anyHighlighted = false;
+                foreach (var result in hitResults)
                 {
-                    DoHighlightPose();
+                    if (Vector3.Distance(result.Position, hitPoint) > 1
+                        || !TryGetHighlightable(result.GameObject, out var toHighlight))
+                    {
+                        continue;
+                    }
+
+                    toHighlight.Highlight();
+                    anyHighlighted = true;
                 }
 
-                return;
-            }
-
-            bool tfHighlighted = false;
-            var tfResults = hitResults
-                .Select(hitResult => hitResult.GameObject)
-                .Where(result => result.layer == LayerType.TfAxis);
-            foreach (var result in tfResults)
-            {
-                var tfFrame = result.transform.parent.GetComponent<TfFrame>();
-                HighlightFrame(tfFrame.Id);
-                tfHighlighted = true;
-            }
-
-            if (tfHighlighted)
-            {
-                return;
-            }
-
-            DoHighlightPose();
-
-            void DoHighlightPose()
-            {
-                Pose worldPose = hitResults[0].CreatePose();
-                HighlightPose(worldPose);
-                if (!isShortClick)
+                if (anyHighlighted)
                 {
-                    var relativePose = RelativePoseToFixedFrame(worldPose);
-                    TapPublisher.Publish(new PoseStamped((tapSeq++, FixedFrameId), relativePose.Unity2RosPose()));
+                    return;
                 }
             }
+
+            var poseToHighlight = clickInfo.TryGetARRaycastResults(out var arHitResults)
+                ? arHitResults[0].CreatePose()
+                : hitResults[0].CreatePose();
+
+            ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(poseToHighlight);
+            if (!isShortClick)
+            {
+                TapPublisher.Publish(new PoseStamped((tapSeq++, FixedFrameId),
+                    RelativePoseToFixedFrame(poseToHighlight).Unity2RosPose()));
+            }
+        }
+
+        static bool TryGetHighlightable([NotNull] GameObject gameObject, out IHighlightable h)
+        {
+            Transform parent;
+            return gameObject.TryGetComponent(out h) ||
+                   (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
         }
 
         [NotNull]
@@ -570,9 +572,7 @@ namespace Iviz.Controllers
             Instance = null;
         }
 
-        static void HighlightPose(in Pose pose) =>
-            ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(pose);
-
+        /*
         public static void HighlightFrame([NotNull] string frameId)
         {
             if (!Instance.frames.ContainsKey(frameId))
@@ -582,6 +582,7 @@ namespace Iviz.Controllers
 
             ResourcePool.RentDisplay<TfFrameHighlighter>().HighlightFrame(frameId);
         }
+        */
 
         static void Publish([NotNull] TFMessage msg)
         {

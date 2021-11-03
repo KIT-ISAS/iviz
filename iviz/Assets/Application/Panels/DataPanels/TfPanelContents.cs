@@ -34,6 +34,12 @@
             //FrameLabelSize = p.AddSlider("Frame Names Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Sender = p.AddSender();
             TapSender = p.AddSender();
+            
+            p.AddCollapsibleWidget("Publishers")
+                .Attach(Sender)
+                .Attach(TapSender)
+                .UpdateSize();            
+            
             p.UpdateSize();
             gameObject.SetActive(false);
         }

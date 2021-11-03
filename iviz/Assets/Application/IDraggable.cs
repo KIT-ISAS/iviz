@@ -8,7 +8,7 @@ namespace Iviz.App
     {
         event Action PointerDown;
         event Action PointerUp;
-        event MovedAction Moved;
+        event Action Moved;
         bool Visible { get; set; }
         void OnPointerMove(in Vector2 cursorPos);
         void OnPointerMove(in Ray ray);

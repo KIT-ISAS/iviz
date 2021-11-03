@@ -66,7 +66,7 @@ namespace Iviz.App
                 {
                     if (value != null)
                     {
-                        TfListener.HighlightFrame(value.Id);
+                        value.Highlight();
                     }
 
                     return;
@@ -95,7 +95,7 @@ namespace Iviz.App
                 Flush();
                 if (value != null)
                 {
-                    TfListener.HighlightFrame(value.Id);
+                    value.Highlight();
                 }
 
                 UpdateFrameButtons();
@@ -362,7 +362,7 @@ namespace Iviz.App
                 return;
             }
 
-            TfListener.HighlightFrame(SelectedFrame.Id);
+            SelectedFrame.Highlight();
             if (ModuleListPanel.GuiInputModule != null)
             {
                 ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.AbsoluteUnityPose.position);
@@ -383,7 +383,7 @@ namespace Iviz.App
         {
             if (SelectedFrame != null)
             {
-                TfListener.HighlightFrame(SelectedFrame.Id);
+                SelectedFrame.Highlight();
                 TfListener.FixedFrameId = SelectedFrame.Id;
             }
 

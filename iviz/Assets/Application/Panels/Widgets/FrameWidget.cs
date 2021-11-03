@@ -98,7 +98,7 @@ namespace Iviz.App
                 guiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
             }
 
-            TfListener.HighlightFrame(Frame.Id);
+            Frame.Highlight();
         }
 
         protected override void OnRevealedRight()

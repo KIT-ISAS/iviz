@@ -13,6 +13,7 @@ using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
+using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
@@ -41,7 +42,7 @@ namespace Iviz.Controllers
     {
         readonly FrameNode frameNode;
         FrameNode childNode;
-        AxisFrameResource axis;
+        AxisFrameResource axisFrame;
         readonly TrailResource trail;
         MeshMarkerResource sphere;
         ArrowResource arrow;
@@ -93,9 +94,9 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (axis != null)
+                if (axisFrame != null)
                 {
-                    axis.Visible = value && FrameVisible;
+                    axisFrame.Visible = value && FrameVisible;
                 }
 
                 if (sphere != null)
@@ -132,9 +133,9 @@ namespace Iviz.Controllers
             set
             {
                 config.FrameVisible = value;
-                if (axis != null)
+                if (axisFrame != null)
                 {
-                    axis.Visible = value && Visible;
+                    axisFrame.Visible = value && Visible;
                 }
 
                 if (sphere != null)
@@ -195,13 +196,28 @@ namespace Iviz.Controllers
             set
             {
                 config.Scale = value;
-                frameNode.Transform.localScale = value * scaleMultiplier * Vector3.one;
-                trail.ElementScale = 0.02f * value * scaleMultiplier;
+                frameNode.Transform.localScale = value * Vector3.one;
+                trail.ElementScale = 0.02f * value;
+                
+                if (axisFrame != null)
+                {
+                    axisFrame.Transform.localScale = value * Vector3.one;
+                }
+
+                if (sphere != null)
+                {
+                    sphere.Transform.localScale = 0.05f * value * Vector3.one;
+                }
+
+                if (angleAxis != null)
+                {
+                    angleAxis.Transform.localScale = value * Vector3.one;
+                }                
             }
         }
 
         float scaleMultiplier = 1;
-        public float ScaleMultiplierPow10
+        public float VectorScaleMultiplierPow10
         {
             get => config.ScaleMultiplierPow10;
             set
@@ -259,7 +275,7 @@ namespace Iviz.Controllers
                         Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler, transportHint);
                     }
 
-                    axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
+                    RentFrame(frameNode);
                     break;
 
                 case PointStamped.RosMessageType:
@@ -272,10 +288,7 @@ namespace Iviz.Controllers
                         Listener = new Listener<Point>(config.Topic, Handler, transportHint);
                     }
 
-                    sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.Transform);
-                    sphere.transform.localScale = 0.05f * Vector3.one;
-                    sphere.Color = Color;
+                    RentSphere(frameNode);
                     break;
 
                 case WrenchStamped.RosMessageType:
@@ -288,16 +301,10 @@ namespace Iviz.Controllers
                         Listener = new Listener<Wrench>(config.Topic, Handler, transportHint);
                     }
 
-                    axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
-                    arrow = ResourcePool.RentDisplay<ArrowResource>(frameNode.Transform);
-                    arrow.Color = Color;
-                    arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(frameNode.Transform);
-                    angleAxis.Color = Color.yellow;
-                    sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.Transform);
-                    sphere.transform.localScale = 0.05f * Vector3.one;
-                    sphere.Color = Color;
+                    RentFrame(frameNode);
+                    RentArrow(frameNode);
+                    RentAngleAxis(frameNode);
+                    RentSphere(frameNode);
                     trail.DataSource = TrailDataSource;
                     break;
 
@@ -311,35 +318,51 @@ namespace Iviz.Controllers
                         Listener = new Listener<Twist>(config.Topic, Handler, transportHint);
                     }
 
-                    axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
-                    arrow = ResourcePool.RentDisplay<ArrowResource>(frameNode.Transform);
-                    arrow.Color = Color;
-                    arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(frameNode.Transform);
-                    angleAxis.Color = Color.yellow;
-                    sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.Transform);
-                    sphere.Transform.localScale = 0.05f * Vector3.one;
-                    sphere.Color = Color;
+                    RentFrame(frameNode);
+                    RentArrow(frameNode);
+                    RentAngleAxis(frameNode);
+                    RentSphere(frameNode);
                     trail.DataSource = TrailDataSource;
                     break;
 
                 case Odometry.RosMessageType:
                     Listener = new Listener<Odometry>(config.Topic, Handler, transportHint);
-                    axis = ResourcePool.RentDisplay<AxisFrameResource>(frameNode.Transform);
-                    childNode = FrameNode.Instantiate("ChildNode");
-                    arrow = ResourcePool.RentDisplay<ArrowResource>(childNode.Transform);
-                    arrow.Color = Color;
-                    arrow.Set(Vector3.one * 0.01f);
-                    angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(childNode.Transform);
-                    angleAxis.Color = Color.yellow;
-                    sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere,
-                        frameNode.Transform);
-                    sphere.Transform.localScale = 0.05f * Vector3.one;
-                    sphere.Color = Color;
+                    RentFrame(frameNode);
+                    RentSphere(frameNode);
+                    childNode = FrameNode.Instantiate($"[{config.Topic} | Child]");
+                    RentArrow(childNode);
+                    RentAngleAxis(childNode);
                     trail.DataSource = TrailDataSource;
                     break;
             }
+        }
+
+        void RentFrame([NotNull] FrameNode node)
+        {
+            axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
+            axisFrame.ShadowsEnabled = false;
+        }
+        
+        void RentArrow([NotNull] FrameNode node)
+        {
+            arrow = ResourcePool.RentDisplay<ArrowResource>(node.Transform);
+            arrow.Color = Color;
+            arrow.Set(Vector3.one * 0.01f);
+            arrow.ShadowsEnabled = false;
+        }
+
+        void RentAngleAxis([NotNull] FrameNode node)
+        {
+            angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(node.Transform);
+            angleAxis.Color = Color.yellow;
+        }
+        
+        void RentSphere([NotNull] FrameNode node)
+        {
+            sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
+            sphere.Transform.localScale = 0.05f * Vector3.one;
+            sphere.Color = Color;
+            sphere.ShadowsEnabled = false;
         }
 
         void Handler([NotNull] PoseStamped msg)
@@ -470,7 +493,7 @@ namespace Iviz.Controllers
                 childNode.DestroySelf();
             }
 
-            axis.ReturnToPool();
+            axisFrame.ReturnToPool();
             angleAxis.ReturnToPool();
             arrow.ReturnToPool();
             sphere.ReturnToPool(Resource.Displays.Sphere);

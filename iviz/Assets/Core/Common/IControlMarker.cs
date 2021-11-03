@@ -34,7 +34,7 @@ namespace Iviz.Displays
         bool Interactable { get; set; }
         void SetColliderInteractable();
 
-        event MovedAction Moved;
+        event Action Moved;
         event Action PointerUp;
         event Action PointerDown;
         event Action<Vector3> MenuClicked;

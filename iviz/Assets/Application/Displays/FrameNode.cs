@@ -26,7 +26,7 @@ namespace Iviz.Controllers
             set => SetParent(value, true);
         }
 
-        [NotNull] public string ParentId => parent != null ? parent.Id : ""; 
+        [NotNull] public string ParentId => parent != null ? parent.Id : "";
 
         [NotNull]
         protected string Name
@@ -41,7 +41,7 @@ namespace Iviz.Controllers
             {
                 return; // destroying!
             }
-            
+
             if (newParent == parent)
             {
                 return;
@@ -83,7 +83,21 @@ namespace Iviz.Controllers
 
             if (Parent == null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId) ? TfListener.DefaultFrame : TfListener.GetOrCreateFrame(parentId);
+                Parent = string.IsNullOrEmpty(parentId)
+                    ? TfListener.DefaultFrame
+                    : TfListener.GetOrCreateFrame(parentId);
+            }
+        }
+
+        public void AttachTo([CanBeNull] TfFrame frame)
+        {
+            if (frame == null)
+            {
+                Parent = TfListener.DefaultFrame;
+            }
+            else if (Parent == null || frame.Id != Parent.Id)
+            {
+                Parent = frame;
             }
         }
 

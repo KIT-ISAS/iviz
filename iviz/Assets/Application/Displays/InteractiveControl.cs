@@ -522,7 +522,7 @@ namespace Iviz.Displays
             }
         }
 
-        public event MovedAction Moved;
+        public event Action Moved;
         public event Action PointerUp;
         public event Action PointerDown;
         public event Action<Vector3> MenuClicked;
@@ -545,11 +545,11 @@ namespace Iviz.Displays
             MenuClicked = null;
         }
 
-        void RaiseMoved(in Pose pose)
+        void RaiseMoved()
         {
             if (isEngaged)
             {
-                Moved?.Invoke(pose);
+                Moved?.Invoke();
             }
         }
 

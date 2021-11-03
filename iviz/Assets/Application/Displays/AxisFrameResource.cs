@@ -83,7 +83,7 @@ namespace Iviz.Displays
             }
         }
 
-        public bool CastsShadows
+        public bool ShadowsEnabled
         {
             set
             {

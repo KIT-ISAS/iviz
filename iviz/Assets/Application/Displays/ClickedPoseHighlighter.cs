@@ -27,7 +27,6 @@ namespace Iviz.Displays
             flatSphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, Transform);
             flatSphere.ShadowsEnabled = false;
             flatSphere.EmissiveColor = Color.white;
-            //resource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
             flatSphere.Layer = LayerType.IgnoreRaycast;
 
             tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
@@ -91,7 +90,6 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            base.Suspend();
             highlightFrameStart = null;
         }
 

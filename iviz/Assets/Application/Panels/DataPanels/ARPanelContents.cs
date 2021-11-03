@@ -25,8 +25,6 @@ namespace Iviz.App
         public SenderWidget ColorSender { get; private set; }
         public SenderWidget DepthSender { get; private set; }
         public SenderWidget DepthConfidenceSender { get; private set; }
-        CollapsibleWidget publishers;
-
 
         void Awake()
         {
@@ -67,7 +65,7 @@ namespace Iviz.App
             DepthSender = p.AddSender();
             DepthConfidenceSender = p.AddSender();
 
-            publishers = p.AddCollapsibleWidget("Publishers")
+            p.AddCollapsibleWidget("Publishers")
                 .Attach(MarkerSender)
                 .Attach(ColorSender)
                 .Attach(DepthSender)

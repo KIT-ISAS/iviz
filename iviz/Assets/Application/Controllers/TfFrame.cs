@@ -12,7 +12,12 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
-    public sealed class TfFrame : FrameNode
+    interface IHighlightable
+    {
+        void Highlight();
+    }
+    
+    public sealed class TfFrame : FrameNode, IHighlightable
     {
         const int TrailTimeWindowInMs = 5000;
 
@@ -426,6 +431,11 @@ namespace Iviz.Controllers
 
             trail = null;
             axis = null;
+        }
+
+        public void Highlight()
+        {
+            ResourcePool.RentDisplay<TfFrameHighlighter>().HighlightFrame(this);
         }
     }
 }

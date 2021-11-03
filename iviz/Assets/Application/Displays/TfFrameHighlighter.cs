@@ -30,7 +30,7 @@ namespace Iviz.Displays
             node.Transform.SetParentLocal(Transform);
 
             axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
-            axisResource.CastsShadows = false;
+            axisResource.ShadowsEnabled = false;
             axisResource.Emissive = 1;
             axisResource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
             axisResource.Layer = LayerType.IgnoreRaycast;
@@ -40,9 +40,9 @@ namespace Iviz.Displays
             tooltip.UseAnimation = false;
         }
 
-        public void HighlightFrame([NotNull] string frameId)
+        public void HighlightFrame([NotNull] TfFrame frame)
         {
-            node.AttachTo(frameId);
+            node.AttachTo(frame);
             highlightFrameStart = Time.time;
             axisResource.Tint = Color.white;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
@@ -112,7 +112,7 @@ namespace Iviz.Displays
 
         public override void SplitForRecycle()
         {
-            axisResource.CastsShadows = true;
+            axisResource.ShadowsEnabled = true;
             axisResource.Emissive = 0;
             axisResource.OverrideMaterial(null);
             tooltip.ReturnToPool();

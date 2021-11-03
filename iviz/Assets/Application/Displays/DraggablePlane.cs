@@ -27,7 +27,13 @@ namespace Iviz.Displays
         bool needsStart;
         Vector3 startIntersection;
 
-        public Transform TargetTransform { get; set; }
+        [SerializeField] Transform targetTransform;
+
+        public Transform TargetTransform
+        {
+            get => targetTransform;
+            set => targetTransform = value;
+        }
 
         public Transform SourceTransform
         {
@@ -35,7 +41,7 @@ namespace Iviz.Displays
             set => sourceTransform = value;
         }
 
-        public event MovedAction Moved;
+        public event Action Moved;
         public event Action PointerDown;
         public event Action PointerUp;
         public event Action StartDragging;
@@ -87,11 +93,6 @@ namespace Iviz.Displays
             PointerUp?.Invoke();
         }
 
-        void SetTargetPose(in Pose pose)
-        {
-            TargetTransform.SetPose(pose);
-        }
-
         static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
         {
             float t = Vector3.Dot(other.origin - ray.origin, ray.direction) /
@@ -135,11 +136,8 @@ namespace Iviz.Displays
                 if (deltaDistance > 0.5f) deltaPosition *= 0.75f / deltaDistance;
 
                 Vector3 deltaPositionWorld = mParent.TransformVector(deltaPosition);
-                SetTargetPose(new Pose(mTarget.position + deltaPositionWorld, mTarget.rotation));
-                //mTarget.position += deltaPositionWorld;
-
-                Moved?.Invoke(mTarget.AsPose());
-                //startIntersection = localIntersection;
+                targetTransform.SetPose(new Pose(mTarget.position + deltaPositionWorld, mTarget.rotation));
+                Moved?.Invoke();
             }
         }
     }
