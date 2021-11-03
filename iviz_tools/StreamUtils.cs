@@ -20,7 +20,7 @@ namespace Iviz.Tools
             {
                 return DoReadChunkAsync(socket, buffer, toRead, token);
             }
-            
+
             int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
             return ValueTask2.FromResult(received == toRead);
         }
@@ -88,7 +88,7 @@ namespace Iviz.Tools
             {
                 return DoReadChunkAsync(socket, buffer, offset, toRead, token);
             }
-            
+
             int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
             return ValueTask2.FromResult(received);
         }
@@ -105,7 +105,11 @@ namespace Iviz.Tools
                 return socket.EndReceive(await tcs.Task);
             }
 
+#if NETSTANDARD2_1_OR_GREATER
+            await using (token.Register(OnCanceled, tcs))
+#else
             using (token.Register(OnCanceled, tcs))
+#endif
             {
                 return socket.EndReceive(await tcs.Task);
             }
@@ -146,7 +150,11 @@ namespace Iviz.Tools
                 return socket.EndSend(await tcs.Task);
             }
 
+#if NETSTANDARD2_1_OR_GREATER
+            await using (token.Register(OnCanceled, tcs))
+#else
             using (token.Register(OnCanceled, tcs))
+#endif
             {
                 return socket.EndSend(await tcs.Task);
             }

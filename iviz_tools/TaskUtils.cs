@@ -47,9 +47,16 @@ namespace Iviz.Tools
             tokenSource.CancelAfter(timeoutInMs);
 
             var timeout = new TaskCompletionSource<object?>();
-            using var registration = tokenSource.Token.Register(SetResult, timeout);
-            Task result = await (task, timeout.Task).WhenAny();
-            return result == task;
+
+#if NETSTANDARD2_1_OR_GREATER
+            await using (tokenSource.Token.Register(SetResult, timeout))
+#else
+            using (tokenSource.Token.Register(SetResult, timeout))
+#endif
+            {
+                Task result = await (task, timeout.Task).WhenAny();
+                return result == task;
+            }
         }
 
         /// <summary>
@@ -75,17 +82,22 @@ namespace Iviz.Tools
 
             var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
-            using var registration = tokenSource.Token.Register(SetResult, timeout);
-
-            Task result = await (task, timeoutTask).WhenAny();
-
-            if (result != task)
+            
+#if NETSTANDARD2_1_OR_GREATER
+            await using (tokenSource.Token.Register(SetResult, timeout))
+#else
+            using (tokenSource.Token.Register(SetResult, timeout))
+#endif
             {
-                Logger.LogErrorFormat<object>("{0}: Task wait timed out", caller);
-                return;
-            }
+                Task result = await (task, timeoutTask).WhenAny();
+                if (result != task)
+                {
+                    Logger.LogErrorFormat<object>("{0}: Task wait timed out", caller);
+                    return;
+                }
 
-            await task.AwaitNoThrow(caller);
+                await task.AwaitNoThrow(caller);
+            }
         }
 
 
@@ -226,8 +238,8 @@ namespace Iviz.Tools
         public static Task WhenAll(this (Task, Task) ts)
         {
             var (task1, task2) = ts;
-            return task1.RanToCompletion() && task2.RanToCompletion() 
-                ? Task.CompletedTask 
+            return task1.RanToCompletion() && task2.RanToCompletion()
+                ? Task.CompletedTask
                 : Task.WhenAll(task1, task2);
         }
 
