@@ -1683,7 +1683,7 @@ namespace Iviz.Roslib
                     .AsTask());
             }
 
-            IServiceCaller[] receivers = subscribedServicesByName.Values.ToArray();
+            var receivers = subscribedServicesByName.Values.ToArray();
             subscribedServicesByName.Clear();
 
             foreach (IServiceCaller receiver in receivers)
@@ -1691,7 +1691,7 @@ namespace Iviz.Roslib
                 receiver.Dispose();
             }
 
-            IServiceRequestManager[] serviceManagers = publishedServicesByName.Values.ToArray();
+            var serviceManagers = publishedServicesByName.Values.ToArray();
             publishedServicesByName.Clear();
 
             foreach (var serviceManager in serviceManagers)
@@ -1969,7 +1969,7 @@ namespace Iviz.Roslib
                 return false;
             }
 
-            if (!(existingSender is ServiceRequestManager<T>))
+            if (existingSender is not ServiceRequestManager<T>)
             {
                 throw new RosInvalidMessageTypeException(
                     $"Existing advertised service type {existingSender.ServiceType} for {serviceName} does not match the given type.");

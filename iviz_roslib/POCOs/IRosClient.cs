@@ -30,20 +30,20 @@ namespace Iviz.Roslib
             CancellationToken token = default);
 
         string Subscribe<T>(string topic, Action<T> callback, out IRosSubscriber<T> subscriber,
-            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp)
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp)
             where T : IMessage, IDeserializable<T>, new();
 
         string Subscribe(string topic, Action<IMessage> callback, out IRosSubscriber subscriber,
-            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.OnlyTcp);
+            bool requestNoDelay = true, RosTransportHint transportHint = RosTransportHint.PreferTcp);
 
         ValueTask<(string id, IRosSubscriber<T> subscriber)>
             SubscribeAsync<T>(string topic, Action<T> callback, bool requestNoDelay = true,
-                RosTransportHint transportHint = RosTransportHint.OnlyTcp, CancellationToken token = default)
+                RosTransportHint transportHint = RosTransportHint.PreferTcp, CancellationToken token = default)
             where T : IMessage, IDeserializable<T>, new();
 
         ValueTask<(string id, IRosSubscriber subscriber)>
             SubscribeAsync(string topic, Action<IMessage> callback, bool requestNoDelay = true,
-                RosTransportHint transportHint = RosTransportHint.OnlyTcp,
+                RosTransportHint transportHint = RosTransportHint.PreferTcp,
                 CancellationToken token = default);
 
         bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
