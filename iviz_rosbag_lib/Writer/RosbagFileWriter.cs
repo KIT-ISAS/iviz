@@ -33,14 +33,12 @@ namespace Iviz.Rosbag.Writer
         time chunkStartTime;
         time chunkEndTime;
         bool disposed;
+        long cachedLastLength;
 
         /// <summary>
         /// The current size of the rosbag file.
         /// </summary>
-        public long Length => !disposed
-            ? writer.Length
-            : throw new ObjectDisposedException(nameof(writer),
-                "Cannot access Length property after disposing the writer");
+        public long Length => !disposed ? writer.Length : cachedLastLength;
 
         /// <summary>
         /// The size of the current chunk.
@@ -671,6 +669,7 @@ namespace Iviz.Rosbag.Writer
                 WriteHeaderRecord(connections.Count, chunkInfos.Count, connectionStart);
             }
 
+            cachedLastLength = writer.Length;
             if (!leaveOpen)
             {
                 writer.Dispose();
@@ -699,13 +698,11 @@ namespace Iviz.Rosbag.Writer
             {
                 long connectionStart = writer.Position;
 
-                //Console.WriteLine("** Writing connections");
                 foreach (var pair in connections)
                 {
                     await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
                 }
 
-                //Console.WriteLine("** Writing chunk infos");
                 foreach (var info in chunkInfos)
                 {
                     await WriteChunkInfoRecordAsync(info);
@@ -716,9 +713,14 @@ namespace Iviz.Rosbag.Writer
                 await WriteHeaderRecordAsync(connections.Count, chunkInfos.Count, connectionStart);
             }
 
+            cachedLastLength = writer.Length;
             if (!leaveOpen)
             {
+#if NETSTANDARD2_0
                 writer.Dispose();
+#else
+                await writer.DisposeAsync();
+#endif
             }
         }
     }
