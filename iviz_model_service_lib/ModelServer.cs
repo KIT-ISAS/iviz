@@ -35,17 +35,21 @@ namespace Iviz.ModelService
             Console.WriteLine("** " + msg);
         }
 
+        static void LogUp(Uri uri)
+        {
+            Console.WriteLine(">> " + uri);
+        }
+
         public ModelServer(string additionalPaths = null, bool enableFileSchema = false)
         {
-            //Logger.Log("** Used package paths:");
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null && additionalPaths is null)
             {
-                Logger.LogError("EE Cannot retrieve environment variable ROS_PACKAGE_PATH");
+                LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages");
             }
             else
             {
-                List<string> paths = new List<string>();
+                var paths = new List<string>();
 
                 if (packagePath != null)
                 {
@@ -62,7 +66,6 @@ namespace Iviz.ModelService
                     string pathNormalized = path.Trim();
                     if (!Directory.Exists(pathNormalized))
                     {
-                        //Logger.Log("** Ignoring '" + pathNormalized + "'");
                         continue;
                     }
 
@@ -73,8 +76,8 @@ namespace Iviz.ModelService
 
             if (packagePaths.Count == 0)
             {
-                LogError(
-                    "No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, or creating a ros_package_path file.");
+                LogError("No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, " +
+                         "or creating a ros_package_path file.");
             }
 
             IsFileSchemaEnabled = enableFileSchema;
@@ -104,7 +107,6 @@ namespace Iviz.ModelService
             }
 
             paths.Add(path);
-            //Logger.Log("++ " + package);
         }
 
         string ResolvePath(Uri uri)
@@ -205,17 +207,22 @@ namespace Iviz.ModelService
                     return;
             }
 
-            //Logger.Log("** Requesting " + modelPath);
-
             Model model;
             try
             {
                 model = LoadModel(modelPath);
                 model.Filename = uri.ToString();
             }
+            catch (XmlException e)
+            {
+                LogError($"Failed to access uri '{uri}'. Reason: XML error while reading '{modelPath}'. {e.Message}");
+                msg.Response.Success = false;
+                msg.Response.Message = "Failed to load model";
+                return;
+            }
             catch (AssimpException e)
             {
-                LogError($"Failed to resolve uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
+                LogError($"Failed to access uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
 
                 msg.Response.Success = false;
                 msg.Response.Message = "Failed to load model";
@@ -226,7 +233,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Model = model;
 
-            Log(">> " + uri);
+            LogUp(uri);
         }
 
         public void TextureCallback(GetModelTexture msg)
@@ -309,7 +316,7 @@ namespace Iviz.ModelService
                 Data = data
             };
 
-            Logger.Log(">> " + uri);
+            LogUp(uri);
         }
 
         Model LoadModel(string fileName)
@@ -317,7 +324,7 @@ namespace Iviz.ModelService
             string orientationHint = "";
             if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
             {
-                XmlDocument doc = new();
+                var doc = new XmlDocument();
                 doc.Load(fileName);
                 var nodeList = doc.GetElementsByTagName("up_axis");
                 if (nodeList.Count != 0 && nodeList[0] != null)
@@ -326,7 +333,7 @@ namespace Iviz.ModelService
                 }
             }
 
-            Assimp.Scene scene = importer.ImportFile(fileName,
+            var scene = importer.ImportFile(fileName,
                 PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
             Model msg = new()
             {
@@ -433,7 +440,7 @@ namespace Iviz.ModelService
                 node.MeshIndices.ToArray()
             ));
 
-            foreach (Assimp.Node child in node.Children)
+            foreach (var child in node.Children)
             {
                 ProcessNode(child, nodes, ids);
             }
@@ -513,7 +520,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Logger.LogError("EE Failed to read '" + filePath + "': " + e.Message);
+                LogError("Failed to read '" + filePath + "'. Reason: " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -522,7 +529,7 @@ namespace Iviz.ModelService
             msg.Response.Message = "";
             msg.Response.Bytes = data;
 
-            Logger.Log(">> " + uri);
+            LogUp(uri);
         }
 
         public void SdfCallback(GetSdf msg)
@@ -548,7 +555,7 @@ namespace Iviz.ModelService
             string modelPath = ResolvePath(uri, out string packagePath);
             if (string.IsNullOrWhiteSpace(modelPath))
             {
-                Logger.LogError("EE Failed to find resource path for '" + modelPath + "'");
+                LogError("Failed to find resource path for '" + modelPath + "'");
                 msg.Response.Message = "Failed to find resource path";
                 return;
             }
@@ -560,7 +567,7 @@ namespace Iviz.ModelService
             }
             catch (IOException e)
             {
-                Logger.LogError("EE Failed to read '" + modelPath + "': " + e.Message);
+                LogError("Failed to read '" + modelPath + "'. Reason: " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -573,9 +580,9 @@ namespace Iviz.ModelService
                 var srcFile = Sdf.SdfFile.CreateFromXml(data);
                 file = srcFile.ResolveIncludes(modelPaths);
             }
-            catch (Exception e) when (e is IOException || e is Sdf.MalformedSdfException)
+            catch (Exception e) when (e is IOException or XmlException or Sdf.MalformedSdfException)
             {
-                Logger.LogError("EE Failed to parse '" + modelPath + "': " + e.Message);
+                LogError("Failed to parse '" + modelPath + "'. Reason: " + e.Message);
                 msg.Response.Message = e.Message;
                 return;
             }
@@ -591,6 +598,8 @@ namespace Iviz.ModelService
                 Includes = includes.ToArray(),
                 Lights = file.Lights.Select(ToLight).ToArray()
             };
+            
+            LogUp(uri);
         }
 
         static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
