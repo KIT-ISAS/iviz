@@ -10,12 +10,10 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib.Utils
 {
-    public static class RosUtils
+    internal static class RosUtils
     {
         public const string ProtocolTcpRosName = "TCPROS";
         public const string ProtocolUdpRosName = "UDPROS";
-
-        static readonly Func<(byte b1, byte b2), byte> And = b => (byte)(b.b1 & b.b2);
 
         internal static List<string> ParseHeader(in Rent<byte> readBuffer) =>
             ParseHeader(readBuffer.Array, readBuffer.Length);
@@ -63,7 +61,7 @@ namespace Iviz.Roslib.Utils
             return contents;
         }
 
-        public static Dictionary<string, string> CreateHeaderDictionary(List<string> fields)
+        internal static Dictionary<string, string> CreateHeaderDictionary(List<string> fields)
         {
             Dictionary<string, string> values = new();
             foreach (string entry in fields)
@@ -112,17 +110,48 @@ namespace Iviz.Roslib.Utils
             return new TopicInfo<T>(callerId, topicName, generator);
         }
 
-        public static bool IsInSameSubnet(IPAddress addressA, IPAddress addressB, IPAddress subnetMask)
+        static bool IsInSameSubnet(UnicastIPAddressInformation info, IPAddress addressB)
         {
-            byte[] addressABytes = addressA.GetAddressBytes();
+            byte[] addressABytes = info.Address.GetAddressBytes();
             byte[] addressBBytes = addressB.GetAddressBytes();
-            byte[] subnetMaskBytes = subnetMask.GetAddressBytes();
-            var broadcastABytes = addressABytes.Zip(subnetMaskBytes).Select(And);
-            var broadcastBBytes = addressBBytes.Zip(subnetMaskBytes).Select(And);
-            return broadcastABytes.SequenceEqual(broadcastBBytes);
+            byte[] subnetMaskBytes = info.Address.AddressFamily == AddressFamily.InterNetwork
+                ? info.IPv4Mask.GetAddressBytes()
+                : GtSubnetMaskFromV6PrefixLength(info.PrefixLength);
+
+            for (int i = 0; i < addressABytes.Length; i++)
+            {
+                if ((addressABytes[i] & subnetMaskBytes[i]) != (addressBBytes[i] & subnetMaskBytes[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
-        public static IEnumerable<UnicastIPAddressInformation> GetInterfaceCandidates(NetworkInterfaceType type)
+        static byte[] GtSubnetMaskFromV6PrefixLength(int prefixLength)
+        {
+            int prefixLeft = prefixLength;
+            byte[] maskBytes = new byte[16];
+            for (int i = 0; i < 16; i++)
+            {
+                if (prefixLeft >= 8)
+                {
+                    maskBytes[i] = 0xff;
+                    prefixLeft -= 8;
+                }
+                else if (prefixLeft != 0)
+                {
+                    int mask = ~((1 << (8 - prefixLeft)) - 1);
+                    maskBytes[i] = (byte)(mask & 0xff);
+                    break;
+                }
+            }
+
+            return maskBytes;
+        }
+
+        static IEnumerable<UnicastIPAddressInformation> GetInterfaceCandidates(NetworkInterfaceType type)
         {
             return NetworkInterface.GetAllNetworkInterfaces()
                 .Where(@interface => @interface.NetworkInterfaceType == type &&
@@ -131,10 +160,99 @@ namespace Iviz.Roslib.Utils
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork);
         }
 
-        public static Uri? GetUriFromInterface(NetworkInterfaceType type, int usingPort)
+        internal static Uri? GetUriFromInterface(NetworkInterfaceType type, string portStr)
         {
-            UnicastIPAddressInformation? ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
-            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{usingPort.ToString()}/");
+            var ipInfo = GetInterfaceCandidates(type).FirstOrDefault();
+            return ipInfo is null ? null : new Uri($"http://{ipInfo.Address}:{portStr}/");
+        }
+
+        internal static IPAddress? TryGetAddress(string hostname)
+        {
+            string resolvedHostname = ConnectionUtils.GlobalResolver.TryGetValue(hostname, out string? newHostname)
+                ? newHostname
+                : hostname;
+            
+            return IPAddress.TryParse(resolvedHostname, out IPAddress? parsedAddress)
+                ? parsedAddress
+                : Dns.GetHostEntry(resolvedHostname).AddressList.FirstOrDefault(address =>
+                    address.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6);
+        }
+
+        internal static IPAddress? TryGetAccessibleAddress(IPAddress masterAddress)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                .FirstOrDefault(info => CanAccessAddress(info, masterAddress))
+                ?.Address;
+        }
+
+        internal static NetworkInterface? TryGetAccessibleInterface(IPAddress masterAddress)
+        {
+            return NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                .Select(@interface => (@interface, infos: @interface.GetIPProperties().UnicastAddresses))
+                .FirstOrDefault(t => t.infos.Any(info => CanAccessAddress(info, masterAddress)))
+                .@interface;
+        }
+
+        static bool CanAccessAddress(UnicastIPAddressInformation info, IPAddress address)
+        {
+            if (info.Address.AddressFamily == AddressFamily.InterNetwork && address.IsIPv4MappedToIPv6)
+            {
+                return IsInSameSubnet(info, address.MapToIPv4());
+            }
+
+            return info.Address.AddressFamily == address.AddressFamily && IsInSameSubnet(info, address);
+        }
+
+        internal static IEnumerable<string> GetAllLocalAddresses()
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                .Select(info => info.Address.ToString());
+        }
+        
+
+        internal static int? TryGetMaxPacketSizeForAddress(string address)
+        {
+            var remoteAddress = RosUtils.TryGetAddress(address);
+            if (remoteAddress == null)
+            {
+                return null;
+            }
+
+            var @interface = TryGetAccessibleInterface(remoteAddress);
+            if (@interface == null)
+            {
+                return null;
+            }
+
+            int mtu = @interface.GetIPProperties().GetIPv4Properties().Mtu; // if v6 is active it will return same mtu
+            if (mtu == 0)
+            {
+                return null; // mono is bad at finding the mtu
+            }
+            
+            int headerSize =
+                (remoteAddress.AddressFamily == AddressFamily.InterNetworkV6 && !remoteAddress.IsIPv4MappedToIPv6)
+                    ? UdpRosParams.Ip6UdpHeadersLength
+                    : UdpRosParams.Ip4UdpHeadersLength;
+            return mtu - headerSize;
+        }
+
+        internal static int GetRecommendedBufferSize(int rcvLength, int defaultSize)
+        {
+            return rcvLength switch
+            {
+                < 64 * 1024 => defaultSize,
+                < 128 * 1024 => 128 * 1024,
+                < 1024 * 1024 => 1024 * 1024,
+                _ => 4 * 1024 * 1024, 
+            };            
         }
     }
 }

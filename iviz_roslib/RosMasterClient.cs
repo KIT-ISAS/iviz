@@ -29,7 +29,7 @@ namespace Iviz.Roslib.XmlRpc
         public string CallerId { get; }
         public int TimeoutInMs { get; set; } = 3000;
 
-        readonly XmlRpcArg[] callerIdArgCache;
+        readonly XmlRpcArg[] cachedCallerIdArg;
 
         readonly List<XmlRpcConnection> rpcConnections = new();
 
@@ -44,7 +44,7 @@ namespace Iviz.Roslib.XmlRpc
             MasterUri = masterUri;
             CallerUri = callerUri;
             CallerId = callerId;
-            callerIdArgCache = new XmlRpcArg[] {CallerId};
+            cachedCallerIdArg = new XmlRpcArg[] {CallerId};
 
             if (numParallelConnections <= 0)
             {
@@ -72,15 +72,13 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetUriResponse GetUri()
         {
-            XmlRpcArg[] args = callerIdArgCache;
-            var response = MethodCall("getUri", args);
+            var response = MethodCall("getUri", cachedCallerIdArg);
             return new GetUriResponse(response);
         }
 
         public async ValueTask<GetUriResponse> GetUriAsync(CancellationToken token = default)
         {
-            XmlRpcArg[] args = callerIdArgCache;
-            var response = await MethodCallAsync("getUri", args, token);
+            var response = await MethodCallAsync("getUri", cachedCallerIdArg, token);
             return new GetUriResponse(response);
         }
 
@@ -125,15 +123,13 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetPublishedTopicsResponse GetTopicTypes()
         {
-            XmlRpcArg[] args = callerIdArgCache;
-            var response = MethodCall("getTopicTypes", args);
+            var response = MethodCall("getTopicTypes", cachedCallerIdArg);
             return new GetPublishedTopicsResponse(response);
         }
 
         public async ValueTask<GetPublishedTopicsResponse> GetTopicTypesAsync(CancellationToken token = default)
         {
-            XmlRpcArg[] args = callerIdArgCache;
-            var response = await MethodCallAsync("getTopicTypes", args, token);
+            var response = await MethodCallAsync("getTopicTypes", cachedCallerIdArg, token);
             return new GetPublishedTopicsResponse(response);
         }
 
@@ -259,14 +255,14 @@ namespace Iviz.Roslib.XmlRpc
 
         public GetSystemStateResponse GetSystemState()
         {
-            XmlRpcArg[] args = callerIdArgCache;
+            XmlRpcArg[] args = cachedCallerIdArg;
             var response = MethodCall("getSystemState", args);
             return new GetSystemStateResponse(response);
         }
 
         public async ValueTask<GetSystemStateResponse> GetSystemStateAsync(CancellationToken token = default)
         {
-            XmlRpcArg[] args = callerIdArgCache;
+            XmlRpcArg[] args = cachedCallerIdArg;
             var response = await MethodCallAsync("getSystemState", args, token);
             return new GetSystemStateResponse(response);
         }
@@ -820,7 +816,7 @@ namespace Iviz.Roslib.XmlRpc
 
     public sealed class LookupServiceResponse : BaseResponse
     {
-        public Uri? ServiceUrl { get; }
+        public Uri? ServiceUri { get; }
 
         internal LookupServiceResponse(XmlRpcValue[]? a)
         {
@@ -848,7 +844,7 @@ namespace Iviz.Roslib.XmlRpc
                 return;
             }
 
-            ServiceUrl = uri;
+            ServiceUri = uri;
         }
     }
 

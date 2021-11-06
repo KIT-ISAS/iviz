@@ -3,7 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
 using Iviz.XmlRpc;
@@ -13,7 +12,7 @@ namespace Iviz.Roslib
     /// <summary>
     /// Class in charge of trying to connect and reconnect over and over to a ROS publisher 
     /// </summary>
-    internal class ReceiverConnector
+    internal class SessionManager
     {
         const int MaxConnectionRetries = 120;
         const int DisposeTimeoutInMs = 2000;
@@ -23,7 +22,7 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource tokenSource = new();
         readonly Task task;
 
-        readonly Action<ReceiverConnector, Response> onConnectionSucceeded;
+        readonly Action<SessionManager, Response> onConnectionSucceeded;
 
         readonly RpcUdpTopicRequest? udpRequest;
         readonly UdpClient? udpClient;
@@ -52,8 +51,8 @@ namespace Iviz.Roslib
                 (tcpResponse, udpResponse, udpClient) = (TcpResponse, UdpResponse, UdpClient);
         }
 
-        public ReceiverConnector(RosNodeClient client, string topic, RosTransportHint transportHint,
-            RpcUdpTopicRequest? udpRequest, Action<ReceiverConnector, Response> onConnectionSucceeded)
+        public SessionManager(RosNodeClient client, string topic, RosTransportHint transportHint,
+            RpcUdpTopicRequest? udpRequest, Action<SessionManager, Response> onConnectionSucceeded)
         {
             this.topic = topic;
             this.client = client;

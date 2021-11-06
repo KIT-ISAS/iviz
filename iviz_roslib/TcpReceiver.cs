@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,7 +12,7 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
-    internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, IRosReceiverInfo where T : IMessage
+    internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, ITcpReceiver where T : IMessage
     {
         const int DisposeTimeoutInMs = 2000;
 
@@ -23,8 +22,9 @@ namespace Iviz.Roslib
         readonly Task task;
         readonly int connectionTimeoutInMs;
 
+        int receiveBufferSize = 8192;
+
         TopicInfo<T> topicInfo;
-        TcpClient? tcpClient;
         bool disposed;
         long numReceived;
         long bytesReceived;
@@ -38,9 +38,10 @@ namespace Iviz.Roslib
         public bool IsPaused { get; set; }
         public Uri RemoteUri { get; }
         public bool IsAlive => !task.IsCompleted;
-        public bool IsConnected => tcpClient is { Connected: true };
+        public bool IsConnected => TcpClient is { Connected: true };
         public ReceiverStatus Status { get; private set; }
         public ErrorMessage? ErrorDescription { get; private set; }
+        public TcpClient? TcpClient { get; private set; }
 
         public TcpReceiver(ReceiverManager<T> manager,
             Uri remoteUri, Endpoint remoteEndpoint, TopicInfo<T> topicInfo,
@@ -77,7 +78,7 @@ namespace Iviz.Roslib
                 Logger.LogDebugFormat("{0}: Connected!", this);
                 var ipEndpoint = (IPEndPoint)newTcpClient.Client.LocalEndPoint!;
                 Endpoint = new Endpoint(ipEndpoint);
-                tcpClient = newTcpClient;
+                TcpClient = newTcpClient;
 
                 try
                 {
@@ -115,8 +116,8 @@ namespace Iviz.Roslib
             }
 
             Status = ReceiverStatus.Dead;
-            tcpClient?.Dispose();
-            tcpClient = null;
+            TcpClient?.Dispose();
+            TcpClient = null;
             try
             {
                 runningTs.Cancel();
@@ -195,7 +196,7 @@ namespace Iviz.Roslib
                 throw new RosInvalidPackageSizeException($"Invalid packet size {length}. Disconnecting.");
             }
 
-            readBuffer.EnsureCapability(length);
+            readBuffer.EnsureCapacity(length);
             if (!await client.ReadChunkAsync(readBuffer.Array, length, runningTs.Token))
             {
                 return -1;
@@ -224,7 +225,7 @@ namespace Iviz.Roslib
 
             return length;
         }
-        
+
         Task SendHeader(TcpClient client)
         {
             string[] contents =
@@ -292,12 +293,33 @@ namespace Iviz.Roslib
                 {
                     continue;
                 }
-                
+
                 T message = generator.DeserializeFromArray(readBuffer.Array, rcvLength);
                 manager.MessageCallback(message, this);
+
+                CheckBufferSize(client, rcvLength);
             }
         }
-        
+
+        void CheckBufferSize(TcpClient client, int rcvLength)
+        {
+            if (receiveBufferSize >= rcvLength)
+            {
+                return;
+            }
+
+            int recommendedSize = RosUtils.GetRecommendedBufferSize(rcvLength, receiveBufferSize);
+            if (recommendedSize == receiveBufferSize)
+            {
+                return;
+            }
+
+            receiveBufferSize = recommendedSize;
+            client.Client.ReceiveBufferSize = recommendedSize;
+            Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
+                recommendedSize / 1024);
+        }
+
         async Task ProcessLoop(TcpClient client)
         {
             await ProcessHandshake(client);
@@ -330,7 +352,7 @@ namespace Iviz.Roslib
 
             disposed = true;
             runningTs.Cancel();
-            tcpClient?.Dispose();
+            TcpClient?.Dispose();
 
             await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
             runningTs.Dispose();

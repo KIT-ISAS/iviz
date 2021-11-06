@@ -1,6 +1,5 @@
 ﻿using System;
 using Iviz.Roslib.Utils;
-using Iviz.Roslib.XmlRpc;
 
 namespace Iviz.Roslib
 {
@@ -22,7 +21,7 @@ namespace Iviz.Roslib
         public string Topic { get; }
         public bool Connected { get; }
 
-        public BusInfo(int id, Uri destinationId, DirectionType direction, string topic, TransportType transport,
+        BusInfo(int id, Uri destinationId, DirectionType direction, string topic, TransportType transport,
             bool status = true)
         {
             ConnectionId = id;
@@ -34,10 +33,13 @@ namespace Iviz.Roslib
         }
 
         public BusInfo(int id, string topic, SubscriberReceiverState receiver) :
-            this(id, receiver.RemoteUri, DirectionType.In, topic,
-                receiver.TransportType ?? throw new ArgumentException("Invalid receiver passed to busInfo!"),
-                receiver.Status == ReceiverStatus.Connected)
+            this(id, receiver.RemoteUri, DirectionType.In, topic, receiver.TransportType!.Value, receiver.IsAlive)
         {
         }
+        
+        public BusInfo(int id, string topic, Uri remoteUri, PublisherSenderState sender) :
+            this(id, remoteUri, DirectionType.Out, topic, sender.TransportType, sender.IsAlive)
+        {
+        }        
     }
 }

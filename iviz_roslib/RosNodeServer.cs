@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Roslib.Utils;
@@ -198,12 +196,7 @@ namespace Iviz.Roslib.XmlRpc
 
         static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
-#if NET5_0_OR_GREATER
-            int id = Environment.ProcessId;
-#else
-            int id = Process.GetCurrentProcess().Id;
-#endif
-            return OkResponse(id);
+            return OkResponse(ConnectionUtils.GetProcessId());
         }
 
         XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
@@ -257,8 +250,7 @@ namespace Iviz.Roslib.XmlRpc
             foreach (var publisherObj in publishers)
             {
                 if (!publisherObj.TryGetString(out string publisherStr) ||
-                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri) ||
-                    publisherUri == null)
+                    !Uri.TryCreate(publisherStr, UriKind.Absolute, out Uri? publisherUri))
                 {
                     Logger.LogFormat("{0}: Invalid uri '{1}'", this, publisherObj);
                     continue;
