@@ -1,4 +1,3 @@
-using System.Runtime.Versioning;
 using System.Xml;
 
 namespace Iviz.Sdf

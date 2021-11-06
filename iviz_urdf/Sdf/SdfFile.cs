@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Iviz.Urdf;
 
 namespace Iviz.Sdf
 {

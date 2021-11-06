@@ -1,6 +1,4 @@
-using System;
 using System.Xml;
-using Iviz.Urdf;
 
 namespace Iviz.Sdf
 {

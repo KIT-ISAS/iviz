@@ -5,7 +5,7 @@
         <AssemblyName>Iviz.Urdf</AssemblyName>
         <RootNamespace>Iviz.Urdf</RootNamespace>
         <Nullable>annotations</Nullable>
-        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
