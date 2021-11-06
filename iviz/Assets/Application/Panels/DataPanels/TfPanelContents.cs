@@ -8,7 +8,7 @@
         public ListenerWidget ListenerStatic { get; private set; }
         public TrashButtonWidget ResetButton { get; private set; }
         public FrameWidget Frame { get; private set; }
-        public ToggleWidget PreferUdp { get; private set; }
+        //public ToggleWidget PreferUdp { get; private set; }
         public ToggleWidget ShowFrameLabels { get; private set; }
         public SliderWidget FrameSize { get; private set; }
         public ToggleWidget ConnectToParent { get; private set; }
@@ -25,7 +25,7 @@
             Listener = p.AddListener();
             ListenerStatic = p.AddListener();
             Frame = p.AddFrame();
-            PreferUdp = p.AddToggle("Prefer UDP");
+            //PreferUdp = p.AddToggle("Prefer UDP");
             KeepAllFrames = p.AddToggle("Keep All Frames, Even if Unused");
             //ShowAxes = p.AddToggle("Show Frames");
             ShowFrameLabels = p.AddToggle("Show Frame Names");

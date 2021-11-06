@@ -173,7 +173,7 @@ namespace Iviz.App
                     }
 
                     string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host; 
-                    Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort}/");
+                    Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
                     const string ownMasterId = "iviz_master";
 
                     if (RosServerManager.Create(ownMasterUri, ownMasterId))

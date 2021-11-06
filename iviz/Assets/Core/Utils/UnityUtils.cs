@@ -202,8 +202,6 @@ namespace Iviz.Core
             return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;            
         }
         
-
-
         public static Vector4 GetColumnIn(this in Matrix4x4 m, int index)
         {
             switch (index)
