@@ -117,7 +117,7 @@ namespace Iviz.XmlRpc
             while (KeepRunning)
                 try
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync();
+                    var client = await listener.AcceptTcpClientAsync();
                     client.NoDelay = true;
 
                     if (!KeepRunning)

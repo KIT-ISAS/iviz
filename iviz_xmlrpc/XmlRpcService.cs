@@ -144,7 +144,7 @@ namespace Iviz.XmlRpc
                         throw new ParseException($"Could not parse '{primitive.InnerText}' as base64!", e);
                     }
                 case "struct":
-                    List<(string, XmlRpcValue)> structValue = new();
+                    var structValue = new List<(string, XmlRpcValue)>();
                     foreach (XmlNode? member in primitive.ChildNodes)
                     {
                         if (member is not { Name: "member" })
@@ -209,7 +209,7 @@ namespace Iviz.XmlRpc
 
         internal static XmlRpcValue ProcessResponse(string inData)
         {
-            XmlDocument document = new();
+            var document = new XmlDocument();
             try
             {
                 document.LoadXml(inData);
@@ -219,7 +219,7 @@ namespace Iviz.XmlRpc
                 throw new ParseException("XML response could not be parsed", e);
             }
 
-            XmlNode? root = document.FirstChild;
+            var root = document.FirstChild;
             while (root != null && root.Name != "methodResponse")
             {
                 root = root.NextSibling;
@@ -230,7 +230,7 @@ namespace Iviz.XmlRpc
                 throw new ParseException("Response has no 'methodResponse' tag");
             }
 
-            XmlNode? child = root.FirstChild;
+            var child = root.FirstChild;
 
             switch (child?.Name)
             {
