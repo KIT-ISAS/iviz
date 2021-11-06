@@ -104,7 +104,7 @@ namespace Iviz.Octree
 
         static float Exp(float f)
         {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             return MathF.Exp(f);
 #else
             return (float) Math.Exp(f);
@@ -113,7 +113,7 @@ namespace Iviz.Octree
         
         static float Log(float f)
         {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             return MathF.Log(f);
 #else
             return (float) Math.Log(f);
@@ -122,7 +122,7 @@ namespace Iviz.Octree
         
         static float Floor(float f)
         {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             return MathF.Floor(f);
 #else
             return (float) Math.Floor(f);
