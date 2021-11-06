@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -42,7 +43,7 @@ namespace Iviz.Tools
 
             if (timeoutInMs == -1)
             {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
                 await using (token.Register(OnCanceled, tcs))
 #else
                 using (token.Register(OnCanceled, tcs))
@@ -54,7 +55,7 @@ namespace Iviz.Tools
             }
 
             using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
             await using (timeoutTs.Token.Register(OnTimeout, tcs))
 #else
@@ -83,5 +84,14 @@ namespace Iviz.Tools
 
         public static bool CheckIfAlive(this Socket? socket) =>
             socket is { Connected: true } && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+
+        public static int GetProcessId()
+        {
+#if NET5_0_OR_GREATER
+            return Environment.ProcessId;
+#else
+            return Process.GetCurrentProcess().Id;
+#endif
+        }
     }
 }

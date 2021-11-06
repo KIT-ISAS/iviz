@@ -1,10 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -105,7 +101,7 @@ namespace Iviz.Tools
                 return socket.EndReceive(await tcs.Task);
             }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
 #else
             using (token.Register(OnCanceled, tcs))
@@ -135,8 +131,8 @@ namespace Iviz.Tools
             }
         }
 
-        public static Task WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
-            CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token).AsTask();
+        public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
+            CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token);
 
         static async ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
             CancellationToken token)
@@ -150,7 +146,7 @@ namespace Iviz.Tools
                 return socket.EndSend(await tcs.Task);
             }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
 #else
             using (token.Register(OnCanceled, tcs))

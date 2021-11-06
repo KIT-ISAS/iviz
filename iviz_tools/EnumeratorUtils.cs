@@ -67,5 +67,17 @@ namespace Iviz.Tools
         public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
 
         public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);
+
+        public static Rent<T> ToRent<T>(this IReadOnlyCollection<T> ts) where T : unmanaged
+        {
+            var rent = new Rent<T>(ts.Count);
+            int i = 0;
+            foreach (var t in ts)
+            {
+                rent[i++] = t;
+            }
+
+            return rent;
+        }
     }
 }

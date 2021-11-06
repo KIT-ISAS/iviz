@@ -48,7 +48,7 @@ namespace Iviz.Tools
 
             var timeout = new TaskCompletionSource<object?>();
 
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (tokenSource.Token.Register(SetResult, timeout))
 #else
             using (tokenSource.Token.Register(SetResult, timeout))
@@ -83,7 +83,7 @@ namespace Iviz.Tools
             var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
             
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (tokenSource.Token.Register(SetResult, timeout))
 #else
             using (tokenSource.Token.Register(SetResult, timeout))
