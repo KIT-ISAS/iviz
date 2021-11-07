@@ -1,30 +1,29 @@
-﻿using System;
+﻿#nullable  enable
+
+using System;
 using System.Text;
-using Iviz.Core;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public interface IMarkerDialogListener
     {
-        [NotNull] string Topic { get; }
-        void GenerateLog([NotNull] StringBuilder description);
-        [NotNull] string BriefDescription { get; }
+        string Topic { get; }
+        void GenerateLog(StringBuilder description);
+        string BriefDescription { get; }
         void Reset();
     }
 
     public sealed class MarkerDialogData : DialogData
     {
-        [NotNull] readonly MarkerDialogContents panel;
+        readonly MarkerDialogContents panel;
         public override IDialogPanelContents Panel => panel;
+        IMarkerDialogListener? Listener { get; set; }
 
         public MarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<MarkerDialogContents>(DialogPanelType.Marker);
         }
-
-        [CanBeNull] IMarkerDialogListener Listener { get; set; }
 
         public override void SetupPanel()
         {
@@ -62,7 +61,7 @@ namespace Iviz.App
         }
 
 
-        public void Show([NotNull] IMarkerDialogListener listener)
+        public void Show(IMarkerDialogListener listener)
         {
             Listener = listener ?? throw new ArgumentNullException(nameof(listener));
             Show();

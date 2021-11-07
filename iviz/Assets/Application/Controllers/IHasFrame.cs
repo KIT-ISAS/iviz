@@ -1,5 +1,6 @@
-﻿using Iviz.App;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using Iviz.App;
 
 namespace Iviz.Controllers
 {
@@ -13,6 +14,6 @@ namespace Iviz.Controllers
         /// <summary>
         /// The transform frame associated to the controller.
         /// </summary>
-        [CanBeNull] TfFrame Frame { get; }
+        TfFrame? Frame { get; }
     }
 }

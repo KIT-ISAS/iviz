@@ -1,8 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -12,15 +13,15 @@ namespace Iviz.Core
     /// </summary>
     public class GameThread : MonoBehaviour
     {
-        static GameThread Instance;
-        readonly ConcurrentQueue<Action> actionsQueue = new ConcurrentQueue<Action>();
-        readonly ConcurrentQueue<Action> listenerQueue = new ConcurrentQueue<Action>();
+        static GameThread? instance;
+        readonly ConcurrentQueue<Action> actionsQueue = new();
+        readonly ConcurrentQueue<Action> listenerQueue = new();
         float lastSecondRunTime;
         float lastTickRunTime;
-        Thread gameThread; // only used for id
+        Thread? gameThread; // only used for id
         int counter;
 
-        static int networkFrameSkip = Settings.IsHololens ? 2 : 1;
+        static int networkFrameSkip = 1;
 
         public static int NetworkFrameSkip
         {
@@ -33,12 +34,41 @@ namespace Iviz.Core
 
         public static DateTime Now { get; private set; } = DateTime.Now;
 
-        [CanBeNull] static string nowFormatted;
-        [NotNull] public static string NowFormatted => nowFormatted ?? (nowFormatted = Now.ToString("HH:mm:ss.fff"));
+        static string? nowFormatted;
+        public static string NowFormatted => nowFormatted ??= Now.ToString("HH:mm:ss.fff");
+
+        /// <summary>
+        /// Runs every frame on the Unity thread.
+        /// </summary>
+        public static event Action? EveryFrame;
+
+        /// <summary>
+        /// Runs every frame on the Unity thread, but may be slowed down if the CPU load is too high.
+        /// Used by the ROS listeners.
+        /// </summary>
+        public static event Action? ListenersEveryFrame;
+
+        /// <summary>
+        /// Runs every frame on the Unity thread, but after EveryFrame has finished.
+        /// </summary>
+        public static event Action? LateEveryFrame;
+
+        /// <summary>
+        /// Runs once per second.
+        /// </summary>
+        public static event Action? EverySecond;
+
+        public static event Action? EveryFastTick;
+
+        /// <summary>
+        /// Runs once per second, but after EverySecond has finished.
+        /// </summary>
+        public static event Action? LateEverySecond;
+
 
         void Awake()
         {
-            Instance = this;
+            instance = this;
             gameThread = Thread.CurrentThread;
         }
 
@@ -141,7 +171,6 @@ namespace Iviz.Core
             counter = 0;
         }
 
-        [NotNull]
         public override string ToString()
         {
             return "[GameThread]";
@@ -161,7 +190,7 @@ namespace Iviz.Core
 
         void OnDestroy()
         {
-            Instance = null;
+            instance = null;
             EveryFrame = null;
             ListenersEveryFrame = null;
             LateEveryFrame = null;
@@ -175,52 +204,23 @@ namespace Iviz.Core
         }
 
         /// <summary>
-        /// Runs every frame on the Unity thread.
-        /// </summary>
-        public static event Action EveryFrame;
-
-        /// <summary>
-        /// Runs every frame on the Unity thread, but may be slowed down if the CPU load is too high.
-        /// Used by the ROS listeners.
-        /// </summary>
-        public static event Action ListenersEveryFrame;
-
-        /// <summary>
-        /// Runs every frame on the Unity thread, but after EveryFrame has finished.
-        /// </summary>
-        public static event Action LateEveryFrame;
-
-        /// <summary>
-        /// Runs once per second.
-        /// </summary>
-        public static event Action EverySecond;
-
-        public static event Action EveryFastTick;
-
-        /// <summary>
-        /// Runs once per second, but after EverySecond has finished.
-        /// </summary>
-        public static event Action LateEverySecond;
-
-        /// <summary>
         /// Puts this action in a queue to be run on the main thread.
         /// If it is already on the main thread, it will run on the next frame.
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        /// <exception cref="ArgumentNullException">If action is null.</exception>
-        public static void Post([NotNull] Action action)
+        public static void Post(Action action)
         {
             if (action is null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance == null)
+            if (instance == null)
             {
                 return;
             }
 
-            Instance.actionsQueue.Enqueue(action);
+            instance.actionsQueue.Enqueue(action);
         }
 
         /// <summary>
@@ -229,22 +229,28 @@ namespace Iviz.Core
         /// The return type is treated as async void. 
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        /// <exception cref="ArgumentNullException">If action is null.</exception>
-        public static void Post([NotNull] Func<Task> action) => Post(() => { action(); });
+        public static void Post(Func<Task> action) => 
+            Post(() => { action(); });
 
-        public static void PostInListenerQueue([NotNull] Action action)
+        /// <summary>
+        /// Puts this async action in a queue to be run on the main thread.
+        /// The listener queue may have less priority than <see cref="Post(System.Action)"/>
+        /// If it is already on the main thread, it will run on the next frame.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        public static void PostInListenerQueue(Action action)
         {
             if (action is null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (Instance == null)
+            if (instance == null)
             {
                 return;
             }
 
-            Instance.listenerQueue.Enqueue(action);
+            instance.listenerQueue.Enqueue(action);
         }
 
         /// <summary>
@@ -253,7 +259,7 @@ namespace Iviz.Core
         /// </summary>
         /// <param name="action">Action to be run.</param>
         /// <exception cref="ArgumentNullException">If action is null.</exception>        
-        public static void PostImmediate([NotNull] Action action)
+        public static void PostImmediate(Action action)
         {
             if (action is null)
             {
@@ -266,14 +272,14 @@ namespace Iviz.Core
                 return;
             }
 
-            if (Instance == null)
+            if (instance == null)
             {
                 return;
             }
 
-            Instance.actionsQueue.Enqueue(action);
+            instance.actionsQueue.Enqueue(action);
         }
 
-        static bool IsGameThread => Thread.CurrentThread == Instance.gameThread;
+        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
     }
 }

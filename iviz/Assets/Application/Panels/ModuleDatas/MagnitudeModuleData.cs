@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -14,8 +14,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class MagnitudeModuleData : ListenerModuleData
     {
-        [NotNull] readonly MagnitudeListener listener;
-        [NotNull] readonly MagnitudePanelContents panel;
+        readonly MagnitudeListener listener;
+        readonly MagnitudePanelContents panel;
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
@@ -23,7 +23,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public MagnitudeModuleData([NotNull] ModuleDataConstructor constructor) :
+        public MagnitudeModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
         {

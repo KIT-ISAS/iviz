@@ -1,8 +1,8 @@
+#nullable enable
+
 using System;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
-using UnityEngine.PlayerLoop;
 
 namespace Iviz.App
 {
@@ -20,15 +20,14 @@ namespace Iviz.App
 
         static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
 
-        [NotNull] readonly SettingsDialogContents panel;
+        readonly SettingsDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        [NotNull]
         static ISettingsManager SettingsManager => Settings.SettingsManager ??
                                                    throw new InvalidOperationException(
                                                        "Settings Dialog used without a SettingsManager!");
 
-        public SettingsDialogData([CanBeNull] SettingsConfiguration config = null)
+        public SettingsDialogData(SettingsConfiguration? config = null)
         {
             panel = DialogPanelManager.GetPanelByType<SettingsDialogContents>(DialogPanelType.Settings);
             if (config != null)
@@ -56,43 +55,25 @@ namespace Iviz.App
 
             panel.SunDirection.Value = SettingsManager.SunDirection;
 
-            if (SettingsManager.TargetFps == Settings.DefaultFps)
+            panel.TargetFps.Index = SettingsManager.TargetFps switch
             {
-                panel.TargetFps.Index = 0;
-            }
-            else if (SettingsManager.TargetFps <= 15)
-            {
-                panel.TargetFps.Index = 3;
-            }
-            else if (SettingsManager.TargetFps <= 30)
-            {
-                panel.TargetFps.Index = 2;
-            }
-            else if (SettingsManager.TargetFps <= 60)
-            {
-                panel.TargetFps.Index = 1;
-            }
-            else
-            {
-                panel.TargetFps.Index = 0;
-            }
+                Settings.DefaultFps => 0,
+                <= 15 => 3,
+                <= 30 => 2,
+                <= 60 => 1,
+                _ => 0
+            };
 
-            switch (SettingsManager.NetworkFrameSkip)
+            panel.NetworkProcessing.Index = SettingsManager.NetworkFrameSkip switch
             {
-                case 1:
-                    panel.NetworkProcessing.Index = 0;
-                    break;
-                case 2:
-                    panel.NetworkProcessing.Index = 1;
-                    break;
-                default:
-                    panel.NetworkProcessing.Index = 2;
-                    break;
-            }
+                1 => 0,
+                2 => 1,
+                _ => 2
+            };
 
-            panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount} files";
-            panel.SavedFilesLabel.text = $"<b>Saved Files:</b> {ModuleListPanel.NumSavedFiles} files";
-            panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
+            panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
+            panel.SavedFilesLabel.text = $"<b>Saved Files:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
+            panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
 
             panel.ModelService.Options = ModelServerModesNames;
             panel.ModelService.Label = UpdateModelServiceLabel();
@@ -117,39 +98,27 @@ namespace Iviz.App
 
             panel.TargetFps.ValueChanged += (i, _) =>
             {
-                switch (i)
+                SettingsManager.TargetFps = i switch
                 {
-                    case 0:
-                        SettingsManager.TargetFps = Settings.DefaultFps;
-                        break;
-                    case 1:
-                        SettingsManager.TargetFps = 60;
-                        break;
-                    case 2:
-                        SettingsManager.TargetFps = 30;
-                        break;
-                    case 3:
-                        SettingsManager.TargetFps = 15;
-                        break;
-                }
+                    0 => Settings.DefaultFps,
+                    1 => 60,
+                    2 => 30,
+                    3 => 15,
+                    _ => SettingsManager.TargetFps
+                };
 
                 ModuleListPanel.UpdateSettings();
             };
 
             panel.NetworkProcessing.ValueChanged += (i, _) =>
             {
-                switch (i)
+                SettingsManager.NetworkFrameSkip = i switch
                 {
-                    case 0:
-                        SettingsManager.NetworkFrameSkip = 1;
-                        break;
-                    case 1:
-                        SettingsManager.NetworkFrameSkip = 2;
-                        break;
-                    case 2:
-                        SettingsManager.NetworkFrameSkip = 4;
-                        break;
-                }
+                    0 => 1,
+                    1 => 2,
+                    2 => 4,
+                    _ => SettingsManager.NetworkFrameSkip
+                };
 
                 ModuleListPanel.UpdateSettings();
             };
@@ -166,7 +135,7 @@ namespace Iviz.App
             {
                 Logger.Info("Settings: Clearing model cache.");
                 await Resource.External.ClearModelCacheAsync();
-                panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount} files";
+                panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
             };
 
             panel.ClearHostHistoryClicked += async () =>
@@ -174,14 +143,14 @@ namespace Iviz.App
                 Logger.Info("Settings: Clearing cache of master uris.");
                 await ModuleListPanel.Instance.ClearMastersCacheAsync();
                 panel.HostHistoryLabel.text =
-                    $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache} entries";
+                    $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
             };
 
             panel.ClearSavedFilesClicked += () =>
             {
                 Logger.Info("Settings: Clearing saved files.");
                 ModuleListPanel.ClearSavedFiles();
-                panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles} files";
+                panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             };
 
             panel.ModelService.ValueChanged += async (i, s) =>
@@ -197,15 +166,12 @@ namespace Iviz.App
                     case ModelServerModes.OnWithFile:
                         await ModuleListPanel.ModelService.Restart(true);
                         break;
-                    default:
-                        break;
                 }
 
                 panel.ModelService.Label = UpdateModelServiceLabel();
             };
         }
 
-        [NotNull]
         static string UpdateModelServiceLabel()
         {
             if (Settings.IsMobile)

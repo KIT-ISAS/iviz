@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -14,8 +14,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class OccupancyGridModuleData : ListenerModuleData
     {
-        [NotNull] readonly OccupancyGridListener listener;
-        [NotNull] readonly OccupancyGridPanelContents panel;
+        readonly OccupancyGridListener listener;
+        readonly OccupancyGridPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -24,7 +24,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public OccupancyGridModuleData([NotNull] ModuleDataConstructor constructor) :
+        public OccupancyGridModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {

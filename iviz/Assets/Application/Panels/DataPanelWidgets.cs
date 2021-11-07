@@ -1,176 +1,161 @@
-﻿using System.Collections;
+﻿#nullable enable
+
 using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
 {
     public class DataPanelWidgets : MonoBehaviour
     {
-        const float yCloseButton = -17.5f;
+        const float YCloseButton = -17.5f;
 
-        [SerializeField] GameObject content = null;
-        [SerializeField] GameObject statics = null;
+        [SerializeField] GameObject? content = null;
+        [SerializeField] GameObject? statics = null;
+        [SerializeField] GameObject? nonstatics = null;
 
-        [SerializeField] GameObject nonstatics = null;
-        //float y;
+        GameObject Content => content.AssertNotNull(nameof(content));
+        GameObject Statics => statics.AssertNotNull(nameof(statics));
+        GameObject NonStatics => nonstatics.AssertNotNull(nameof(nonstatics));
 
         public TrashButtonWidget AddTrashButton()
         {
-            var o = Resource.Widgets.TrashButton.Instantiate(statics.transform);
-            var oTransform = (RectTransform)o.transform;
-            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
+            var o = Resource.Widgets.TrashButton.Instantiate(Statics.transform);
+            var oTransform = (RectTransform) o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
 
         public ToggleButtonWidget AddHideButton()
         {
-            var o = Resource.Widgets.ToggleButton.Instantiate(statics.transform);
-            var oTransform = (RectTransform)o.transform;
-            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
+            var o = Resource.Widgets.ToggleButton.Instantiate(Statics.transform);
+            var oTransform = (RectTransform) o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
             return o.GetComponent<ToggleButtonWidget>();
         }
 
         public TrashButtonWidget AddResetButton()
         {
-            var o = Resource.Widgets.ResetButton.Instantiate(statics.transform);
-            var oTransform = (RectTransform)o.transform;
-            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, yCloseButton);
+            var o = Resource.Widgets.ResetButton.Instantiate(Statics.transform);
+            var oTransform = (RectTransform) o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
             return o.GetComponent<TrashButtonWidget>();
         }
 
-        [NotNull]
-        public HeadTitleWidget AddHeadTitleWidget([NotNull] string label)
+        public HeadTitleWidget AddHeadTitleWidget(string label)
         {
-            return Resource.Widgets.HeadTitle.Instantiate<HeadTitleWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.HeadTitle.Instantiate<HeadTitleWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public SectionTitleWidget AddSectionTitleWidget([NotNull] string label)
+        public SectionTitleWidget AddSectionTitleWidget(string label)
         {
-            return Resource.Widgets.SectionTitle.Instantiate<SectionTitleWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.SectionTitle.Instantiate<SectionTitleWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public ToggleWidget AddToggle([NotNull] string label)
+        public ToggleWidget AddToggle(string label)
         {
-            return Resource.Widgets.Toggle.Instantiate<ToggleWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Toggle.Instantiate<ToggleWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public SliderWidget AddSlider([NotNull] string label)
+        public SliderWidget AddSlider(string label)
         {
-            return Resource.Widgets.Slider.Instantiate<SliderWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Slider.Instantiate<SliderWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public InputFieldWidget AddInputField([NotNull] string label)
+        public InputFieldWidget AddInputField(string label)
         {
-            return Resource.Widgets.Input.Instantiate<InputFieldWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Input.Instantiate<InputFieldWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public InputFieldWithHintsWidget AddInputFieldWithHints([NotNull] string label)
+        public InputFieldWithHintsWidget AddInputFieldWithHints(string label)
         {
-            return Resource.Widgets.InputWithHints.Instantiate<InputFieldWithHintsWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.InputWithHints.Instantiate<InputFieldWithHintsWidget>(NonStatics.transform)
+                .SetLabel(label);
         }
 
-        [NotNull]
-        public InputFieldWidget AddShortInputField([NotNull] string label)
+        public InputFieldWidget AddShortInputField(string label)
         {
-            return Resource.Widgets.ShortInput.Instantiate<InputFieldWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.ShortInput.Instantiate<InputFieldWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public NumberInputFieldWidget AddNumberInputField([NotNull] string label)
+        public NumberInputFieldWidget AddNumberInputField(string label)
         {
-            return Resource.Widgets.NumberInput.Instantiate<NumberInputFieldWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.NumberInput.Instantiate<NumberInputFieldWidget>(NonStatics.transform)
+                .SetLabel(label);
         }
 
-        [NotNull]
-        public Vector3Widget AddVector3([NotNull] string label)
+        public Vector3Widget AddVector3(string label)
         {
-            return Resource.Widgets.Vector3.Instantiate<Vector3Widget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Vector3.Instantiate<Vector3Widget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public Vector3SliderWidget AddVector3Slider([NotNull] string label)
+        public Vector3SliderWidget AddVector3Slider(string label)
         {
-            return Resource.Widgets.Vector3Slider.Instantiate<Vector3SliderWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Vector3Slider.Instantiate<Vector3SliderWidget>(NonStatics.transform)
+                .SetLabel(label);
         }
 
-        [NotNull]
-        public DropdownWidget AddDropdown([NotNull] string label)
+        public DropdownWidget AddDropdown(string label)
         {
-            return Resource.Widgets.Dropdown.Instantiate<DropdownWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.Dropdown.Instantiate<DropdownWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public ColorPickerWidget AddColorPicker([NotNull] string label)
+        public ColorPickerWidget AddColorPicker(string label)
         {
-            return Resource.Widgets.ColorPicker.Instantiate<ColorPickerWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.ColorPicker.Instantiate<ColorPickerWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public ImagePreviewWidget AddImagePreviewWidget([NotNull] string label)
+        public ImagePreviewWidget AddImagePreviewWidget(string label)
         {
-            return Resource.Widgets.ImagePreview.Instantiate<ImagePreviewWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.ImagePreview.Instantiate<ImagePreviewWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
-        public DataLabelWidget AddDataLabel([NotNull] string label)
+        public DataLabelWidget AddDataLabel(string label)
         {
-            return Resource.Widgets.DataLabel.Instantiate<DataLabelWidget>(nonstatics.transform).SetLabel(label);
+            return Resource.Widgets.DataLabel.Instantiate<DataLabelWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        [NotNull]
         public SenderWidget AddSender()
         {
-            return Resource.Widgets.Sender.Instantiate<SenderWidget>(nonstatics.transform);
+            return Resource.Widgets.Sender.Instantiate<SenderWidget>(NonStatics.transform);
         }
 
-        [NotNull]
         public ListenerWidget AddListener()
         {
-            return Resource.Widgets.Listener.Instantiate<ListenerWidget>(nonstatics.transform);
+            return Resource.Widgets.Listener.Instantiate<ListenerWidget>(NonStatics.transform);
         }
 
-        [NotNull]
         public MarkerWidget AddMarker()
         {
-            return Resource.Widgets.MarkerWidget.Instantiate<MarkerWidget>(nonstatics.transform);
+            return Resource.Widgets.MarkerWidget.Instantiate<MarkerWidget>(NonStatics.transform);
         }
 
-        [NotNull]
         public FrameWidget AddFrame()
         {
-            return Resource.Widgets.Frame.Instantiate<FrameWidget>(nonstatics.transform);
+            return Resource.Widgets.Frame.Instantiate<FrameWidget>(NonStatics.transform);
         }
 
-        [NotNull]
         public ARMarkerWidget AddARMarker()
         {
-            return Resource.Widgets.ARMarkerWidget.Instantiate<ARMarkerWidget>(nonstatics.transform);
+            return Resource.Widgets.ARMarkerWidget.Instantiate<ARMarkerWidget>(NonStatics.transform);
         }
-        
-        [NotNull]
-        public CollapsibleWidget AddCollapsibleWidget([NotNull] string label)
+
+        public CollapsibleWidget AddCollapsibleWidget(string label)
         {
-            return Resource.Widgets.CollapsibleWidget.Instantiate<CollapsibleWidget>(nonstatics.transform)
+            return Resource.Widgets.CollapsibleWidget.Instantiate<CollapsibleWidget>(NonStatics.transform)
                 .SetLabel(label)
                 .SetParent(this);
-        }        
+        }
 
         public void UpdateSize()
         {
             const float yOffset = 5;
 
-            var children = nonstatics.transform.Cast<RectTransform>();
+            var children = NonStatics.transform.Cast<RectTransform>();
             float y = 0;
             foreach (var child in children)
             {
@@ -179,8 +164,7 @@ namespace Iviz.App
                 child.gameObject.SetActive(true);
             }
 
-            var contentTransform = (RectTransform)content.transform;
-            //contentTransform.sizeDelta = new Vector2(contentTransform.sizeDelta.x, y);
+            var contentTransform = (RectTransform) Content.transform;
             contentTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, y);
         }
     }

@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+#if false
 namespace Iviz.Controllers
 {
     public interface IVRButton
@@ -197,3 +198,5 @@ namespace Iviz.Controllers
         }
     }
 }
+
+#endif

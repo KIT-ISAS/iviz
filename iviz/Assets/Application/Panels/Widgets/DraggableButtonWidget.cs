@@ -7,7 +7,8 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler
+    public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler,
+        IPointerUpHandler
     {
         [SerializeField] Button button = null;
         [SerializeField] RectTransform targetTransform = null;
@@ -25,7 +26,7 @@ namespace Iviz.App
         float ScaledMoveThresholdRight => moveThresholdRight * ModuleListPanel.CanvasScale;
         float ScaledMinMotionThreshold => minMotionThreshold * ModuleListPanel.CanvasScale;
         float ScaledMaxMotionYThreshold => 10 * ModuleListPanel.CanvasScale;
-        
+
         bool isDragging;
         bool stuckRight;
         bool stuckLeft;
@@ -37,7 +38,7 @@ namespace Iviz.App
         bool raiseRightOnRelease;
 
         [NotNull] public RectTransform Transform => (RectTransform) GameObject.transform;
-        public Text Text => buttonText;
+        public Text ButtonText => buttonText;
         [NotNull] public GameObject GameObject => transform.parent.gameObject;
 
         public event Action RevealedLeft;
@@ -59,9 +60,6 @@ namespace Iviz.App
 
         protected virtual void Awake()
         {
-            float thresholdScale = ModuleListPanel.CanvasScale;
-
-            
             if (targetTransform == null)
             {
                 targetTransform = (RectTransform) transform;
@@ -105,13 +103,14 @@ namespace Iviz.App
 
         void IDragHandler.OnDrag([NotNull] PointerEventData eventData)
         {
+            //Debug.Log(eventData.delta.x);
             movedX += eventData.delta.x;
             movedY += eventData.delta.y;
-            
+
             if (movedX > 0 && !allowRevealLeft
                 || movedX < 0 && !allowRevealRight
                 || Mathf.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
-                || Mathf.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging) 
+                || Mathf.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
             {
                 parentScrollRect.OnDrag(eventData);
                 return;
@@ -119,7 +118,8 @@ namespace Iviz.App
 
             if (!isDragging)
             {
-                startX = targetTransform.position.x;
+                startX = targetTransform.anchoredPosition.x;
+                //startX = targetTransform.position.x;
                 isDragging = true;
             }
 
@@ -128,7 +128,9 @@ namespace Iviz.App
                 return;
             }
 
-            targetTransform.position = targetTransform.position.WithX(startX + movedX);
+            //targetTransform.position = targetTransform.position.WithX(startX + movedX);
+            targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX + movedX);
+
             if (movedX > ScaledMoveThresholdLeft)
             {
                 if (!stuckRight)
@@ -137,7 +139,9 @@ namespace Iviz.App
                     stuckRight = true;
                 }
 
-                targetTransform.position = targetTransform.position.WithX(startX + ScaledMoveThresholdLeft);
+                //targetTransform.position = targetTransform.position.WithX(startX + ScaledMoveThresholdLeft);
+                targetTransform.anchoredPosition =
+                    targetTransform.anchoredPosition.WithX(startX + ScaledMoveThresholdLeft);
             }
             else
             {
@@ -153,7 +157,9 @@ namespace Iviz.App
                     stuckLeft = true;
                 }
 
-                targetTransform.position = targetTransform.position.WithX(startX - ScaledMoveThresholdRight);
+                //targetTransform.position = targetTransform.position.WithX(startX - ScaledMoveThresholdRight);
+                targetTransform.anchoredPosition =
+                    targetTransform.anchoredPosition.WithX(startX - ScaledMoveThresholdRight);
             }
             else
             {
@@ -176,7 +182,8 @@ namespace Iviz.App
             isDragging = false;
             stuckLeft = false;
             stuckRight = false;
-            targetTransform.position = targetTransform.position.WithX(startX);
+            //targetTransform.position = targetTransform.position.WithX(startX);
+            targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX);
             if (raiseLeftOnRelease)
             {
                 OnRevealedLeft();
@@ -216,13 +223,23 @@ namespace Iviz.App
                 isDragging = false;
                 stuckLeft = false;
                 stuckRight = false;
-                targetTransform.position = targetTransform.position.WithX(startX);
+                //targetTransform.position = targetTransform.position.WithX(startX);
+                targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX);
             }
         }
 
         void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
         {
             parentScrollRect.OnBeginDrag(eventData);
+        }
+
+        void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
+        {
+            if (Settings.IsVR && isDragging)
+            {
+                // end dragging sometimes does not get triggered
+                ((IEndDragHandler) this).OnEndDrag(eventData);
+            }
         }
     }
 }

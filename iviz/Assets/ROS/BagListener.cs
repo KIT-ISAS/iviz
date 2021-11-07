@@ -1,22 +1,20 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Nito.AsyncEx;
-using UnityEngine;
 using Logger = Iviz.Tools.Logger;
 
 namespace Iviz.Ros
 {
     public sealed class BagListener
     {
-        readonly AsyncCollection<(IMessage, IRosConnection, time)> messageQueue =
-            new AsyncCollection<(IMessage, IRosConnection, time)>();
+        readonly AsyncCollection<(IMessage, IRosConnection, time)> messageQueue = new();
 
         readonly Task task;
         readonly string path;
@@ -24,7 +22,7 @@ namespace Iviz.Ros
 
         public long Length { get; private set; }
 
-        public BagListener([NotNull] string path)
+        public BagListener(string path)
         {
             this.path = path;
             if (Settings.IsMobile)
@@ -61,7 +59,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void EnqueueMessage([NotNull] IMessage msg, [NotNull] IRosConnection connection)
+        internal void EnqueueMessage(IMessage msg, IRosConnection connection)
         {
             try
             {
@@ -79,7 +77,7 @@ namespace Iviz.Ros
 
         async Task WriteMessagesAsync()
         {
-            RosbagFileWriter writer = null;
+            RosbagFileWriter? writer = null;
             
             try
             {
@@ -109,10 +107,6 @@ namespace Iviz.Ros
             }
         }
 
-        [NotNull]
-        public override string ToString()
-        {
-            return "[BagListener]";
-        }
+        public override string ToString() => "[BagListener]";
     }
 }

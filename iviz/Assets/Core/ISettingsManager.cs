@@ -1,5 +1,6 @@
+#nullable enable
+
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -12,11 +13,11 @@ namespace Iviz.Core
         int TargetFps { get; set; }
         Color BackgroundColor { get; set; }
         int SunDirection { get; set; }
-        [NotNull] SettingsConfiguration Config { get; set; }
+        SettingsConfiguration Config { get; set; }
 
         bool SupportsView { get; }
         bool SupportsAR { get; }
-        [NotNull] IEnumerable<string> QualityLevelsInView { get; }
-        [NotNull] IEnumerable<string> QualityLevelsInAR { get; }
+        IEnumerable<string> QualityLevelsInView { get; }
+        IEnumerable<string> QualityLevelsInAR { get; }
     }
 }

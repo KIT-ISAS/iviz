@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.Runtime.Serialization;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
@@ -12,8 +13,6 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -78,33 +77,35 @@ namespace Iviz.Controllers
         const string HeadFrameId = "~ar_head";
         protected const string CameraFrameId = "~ar_camera";
 
-        [NotNull] static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
+        static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
-        public static readonly Vector3 DefaultWorldOffset = new Vector3(0.5f, 0, -0.2f);
+        public static readonly Vector3 DefaultWorldOffset = new(0.5f, 0, -0.2f);
         public static bool IsActive => Instance != null;
-        [CanBeNull] public static ARFoundationController Instance { get; protected set; }
+        public static ARFoundationController? Instance { get; protected set; }
         public static bool IsVisible => Instance != null && Instance.Visible;
 
-        readonly ARConfiguration config = new ARConfiguration();
-        readonly MarkerDetector detector = new MarkerDetector();
+        readonly ARConfiguration config = new();
+        readonly MarkerDetector detector = new();
 
-        IModuleData moduleData;
+        IModuleData? moduleData;
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
-        
         uint markerSeq;
+        TfFrame? cameraFrame;
+        Canvas? canvas;
 
-        protected Canvas canvas;
+        protected Canvas Canvas => canvas != null
+            ? canvas
+            : (canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas)));
 
-        public ARMarkerExecutor MarkerExecutor { get; } = new ARMarkerExecutor();
-        public Sender<DetectedARMarkerArray> MarkerSender { get; private set; }
-
-        public Sender<Image> ColorSender { get; private set; }
-        public Sender<Image> DepthSender { get; private set; }
-        public Sender<Image> DepthConfidenceSender { get; private set; }
-        protected Sender<CameraInfo> ColorInfoSender { get; private set; }
-        protected Sender<CameraInfo> DepthInfoSender { get; private set; }
+        public ARMarkerExecutor MarkerExecutor { get; } = new();
+        public Sender<DetectedARMarkerArray>? MarkerSender { get; private set; }
+        public Sender<Image>? ColorSender { get; private set; }
+        public Sender<Image>? DepthSender { get; private set; }
+        public Sender<Image>? DepthConfidenceSender { get; private set; }
+        protected Sender<CameraInfo>? ColorInfoSender { get; private set; }
+        protected Sender<CameraInfo>? DepthInfoSender { get; private set; }
 
         public ARConfiguration Config
         {
@@ -176,10 +177,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableQrDetection = value;
-                if (detector != null)
-                {
-                    detector.EnableQr = value;
-                }
+                detector.EnableQr = value;
             }
         }
 
@@ -201,10 +199,7 @@ namespace Iviz.Controllers
             set
             {
                 config.EnableArucoDetection = value;
-                if (detector != null)
-                {
-                    detector.EnableAruco = value;
-                }
+                detector.EnableAruco = value;
             }
         }
 
@@ -246,9 +241,7 @@ namespace Iviz.Controllers
             set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
         }
 
-        [CanBeNull] TfFrame cameraFrame;
 
-        [NotNull]
         public TfFrame Frame
         {
             get
@@ -267,24 +260,19 @@ namespace Iviz.Controllers
         /// <summary>
         /// AR has been enabled / disabled
         /// </summary>
-        public static event Action<bool> ARStateChanged;
+        public static event Action<bool>? ARStateChanged;
 
         /// <summary>
         /// AR camera view has been enabled / disabled
         /// </summary>
-        public static event Action<bool> ARCameraViewChanged;
+        public static event Action<bool>? ARCameraViewChanged;
 
-        public event Action<RootMover> WorldPoseChanged;
+        public event Action<RootMover>? WorldPoseChanged;
 
 
         protected virtual void Awake()
         {
             gameObject.name = "AR";
-
-            if (canvas == null)
-            {
-                canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
-            }
 
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
@@ -297,7 +285,6 @@ namespace Iviz.Controllers
             }
 
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
-
             ColorSender = new Sender<Image>("~color/image_color");
             DepthSender = new Sender<Image>("~depth/image");
             DepthConfidenceSender = new Sender<Image>("~depth/image_confidence");
@@ -334,14 +321,14 @@ namespace Iviz.Controllers
 
             if (ARJoystick.IsGlobal)
             {
-                SetWorldAngle(WorldAngle + joyVelocityAngle.Value, RootMover.ControlMarker);
+                SetWorldAngle(WorldAngle + joyVelocityAngle!.Value, RootMover.ControlMarker);
             }
             else
             {
                 var arCameraPose = ARCamera.transform.AsPose();
                 Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
 
-                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle.Value, Vector3.up);
+                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle!.Value, Vector3.up);
                 var pose = new Pose(rotation * (-pivot) + pivot, rotation);
 
                 SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
@@ -361,20 +348,20 @@ namespace Iviz.Controllers
             }
             else
             {
-                joyVelocityPos += deltaPosition;
+                joyVelocityPos = deltaPosition + joyVelocityPos.Value;
             }
 
             Vector3 deltaWorldPosition;
             if (ARJoystick.IsGlobal)
             {
-                deltaWorldPosition = WorldPose.rotation * joyVelocityPos.Value.Ros2Unity();
+                deltaWorldPosition = WorldPose.rotation * joyVelocityPos!.Value.Ros2Unity();
             }
             else
             {
                 var arCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
                 float rotY = arCameraPose.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
-                (float joyX, float joyY, float joyZ) = joyVelocityPos.Value;
+                (float joyX, float joyY, float joyZ) = joyVelocityPos!.Value;
                 deltaWorldPosition = cameraRotation * new Vector3(joyX, joyZ, joyY);
             }
 
@@ -450,25 +437,20 @@ namespace Iviz.Controllers
             return Instance.WorldPose.Multiply(unityPose);
         }
 
-        public virtual void Update()
+        protected virtual void Update()
         {
             var absoluteArCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
             var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
             TfListener.Publish(HeadFrameId, relativePose);
         }
 
-        void OnMarkerDetected([NotNull] Screenshot screenshot, [NotNull] IMarkerCorners[] markers)
+        void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
         {
-            DetectedARMarker ToMarker(IMarkerCorners marker) => new DetectedARMarker
+            DetectedARMarker ToMarker(IMarkerCorners marker) => new()
             {
                 Type = (byte) marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
                 Code = marker.Code,
-                /*
-                CameraPose = TfListener.RelativePoseToFixedFrame(screenshot.CameraPose)
-                    .Unity2RosPose()
-                    .ToCameraFrame(),
-                    */
                 CameraPose = TfListener.RelativePoseToFixedFrame(ARPoseToUnity(screenshot.CameraPose))
                     .Unity2RosPose()
                     .ToCameraFrame(),
@@ -484,7 +466,7 @@ namespace Iviz.Controllers
                 MarkerExecutor.Process(marker);
             }
 
-            MarkerSender.Publish(new DetectedARMarkerArray(array));
+            MarkerSender?.Publish(new DetectedARMarkerArray(array));
 
             foreach (var corners in markers)
             {

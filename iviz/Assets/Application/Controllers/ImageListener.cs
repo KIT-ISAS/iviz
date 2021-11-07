@@ -39,7 +39,7 @@ namespace Iviz.Controllers
         readonly ImageResource billboard;
         readonly ImageTexture imageTexture;
 
-        public override TfFrame Frame => node.Parent;
+        [CanBeNull] public override TfFrame Frame => node.Parent;
 
         [CanBeNull] Texture2D Texture => imageTexture.Texture;
         [NotNull] public Material Material => imageTexture.Material;

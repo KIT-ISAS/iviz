@@ -7,11 +7,11 @@ namespace Iviz.App
 {
     public class AnchorToggleButton : MonoBehaviour
     {
-        static readonly Color EnabledColor = Settings.IsHololens
+        static Color EnabledColor => Settings.IsHololens
             ? new Color(0.45f, 0.75f, 0.75f, 1.0f)
             : Color.black;
 
-        static readonly Color DisabledColor = Settings.IsHololens
+        static Color DisabledColor => Settings.IsHololens
             ? new Color(0.75f, 0.75f, 0.75f, 1.0f)
             : new Color(0.75f, 0.75f, 0.75f, 0.25f);
 

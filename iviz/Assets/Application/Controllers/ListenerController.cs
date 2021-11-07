@@ -1,6 +1,6 @@
-﻿using Iviz.Ros;
-using JetBrains.Annotations;
-using UnityEngine;
+﻿#nullable enable
+
+using Iviz.Ros;
 
 namespace Iviz.Controllers
 {
@@ -12,9 +12,9 @@ namespace Iviz.Controllers
         /// <summary>
         /// The ROS subscriber of this controller. Only active after <see cref="StartListening"/> is called.
         /// </summary>
-        [CanBeNull] public IListener Listener { get; protected set; }
+        public IListener? Listener { get; protected set; }
 
-        public abstract TfFrame Frame { get; }
+        public abstract TfFrame? Frame { get; }
 
         public abstract IModuleData ModuleData { get; }
 
@@ -36,10 +36,6 @@ namespace Iviz.Controllers
 
         public abstract bool Visible { get; set; }
 
-        [NotNull]
-        public override string ToString()
-        {
-            return $"[{GetType().Name}:'{Listener?.Topic}']";
-        }
+        public override string ToString() => $"[{GetType().Name}:'{Listener?.Topic}']";
     }
 }

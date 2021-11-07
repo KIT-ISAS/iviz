@@ -1,10 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
 using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -14,8 +13,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class PointCloudModuleData : ListenerModuleData
     {
-        [NotNull] readonly PointCloudListener listener;
-        [NotNull] readonly PointCloudPanelContents panel;
+        readonly PointCloudListener listener;
+        readonly PointCloudPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -24,7 +23,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
 
-        public PointCloudModuleData([NotNull] ModuleDataConstructor constructor) :
+        public PointCloudModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(ModuleType.PointCloud);
@@ -90,16 +89,18 @@ namespace Iviz.App
             panel.NumPoints.Label = BuildDescriptionString();
         }
 
-        [NotNull]
         string BuildDescriptionString()
         {
-            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            var (x, y) = listener.MeasuredIntensityBounds;
+            string minIntensityStr = x.ToString("#,0.##", UnityUtils.Culture);
+            string maxIntensityStr = y.ToString("#,0.##", UnityUtils.Culture);
             return
                 $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
-                (listener.Size == 0 ? "Empty" :
-                    listener.IsIntensityUsed ? $"[{minIntensityStr} .. {maxIntensityStr}]" :
-                    "Color");
+                (listener.Size == 0 
+                    ? "Empty" 
+                    : listener.IsIntensityUsed 
+                        ? $"[{minIntensityStr} .. {maxIntensityStr}]" 
+                        : "Color");
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -116,7 +117,7 @@ MonoBehaviour:
     type: 3}
   TfFrameHighlighter: {fileID: 6461046881955748097, guid: b73799776e2784a949990deb1e69eb7e,
     type: 3}
-  PoseHighlighter: {fileID: 6510277171356190917, guid: 8f617a82cf6d8417ea3b87039e71bca7,
+  ClickedPoseHighlighter: {fileID: 6510277171356190917, guid: 8f617a82cf6d8417ea3b87039e71bca7,
     type: 3}
   LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
     type: 2}

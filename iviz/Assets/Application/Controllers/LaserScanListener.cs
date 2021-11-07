@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public LaserScanListener(IModuleData moduleData)
+        public LaserScanListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData;
 

@@ -1,14 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -49,15 +47,14 @@ namespace Iviz.App
             "<color=#ff0000>Fatal Only</color>"
         };
 
-        [NotNull] readonly ConsoleDialogContents dialog;
+        readonly ConsoleDialogContents dialog;
         public override IDialogPanelContents Panel => dialog;
 
-        readonly ConcurrentQueue<LogMessage> messageQueue = new ConcurrentQueue<LogMessage>();
+        readonly ConcurrentQueue<LogMessage> messageQueue = new();
 
-        readonly ConcurrentSet<string> ids = new ConcurrentSet<string>();
+        readonly ConcurrentSet<string> ids = new();
 
         bool isPaused;
-
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
 
@@ -117,8 +114,7 @@ namespace Iviz.App
             dialog.BottomText.text = UpdateStats();
         }
 
-        [NotNull]
-        string UpdateStats()
+        static string UpdateStats()
         {
             var listener = ConnectionManager.LogListener;
             if (listener == null)
@@ -175,8 +171,7 @@ namespace Iviz.App
         void HandleMessage(in Log log)
         {
             if (log.Level < (byte)minLogLevel
-                || idCode == FromIdCode.None
-                || idCode == FromIdCode.Me
+                || idCode is FromIdCode.None or FromIdCode.Me 
                 || log.Name == ConnectionManager.MyId)
             {
                 return;
@@ -185,71 +180,53 @@ namespace Iviz.App
             HandleMessage(new LogMessage(log));
         }
 
-        [NotNull]
         static string ColorFromLevel(LogLevel level)
         {
-            if (level >= LogLevel.Fatal)
+            return level switch
             {
-                return FatalColor;
-            }
-
-            if (level >= LogLevel.Error)
-            {
-                return ErrorColor;
-            }
-
-            if (level >= LogLevel.Warn)
-            {
-                return WarnColor;
-            }
-
-            if (level >= LogLevel.Info)
-            {
-                return InfoColor;
-            }
-
-            return DefaultColor;
+                >= LogLevel.Fatal => FatalColor,
+                >= LogLevel.Error => ErrorColor,
+                >= LogLevel.Warn => WarnColor,
+                >= LogLevel.Info => InfoColor,
+                _ => DefaultColor
+            };
         }
 
         public static int IndexFromLevel(LogLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case LogLevel.Debug: return 0;
-                case LogLevel.Info: return 1;
-                case LogLevel.Warn: return 2;
-                case LogLevel.Error: return 3;
-                case LogLevel.Fatal: return 4;
-                default: throw new ArgumentException("Invalid level", nameof(level));
-            }
+                LogLevel.Debug => 0,
+                LogLevel.Info => 1,
+                LogLevel.Warn => 2,
+                LogLevel.Error => 3,
+                LogLevel.Fatal => 4,
+                _ => throw new ArgumentException("Invalid level", nameof(level))
+            };
         }
 
         public static LogLevel LevelFromIndex(int index)
         {
-            switch (index)
+            return index switch
             {
-                case 0: return LogLevel.Debug;
-                case 1: return LogLevel.Info;
-                case 2: return LogLevel.Warn;
-                case 3: return LogLevel.Error;
-                case 4: return LogLevel.Fatal;
-                default: throw new ArgumentException("Invalid index", nameof(index));
-            }
+                0 => LogLevel.Debug,
+                1 => LogLevel.Info,
+                2 => LogLevel.Warn,
+                3 => LogLevel.Error,
+                4 => LogLevel.Fatal,
+                _ => throw new ArgumentException("Invalid index", nameof(index))
+            };
         }
 
         static FromIdCode GetIdCode(string id)
         {
-            switch (id)
+            return id switch
             {
-                case AllString:
-                    return FromIdCode.All;
-                case NoneString:
-                    return FromIdCode.None;
-                case MeString:
-                    return FromIdCode.Me;
-                default:
-                    return FromIdCode.OnlyId;
-            }
+                AllString => FromIdCode.All,
+                NoneString => FromIdCode.None,
+                MeString => FromIdCode.Me,
+                _ => FromIdCode.OnlyId
+            };
         }
 
         void ProcessLog(bool forceReprocess = false)

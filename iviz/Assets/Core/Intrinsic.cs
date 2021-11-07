@@ -1,10 +1,9 @@
+#nullable enable
+
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.MsgsWrapper;
-using Iviz.Roslib.Utils;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -19,19 +18,17 @@ namespace Iviz.Core
 
         public Intrinsic(float fx, float cx, float fy, float cy) => (Fx, Cx, Fy, Cy) = (fx, cx, fy, cy);
 
-        public Intrinsic([NotNull] double[] array) :
+        public Intrinsic(double[] array) :
             this((float) array[0], (float) array[2], (float) array[4], (float) array[5])
         {
         }
 
-        [NotNull]
         public override string ToString() => BuiltIns.ToJsonString(this);
 
         public Intrinsic Scale(float f) => new Intrinsic(Fx * f, Cx * f, Fy * f, Cy * f);
 
         public Vector3f Unproject(in Vector2f v, float z) => new Vector3f((v.X - Cx) / Fx * z, (v.Y - Cy) / Fy * z, z);
 
-        [NotNull]
         public double[] ToArray() => new double[] {Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1};
 
         public float GetHorizontalFovInRad(float imageWidth) =>

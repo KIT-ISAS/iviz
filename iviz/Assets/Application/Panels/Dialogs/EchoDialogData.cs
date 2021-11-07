@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -9,10 +12,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
-using Iviz.Roslib;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TMPro;
 
@@ -26,21 +26,19 @@ namespace Iviz.App
         static readonly JsonSerializer JsonSerializer = JsonSerializer.CreateDefault(
             new JsonSerializerSettings
             {
-                Converters = { new ClampJsonConverter(MaxMessageLength) }
+                Converters = {new ClampJsonConverter(MaxMessageLength)}
             });
 
-        [NotNull] readonly EchoDialogContents dialog;
-        public override IDialogPanelContents Panel => dialog;
+        readonly EchoDialogContents dialog;
+        readonly Dictionary<string, Type> topicTypes = new();
+        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue = new();
+        readonly List<TopicEntry> entries = new();
 
-        readonly Dictionary<string, Type> topicTypes = new Dictionary<string, Type>();
-
-        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue =
-            new ConcurrentQueue<(string, IMessage)>();
-
-        readonly List<TopicEntry> entries = new List<TopicEntry>();
-        IListener listener;
+        IListener? listener;
         bool queueIsDirty;
         bool isPaused;
+
+        public override IDialogPanelContents Panel => dialog;
 
         public EchoDialogData()
         {
@@ -48,11 +46,11 @@ namespace Iviz.App
             dialog.Text.vertexBufferAutoSizeReduction = false;
         }
 
-        [ContractAnnotation("=> false, type:null; => true, type:notnull")]
-        bool TryGetType([NotNull] string rosMsgType, out Type type)
+        bool TryGetType(string rosMsgType, [NotNullWhen(true)] out Type? type)
         {
-            if (topicTypes.TryGetValue(rosMsgType, out type))
+            if (topicTypes.TryGetValue(rosMsgType, out var knownType))
             {
+                type = knownType;
                 return true;
             }
 
@@ -66,7 +64,7 @@ namespace Iviz.App
             return true;
         }
 
-        void CreateListener([NotNull] string topicName, [CanBeNull] string rosMsgType, [NotNull] Type csType)
+        void CreateListener(string topicName, string? rosMsgType, Type csType)
         {
             if (listener != null)
             {
@@ -78,17 +76,9 @@ namespace Iviz.App
                 listener.Stop();
             }
 
-            if (csType == typeof(DynamicMessage))
-            {
-                listener = new Listener<DynamicMessage>(topicName, Handler);
-            }
-            else
-            {
-                Func<IMessage, bool> handler = Handler;
-                Type listenerType = typeof(Listener<>).MakeGenericType(csType);
-                listener = (IListener)Activator.CreateInstance(listenerType,
-                    topicName, handler, RosTransportHint.PreferTcp);
-            }
+            listener = csType == typeof(DynamicMessage)
+                ? new Listener<DynamicMessage>(topicName, Handler)
+                : Listener.Create(topicName, Handler, csType);
         }
 
         void CreateTopicList()
@@ -100,7 +90,7 @@ namespace Iviz.App
 
             foreach ((string topic, string msgType) in newTopics)
             {
-                Type csType = TryGetType(msgType, out Type newCsType) ? newCsType : typeof(DynamicMessage);
+                Type csType = TryGetType(msgType, out Type? newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
 
@@ -203,7 +193,7 @@ namespace Iviz.App
 
             var description = BuilderPool.Rent();
             var stringWriter = new StringWriter(description, CultureInfo.InvariantCulture);
-            var jsonTextWriter = new BoldJsonWriter(stringWriter) { Formatting = Formatting.Indented };
+            var jsonTextWriter = new BoldJsonWriter(stringWriter) {Formatting = Formatting.Indented};
             try
             {
                 foreach (var (timeFormatted, msg) in messageQueue)
@@ -235,7 +225,7 @@ namespace Iviz.App
 
         sealed class BoldJsonWriter : JsonTextWriter
         {
-            public BoldJsonWriter([NotNull] TextWriter textWriter) : base(textWriter)
+            public BoldJsonWriter(TextWriter textWriter) : base(textWriter)
             {
             }
 
@@ -252,11 +242,11 @@ namespace Iviz.App
 
         sealed class TopicEntry : IComparable<TopicEntry>
         {
-            public static readonly TopicEntry Empty = new TopicEntry();
-            [NotNull] public string Topic { get; }
-            [CanBeNull] public string RosMsgType { get; }
-            [NotNull] public Type CsType { get; }
-            [NotNull] public string Description { get; }
+            public static readonly TopicEntry Empty = new();
+            public string Topic { get; }
+            public string? RosMsgType { get; }
+            public Type CsType { get; }
+            public string Description { get; }
 
             TopicEntry()
             {
@@ -266,7 +256,7 @@ namespace Iviz.App
                 Description = "<color=grey>(None)</color>";
             }
 
-            public TopicEntry([NotNull] string topic, [NotNull] string rosMsgType, [NotNull] Type csType)
+            public TopicEntry(string topic, string rosMsgType, Type csType)
             {
                 Topic = topic;
                 RosMsgType = rosMsgType;
@@ -285,10 +275,9 @@ namespace Iviz.App
             }
         }
 
-        static Action<TMP_Text, StringBuilder, int, int> setTextFn;
+        static Action<TMP_Text, StringBuilder, int, int>? setTextFn;
 
         /// <summary> Retrieves private TMP_Text.SetText(StringBuilder, int, int) as delegate </summary>
-        [NotNull]
         static Action<TMP_Text, StringBuilder, int, int> SetText
         {
             get
@@ -300,13 +289,13 @@ namespace Iviz.App
 
                 var methodInfo = typeof(TMP_Text).GetMethod(nameof(TMP_Text.SetText),
                     BindingFlags.Instance | BindingFlags.NonPublic,
-                    null, new[] { typeof(StringBuilder), typeof(int), typeof(int) }, null);
+                    null, new[] {typeof(StringBuilder), typeof(int), typeof(int)}, null);
                 if (methodInfo == null)
                 {
                     throw new NullReferenceException("Missing SetText in TMP_Text!"); // can't really happen
                 }
 
-                setTextFn = (Action<TMP_Text, StringBuilder, int, int>)methodInfo.CreateDelegate(
+                setTextFn = (Action<TMP_Text, StringBuilder, int, int>) methodInfo.CreateDelegate(
                     typeof(Action<TMP_Text, StringBuilder, int, int>));
                 return setTextFn;
             }

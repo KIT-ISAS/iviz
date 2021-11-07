@@ -12,29 +12,29 @@ namespace Iviz.Displays
     /// Internally a wrapper around <see cref="float4x2"/>. 
     /// </summary>    
     [StructLayout(LayoutKind.Sequential)]
-    public readonly struct LineWithColor
+    public struct LineWithColor
     {
-        static readonly float WhiteBits = PointWithColor.FloatFromColorBits(Color.white);
+        static readonly float WhiteBits = PointWithColor.RecastToFloat(Color.white);
 
-        public readonly float4x2 f;
+        public float4x2 f;
 
-        public float3 A => f.c0.xyz;
+        public readonly float3 A => f.c0.xyz;
 
-        Color32 ColorA => PointWithColor.ColorFromFloatBits(f.c0.w);
+        readonly Color32 ColorA => PointWithColor.RecastToColor32(f.c0.w);
 
-        public float3 B => f.c1.xyz;
+        public readonly float3 B => f.c1.xyz;
 
-        Color32 ColorB => PointWithColor.ColorFromFloatBits(f.c1.w);
+        readonly Color32 ColorB => PointWithColor.RecastToColor32(f.c1.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB) :
-            this(start, PointWithColor.FloatFromColorBits(colorA), end, PointWithColor.FloatFromColorBits(colorB))
+            this(start, PointWithColor.RecastToFloat(colorA), end, PointWithColor.RecastToFloat(colorB))
         {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, in Vector3 end, Color32 color) :
-            this(start, PointWithColor.FloatFromColorBits(color), end, PointWithColor.FloatFromColorBits(color))
+            this(start, PointWithColor.RecastToFloat(color), end, PointWithColor.RecastToFloat(color))
         {
         }
 
@@ -65,14 +65,8 @@ namespace Iviz.Displays
             f.c1 = end.f;
         }
 
-        /// <summary>
-        /// Do the positions have a Nan? (ignores intensity) 
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool HasNaN() => f.c0.HasNaN() || f.c1.HasNaN();
-
         [NotNull]
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"[x={f.c0.x} y={f.c0.y} z={f.c0.z} i={f.c0.w} c={ColorA} ---- " +
                    $"x={f.c1.x} y={f.c1.y} z={f.c1.z} i={f.c1.w} c={ColorB}]";

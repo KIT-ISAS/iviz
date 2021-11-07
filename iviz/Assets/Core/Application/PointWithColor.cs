@@ -11,13 +11,13 @@ namespace Iviz.Displays
     /// The same field is read either as a Color32 or a float depending on whether UseColormap is enabled in the display.
     /// Internally a wrapper around <see cref="float4"/>. 
     /// </summary>
-    public readonly struct PointWithColor
+    public struct PointWithColor
     {
         /// <summary>
         /// Color representation from the bits of a float.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal static Color32 ColorFromFloatBits(float f)
+        internal static Color32 RecastToColor32(float f)
         {
             unsafe
             {
@@ -29,7 +29,7 @@ namespace Iviz.Displays
         /// Float representation from the bits of a Color32.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public static float FloatFromColorBits(Color32 f)
+        public static float RecastToFloat(Color32 f)
         {
             unsafe
             {
@@ -37,15 +37,15 @@ namespace Iviz.Displays
             }
         }
 
-        public readonly float4 f;
+        public float4 f;
         
-        public float3 Position => f.xyz;
-        Color32 Color => ColorFromFloatBits(f.w);
-        float Intensity => f.w;
+        public readonly float3 Position => f.xyz;
+        readonly Color32 Color => RecastToColor32(f.w);
+        readonly float Intensity => f.w;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, Color32 color) :
-            this(position.x, position.y, position.z, FloatFromColorBits(color))
+            this(position.x, position.y, position.z, RecastToFloat(color))
         {
         }
 
@@ -68,11 +68,11 @@ namespace Iviz.Displays
         /// Do the positions have a Nan? (ignores intensity) 
         /// </summary>        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]        
-        public bool HasNaN() => f.HasNaN();
+        public readonly bool HasNaN() => f.HasNaN();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [NotNull]
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"[x={f.x} y={f.y} z={f.z} i={Intensity} c={Color}]";
         }

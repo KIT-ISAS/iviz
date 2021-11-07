@@ -1,9 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -27,19 +28,15 @@ namespace Iviz.App
 
     public class DialogPanelManager : MonoBehaviour
     {
-        readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType =
-            new Dictionary<DialogPanelType, IDialogPanelContents>();
+        readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType = new();
 
-        [CanBeNull] DialogData selectedDialogData;
-        Canvas parentCanvas;
+        DialogData? selectedDialogData;
         bool started;
 
         public bool Active
         {
-            get => parentCanvas.enabled;
             set
             {
-                //parentCanvas.enabled = value;
                 if (selectedDialogData != null)
                 {
                     selectedDialogData.Panel.Active = value;
@@ -49,8 +46,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            parentCanvas = GetComponentInParent<Canvas>();
-
             gameObject.SetActive(false);
             (DialogPanelType type, IDialogPanelContents panel)[] panels =
             {
@@ -84,21 +79,14 @@ namespace Iviz.App
             GameThread.EveryFastTick += UpdateSelectedFast;
         }
 
-        [NotNull]
-        T CreatePanel<T>([NotNull] Info<GameObject> source) where T : IDialogPanelContents
+        T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanelContents
         {
             if (source == null)
             {
                 throw new NullReferenceException("Requested a panel from source null!");
             }
 
-            var panel = source.Instantiate<T>(transform);
-            if (panel == null)
-            {
-                throw new NullReferenceException($"Panel '{source}' does not have a module of type {typeof(T)}");
-            }
-
-            return panel;
+            return source.Instantiate<T>(transform);
         }
 
 
@@ -132,7 +120,6 @@ namespace Iviz.App
             }
         }
 
-        [NotNull]
         public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanelContents
         {
             if (!panelByType.TryGetValue(resource, out IDialogPanelContents cm))
@@ -145,7 +132,7 @@ namespace Iviz.App
                 : throw new InvalidOperationException("Panel type does not match!");
         }
 
-        void SelectPanelFor([CanBeNull] DialogData newSelected)
+        void SelectPanelFor(DialogData? newSelected)
         {
             if (!started)
             {
@@ -158,13 +145,13 @@ namespace Iviz.App
             }
 
             HideSelectedPanel();
-            if (newSelected != null && !newSelected.Detached)
+            if (newSelected is {Detached: false})
             {
                 ShowPanel(newSelected);
             }
         }
 
-        void ShowPanel([NotNull] DialogData newSelected)
+        void ShowPanel(DialogData newSelected)
         {
             selectedDialogData = newSelected;
             try
@@ -177,28 +164,28 @@ namespace Iviz.App
             }
 
             selectedDialogData.Panel.Active = true;
-            //Active = true;
         }
 
         void HideSelectedPanel()
         {
-            if (selectedDialogData != null)
+            if (selectedDialogData == null)
             {
-                HidePanel(selectedDialogData);
-                selectedDialogData = null;
+                return;
             }
+            
+            HidePanel(selectedDialogData);
+            selectedDialogData = null;
         }
 
-        static void HidePanel([NotNull] DialogData dialogData)
+        static void HidePanel(DialogData dialogData)
         {
             dialogData.Panel.Active = false;
             dialogData.CleanupPanel();
             dialogData.Panel.ClearSubscribers();
-            //Active = false;
         }
 
 
-        public void HidePanelFor([CanBeNull] DialogData deselected)
+        public void HidePanelFor(DialogData? deselected)
         {
             if (deselected == null)
             {
@@ -217,7 +204,7 @@ namespace Iviz.App
             }
         }
 
-        public void TogglePanel([CanBeNull] DialogData selected)
+        public void TogglePanel(DialogData? selected)
         {
             if (selectedDialogData == selected)
             {
@@ -240,10 +227,6 @@ namespace Iviz.App
             selectedDialogData = null;
         } 
 
-        [NotNull]
-        public override string ToString()
-        {
-            return "[DialogPanelManager]";
-        }
+        public override string ToString() => "[DialogPanelManager]";
     }
 }

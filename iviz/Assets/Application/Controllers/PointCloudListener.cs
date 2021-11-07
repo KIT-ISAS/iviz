@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -9,7 +12,6 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -18,14 +20,14 @@ namespace Iviz.Controllers
 {
     public sealed class PointCloudListener : ListenerController
     {
-        static readonly PointField EmptyPointField = new PointField();
+        static readonly PointField EmptyPointField = new();
 
-        readonly PointCloudConfiguration config = new PointCloudConfiguration();
-        readonly List<string> fieldNames = new List<string> {"x", "y", "z"};
+        readonly PointCloudConfiguration config = new();
+        readonly List<string> fieldNames = new() {"x", "y", "z"};
         readonly FrameNode node;
         readonly PointListResource pointCloud;
         readonly MeshListResource meshCloud;
-        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
+        readonly NativeList<float4> pointBuffer = new();
 
         bool isProcessing;
 
@@ -40,7 +42,7 @@ namespace Iviz.Controllers
         }
 
 
-        public PointCloudListener([NotNull] IModuleData moduleData)
+        public PointCloudListener(IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             FieldNames = fieldNames.AsReadOnly();
@@ -57,7 +59,7 @@ namespace Iviz.Controllers
 
         public int Size { get; private set; }
 
-        public override TfFrame Frame => node.Parent;
+        public override TfFrame? Frame => node.Parent;
 
         public PointCloudConfiguration Config
         {
@@ -260,8 +262,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        [ContractAnnotation("=> false, result:null; => true, result:notnull")]
-        static bool TryGetField([NotNull] PointField[] fields, string name, out PointField result)
+        static bool TryGetField(PointField[] fields, string name, [NotNullWhen(true)] out PointField? result)
         {
             foreach (PointField field in fields)
             {
@@ -285,7 +286,7 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            foreach ((PointField field, string fieldName) in fields.Zip(fieldNames))
+            foreach (var (field, fieldName) in fields.Zip(fieldNames))
             {
                 if (field.Name != fieldName)
                 {
@@ -325,9 +326,9 @@ namespace Iviz.Controllers
                     }
                 }
 
-                if (!TryGetField(msg.Fields, "x", out PointField xField) || xField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "y", out PointField yField) || yField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "z", out PointField zField) || zField.Datatype != PointField.FLOAT32)
+                if (!TryGetField(msg.Fields, "x", out PointField? xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "y", out PointField? yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "z", out PointField? zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     IsProcessing = false;
@@ -338,7 +339,7 @@ namespace Iviz.Controllers
                 int yOffset = (int) yField.Offset;
                 int zOffset = (int) zField.Offset;
 
-                var iField = TryGetField(msg.Fields, config.IntensityChannel, out PointField outField)
+                var iField = TryGetField(msg.Fields, config.IntensityChannel, out PointField? outField)
                     ? outField
                     : EmptyPointField;
 
@@ -434,36 +435,18 @@ namespace Iviz.Controllers
             }
             else
             {
-                switch (iType)
+                intensityFn = iType switch
                 {
-                    case PointField.FLOAT32:
-                        intensityFn = BitConverter.ToSingle;
-                        break;
-                    case PointField.FLOAT64:
-                        intensityFn = (m, o) => (float) BitConverter.ToDouble(m, o);
-                        break;
-                    case PointField.INT8:
-                        intensityFn = (m, o) => (sbyte) m[o];
-                        break;
-                    case PointField.UINT8:
-                        intensityFn = (m, o) => m[o];
-                        break;
-                    case PointField.INT16:
-                        intensityFn = (m, o) => BitConverter.ToInt16(m, o);
-                        break;
-                    case PointField.UINT16:
-                        intensityFn = (m, o) => BitConverter.ToUInt16(m, o);
-                        break;
-                    case PointField.INT32:
-                        intensityFn = (m, o) => BitConverter.ToInt32(m, o);
-                        break;
-                    case PointField.UINT32:
-                        intensityFn = (m, o) => BitConverter.ToUInt32(m, o);
-                        break;
-                    default:
-                        intensityFn = (m, o) => 0;
-                        break;
-                }
+                    PointField.FLOAT32 => BitConverter.ToSingle,
+                    PointField.FLOAT64 => (m, o) => (float) BitConverter.ToDouble(m, o),
+                    PointField.INT8 => (m, o) => (sbyte) m[o],
+                    PointField.UINT8 => (m, o) => m[o],
+                    PointField.INT16 => (m, o) => BitConverter.ToInt16(m, o),
+                    PointField.UINT16 => (m, o) => BitConverter.ToUInt16(m, o),
+                    PointField.INT32 => (m, o) => BitConverter.ToInt32(m, o),
+                    PointField.UINT32 => (m, o) => BitConverter.ToUInt32(m, o),
+                    _ => (_, _) => 0
+                };
             }
 
             for (int v = (int) msg.Height; v > 0; v--, heightOffset += rowStep)
@@ -471,7 +454,7 @@ namespace Iviz.Controllers
                 int rowOffset = heightOffset;
                 for (int u = (int) msg.Width; u > 0; u--, rowOffset += pointStep)
                 {
-                    Vector3 xyz = new Vector3(
+                    Vector3 xyz = new(
                         BitConverter.ToSingle(dataSrc, rowOffset + xOffset),
                         BitConverter.ToSingle(dataSrc, rowOffset + yOffset),
                         BitConverter.ToSingle(dataSrc, rowOffset + zOffset)

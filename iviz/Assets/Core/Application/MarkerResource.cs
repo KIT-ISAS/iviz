@@ -1,22 +1,20 @@
-﻿using System;
-using Iviz.Core;
-using Iviz.Resources;
-using Iviz.Sdf;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        [CanBeNull] Transform mTransform;
-        [SerializeField, CanBeNull] BoxCollider boxCollider;
+        Transform? mTransform;
+        [SerializeField] BoxCollider? boxCollider;
         bool colliderEnabled = true;
-        
+
         protected bool HasBoxCollider => boxCollider != null || TryGetBoxCollider(out boxCollider);
 
-        [ContractAnnotation("=> false, bc:null; => true, bc:notnull")]
-        bool TryGetBoxCollider(out BoxCollider bc) => (bc = GetComponent<BoxCollider>()) != null;
+        bool TryGetBoxCollider([NotNullWhen(true)] out BoxCollider? bc) => (bc = GetComponent<BoxCollider>()) != null;
 
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
@@ -50,7 +48,7 @@ namespace Iviz.Displays
         {
         }
 
-        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : (Bounds?) null;
+        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : null;
 
         public bool ColliderEnabled
         {
@@ -80,25 +78,6 @@ namespace Iviz.Displays
         public virtual void Suspend()
         {
             Visible = true;
-        }
-
-        public bool TryRaycast(in Vector2 cameraPoint, out Vector3 hit)
-        {
-            if (!HasBoxCollider)
-            {
-                hit = default;
-                return false;
-            }
-
-            var ray = Settings.MainCamera.ScreenPointToRay(cameraPoint);
-            if (BoxCollider.Raycast(ray, out var hitInfo, 1000f))
-            {
-                hit = hitInfo.point;
-                return true;
-            }
-
-            hit = default;
-            return false;
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿#nullable enable
+
+using System.Runtime.CompilerServices;
 using System.Text;
-using Iviz.Msgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
@@ -13,7 +13,6 @@ namespace Iviz.Core
 
         static readonly uint[] Table = InitializeTable();
 
-        [NotNull]
         static uint[] InitializeTable()
         {
             uint[] createTable = new uint[256];
@@ -55,19 +54,20 @@ namespace Iviz.Core
             return CalculateHash(startHash, (byte*) ptr, sizeof(T));
         }
 
-        public static uint Compute([NotNull] StringBuilder value, uint startHash = DefaultSeed)
+        public static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
         {
             uint hash = startHash;
             for (int i = 0; i < value.Length; i++)
             {
-                uint val = value[i];
+                // indexing is fast as long as there is one chunk
+                uint val = value[i]; 
                 hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
             }
 
             return hash;
         }
 
-        public static unsafe uint Compute<T>([NotNull] T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        public static unsafe uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
             {
@@ -75,7 +75,7 @@ namespace Iviz.Core
             }
         }
 
-        public static unsafe uint Compute([NotNull] string array, uint startHash = DefaultSeed)
+        public static unsafe uint Compute(string array, uint startHash = DefaultSeed)
         {
             fixed (char* ptr = array)
             {

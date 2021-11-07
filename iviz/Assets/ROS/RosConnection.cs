@@ -1,18 +1,15 @@
+#nullable enable
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
-using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
@@ -22,13 +19,12 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
-        [ItemNotNull]
         protected static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
 
-        readonly SemaphoreSlim signal = new SemaphoreSlim(0);
+        readonly SemaphoreSlim signal = new(0);
         readonly Task task;
-        readonly ConcurrentQueue<Func<Task>> toDos = new ConcurrentQueue<Func<Task>>();
-        readonly CancellationTokenSource connectionTs = new CancellationTokenSource();
+        readonly ConcurrentQueue<Func<Task>> toDos = new();
+        readonly CancellationTokenSource connectionTs = new();
 
         DateTime lastConnectionTry = DateTime.MinValue;
 
@@ -45,8 +41,8 @@ namespace Iviz.Ros
             CancellationToken token)
             where T : IService;
 
-        public event Action<ConnectionState> ConnectionStateChanged;
-        public event Action<bool> ConnectionWarningStateChanged;
+        public event Action<ConnectionState>? ConnectionStateChanged;
+        public event Action<bool>? ConnectionWarningStateChanged;
 
         internal virtual void Stop()
         {
@@ -144,7 +140,6 @@ namespace Iviz.Ros
             lastConnectionTry = DateTime.MinValue;
         }
 
-        [NotNull]
         public override string ToString() => "[RosConnection]";
     }
 

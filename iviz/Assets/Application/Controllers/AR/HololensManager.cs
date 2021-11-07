@@ -18,7 +18,7 @@ using TMPro;
 using Unity.Collections;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-#if UNITY_WSA
+#if false
 using Microsoft.MixedReality.Toolkit;
 using UnityEngine.XR.ARSubsystems;
 using UnityEngine.XR.WSA;
@@ -27,7 +27,7 @@ using UnityEngine.XR.WSA;
 
 namespace Iviz.Hololens
 {
-#if UNITY_WSA
+#if false
     sealed class HololensManager : MonoBehaviour, ISettingsManager
     {
         static readonly Pose InfinitePose = new Pose(new Vector3(5000, 5000, 5000), Quaternion.identity);

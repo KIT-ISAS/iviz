@@ -1,6 +1,6 @@
+#nullable enable
+
 using System;
-using System.Runtime.Serialization;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -13,19 +13,18 @@ namespace Iviz.Resources
     /// <typeparam name="T">Unity object type, such as a GameObject or a Texture.</typeparam>
     public sealed class Info<T> : IEquatable<Info<T>> where T : UnityEngine.Object
     {
-        [CanBeNull] readonly string resourceName;
-        [CanBeNull] T baseObject;
+        readonly string? resourceName;
+        T? baseObject;
         int id;
 
         /// <summary>
         /// Returns or loads a resource of this type.  
         /// </summary>
-        [NotNull]
         public T Object
         {
             get
             {
-                if (!(baseObject is null))
+                if (baseObject is not null)
                 {
                     return baseObject;
                 }
@@ -49,7 +48,7 @@ namespace Iviz.Resources
         /// Constructs a unique identifier from a resource path. The instance will be loaded the first time it is needed.
         /// </summary>
         /// <param name="resourceName">Path to the resource.</param>
-        public Info([NotNull] string resourceName) : this(resourceName, null)
+        public Info(string resourceName) : this(resourceName, null)
         {
             if (resourceName == null)
             {
@@ -61,7 +60,7 @@ namespace Iviz.Resources
         /// Constructs a unique identifier from an existing instance
         /// </summary>
         /// <param name="baseObject">Loaded instance of this type, if already available.</param>
-        public Info([NotNull] T baseObject) : this(null, baseObject)
+        public Info(T baseObject) : this(null, baseObject)
         {
             if (baseObject == null)
             {
@@ -69,14 +68,13 @@ namespace Iviz.Resources
             }
         }
 
-        Info([CanBeNull] string resourceName, [CanBeNull] T baseObject) =>
+        Info(string? resourceName, T? baseObject) =>
             (this.resourceName, this.baseObject) = (resourceName, baseObject);
 
 
         /// <summary>
         /// Name of this resource.
         /// </summary>
-        [NotNull]
         public string Name => Object.name;
 
         public override string ToString() => Object.ToString();
@@ -84,19 +82,18 @@ namespace Iviz.Resources
         /// <summary>
         /// Instantiates a clone of the resource.
         /// </summary>
-        /// <param name="parent">If not null, sets the clone parent to this.</param>
+        /// <param name="parent">Sets the clone's parent to this transform.</param>
         /// <returns>An instantiated clone.</returns>
-        [NotNull]
-        public T Instantiate([CanBeNull] Transform parent = null) => UnityEngine.Object.Instantiate(Object, parent);
+        public T Instantiate(Transform? parent = null) => UnityEngine.Object.Instantiate(Object, parent);
 
-        public bool Equals(Info<T> other) => other != null && Id == other.Id;
+        public bool Equals(Info<T>? other) => other != null && Id == other.Id;
 
         public override bool Equals(object obj) => obj is Info<T> info && Id == info.Id;
 
-        public static bool operator ==([CanBeNull] Info<T> a, [CanBeNull] Info<T> b) =>
-            ReferenceEquals(a, b) || (!(a is null) && a.Equals(b));
+        public static bool operator ==(Info<T>? a, Info<T>? b) =>
+            ReferenceEquals(a, b) || (a is not null && a.Equals(b));
 
-        public static bool operator !=([CanBeNull] Info<T> a, [CanBeNull] Info<T> b) => !(a == b);
+        public static bool operator !=(Info<T>? a, Info<T>? b) => !(a == b);
 
         public override int GetHashCode() => Id.GetHashCode();
     }

@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
-using Iviz.Msgs.GeometryMsgs;
-using Iviz.Resources;
-using Iviz.Ros;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -18,15 +15,15 @@ namespace Iviz.App
     {
         const float InteriorColorFactor = 0.25f;
 
-        [NotNull] public GridController GridController { get; }
-        [NotNull] readonly GridPanelContents panel;
+        readonly GridPanelContents panel;
 
+        public GridController GridController { get; }
         public override ModuleType ModuleType => ModuleType.Grid;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => GridController.Config;
         public override IController Controller => GridController;
 
-        public GridModuleData([NotNull] ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public GridModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
 
@@ -58,14 +55,6 @@ namespace Iviz.App
             panel.Offset.Value = GridController.Offset;
             panel.FollowCamera.Value = GridController.FollowCamera;
             panel.HideInARMode.Value = GridController.HideInARMode;
-            /*
-            panel.PublishLongTapPosition.Value = GridController.PublishLongTapPosition;
-            panel.Sender.Set(GridController.SenderPoint);
-            panel.LastTapPosition.Label = GridController.LastTapPositionString;
-            panel.TapTopic.Value = GridController.TapTopic;
-            panel.TapTopic.Interactable = GridController.PublishLongTapPosition;
-            panel.TapTopic.Hints = GetTopicHints();
-            */
 
             panel.ColorPicker.ValueChanged += f => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
@@ -78,19 +67,6 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
             panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
-            /*
-            panel.PublishLongTapPosition.ValueChanged += f =>
-            {
-                GridController.PublishLongTapPosition = f;
-                panel.Sender.Set(GridController.SenderPoint);
-                panel.TapTopic.Interactable = f;
-            };
-            panel.TapTopic.EndEdit += f =>
-            {
-                GridController.TapTopic = f;
-                panel.Sender.Set(GridController.SenderPoint);
-            };
-            */
         }
 
         void UpdateColor()
@@ -106,29 +82,6 @@ namespace Iviz.App
                 GridController.GridColor = f;
             }
         }
-
-        public override void UpdatePanel()
-        {
-            //panel.TapTopic.Hints = GetTopicHints();
-        }
-
-        /*
-        static readonly string[] OwnPublishedTopicName = {"clicked_point"};
-        
-        [NotNull]
-        IEnumerable<string> GetTopicHints()
-        {
-            string ownResolvedTopic =
-                (GridController.SenderPoint != null &&
-                 GridController.SenderPoint.TryGetResolvedTopicName(out string topicName))
-                    ? topicName
-                    : OwnPublishedTopicName[0];
-            return ConnectionManager.Connection.GetSystemPublishedTopicTypes()
-                .Where(tuple => tuple.Type == PointStamped.RosMessageType && tuple.Topic != ownResolvedTopic)
-                .Select(tuple => tuple.Topic)
-                .Concat(OwnPublishedTopicName);
-        }
-        */
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

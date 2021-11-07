@@ -130,8 +130,8 @@ namespace Iviz.Displays
                     points.Array[pOff++] = b - halfDiffYz;
                     points.Array[pOff++] = b + halfDirX;
 
-                    Color32 ca = PointWithColor.ColorFromFloatBits(line.c0.w);
-                    Color32 cb = PointWithColor.ColorFromFloatBits(line.c1.w);
+                    Color32 ca = PointWithColor.RecastToColor32(line.c0.w);
+                    Color32 cb = PointWithColor.RecastToColor32(line.c1.w);
 
                     Vector2 uv0 = new Vector2(line.c0.w, 0);
                     for (int i = 0; i < 5; i++)

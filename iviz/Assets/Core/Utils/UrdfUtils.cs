@@ -1,12 +1,13 @@
+#nullable enable
+
 using System;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
 {
     public static class UrdfUtils
     {
-        public static Vector3 ToVector3([NotNull] this Urdf.Vector3f v)
+        public static Vector3 ToVector3(this Urdf.Vector3f v)
         {
             if (v == null)
             {
@@ -16,7 +17,7 @@ namespace Iviz.Core
             return new Vector3(v.X, v.Y, v.Z).Ros2Unity();
         }
 
-        static Quaternion ToQuaternion([NotNull] this Urdf.Vector3f v)
+        static Quaternion ToQuaternion(this Urdf.Vector3f v)
         {
             if (v == null)
             {
@@ -26,7 +27,7 @@ namespace Iviz.Core
             return new Vector3(v.X, v.Y, v.Z).RosRpy2Unity();
         }
 
-        public static Pose ToPose([NotNull] this Urdf.Origin v)
+        public static Pose ToPose(this Urdf.Origin v)
         {
             if (v == null)
             {
@@ -36,7 +37,7 @@ namespace Iviz.Core
             return new Pose(v.Xyz.ToVector3(), v.Rpy.ToQuaternion());
         }
 
-        public static Color ToColor([NotNull] this Urdf.Color v)
+        public static Color ToColor(this Urdf.Color v)
         {
             if (v == null)
             {
@@ -47,9 +48,9 @@ namespace Iviz.Core
             return new Color(r, g, b, a);
         }
 
-        public static bool IsReference([CanBeNull] this Urdf.Material material)
+        public static bool IsReference(this Urdf.Material? material)
         {
-            return material != null && material.Color is null && material.Texture is null;
+            return material is (_, null, null);
         }
     }
 }

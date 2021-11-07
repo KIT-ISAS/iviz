@@ -1,15 +1,12 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;
-using Iviz.Msgs.GeometryMsgs;
-using Iviz.Ros;
-using JetBrains.Annotations;
 using UnityEngine.Rendering;
 using Vector3 = UnityEngine.Vector3;
 
@@ -207,61 +204,7 @@ namespace Iviz.Controllers
             }
         }
 
-        /*
-        public bool PublishLongTapPosition
-        {
-            get => config.PublishLongTapPosition;
-            set
-            {
-                
-                if (value && SenderPoint == null)
-                {
-                    SenderPoint = new Sender<PointStamped>(TapTopic);
-                    if (GuiInputModule.Instance != null)
-                    {
-                        GuiInputModule.Instance.LongClick += OnLongClick;
-                    }
-                }
-                else if (!value && SenderPoint != null)
-                {
-                    SenderPoint.Stop();
-                    SenderPoint = null;
-                    if (GuiInputModule.Instance != null)
-                    {
-                        GuiInputModule.Instance.LongClick -= OnLongClick;
-                    }
-                }
-
-                config.PublishLongTapPosition = value;
-            }
-        }
-
-        [NotNull]
-        public string TapTopic
-        {
-            get => config.TapTopic;
-            set
-            {
-                string trimmed = value.Trim();
-                config.TapTopic = trimmed;
-                if (SenderPoint != null && SenderPoint.Topic != trimmed)
-                {
-                    SenderPoint.Stop();
-                    SenderPoint = new Sender<PointStamped>(trimmed);
-                }
-            }
-        }
-
-        [NotNull]
-        public string LastTapPositionString =>
-            lastTapPosition == null
-                ? "<b>Last Tap Position:</b>\n<i>None</i>"
-                : $"<b>Last Tap Position:</b>\n[X:{lastTapPosition.Value.X:N3} Y:{lastTapPosition.Value.Y:N3} Z:{lastTapPosition.Value.Z:N3}]";
-        */
-
-
-        //void Awake()
-        public GridController([NotNull] IModuleData moduleData)
+        public GridController(IModuleData moduleData)
         {
             grid = ResourcePool.RentDisplay<GridResource>();
             grid.name = "Grid";
@@ -300,24 +243,6 @@ namespace Iviz.Controllers
             Config = new GridConfiguration();
         }
 
-        /*
-        void OnLongClick(ClickInfo clickInfo)
-        {
-            if (SenderPoint == null || !grid.TryRaycast(clickInfo.CursorPosition, out Vector3 hit))
-            {
-                return;
-            }
-
-            lastTapPosition = TfListener.RelativePositionToOrigin(hit).Unity2RosPoint();
-            SenderPoint.Publish(new PointStamped
-            {
-                Header = (clickedSeq++, TfListener.FixedFrameId),
-                Point = lastTapPosition.Value
-            });
-            ModuleData.ResetPanel();
-        }
-        */
-
         void UpdateMesh()
         {
             const int numberOfGridCells = 90;
@@ -333,13 +258,6 @@ namespace Iviz.Controllers
             grid.ReturnToPool();
             node.DestroySelf();
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
-
-            /*
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.LongClick -= OnLongClick;
-            }
-            */
         }
 
         public void ResetController()

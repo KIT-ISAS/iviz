@@ -1,5 +1,6 @@
+#nullable enable
+
 using System;
-using JetBrains.Annotations;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
@@ -20,6 +21,13 @@ namespace Iviz.Core
             false;
 #endif
 
+        public const bool IsStandalone =
+#if !UNITY_EDITOR && UNITY_STANDALONE
+            true;
+#else
+            false;
+#endif
+
         /// <summary>
         /// Is this being run on an Android or IOS device? (smartphone or tablet)
         /// </summary>
@@ -29,84 +37,60 @@ namespace Iviz.Core
 #else
             false;
 #endif
-        
+
         public const bool IsIphone =
 #if !UNITY_EDITOR && UNITY_IOS
             true;
 #else
             false;
-#endif      
-        
+#endif
+
         public const bool IsAndroid =
 #if !UNITY_EDITOR && UNITY_ANDROID
             true;
 #else
             false;
-#endif  
+#endif
 
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
-        public const bool IsHololens =
-#if UNITY_WSA
-#if UNITY_EDITOR
-            true;
-#else
-            true;
-#endif
-#else
-            false;
-#endif
-
+        public static bool IsHololens { get; set; }
         public static bool IsVR { get; set; }
         public static bool IsVRButtonDown { get; set; }
+
+
+        static string? persistentDataPath;
+        static string? savedFolder;
+        static string? bagsFolder;
+        static string? simpleConfigurationPath;
+        static string? resourcesPath;
+        static string? savedRobotsPath;
+        static string? resourcesFilePath;
         
-        
-        static string persistentDataPath;
-        static string savedFolder;
-        static string bagsFolder;
-        static string simpleConfigurationPath;
-        static string resourcesPath;
-        static string savedRobotsPath;
-        static string resourcesFilePath;
+        static string PersistentDataPath => persistentDataPath ??= Application.persistentDataPath;
+        public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
+        public static string BagsFolder => bagsFolder ??= PersistentDataPath + "/bags";
 
-
-        [NotNull]
-        static string PersistentDataPath =>
-            persistentDataPath ?? (persistentDataPath = Application.persistentDataPath);
-
-        [NotNull] public static string SavedFolder => savedFolder ?? (savedFolder = PersistentDataPath + "/saved");
-
-        [NotNull] public static string BagsFolder => bagsFolder ?? (bagsFolder = PersistentDataPath + "/bags");
-
-        [NotNull]
         public static string SimpleConfigurationPath =>
-            simpleConfigurationPath ?? (simpleConfigurationPath = $"{PersistentDataPath}/connection.json");
+            simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";
 
-        [NotNull]
-        public static string ResourcesPath => resourcesPath ?? (resourcesPath = $"{PersistentDataPath}/resources");
+        public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
+        public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
+        public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
 
-        [NotNull]
-        public static string SavedRobotsPath => savedRobotsPath ?? (savedRobotsPath = $"{PersistentDataPath}/robots");
+        static Camera? mainCamera;
+        static Transform? mainCameraTransform;
 
-        [NotNull]
-        public static string ResourcesFilePath =>
-            resourcesFilePath ?? (resourcesFilePath = $"{PersistentDataPath}/resources.json");
-
-        [CanBeNull] static Camera mainCamera;
-        [CanBeNull] static Transform mainCameraTransform;
-
-        [NotNull]
         public static Transform MainCameraTransform => mainCameraTransform != null
             ? mainCameraTransform
             : (mainCameraTransform = MainCamera.transform);
 
-        [NotNull]
         public static Camera MainCamera
         {
             get => mainCamera != null
                 ? mainCamera
-                : mainCamera = (GameObject.FindWithTag("MainCamera").CheckedNull() 
+                : mainCamera = (GameObject.FindWithTag("MainCamera").CheckedNull()
                                 ?? GameObject.Find("MainCamera").CheckedNull()
                                 ?? throw new NullReferenceException("Failed to find camera!"))
                     .GetComponent<Camera>();
@@ -116,17 +100,17 @@ namespace Iviz.Core
                 mainCameraTransform = value.transform;
             }
         }
-        
-        [CanBeNull] public static Camera ARCamera { get; set; }
-        public static event Action<QualityType> QualityTypeChanged;
+
+        public static Camera? ARCamera { get; set; }
+        public static event Action<QualityType>? QualityTypeChanged;
 
         public static void RaiseQualityTypeChanged(QualityType newQualityType)
         {
             QualityTypeChanged?.Invoke(newQualityType);
         }
-        
-        [CanBeNull] public static ISettingsManager SettingsManager { get; set; }
-        [CanBeNull] public static IScreenCaptureManager ScreenCaptureManager { get; set; }
+
+        public static ISettingsManager? SettingsManager { get; set; }
+        public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
         static bool? supportsComputeBuffersHelper;
 
@@ -146,6 +130,7 @@ namespace Iviz.Core
         public static bool SupportsRGB24 => supportsRGB24 ??
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
                                             .Value;
+
         static Settings()
         {
             AotHelper.EnsureType<StringEnumConverter>();

@@ -289,4 +289,14 @@ namespace Iviz.Ros
             return $"[Listener {Topic} [{Type}]]";
         }
     }
+
+    public static class Listener
+    {
+        public static IListener Create(string topicName, Func<IMessage, bool> handler, Type csType)
+        {
+            Type listenerType = typeof(Listener<>).MakeGenericType(csType);
+            return (IListener)Activator.CreateInstance(listenerType,
+                topicName, handler, RosTransportHint.PreferTcp);
+        } 
+    }
 }

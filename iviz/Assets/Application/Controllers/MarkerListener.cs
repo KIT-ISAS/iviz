@@ -103,7 +103,7 @@ namespace Iviz.Controllers
 
                 foreach (var marker in markers.Values)
                 {
-                    marker.Visible = value && config.VisibleMask[(int)marker.MarkerType];
+                    marker.Visible = value && config.VisibleMask[(int) marker.MarkerType];
                 }
             }
         }
@@ -158,10 +158,10 @@ namespace Iviz.Controllers
             var deadEntries = markers
                 .Where(entry => entry.Value.ExpirationTime < GameThread.Now)
                 .ToArray();
-            foreach (var entry in deadEntries)
+            foreach (var (key, value) in deadEntries)
             {
-                markers.Remove(entry.Key);
-                DeleteMarkerObject(entry.Value);
+                markers.Remove(key);
+                DeleteMarkerObject(value);
             }
         }
 
@@ -315,7 +315,7 @@ namespace Iviz.Controllers
             yield return "---";
             for (int i = 0; i < config.VisibleMask.Length; i++)
             {
-                string name = ((MarkerType)i).ToString();
+                string name = ((MarkerType) i).ToString();
                 yield return config.VisibleMask[i] ? name : $"<color=#A0A0A0>({name})</color>";
             }
         }
@@ -325,7 +325,7 @@ namespace Iviz.Controllers
             bool newVisible = !config.VisibleMask[i];
             config.VisibleMask[i] = newVisible;
 
-            MarkerType markerType = (MarkerType)i;
+            MarkerType markerType = (MarkerType) i;
             foreach (var marker in markers.Values)
             {
                 if (marker.MarkerType == markerType)

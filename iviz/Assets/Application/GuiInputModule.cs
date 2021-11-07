@@ -1,14 +1,15 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering.PostProcessing;
-using UnityEngine.XR.ARFoundation;
 using Logger = Iviz.Core.Logger;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -32,16 +33,15 @@ namespace Iviz.App
             {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
 
         static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
-        static readonly Vector3 DirectionWeight = new Vector3(1.5f, 1.5f, 1);
+        static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
 
-        readonly SettingsConfiguration config = new SettingsConfiguration();
+        readonly SettingsConfiguration config = new();
 
         Vector3 accel;
         bool pointerIsAlreadyMoving;
         bool alreadyScaling;
-        [CanBeNull] TfFrame cameraViewOverride;
-
-        IDraggable draggedObject;
+        TfFrame? cameraViewOverride;
+        IDraggable? draggedObject;
 
         bool pointerMotionIsInvalid;
 
@@ -49,10 +49,10 @@ namespace Iviz.App
         Pose lookAtCameraStartPose;
         Pose lookAtCameraTargetPose;
 
-        [CanBeNull] Light mainLight;
+        Light? mainLight;
 
         Vector3 orbitCenter;
-        [CanBeNull] TfFrame orbitCenterOverride;
+        TfFrame? orbitCenterOverride;
 
         float orbitX, orbitY = 45, orbitRadius = 5.0f;
         Vector2 pointerDownStart;
@@ -70,12 +70,15 @@ namespace Iviz.App
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
 
-        [CanBeNull] public static GuiInputModule Instance { get; private set; }
+        public static GuiInputModule? Instance { get; private set; }
 
-        [NotNull] static Camera MainCamera => Settings.MainCamera;
+        static Camera MainCamera => Settings.MainCamera;
 
-        [CanBeNull]
-        public TfFrame OrbitCenterOverride
+        public event Action<ClickInfo>? PointerDown;
+        public event Action<ClickInfo>? ShortClick;
+        public event Action<ClickInfo>? LongClick;
+
+        public TfFrame? OrbitCenterOverride
         {
             get => lookAtAnimationStart != null ? null : orbitCenterOverride;
             set
@@ -91,8 +94,7 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull]
-        public TfFrame CameraViewOverride
+        public TfFrame? CameraViewOverride
         {
             get => cameraViewOverride;
             set
@@ -107,8 +109,7 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull]
-        public IDraggable DraggedObject
+        public IDraggable? DraggedObject
         {
             get => draggedObject;
             private set
@@ -129,7 +130,7 @@ namespace Iviz.App
                 ? Input.touchCount == 1
                 : Settings.IsVR
                     ? Settings.IsVRButtonDown
-                    : Input.GetMouseButton(1);
+                    : Mouse.current.rightButton.isPressed;
 
         void Awake()
         {
@@ -301,12 +302,14 @@ namespace Iviz.App
             get => config.BackgroundColor;
             set
             {
-                config.BackgroundColor = value.WithAlpha(1);
+                Color colorToUse = Settings.IsHololens ? Color.black : value;
+                
+                config.BackgroundColor = colorToUse.WithAlpha(1);
 
-                Color valueNoAlpha = value.WithAlpha(0);
+                Color valueNoAlpha = colorToUse.WithAlpha(0);
                 MainCamera.backgroundColor = valueNoAlpha;
 
-                float maxRGB = Mathf.Max(Mathf.Max(value.r, value.g), value.b);
+                float maxRGB = Mathf.Max(Mathf.Max(colorToUse.r, colorToUse.g), colorToUse.b);
                 Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
                 RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
             }
@@ -355,10 +358,6 @@ namespace Iviz.App
             QualityInAr = QualityInAr;
             QualityInView = QualityInView;
         }
-
-        public event Action<ClickInfo> PointerDown;
-        public event Action<ClickInfo> ShortClick;
-        public event Action<ClickInfo> LongClick;
 
         public void ResetDraggedObject()
         {
@@ -444,17 +443,19 @@ namespace Iviz.App
             }
             else
             {
-                pointerIsDown = Input.GetMouseButton(1);
+                //pointerIsDown = Input.GetMouseButton(1);
+                pointerIsDown = Mouse.current.rightButton.isPressed;
 
                 if (pointerIsDown)
                 {
-                    pointerPosition = Input.mousePosition;
+                    //pointerPosition = Input.mousePosition;
+                    pointerPosition = Mouse.current.position.ReadValue();
 
                     if (!prevPointerDown)
                     {
                         pointerIsOnGui = IsPointerOnGui(pointerPosition);
                         pointerDownTime = Time.time;
-                        pointerDownStart = Input.mousePosition;
+                        pointerDownStart = pointerPosition;
                     }
                 }
                 else
@@ -566,11 +567,11 @@ namespace Iviz.App
             }
 
 
-            if (Input.GetKey(KeyCode.W))
+            if (Keyboard.current[Key.W].isPressed)
             {
                 orbitRadius = Mathf.Max(0, orbitRadius - orbitRadiusAdvance);
             }
-            else if (Input.GetKey(KeyCode.S))
+            else if (Keyboard.current[Key.S].isPressed)
             {
                 orbitRadius += orbitRadiusAdvance;
             }
@@ -604,7 +605,6 @@ namespace Iviz.App
             lastAltDistancePointerAndAlt = distancePointerAndAlt;
 
             alreadyScaling = true;
-
 
             const float radiusCoeff = -0.0025f;
             const float tangentCoeff = 0.001f;
@@ -759,33 +759,33 @@ namespace Iviz.App
 
         static Vector3Int GetBaseInput()
         {
-            Vector3Int pVelocity = new Vector3Int();
-            if (Input.GetKey(KeyCode.W))
+            var pVelocity = new Vector3Int();
+            if (Keyboard.current[Key.W].isPressed)
             {
                 pVelocity += new Vector3Int(0, 0, 1);
             }
 
-            if (Input.GetKey(KeyCode.S))
+            if (Keyboard.current[Key.S].isPressed)
             {
                 pVelocity += new Vector3Int(0, 0, -1);
             }
 
-            if (Input.GetKey(KeyCode.A))
+            if (Keyboard.current[Key.A].isPressed)
             {
                 pVelocity += Vector3Int.left;
             }
 
-            if (Input.GetKey(KeyCode.D))
+            if (Keyboard.current[Key.D].isPressed)
             {
                 pVelocity += Vector3Int.right;
             }
 
-            if (Input.GetKey(KeyCode.Q))
+            if (Keyboard.current[Key.Q].isPressed)
             {
                 pVelocity += Vector3Int.down;
             }
 
-            if (Input.GetKey(KeyCode.E))
+            if (Keyboard.current[Key.E].isPressed)
             {
                 pVelocity += Vector3Int.up;
             }

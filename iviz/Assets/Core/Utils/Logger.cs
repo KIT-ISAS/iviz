@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿#nullable enable
+
+using System;
 using System.Text;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
@@ -14,20 +14,20 @@ namespace Iviz.Core
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
 
-        public static event Action<string> LogInternal;
-        public static event ExternalLogDelegate LogExternal;
+        public static event Action<string>? LogInternal;
+        public static event ExternalLogDelegate? LogExternal;
 
-        public static void Info([CanBeNull] object t)
+        public static void Info(object? t)
         {
             ExternalImpl(t?.ToString(), LogLevel.Info);
         }
 
-        public static void Error([CanBeNull] object t)
+        public static void Error(object? t)
         {
-            ExternalImpl((string)t, LogLevel.Error);
+            ExternalImpl((string?)t, LogLevel.Error);
         }
 
-        public static void Error([CanBeNull] object t, [CanBeNull] Exception e)
+        public static void Error(object? t, Exception? e)
         {
             ExternalImpl(t, LogLevel.Error, e);
         }
@@ -37,29 +37,29 @@ namespace Iviz.Core
         {
         }
 
-        public static void Warn([CanBeNull] object t)
+        public static void Warn(object? t)
         {
             ExternalImpl(t?.ToString(), LogLevel.Warn);
         }
 
-        public static void Debug([CanBeNull] object t)
+        public static void Debug(object? t)
         {
             ExternalImpl(t?.ToString(), LogLevel.Debug);
         }
 
-        public static void Debug([CanBeNull] object t, Exception e)
+        public static void Debug(object? t, Exception e)
         {
             ExternalImpl(t, LogLevel.Debug, e);
         }
 
-        public static void Internal([CanBeNull] string msg)
+        public static void Internal(string? msg)
         {
             string msgTxt = $"<font=Bold>[{GameThread.NowFormatted}]</font> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }
 
-        public static void Internal([CanBeNull] string msg, [CanBeNull] Exception e)
+        public static void Internal(string? msg, Exception? e)
         {
             var str = BuilderPool.Rent();
             try
@@ -72,7 +72,7 @@ namespace Iviz.Core
             }
         }
 
-        static void InternalImpl([CanBeNull] string msg, [CanBeNull] Exception e, [NotNull] StringBuilder str)
+        static void InternalImpl(string? msg, Exception? e, StringBuilder str)
         {
             str.Length = 0;
             str.Append("<font=Bold>[")
@@ -86,10 +86,10 @@ namespace Iviz.Core
             }
             else
             {
-                Exception childException = e;
+                Exception? childException = e;
                 while (childException != null)
                 {
-                    if (!(childException is AggregateException))
+                    if (childException is not AggregateException)
                     {
                         str.AppendLine()
                             .Append("<color=red>")
@@ -108,7 +108,7 @@ namespace Iviz.Core
         }
 
 
-        static void ExternalImpl([CanBeNull] string msg, LogLevel level)
+        static void ExternalImpl(string? msg, LogLevel level)
         {
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
             switch (level)
@@ -127,7 +127,7 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e)
+        static void ExternalImpl(object? msg, LogLevel level, Exception? e)
         {
             var str = BuilderPool.Rent();
             try
@@ -140,8 +140,7 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl([CanBeNull] object msg, LogLevel level, [CanBeNull] Exception e,
-            [NotNull] StringBuilder str)
+        static void ExternalImpl(object? msg, LogLevel level, Exception? e, StringBuilder str)
         {
             str.Length = 0;
             str.Append(msg ?? NullMessage);
@@ -152,10 +151,10 @@ namespace Iviz.Core
             }
             else
             {
-                Exception childException = e;
+                Exception? childException = e;
                 while (childException != null)
                 {
-                    if (!(childException is AggregateException))
+                    if (childException is not AggregateException)
                     {
                         str.AppendLine();
                         str.Append("[").Append(childException.GetType().Name).Append("] ")
@@ -169,13 +168,27 @@ namespace Iviz.Core
             string message = str.ToString();
             LogExternal?.Invoke(new LogMessage(level, message));
 
-            if (!Settings.IsMobile)
+            if (!Settings.IsStandalone)
             {
-                UnityEngine.Debug.LogWarning((string)msg + e);
+                if (level == LogLevel.Debug)
+                {
+                    UnityEngine.Debug.Log((string?)msg + e);
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning((string?) msg + e);
+                }
             }
             else
             {
-                UnityEngine.Debug.LogWarning(message);
+                if (level == LogLevel.Debug)
+                {
+                    UnityEngine.Debug.Log(message);
+                }
+                else
+                {
+                    UnityEngine.Debug.LogWarning(message);
+                }
             }
         }
     }

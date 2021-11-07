@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,7 +7,6 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
@@ -14,11 +15,11 @@ namespace Iviz.App
 {
     public readonly struct ClickHitResult
     {
-        [NotNull] public GameObject GameObject { get; }
+        public GameObject GameObject { get; }
         public Vector3 Position { get; }
         public Vector3 Normal { get; }
 
-        ClickHitResult([NotNull] GameObject gameObject, in Vector3 position, in Vector3 normal)
+        ClickHitResult(GameObject gameObject, in Vector3 position, in Vector3 normal)
         {
             GameObject = gameObject;
             Position = position;
@@ -50,13 +51,12 @@ namespace Iviz.App
     public sealed class ClickInfo
     {
         readonly Vector2 cursorPosition;
-
-        [CanBeNull] ClickHitResult[] arHits;
-        [CanBeNull] ClickHitResult[] unityHits;
+        ClickHitResult[]? arHits;
+        ClickHitResult[]? unityHits;
 
         public ClickInfo(in Vector2 cursorPosition) => this.cursorPosition = cursorPosition;
-
-        public bool TryGetARRaycastResults([NotNull] out ClickHitResult[] hits)
+        
+        public bool TryGetARRaycastResults(out ClickHitResult[] hits)
         {
             if (arHits != null)
             {
@@ -84,7 +84,7 @@ namespace Iviz.App
             return true;
         }
 
-        public bool TryGetRaycastResults([NotNull] out ClickHitResult[] hits)
+        public bool TryGetRaycastResults(out ClickHitResult[] hits)
         {
             if (unityHits != null)
             {

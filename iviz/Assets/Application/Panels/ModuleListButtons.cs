@@ -1,12 +1,11 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -14,27 +13,27 @@ namespace Iviz.App
     {
         const float YOffset = 2;
 
-        [NotNull, ItemNotNull] readonly List<DraggableButtonWidget> buttons = new List<DraggableButtonWidget>();
-        [NotNull] readonly RectTransform contentObjectTransform;
+        readonly List<DraggableButtonWidget> buttons = new();
+        readonly RectTransform contentObjectTransform;
         readonly float buttonHeight;
 
-        public ModuleListButtons([NotNull] GameObject contentObject)
+        public ModuleListButtons(GameObject contentObject)
         {
             buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
             contentObjectTransform = (RectTransform) contentObject.transform;
         }
 
-        public void CreateButtonForModule([NotNull] ModuleData moduleData)
+        public void CreateButtonForModule(ModuleData moduleData)
         {
             int size = buttons.Count;
             float y = 2 * YOffset + size * (buttonHeight + YOffset);
 
-            DraggableButtonWidget button = ResourcePool
+            var button = ResourcePool
                 .Rent(Resource.Widgets.DisplayButton, contentObjectTransform, false)
                 .GetComponentInChildren<DraggableButtonWidget>();
 
             button.Transform.anchoredPosition = new Vector2(0, -y);
-            button.Text.text = moduleData.ButtonText;
+            button.ButtonText.text = moduleData.ButtonText;
             button.Name = $"Button:{moduleData.ModuleType}";
             button.Visible = true;
             
@@ -49,7 +48,7 @@ namespace Iviz.App
 
         public void RemoveButton(int index)
         {
-            DraggableButtonWidget button = buttons[index];
+            var button = buttons[index];
             button.ClearSubscribers();
             ResourcePool.Return(Resource.Widgets.DisplayButton, button.GameObject);
 
@@ -65,7 +64,7 @@ namespace Iviz.App
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
         }
 
-        public void UpdateButton(int index, [NotNull] string content)
+        public void UpdateButton(int index, string content)
         {
             if (index < 0 || index >= buttons.Count)
             {
@@ -77,21 +76,15 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(content));
             }
 
-            var text = buttons[index].Text;
+            var text = buttons[index].ButtonText;
             text.text = content;
             int lineBreaks = content.Count(x => x == '\n');
-            switch (lineBreaks)
+            text.fontSize = lineBreaks switch
             {
-                case 2:
-                    text.fontSize = 11;
-                    break;
-                case 3:
-                    text.fontSize = 10;
-                    break;
-                default:
-                    text.fontSize = 12;
-                    break;
-            }
+                2 => 11,
+                3 => 10,
+                _ => 12
+            };
         }
     }
 }

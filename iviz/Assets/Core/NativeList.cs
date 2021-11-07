@@ -61,6 +61,15 @@ namespace Iviz.Core
             length = nextLength;
         }
 
+        public ref T Add()
+        {
+            int prevLength = length;
+            int nextLength = length + 1;
+            EnsureCapacity(nextLength);
+            length = nextLength;
+            return ref UnsafeGet(prevLength);
+        }
+
         public void AddRange([NotNull] NativeList<T> otherArray)
         {
             if (otherArray.Length == 0)

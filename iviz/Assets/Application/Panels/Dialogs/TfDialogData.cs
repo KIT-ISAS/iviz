@@ -1,12 +1,13 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using Iviz.Controllers;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class TfDialogData : DialogData
     {
-        [NotNull] readonly TfDialogContents panel;
+        readonly TfDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         public TfDialogData()
@@ -41,7 +42,7 @@ namespace Iviz.App
             panel.TfLog.UpdateFrameText();
         }
 
-        public void Show([NotNull] TfFrame frame)
+        public void Show(TfFrame frame)
         {
             if (frame == null)
             {

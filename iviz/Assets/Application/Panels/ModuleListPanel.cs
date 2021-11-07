@@ -21,6 +21,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 using Logger = Iviz.Core.Logger;
 using Quaternion = UnityEngine.Quaternion;
 
@@ -30,6 +31,8 @@ namespace Iviz.App
     {
         public const int ModuleDataCaptionWidth = 200;
 
+        [SerializeField] bool isVREnabled;
+        [SerializeField] bool isHololens;
         [SerializeField] DataLabelWidget masterUriStr = null;
         [SerializeField] TopButtonWidget dragButton = null;
         [SerializeField] TrashButtonWidget masterUriButton = null;
@@ -170,7 +173,7 @@ namespace Iviz.App
         [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         [NotNull] TfModuleData TfData => (TfModuleData)moduleDatas[0];
         [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
-        [NotNull] ModuleListButtons Buttons => buttons ?? (buttons = new ModuleListButtons(contentObject));
+        [NotNull] ModuleListButtons Buttons => buttons ??= new ModuleListButtons(contentObject);
 
         bool sceneInteractable;
 
@@ -234,12 +237,16 @@ namespace Iviz.App
             GuiDialogListener.ClearResources();
             ARController.ClearResources();
 
+            if (isHololens)
+            {
+                Settings.IsHololens = true;
+            }
+
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
 
             dialogDatas = new DialogData[]
             {
-                //imageData = new ImageDialogData(),
                 tfTreeData = new TfDialogData(),
                 loadConfigData = new LoadConfigDialogData(),
                 saveConfigData = new SaveConfigDialogData(),
@@ -385,6 +392,15 @@ namespace Iviz.App
 
             AllGuiVisible = AllGuiVisible; // initialize value
 
+            if (isVREnabled || isHololens)
+            {
+                Settings.IsVR = true;
+                foreach (var subCanvas in rootCanvas.GetComponentsInChildren<Canvas>(true))
+                {
+                    subCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+                }
+            }
+            
             initialized = true;
 
             InitFinished?.Invoke();
@@ -621,12 +637,13 @@ namespace Iviz.App
                 }
 
                 systemData.HostAliases = config.HostAliases;
-                ConnectionManager.Connection.SetHostAliases(
-                    config.HostAliases.Select(alias => (alias.Hostname, alias.Address)));
+                ConnectionManager.Connection.SetHostAliases(config.HostAliases
+                    .Where(alias => alias != null)
+                    .Select(alias => (alias.Value.Hostname, alias.Value.Address)));
                 arMarkerData.Configuration = config.MarkersConfiguration;
             }
             catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+                (e is IOException or SecurityException or JsonException)
             {
                 Logger.Debug($"{this}: Error loading simple configuration", e);
                 File.Delete(path);
@@ -639,7 +656,7 @@ namespace Iviz.App
 
             try
             {
-                ConnectionConfiguration config = new ConnectionConfiguration
+                ConnectionConfiguration config = new()
                 {
                     MasterUri = connectionData.MasterUri?.ToString() ?? "",
                     MyUri = connectionData.MyUri?.ToString() ?? "",
@@ -654,7 +671,7 @@ namespace Iviz.App
                 await FileUtils.WriteAllTextAsync(Settings.SimpleConfigurationPath, text, default);
             }
             catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+                (e is IOException or SecurityException or JsonException)
             {
                 Logger.Debug($"{this}: Error saving simple configuration", e);
             }

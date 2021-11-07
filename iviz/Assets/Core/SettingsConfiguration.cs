@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
 using Newtonsoft.Json;

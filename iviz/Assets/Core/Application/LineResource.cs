@@ -78,11 +78,15 @@ namespace Iviz.Displays
 
         public LineRenderType RenderType { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public static bool IsElementValid(in LineWithColor t) => !t.HasNaN() &&
-                                                                 (t.A - t.B).MaxAbsCoeff() > MinLineLength &&
-                                                                 t.A.MaxAbsCoeff() < MaxPositionMagnitude &&
-                                                                 t.B.MaxAbsCoeff() < MaxPositionMagnitude;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsElementValid(in LineWithColor t) => IsElementValid(t.f);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsElementValid(in float4x2 f) => !f.c0.HasNaN() &&
+                                                            !f.c1.HasNaN() &&
+                                                            (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
+                                                            f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
+                                                            f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
 
         /// <summary>
         /// Sets the lines with the given list.
@@ -97,18 +101,15 @@ namespace Iviz.Displays
             }
 
             lineBuffer.EnsureCapacity(lines.Length);
-
             lineBuffer.Clear();
             if (lines.Length != 0)
             {
                 foreach (ref readonly LineWithColor t in lines.Ref())
                 {
-                    if (!IsElementValid(t))
+                    if (IsElementValid(t))
                     {
-                        continue;
+                        lineBuffer.Add(t.f);
                     }
-
-                    lineBuffer.Add(t.f);
                 }
             }
 
@@ -123,16 +124,13 @@ namespace Iviz.Displays
             }
 
             lineBuffer.EnsureCapacity(lines.Length);
-
             lineBuffer.Clear();
             foreach (ref readonly LineWithColor t in lines.Ref())
             {
-                if (!IsElementValid(t))
+                if (IsElementValid(t))
                 {
-                    continue;
+                    lineBuffer.Add(t.f);
                 }
-
-                lineBuffer.Add(t.f);
             }
 
             UpdateLines(overrideNeedsAlpha);
@@ -200,13 +198,13 @@ namespace Iviz.Displays
 
             foreach (ref readonly float4x2 t in lineBuffer.Ref())
             {
-                Color32 cA = PointWithColor.ColorFromFloatBits(t.c0.w);
+                Color32 cA = PointWithColor.RecastToColor32(t.c0.w);
                 if (cA.a < 255)
                 {
                     return true;
                 }
 
-                Color32 cB = PointWithColor.ColorFromFloatBits(t.c1.w);
+                Color32 cB = PointWithColor.RecastToColor32(t.c1.w);
                 if (cB.a < 255)
                 {
                     return true;

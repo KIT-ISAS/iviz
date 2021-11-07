@@ -1,9 +1,11 @@
-﻿#define LOG_ENABLED
+﻿#nullable enable
+
+#define LOG_ENABLED
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,10 +15,8 @@ using Iviz.Ntp;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Logger = Iviz.Tools.Logger;
 using Random = System.Random;
@@ -28,37 +28,36 @@ namespace Iviz.Ros
         internal const int InvalidId = -1;
 
         static readonly Action<string> LogInternalIfHololens =
-            Settings.IsHololens ? (Action<string>)Core.Logger.Internal : Logger.LogDebug;
+            Settings.IsHololens ? Core.Logger.Internal : Logger.LogDebug;
 
         static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
-        readonly ConcurrentDictionary<int, IRosPublisher> publishers = new ConcurrentDictionary<int, IRosPublisher>();
-        readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new Dictionary<string, IAdvertisedTopic>();
-        readonly Dictionary<string, IAdvertisedService> servicesByTopic = new Dictionary<string, IAdvertisedService>();
-        readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new Dictionary<string, ISubscribedTopic>();
+        readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
+        readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
+        readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
+        readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
 
-        readonly List<(string, string)> hostAliases = new List<(string, string)>();
+        readonly List<(string, string)> hostAliases = new();
 
-        [NotNull] IReadOnlyCollection<string> cachedParameters = EmptyParameters;
-        [NotNull] IReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
-        [NotNull] IReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
-        [CanBeNull] SystemState cachedSystemState;
-        [CanBeNull] RosClient client;
-        [CanBeNull] BagListener bagListener;
+        IReadOnlyCollection<string> cachedParameters = EmptyParameters;
+        IReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
+        IReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
+        SystemState? cachedSystemState;
+        RosClient? client;
+        BagListener? bagListener;
 
-        [NotNull] CancellationTokenSource connectionTs = new CancellationTokenSource();
+        CancellationTokenSource connectionTs = new();
 
-        Task watchdogTask;
-        Task ntpTask;
-        Uri masterUri;
-        string myId;
-        Uri myUri;
+        Task? watchdogTask;
+        Task? ntpTask;
+        Uri? masterUri;
+        string? myId;
+        Uri? myUri;
 
         bool Connected => client != null;
 
-        [NotNull] public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
+        public RosClient Client => client ?? throw new InvalidOperationException("Client not connected");
 
-        [CanBeNull]
-        public Uri MasterUri
+        public Uri? MasterUri
         {
             get => masterUri;
             set
@@ -68,8 +67,7 @@ namespace Iviz.Ros
             }
         }
 
-        [CanBeNull]
-        public string MyId
+        public string? MyId
         {
             get => myId;
             set
@@ -79,8 +77,7 @@ namespace Iviz.Ros
             }
         }
 
-        [CanBeNull]
-        public Uri MyUri
+        public Uri? MyUri
         {
             get => myUri;
             set
@@ -90,8 +87,7 @@ namespace Iviz.Ros
             }
         }
 
-        [CanBeNull]
-        public BagListener BagListener
+        public BagListener? BagListener
         {
             get => bagListener;
             set
@@ -117,7 +113,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void SetHostAliases([NotNull] IEnumerable<(string, string)> newHostAliases)
+        public void SetHostAliases(IEnumerable<(string, string)> newHostAliases)
         {
             hostAliases.Clear();
             hostAliases.AddRange(newHostAliases);
@@ -252,7 +248,7 @@ namespace Iviz.Ros
                         break;
                     case RosUriBindingException _:
                         Core.Logger.Internal(
-                            $"<b>Error:</b> Port {MyUri?.Port} is already being used by another application. " +
+                            $"<b>Error:</b> Port {MyUri?.Port.ToString()} is already being used by another application. " +
                             $"Maybe another iviz instance is running? Try another port!");
                         break;
                     case RoslibException _:
@@ -312,22 +308,17 @@ namespace Iviz.Ros
             }
 
             ConnectionUtils.GlobalResolver.Clear();
-            foreach (var pair in hosts)
+            foreach (var (key, value) in hosts)
             {
-                Core.Logger.Info($"Adding custom host {pair.Key} -> {pair.Value}");
-                ConnectionUtils.GlobalResolver[pair.Key] = pair.Value;
+                Core.Logger.Info($"Adding custom host {key} -> {value}");
+                ConnectionUtils.GlobalResolver[key] = value;
             }
         }
 
         void AddConfigHostAliases()
         {
-            foreach ((string hostname, string address) in hostAliases)
+            foreach (var (hostname, address) in hostAliases)
             {
-                if (hostname == null || address == null)
-                {
-                    continue;
-                }
-
                 ConnectionUtils.GlobalResolver[hostname] = address;
             }
         }
@@ -358,14 +349,14 @@ namespace Iviz.Ros
         }
 
         static async Task WatchdogTask(
-            [NotNull] RosMasterClient masterApi,
+            RosMasterClient masterApi,
             CancellationToken token)
         {
             const int maxTimeMasterUnseenInMs = 10000;
             const int delayBetweenPingsInMs = 5000;
             DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
-            Uri lastRosOutUri = null;
+            Uri? lastRosOutUri = null;
             var connection = ConnectionManager.Connection;
 
 
@@ -393,7 +384,7 @@ namespace Iviz.Ros
                         continue;
                     }
 
-                    TimeSpan timeSinceLastAccess = now - lastMasterAccess;
+                    var timeSinceLastAccess = now - lastMasterAccess;
                     lastMasterAccess = now;
                     if (warningSet)
                     {
@@ -436,7 +427,7 @@ namespace Iviz.Ros
             connection.SetConnectionWarningState(false);
         }
 
-        static async Task NtpCheckerTask([NotNull] string hostname, CancellationToken token)
+        static async Task NtpCheckerTask(string hostname, CancellationToken token)
         {
             Core.Logger.Debug("[NtpChecker] Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
@@ -446,13 +437,17 @@ namespace Iviz.Ros
             {
                 offset = await NtpQuery.GetNetworkTimeOffsetAsync(hostname, token);
             }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
             catch (Exception e)
             {
-                Core.Logger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
+                if (e is OperationCanceledException or IOException)
+                {
+                    Core.Logger.Debug("[NtpChecker] Failed to read NTP clock from the master.", e);
+                }
+                else
+                {
+                    Core.Logger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
+                }
+
                 return;
             }
 
@@ -472,14 +467,11 @@ namespace Iviz.Ros
             }
         }
 
-        static readonly Random Random = new Random();
+        static readonly Random Random = new();
 
-        [NotNull]
-        static Task DelayByPlatform(CancellationToken token) => Settings.IsHololens
-            ? Task.Delay(Random.Next(0, 1000), token)
-            : Task.CompletedTask;
+        static Task DelayByPlatform(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
 
-        async Task ReAdvertise([NotNull] IAdvertisedTopic topic, CancellationToken token)
+        async Task ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
             await topic.AdvertiseAsync(Connected ? Client : null, token);
@@ -487,13 +479,13 @@ namespace Iviz.Ros
             publishers[topic.Id] = topic.Publisher;
         }
 
-        async Task ReSubscribe([NotNull] ISubscribedTopic topic, CancellationToken token)
+        async Task ReSubscribe(ISubscribedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
             await topic.SubscribeAsync(Connected ? Client : null, token: token);
         }
 
-        async Task ReAdvertiseService([NotNull] IAdvertisedService service, CancellationToken token)
+        async Task ReAdvertiseService(IAdvertisedService service, CancellationToken token)
         {
             await DelayByPlatform(token);
             await service.AdvertiseAsync(Connected ? Client : null, token);
@@ -544,7 +536,7 @@ namespace Iviz.Ros
             base.Disconnect();
         }
 
-        internal void Advertise<T>([NotNull] Sender<T> advertiser) where T : IMessage
+        internal void Advertise<T>(Sender<T> advertiser) where T : IMessage
         {
             if (advertiser == null)
             {
@@ -567,7 +559,7 @@ namespace Iviz.Ros
         }
 
 
-        async Task AdvertiseImpl<T>([NotNull] Sender<T> advertiser, CancellationToken token) where T : IMessage
+        async Task AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -608,7 +600,7 @@ namespace Iviz.Ros
             advertiser.Id = newAdvertisedTopic.Id;
         }
 
-        public void AdvertiseService<T>([NotNull] string service, [NotNull] Action<T> callback)
+        public void AdvertiseService<T>(string service, Action<T> callback)
             where T : IService, new()
         {
             if (service == null)
@@ -628,7 +620,7 @@ namespace Iviz.Ros
             });
         }
 
-        public void AdvertiseService<T>([NotNull] string service, [NotNull] Func<T, Task> callback)
+        public void AdvertiseService<T>(string service, Func<T, Task> callback)
             where T : IService, new()
         {
             if (service == null)
@@ -655,7 +647,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task AdvertiseServiceImpl<T>([NotNull] string serviceName, [NotNull] Func<T, Task> callback,
+        async Task AdvertiseServiceImpl<T>(string serviceName, Func<T, Task> callback,
             CancellationToken token)
             where T : IService, new()
         {
@@ -696,23 +688,21 @@ namespace Iviz.Ros
 
             token.ThrowIfCancellationRequested();
 
-            using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+            tokenSource.CancelAfter(timeoutInMs);
+            try
             {
-                tokenSource.CancelAfter(timeoutInMs);
-                try
-                {
-                    await Client.CallServiceAsync(service, srv, true, tokenSource.Token);
-                    return true;
-                }
-                catch (OperationCanceledException e) when (!token.IsCancellationRequested &&
-                                                           !connectionTs.IsCancellationRequested)
-                {
-                    throw new TimeoutException($"Service call to '{service}' timed out", e);
-                }
+                await Client.CallServiceAsync(service, srv, true, tokenSource.Token);
+                return true;
+            }
+            catch (OperationCanceledException e) when (!token.IsCancellationRequested &&
+                                                       !connectionTs.IsCancellationRequested)
+            {
+                throw new TimeoutException($"Service call to '{service}' timed out", e);
             }
         }
 
-        internal void Publish<T>([NotNull] Sender<T> advertiser, [NotNull] in T msg) where T : IMessage
+        internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage
         {
             if (advertiser.Id == InvalidId)
             {
@@ -748,17 +738,17 @@ namespace Iviz.Ros
                     publisher.Publish(msg);
                 }
             }
-            catch (Exception e) when (!(e is OperationCanceledException))
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 Debug.LogWarning($"Exception during RoslibConnection.Publish(): {e.Message}");
             }
         }
 
-        internal bool TryGetResolvedTopicName([NotNull] ISender advertiser, [CanBeNull] out string topicName)
+        internal bool TryGetResolvedTopicName(ISender advertiser, out string? topicName)
         {
             if (advertiser.Id == InvalidId || !publishers.TryGetValue(advertiser.Id, out var basePublisher))
             {
-                topicName = default;
+                topicName = null;
                 return false;
             }
 
@@ -766,7 +756,7 @@ namespace Iviz.Ros
             return true;
         }
 
-        internal void Subscribe<T>([NotNull] Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
+        internal void Subscribe<T>(Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
             if (listener == null)
             {
@@ -780,14 +770,14 @@ namespace Iviz.Ros
                 {
                     await SubscribeImpl<T>(listener, token);
                 }
-                catch (Exception e) when (!(e is OperationCanceledException))
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Subscribe(): ", e);
                 }
             });
         }
 
-        async Task SubscribeImpl<T>([NotNull] IListener listener, CancellationToken token)
+        async Task SubscribeImpl<T>(IListener listener, CancellationToken token)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
@@ -801,7 +791,7 @@ namespace Iviz.Ros
             await newSubscribedTopic.SubscribeAsync(Connected ? Client : null, listener, token);
         }
 
-        internal void SetPause([NotNull] IListener listener, bool value)
+        internal void SetPause(IListener listener, bool value)
         {
             if (listener == null)
             {
@@ -820,7 +810,7 @@ namespace Iviz.Ros
             });
         }
 
-        internal void Unadvertise([NotNull] ISender advertiser)
+        internal void Unadvertise(ISender advertiser)
         {
             if (advertiser == null)
             {
@@ -834,14 +824,14 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseImpl(advertiser, token);
                 }
-                catch (Exception e) when (!(e is OperationCanceledException))
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
                 }
             });
         }
 
-        async Task UnadvertiseImpl([NotNull] ISender advertiser, CancellationToken token)
+        async Task UnadvertiseImpl(ISender advertiser, CancellationToken token)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -867,7 +857,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Unsubscribe([NotNull] IListener subscriber)
+        internal void Unsubscribe(IListener subscriber)
         {
             if (subscriber == null)
             {
@@ -881,14 +871,14 @@ namespace Iviz.Ros
                 {
                     await UnsubscribeImpl(subscriber, token);
                 }
-                catch (Exception e) when (!(e is OperationCanceledException))
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     Core.Logger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
                 }
             });
         }
 
-        async Task UnsubscribeImpl([NotNull] IListener subscriber, CancellationToken token)
+        async Task UnsubscribeImpl(IListener subscriber, CancellationToken token)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
@@ -906,7 +896,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void UnadvertiseService([NotNull] string service)
+        public void UnadvertiseService(string service)
         {
             if (service == null)
             {
@@ -930,7 +920,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task UnadvertiseServiceImpl([NotNull] string serviceName, CancellationToken token)
+        async Task UnadvertiseServiceImpl(string serviceName, CancellationToken token)
         {
             if (!servicesByTopic.TryGetValue(serviceName, out var baseService))
             {
@@ -947,7 +937,6 @@ namespace Iviz.Ros
             servicesByTopic.Remove(serviceName);
         }
 
-        [NotNull]
         public IReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
@@ -959,7 +948,6 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        [ItemNotNull]
         public async ValueTask<IReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(
             int timeoutInMs = 2000,
             CancellationToken token = default)
@@ -972,11 +960,9 @@ namespace Iviz.Ros
 
             try
             {
-                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
-                {
-                    tokenSource.CancelAfter(timeoutInMs);
-                    cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(tokenSource.Token);
-                }
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                tokenSource.CancelAfter(timeoutInMs);
+                cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -989,7 +975,6 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        [NotNull]
         public IReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
@@ -1001,7 +986,6 @@ namespace Iviz.Ros
             return cachedTopics;
         }
 
-        [ItemNotNull]
         async ValueTask<IReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
             int timeoutInMs = 2000,
             CancellationToken token = default)
@@ -1014,11 +998,9 @@ namespace Iviz.Ros
 
             try
             {
-                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
-                {
-                    tokenSource.CancelAfter(timeoutInMs);
-                    cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
-                }
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                tokenSource.CancelAfter(timeoutInMs);
+                cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1031,7 +1013,6 @@ namespace Iviz.Ros
             return cachedTopics;
         }
 
-        [NotNull, ItemNotNull]
         public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
         {
             CancellationToken internalToken = connectionTs.Token;
@@ -1045,10 +1026,8 @@ namespace Iviz.Ros
 
                 try
                 {
-                    using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken))
-                    {
-                        cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
-                    }
+                    using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
+                    cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
                 }
                 catch (OperationCanceledException)
                 {
@@ -1062,7 +1041,7 @@ namespace Iviz.Ros
             return cachedParameters;
         }
 
-        public async ValueTask<(XmlRpcValue result, string errorMsg)> GetParameterAsync([NotNull] string parameter,
+        public async ValueTask<(XmlRpcValue result, string? errorMsg)> GetParameterAsync(string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
             if (parameter == null)
@@ -1082,18 +1061,16 @@ namespace Iviz.Ros
 
             try
             {
-                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token))
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                tokenSource.CancelAfter(timeoutInMs);
+                (bool success, XmlRpcValue param) =
+                    await Client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
+                if (!success)
                 {
-                    tokenSource.CancelAfter(timeoutInMs);
-                    (bool success, XmlRpcValue param) =
-                        await Client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
-                    if (!success)
-                    {
-                        return (default, $"'{parameter}' not found");
-                    }
-
-                    return (param, null);
+                    return (default, $"'{parameter}' not found");
                 }
+
+                return (param, null);
             }
             catch (OperationCanceledException)
             {
@@ -1110,8 +1087,7 @@ namespace Iviz.Ros
             }
         }
 
-        [CanBeNull]
-        public SystemState GetSystemState(RequestType type = RequestType.CachedButRequestInBackground)
+        public SystemState? GetSystemState(RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
@@ -1132,11 +1108,9 @@ namespace Iviz.Ros
             const int timeoutInMs = 2000;
             try
             {
-                using (var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionTs.Token))
-                {
-                    tokenSource.CancelAfter(timeoutInMs);
-                    cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
-                }
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionTs.Token);
+                tokenSource.CancelAfter(timeoutInMs);
+                cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -1147,7 +1121,7 @@ namespace Iviz.Ros
             }
         }
 
-        public (int Active, int Total) GetNumPublishers([NotNull] string topic)
+        public (int Active, int Total) GetNumPublishers(string topic)
         {
             if (topic == null)
             {
@@ -1159,9 +1133,11 @@ namespace Iviz.Ros
             return subscriber != null ? (subscriber.NumActivePublishers, subscriber.NumPublishers) : (-1, -1);
         }
 
-        internal int GetNumSubscribers([NotNull] ISender sender)
+        internal int GetNumSubscribers(ISender sender)
         {
-            return sender.Id != InvalidId && publishers.TryGetValue(sender.Id, out var basePublisher)
+            return sender.Id != InvalidId 
+                   && publishers.TryGetValue(sender.Id, out var basePublisher)
+                   && basePublisher != null
                 ? basePublisher.NumSubscribers
                 : 0;
         }

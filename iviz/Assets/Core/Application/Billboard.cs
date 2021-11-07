@@ -1,14 +1,14 @@
-﻿using Iviz.Core;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using Iviz.Core;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace Iviz.Displays
 {
     public sealed class Billboard : MonoBehaviour
     {
-        Transform mTransform;
-        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform? mTransform;
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         
         [SerializeField] Vector3 offset;
         [SerializeField] bool keepHorizontal = false;

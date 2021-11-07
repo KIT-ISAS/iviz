@@ -2,7 +2,7 @@ using Iviz.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-#if UNITY_WSA
+#if false
 using Microsoft.MixedReality.Toolkit.Input;
 #endif
 

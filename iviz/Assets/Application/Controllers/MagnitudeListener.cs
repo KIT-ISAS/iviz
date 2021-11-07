@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -10,10 +12,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Roslib.Utils;
-using JetBrains.Annotations;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
@@ -41,19 +40,19 @@ namespace Iviz.Controllers
     public sealed class MagnitudeListener : ListenerController
     {
         readonly FrameNode frameNode;
-        FrameNode childNode;
-        AxisFrameResource axisFrame;
         readonly TrailResource trail;
-        MeshMarkerResource sphere;
-        ArrowResource arrow;
-        AngleAxisResource angleAxis;
+        FrameNode? childNode;
+        AxisFrameResource? axisFrame;
+        MeshMarkerResource? sphere;
+        ArrowResource? arrow;
+        AngleAxisResource? angleAxis;
         
         Vector3 dirForDataSource;
 
         readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
 
         public override IModuleData ModuleData { get; }
-        public override TfFrame Frame => frameNode.Parent;
+        public override TfFrame? Frame => frameNode.Parent;
 
         public MagnitudeConfiguration Config
         {
@@ -246,7 +245,7 @@ namespace Iviz.Controllers
             set => config.VectorScale = value;
         }
 
-        public MagnitudeListener([NotNull] IModuleData moduleData)
+        public MagnitudeListener(IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
@@ -270,11 +269,7 @@ namespace Iviz.Controllers
                     goto case Msgs.GeometryMsgs.Pose.RosMessageType;
 
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
-                    if (Listener == null)
-                    {
-                        Listener = new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler, transportHint);
-                    }
-
+                    Listener ??= new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler, transportHint);
                     RentFrame(frameNode);
                     break;
 
@@ -283,10 +278,7 @@ namespace Iviz.Controllers
                     goto case Point.RosMessageType;
 
                 case Point.RosMessageType:
-                    if (Listener == null)
-                    {
-                        Listener = new Listener<Point>(config.Topic, Handler, transportHint);
-                    }
+                    Listener ??= new Listener<Point>(config.Topic, Handler, transportHint);
 
                     RentSphere(frameNode);
                     break;
@@ -296,11 +288,7 @@ namespace Iviz.Controllers
                     goto case Wrench.RosMessageType;
 
                 case Wrench.RosMessageType:
-                    if (Listener == null)
-                    {
-                        Listener = new Listener<Wrench>(config.Topic, Handler, transportHint);
-                    }
-
+                    Listener ??= new Listener<Wrench>(config.Topic, Handler, transportHint);
                     RentFrame(frameNode);
                     RentArrow(frameNode);
                     RentAngleAxis(frameNode);
@@ -313,11 +301,7 @@ namespace Iviz.Controllers
                     goto case Twist.RosMessageType;
 
                 case Twist.RosMessageType:
-                    if (Listener == null)
-                    {
-                        Listener = new Listener<Twist>(config.Topic, Handler, transportHint);
-                    }
-
+                    Listener ??= new Listener<Twist>(config.Topic, Handler, transportHint);
                     RentFrame(frameNode);
                     RentArrow(frameNode);
                     RentAngleAxis(frameNode);
@@ -337,13 +321,13 @@ namespace Iviz.Controllers
             }
         }
 
-        void RentFrame([NotNull] FrameNode node)
+        void RentFrame(FrameNode node)
         {
             axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
             axisFrame.ShadowsEnabled = false;
         }
         
-        void RentArrow([NotNull] FrameNode node)
+        void RentArrow(FrameNode node)
         {
             arrow = ResourcePool.RentDisplay<ArrowResource>(node.Transform);
             arrow.Color = Color;
@@ -351,13 +335,13 @@ namespace Iviz.Controllers
             arrow.ShadowsEnabled = false;
         }
 
-        void RentAngleAxis([NotNull] FrameNode node)
+        void RentAngleAxis(FrameNode node)
         {
             angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(node.Transform);
             angleAxis.Color = Color.yellow;
         }
         
-        void RentSphere([NotNull] FrameNode node)
+        void RentSphere(FrameNode node)
         {
             sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
             sphere.Transform.localScale = 0.05f * Vector3.one;
@@ -365,7 +349,7 @@ namespace Iviz.Controllers
             sphere.ShadowsEnabled = false;
         }
 
-        void Handler([NotNull] PoseStamped msg)
+        void Handler(PoseStamped msg)
         {
             frameNode.AttachTo(msg.Header);
             Handler(msg.Pose);
@@ -381,7 +365,7 @@ namespace Iviz.Controllers
             frameNode.Transform.SetLocalPose(msg.Ros2Unity());
         }
 
-        void Handler([NotNull] PointStamped msg)
+        void Handler(PointStamped msg)
         {
             frameNode.AttachTo(msg.Header);
             Handler(msg.Point);
@@ -397,7 +381,7 @@ namespace Iviz.Controllers
             frameNode.Transform.localPosition = msg.Ros2Unity();
         }
 
-        void Handler([NotNull] WrenchStamped msg)
+        void Handler(WrenchStamped msg)
         {
             frameNode.AttachTo(msg.Header);
             Handler(msg.Wrench);
@@ -405,7 +389,7 @@ namespace Iviz.Controllers
 
         Vector3 TrailDataSource() => frameNode.Transform.TransformPoint(dirForDataSource * (VectorScale * scaleMultiplier));
 
-        void Handler([NotNull] Wrench msg)
+        void Handler(Wrench msg)
         {
             if (msg.Force.HasNaN() || msg.Torque.HasNaN())
             {
@@ -413,12 +397,20 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = msg.Force.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
-            angleAxis.Set(msg.Torque.Ros2Unity());
+            if (arrow != null)
+            {
+                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+            }
+
+            if (angleAxis != null)
+            {
+                angleAxis.Set(msg.Torque.Ros2Unity());
+            }
+
             dirForDataSource = dir;
         }
 
-        void Handler([NotNull] TwistStamped msg)
+        void Handler(TwistStamped msg)
         {
             frameNode.AttachTo(msg.Header);
             Handler(msg.Twist);
@@ -433,15 +425,26 @@ namespace Iviz.Controllers
             }
 
             Vector3 dir = linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
-            angleAxis.Set(angular.RosRpy2Unity());
+            if (arrow != null)
+            {
+                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+            }
+
+            if (angleAxis != null)
+            {
+                angleAxis.Set(angular.RosRpy2Unity());
+            }
+
             dirForDataSource = dir;
         }
 
-        void Handler([NotNull] Odometry msg)
+        void Handler(Odometry msg)
         {
             frameNode.AttachTo(msg.Header);
-            childNode.AttachTo(msg.ChildFrameId);
+            if (childNode != null)
+            {
+                childNode.AttachTo(msg.ChildFrameId);
+            }
 
             if (msg.Pose.Pose.HasNaN())
             {
@@ -457,8 +460,16 @@ namespace Iviz.Controllers
             frameNode.Transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
             Vector3 dir = linear.Ros2Unity();
-            arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
-            angleAxis.Set(angular.RosRpy2Unity());
+            if (arrow != null)
+            {
+                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+            }
+
+            if (angleAxis != null)
+            {
+                angleAxis.Set(angular.RosRpy2Unity());
+            }
+
             dirForDataSource = dir;
         }
 

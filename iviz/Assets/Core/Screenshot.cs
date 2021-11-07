@@ -1,7 +1,8 @@
+#nullable enable
+
 using System;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -27,7 +28,7 @@ namespace Iviz.Core
         public byte[] Bytes { get; }
 
         public Screenshot(ScreenshotFormat format, int width, int height, in Intrinsic intrinsic, in Pose cameraPose,
-            [NotNull] byte[] bytes)
+            byte[] bytes)
         {
             Format = format;
             Timestamp = time.Now();
@@ -39,9 +40,8 @@ namespace Iviz.Core
             Bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
         }
 
-        [NotNull]
         public CameraInfo CreateCameraInfoMessage(string cameraFrameId, uint seqId) =>
-            new CameraInfo
+            new()
             {
                 Header = (seqId, Timestamp, cameraFrameId),
                 Width = (uint)Width,
@@ -49,9 +49,8 @@ namespace Iviz.Core
                 K = Intrinsic.ToArray(),
             };
 
-        [NotNull]
         public Image CreateImageMessage(string cameraFrameId, uint seqId) =>
-            new Image(
+            new(
                 (seqId, Timestamp, cameraFrameId),
                 (uint)Height,
                 (uint)Width,
@@ -61,45 +60,32 @@ namespace Iviz.Core
                 Bytes
             );
 
-        [NotNull]
         static string EncodingFromFormat(ScreenshotFormat format)
         {
-            switch (format)
+            return format switch
             {
-                case ScreenshotFormat.Bgra:
-                    return "bgra8";
-                case ScreenshotFormat.Rgb:
-                    return "rgb8";
-                case ScreenshotFormat.Mono8:
-                    return "mono8";
-                case ScreenshotFormat.Mono16:
-                    return "mono16";
-                case ScreenshotFormat.Float:
-                    return "32FC";
-                default:
-                    throw new ArgumentException();
-            }
+                ScreenshotFormat.Bgra => "bgra8",
+                ScreenshotFormat.Rgb => "rgb8",
+                ScreenshotFormat.Mono8 => "mono8",
+                ScreenshotFormat.Mono16 => "mono16",
+                ScreenshotFormat.Float => "32FC",
+                _ => throw new ArgumentException()
+            };
         }
 
         static int BppFromFormat(ScreenshotFormat format)
         {
-            switch (format)
+            return format switch
             {
-                case ScreenshotFormat.Mono8:
-                    return 1;
-                case ScreenshotFormat.Mono16:
-                    return 2;
-                case ScreenshotFormat.Rgb:
-                    return 3;
-                case ScreenshotFormat.Float:
-                case ScreenshotFormat.Bgra:
-                    return 4;
-                default:
-                    throw new ArgumentException();
-            }
+                ScreenshotFormat.Mono8 => 1,
+                ScreenshotFormat.Mono16 => 2,
+                ScreenshotFormat.Rgb => 3,
+                ScreenshotFormat.Float => 4,
+                ScreenshotFormat.Bgra => 4,
+                _ => throw new ArgumentException()
+            };
         }
 
-        [NotNull]
         public override string ToString()
         {
             return $"[Screenshot width={Width} height={Height} At={CameraPose}]";

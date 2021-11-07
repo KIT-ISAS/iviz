@@ -1,30 +1,29 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
-    interface IHighlightable
+    internal interface IHighlightable
     {
         void Highlight();
     }
-    
+
     public sealed class TfFrame : FrameNode, IHighlightable
     {
         const int TrailTimeWindowInMs = 5000;
 
-        [SerializeField] string id;
+        [SerializeField] string id = "";
 
-        readonly Dictionary<string, TfFrame> children = new Dictionary<string, TfFrame>();
-        readonly List<FrameNode> listeners = new List<FrameNode>();
+        readonly Dictionary<string, TfFrame> children = new();
+        readonly List<FrameNode> listeners = new();
 
         Pose pose;
 
@@ -34,30 +33,46 @@ namespace Iviz.Controllers
         bool visible;
         bool forceInvisible;
 
-        AxisFrameResource axis;
-        TextMarkerResource label;
-        LineConnector parentConnector;
+        AxisFrameResource? axis;
+        TextMarkerResource? label;
+        LineConnector? parentConnector;
+        TrailResource? trail;
 
-        [CanBeNull] TrailResource trail;
+        AxisFrameResource Axis
+        {
+            get
+            {
+                if (axis != null)
+                {
+                    return axis;
+                }
 
-        [NotNull]
+                axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
+                axis.ColliderEnabled = true;
+                axis.Layer = LayerType.IgnoreRaycast;
+                axis.gameObject.layer = LayerType.TfAxis;
+                axis.name = "[Axis]";
+                return axis;
+            }
+        }
+
         TrailResource Trail
         {
             get
             {
-                if (trail == null)
+                if (trail != null)
                 {
-                    trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrame.Transform);
-                    trail.TimeWindowInMs = TrailTimeWindowInMs;
-                    trail.Color = Color.yellow;
-                    trail.Name = $"[Trail:{id}]";
+                    return trail;
                 }
 
+                trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrame.Transform);
+                trail.TimeWindowInMs = TrailTimeWindowInMs;
+                trail.Color = Color.yellow;
+                trail.Name = $"[Trail:{id}]";
                 return trail;
             }
         }
 
-        [NotNull]
         TextMarkerResource Label
         {
             get
@@ -66,7 +81,7 @@ namespace Iviz.Controllers
                 {
                     return label;
                 }
-                
+
                 label = ResourcePool.RentDisplay<TextMarkerResource>(Transform);
                 label.Name = "[Label]";
                 label.Text = Id;
@@ -78,50 +93,44 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         LineConnector ParentConnector
         {
             get
             {
-                if (parentConnector == null)
+                if (parentConnector != null)
                 {
-                    parentConnector = ResourcePool.RentDisplay<LineConnector>(Transform);
-                    parentConnector.A = Transform;
-
-                    parentConnector.B = Transform.parent.CheckedNull() ?? TfListener.RootFrame.Transform;
-
-                    parentConnector.name = "[Connector]";
-                    parentConnector.LineWidth = FrameSize / 20;
-                    parentConnector.Layer = LayerType.IgnoreRaycast;
-                    parentConnector.gameObject.SetActive(false);
+                    return parentConnector;
                 }
 
+                parentConnector = ResourcePool.RentDisplay<LineConnector>(Transform);
+                parentConnector.A = Transform;
+                parentConnector.B = Transform.parent.CheckedNull() ?? TfListener.RootFrame.Transform;
+
+                parentConnector.name = "[Connector]";
+                parentConnector.LineWidth = FrameSize / 20;
+                parentConnector.Layer = LayerType.IgnoreRaycast;
+                parentConnector.gameObject.SetActive(false);
                 return parentConnector;
             }
         }
 
-        bool HasTrail => trail != null;
-        bool HasLabelObjectText => label != null;
-        bool HasParentConnector => parentConnector != null;
+        public Dictionary<string, TfFrame>.ValueCollection Children => children.Values;
 
-        [NotNull] public Dictionary<string, TfFrame>.ValueCollection Children => children.Values;
-
-        [NotNull]
         public string Id
         {
             get => id;
             private set
             {
                 id = value ?? throw new ArgumentNullException(nameof(value));
-                
-                if (HasLabelObjectText)
+
+                if (label != null)
                 {
-                    Label.Text = id;
+                    label.Text = id;
                 }
 
-                if (HasTrail)
+                if (trail != null)
                 {
-                    Trail.Name = $"[Trail:{id}]";
+                    trail.Name = $"[Trail:{id}]";
                 }
             }
         }
@@ -144,7 +153,7 @@ namespace Iviz.Controllers
             set
             {
                 visible = value;
-                axis.Visible = value && !ForceInvisible;
+                Axis.Visible = value && !ForceInvisible;
                 LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;
             }
@@ -156,12 +165,10 @@ namespace Iviz.Controllers
             set
             {
                 labelVisible = value;
-                if (!HasLabelObjectText && !value)
+                if (label != null || value)
                 {
-                    return;
+                    Label.Visible = !ForceInvisible && Visible && value;
                 }
-
-                Label.Visible = !ForceInvisible && Visible && value;
             }
         }
 
@@ -171,41 +178,39 @@ namespace Iviz.Controllers
             set
             {
                 labelSize = value;
-                if (HasLabelObjectText)
+                if (label != null)
                 {
-                    Label.ElementSize = 0.5f * value * FrameSize;
+                    label.ElementSize = 0.5f * value * FrameSize;
                 }
             }
         }
 
         public bool ConnectorVisible
         {
-            get => HasParentConnector && ParentConnector.Visible;
+            get => parentConnector != null && parentConnector.Visible;
             set
             {
-                if (!HasParentConnector && !value)
+                if (parentConnector != null || value)
                 {
-                    return;
+                    ParentConnector.Visible = !ForceInvisible && Visible && value;
                 }
-
-                ParentConnector.Visible = !ForceInvisible && Visible && value;
             }
         }
 
         public float FrameSize
         {
-            get => axis.AxisLength;
+            get => Axis.AxisLength;
             set
             {
-                axis.AxisLength = value;
-                if (HasParentConnector)
+                Axis.AxisLength = value;
+                if (parentConnector != null)
                 {
                     parentConnector.LineWidth = FrameSize / 20;
                 }
 
-                if (HasLabelObjectText)
+                if (label != null)
                 {
-                    Label.BillboardOffset = 1.5f * FrameSize * Vector3.up;
+                    label.BillboardOffset = 1.5f * FrameSize * Vector3.up;
                 }
 
                 LabelSize = LabelSize;
@@ -218,26 +223,21 @@ namespace Iviz.Controllers
             set
             {
                 trailVisible = value;
-                if (!HasTrail && !value)
+                if (trail == null && !value)
                 {
                     return;
                 }
 
                 Trail.Visible = value && Visible;
-                if (value)
-                {
-                    Trail.DataSource = () => Transform.position;
-                }
-                else
-                {
-                    Trail.DataSource = null;
-                }
+                Trail.DataSource = value 
+                    ? () => Transform.position 
+                    : null;
             }
         }
 
         public bool ParentCanChange { get; set; } = true;
 
-        public override TfFrame Parent
+        public override TfFrame? Parent
         {
             get => base.Parent;
             set
@@ -265,22 +265,16 @@ namespace Iviz.Controllers
 
         void Awake()
         {
-            axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
-
-            axis.ColliderEnabled = true;
-            axis.Layer = LayerType.IgnoreRaycast;
-            axis.gameObject.layer = Settings.IsHololens ? LayerType.IgnoreRaycast : LayerType.TfAxis;
-            axis.name = "[Axis]";
             FrameSize = 0.125f;
         }
 
-        public void Setup([NotNull] string newId)
+        public void Setup(string newId)
         {
             Id = newId;
             Name = "{" + Id + "}";
         }
 
-        public void AddListener([NotNull] FrameNode frame)
+        public void AddListener(FrameNode frame)
         {
             if (frame == null)
             {
@@ -293,7 +287,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void RemoveListener([NotNull] FrameNode frame)
+        public void RemoveListener(FrameNode frame)
         {
             if (frame == null)
             {
@@ -309,12 +303,12 @@ namespace Iviz.Controllers
             CheckIfDead();
         }
 
-        void AddChild([NotNull] TfFrame frame)
+        void AddChild(TfFrame frame)
         {
             children.Add(frame.Id, frame);
         }
 
-        void RemoveChild([NotNull] TfFrame frame)
+        void RemoveChild(TfFrame frame)
         {
             if (IsChildless)
             {
@@ -330,32 +324,31 @@ namespace Iviz.Controllers
             {
                 Debug.LogWarning($"Frame '{id}' had a listener that was previously destroyed.");
             }
-            
+
             if (HasNoListeners && IsChildless)
             {
                 TfListener.Instance.MarkAsDead(this);
             }
         }
 
-        public bool SetParent([CanBeNull] TfFrame newParent)
+        public bool SetParent(TfFrame? newParent)
         {
             if (!ParentCanChange)
             {
                 return false;
             }
-            
-            bool newParentIsNull = (newParent is null);
-            TfFrame oldParent = Parent;
 
-            if (newParentIsNull)
+            TfFrame? oldParent = Parent;
+
+            if (newParent is null)
             {
-                if (!(oldParent is null))
+                if (oldParent is not null)
                 {
                     oldParent.RemoveChild(this);
                 }
 
                 base.Parent = null;
-                if (HasParentConnector)
+                if (parentConnector != null)
                 {
                     ParentConnector.B = TfListener.OriginFrame.Transform;
                 }
@@ -373,7 +366,7 @@ namespace Iviz.Controllers
                     return true;
                 }
 
-                if (!(oldParent is null))
+                if (oldParent is not null)
                 {
                     oldParent.RemoveChild(this);
                 }
@@ -381,7 +374,7 @@ namespace Iviz.Controllers
                 base.Parent = newParent;
                 newParent.AddChild(this);
 
-                if (HasParentConnector)
+                if (parentConnector != null)
                 {
                     ParentConnector.B = Transform.parent;
                 }
@@ -390,7 +383,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        static bool IsChildOf([CanBeNull] TfFrame maybeChild, [NotNull] Object frame)
+        static bool IsChildOf(TfFrame? maybeChild, Object frame)
         {
             int frameId = frame.GetInstanceID();
 
@@ -412,7 +405,6 @@ namespace Iviz.Controllers
 
         public void SetPose(in Pose newPose)
         {
-            //if (pose == newPose)
             if (pose.EqualsApprox(newPose))
             {
                 return;

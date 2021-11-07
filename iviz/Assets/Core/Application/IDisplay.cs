@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿#nullable enable
+
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -12,7 +13,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Bounds of the display in local coordinates, or null if the display is empty.
         /// </summary>
-        [CanBeNull] Bounds? Bounds { get; }
+        Bounds? Bounds { get; }
         /// <summary>
         /// Unity layer of the display.
         /// </summary>

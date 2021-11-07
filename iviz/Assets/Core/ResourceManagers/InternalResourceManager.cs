@@ -1,9 +1,11 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Iviz.Core;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -12,27 +14,26 @@ namespace Iviz.Resources
 {
     public sealed class InternalResourceManager
     {
-        readonly Dictionary<string, Info<GameObject>> gameObjects = new Dictionary<string, Info<GameObject>>
+        readonly Dictionary<string, Info<GameObject>> gameObjects = new()
         {
             ["package://iviz_internal/cube"] = Resource.Displays.Cube,
             ["package://iviz_internal/cylinder"] = Resource.Displays.Cylinder,
             ["package://iviz_internal/sphere"] = Resource.Displays.Sphere,
         };
 
-        readonly Dictionary<string, Info<Texture2D>> textures = new Dictionary<string, Info<Texture2D>>();
+        readonly Dictionary<string, Info<Texture2D>> textures = new();
 
-        readonly HashSet<string> negGameObjects = new HashSet<string>();
-        readonly HashSet<string> negTextures = new HashSet<string>();
+        readonly HashSet<string> negGameObjects = new();
+        readonly HashSet<string> negTextures = new();
 
-        [NotNull] readonly ReadOnlyDictionary<string, string> robotDescriptions;
+        readonly ReadOnlyDictionary<string, string> robotDescriptions;
 
-        [NotNull, ItemNotNull]
         public IEnumerable<string> GetRobotNames() =>
             robotDescriptions.Keys ?? (IEnumerable<string>) Array.Empty<string>();
 
         public InternalResourceManager()
         {
-            string robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
+            string? robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
             if (string.IsNullOrEmpty(robotsFile))
             {
                 Logger.Warn($"{this}: Empty resource file!");
@@ -42,23 +43,23 @@ namespace Iviz.Resources
 
             Dictionary<string, string> robots = JsonConvert.DeserializeObject<Dictionary<string, string>>(robotsFile);
             Dictionary<string, string> tmpRobotDescriptions = new Dictionary<string, string>();
-            foreach (var pair in robots)
+            foreach (var (key, value) in robots)
             {
-                string robotDescription =
-                    UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + pair.Value)?.text;
+                string? robotDescription =
+                    UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
                 if (string.IsNullOrEmpty(robotDescription))
                 {
-                    Logger.Info($"{this}: Empty or null description file {pair.Value}!");
+                    Logger.Info($"{this}: Empty or null description file {value}!");
                     continue;
                 }
 
-                tmpRobotDescriptions[pair.Key] = robotDescription;
+                tmpRobotDescriptions[key] = robotDescription;
             }
 
             robotDescriptions = tmpRobotDescriptions.AsReadOnly();
         }
 
-        public bool ContainsRobot([NotNull] string robotName)
+        public bool ContainsRobot(string robotName)
         {
             if (robotName == null)
             {
@@ -68,8 +69,7 @@ namespace Iviz.Resources
             return robotDescriptions.ContainsKey(robotName);
         }
 
-        [ContractAnnotation("=> false, robotDescription:null; => true, robotDescription:notnull")]
-        public bool TryGetRobot([NotNull] string robotName, out string robotDescription)
+        public bool TryGetRobot(string robotName, out string robotDescription)
         {
             if (robotName == null)
             {
@@ -79,23 +79,20 @@ namespace Iviz.Resources
             return robotDescriptions.TryGetValue(robotName, out robotDescription);
         }
 
-        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public bool TryGet([NotNull] string uriString, out Info<GameObject> info)
+        public bool TryGet(string uriString, [NotNullWhen(true)] out Info<GameObject>? info)
         {
             return TryGet(uriString, gameObjects, negGameObjects, out info);
         }
 
-        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        public bool TryGet([NotNull] string uriString, out Info<Texture2D> info)
+        public bool TryGet(string uriString, [NotNullWhen(true)] out Info<Texture2D>? info)
         {
             return TryGet(uriString, textures, negTextures, out info);
         }
 
-        [ContractAnnotation("=> false, info:null; => true, info:notnull")]
-        bool TryGet<T>([NotNull] string uriString,
-            [NotNull] Dictionary<string, Info<T>> repository,
-            [NotNull] HashSet<string> negRepository,
-            [CanBeNull] out Info<T> info)
+        bool TryGet<T>(string uriString,
+            Dictionary<string, Info<T>> repository,
+            HashSet<string> negRepository,
+            [NotNullWhen(true)] out Info<T>? info)
             where T : UnityEngine.Object
         {
             if (uriString is null)
@@ -147,10 +144,6 @@ namespace Iviz.Resources
             return true;
         }
 
-        [NotNull]
-        public override string ToString()
-        {
-            return "[InternalResourceManager]";
-        }
+        public override string ToString() => "[InternalResourceManager]";
     }
 }

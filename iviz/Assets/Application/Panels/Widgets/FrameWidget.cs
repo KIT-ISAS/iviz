@@ -1,7 +1,7 @@
-﻿using Iviz.Controllers;
+﻿#nullable enable
+
+using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Displays;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,13 +9,13 @@ namespace Iviz.App
 {
     public sealed class FrameWidget : DraggableButtonWidget
     {
-        [SerializeField] Text text = null;
+        [SerializeField] Text? text = null;
+        Text Text => text.AssertNotNull(nameof(text));
 
-        TfFrame frame;
-        IHasFrame owner;
+        TfFrame? frame;
+        IHasFrame? owner;
 
-        [CanBeNull]
-        public IHasFrame Owner
+        public IHasFrame? Owner
         {
             get => owner;
             set
@@ -34,8 +34,7 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull]
-        TfFrame Frame
+        TfFrame? Frame
         {
             get => frame;
             set
@@ -60,7 +59,7 @@ namespace Iviz.App
                     newText = $"<b>➤{frame.Id}</b>";
                 }
 
-                text.text = newText;
+                Text.text = newText;
                 UpdateStats();
             }
         }

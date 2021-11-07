@@ -1,14 +1,15 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using Iviz.Core;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public static class LineUtils
     {
-        public static void AddLineStipple([NotNull] List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
+        public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
             float stippleLength = 0.1f)
         {
             if (lines == null)
@@ -50,10 +51,10 @@ namespace Iviz.Displays
                 notAxis = Vector3.right;
             }
 
-            Vector3 diry = notAxis.Cross(axis).Normalized();
-            Vector3 dirx = axis.Cross(diry).Normalized();
-            dirx *= radius;
-            diry *= radius;
+            Vector3 dirY = notAxis.Cross(axis).Normalized();
+            Vector3 dirX = axis.Cross(dirY).Normalized();
+            dirX *= radius;
+            dirY *= radius;
 
             float coeff = Mathf.PI / numStipples;
             for (int i = 1; i <= 2 * numStipples + 1; i += 2)
@@ -63,12 +64,12 @@ namespace Iviz.Displays
                 a = i * coeff;
                 ax = Mathf.Cos(a);
                 ay = Mathf.Sin(a);
-                Vector3 v0 = ax * dirx + ay * diry;
+                Vector3 v0 = ax * dirX + ay * dirY;
 
                 a += coeff;
                 ax = Mathf.Cos(a);
                 ay = Mathf.Sin(a);
-                Vector3 v1 = ax * dirx + ay * diry;
+                Vector3 v1 = ax * dirX + ay * dirY;
 
                 lines.Add(new LineWithColor(c + v0, c + v1, color));
             }

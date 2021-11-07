@@ -1,7 +1,9 @@
+#nullable enable
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Iviz.Tools;
 using System.Linq;
@@ -10,7 +12,6 @@ using System.Runtime.CompilerServices;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -20,7 +21,7 @@ namespace Iviz.Core
 {
     public static class UnityUtils
     {
-        public static CultureInfo Culture { get; } = BuiltIns.Culture;
+        public static readonly CultureInfo Culture = BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MagnitudeSq(this in Vector3 v)
@@ -29,22 +30,20 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff(this in float3 p)
-        {
-            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
-        }
+        public static float MaxAbsCoeff(this in float3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff3(this in float4 p)
-        {
-            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
-        }
+        public static float MaxAbsCoeff3(this in float4 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MaxAbsCoeff(this in Vector3 p)
+        public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float MaxAbsCoeff(float x, float y, float z)
         {
-            return Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z));
+            return Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
@@ -92,12 +91,6 @@ namespace Iviz.Core
             return p;
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public static float3 Abs(this in float3 p)
-        //{
-        //    return new float3(Mathf.Abs(p.x), Mathf.Abs(p.y), Mathf.Abs(p.z));
-        //}
-
         public static bool TryParse(string s, out float f)
         {
             if (float.TryParse(s, NumberStyles.Any, Culture, out f))
@@ -110,13 +103,13 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose AsPose([NotNull] this Transform t)
+        public static Pose AsPose(this Transform t)
         {
             return new Pose(t.position, t.rotation);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Pose AsLocalPose([NotNull] this Transform t)
+        public static Pose AsLocalPose(this Transform t)
         {
             return new Pose(t.localPosition, t.localRotation);
         }
@@ -140,17 +133,17 @@ namespace Iviz.Core
             return o;
         }
 
-        public static void SetPose([NotNull] this Transform t, in Pose p)
+        public static void SetPose(this Transform t, in Pose p)
         {
             t.SetPositionAndRotation(p.position, p.rotation);
         }
 
-        public static void SetParentLocal([NotNull] this Transform t, [CanBeNull] Transform parent)
+        public static void SetParentLocal(this Transform t, Transform? parent)
         {
             t.SetParent(parent, false);
         }
 
-        public static void SetLocalPose([NotNull] this Transform t, in Pose p)
+        public static void SetLocalPose(this Transform t, in Pose p)
         {
             t.localPosition = p.position;
             t.localRotation = p.rotation;
@@ -177,20 +170,12 @@ namespace Iviz.Core
 
         public static bool EqualsApprox(this in Pose p, in Pose q)
         {
-            /*
-            return Mathf.Approximately(p.position.x, q.position.x)
-                   && Mathf.Approximately(p.position.y, q.position.y)
-                   && Mathf.Approximately(p.position.z, q.position.z)
-                   && Mathf.Approximately(p.rotation.x, q.rotation.x)
-                   && Mathf.Approximately(p.rotation.y, q.rotation.y)
-                   && Mathf.Approximately(p.rotation.z, q.rotation.z)
-                   && Mathf.Approximately(p.rotation.w, q.rotation.w);
-                   */
             return EqualsApprox(p.position, q.position) && EqualsApprox(p.rotation, q.rotation);
         }
 
         static bool EqualsApprox(in Vector3 lhs, in Vector3 rhs)
         {
+            // from unity
             float num1 = lhs.x - rhs.x;
             float num2 = lhs.y - rhs.y;
             float num3 = lhs.z - rhs.z;
@@ -199,26 +184,8 @@ namespace Iviz.Core
 
         static bool EqualsApprox(in Quaternion a, in Quaternion b)
         {
-            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;            
-        }
-        
-
-
-        public static Vector4 GetColumnIn(this in Matrix4x4 m, int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    return new Vector4(m.m00, m.m10, m.m20, m.m30);
-                case 1:
-                    return new Vector4(m.m01, m.m11, m.m21, m.m31);
-                case 2:
-                    return new Vector4(m.m02, m.m12, m.m22, m.m32);
-                case 3:
-                    return new Vector4(m.m03, m.m13, m.m23, m.m33);
-                default:
-                    throw new IndexOutOfRangeException("Invalid column index!");
-            }
+            // from unity
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;
         }
 
         public static Pose Lerp(this in Pose p, in Pose o, float t) => new Pose(
@@ -226,30 +193,22 @@ namespace Iviz.Core
             Quaternion.Lerp(p.rotation, o.rotation, t)
         );
 
-        public static Pose LocalLerp([NotNull] this Transform p, in Pose o, float t)
+        public static Pose LocalLerp(this Transform p, in Pose o, float t)
         {
-            return new Pose(
+            return new(
                 Vector3.Lerp(p.localPosition, o.position, t),
                 Quaternion.Lerp(p.localRotation, o.rotation, t)
             );
         }
 
-        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts)
+        public static ArraySegment<T> AsSegment<T>(this T[] ts)
         {
             return new ArraySegment<T>(ts);
         }
 
-        public static ArraySegment<T> AsSegment<T>([NotNull] this T[] ts, int offset)
+        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset)
         {
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
-        }
-
-        static readonly Plane[] PlaneCache = new Plane[6];
-
-        public static bool IsVisibleFromMainCamera(this in Bounds bounds)
-        {
-            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
-            return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
         /// <summary>
@@ -258,8 +217,13 @@ namespace Iviz.Core
         /// <param name="o">The Unity object to evaluate</param>
         /// <typeparam name="T">The type of the Unity object</typeparam>
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
-        [CanBeNull]
-        public static T CheckedNull<T>([CanBeNull] this T o) where T : UnityEngine.Object => o != null ? o : null;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [return: NotNullIfNotNull("o")]
+        public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T AssertNotNull<T>(this T? o, string name) where T : UnityEngine.Object =>
+            o != null ? o : throw new NullReferenceException($"Asset {name} has not been set!");
 
         public static Color WithAlpha(this Color c, float alpha)
         {
@@ -321,36 +285,33 @@ namespace Iviz.Core
             Color.RGBToHSV(c, out float h, out _, out float v);
             return Color.HSVToRGB(h, saturation, v).WithAlpha(c.a);
         }
-        
+
         public static Color WithValue(this in Color c, float value)
         {
             Color.RGBToHSV(c, out float h, out float s, out _);
             return Color.HSVToRGB(h, s, value).WithAlpha(c.a);
-        }        
-        
+        }
+
         public static bool IsUsable(this in Pose pose)
         {
             const int maxPoseMagnitude = 100000;
             return pose.position.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
-        [ContractAnnotation("=> false, t:null; => true, t:notnull")]
-        public static bool TryGetFirst<T>([NotNull] this IEnumerable<T> enumerable, [CanBeNull] out T t)
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? t)
         {
-            using (var enumerator = enumerable.GetEnumerator())
+            using var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
             {
-                if (enumerator.MoveNext())
-                {
-                    t = enumerator.Current;
-                    return true;
-                }
-
-                t = default;
-                return false;
+                t = enumerator.Current;
+                return true;
             }
+
+            t = default;
+            return false;
         }
 
-        static Func<object, Array> extractArrayFromListTypeFn;
+        static Func<object, Array>? extractArrayFromListTypeFn;
 
         static Func<object, Array> ExtractArrayFromList
         {
@@ -370,18 +331,18 @@ namespace Iviz.Core
                 }
 
                 extractArrayFromListTypeFn =
-                    (Func<object, Array>)methodInfo.CreateDelegate(typeof(Func<object, Array>));
+                    (Func<object, Array>) methodInfo.CreateDelegate(typeof(Func<object, Array>));
 
                 return extractArrayFromListTypeFn;
             }
         }
 
-        public static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
+        public static T[] ExtractArray<T>(this List<T> list) => (T[]) ExtractArrayFromList(list);
     }
 
     public static class ResourceUtils
     {
-        public static void ReturnToPool<T>([CanBeNull] this T resource) where T : MonoBehaviour, IDisplay
+        public static void ReturnToPool<T>(this T? resource) where T : MonoBehaviour, IDisplay
         {
             if (resource == null)
             {
@@ -392,7 +353,7 @@ namespace Iviz.Core
             ResourcePool.ReturnDisplay(resource);
         }
 
-        public static void ReturnToPool([CanBeNull] this IDisplay resource, [NotNull] Info<GameObject> info)
+        public static void ReturnToPool(this IDisplay? resource, Info<GameObject> info)
         {
             if (resource == null)
             {
@@ -400,29 +361,41 @@ namespace Iviz.Core
             }
 
             resource.Suspend();
-            ResourcePool.Return(info, ((MonoBehaviour)resource).gameObject);
+            ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
         }
 
-        [NotNull]
-        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>([NotNull] this Dictionary<T, TU> t)
+        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
         {
             return new ReadOnlyDictionary<T, TU>(t);
         }
 
-        [NotNull]
-        public static IEnumerable<(T item, int index)> WithIndex<T>([NotNull] this IEnumerable<T> source)
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source)
         {
             return source.Select((item, index) => (item, index));
+        }
+        
+        public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
+            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
+
+        public static T Instantiate<T>(this Info<GameObject> o, Transform? parent = null)
+        {
+            var component = o.Instantiate(parent).GetComponent<T>();
+            if (component == null)
+            {
+                throw new NullReferenceException("While instantiating " + o + " the component " + 
+                                                 typeof(T).Name + " was not found.");
+            }
+
+            return component;
         }
     }
 
     public static class BoundsUtils
     {
-        [ContractAnnotation("null => null; notnull => notnull")]
-        [CanBeNull]
-        public static Transform GetTransform([CanBeNull] this IDisplay resource)
+        [return: NotNullIfNotNull("resource")]
+        public static Transform? GetTransform(this IDisplay? resource)
         {
-            return ((MonoBehaviour)resource)?.transform;
+            return ((MonoBehaviour?) resource)?.transform;
         }
 
         static readonly Vector3[] CubePoints =
@@ -484,40 +457,40 @@ namespace Iviz.Core
             return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
-        static Bounds TransformBound(this in Bounds bounds, [NotNull] Transform transform)
+        static Bounds TransformBound(this in Bounds bounds, Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
 
-        static Bounds TransformBoundWithInverse(this in Bounds bounds, [NotNull] Transform transform)
+        static Bounds TransformBoundWithInverse(this in Bounds bounds, Transform transform)
         {
             var (x, y, z) = transform.localScale;
             return TransformBound(bounds, transform.AsLocalPose().Inverse(),
                 new Vector3(1f / x, 1f / y, 1f / z));
         }
 
-        public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, [NotNull] Transform transform)
+        public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, Transform transform)
         {
             if (transform == null)
             {
                 throw new ArgumentNullException(nameof(transform));
             }
 
-            return bounds == null ? (Bounds?)null : TransformBoundWithInverse(bounds.Value, transform);
+            return bounds == null ? null : TransformBoundWithInverse(bounds.Value, transform);
         }
 
-        public static Bounds? TransformBound(this in Bounds? bounds, [NotNull] Transform transform)
+        public static Bounds? TransformBound(this in Bounds? bounds, Transform transform)
         {
             if (transform == null)
             {
                 throw new ArgumentNullException(nameof(transform));
             }
 
-            return bounds == null ? (Bounds?)null : TransformBound(bounds.Value, transform);
+            return bounds == null ? null : TransformBound(bounds.Value, transform);
         }
 
 
-        public static Bounds? CombineBounds([NotNull] this IEnumerable<Bounds?> enumOfBounds)
+        public static Bounds? CombineBounds(this IEnumerable<Bounds?> enumOfBounds)
         {
             if (enumOfBounds == null)
             {
@@ -525,87 +498,85 @@ namespace Iviz.Core
             }
 
             Bounds? result = null;
-            using (var it = enumOfBounds.GetEnumerator())
+            using var it = enumOfBounds.GetEnumerator();
+            while (it.MoveNext())
             {
-                while (it.MoveNext())
+                Bounds? bounds = it.Current;
+                if (bounds == null)
                 {
-                    Bounds? bounds = it.Current;
-                    if (bounds == null)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    if (result == null)
-                    {
-                        result = bounds;
-                    }
-                    else
-                    {
-                        result.Value.Encapsulate(bounds.Value);
-                    }
+                if (result == null)
+                {
+                    result = bounds;
+                }
+                else
+                {
+                    result.Value.Encapsulate(bounds.Value);
                 }
             }
 
             return result;
         }
+        
+        static readonly Plane[] PlaneCache = new Plane[6];
 
-        [NotNull]
-        public static T EnsureComponent<T>([NotNull] this GameObject gameObject) where T : Component =>
-            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
-
-        [NotNull]
-        public static T Instantiate<T>([NotNull] this Info<GameObject> o, [CanBeNull] Transform parent = null) =>
-            o.Instantiate(parent).GetComponent<T>();
+        public static bool IsVisibleFromMainCamera(this in Bounds bounds)
+        {
+            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
+            return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
+        }
     }
 
     public static class MeshUtils
     {
-        public static void SetVertices([NotNull] this Mesh mesh, in Rent<Vector3> ps)
+        public static void SetVertices(this Mesh mesh, in Rent<Vector3> ps)
         {
             mesh.SetVertices(ps.Array, 0, ps.Length);
         }
 
-        public static void SetNormals([NotNull] this Mesh mesh, in Rent<Vector3> ps)
+        public static void SetNormals(this Mesh mesh, in Rent<Vector3> ps)
         {
             mesh.SetNormals(ps.Array, 0, ps.Length);
         }
 
-        public static void SetTangents([NotNull] this Mesh mesh, in Rent<Vector4> ps)
+        public static void SetTangents(this Mesh mesh, in Rent<Vector4> ps)
         {
             mesh.SetTangents(ps.Array, 0, ps.Length);
         }
 
-        public static void SetIndices([NotNull] this Mesh mesh, in Rent<int> ps, MeshTopology topology, int subMesh)
+        public static void SetIndices(this Mesh mesh, in Rent<int> ps, MeshTopology topology, int subMesh)
         {
             mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
         }
 
-        public static void SetColors([NotNull] this Mesh mesh, in Rent<Color> ps)
+        public static void SetColors(this Mesh mesh, in Rent<Color> ps)
         {
             mesh.SetColors(ps.Array, 0, ps.Length);
         }
 
-        public static void SetColors([NotNull] this Mesh mesh, in Rent<Color32> ps)
+        public static void SetColors(this Mesh mesh, in Rent<Color32> ps)
         {
             mesh.SetColors(ps.Array, 0, ps.Length);
         }
 
-        public static void SetUVs([NotNull] this Mesh mesh, in Rent<Vector2> ps)
+        public static void SetUVs(this Mesh mesh, in Rent<Vector2> ps)
         {
             mesh.SetUVs(0, ps.Array, 0, ps.Length);
         }
 
-        public static void SetUVs([NotNull] this Mesh mesh, in Rent<Vector3> ps)
+        public static void SetUVs(this Mesh mesh, in Rent<Vector3> ps)
         {
             mesh.SetUVs(0, ps.Array, 0, ps.Length);
         }
 
-        public static void SetUVs([NotNull] this Mesh mesh, int channel, in Rent<Vector3> ps)
+        public static void SetUVs(this Mesh mesh, int channel, in Rent<Vector3> ps)
         {
             mesh.SetUVs(channel, ps.Array, 0, ps.Length);
         }
 
-        public static void SetTriangles([NotNull] this Mesh mesh, in Rent<int> ps, int subMesh = 0)
+        public static void SetTriangles(this Mesh mesh, in Rent<int> ps, int subMesh = 0)
         {
             mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
         }
@@ -613,8 +584,8 @@ namespace Iviz.Core
 
     public static class MeshRendererUtils
     {
-        static MaterialPropertyBlock propBlock;
-        [NotNull] static MaterialPropertyBlock PropBlock => propBlock ?? (propBlock = new MaterialPropertyBlock());
+        static MaterialPropertyBlock? propBlock;
+        static MaterialPropertyBlock PropBlock => propBlock ??= new MaterialPropertyBlock();
 
         static readonly int ColorPropId = Shader.PropertyToID("_Color");
         static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
@@ -623,7 +594,7 @@ namespace Iviz.Core
         static readonly int SmoothnessPropId = Shader.PropertyToID("_Smoothness");
         static readonly int MetallicPropId = Shader.PropertyToID("_Metallic");
 
-        public static void SetPropertyColor([NotNull] this MeshRenderer meshRenderer, in Color color, int id = 0)
+        public static void SetPropertyColor(this MeshRenderer meshRenderer, in Color color, int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -635,7 +606,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertyEmissiveColor([NotNull] this MeshRenderer meshRenderer, in Color color,
+        public static void SetPropertyEmissiveColor(this MeshRenderer meshRenderer, in Color color,
             int id = 0)
         {
             if (meshRenderer == null)
@@ -648,7 +619,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertySmoothness([NotNull] this MeshRenderer meshRenderer, float smoothness, int id = 0)
+        public static void SetPropertySmoothness(this MeshRenderer meshRenderer, float smoothness, int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -660,7 +631,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void SetPropertyMetallic([NotNull] this MeshRenderer meshRenderer, float metallic, int id = 0)
+        public static void SetPropertyMetallic(this MeshRenderer meshRenderer, float metallic, int id = 0)
         {
             if (meshRenderer == null)
             {
@@ -672,7 +643,7 @@ namespace Iviz.Core
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
 
-        public static void ResetPropertyTextureScale([NotNull] this MeshRenderer meshRenderer)
+        public static void ResetPropertyTextureScale(this MeshRenderer meshRenderer)
         {
             if (meshRenderer == null)
             {

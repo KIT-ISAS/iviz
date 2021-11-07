@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
 using System;
 using Iviz.Core;
-using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -14,28 +15,26 @@ namespace Iviz.Controllers
     public abstract class FrameNode : MonoBehaviour
     {
         bool disposed;
-        [CanBeNull] TfFrame parent;
+        TfFrame? parent;
 
-        Transform mTransform;
-        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform? mTransform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
-        [CanBeNull]
-        public virtual TfFrame Parent
+        public virtual TfFrame? Parent
         {
             get => parent;
             set => SetParent(value, true);
         }
 
-        [NotNull] public string ParentId => parent != null ? parent.Id : "";
+        public string ParentId => parent != null ? parent.Id : "";
 
-        [NotNull]
         protected string Name
         {
             get => gameObject.name;
             set => gameObject.name = value;
         }
 
-        void SetParent([CanBeNull] TfFrame newParent, bool attach)
+        void SetParent(TfFrame? newParent, bool attach)
         {
             if (!IsAlive)
             {
@@ -69,12 +68,12 @@ namespace Iviz.Controllers
             AttachTo(header.FrameId, header.Stamp);
         }
 
-        public void AttachTo([CanBeNull] string parentId)
+        public void AttachTo(string? parentId)
         {
             AttachTo(parentId, default);
         }
 
-        void AttachTo([CanBeNull] string parentId, in Msgs.time _)
+        void AttachTo(string? parentId, in Msgs.time _)
         {
             if (parentId == null)
             {
@@ -89,7 +88,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void AttachTo([CanBeNull] TfFrame frame)
+        public void AttachTo(TfFrame frame)
         {
             if (frame == null)
             {
@@ -120,8 +119,7 @@ namespace Iviz.Controllers
 
         public bool IsAlive => !disposed && this != null;
 
-        [NotNull]
-        public static FrameNode Instantiate([NotNull] string name)
+        public static FrameNode Instantiate(string name)
         {
             if (name == null)
             {
@@ -129,7 +127,7 @@ namespace Iviz.Controllers
             }
 
             var node = new GameObject(name).AddComponent<SimpleFrameNode>();
-            if (TfListener.Instance != null && TfListener.DefaultFrame != null)
+            if (TfListener.HasInstance)
             {
                 node.Parent = TfListener.DefaultFrame;
             }

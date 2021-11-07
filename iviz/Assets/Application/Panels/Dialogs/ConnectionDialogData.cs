@@ -1,10 +1,11 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -15,19 +16,18 @@ namespace Iviz.App
     public sealed class ConnectionDialogData : DialogData
     {
         const int DefaultPort = 7613;
-        [NotNull] static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
-        [NotNull] static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
-        [NotNull] static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
+        static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
+        static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
+        static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
-        [NotNull] readonly ConnectionDialogContents panel;
+        readonly ConnectionDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        readonly List<Uri> lastMasterUris = new List<Uri>();
+        readonly List<Uri> lastMasterUris = new();
 
-        [CanBeNull] Uri masterUri = DefaultMasterUri;
+        Uri? masterUri = DefaultMasterUri;
 
-        [CanBeNull]
-        public Uri MasterUri
+        public Uri? MasterUri
         {
             get => masterUri;
             set
@@ -37,10 +37,9 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull] Uri myUri = DefaultMyUri;
+        Uri? myUri = DefaultMyUri;
 
-        [CanBeNull]
-        public Uri MyUri
+        public Uri? MyUri
         {
             get => myUri;
             set
@@ -50,10 +49,9 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull] string myId = DefaultMyId;
+        string? myId = DefaultMyId;
 
-        [CanBeNull]
-        public string MyId
+        public string? MyId
         {
             get => myId;
             set
@@ -62,9 +60,8 @@ namespace Iviz.App
                 MyIdChanged?.Invoke(value);
             }
         }
-        
-        
-        [NotNull, ItemNotNull]
+
+
         public List<Uri> LastMasterUris
         {
             get => lastMasterUris;
@@ -75,15 +72,14 @@ namespace Iviz.App
             }
         }
 
-        public event Action<Uri> MasterUriChanged;
-        public event Action<Uri> MyUriChanged;
-        public event Action<string> MyIdChanged;
-        public event Action<bool> MasterActiveChanged;
+        public event Action<Uri?>? MasterUriChanged;
+        public event Action<Uri?>? MyUriChanged;
+        public event Action<string?>? MyIdChanged;
+        public event Action<bool>? MasterActiveChanged;
 
         public ConnectionDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
-
             Logger.LogInternal += OnLogInternal;
         }
 
@@ -134,18 +130,22 @@ namespace Iviz.App
             panel.MasterUri.EndEdit += text =>
             {
                 string trimmed = text.Trim();
-                MasterUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
+                MasterUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
+                    ? uri
+                    : null;
                 if (MasterUri == null)
                 {
                     return;
                 }
 
-                Uri newCallerUri = RosClient.TryGetCallerUriFor(MasterUri, DefaultPort);
-                if (newCallerUri != null)
+                var newCallerUri = RosClient.TryGetCallerUriFor(MasterUri, DefaultPort);
+                if (newCallerUri == null)
                 {
-                    MyUri = newCallerUri;
-                    panel.MyUri.Value = newCallerUri.ToString();
+                    return;
                 }
+                
+                MyUri = newCallerUri;
+                panel.MyUri.Value = newCallerUri.ToString();
             };
             panel.MyId.EndEdit += text =>
             {
@@ -172,8 +172,8 @@ namespace Iviz.App
                         return;
                     }
 
-                    string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host; 
-                    Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort}/");
+                    string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
+                    var ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
                     const string ownMasterId = "iviz_master";
 
                     if (RosServerManager.Create(ownMasterUri, ownMasterId))
@@ -185,7 +185,8 @@ namespace Iviz.App
                         }
 
                         panel.ServerMode.State = true;
-                        Logger.Internal($"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
+                        Logger.Internal(
+                            $"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
                         MasterActiveChanged?.Invoke(true);
                     }
                 }

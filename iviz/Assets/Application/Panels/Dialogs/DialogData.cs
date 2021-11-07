@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿#nullable enable
+
 using UnityEngine;
 
 namespace Iviz.App
@@ -9,10 +10,9 @@ namespace Iviz.App
         static readonly Vector2 DefaultSize = new Vector2(0, -90);
         public static readonly Vector2 MinSize = new Vector2(-120, -450);
 
-        [NotNull] protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
-
-        [NotNull] protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
-        [NotNull] public abstract IDialogPanelContents Panel { get; }
+        protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
+        protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
+        public abstract IDialogPanelContents Panel { get; }
 
         bool detached;
 
@@ -68,8 +68,8 @@ namespace Iviz.App
 
         protected void ResetPanelPosition()
         {
-            var gameObject = ((MonoBehaviour)Panel).gameObject;
-            var transform = (RectTransform)gameObject.transform;
+            var gameObject = ((MonoBehaviour) Panel).gameObject;
+            var transform = (RectTransform) gameObject.transform;
             transform.anchoredPosition = DefaultAnchoredPosition;
             transform.sizeDelta = DefaultSize;
         }
@@ -80,11 +80,7 @@ namespace Iviz.App
             ModuleListPanel.AllGuiVisible = true;
         }
 
-        [NotNull]
-        public override string ToString()
-        {
-            return $"[{GetType().Name}]";
-        }
+        public override string ToString() => $"[{GetType().Name}]";
 
         protected void Close()
         {

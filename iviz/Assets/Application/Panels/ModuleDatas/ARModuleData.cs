@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public ARModuleData([NotNull] ModuleDataConstructor constructor) :
+        public ARModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(ModuleType.AugmentedReality);

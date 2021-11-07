@@ -183,7 +183,7 @@ namespace Iviz.Displays
                             var p = pointBuffer[i];
                             points.Array[i] = p.xyz;
                             indices.Array[i] = i;
-                            colors.Array[i] = PointWithColor.ColorFromFloatBits(p.w);
+                            colors.Array[i] = PointWithColor.RecastToColor32(p.w);
                         }
 
                         mesh.SetVertices(points);
@@ -257,9 +257,9 @@ namespace Iviz.Displays
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in PointWithColor t)
+        public static bool IsElementValid(in float4 t)
         {
-            return !(t.Position.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude);
+            return !(t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
         }
 
         public void SetDirect([NotNull] DirectPointSetter callback, int reserve = 0)

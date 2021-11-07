@@ -158,28 +158,28 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(c));
             }
 
-            switch (c.ModuleType)
+            return c.ModuleType switch
             {
-                case ModuleType.TF: return new TfModuleData(c);
-                case ModuleType.PointCloud: return new PointCloudModuleData(c);
-                case ModuleType.Grid: return new GridModuleData(c);
-                case ModuleType.Image: return new ImageModuleData(c);
-                case ModuleType.Robot: return new SimpleRobotModuleData(c);
-                case ModuleType.Marker: return new MarkerModuleData(c);
-                case ModuleType.InteractiveMarker: return new InteractiveMarkerModuleData(c);
-                case ModuleType.JointState: return new JointStateModuleData(c);
-                case ModuleType.DepthCloud: return new DepthCloudModuleData(c);
-                case ModuleType.LaserScan: return new LaserScanModuleData(c);
-                case ModuleType.AugmentedReality: return new ARModuleData(c);
-                case ModuleType.Magnitude: return new MagnitudeModuleData(c);
-                case ModuleType.OccupancyGrid: return new OccupancyGridModuleData(c);
-                case ModuleType.Joystick: return new JoystickModuleData(c);
-                case ModuleType.Path: return new PathModuleData(c);
-                case ModuleType.GridMap: return new GridMapModuleData(c);
-                case ModuleType.Octomap: return new OctomapModuleData(c);
-                case ModuleType.GuiDialog: return new GuiDialogModuleData(c);
-                default: throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType);
-            }
+                ModuleType.TF => new TfModuleData(c),
+                ModuleType.PointCloud => new PointCloudModuleData(c),
+                ModuleType.Grid => new GridModuleData(c),
+                ModuleType.Image => new ImageModuleData(c),
+                ModuleType.Robot => new SimpleRobotModuleData(c),
+                ModuleType.Marker => new MarkerModuleData(c),
+                ModuleType.InteractiveMarker => new InteractiveMarkerModuleData(c),
+                ModuleType.JointState => new JointStateModuleData(c),
+                ModuleType.DepthCloud => new DepthCloudModuleData(c),
+                ModuleType.LaserScan => new LaserScanModuleData(c),
+                ModuleType.AugmentedReality => new ARModuleData(c),
+                ModuleType.Magnitude => new MagnitudeModuleData(c),
+                ModuleType.OccupancyGrid => new OccupancyGridModuleData(c),
+                ModuleType.Joystick => new JoystickModuleData(c),
+                ModuleType.Path => new PathModuleData(c),
+                ModuleType.GridMap => new GridMapModuleData(c),
+                ModuleType.Octomap => new OctomapModuleData(c),
+                ModuleType.GuiDialog => new GuiDialogModuleData(c),
+                _ => throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType)
+            };
         }
     }
 }

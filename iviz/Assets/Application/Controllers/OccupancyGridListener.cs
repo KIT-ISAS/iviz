@@ -87,7 +87,8 @@ namespace Iviz.Controllers
                     numValid = 0;
                 }
 
-                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | {cellSize.ToString("#,0.###")} m/cell</b>\n" +
+                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
+                       $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
                        $"{numValid.ToString("N0")} valid";
             }
         }
@@ -275,8 +276,8 @@ namespace Iviz.Controllers
             Pose origin = msg.Info.Origin.Ros2Unity();
             if (!origin.IsUsable())
             {
-                Logger.Error(
-                    $"{this}: Cannot use ({origin.position.x}, {origin.position.y}, {origin.position.z}) as position. Values too large");
+                Logger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
+                             $"{origin.position.z}) as position. Values too large");
                 origin = Pose.identity;
             }
 

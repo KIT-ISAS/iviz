@@ -1,6 +1,8 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -10,17 +12,14 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class TextMarkerResource : MarkerResource
     {
-        [SerializeField] TextMesh textMesh;
-        [SerializeField] Billboard billboard;
-        [SerializeField] MeshRenderer meshRenderer;
+        [SerializeField] TextMesh? textMesh;
+        [SerializeField] Billboard? billboard;
+        [SerializeField] MeshRenderer? meshRenderer;
 
-        [NotNull] TextMesh TextMesh => textMesh != null ? textMesh : textMesh = GetComponent<TextMesh>();
-        [NotNull] Billboard Billboard => billboard != null ? billboard : billboard = GetComponent<Billboard>();
+        TextMesh TextMesh => textMesh.AssertNotNull(nameof(textMesh));
+        Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
-
-        [NotNull]
         public string Text
         {
             get => TextMesh.text;

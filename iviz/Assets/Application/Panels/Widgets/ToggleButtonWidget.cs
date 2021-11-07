@@ -1,5 +1,6 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,13 +8,14 @@ namespace Iviz.App
 {
     public sealed class ToggleButtonWidget : TrashButtonWidget
     {
-        [SerializeField] Sprite activeSprite;
-        [SerializeField] Sprite inactiveSprite;
+        [SerializeField] Sprite? activeSprite = null;
+        [SerializeField] Sprite? inactiveSprite = null;
 
         [SerializeField] string activeText = ""; 
         [SerializeField] string inactiveText = "";
-        [SerializeField] Text text = null;
+        [SerializeField] Text? text = null;
 
+        /*
         public Sprite ActiveSprite
         {
             get => activeSprite;
@@ -25,15 +27,14 @@ namespace Iviz.App
             get => inactiveSprite;
             set => inactiveSprite = value;
         }
+        */
 
-        [NotNull]
         public string ActiveText
         {
             get => activeText;
             set => activeText = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [NotNull]
         public string InactiveText
         {
             get => inactiveText;

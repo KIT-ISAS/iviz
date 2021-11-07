@@ -1,5 +1,7 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,22 +9,25 @@ namespace Iviz.App
 {
     public class TrashButtonWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Button button = null;
-        [SerializeField] Image image = null;
+        [SerializeField] Button? button = null;
+        [SerializeField] Image? image = null;
+
+        Button Button => button.AssertNotNull(nameof(button));
+        Image Image => image.AssertNotNull(nameof(image));
 
         public bool Interactable
         {
-            get => button.interactable;
-            set => button.interactable = value;
+            get => Button.interactable;
+            set => Button.interactable = value;
         }
 
-        public Sprite Sprite
+        public Sprite? Sprite
         {
-            get => image.sprite;
-            set => image.sprite = value;
+            get => Image.sprite;
+            set => Image.sprite = value;
         }
 
-        public event Action Clicked;
+        public event Action? Clicked;
 
         public void OnClicked()
         {
@@ -34,12 +39,10 @@ namespace Iviz.App
             Clicked = null;
         }
 
-        [NotNull]
         public TrashButtonWidget SubscribeClicked(Action f)
         {
             Clicked += f;
             return this;
         }
-
     }
 }

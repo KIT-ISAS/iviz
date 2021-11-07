@@ -1,11 +1,11 @@
+#nullable enable
+
+using System;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -13,9 +13,9 @@ namespace Iviz.Controllers
 {
     internal class MarkerPointHelper
     {
-        Point[] points;
-        ColorRGBA[] colors;
-        Color color;
+        Point[] points = Array.Empty<Point>();
+        ColorRGBA[] colors = Array.Empty<ColorRGBA>();
+        Color32 color32;
 
         readonly PointListResource.DirectPointSetter singleColor;
         readonly PointListResource.DirectPointSetter noTint;
@@ -28,79 +28,62 @@ namespace Iviz.Controllers
             tintColor = ProcessTintColor;
         }
 
-        public PointListResource.DirectPointSetter GetPointSetter([NotNull] Marker msg)
+        public PointListResource.DirectPointSetter GetPointSetter(Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;
-            color = msg.Color.ToUnityColor();
+            color32 = msg.Color.ToUnityColor();
 
             if (msg.Colors.Length == 0)
             {
                 return singleColor;
             }
 
-            return color == Color.white ? noTint : tintColor;
+            return color32 == Color.white ? noTint : tintColor;
         }
 
         void ProcessSingleColor(NativeList<float4> pointBuffer)
         {
-            float colorAsFloat = PointWithColor.FloatFromColorBits(color);
+            var f = new float4();
+            f.w = PointWithColor.RecastToFloat(color32);
+
             foreach (var rosPoint in points)
             {
-                PointWithColor point = new PointWithColor(rosPoint.Ros2Unity(), colorAsFloat);
-                if (PointListResource.IsElementValid(point))
+                (f.x, f.y, f.z) = rosPoint.Ros2Unity();
+                if (PointListResource.IsElementValid(f))
                 {
-                    pointBuffer.Add(point.f);
+                    pointBuffer.Add(f);
                 }
             }
         }
 
         void ProcessNoTint(NativeList<float4> pointBuffer)
         {
+            var f = new float4();
+
             for (int i = 0; i < points.Length; i++)
             {
-                ColorRGBA c = colors[i];
-                
-                float4 rgba = new float4(c.R, c.G, c.B, c.A);
-                if (rgba.HasNaN())
+                (f.x, f.y, f.z) = points[i].Ros2Unity();
+                if (PointListResource.IsElementValid(f))
                 {
-                    continue;
-                }
-
-                int4 rgbaAsInt = math.min(new int4(rgba * 255), 255);
-
-                PointWithColor point = new PointWithColor(
-                    points[i].Ros2Unity(),
-                    new Color32((byte) rgbaAsInt.x, (byte) rgbaAsInt.y, (byte) rgbaAsInt.z, (byte) rgbaAsInt.w)
-                );
-                if (PointListResource.IsElementValid(point))
-                {
-                    pointBuffer.Add(point.f);
+                    f.w = PointWithColor.RecastToFloat(colors[i].ToUnityColor32());
+                    pointBuffer.Add(f);
                 }
             }
         }
 
         void ProcessTintColor(NativeList<float4> pointBuffer)
         {
-            float4 mRgba = new float4(color.r, color.g, color.b, color.a);
+            Color color = color32;
+            var f = new float4();
+            
             for (int i = 0; i < points.Length; i++)
             {
-                ColorRGBA c = colors[i];
-                float4 rgba = new float4(c.R, c.G, c.B, c.A);
-                if (rgba.HasNaN())
+                (f.x, f.y, f.z) = points[i].Ros2Unity();
+                if (PointListResource.IsElementValid(f))
                 {
-                    continue;
-                }
-
-                int4 rgbaAsInt = math.min(new int4(rgba * mRgba * 255), 255);
-
-                PointWithColor point = new PointWithColor(
-                    points[i].Ros2Unity(),
-                    new Color32((byte) rgbaAsInt.x, (byte) rgbaAsInt.y, (byte) rgbaAsInt.z, (byte) rgbaAsInt.w)
-                );
-                if (PointListResource.IsElementValid(point))
-                {
-                    pointBuffer.Add(point.f);
+                    f.w = PointWithColor.RecastToFloat(color * colors[i].ToUnityColor());
+                    pointBuffer.Add(f);
                 }
             }
         }

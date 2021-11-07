@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using System.Collections.Generic;
 
 namespace Iviz.Controllers
 {
@@ -24,7 +25,7 @@ namespace Iviz.Controllers
         /// </summary>
         /// <param name="configAsJson">The new configuration, encoded as JSON</param>
         /// <param name="fields">The fields in the configuration that are active.</param>
-        void UpdateConfiguration([NotNull] string configAsJson, [NotNull, ItemNotNull] IEnumerable<string> fields);
+        void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
     }
 
     /// <summary>
@@ -35,7 +36,6 @@ namespace Iviz.Controllers
         /// <summary>
         /// The <see cref="ModuleData"/> of this controller.
         /// </summary>
-        [NotNull]
         IModuleData ModuleData { get; }
 
         /// <summary>

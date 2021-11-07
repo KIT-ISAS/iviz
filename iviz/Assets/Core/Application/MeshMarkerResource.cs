@@ -161,6 +161,7 @@ namespace Iviz.Displays
 
             MainRenderer.ResetPropertyTextureScale();
 
+            /*
             if (Settings.IsHololens)
             {
                 var materials = MainRenderer.materials.ToArray();
@@ -174,6 +175,7 @@ namespace Iviz.Displays
 
                 MainRenderer.materials = materials;
             }
+            */
         }
 
         public bool OcclusionOnly

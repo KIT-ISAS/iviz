@@ -1,16 +1,16 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Text;
-using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class NetworkDialogData : DialogData
     {
-        [NotNull] readonly NetworkDialogContents panel;
+        readonly NetworkDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
         public NetworkDialogData()
@@ -56,7 +56,7 @@ namespace Iviz.App
             }
         }
 
-        static void GenerateReport([NotNull] StringBuilder builder, [CanBeNull] RosClient client)
+        static void GenerateReport(StringBuilder builder, RosClient? client)
         {
             if (client == null)
             {

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -15,8 +15,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class MarkerModuleData : ListenerModuleData
     {
-        [NotNull] readonly MarkerListener listener;
-        [NotNull] readonly MarkerPanelContents panel;
+        readonly MarkerListener listener;
+        readonly MarkerPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         protected override ListenerController Listener => listener;
@@ -24,7 +24,7 @@ namespace Iviz.App
 
         public override IConfiguration Configuration => listener.Config;
 
-        public MarkerModuleData([NotNull] ModuleDataConstructor constructor) :
+        public MarkerModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {

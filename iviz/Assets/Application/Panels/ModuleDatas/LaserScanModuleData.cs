@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -13,8 +13,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class LaserScanModuleData : ListenerModuleData
     {
-        [NotNull] readonly LaserScanListener listener;
-        [NotNull] readonly LaserScanPanelContents panel;
+        readonly LaserScanListener listener;
+        readonly LaserScanPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -22,8 +22,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.LaserScan;
         public override IConfiguration Configuration => listener.Config;
 
-
-        public LaserScanModuleData([NotNull] ModuleDataConstructor constructor) :
+        public LaserScanModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {

@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
@@ -18,10 +20,10 @@ namespace Iviz.MarkerDetection
         bool enableAruco;
 
         readonly Task task;
-        readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource tokenSource = new();
 
         CancellationToken Token => tokenSource.Token;
-        public event Action<Screenshot, IMarkerCorners[]> MarkerDetected;
+        public event Action<Screenshot, IMarkerCorners[]>? MarkerDetected;
 
         public int DelayBetweenCapturesInMs { get; set; } = 3000;
         public int DelayBetweenCapturesFastInMs { get; set; } = 500;
@@ -53,11 +55,11 @@ namespace Iviz.MarkerDetection
 
         async Task RunAsync()
         {
-            CvContext cvContext = null;
+            CvContext? cvContext = null;
 
             try
             {
-                SemaphoreSlim signal = new SemaphoreSlim(0);
+                var signal = new SemaphoreSlim(0);
 
                 ARMarkerType? lastRoundFound = null;
                 while (!Token.IsCancellationRequested)
@@ -76,7 +78,7 @@ namespace Iviz.MarkerDetection
                             : DelayBetweenCapturesInMs,
                         Token);
 
-                    Screenshot screenshot = null;
+                    Screenshot? screenshot = null;
                     GameThread.Post(async () =>
                     {
                         try
@@ -102,10 +104,7 @@ namespace Iviz.MarkerDetection
                         cvContext = null;
                     }
 
-                    if (cvContext == null)
-                    {
-                        cvContext = new CvContext(screenshot.Width, screenshot.Height);
-                    }
+                    cvContext ??= new CvContext(screenshot.Width, screenshot.Height);
 
                     if (Settings.IsHololens)
                     {
@@ -116,9 +115,9 @@ namespace Iviz.MarkerDetection
                         cvContext.SetImageData(screenshot.Bytes, screenshot.Bpp);
                     }
 
-                    IEnumerable<IMarkerCorners> markerCorners;
+                    IEnumerable<IMarkerCorners>? markerCorners;
 
-                    IEnumerable<IMarkerCorners> ProcessQr()
+                    IEnumerable<IMarkerCorners>? ProcessQr()
                     {
                         if (cvContext.DetectQrMarkers() == 0)
                         {
@@ -129,7 +128,7 @@ namespace Iviz.MarkerDetection
                         return cvContext.GetDetectedQrCorners();
                     }
 
-                    IEnumerable<IMarkerCorners> ProcessAruco()
+                    IEnumerable<IMarkerCorners>? ProcessAruco()
                     {
                         if (cvContext.DetectArucoMarkers() == 0)
                         {
@@ -162,8 +161,6 @@ namespace Iviz.MarkerDetection
                             : (qrCorners ?? arucoCorners);
                     }
 
-                    //Debug.Log(GameThread.GameTime - start);
-
                     if (markerCorners == null)
                     {
                         lastRoundFound = null;
@@ -192,9 +189,9 @@ namespace Iviz.MarkerDetection
             catch (OperationCanceledException)
             {
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //Debug.LogError(e);
+                Debug.LogError(e);
             }
             finally
             {
@@ -204,6 +201,11 @@ namespace Iviz.MarkerDetection
 
         async void SetEnabled(bool value)
         {
+            if (Settings.ScreenCaptureManager == null)
+            {
+                return;
+            }
+
             if (value)
             {
                 if (Settings.IsHololens)
@@ -220,8 +222,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic,
-            float sizeInM)
+        public static Pose SolvePnp(IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
         {
             var objectCorners = new Vector3f[]
             {
@@ -241,10 +242,6 @@ namespace Iviz.MarkerDetection
             task.WaitNoThrow(2000, this);
         }
 
-        [NotNull]
-        public override string ToString()
-        {
-            return "[MarkerDetector]";
-        }
+        public override string ToString() => "[MarkerDetector]";
     }
 }
