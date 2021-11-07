@@ -307,7 +307,7 @@ namespace Iviz.Controllers
             WorldPoseChanged += OnWorldPoseChanged;
 
             Settings.ScreenCaptureManager =
-                new ARFoundationScreenCaptureManager(cameraManager, arCamera.transform, occlusionManager, arSession);
+                new ARFoundationScreenCaptureManager(cameraManager, arCamera.transform, occlusionManager);
 
             if (GuiInputModule.Instance != null)
             {

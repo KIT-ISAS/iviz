@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Iviz.Controllers.ARKit;
 using Iviz.Core;
 using JetBrains.Annotations;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
-using Debug = UnityEngine.Debug;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
@@ -20,9 +17,7 @@ namespace Iviz.Controllers
         [NotNull] readonly ARCameraManager cameraManager;
         [NotNull] readonly Transform arCameraTransform;
         [NotNull] readonly AROcclusionManager occlusionManager;
-        [NotNull] readonly ARSession arSession;
-        [NotNull] readonly ARKitDepthMapReader depthMapReader = new ARKitDepthMapReader();
-
+        
         Intrinsic? intrinsic;
 
         Intrinsic Intrinsic
@@ -52,8 +47,7 @@ namespace Iviz.Controllers
         public ARFoundationScreenCaptureManager(
             [NotNull] ARCameraManager cameraManager,
             [NotNull] Transform arCameraTransform,
-            [NotNull] AROcclusionManager occlusionManager,
-            [NotNull] ARSession arSession)
+            [NotNull] AROcclusionManager occlusionManager)
         {
             this.cameraManager = cameraManager != null
                 ? cameraManager
@@ -64,14 +58,10 @@ namespace Iviz.Controllers
             this.occlusionManager = occlusionManager != null
                 ? occlusionManager
                 : throw new ArgumentNullException(nameof(occlusionManager));
-            this.arSession = arSession != null
-                ? arSession
-                : throw new ArgumentNullException(nameof(arSession));
         }
 
         public bool Started => true;
 
-        [NotNull]
         public IEnumerable<(int width, int height)> GetResolutions()
         {
             var configuration = cameraManager.subsystem.currentConfiguration;
@@ -166,16 +156,6 @@ namespace Iviz.Controllers
             {
                 return null;
             }
-
-            /*
-            var screenshot = depthMapReader.GetDepthImage(arSession.subsystem, arCameraTransform.AsPose());
-            if (screenshot != null)
-            {
-                lastDepth = screenshot;
-            }
-
-            return new ValueTask<Screenshot>(screenshot);
-            */
 
             if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
             {
@@ -338,7 +318,6 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            depthMapReader.Dispose();
         }
     }
 }

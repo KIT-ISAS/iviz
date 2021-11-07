@@ -166,7 +166,7 @@ namespace Iviz.Displays
                 Pose offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
                 Pose newPose = pose.Multiply(offset);
                 mTransform.SetLocalPose(newPose);
-                mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs() * 0.1f;
+                mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs();
 
                 EnsureSize(segmentWidth, segmentHeight);
                 var array = texture.GetRawTextureData<sbyte>();

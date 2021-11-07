@@ -151,7 +151,7 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        void Callback(in T msg, IRosReceiverInfo info)
+        void Callback(in T msg, IRosReceiver _)
         {
             foreach (var listener in listeners)
             {
