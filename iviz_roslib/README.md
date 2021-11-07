@@ -7,13 +7,13 @@ I have tested it in Windows, Ubuntu Linux, macOS, iOS, Android, and UWP (Hololen
 
 ## Getting Started
 
-There is a project called _iviz_utils_ in the root of the repository that references all the other projects.
+There is a project called __iviz_utils__ in the root of the repository that references all the other projects.
 You can either:
 * include the project into your VS, VSCode, or Rider solution, or
-* reference all the DLLs in either /Publish (NET Standard 2) or /Publish5 (NET 5) in your project.
+* reference all the DLLs in either __iviz_utils/Publish__ (NET Standard 2) or __iviz_utils/Publish5__ (NET 5) in your project.
 
 If you are in Unity, all you need to do is copy all the DLLs and put them somewhere in your Assets directory.
-If you are recompiling the library, or adapting the code to your own libraries, keep in mind that Unity only supports .NETStandard 2.0 (not 2.1, and not Core).
+If you are recompiling the library, or adapting the code to your own libraries, keep in mind that Unity only supports .NETStandard 2.0 (2.1  in 2021.2, but not Core).
 
 *Note:* The file Newtonsoft.Json.dll is a bit problematic, because some Unity packages already provide it.
 If you get an error of "duplicate references" you can remove the iviz version.
@@ -40,11 +40,13 @@ If this address is not reachable to other nodes, you will only be able to subscr
 A connection example follows:
 ```c#
 // set the master uri: check ROS_MASTER_URI first, else use the given value
-Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.220:11311");
+Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.1:11311");
 
-// set our own uri: TryGetCallerUriFor checks first ROS_HOSTNAME, then ROS_IP, then check the interfaces for an address that can access the master uri
-// if none are found, use the given uri 
-Uri callerUri = TryGetCallerUriFor(masterUri, 7614) ?? new Uri("http://192.168.0.2:7614");
+// set our own uri, the address should match your ip 
+Uri callerUri = new Uri("http://192.168.0.2:7614");
+
+// alternative that tries to guess your address and uses the port 7614
+// Uri callerUri = TryGetCallerUriFor(masterUri, 7614) 
 
 // set the name of our node
 string callerId = "/iviz_test";
@@ -98,7 +100,7 @@ The identifier _id_ acts as a sort of reference counter, and is needed if you wa
 publisher.Unadvertise(id);
 ``` 
 You can advertise a topic multiple times, for example if your application has multiple modules that use the same client.
-You will receive a different id each time.
+The client will only advertise it once in ROS, and you will receive a different id each time.
 If all the ids are unadvertised, the publisher will be disposed and the topic will be unregistered from the ROS system.   
 
 Other things of interest:

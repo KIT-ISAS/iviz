@@ -217,11 +217,12 @@ namespace Iviz.Roslib
             try
             {
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
+                // (there is nothing special about GetUri, it's just a cheap call)
                 RosMasterClient.GetUri();
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                throw new RosConnectionException($"Failed to contact the master URI '{masterUri}'", e);
+                throw new RosConnectionException($"Failed to contact the master URI at '{masterUri}'", e);
             }
 
             try
@@ -295,6 +296,7 @@ namespace Iviz.Roslib
             try
             {
                 // Do a simple ping to the master. This will tell us whether the master is reachable.
+                // (there is nothing special about GetUri, it's just a cheap call)
                 await client.RosMasterClient.GetUriAsync(token);
             }
             catch (Exception e)
@@ -1619,6 +1621,8 @@ namespace Iviz.Roslib
                 Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
             }
 
+            await finalTask.AwaitNoThrow(this);
+            
             RosMasterClient.Dispose();
         }
 
