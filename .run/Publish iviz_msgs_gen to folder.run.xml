@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Publish iviz_msgs_gen to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
-    <riderPublish target_folder="$PROJECT_DIR$/iviz_msgs_gen/Publish" target_framework="net5.0" uuid_high="-7368443065403817056" uuid_low="-7587548383183217018" />
-    <method v="2" />
-  </configuration>
-</component>

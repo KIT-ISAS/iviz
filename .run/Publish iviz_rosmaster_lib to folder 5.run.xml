@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Publish iviz_rosmaster_lib to folder 5" type="DotNetFolderPublish" factoryName="Publish to folder">
-    <riderPublish target_folder="$PROJECT_DIR$/iviz_rosmaster_lib/Publish5" target_framework="net5.0" uuid_high="182662469355850606" uuid_low="-5042054231437322749" />
-    <method v="2" />
-  </configuration>
-</component>
