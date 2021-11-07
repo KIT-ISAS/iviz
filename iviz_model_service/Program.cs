@@ -28,7 +28,8 @@ namespace Iviz.ModelService
             Uri? masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
-                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. Try setting ROS_MASTER_URI to the address of the master.");
+                Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. " +
+                                        "Try setting ROS_MASTER_URI to the address of the master.");
                 return;
             }
 
@@ -39,8 +40,8 @@ namespace Iviz.ModelService
             if (args.Length != 0 && args[0] == "--enable-file-schema")
             {
                 enableFileSchema = true;
-                Console.Error.WriteLine(
-                    "WW Uris starting with 'file://' are now accepted. This makes all your files available to the outside");
+                Console.Error.WriteLine("WW Uris starting with 'file://' are now accepted. " +
+                                        "This makes all your files available to the outside.");
             }
             else
             {
@@ -87,7 +88,7 @@ namespace Iviz.ModelService
             
             Console.WriteLine("** Done.");
             Console.WriteLine("** Iviz.ModelService started with " + modelServer.NumPackages + " ROS package path(s).");
-            Console.WriteLine("** Waiting for requests...");
+            Console.WriteLine("** Standing by for requests.");
 
             await WaitForCancel();
 
@@ -128,18 +129,18 @@ namespace Iviz.ModelService
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
             if (!File.Exists(extrasPath))
             {
-                Console.WriteLine($"** Tried to search for extra ROS paths in file '{extrasPath}', but it is not present.");
+                // Console.WriteLine($"** Optional file '{extrasPath}' with extra ROS package paths is not present.");
                 return null;
             }
 
             try
             {
-                Console.WriteLine($"** Reading extra ROS paths from file '{extrasPath}'");
+                Console.WriteLine($"** Reading extra ROS package paths from file '{extrasPath}'");
                 return await File.ReadAllTextAsync(extrasPath);
             }
             catch (IOException e)
             {
-                Logger.LogError($"EE ROS package file '{extrasPath}' exists but could not be read: {e.Message}");
+                Logger.LogError($"EE ROS package file '{extrasPath}' exists but could not be read. Reason: {e.Message}");
                 return null;
             }
         }
