@@ -105,7 +105,7 @@ namespace Iviz.Tools
                 return socket.EndReceive(await tcs.Task);
             }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
 #else
             using (token.Register(OnCanceled, tcs))
@@ -150,7 +150,7 @@ namespace Iviz.Tools
                 return socket.EndSend(await tcs.Task);
             }
 
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
 #else
             using (token.Register(OnCanceled, tcs))

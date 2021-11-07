@@ -42,7 +42,7 @@ namespace Iviz.Tools
 
             if (timeoutInMs == -1)
             {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
                 await using (token.Register(OnCanceled, tcs))
 #else
                 using (token.Register(OnCanceled, tcs))
@@ -54,7 +54,7 @@ namespace Iviz.Tools
             }
 
             using var timeoutTs = new CancellationTokenSource(timeoutInMs);
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
             await using (timeoutTs.Token.Register(OnTimeout, tcs))
 #else

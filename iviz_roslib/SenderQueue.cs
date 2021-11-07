@@ -48,7 +48,7 @@ namespace Iviz.Roslib
 
         static async Task WaitForSignal(TaskCompletionSource<object?> msgSignal, CancellationToken token)
         {
-#if NETSTANDARD2_1_OR_GREATER
+#if !NETSTANDARD2_0
             await using (token.Register(StreamUtils.OnCanceled, msgSignal))
 #else
             using (token.Register(StreamUtils.OnCanceled, msgSignal))
