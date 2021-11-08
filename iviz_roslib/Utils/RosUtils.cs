@@ -219,20 +219,29 @@ namespace Iviz.Roslib.Utils
 
         internal static int? TryGetMaxPacketSizeForAddress(string address)
         {
-            var remoteAddress = RosUtils.TryGetAddress(address);
+            var remoteAddress = TryGetAddress(address);
             if (remoteAddress == null)
             {
                 return null;
             }
 
             var @interface = TryGetAccessibleInterface(remoteAddress);
-            if (@interface == null)
+
+            int? mtuCandidate;
+
+            try
             {
+                mtuCandidate =
+                    @interface?.GetIPProperties()?.GetIPv4Properties()?.Mtu; // if v6 is active it will return same mtu
+            }
+            catch (Exception e)
+            {
+                // this shouldn't throw at all!
+                Logger.LogDebugFormat("Mono error: Failed to obtain interface MTU: {0}", e);
                 return null;
             }
 
-            int mtu = @interface.GetIPProperties().GetIPv4Properties().Mtu; // if v6 is active it will return same mtu
-            if (mtu == 0)
+            if (mtuCandidate is not {} mtu || mtu == 0)
             {
                 return null; // mono is bad at finding the mtu
             }
