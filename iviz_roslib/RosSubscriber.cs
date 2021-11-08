@@ -13,14 +13,14 @@ namespace Iviz.Roslib
     /// </summary>
     public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
-        static readonly Action<T, IRosReceiverInfo>[] EmptyCallback = Array.Empty<Action<T, IRosReceiverInfo>>();
+        static readonly RosCallback<T>[] EmptyCallback = Array.Empty<RosCallback<T>>();
 
-        readonly Dictionary<string, Action<T, IRosReceiverInfo>> callbacksById = new();
+        readonly Dictionary<string, RosCallback<T>> callbacksById = new();
         readonly CancellationTokenSource runningTs = new();
         readonly RosClient client;
         readonly ReceiverManager<T> manager;
 
-        Action<T, IRosReceiverInfo>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
+        RosCallback<T>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
         int totalSubscribers;
         bool disposed;
 
@@ -71,13 +71,13 @@ namespace Iviz.Roslib
                 { TimeoutInMs = timeoutInMs };
         }
 
-        internal void MessageCallback(in T msg, IRosReceiverInfo receiverInfo)
+        internal void MessageCallback(in T msg, IRosReceiver receiver)
         {
             foreach (var callback in cachedCallbacks)
             {
                 try
                 {
-                    callback(msg, receiverInfo);
+                    callback(in msg, receiver);
                 }
                 catch (Exception e)
                 {
@@ -174,11 +174,11 @@ namespace Iviz.Roslib
             return type == typeof(T);
         }
 
-        string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
+        string IRosSubscriber.Subscribe(Action<IMessage> callback) => 
             Subscribe(msg => callback(msg));
 
-        string IRosSubscriber.Subscribe(Action<IMessage, IRosReceiverInfo> callback) =>
-            Subscribe((msg, receiver) => callback(msg, receiver));
+        string IRosSubscriber.Subscribe(Action<IMessage, IRosReceiver> callback) =>
+            Subscribe((in T msg, IRosReceiver receiver) => callback(msg, receiver));
 
 
         /// <summary>
@@ -188,22 +188,10 @@ namespace Iviz.Roslib
         /// <typeparam name="T">The message type</typeparam>
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
-        public string Subscribe(Action<T> callback)
-        {
-            if (callback is null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+        public string Subscribe(Action<T> callback) => 
+            Subscribe((in T t, IRosReceiver _) => callback(t));
 
-            AssertIsAlive();
-
-            string id = GenerateId();
-            callbacksById.Add(id, (t, _) => callback(t));
-            cachedCallbacks = callbacksById.Values.ToArray();
-            return id;
-        }
-
-        public string Subscribe(Action<T, IRosReceiverInfo> callback)
+        public string Subscribe(RosCallback<T> callback)
         {
             if (callback is null)
             {

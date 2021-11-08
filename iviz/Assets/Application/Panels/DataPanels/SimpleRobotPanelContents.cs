@@ -40,6 +40,7 @@ namespace Iviz.App
             Save = p.AddToggle("Save this Robot Locally");
 
             Material = p.AddCollapsibleWidget("Visuals")
+                .Attach(OcclusionOnlyMode)
                 .Attach(Tint)
                 .Attach(Alpha)
                 .Attach(Metallic)

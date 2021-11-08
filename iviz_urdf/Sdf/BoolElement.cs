@@ -1,5 +1,4 @@
 using System.Xml;
-using Iviz.Msgs.MeshMsgs;
 
 namespace Iviz.Sdf
 {

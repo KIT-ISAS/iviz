@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Tools;
@@ -185,7 +184,7 @@ namespace Iviz.Msgs
             return str.ToString();
         }
 
-        public static string RosNameToCs(string name)
+        static string RosNameToCs(string name)
         {
             if (name == null)
             {
@@ -217,7 +216,15 @@ namespace Iviz.Msgs
         public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
         {
             string guessName = $"{assemblyName}.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
-            return Type.GetType(guessName);
+            var type = Type.GetType(guessName);
+            if (type != null 
+                && typeof(IMessage).IsAssignableFrom(type) 
+                && (type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null))
+            {
+                return type;
+            }
+
+            return null;
         }
 
         public static string ToJsonString(this ISerializable o, bool indented = true)

@@ -16,6 +16,7 @@ PluginImporter:
     second:
       enabled: 0
       settings:
+        Exclude Android: 1
         Exclude Editor: 0
         Exclude Linux64: 0
         Exclude OSXUniversal: 0
@@ -24,9 +25,15 @@ PluginImporter:
         Exclude Win64: 0
         Exclude iOS: 1
   - first:
+      Android: Android
+    second:
+      enabled: 0
+      settings:
+        CPU: ARMv7
+  - first:
       Any: 
     second:
-      enabled: 1
+      enabled: 0
       settings: {}
   - first:
       Editor: Editor

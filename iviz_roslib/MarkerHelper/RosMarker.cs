@@ -8,7 +8,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.XmlRpc;
 
 namespace Iviz.Roslib.MarkerHelper
 {

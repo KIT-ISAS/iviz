@@ -11,36 +11,55 @@ namespace Iviz.Roslib
     internal sealed class SenderQueue<T> where T : IMessage
     {
         const int MaxPacketsWithoutConstraint = 2;
+        const int MaxPacketsInQueue = 2048;
 
-        readonly IRosSenderInfo sender;
+        readonly IRosSender sender;
         readonly SemaphoreSlim signal = new(0);
         readonly ConcurrentQueue<Entry?> messageQueue = new();
         readonly List<Entry?> sendQueue = new();
-
-        public int MaxQueueSizeInBytes { get; set; } = 50000;
+        int messagesInQueue;
+        
+        
+        public long MaxQueueSizeInBytes { get; set; } = 50000;
 
         public int Count => messageQueue.Count;
 
-        public SenderQueue(IRosSenderInfo sender) => this.sender = sender;
+        public SenderQueue(IRosSender sender) => this.sender = sender;
 
-        public void Enqueue(in T message)
+        public void Enqueue(in T message, ref int numDropped, ref long bytesDropped)
         {
+            if (messagesInQueue > MaxPacketsInQueue)
+            {
+                bytesDropped += message.RosMessageLength;
+                numDropped++;
+                return;
+            }
+            
             messageQueue.Enqueue(new Entry(message));
+            Interlocked.Increment(ref messagesInQueue);
             signal.Release();
         }
 
         public void EnqueueEmpty()
         {
             messageQueue.Enqueue(null);
+            Interlocked.Increment(ref messagesInQueue);
             signal.Release();
         }
 
-        public Task EnqueueAsync(in T message, CancellationToken token)
+        public Task EnqueueAsync(in T message, CancellationToken token, ref int numDropped, ref long bytesDropped)
         {
+            if (messagesInQueue > MaxPacketsInQueue)
+            {
+                bytesDropped += message.RosMessageLength;
+                numDropped++;
+                return Task.CompletedTask;
+            }
+            
             var msgSignal = new TaskCompletionSource<object?>();
             messageQueue.Enqueue(new Entry(message, msgSignal));
             signal.Release();
-
+            
             return token.CanBeCanceled
                 ? WaitForSignal(msgSignal, token)
                 : msgSignal.Task;
@@ -63,9 +82,9 @@ namespace Iviz.Roslib
             return signal.WaitAsync(token);
         }
 
-        public RangeEnumerable<Entry?> ReadAll(ref long numDropped, ref long bytesDropped)
+        public RangeEnumerable<Entry?> ReadAll(ref int numDropped, ref long bytesDropped)
         {
-            int totalQueueSizeInBytes = ReadFromQueue();
+            long totalQueueSizeInBytes = ReadFromQueue();
 
             if (sendQueue.Count <= MaxPacketsWithoutConstraint ||
                 totalQueueSizeInBytes < MaxQueueSizeInBytes)
@@ -74,7 +93,7 @@ namespace Iviz.Roslib
             }
 
             DiscardOldMessages(totalQueueSizeInBytes, MaxQueueSizeInBytes, out int newNumDropped,
-                out int newBytesDropped);
+                out long newBytesDropped);
             numDropped += newNumDropped;
             bytesDropped += newBytesDropped;
 
@@ -86,9 +105,9 @@ namespace Iviz.Roslib
             return sendQueue.Skip(newNumDropped);
         }
 
-        int ReadFromQueue()
+        long ReadFromQueue()
         {
-            int totalQueueSizeInBytes = 0;
+            long totalQueueSizeInBytes = 0;
 
             sendQueue.Clear();
             while (messageQueue.TryDequeue(out var element))
@@ -98,17 +117,19 @@ namespace Iviz.Roslib
                 {
                     totalQueueSizeInBytes += notNullElement.messageLength;
                 }
+
+                Interlocked.Decrement(ref messagesInQueue);
             }
 
             return totalQueueSizeInBytes;
         }
 
-        void DiscardOldMessages(int totalQueueSizeInBytes, int maxQueueSizeInBytes,
-            out int numDropped, out int bytesDropped)
+        void DiscardOldMessages(long totalQueueSizeInBytes, long maxQueueSizeInBytes,
+            out int numDropped, out long bytesDropped)
         {
             int c = sendQueue.Count - 1;
 
-            int remainingBytes = maxQueueSizeInBytes;
+            long remainingBytes = maxQueueSizeInBytes;
             for (int i = 0; i < MaxPacketsWithoutConstraint; i++)
             {
                 var element = sendQueue[c - i];
@@ -130,7 +151,7 @@ namespace Iviz.Roslib
                         continue;
                     }
 
-                    int currentMsgLength = notNullElement.messageLength;
+                    long currentMsgLength = notNullElement.messageLength;
                     if (currentMsgLength > remainingBytes)
                     {
                         break;
@@ -173,7 +194,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public void SendToLoopback(in RangeEnumerable<Entry?> queue, ILoopbackReceiver<T> loopbackReceiver,
+        public void DirectSendToLoopback(in RangeEnumerable<Entry?> queue, ILoopbackReceiver<T> loopbackReceiver,
             ref long numSent, ref long bytesSent)
         {
             if (loopbackReceiver == null)
@@ -210,8 +231,14 @@ namespace Iviz.Roslib
             public readonly int messageLength;
             public readonly TaskCompletionSource<object?>? signal;
 
-            public Entry(in T message, TaskCompletionSource<object?>? signal = null) =>
+            public Entry(in T message, TaskCompletionSource<object?>? signal = null)
+            {
                 (this.message, messageLength, this.signal) = (message, message.RosMessageLength, signal);
+                if (messageLength < 0)
+                {
+                    throw new RosMessageSizeOverflowException();
+                }
+            }
 
             public void Deconstruct(out T outMessage, out int outMessageLength,
                 out TaskCompletionSource<object?>? outSignal) =>

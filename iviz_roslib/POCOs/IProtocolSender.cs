@@ -7,7 +7,7 @@ namespace Iviz.Roslib
     internal interface IProtocolSender<TMessage> where TMessage : IMessage
     {
         bool IsAlive { get; }
-        int MaxQueueSizeInBytes { set; }
+        long MaxQueueSizeInBytes { set; }
         Task DisposeAsync(CancellationToken token);
         void Publish(in TMessage msg);
         Task PublishAndWaitAsync(in TMessage message, CancellationToken token);

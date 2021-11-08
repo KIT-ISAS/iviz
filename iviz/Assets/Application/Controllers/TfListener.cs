@@ -113,10 +113,10 @@ namespace Iviz.Controllers
             {
                 Vector3 hitPoint = hitResults[0].Position;
                 bool anyHighlighted = false;
-                foreach (var result in hitResults)
+                foreach (var (gameObject, position, _) in hitResults)
                 {
-                    if (Vector3.Distance(result.Position, hitPoint) > 1
-                        || !TryGetHighlightable(result.GameObject, out var toHighlight))
+                    if (Vector3.Distance(position, hitPoint) > 1
+                        || !TryGetHighlightable(gameObject, out var toHighlight))
                     {
                         continue;
                     }

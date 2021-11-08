@@ -142,25 +142,18 @@ namespace Iviz.MsgsGen
             switch (ArraySize)
             {
                 case NotAnArray when CsClassName == "string":
-                    if (UseShared)
+                {
+                    if (serializeAsProperty)
                     {
                         result = isInStruct
-                            ? $"public StringRef? {CsFieldName};"
-                            : $"public StringRef {CsFieldName} {{ get; set; }}";
+                            ? $"public string? {CsFieldName};"
+                            : $"public string {CsFieldName} {{ get; set; }}";
                     }
                     else
                     {
-                        if (serializeAsProperty)
-                        {
-                            result = isInStruct
-                                ? $"public string? {CsFieldName};"
-                                : $"public string {CsFieldName} {{ get; set; }}";
-                        }
-                        else
-                        {
-                            result = $"public string {CsFieldName};";
-                        }
+                        result = $"public string {CsFieldName};";
                     }
+                }
 
                     break;
                 case NotAnArray:
@@ -176,69 +169,32 @@ namespace Iviz.MsgsGen
                     }
 
                     break;
-                case DynamicSizeArray when UseShared && CsClassName == "string":
-                    if (UseShared)
-                    {
-                        result = isInStruct
-                            ? $"public UniqueRef<StringRef>? {CsFieldName};"
-                            : $"public UniqueRef<StringRef> {CsFieldName} {{ get; set; }}";
-                    }
-                    else
+                case DynamicSizeArray:
+                {
+                    if (serializeAsProperty)
                     {
                         result = isInStruct
                             ? $"public {CsClassName}[]? {CsFieldName};"
                             : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
                     }
-
-                    break;
-                case DynamicSizeArray:
-                    if (UseShared && CsClassName == "string")
-                    {
-                        result = isInStruct
-                            ? $"public UniqueRef<StringRef>? {CsFieldName};"
-                            : $"public UniqueRef<StringRef> {CsFieldName} {{ get; set; }}";
-                    }
-                    else if (UseShared)
-                    {
-                        result = isInStruct
-                            ? $"public UniqueRef<{CsClassName}>? {CsFieldName};"
-                            : $"public UniqueRef<{CsClassName}> {CsFieldName} {{ get; set; }}";
-                    }
                     else
                     {
-                        if (serializeAsProperty)
-                        {
-                            result = isInStruct
-                                ? $"public {CsClassName}[]? {CsFieldName};"
-                                : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
-                        }
-                        else
-                        {
-                            result = $"public {CsClassName}[] {CsFieldName};";
-                        }
+                        result = $"public {CsClassName}[] {CsFieldName};";
                     }
+                }
 
                     break;
                 default:
                 {
-                    if (UseShared)
+                    if (serializeAsProperty)
                     {
                         result = isInStruct
-                            ? $"public UniqueRef<{CsClassName}>? {CsFieldName} {{ get; set; }}"
-                            : $"public UniqueRef<{CsClassName}> {CsFieldName} {{ get; set; }}";
+                            ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
+                            : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
                     }
                     else
                     {
-                        if (serializeAsProperty)
-                        {
-                            result = isInStruct
-                                ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
-                                : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
-                        }
-                        else
-                        {
-                            result = $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName};";
-                        }
+                        result = $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName};";
                     }
 
                     break;
@@ -248,26 +204,7 @@ namespace Iviz.MsgsGen
             string csString = Comment.Length == 0
                 ? $"{attrStr} {result}"
                 : $"{attrStr} {result} //{Comment}";
-
-            /*
-            if (ArraySize <= 0 || !isInStruct)
-            {
-                return new[] {csString};
-            }
-
-            List<string> list = new List<string> {csString};
-            for (int i = 0; i < ArraySize; i++)
-            {
-                list.Add($"public {CsClassName} {CsFieldName}{i}");
-                list.Add("{");
-                list.Add($"    readonly get => {CsFieldName}[{i}];");
-                list.Add($"    set => {CsFieldName}[{i}] = value;");
-                list.Add("}");
-            }
-
-            return list;
-            */
-
+            
             return new[] { csString };
         }
 
@@ -303,7 +240,6 @@ namespace Iviz.MsgsGen
                 RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
 
             // is it in the assembly?
-
             Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
             if (guessType == null)
             {

@@ -1,6 +1,5 @@
 using System.Runtime.Serialization;
 using Iviz.Msgs;
-using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.MsgsWrapper
 {

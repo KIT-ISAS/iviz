@@ -239,12 +239,7 @@ namespace Iviz.RosMaster
 
         static XmlRpcArg GetPid(XmlRpcValue[] _)
         {
-#if NET5_0_OR_GREATER
-            int id = Environment.ProcessId;
-#else
-            int id = System.Diagnostics.Process.GetCurrentProcess().Id;
-#endif
-            return OkResponse(id);
+            return OkResponse(ConnectionUtils.GetProcessId());
         }
 
         XmlRpcArg GetUri(XmlRpcValue[] _)

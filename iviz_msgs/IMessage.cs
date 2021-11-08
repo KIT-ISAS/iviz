@@ -1,7 +1,5 @@
 ﻿
 
-using System;
-
 namespace Iviz.Msgs
 {
 

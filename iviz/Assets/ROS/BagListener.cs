@@ -34,6 +34,7 @@ namespace Iviz.Ros
             {
                 Logger.LogFormat("{0}: Writing rosbag to path {1}", this, path);
             }
+
             task = Task.Run(WriteMessagesAsync);
         }
 
@@ -45,7 +46,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            disposed = true; 
+            disposed = true;
             messageQueue.CompleteAdding();
             await task;
             if (Settings.IsMobile)
@@ -97,13 +98,11 @@ namespace Iviz.Ros
             {
                 Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
             }
-            finally
+
+            if (writer != null)
             {
-                if (writer != null)
-                {
-                    Length = writer.Length;
-                    await writer.DisposeAsync().AwaitNoThrow(this);
-                }
+                Length = writer.Length;
+                await writer.DisposeAsync();
             }
         }
 

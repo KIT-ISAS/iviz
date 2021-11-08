@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Buffer = Iviz.Msgs.Buffer;
 

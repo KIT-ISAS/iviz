@@ -1,12 +1,8 @@
 using System;
-using System.Drawing;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Newtonsoft.Json;
 using NUnit.Framework;
 

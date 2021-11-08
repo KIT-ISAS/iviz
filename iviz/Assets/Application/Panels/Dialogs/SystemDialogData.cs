@@ -338,12 +338,12 @@ namespace Iviz.App
                 try
                 {
                     var response = await client.RosMasterClient.LookupServiceAsync(service, token);
-                    if (response.ServiceUrl == null)
+                    if (response.ServiceUri == null)
                     {
                         return;
                     }
 
-                    providerAddress = response.ServiceUrl.ToString();
+                    providerAddress = response.ServiceUri.ToString();
                     UpdateServicesLink(service);
                 }
                 catch (OperationCanceledException)

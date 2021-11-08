@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -83,5 +84,14 @@ namespace Iviz.Tools
 
         public static bool CheckIfAlive(this Socket? socket) =>
             socket is { Connected: true } && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+
+        public static int GetProcessId()
+        {
+#if NET5_0_OR_GREATER
+            return Environment.ProcessId;
+#else
+            return Process.GetCurrentProcess().Id;
+#endif
+        }
     }
 }

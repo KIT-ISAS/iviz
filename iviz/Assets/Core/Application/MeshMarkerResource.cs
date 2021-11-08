@@ -231,33 +231,36 @@ namespace Iviz.Displays
             }
 
             var effectiveColor = Color * Tint;
-            if (autoSelectMaterial)
+            if (!autoSelectMaterial)
             {
-                if (DiffuseTexture == null && BumpTexture == null)
-                {
-                    var material = effectiveColor.a > 254f / 255f
-                        ? Resource.Materials.Lit.Object
-                        : Resource.Materials.TransparentLit.Object;
-                    MainRenderer.sharedMaterial = material;
-                }
-                else if (effectiveColor.a > 254f / 255f)
-                {
-                    if (textureMaterial == null)
-                    {
-                        textureMaterial = Resource.TexturedMaterials.Get(DiffuseTexture, BumpTexture);
-                    }
+                MainRenderer.SetPropertyColor(effectiveColor);
+                return;
+            }
 
-                    MainRenderer.sharedMaterial = textureMaterial;
-                }
-                else
+            if (DiffuseTexture == null && BumpTexture == null)
+            {
+                var material = effectiveColor.a > 254f / 255f
+                    ? Resource.Materials.Lit.Object
+                    : Resource.Materials.TransparentLit.Object;
+                MainRenderer.sharedMaterial = material;
+            }
+            else if (effectiveColor.a > 254f / 255f)
+            {
+                if (textureMaterial == null)
                 {
-                    if (textureMaterialAlpha == null)
-                    {
-                        textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(DiffuseTexture, BumpTexture);
-                    }
-
-                    MainRenderer.sharedMaterial = textureMaterialAlpha;
+                    textureMaterial = Resource.TexturedMaterials.Get(DiffuseTexture, BumpTexture);
                 }
+
+                MainRenderer.sharedMaterial = textureMaterial;
+            }
+            else
+            {
+                if (textureMaterialAlpha == null)
+                {
+                    textureMaterialAlpha = Resource.TexturedMaterials.GetAlpha(DiffuseTexture, BumpTexture);
+                }
+
+                MainRenderer.sharedMaterial = textureMaterialAlpha;
             }
 
             MainRenderer.SetPropertyColor(effectiveColor);

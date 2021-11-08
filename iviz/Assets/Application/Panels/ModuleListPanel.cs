@@ -518,7 +518,7 @@ namespace Iviz.App
 
         void UpdateLeftHideVisible()
         {
-            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsVisible && !AllGuiVisible);
+            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsActive && !AllGuiVisible);
         }
 
         public async void SaveStateConfiguration([NotNull] string file)

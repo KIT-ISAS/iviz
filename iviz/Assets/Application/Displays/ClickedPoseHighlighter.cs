@@ -37,7 +37,7 @@ namespace Iviz.Displays
         public void HighlightPose(in Pose absolutePose)
         {
             highlightFrameStart = Time.time;
-            flatSphere.Tint = Color.white.WithAlpha(0.3f);
+            flatSphere.Color = Color.white.WithAlpha(0.3f);
             tooltip.CaptionColor = Color.white;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
 
@@ -85,7 +85,7 @@ namespace Iviz.Displays
             float alpha = Mathf.Sqrt(srcAlpha);
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
-            flatSphere.Tint = Color.white.WithAlpha(0.3f * alpha);
+            flatSphere.Color = Color.white.WithAlpha(0.3f * alpha);
         }
 
         public override void Suspend()

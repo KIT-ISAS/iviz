@@ -24,7 +24,7 @@ namespace Iviz.Roslib
         [DataMember] public string RemoteId { get; internal set; } = "";
         [DataMember] public Endpoint RemoteEndpoint { get; internal set; }
         [DataMember] public int CurrentQueueSize { get; internal set; }
-        [DataMember] public int MaxQueueSize { get; internal set; }
+        [DataMember] public long MaxQueueSizeInBytes { get; internal set; }
         [DataMember] public long NumSent { get; internal set; }
         [DataMember] public long BytesSent { get; internal set; }
         [DataMember] public long NumDropped { get; internal set; }

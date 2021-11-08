@@ -1,5 +1,4 @@
 ﻿using System;
-using Iviz.Msgs;
 using Iviz.Tools;
 
 namespace Iviz.Roslib.Utils
@@ -20,7 +19,7 @@ namespace Iviz.Roslib.Utils
             buffer = new Rent<byte>(size);
         }
 
-        public void EnsureCapability(int size)
+        public void EnsureCapacity(int size)
         {
             if (disposed)
             {

@@ -60,7 +60,7 @@ namespace Iviz.App
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.Sender.Set(listener.Publisher);
             panel.TapSender.Set(listener.TapPublisher);
-            panel.PreferUdp.Value = listener.PreferUdp;
+            //panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.HideButton.Clicked += ToggleVisible;
             panel.ShowFrameLabels.ValueChanged += f => listener.FrameLabelsVisible = f;
@@ -68,7 +68,7 @@ namespace Iviz.App
             panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
-            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
+            //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
         }
 
         public override void Close()

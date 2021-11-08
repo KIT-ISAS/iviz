@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -11,18 +10,16 @@ using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib.Utils;
 using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Nito.AsyncEx;
+using Buffer = System.Buffer;
 using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
 
 namespace Iviz.Roslib
 {
-    internal sealed class UdpSender<T> : IProtocolSender<T>, IRosSenderInfo where T : IMessage
+    internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IMessage
     {
         readonly CancellationTokenSource runningTs = new();
         readonly SenderQueue<T> senderQueue;
         readonly TopicInfo<T> topicInfo;
-        readonly UdpClient udpClient;
-        readonly int maxPackageSize;
         readonly Task task;
 
         public IReadOnlyCollection<string> RosHeader { get; }
@@ -37,33 +34,36 @@ namespace Iviz.Roslib
         long bytesSent;
         bool disposed;
 
-        long numDropped;
+        int numDropped;
         long numSent;
-
+        
         byte msgId;
 
         bool KeepRunning => !runningTs.IsCancellationRequested;
 
         public bool IsAlive => !task.IsCompleted;
 
-        public int MaxQueueSizeInBytes
+        public long MaxQueueSizeInBytes
         {
             get => senderQueue.MaxQueueSizeInBytes;
             set => senderQueue.MaxQueueSizeInBytes = value;
         }
 
+        public UdpClient UdpClient { get; }
+        public int MaxPacketSize { get; }
         public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
         public UdpSender(RpcUdpTopicRequest request, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg,
             out byte[] responseHeader)
         {
-            const int ownMaxPackageSize = UdpRosParams.DefaultMTU - UdpRosParams.IpUdpHeadersLength;
-
             this.topicInfo = topicInfo;
             senderQueue = new SenderQueue<T>(this);
 
-            maxPackageSize = Math.Min(request.MaxPacketSize, ownMaxPackageSize);
             RemoteEndpoint = new Endpoint(request.Hostname, request.Port);
+
+            int ownMaxPacketSize = RosUtils.TryGetMaxPacketSizeForAddress(request.Hostname) ??
+                                   (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
+            MaxPacketSize = Math.Min(request.MaxPacketSize, ownMaxPacketSize);
 
             var rosHeader = RosUtils.ParseHeader(request.Header);
             var fields = RosUtils.CreateHeaderDictionary(rosHeader);
@@ -71,7 +71,7 @@ namespace Iviz.Roslib
 
             if (fields.Count < 4)
             {
-                throw new RosInvalidHeaderException("Expected at least 3 fields. Closing connection");
+                throw new RosInvalidHeaderException("Expected at least 4 fields. Closing connection");
             }
 
             if (fields.TryGetValue("callerid", out string? receivedId))
@@ -107,10 +107,11 @@ namespace Iviz.Roslib
                 }
             }
 
-            udpClient = new UdpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
-            udpClient.TryConnect(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
+            UdpClient = new UdpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
+            UdpClient.TryConnect(RemoteEndpoint.Hostname, RemoteEndpoint.Port);
+            UdpClient.Client.SendBufferSize = 32768;
 
-            var maybeLocalEndPoint = (IPEndPoint?)udpClient.Client.LocalEndPoint;
+            var maybeLocalEndPoint = (IPEndPoint?)UdpClient.Client.LocalEndPoint;
             if (maybeLocalEndPoint is not { } localEndPoint)
             {
                 throw new RosConnectionException("Failed to initialize socket");
@@ -158,7 +159,7 @@ namespace Iviz.Roslib
                 }
             }
 
-            udpClient.Dispose();
+            UdpClient.Dispose();
             try
             {
                 runningTs.Cancel();
@@ -177,7 +178,7 @@ namespace Iviz.Roslib
                 Publish(latchedMsg.Value);
             }
 
-            using var writeBuffer = new Rent<byte>(maxPackageSize);
+            using var writeBuffer = new Rent<byte>(MaxPacketSize);
             for (int i = 0; i < UdpRosParams.HeaderLength; i++)
             {
                 writeBuffer[i] = 0;
@@ -193,7 +194,7 @@ namespace Iviz.Roslib
 
                 if (LoopbackReceiver != null)
                 {
-                    senderQueue.SendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
+                    senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
                 }
                 else
                 {
@@ -204,7 +205,10 @@ namespace Iviz.Roslib
 
         async Task SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
         {
-            const int bothHeadersSize = UdpRosParams.HeaderLength + 4;
+            const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
+            byte[] array = writeBuffer.Array;
+
+            using var resizableBuffer = new ByteBufferRent();
 
             try
             {
@@ -212,26 +216,50 @@ namespace Iviz.Roslib
                 {
                     if (e is not var (msg, msgLength, msgSignal))
                     {
-                        WriteKeepAlive(writeBuffer.Array);
-                        await udpClient.WriteChunkAsync(writeBuffer.Array, 0, bothHeadersSize, runningTs.Token);
+                        WriteKeepAlive();
+                        await WriteChunkAsync(udpPlusSizeHeaders);
                         continue;
                     }
 
-                    if (msgLength > maxPackageSize - bothHeadersSize)
+                    if (msgLength + udpPlusSizeHeaders <= MaxPacketSize)
                     {
-                        msgSignal?.TrySetException(CreateQueueOverflowException());
-                        numDropped++;
-                        bytesDropped += msgLength + bothHeadersSize;
-                        continue;
+                        WriteUnfragmented(msgLength);
+                        msg.SerializeToArray(array, udpPlusSizeHeaders);
+                        await WriteChunkAsync(msgLength + udpPlusSizeHeaders);
                     }
+                    else
+                    {
+                        resizableBuffer.EnsureCapacity(msgLength);
+                        msg.SerializeToArray(resizableBuffer.Array);
 
-                    WriteLengthToBuffer(msgLength, writeBuffer.Array);
-                    msg.SerializeToArray(writeBuffer.Array, bothHeadersSize);
+                        int maxPayloadSize = MaxPacketSize - UdpRosParams.HeaderLength;
+                        int totalBlocks = (4 + msgLength + maxPayloadSize - 1) / maxPayloadSize;
+                        int offset = 0;
 
-                    await udpClient.WriteChunkAsync(writeBuffer.Array, 0, msgLength + bothHeadersSize, runningTs.Token);
+                        {
+                            WriteFragmentedFirst(totalBlocks, msgLength);
+                            int firstPayloadSize = maxPayloadSize - 4; // the first packet includes the message length
+                            Buffer.BlockCopy(resizableBuffer.Array, offset,
+                                array, udpPlusSizeHeaders, firstPayloadSize);
+                            await WriteChunkAsync(MaxPacketSize);
+                            offset += firstPayloadSize;
+                        }
+
+                        int blockNr = 1;
+                        while (offset != msgLength)
+                        {
+                            WriteFragmentedN(blockNr++);
+                            int currentPayloadSize = Math.Min(msgLength - offset, maxPayloadSize);
+                            Buffer.BlockCopy(resizableBuffer.Array, offset,
+                                array, UdpRosParams.HeaderLength,
+                                currentPayloadSize);
+                            await WriteChunkAsync(UdpRosParams.HeaderLength + currentPayloadSize);
+                            offset += currentPayloadSize;
+                        }
+                    }
 
                     numSent++;
-                    bytesSent += msgLength + bothHeadersSize;
+                    bytesSent += msgLength + udpPlusSizeHeaders;
                     msgSignal?.TrySetResult(null);
                 }
             }
@@ -240,40 +268,78 @@ namespace Iviz.Roslib
                 senderQueue.FlushFrom(queue, e);
                 throw;
             }
-        }
 
-        void WriteKeepAlive(byte[] array)
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (2 - keepalive)
-            array[4] = UdpRosParams.OpCodePing;
-            // 1 byte msgId
-            array[5] = msgId++;
-            // 2 bytes block id (0, unfragmented)
-            // 4 bytes message length
-            array[8] = 0;
-            array[9] = 0;
-            array[10] = 0;
-            array[11] = 0;
-            // total 12
-        }
 
-        void WriteLengthToBuffer(int msgLength, byte[] array)
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (0 - unfragmented datagram)
-            // 1 byte msgId
-            array[4] = UdpRosParams.OpCodeData0;
-            array[5] = msgId++;
-            // 2 bytes block id (0, unfragmented)
-            // 4 bytes message length
-            array[8] = (byte)msgLength;
-            array[9] = (byte)(msgLength >> 8);
-            array[10] = (byte)(msgLength >> 0x10);
-            array[11] = (byte)(msgLength >> 0x18);
-            // total 12
-        }
+            void WriteKeepAlive()
+            {
+                // 4 bytes connection id (here always 0)
+                // 1 byte op code (2 - keepalive)
+                array[4] = UdpRosParams.OpCodePing;
+                // 1 byte msgId
+                array[5] = ++msgId;
+                // 2 bytes block id (0, first datagram)
+                // 4 bytes message length
+                array[8] = 0;
+                array[9] = 0;
+                array[10] = 0;
+                array[11] = 0;
+                // total 12
+            }
 
+            void WriteUnfragmented(int msgLength)
+            {
+                // 4 bytes connection id (here always 0)
+                // 1 byte op code (0 - first datagram)
+                array[4] = UdpRosParams.OpCodeData0;
+                // 1 byte msgId
+                array[5] = ++msgId;
+                // 2 bytes block id (0, unfragmented)
+                // 4 bytes message length
+                array[8] = (byte)msgLength;
+                array[9] = (byte)(msgLength >> 8);
+                array[10] = (byte)(msgLength >> 0x10);
+                array[11] = (byte)(msgLength >> 0x18);
+                // total 12
+            }
+
+            void WriteFragmentedFirst(int totalBlocks, int msgLength)
+            {
+                // 4 bytes connection id (here always 0)
+                // 1 byte op code (0 - first datagram)
+                array[4] = UdpRosParams.OpCodeData0;
+                // 1 byte msgId
+                array[5] = ++msgId;
+                // 2 bytes block id (total blocks)
+                array[6] = (byte)totalBlocks;
+                array[7] = (byte)(totalBlocks >> 8);
+                // 4 bytes message length
+                array[8] = (byte)msgLength;
+                array[9] = (byte)(msgLength >> 8);
+                array[10] = (byte)(msgLength >> 0x10);
+                array[11] = (byte)(msgLength >> 0x18);
+                // total 12
+            }
+
+            void WriteFragmentedN(int blockNr)
+            {
+                // 4 bytes connection id (here always 0)
+                // 1 byte op code (0 - first datagram)
+                array[4] = UdpRosParams.OpCodeDataN;
+                // 1 byte msgId
+                array[5] = msgId;
+                // 2 bytes block id (total blocks)
+                array[6] = (byte)blockNr;
+                array[7] = (byte)(blockNr >> 8);
+                // no message length here! it was written in the first datagram
+                // total 8
+            }
+
+            ValueTask<int> WriteChunkAsync(int toWrite)
+            {
+                return UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
+            }
+        }
+        
         async Task KeepAliveMessages()
         {
             while (KeepRunning)
@@ -293,17 +359,11 @@ namespace Iviz.Roslib
             disposed = true;
 
             runningTs.Cancel();
-            udpClient.Dispose();
+            UdpClient.Dispose();
 
             await task.AwaitNoThrow(5000, this, token);
             runningTs.Dispose();
         }
-
-        RosQueueException CreateQueueException(Exception e) =>
-            new($"An unexpected exception was thrown while sending to node '{RemoteCallerId}'", e, this);
-
-        RosQueueOverflowException CreateQueueOverflowException() =>
-            new($"Package size was larger than the maximum. Fragmentation not implemented yet", this);
 
         public PublisherSenderState State =>
             new()
@@ -314,7 +374,7 @@ namespace Iviz.Roslib
                 RemoteId = RemoteCallerId,
                 RemoteEndpoint = RemoteEndpoint,
                 CurrentQueueSize = senderQueue.Count,
-                MaxQueueSize = MaxQueueSizeInBytes,
+                MaxQueueSizeInBytes = MaxQueueSizeInBytes,
                 NumSent = numSent,
                 BytesSent = bytesSent,
                 NumDropped = numDropped,
@@ -323,24 +383,17 @@ namespace Iviz.Roslib
 
         public void Publish(in T message)
         {
-            if (!IsAlive)
+            if (IsAlive)
             {
-                numDropped++;
-                return;
+                senderQueue.Enqueue(message, ref numDropped, ref bytesDropped);
             }
-
-            senderQueue.Enqueue(message);
         }
 
         public Task PublishAndWaitAsync(in T message, CancellationToken token)
         {
-            if (IsAlive)
-            {
-                return senderQueue.EnqueueAsync(message, token);
-            }
-
-            numDropped++;
-            return Task.FromException(new InvalidOperationException("Sender has been disposed."));
+            return !IsAlive
+                ? Task.FromException(new InvalidOperationException("Sender has been disposed."))
+                : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
         }
 
         public override string ToString() =>

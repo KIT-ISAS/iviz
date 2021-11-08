@@ -1,10 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -135,8 +131,8 @@ namespace Iviz.Tools
             }
         }
 
-        public static Task WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
-            CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token).AsTask();
+        public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
+            CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token);
 
         static async ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
             CancellationToken token)

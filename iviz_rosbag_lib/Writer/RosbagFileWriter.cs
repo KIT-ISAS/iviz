@@ -33,14 +33,12 @@ namespace Iviz.Rosbag.Writer
         time chunkStartTime;
         time chunkEndTime;
         bool disposed;
+        long cachedLastLength;
 
         /// <summary>
         /// The current size of the rosbag file.
         /// </summary>
-        public long Length => !disposed
-            ? writer.Length
-            : throw new ObjectDisposedException(nameof(writer),
-                "Cannot access Length property after disposing the writer");
+        public long Length => !disposed ? writer.Length : cachedLastLength;
 
         /// <summary>
         /// The size of the current chunk.
@@ -637,6 +635,31 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
+        void Close()
+        {
+            TryCloseChunk();
+
+            if (connections.Count == 0 || chunkInfos.Count == 0)
+            {
+                return;
+            }
+
+            long connectionStart = writer.Position;
+
+            foreach (var pair in connections)
+            {
+                WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
+            }
+
+            foreach (var info in chunkInfos)
+            {
+                WriteChunkInfoRecord(info);
+            }
+
+            writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
+            WriteHeaderRecord(connections.Count, chunkInfos.Count, connectionStart);
+        }
+
         /// <summary>
         /// Writes the index and closes the file.
         /// </summary>
@@ -648,33 +671,46 @@ namespace Iviz.Rosbag.Writer
             }
 
             disposed = true;
-            TryCloseChunk();
 
-            if (connections.Count != 0 && chunkInfos.Count != 0)
+            try
             {
-                long connectionStart = writer.Position;
-
-                //Console.WriteLine("** Writing connections");
-                foreach (var pair in connections)
-                {
-                    WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
-                }
-
-                //Console.WriteLine("** Writing chunk infos");
-                foreach (var info in chunkInfos)
-                {
-                    WriteChunkInfoRecord(info);
-                }
-
-                //Console.WriteLine("** Updating header");
-                writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
-                WriteHeaderRecord(connections.Count, chunkInfos.Count, connectionStart);
+                Close();
+            }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Exception in Dispose: {1}", this, e);
             }
 
+            cachedLastLength = writer.Length;
             if (!leaveOpen)
             {
                 writer.Dispose();
             }
+        }
+
+        async Task CloseAsync()
+        {
+            await TryCloseChunkAsync();
+
+            if (connections.Count == 0 || chunkInfos.Count == 0)
+            {
+                return;
+            }
+
+            long connectionStart = writer.Position;
+
+            foreach (var pair in connections)
+            {
+                await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
+            }
+
+            foreach (var info in chunkInfos)
+            {
+                await WriteChunkInfoRecordAsync(info);
+            }
+
+            writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
+            await WriteHeaderRecordAsync(connections.Count, chunkInfos.Count, connectionStart);
         }
 
 #if !NETSTANDARD2_0
@@ -693,32 +729,24 @@ namespace Iviz.Rosbag.Writer
 
             disposed = true;
 
-            await TryCloseChunkAsync();
-
-            if (connections.Count != 0 && chunkInfos.Count != 0)
+            try
             {
-                long connectionStart = writer.Position;
-
-                //Console.WriteLine("** Writing connections");
-                foreach (var pair in connections)
-                {
-                    await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
-                }
-
-                //Console.WriteLine("** Writing chunk infos");
-                foreach (var info in chunkInfos)
-                {
-                    await WriteChunkInfoRecordAsync(info);
-                }
-
-                //Console.WriteLine("** Updating header");
-                writer.Seek(RosbagMagic.Length, SeekOrigin.Begin);
-                await WriteHeaderRecordAsync(connections.Count, chunkInfos.Count, connectionStart);
+                await CloseAsync();
             }
+            catch (Exception e)
+            {
+                Logger.LogErrorFormat("{0}: Exception in DisposeAsync: {1}", this, e);
+            }
+
+            cachedLastLength = writer.Length;
 
             if (!leaveOpen)
             {
+#if NETSTANDARD2_0
                 writer.Dispose();
+#else
+                await writer.DisposeAsync();
+#endif
             }
         }
     }

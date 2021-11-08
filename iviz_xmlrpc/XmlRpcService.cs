@@ -12,70 +12,6 @@ using Iviz.Tools;
 namespace Iviz.XmlRpc
 {
     /// <summary>
-    /// Parent class for the exceptions from this library.
-    /// </summary>
-    public class XmlRpcException : Exception
-    {
-        protected XmlRpcException(string message) : base(message)
-        {
-        }
-
-        protected XmlRpcException(string message, Exception inner) : base(message, inner)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Thrown when the remote call reported an exception. 
-    /// </summary>
-    public class FaultException : XmlRpcException
-    {
-        public FaultException(string message) : base(message)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Thrown when the XML could not be parsed.
-    /// </summary>
-    public class ParseException : XmlRpcException
-    {
-        public ParseException(string message) : base(message)
-        {
-        }
-
-        public ParseException(string message, Exception inner) : base(message, inner)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Thrown when an error happened during the connection.
-    /// </summary>    
-    public class HttpConnectionException : XmlRpcException
-    {
-        public HttpConnectionException(string message) : base(message)
-        {
-        }
-
-        public HttpConnectionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
-
-    public class RpcConnectionException : HttpConnectionException
-    {
-        public RpcConnectionException(string message) : base(message)
-        {
-        }
-
-        public RpcConnectionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
-
-
-    /// <summary>
     /// Functions for XML-RPC calls.
     /// </summary>
     public static class XmlRpcService
@@ -144,7 +80,7 @@ namespace Iviz.XmlRpc
                         throw new ParseException($"Could not parse '{primitive.InnerText}' as base64!", e);
                     }
                 case "struct":
-                    List<(string, XmlRpcValue)> structValue = new();
+                    var structValue = new List<(string, XmlRpcValue)>();
                     foreach (XmlNode? member in primitive.ChildNodes)
                     {
                         if (member is not { Name: "member" })
@@ -209,7 +145,7 @@ namespace Iviz.XmlRpc
 
         internal static XmlRpcValue ProcessResponse(string inData)
         {
-            XmlDocument document = new();
+            var document = new XmlDocument();
             try
             {
                 document.LoadXml(inData);
@@ -219,7 +155,7 @@ namespace Iviz.XmlRpc
                 throw new ParseException("XML response could not be parsed", e);
             }
 
-            XmlNode? root = document.FirstChild;
+            var root = document.FirstChild;
             while (root != null && root.Name != "methodResponse")
             {
                 root = root.NextSibling;
@@ -230,7 +166,7 @@ namespace Iviz.XmlRpc
                 throw new ParseException("Response has no 'methodResponse' tag");
             }
 
-            XmlNode? child = root.FirstChild;
+            var child = root.FirstChild;
 
             switch (child?.Name)
             {

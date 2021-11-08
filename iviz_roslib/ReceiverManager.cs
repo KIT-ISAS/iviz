@@ -2,18 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
-using Iviz.Roslib.Utils;
-using Iviz.Roslib.XmlRpc;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using Nito.AsyncEx;
-using TaskExtensions = Nito.AsyncEx.TaskExtensions;
 
 namespace Iviz.Roslib
 {
@@ -22,7 +16,7 @@ namespace Iviz.Roslib
         const int DefaultTimeoutInMs = 5000;
 
         readonly AsyncLock mutex = new();
-        readonly ConcurrentDictionary<Uri, ReceiverConnector> connectorsByUri = new();
+        readonly ConcurrentDictionary<Uri, SessionManager> connectorsByUri = new();
         readonly ConcurrentDictionary<Uri, IProtocolReceiver> receiversByUri = new();
         readonly RosClient client;
         readonly RosSubscriber<T> subscriber;
@@ -66,9 +60,9 @@ namespace Iviz.Roslib
         public bool RequestNoDelay { get; }
         public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
-        internal void MessageCallback(in T msg, IRosReceiverInfo receiverInfo)
+        internal void MessageCallback(in T msg, IRosReceiver receiver)
         {
-            subscriber.MessageCallback(msg, receiverInfo);
+            subscriber.MessageCallback(msg, receiver);
         }
 
         public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
@@ -93,12 +87,13 @@ namespace Iviz.Roslib
                 if (newPublishers.Any(uri => !receiversByUri.ContainsKey(uri)))
                 {
                     var toAdd = newPublishers.Where(uri => !receiversByUri.ContainsKey(uri));
-                    var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                        ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, topicInfo)
-                        : null;
 
                     foreach (Uri remoteUri in toAdd)
                     {
+                        var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
+                            ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                            : null;
+
                         if (connectorsByUri.TryGetValue(remoteUri, out var oldConnector))
                         {
                             if (oldConnector.IsAlive)
@@ -111,7 +106,7 @@ namespace Iviz.Roslib
 
                         var rosNodeClient = client.CreateNodeClient(remoteUri);
                         Logger.LogDebugFormat("{0}: Adding connector for '{1}'", this, remoteUri);
-                        var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
+                        var receiverConnector = new SessionManager(rosNodeClient, topicInfo.Topic, transportHint,
                             udpTopicRequest, OnConnectionSucceeded);
                         connectorsByUri[remoteUri] = receiverConnector;
                     }
@@ -126,7 +121,7 @@ namespace Iviz.Roslib
             }
         }
 
-        void OnConnectionSucceeded(ReceiverConnector connector, ReceiverConnector.Response response)
+        void OnConnectionSucceeded(SessionManager connector, SessionManager.Response response)
         {
             IProtocolReceiver receiver;
             var (tcpEndpoint, udpResponse, udpClient) = response;
@@ -164,12 +159,12 @@ namespace Iviz.Roslib
                     }
 
                     var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                        ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, topicInfo)
+                        ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                         : null;
 
                     var rosNodeClient = client.CreateNodeClient(remoteUri);
                     token.ThrowIfCancellationRequested();
-                    var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
+                    var receiverConnector = new SessionManager(rosNodeClient, topicInfo.Topic, transportHint,
                         udpTopicRequest, OnConnectionSucceeded);
 
                     connectorsByUri[remoteUri] = receiverConnector;
@@ -240,7 +235,7 @@ namespace Iviz.Roslib
         {
             var publisherUris = allPublisherUris;
             var receivers = new Dictionary<Uri, IProtocolReceiver>(receiversByUri);
-            var connectors = new Dictionary<Uri, ReceiverConnector>(connectorsByUri);
+            var connectors = new Dictionary<Uri, SessionManager>(connectorsByUri);
 
             var states = new List<SubscriberReceiverState>();
             foreach (Uri uri in publisherUris)

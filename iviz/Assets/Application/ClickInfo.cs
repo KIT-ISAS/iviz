@@ -44,8 +44,10 @@ namespace Iviz.App
             var forward = side.Cross(Normal);
             
             return new Pose(Position, Quaternion.LookRotation(forward, Normal));
-        } 
-        
+        }
+
+        public void Deconstruct(out GameObject gameObject, out Vector3 position, out Vector3 normal) =>
+            (gameObject, position, normal) = (GameObject, Position, Normal);
     }
 
     public sealed class ClickInfo

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Web;
 using Iviz.Tools;
 
@@ -21,8 +20,8 @@ namespace Iviz.XmlRpc
 
         XmlRpcArg(bool f)
         {
-            content = f 
-                ? "<value><boolean>1</boolean></value>\n" 
+            content = f
+                ? "<value><boolean>1</boolean></value>\n"
                 : "<value><boolean>0</boolean></value>\n";
         }
 
@@ -80,7 +79,7 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg((string A, string B) f) : this(((XmlRpcArg) f.A, (XmlRpcArg) f.B))
+        XmlRpcArg((string A, string B) f) : this(((XmlRpcArg)f.A, (XmlRpcArg)f.B))
         {
         }
 
@@ -167,34 +166,39 @@ namespace Iviz.XmlRpc
                 : $"<value><base64>{Convert.ToBase64String(f)}</base64></value>\n";
         }
 
-        public XmlRpcArg((string name, XmlRpcArg value)[] f)
+        public XmlRpcArg((string name, XmlRpcArg value)[] fs)
         {
-            if (f == null)
+            if (fs == null)
             {
-                throw new ArgumentNullException(nameof(f));
+                throw new ArgumentNullException(nameof(fs));
             }
 
-            if (f.Length == 0)
+            if (fs.Length == 0)
             {
                 content = "<value><struct></struct></value>";
                 return;
             }
 
-            StringBuilder builder = new(100);
-            builder.Append("<value><struct>");
-            foreach (var (name, arg) in f)
-            {
-                builder.Append("<member><name>").Append(name).Append("</name>").Append(arg.content)
-                    .Append("</member>");
-            }
+            string?[] array = new string[2 + 5 * fs.Length];
+            array[0] = "<value><struct>";
 
-            builder.Append("</struct></value>");
-            content = builder.ToString();
+            int j = 1;
+            foreach (var (name, arg) in fs)
+            {
+                array[j++] = "<member><name>";
+                array[j++] = name;
+                array[j++] = "</name>";
+                array[j++] = arg.content;
+                array[j++] = "</member>";
+            }
+            
+            array[j] = "</struct></value>";
+            content = string.Concat(array);
         }
 
         public override string ToString()
         {
-            return content ?? throw new InvalidOperationException("Arg has no valid value");
+            return content ?? "[Invalid XmlRpcArg]";
         }
 
         public void ThrowIfEmpty()

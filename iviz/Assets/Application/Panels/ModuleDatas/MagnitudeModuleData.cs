@@ -56,7 +56,7 @@ namespace Iviz.App
             panel.VectorScale.Value = listener.VectorScale;
             panel.HideButton.State = listener.Visible;
             panel.ScaleMultiplier.Value = listener.VectorScaleMultiplierPow10;
-            panel.PreferUdp.Value = listener.PreferUdp;
+            //panel.PreferUdp.Value = listener.PreferUdp;
 
 
             panel.ShowTrail.ValueChanged += f => { listener.TrailVisible = f; };
@@ -68,7 +68,7 @@ namespace Iviz.App
             panel.ShowVector.ValueChanged += f => { listener.VectorVisible = f; };
             panel.VectorScale.ValueChanged += f => { listener.VectorScale = f; };
             panel.ScaleMultiplier.ValueChanged += f => { listener.VectorScaleMultiplierPow10 = f; };
-            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
+            //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             switch (listener.Config.Type)
             {

@@ -81,7 +81,7 @@ namespace Iviz.Roslib
         /// <param name="callback">The function to call when a message arrives.</param>
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>
-        public string Subscribe(Action<IMessage, IRosReceiverInfo> callback);
+        public string Subscribe(Action<IMessage, IRosReceiver> callback);
  
         /// <summary>
         /// Unregisters the given id from the subscriber. If the subscriber has no ids left, the topic will be unsubscribed from the master.
@@ -108,6 +108,8 @@ namespace Iviz.Roslib
         public Task DisposeAsync(CancellationToken token);
     }
     
+    public delegate void RosCallback<T>(in T message, IRosReceiver info) where T : IMessage;
+
     public interface IRosSubscriber<T> : IRosSubscriber where T : IMessage
     {
         /// <summary>
@@ -124,7 +126,7 @@ namespace Iviz.Roslib
         /// <param name="callback">The function to call when a message arrives.</param>
         /// <returns>The subscribed id.</returns>
         /// <exception cref="ArgumentNullException">The callback is null.</exception>        
-        string Subscribe(Action<T, IRosReceiverInfo> callback);
+        string Subscribe(RosCallback<T> callback);
         
         internal bool TryGetLoopbackReceiver(in Endpoint uri, out ILoopbackReceiver<T>? receiver);
     }    
