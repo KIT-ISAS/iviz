@@ -235,18 +235,15 @@ namespace Iviz.Controllers
                 base.EnableMeshing = value;
                 if (value)
                 {
-                    var meshManager = ArCamera.gameObject.EnsureComponent<ARMeshManager>();
-                    meshManager.meshPrefab = meshPrefab;
-                    meshManager.normals = false;
+                    MeshManager = ArCamera.gameObject.EnsureComponent<ARMeshManager>();
+                    MeshManager.meshPrefab = meshPrefab;
+                    MeshManager.normals = false;
                 }
-                else
+                else if (MeshManager != null)
                 {
-                    var meshManager = ArCamera.gameObject.GetComponent<ARMeshManager>();
-                    if (meshManager != null)
-                    {
-                        meshManager.DestroyAllMeshes();
-                        Destroy(meshManager);
-                    }
+                    MeshManager.DestroyAllMeshes();
+                    Destroy(MeshManager);
+                    MeshManager = null;
                 }
             }
         }
@@ -275,14 +272,7 @@ namespace Iviz.Controllers
 
             Settings.ARCamera = ArCamera;
 
-            /*
-            Session = GetComponentInChildren<ARSession>();
-            OcclusionManager = GetComponentInChildren<AROcclusionManager>();
-            PlaneManager = ArSessionOrigin.GetComponent<ARPlaneManager>();
-            Raycaster = ArSessionOrigin.GetComponent<ARRaycastManager>();
-            AnchorManager = ArSessionOrigin.GetComponent<ARAnchorManager>();
-            CameraManager = ArCamera.GetComponent<ARCameraManager>();
-            */
+            MeshManager = ArCamera.gameObject.EnsureComponent<ARMeshManager>();
 
             lastAnchorMoved = Time.time;
 
@@ -600,7 +590,7 @@ namespace Iviz.Controllers
 
             try
             {
-                var captureManager = (ARFoundationScreenCaptureManager?) Settings.ScreenCaptureManager;
+                var captureManager = (ARFoundationScreenCaptureManager?)Settings.ScreenCaptureManager;
 
                 bool shouldPublishColor = ColorSender.NumSubscribers != 0;
                 bool shouldPublishDepth = DepthSender.NumSubscribers != 0;
@@ -615,15 +605,15 @@ namespace Iviz.Controllers
 
                 var colorTask = shouldPublishColor
                     ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?) null;
+                    : (ValueTask<Screenshot?>?)null;
 
                 var depthTask = shouldPublishDepth
                     ? captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?) null;
+                    : (ValueTask<Screenshot?>?)null;
 
                 var confidenceTask = shouldPublishConfidence
                     ? captureManager.CaptureDepthConfidenceAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?) null;
+                    : (ValueTask<Screenshot?>?)null;
 
                 var color = colorTask != null ? await colorTask.Value : null;
                 var depth = depthTask != null ? await depthTask.Value : null;
@@ -679,7 +669,7 @@ namespace Iviz.Controllers
 
                     for (int v = 0; v < confidence.Height * confidence.Width; v++)
                     {
-                        bytes[v] = (byte) (bytes[v] * 127);
+                        bytes[v] = (byte)(bytes[v] * 127);
                     }
 
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));

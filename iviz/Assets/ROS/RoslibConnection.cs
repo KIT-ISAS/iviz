@@ -731,9 +731,9 @@ namespace Iviz.Ros
 
             try
             {
-                if (publishers.TryGetValue(advertiser.Id, out var basePublisher) &&
-                    basePublisher.NumSubscribers > 0 &&
-                    basePublisher is IRosPublisher<T> publisher)
+                if (publishers.TryGetValue(advertiser.Id, out var basePublisher) 
+                    && basePublisher is {NumSubscribers: > 0} 
+                    && basePublisher is IRosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
                 }
@@ -746,14 +746,16 @@ namespace Iviz.Ros
 
         internal bool TryGetResolvedTopicName(ISender advertiser, out string? topicName)
         {
-            if (advertiser.Id == InvalidId || !publishers.TryGetValue(advertiser.Id, out var basePublisher))
+            if (advertiser.Id != InvalidId 
+                && publishers.TryGetValue(advertiser.Id, out var basePublisher)
+                && basePublisher != null)
             {
-                topicName = null;
-                return false;
+                topicName = basePublisher.Topic;
+                return true;
             }
 
-            topicName = basePublisher.Topic;
-            return true;
+            topicName = null;
+            return false;
         }
 
         internal void Subscribe<T>(Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
@@ -1121,7 +1123,7 @@ namespace Iviz.Ros
             }
         }
 
-        public (int Active, int Total) GetNumPublishers(string topic)
+        public (int active, int total) GetNumPublishers(string topic)
         {
             if (topic == null)
             {

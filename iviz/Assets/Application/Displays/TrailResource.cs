@@ -1,8 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -15,20 +16,28 @@ namespace Iviz.Displays
         [SerializeField] int timeWindowInMs = 5000;
         [SerializeField] Color color = UnityEngine.Color.red;
 
-        readonly Queue<(Vector3 A, Vector3 B)> measurements =
-            new Queue<(Vector3, Vector3)>(5 * MeasurementsPerSecond);
+        readonly Queue<(Vector3 A, Vector3 B)> measurements = new(5 * MeasurementsPerSecond);
+        readonly Func<NativeList<float4x2>, bool?> lineSetterDelegate;
 
         Vector3? lastMeasurement;
         float lastTick;
         int maxMeasurements = 160;
 
-        LineResource resource;
+        LineResource? resource;
+        LineResource Resource => resource != null ? resource : (resource = CreateLineResource(Transform));
 
-        protected override IDisplay Display => resource;
+        protected override IDisplay Display => Resource;
+        public Func<Vector3>? DataSource { get; set; }
 
-        public Func<Vector3> DataSource { get; set; }
-        readonly LineResource.DirectLineSetter lineSetterDelegate;
 
+        static LineResource CreateLineResource(Transform transform)
+        {
+            var resource = ResourcePool.RentDisplay<LineResource>(transform);
+            resource.Name = "[Line for Trail]";
+            resource.ElementScale = 0.01f;
+            return resource;
+        }
+        
         public TrailResource()
         {
             lineSetterDelegate = LineSetter;
@@ -63,16 +72,13 @@ namespace Iviz.Displays
 
         public float ElementScale
         {
-            get => resource.ElementScale;
-            set => resource.ElementScale = value;
+            get => Resource.ElementScale;
+            set => Resource.ElementScale = value;
         }
 
         void Awake()
         {
             Transform.SetPose(Pose.identity);
-            resource = ResourcePool.RentDisplay<LineResource>(Transform);
-            resource.Name = "[Line for Trail]";
-            resource.ElementScale = 0.01f;
             TimeWindowInMs = TimeWindowInMs;
             Layer = LayerType.IgnoreRaycast;
         }
@@ -113,7 +119,7 @@ namespace Iviz.Displays
 
             lastMeasurement = newMeasurement;
 
-            resource.SetDirect(lineSetterDelegate, measurements.Count);
+            Resource.SetDirect(lineSetterDelegate, measurements.Count);
         }
 
         bool? LineSetter(NativeList<float4x2> lineBuffer)
@@ -125,7 +131,7 @@ namespace Iviz.Displays
             foreach ((Vector3 a, Vector3 b) in measurements)
             {
                 Color32 colorB = colorA.WithAlpha((byte) (i * scale));
-                LineWithColor line = new LineWithColor(a, colorA, b, colorB);
+                LineWithColor line = new(a, colorA, b, colorB);
                 if (LineResource.IsElementValid(line))
                 {
                     lineBuffer.Add(line.f);

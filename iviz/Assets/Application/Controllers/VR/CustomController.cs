@@ -9,14 +9,32 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Iviz.Controllers
 {
-    public sealed class GazeController : XRBaseController
+    /// <summary>
+    /// A simplified version of <see cref="XRController"/> for devices that do not have a <see cref="XRNode"/>.
+    /// Instead we just wait for a device that "looks like" what we need.  
+    /// </summary>
+    public abstract class CustomController : XRBaseController
     {
-        static readonly InputFeatureUsage<Vector3> GazePosition = new("gazePosition");
-        static readonly InputFeatureUsage<Quaternion> GazeRotation = new("gazeRotation");
-        static bool HasFlag(InputDeviceCharacteristics full, InputDeviceCharacteristics flag) => (full & flag) == flag;
+        readonly List<InputFeatureUsage> cachedUsages = new();
+        InputDevice? device;
 
-        InputDevice device;
+        protected static bool HasFlag(InputDeviceCharacteristics full, InputDeviceCharacteristics flag) => (full & flag) == flag;
+        protected static bool HasFlag(InputTrackingState full, InputTrackingState flag) => (full & flag) == flag;
+        protected abstract bool MatchesDevice(InputDeviceCharacteristics characteristics,
+            List<InputFeatureUsage> usages);
 
+        protected bool TryGetDevice(out InputDevice outDevice)
+        {
+            if (device != null)
+            {
+                outDevice = device.Value;
+                return true;
+            }
+
+            outDevice = default;
+            return false;
+        }
+        
         protected override void Awake()
         {
             base.Awake();
@@ -32,16 +50,9 @@ namespace Iviz.Controllers
 
         void OnDeviceConnected(InputDevice newDevice)
         {
-            if (!HasFlag(newDevice.characteristics, InputDeviceCharacteristics.EyeTracking))
-            {
-                return;
-            }
-
-            var usages = new List<InputFeatureUsage>();
-            newDevice.TryGetFeatureUsages(usages);
-
-            if (usages.Contains((InputFeatureUsage) GazePosition) &&
-                usages.Contains((InputFeatureUsage) GazeRotation))
+            cachedUsages.Clear();
+            newDevice.TryGetFeatureUsages(cachedUsages);
+            if (MatchesDevice(newDevice.characteristics, cachedUsages))
             {
                 device = newDevice;
             }
@@ -51,75 +62,8 @@ namespace Iviz.Controllers
         {
             if (deadDevice == device)
             {
-                device = default;
+                device = null;
             }
-        }
-
-
-        /// <inheritdoc />
-        protected override void UpdateTrackingInput(XRControllerState? controllerState)
-        {
-            base.UpdateTrackingInput(controllerState);
-            if (controllerState == null || !device.isValid)
-            {
-                return;
-            }
-
-
-            if (!device.TryGetFeatureValue(CommonUsages.trackingState, out var trackingState))
-            {
-                return;
-            }
-
-            if (HasFlag(trackingState, InputTrackingState.Rotation))
-            {
-                
-            }
-                && device.TryGetFeatureValue(GazeRotation, out var rotation))
-            {
-                Vector3 p = rotation * (2 * Vector3.forward);
-                cube.transform.position = GetComponent<Camera>().transform.position + p;
-            }
-
-
-
-            //controllerState.poseDataFlags = PoseDataFlags.NoData;
-            //controllerState.position = new Vector3(x, 0, 0);
-            //controllerState.poseDataFlags |= PoseDataFlags.Position;
-
-            /*
-            {
-                if (inputDevice.TryGetFeatureValue(CommonUsages.trackingState, out var trackingState))
-                {
-                    if ((trackingState & InputTrackingState.Position) != 0 &&
-                        inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out var devicePosition))
-                    {
-                        controllerState.position = devicePosition;
-                        controllerState.poseDataFlags |= PoseDataFlags.Position;
-                    }
-
-                    if ((trackingState & InputTrackingState.Rotation) != 0 &&
-                        inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out var deviceRotation))
-                    {
-                        controllerState.rotation = deviceRotation;
-                        controllerState.poseDataFlags |= PoseDataFlags.Rotation;
-                    }
-                }
-            }
-            */
-        }
-
-        /// <inheritdoc />
-        protected override void UpdateInput(XRControllerState? controllerState)
-        {
-            base.UpdateInput(controllerState);
-            controllerState?.ResetFrameDependentStates();
-        }
-
-        /// <inheritdoc />
-        public override bool SendHapticImpulse(float amplitude, float duration)
-        {
-            return false;
         }
     }
 }

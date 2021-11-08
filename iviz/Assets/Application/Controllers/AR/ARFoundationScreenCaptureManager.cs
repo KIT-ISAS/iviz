@@ -92,7 +92,6 @@ namespace Iviz.Controllers
 
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {
-                //Logger.Info($"{this}: Color capture failed.");
                 return null;
             }
 

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#nullable enable
+
+using System;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -18,7 +16,7 @@ namespace Iviz.Displays
 
         public bool FlipWinding { get; set; }
 
-        [CanBeNull] Mesh mesh;
+        Mesh? mesh;
         Bounds localBounds;
 
         public Bounds LocalBounds
@@ -52,7 +50,6 @@ namespace Iviz.Displays
             LocalBounds = LocalBounds;
         }
 
-        [NotNull]
         Mesh EnsureOwnMesh(int numPointsNeeded)
         {
             var indexFormat = numPointsNeeded >= MaxVerticesShort

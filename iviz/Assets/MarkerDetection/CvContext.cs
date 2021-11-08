@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,9 +9,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.MarkerDetection
 {
@@ -95,7 +95,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public void SetImageData([NotNull] byte[] image, int bpp)
+        public void SetImageData(byte[] image, int bpp)
         {
             if (image == null)
             {
@@ -121,7 +121,7 @@ namespace Iviz.MarkerDetection
             Marshal.Copy(image, 0, imagePtr, Width * Height * 3);
         }
 
-        public void SetImageDataFlipY([NotNull] byte[] image, int bpp)
+        public void SetImageDataFlipY(byte[] image, int bpp)
         {
             if (imageSize > image.Length)
             {
@@ -145,7 +145,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public void GetImageData([NotNull] byte[] image)
+        public void GetImageData(byte[] image)
         {
             if (image == null)
             {
@@ -162,41 +162,28 @@ namespace Iviz.MarkerDetection
 
         public void SetCameraMatrix(float fx, float ox, float fy, float oy)
         {
-            using (var array = new Rent<float>(9))
+            using var array = new Rent<float>(9);
+            array.Array[0] = fx;
+            array.Array[1] = 0;
+            array.Array[2] = ox;
+
+            array.Array[3] = 0;
+            array.Array[4] = fy;
+            array.Array[5] = oy;
+
+            array.Array[6] = 0;
+            array.Array[7] = 0;
+            array.Array[8] = 1;
+            if (!Native.SetCameraMatrix(ContextPtr, array.Array, array.Length))
             {
-                array.Array[0] = fx;
-                array.Array[1] = 0;
-                array.Array[2] = ox;
-
-                array.Array[3] = 0;
-                array.Array[4] = fy;
-                array.Array[5] = oy;
-
-                array.Array[6] = 0;
-                array.Array[7] = 0;
-                array.Array[8] = 1;
-                if (!Native.SetCameraMatrix(ContextPtr, array.Array, array.Length))
-                {
-                    throw new CvMarkerException();
-                }
+                throw new CvMarkerException();
             }
         }
 
-        public int DetectArucoMarkers()
-        {
-            Native.DetectArucoMarkers(ContextPtr);
-            return Native.GetNumDetectedMarkers(ContextPtr);
-        }
-
-        public int DetectQrMarkers()
+        public QrMarkerCorners[] DetectQrMarkers()
         {
             Native.DetectQrMarkers(ContextPtr);
-            return Native.GetNumDetectedMarkers(ContextPtr);
-        }
 
-        [NotNull]
-        public QrMarkerCorners[] GetDetectedQrCorners()
-        {
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
@@ -210,42 +197,42 @@ namespace Iviz.MarkerDetection
 
             var markers = new QrMarkerCorners[numDetected];
 
-            using (var pointers = new Rent<IntPtr>(numDetected))
-            using (var pointerLengths = new Rent<int>(numDetected))
-            using (var corners = new Rent<float>(8 * numDetected))
+            using var pointers = new Rent<IntPtr>(numDetected);
+            using var pointerLengths = new Rent<int>(numDetected);
+            using var corners = new Rent<float>(8 * numDetected);
+            
+            if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
+                !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
             {
-                if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
-                    !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
+                throw new CvMarkerException();
+            }
+
+            int o = 0;
+            for (int i = 0; i < numDetected; i++)
+            {
+                string code;
+                using (var strBytes = new Rent<byte>(pointerLengths[i]))
                 {
-                    throw new CvMarkerException();
+                    Marshal.Copy(pointers[i], strBytes.Array, 0, strBytes.Length);
+                    code = BuiltIns.UTF8.GetString(strBytes.Array, 0, strBytes.Length);
                 }
 
-                int o = 0;
-                for (int i = 0; i < numDetected; i++)
+                markers[i] = new QrMarkerCorners(code, new Vector2f[]
                 {
-                    string code;
-                    using (var strBytes = new Rent<byte>(pointerLengths[i]))
-                    {
-                        Marshal.Copy(pointers[i], strBytes.Array, 0, strBytes.Length);
-                        code = BuiltIns.UTF8.GetString(strBytes.Array, 0, strBytes.Length);
-                    }
-
-                    markers[i] = new QrMarkerCorners(code, new Vector2f[]
-                    {
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                    });
-                }
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                });
             }
 
             return markers;
         }
 
-        [NotNull]
-        public ArucoMarkerCorners[] GetDetectedArucoCorners()
+        public ArucoMarkerCorners[] DetectArucoMarkers()
         {
+            Native.DetectArucoMarkers(ContextPtr);
+
             int numDetected = Native.GetNumDetectedMarkers(ContextPtr);
             if (numDetected < 0)
             {
@@ -259,33 +246,32 @@ namespace Iviz.MarkerDetection
 
             var markers = new ArucoMarkerCorners[numDetected];
 
-            using (var indices = new Rent<int>(numDetected))
-            using (var corners = new Rent<float>(8 * numDetected))
+            using var indices = new Rent<int>(numDetected);
+            using var corners = new Rent<float>(8 * numDetected);
+            
+            if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
+                !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
             {
-                if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
-                    !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
-                {
-                    throw new CvMarkerException();
-                }
+                throw new CvMarkerException();
+            }
 
-                int o = 0;
-                for (int i = 0; i < numDetected; i++)
+            int o = 0;
+            for (int i = 0; i < numDetected; i++)
+            {
+                markers[i] = new ArucoMarkerCorners(indices[i], new Vector2f[]
                 {
-                    markers[i] = new ArucoMarkerCorners(indices[i], new Vector2f[]
-                    {
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                        (corners[o++], corners[o++]),
-                    });
-                }
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                    (corners[o++], corners[o++]),
+                });
             }
 
             return markers;
         }
 
-        public static Pose SolvePnp([NotNull] IReadOnlyList<Vector2f> input,
-            [NotNull] IReadOnlyList<Vector3f> output,
+        public static Pose SolvePnp(IReadOnlyList<Vector2f> input,
+            IReadOnlyList<Vector3f> output,
             in Intrinsic intrinsic,
             SolvePnPMethod method = SolvePnPMethod.Iterative)
         {
@@ -304,47 +290,46 @@ namespace Iviz.MarkerDetection
                 throw new ArgumentException("Input and output lengths do not match");
             }
 
-            using (var inputFloats = new Rent<float>(input.Count * 2))
-            using (var outputFloats = new Rent<float>(output.Count * 3))
-            using (var cameraFloats = new Rent<float>(6))
-            using (var resultFloats = new Rent<float>(6))
+            using var inputFloats = new Rent<float>(input.Count * 2);
+            using var outputFloats = new Rent<float>(output.Count * 3);
+            using var cameraFloats = new Rent<float>(6);
+            using var resultFloats = new Rent<float>(6);
+            
+            int o = 0;
+            foreach (var v in input)
             {
-                int o = 0;
-                foreach (var v in input)
-                {
-                    (inputFloats[o], inputFloats[o + 1]) = v;
-                    o += 2;
-                }
-
-                o = 0;
-                foreach (var v in output)
-                {
-                    (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
-                    o += 3;
-                }
-
-                cameraFloats[0] = intrinsic.Fx;
-                cameraFloats[1] = 0;
-                cameraFloats[2] = intrinsic.Cx;
-                cameraFloats[3] = 0;
-                cameraFloats[4] = intrinsic.Fy;
-                cameraFloats[5] = intrinsic.Cy;
-
-                if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
-                    cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))
-                {
-                    throw new CvMarkerException();
-                }
-
-                Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
-                Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
-                double angle = angleAxis.Norm;
-                var rotation = angle == 0
-                    ? Quaternion.Identity
-                    : Quaternion.AngleAxis(angle, angleAxis / angle);
-
-                return (translation, rotation);
+                (inputFloats[o], inputFloats[o + 1]) = v;
+                o += 2;
             }
+
+            o = 0;
+            foreach (var v in output)
+            {
+                (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
+                o += 3;
+            }
+
+            cameraFloats[0] = intrinsic.Fx;
+            cameraFloats[1] = 0;
+            cameraFloats[2] = intrinsic.Cx;
+            cameraFloats[3] = 0;
+            cameraFloats[4] = intrinsic.Fy;
+            cameraFloats[5] = intrinsic.Cy;
+
+            if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
+                cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))
+            {
+                throw new CvMarkerException();
+            }
+
+            Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
+            Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
+            double angle = angleAxis.Norm;
+            var rotation = angle == 0
+                ? Quaternion.Identity
+                : Quaternion.AngleAxis(angle, angleAxis / angle);
+
+            return (translation, rotation);
         }
 
         void ReleaseUnmanagedResources()
@@ -378,19 +363,19 @@ namespace Iviz.MarkerDetection
             public delegate void Callback(string s);
 
             [MonoPInvokeCallback(typeof(Callback))]
-            public static void Debug([CanBeNull] string t)
+            public static void Debug(string? t)
             {
                 UnityEngine.Debug.Log(t);
             }
 
             [MonoPInvokeCallback(typeof(Callback))]
-            public static void Info([CanBeNull] string t)
+            public static void Info(string? t)
             {
                 UnityEngine.Debug.LogWarning(t);
             }
 
             [MonoPInvokeCallback(typeof(Callback))]
-            public static void Error([CanBeNull] string t)
+            public static void Error(string? t)
             {
                 UnityEngine.Debug.LogError(t);
             }
@@ -545,7 +530,7 @@ namespace Iviz.MarkerDetection
     public interface IMarkerCorners
     {
         ReadOnlyCollection<Vector2f> Corners { get; }
-        [NotNull] string Code { get; }
+        string Code { get; }
         ARMarkerType Type { get; }
     }
 
@@ -554,12 +539,11 @@ namespace Iviz.MarkerDetection
         public ARMarkerType Type => ARMarkerType.Aruco;
         public int Id { get; }
         public string Code => Id.ToString();
-        [NotNull] public ReadOnlyCollection<Vector2f> Corners { get; }
+        public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        internal ArucoMarkerCorners(int id, [NotNull] IList<Vector2f> corners) =>
+        internal ArucoMarkerCorners(int id, IList<Vector2f> corners) =>
             (Id, Corners) = (id, corners.AsReadOnly());
 
-        [NotNull]
         public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }
@@ -570,10 +554,9 @@ namespace Iviz.MarkerDetection
         public string Code { get; }
         public ReadOnlyCollection<Vector2f> Corners { get; }
 
-        internal QrMarkerCorners(string code, [NotNull] IList<Vector2f> corners) =>
+        internal QrMarkerCorners(string code, IList<Vector2f> corners) =>
             (Code, Corners) = (code, corners.AsReadOnly());
 
-        [NotNull]
         public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
                                              string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
     }

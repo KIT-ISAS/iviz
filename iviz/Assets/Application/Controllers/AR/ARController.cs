@@ -16,6 +16,7 @@ using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -269,6 +270,7 @@ namespace Iviz.Controllers
 
         public event Action<RootMover>? WorldPoseChanged;
 
+        public ARMeshManager? MeshManager { get; protected set; }
 
         protected virtual void Awake()
         {

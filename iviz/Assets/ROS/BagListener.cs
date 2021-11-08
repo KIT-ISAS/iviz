@@ -82,12 +82,14 @@ namespace Iviz.Ros
             
             try
             {
-                writer = await RosbagFileWriter.CreateAsync(path);
-                while (true)
+                await using (writer = await RosbagFileWriter.CreateAsync(path))
                 {
-                    var (message, connection, time) = await messageQueue.TakeAsync();
-                    await writer.WriteAsync(message, connection, time);
-                    Length = writer.Length;
+                    while (true)
+                    {
+                        var (message, connection, time) = await messageQueue.TakeAsync();
+                        await writer.WriteAsync(message, connection, time);
+                        Length = writer.Length;
+                    }
                 }
             }
             catch (InvalidOperationException)
@@ -102,7 +104,6 @@ namespace Iviz.Ros
             if (writer != null)
             {
                 Length = writer.Length;
-                await writer.DisposeAsync();
             }
         }
 

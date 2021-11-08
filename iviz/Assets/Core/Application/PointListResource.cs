@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -23,26 +20,25 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class PointListResource : MarkerResourceWithColormap
     {
-        public delegate void DirectPointSetter(NativeList<float4> pointBuffer);
-
         public const float MaxPositionMagnitude = 1e3f;
 
         static readonly int PointsId = Shader.PropertyToID("_Points");
         static readonly int ScaleId = Shader.PropertyToID("_Scale");
 
-        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
+        readonly NativeList<float4> pointBuffer = new();
 
         bool isDirty;
 
-        Mesh mesh;
+        Mesh? mesh;
 
-        [SerializeField] MeshRenderer meshRenderer = null;
-        [SerializeField] MeshFilter meshFilter = null;
-        [CanBeNull] ComputeBuffer pointComputeBuffer;
+        [SerializeField] MeshRenderer? meshRenderer = null;
+        [SerializeField] MeshFilter? meshFilter = null;
+        ComputeBuffer? pointComputeBuffer;
 
-        Material currentMaterial;
+        Material? currentMaterial;
 
-        [NotNull] MeshRenderer MeshRenderer => meshRenderer;
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        MeshFilter MeshFilter => meshFilter.AssertNotNull(nameof(meshFilter));
 
         int Size => pointBuffer.Length;
 
@@ -74,9 +70,9 @@ namespace Iviz.Displays
             {
                 Logger.Info($"{this}: Device does not support compute buffers in vertices. " +
                             "Point clouds may not appear correctly.");
-                mesh = new Mesh { name = "PointCloud Mesh" };
+                mesh = new Mesh {name = "PointCloud Mesh"};
                 mesh.MarkDynamic();
-                meshFilter.mesh = mesh;
+                MeshFilter.mesh = mesh;
                 MeshRenderer.enabled = true;
             }
 
@@ -145,6 +141,11 @@ namespace Iviz.Displays
                 return;
             }
 
+            if (mesh == null)
+            {
+                throw new InvalidOperationException("Cannot update empty mesh!");
+            }
+
             mesh.Clear();
 
             if (Size == 0)
@@ -159,37 +160,33 @@ namespace Iviz.Displays
             {
                 if (UseColormap)
                 {
-                    using (var uvs = new Rent<Vector2>(pointBuffer.Length))
+                    using var uvs = new Rent<Vector2>(pointBuffer.Length);
+                    for (int i = 0; i < pointBuffer.Length; i++)
                     {
-                        for (int i = 0; i < pointBuffer.Length; i++)
-                        {
-                            var p = pointBuffer[i];
-                            points.Array[i] = p.xyz;
-                            indices.Array[i] = i;
-                            uvs.Array[i].x = p.w;
-                        }
-
-                        mesh.SetVertices(points);
-                        mesh.SetUVs(uvs);
-                        mesh.SetIndices(indices, MeshTopology.Points, 0);
+                        var p = pointBuffer[i];
+                        points.Array[i] = p.xyz;
+                        indices.Array[i] = i;
+                        uvs.Array[i].x = p.w;
                     }
+
+                    mesh.SetVertices(points);
+                    mesh.SetUVs(uvs);
+                    mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
                 else
                 {
-                    using (var colors = new Rent<Color32>(pointBuffer.Length))
+                    using var colors = new Rent<Color32>(pointBuffer.Length);
+                    for (int i = 0; i < pointBuffer.Length; i++)
                     {
-                        for (int i = 0; i < pointBuffer.Length; i++)
-                        {
-                            var p = pointBuffer[i];
-                            points.Array[i] = p.xyz;
-                            indices.Array[i] = i;
-                            colors.Array[i] = PointWithColor.RecastToColor32(p.w);
-                        }
-
-                        mesh.SetVertices(points);
-                        mesh.SetColors(colors);
-                        mesh.SetIndices(indices, MeshTopology.Points, 0);
+                        var p = pointBuffer[i];
+                        points.Array[i] = p.xyz;
+                        indices.Array[i] = i;
+                        colors.Array[i] = PointWithColor.RecastToColor32(p.w);
                     }
+
+                    mesh.SetVertices(points);
+                    mesh.SetColors(colors);
+                    mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
             }
 
@@ -203,13 +200,12 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer)null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
             }
 
             pointBuffer.Dispose();
         }
 
-        [NotNull]
         public override string ToString()
         {
             return "[PointListResource '" + Name + "']";
@@ -219,7 +215,7 @@ namespace Iviz.Displays
         ///     Sets the list of points.
         /// </summary>
         /// <param name="points">The list of points.</param>
-        public void Set([NotNull] NativeList<PointWithColor> points)
+        public void Set(NativeList<PointWithColor> points)
         {
             if (points == null)
             {
@@ -249,7 +245,7 @@ namespace Iviz.Displays
         ///     Copies the list of points directly without checking.
         /// </summary>
         /// <param name="points">A native list with the points.</param>
-        public void SetDirect([NotNull] NativeList<float4> points)
+        public void SetDirect(NativeList<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
@@ -262,7 +258,7 @@ namespace Iviz.Displays
             return !(t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
         }
 
-        public void SetDirect([NotNull] DirectPointSetter callback, int reserve = 0)
+        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
         {
             if (callback == null)
             {
@@ -331,7 +327,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer)null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
             }
 
             if (pointBuffer.Capacity != 0)
@@ -353,9 +349,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, (ComputeBuffer)null);
-
-            //processing = false;
+            Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
         }
 
         protected override void UpdateProperties()

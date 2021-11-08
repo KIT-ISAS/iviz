@@ -20,6 +20,7 @@
             int dummy;
         };
 
+        fixed4 _Color;
         fixed4 _Tint;
         
         half4 LightingNoLighting(SurfaceOutput s, half3 __, half ___)

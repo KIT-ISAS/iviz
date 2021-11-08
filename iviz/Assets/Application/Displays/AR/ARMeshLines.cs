@@ -1,9 +1,10 @@
-using System;
+#nullable enable
+
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -14,11 +15,25 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : MonoBehaviour, IDisplay
     {
-        static float? pulseStart;
         static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
         static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
         static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-        
+
+        static float? pulseStart;
+        static GameObject? container;
+
+        static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
+        {
+            if (ARController.Instance != null)
+            {
+                meshManager = ARController.Instance.MeshManager;
+                return meshManager != null;
+            }
+
+            meshManager = null;
+            return false;
+        }
+
         public static void TriggerPulse(in Vector3 start)
         {
             bool hasPulse = pulseStart != null;
@@ -26,11 +41,12 @@ namespace Iviz.Displays
             if (!hasPulse)
             {
                 GameThread.EveryFrame += UpdateStatic;
+                Debug.Log("adding to everyframe");
             }
-            
-            var material = Resource.Materials.LinePulse.Object;
+
+            var material = Resources.Resource.Materials.LinePulse.Object;
             material.SetVector(PulseCenter, start);
-            material.SetFloat(PulseDelta, 0.25f);            
+            material.SetFloat(PulseDelta, 0.25f);
         }
 
         static void UpdateStatic()
@@ -47,27 +63,53 @@ namespace Iviz.Displays
                 GameThread.EveryFrame -= UpdateStatic;
                 return;
             }
-            
-            var material = Resource.Materials.LinePulse.Object;
-            material.SetFloat(PulseTime,  (timeDiff - 0.5f));
+
+            var material = Resources.Resource.Materials.LinePulse.Object;
+            material.SetFloat(PulseTime, (timeDiff - 0.5f));
         }
-        
+
 
         bool pulseMaterialSet;
         readonly List<int> indices = new List<int>();
         readonly List<Vector3> vertices = new List<Vector3>();
 
-        Transform mTransform;
-        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform? mTransform;
+        MeshFilter? meshFilter;
+        LineResource? resource;
+
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
+
+        LineResource Resource
+        {
+            get
+            {
+                if (resource != null)
+                {
+                    return resource;
+                }
+
+                if (container == null)
+                {
+                    pulseStart = null;
+                    container = new GameObject("AR Mesh Lines");
+                }
+
+                resource = ResourcePool.RentDisplay<LineResource>(container.transform);
+                resource.ElementScale = 0.001f;
+                resource.Visible = ARController.IsVisible;
+                resource.MaterialOverride = pulseStart != null
+                    ? Resources.Resource.Materials.LinePulse.Object
+                    : Resources.Resource.Materials.LineMesh.Object;
+
+                return resource;
+            }
+        } 
 
 
-        [CanBeNull] MeshFilter meshFilter;
-        [NotNull] MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
-
-        LineResource resource;
         static readonly int Tint = Shader.PropertyToID("_Tint");
 
-        public Bounds? Bounds => resource.Bounds;
+        public Bounds? Bounds => Resource != null ? Resource.Bounds : null;
 
         public int Layer { get; set; }
 
@@ -77,7 +119,6 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        [NotNull]
         public string Name
         {
             get => gameObject.name;
@@ -86,21 +127,13 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.RentDisplay<LineResource>();
-            resource.ElementScale = 0.001f;
-            resource.Visible = ARController.IsVisible;
-
-            resource.MaterialOverride = pulseStart != null
-                ? Resource.Materials.LinePulse.Object
-                : Resource.Materials.LineMesh.Object;
             pulseMaterialSet = pulseStart != null;
+            MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
+            Resource.Visible = Visible;
 
-            MeshFilter.sharedMesh = new Mesh {name = "AR Mesh"};
-
-            if (Settings.ARCamera != null)
+            if (TryGetMeshManager(out var meshManager))
             {
-                var manager = Settings.ARCamera.GetComponent<ARMeshManager>();
-                manager.meshesChanged += OnManagerChanged;
+                meshManager.meshesChanged += OnManagerChanged;
             }
             else
             {
@@ -119,7 +152,7 @@ namespace Iviz.Displays
         void OnARCameraViewChanged(bool value)
         {
             bool hasPulse = pulseStart != null;
-            resource.Visible = hasPulse || !value;
+            Resource.Visible = hasPulse || !value;
         }
 
         void OnManagerChanged(ARMeshesChangedEventArgs args)
@@ -131,32 +164,30 @@ namespace Iviz.Displays
 
             if (args.removed.Contains(MeshFilter))
             {
-                resource.Reset();
+                Resource.Reset();
             }
         }
 
         void Update()
         {
-            if (resource.Visible)
+            if (Resource.Visible)
             {
                 var unityPose = ARController.ARPoseToUnity(Transform.AsPose());
-                //var relativePose = TfListener.RelativePoseToOrigin(unityPose);    
-                //resource.Transform.SetPose(unityPose);
-                resource.Transform.SetPose(unityPose);
+                Resource.Transform.SetPose(unityPose);
             }
 
             bool hasPulse = pulseStart != null;
             if (hasPulse && !pulseMaterialSet)
             {
-                resource.MaterialOverride = Resource.Materials.LinePulse.Object;
+                Resource.MaterialOverride = Resources.Resource.Materials.LinePulse.Object;
                 pulseMaterialSet = true;
-                resource.Visible = true;
+                Resource.Visible = true;
             }
             else if (!hasPulse && pulseMaterialSet)
             {
-                resource.MaterialOverride = Resource.Materials.LineMesh.Object;
+                Resource.MaterialOverride = Resources.Resource.Materials.LineMesh.Object;
                 pulseMaterialSet = false;
-                resource.Visible = !ARController.IsVisible;
+                Resource.Visible = !ARController.IsVisible;
             }
         }
 
@@ -170,7 +201,7 @@ namespace Iviz.Displays
             vertices.Clear();
             mesh.GetVertices(vertices);
 
-            resource.SetDirect(DirectLineSetter);
+            Resource.SetDirect(DirectLineSetter);
         }
 
         bool? DirectLineSetter([NotNull] NativeList<float4x2> lineBuffer)
@@ -235,17 +266,19 @@ namespace Iviz.Displays
 
         void OnDestroy()
         {
-            resource.ReturnToPool();
-            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
-            Destroy(MeshFilter.sharedMesh);
-
-            if (Settings.ARCamera == null)
+            if (resource != null)
             {
-                return;
+                resource.ReturnToPool();
             }
 
-            var manager = Settings.ARCamera.GetComponent<ARMeshManager>();
-            manager.meshesChanged -= OnManagerChanged;
+            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
+
+            Destroy(MeshFilter.sharedMesh);
+
+            if (TryGetMeshManager(out var meshManager))
+            {
+                meshManager.meshesChanged -= OnManagerChanged;
+            }
         }
 
         static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
@@ -253,12 +286,10 @@ namespace Iviz.Displays
             f.c0.x = a.x;
             f.c0.y = a.y;
             f.c0.z = a.z;
-            //f.c0.w = White;
 
             f.c1.x = b.x;
             f.c1.y = b.y;
             f.c1.z = b.z;
-            //f.c1.w = White;
         }
     }
 }

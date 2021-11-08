@@ -35,13 +35,13 @@ namespace Iviz.App.Tests
 
 
             cvContext.SetImageDataFlipY(texture.GetRawTextureData(), 3);
-            int numQrs = cvContext.DetectQrMarkers();
-            if (numQrs == 0)
+            var qrs = cvContext.DetectQrMarkers();
+            if (qrs.Length == 0)
             {
                 return;
             }
 
-            var qr = cvContext.GetDetectedQrCorners()[0];
+            var qr = qrs[0];
 
             DrawLine(texture,
                 0, 0,

@@ -212,6 +212,12 @@ namespace Iviz.App
         void Awake()
         {
             instance = this;
+            Resource.ClearResources();
+            GuiDialogListener.ClearResources();
+            ARController.ClearResources();
+
+            Settings.IsHololens = isHololens;
+            Settings.IsVR = isVREnabled;
         }
 
         void OnDestroy()
@@ -233,15 +239,6 @@ namespace Iviz.App
 
         void Start()
         {
-            Resource.ClearResources();
-            GuiDialogListener.ClearResources();
-            ARController.ClearResources();
-
-            if (isHololens)
-            {
-                Settings.IsHololens = true;
-            }
-
             availableModules = new AddModuleDialogData();
             availableTopics = new AddTopicDialogData();
 
@@ -394,7 +391,6 @@ namespace Iviz.App
 
             if (isVREnabled || isHololens)
             {
-                Settings.IsVR = true;
                 foreach (var subCanvas in rootCanvas.GetComponentsInChildren<Canvas>(true))
                 {
                     subCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();

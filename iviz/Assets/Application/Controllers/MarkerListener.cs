@@ -1,44 +1,39 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
-using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
     public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
-        readonly MarkerConfiguration config = new MarkerConfiguration();
+        readonly MarkerConfiguration config = new();
 
         /// List of markers
-        readonly Dictionary<(string Ns, int Id), MarkerObject> markers =
-            new Dictionary<(string Ns, int Id), MarkerObject>();
+        readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new();
 
         /// Temporary buffer to hold incoming marker messages from the network thread
-        readonly Dictionary<(string Ns, int Id), Marker>
-            newMarkerBuffer = new Dictionary<(string Ns, int Id), Marker>();
+        readonly Dictionary<(string Ns, int Id), Marker> newMarkerBuffer = new();
 
-        public MarkerListener([NotNull] IModuleData moduleData)
+        public MarkerListener(IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
         }
 
         public override IModuleData ModuleData { get; }
-        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
+        public override TfFrame Frame => TfListener.DefaultFrame;
 
         public MarkerConfiguration Config
         {
@@ -55,7 +50,7 @@ namespace Iviz.Controllers
 
                 if (value.VisibleMask.Length != config.VisibleMask.Length)
                 {
-                    Logger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length}");
+                    Logger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length.ToString()}");
                     return;
                 }
 
@@ -139,15 +134,12 @@ namespace Iviz.Controllers
         {
             var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
 
-            switch (config.Type)
+            Listener = config.Type switch
             {
-                case Marker.RosMessageType:
-                    Listener = new Listener<Marker>(config.Topic, Handler, rosTransportHint);
-                    break;
-                case MarkerArray.RosMessageType:
-                    Listener = new Listener<MarkerArray>(config.Topic, Handler, rosTransportHint);
-                    break;
-            }
+                Marker.RosMessageType => new Listener<Marker>(config.Topic, Handler, rosTransportHint),
+                MarkerArray.RosMessageType => new Listener<MarkerArray>(config.Topic, Handler, rosTransportHint),
+                _ => null
+            };
 
             GameThread.EverySecond += CheckDeadMarkers;
             GameThread.EveryFrame += HandleAsync;
@@ -208,19 +200,12 @@ namespace Iviz.Controllers
         {
             get
             {
-                string markerStr;
-                switch (markers.Count)
+                string markerStr = markers.Count switch
                 {
-                    case 0:
-                        markerStr = "<b>No markers →</b>";
-                        break;
-                    case 1:
-                        markerStr = "<b>1 marker →</b>";
-                        break;
-                    default:
-                        markerStr = $"<b>{markers.Count.ToString()} markers →</b>";
-                        break;
-                }
+                    0 => "<b>No markers →</b>",
+                    1 => "<b>1 marker →</b>",
+                    _ => $"<b>{markers.Count.ToString()} markers →</b>"
+                };
 
                 int totalErrors = 0, totalWarnings = 0;
                 foreach (var marker in markers.Values)
@@ -235,32 +220,19 @@ namespace Iviz.Controllers
                     return $"{markerStr}\nNo errors";
                 }
 
-                string errorStr, warnStr;
-                switch (totalErrors)
+                string errorStr = totalErrors switch
                 {
-                    case 0:
-                        errorStr = "No errors";
-                        break;
-                    case 1:
-                        errorStr = "1 error";
-                        break;
-                    default:
-                        errorStr = $"{totalErrors} errors";
-                        break;
-                }
+                    0 => "No errors",
+                    1 => "1 error",
+                    _ => $"{totalErrors} errors"
+                };
 
-                switch (totalWarnings)
+                string warnStr = totalWarnings switch
                 {
-                    case 0:
-                        warnStr = "No warnings";
-                        break;
-                    case 1:
-                        warnStr = "1 warning";
-                        break;
-                    default:
-                        warnStr = $"{totalWarnings} warnings";
-                        break;
-                }
+                    0 => "No warnings",
+                    1 => "1 warning",
+                    _ => $"{totalWarnings} warnings"
+                };
 
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
@@ -287,7 +259,7 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        bool Handler([NotNull] MarkerArray msg)
+        bool Handler(MarkerArray msg)
         {
             lock (newMarkerBuffer)
             {
@@ -300,7 +272,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool Handler([NotNull] Marker marker)
+        bool Handler(Marker marker)
         {
             lock (newMarkerBuffer)
             {
@@ -359,11 +331,11 @@ namespace Iviz.Controllers
             using (newMarkers)
                 foreach (var marker in newMarkers)
                 {
-                    HandleAsync(marker);
+                    HandleAsync(marker!);
                 }
         }
 
-        void HandleAsync([NotNull] Marker msg)
+        void HandleAsync(Marker msg)
         {
             var id = IdFromMessage(msg);
             switch (msg.Action)
@@ -404,17 +376,16 @@ namespace Iviz.Controllers
             }
         }
 
-        public static (string Ns, int Id) IdFromMessage([NotNull] Marker marker)
+        public static (string Ns, int Id) IdFromMessage(Marker marker)
         {
             return (marker.Ns, marker.Id);
         }
 
-        static void DeleteMarkerObject([NotNull] MarkerObject markerToDelete)
+        static void DeleteMarkerObject(MarkerObject markerToDelete)
         {
             markerToDelete.DestroySelf();
         }
 
-        [NotNull]
         MarkerObject CreateMarkerObject(in (string, int) id, int msgType)
         {
             var marker = new GameObject("MarkerObject").AddComponent<MarkerObject>();

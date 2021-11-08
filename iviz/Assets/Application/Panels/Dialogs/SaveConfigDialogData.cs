@@ -1,22 +1,23 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Iviz.Core;
 using Iviz.Tools;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
     public sealed class SaveConfigDialogData : DialogData
     {
-        [NotNull] readonly SaveConfigDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
-
         const string Suffix = LoadConfigDialogData.Suffix;
 
-        readonly List<SavedFileInfo> files = new List<SavedFileInfo>();
+        readonly SaveConfigDialogContents panel;
+        readonly List<SavedFileInfo> files = new();
+        
+        public override IDialogPanelContents Panel => panel;
 
         public SaveConfigDialogData()
         {

@@ -1,32 +1,32 @@
+#nullable enable
+
 using System;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs;
-using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
     public interface ISender
     {
-        [NotNull] string Topic { get; }
-        [NotNull] string Type { get; }
+        string Topic { get; }
+        string Type { get; }
         int Id { get; }
         RosSenderStats Stats { get; }
         int NumSubscribers { get; }
         void Stop();
-        void Publish([NotNull] IMessage msg);
+        void Publish(IMessage msg);
     }
 
     public sealed class Sender<T> : ISender where T : IMessage
     {
-        [NotNull] static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => ConnectionManager.Connection;
 
         int lastMsgBytes;
         int lastMsgCounter;
         int totalMsgCounter;
 
-        public Sender([NotNull] string topic)
+        public Sender(string topic)
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
@@ -58,7 +58,7 @@ namespace Iviz.Ros
             Connection.Unadvertise(this);
         }
 
-        public void Publish([NotNull] in T msg)
+        public void Publish(in T msg)
         {
             Connection.Publish(this, msg);
 
@@ -92,7 +92,6 @@ namespace Iviz.Ros
             NumSubscribers = Connection.GetNumSubscribers(this);
         }
 
-        [NotNull]
         public override string ToString() => $"[Sender {Topic} [{Type}]]";
     }
 }

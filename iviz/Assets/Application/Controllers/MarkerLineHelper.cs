@@ -17,12 +17,12 @@ namespace Iviz.Controllers
         ColorRGBA[] colors = Array.Empty<ColorRGBA>();
         Color32 color32;
 
-        readonly LineResource.DirectLineSetter lineStripSingleColor;
-        readonly LineResource.DirectLineSetter lineStripNoTint;
-        readonly LineResource.DirectLineSetter lineStripTintColor;
-        readonly LineResource.DirectLineSetter lineListSingleColor;
-        readonly LineResource.DirectLineSetter lineListNoTint;
-        readonly LineResource.DirectLineSetter lineListTintColor;
+        readonly Func<NativeList<float4x2>, bool?> lineStripSingleColor;
+        readonly Func<NativeList<float4x2>, bool?> lineStripNoTint;
+        readonly Func<NativeList<float4x2>, bool?> lineStripTintColor;
+        readonly Func<NativeList<float4x2>, bool?> lineListSingleColor;
+        readonly Func<NativeList<float4x2>, bool?> lineListNoTint;
+        readonly Func<NativeList<float4x2>, bool?> lineListTintColor;
 
         public MarkerLineHelper()
         {
@@ -34,7 +34,7 @@ namespace Iviz.Controllers
             lineListTintColor = ProcessLineListTintColor;
         }
 
-        public LineResource.DirectLineSetter GetLineSetterForStrip(Marker msg)
+        public Func<NativeList<float4x2>, bool?> GetLineSetterForStrip(Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;
@@ -122,7 +122,7 @@ namespace Iviz.Controllers
 
             if (lPoints.Length == 0)
             {
-                return color.a < 1 ? (bool?) true : null;
+                return color.a < 1 ? true : null;
             }
 
             var f = new float4x2();
@@ -144,10 +144,10 @@ namespace Iviz.Controllers
                 }
             }
 
-            return color.a < 1 ? (bool?) true : null;
+            return color.a < 1 ? true : null;
         }
 
-        public LineResource.DirectLineSetter GetLineSetterForList(Marker msg)
+        public Func<NativeList<float4x2>, bool?> GetLineSetterForList(Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;
@@ -236,7 +236,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            return color.a < 1 ? (bool?) true : null;
+            return color.a < 1 ? true : null;
         }
     }
 }

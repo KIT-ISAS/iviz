@@ -24,7 +24,7 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         OctreeHelper helper;
         Octomap lastMsg;
-        readonly PointListResource.DirectPointSetter setterFunction;
+        readonly Action<NativeList<float4>> setterFunction;
 
         public override IModuleData ModuleData { get; }
         public override TfFrame Frame => node.Parent;

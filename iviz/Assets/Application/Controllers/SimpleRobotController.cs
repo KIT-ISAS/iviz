@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Threading.Tasks;
 using Iviz.App;
@@ -6,12 +8,8 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
@@ -20,24 +18,16 @@ namespace Iviz.Controllers
     /// </summary>
     public sealed class SimpleRobotController : IController, IHasFrame, IJointProvider
     {
-        const int parameterTimeoutInMs = 3000;
+        const int ParameterTimeoutInMs = 3000;
 
-        readonly RobotConfiguration config = new RobotConfiguration();
+        readonly RobotConfiguration config = new();
         readonly FrameNode node;
-        Task robotLoadingTask;
+        Task? robotLoadingTask;
+        RobotModel? robot;
 
-        public SimpleRobotController([NotNull] IModuleData moduleData)
-        {
-            node = FrameNode.Instantiate("SimpleRobotNode");
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+        GameObject? RobotObject => Robot?.BaseLinkObject;
 
-            Config = new RobotConfiguration();
-        }
-
-        [CanBeNull] RobotModel robot;
-
-        [CanBeNull]
-        public RobotModel Robot
+        public RobotModel? Robot
         {
             get => robot;
             private set
@@ -52,8 +42,6 @@ namespace Iviz.Controllers
                 robot = value;
             }
         }
-
-        [CanBeNull] GameObject RobotObject => Robot?.BaseLinkObject;
 
         public RobotConfiguration Config
         {
@@ -74,12 +62,9 @@ namespace Iviz.Controllers
         }
 
         public string HelpText { get; private set; } = "<b>No Robot Loaded</b>";
+        public string SourceParameter => config.SourceParameter;
+        public string SavedRobotName => config.SavedRobotName;
 
-        [NotNull] public string SourceParameter => config.SourceParameter;
-
-        [NotNull] public string SavedRobotName => config.SavedRobotName;
-
-        [NotNull]
         public string FramePrefix
         {
             get => config.FramePrefix;
@@ -105,7 +90,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string FrameSuffix
         {
             get => config.FrameSuffix;
@@ -208,9 +192,8 @@ namespace Iviz.Controllers
 
         public IModuleData ModuleData { get; }
 
-        public TfFrame Frame => node.Parent;
+        public TfFrame? Frame => node.Parent;
 
-        [NotNull]
         public string Name
         {
             get
@@ -234,9 +217,18 @@ namespace Iviz.Controllers
             }
         }
 
-        public event Action Stopped;
+        public event Action? Stopped;
 
-        public bool TryWriteJoint([NotNull] string joint, float value)
+        public SimpleRobotController(IModuleData moduleData)
+        {
+            node = FrameNode.Instantiate("SimpleRobotNode");
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+
+            Config = new RobotConfiguration();
+        }
+
+        
+        public bool TryWriteJoint(string joint, float value)
         {
             if (Robot == null)
             {
@@ -269,7 +261,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void ProcessRobotSource([CanBeNull] string savedRobotName, [CanBeNull] string sourceParameter)
+        public void ProcessRobotSource(string? savedRobotName, string? sourceParameter)
         {
             if (!string.IsNullOrEmpty(savedRobotName))
             {
@@ -290,7 +282,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public async void TryLoadFromSourceParameter([CanBeNull] string value)
+        public async void TryLoadFromSourceParameter(string? value)
         {
             config.SourceParameter = "";
             Robot = null;
@@ -303,11 +295,11 @@ namespace Iviz.Controllers
             }
 
             XmlRpcValue parameterValue;
-            string errorMsg;
+            string? errorMsg;
             try
             {
                 HelpText = "- Requesting parameter -";
-                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, parameterTimeoutInMs);
+                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
@@ -345,7 +337,7 @@ namespace Iviz.Controllers
             config.SourceParameter = value;
         }
 
-        public async void TryLoadSavedRobot([CanBeNull] string robotName)
+        public async void TryLoadSavedRobot(string? robotName)
         {
             config.SavedRobotName = "";
             Robot = null;
@@ -357,7 +349,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
+            (bool result, string? robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
                 Core.Logger.Debug($"{this}: Failed to load robot!");
@@ -370,7 +362,7 @@ namespace Iviz.Controllers
             LoadRobotFromDescription(robotDescription);
         }
 
-        bool LoadRobotFromDescription([CanBeNull] string description)
+        bool LoadRobotFromDescription(string? description)
         {
             if (string.IsNullOrEmpty(description))
             {
@@ -470,7 +462,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         string Decorate(string jointName)
         {
             return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
@@ -483,14 +474,14 @@ namespace Iviz.Controllers
                 return;
             }
 
-            foreach (var entry in Robot.LinkParents)
+            foreach (var (link, parentLink) in Robot.LinkParents)
             {
-                if (TfListener.TryGetFrame(Decorate(entry.Key), out TfFrame frame))
+                if (TfListener.TryGetFrame(Decorate(link), out var frame))
                 {
                     frame.RemoveListener(node);
                 }
 
-                if (TfListener.TryGetFrame(Decorate(entry.Value), out TfFrame parentFrame))
+                if (TfListener.TryGetFrame(Decorate(parentLink), out var parentFrame))
                 {
                     parentFrame.RemoveListener(node);
                 }
@@ -512,23 +503,20 @@ namespace Iviz.Controllers
             }
 
             RobotObject.transform.SetParentLocal(TfListener.DefaultFrame.Transform);
-            foreach (var pair in Robot.LinkObjects)
+            foreach (var (link, linkObject) in Robot.LinkObjects)
             {
-                string link = pair.Key;
-                GameObject linkObject = pair.Value;
-                TfFrame frame = TfListener.GetOrCreateFrame(Decorate(link), node);
+                var frame = TfListener.GetOrCreateFrame(Decorate(link), node);
                 linkObject.transform.SetParentLocal(frame.Transform);
                 linkObject.transform.SetLocalPose(Pose.identity);
             }
 
             // fill in missing frame parents, but only they don't already have one
-            foreach (var pair in Robot.LinkParents)
+            foreach (var (link, parentLink) in Robot.LinkParents)
             {
-                TfFrame frame = TfListener.GetOrCreateFrame(Decorate(pair.Key), node);
+                var frame = TfListener.GetOrCreateFrame(Decorate(link), node);
                 if (frame.Parent == TfListener.OriginFrame)
                 {
-                    TfFrame parentFrame = TfListener.GetOrCreateFrame(Decorate(pair.Value), node);
-                    frame.Parent = parentFrame;
+                    frame.Parent = TfListener.GetOrCreateFrame(Decorate(parentLink), node);
                 }
             }
 

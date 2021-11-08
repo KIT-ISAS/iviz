@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿#nullable enable
+
+using System;
 using Iviz.Core;
 using Iviz.Resources;
-using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
@@ -22,32 +19,28 @@ namespace Iviz.Displays
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
-        [FormerlySerializedAs("texture")] [SerializeField]
-        Texture2D diffuseTexture;
-
-        [SerializeField] Texture2D bumpTexture;
+        [SerializeField] Texture2D? diffuseTexture;
+        [SerializeField] Texture2D? bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
         [SerializeField] Color tint = Color.white;
         [SerializeField] bool occlusionOnly;
         [SerializeField] float smoothness = Settings.IsHololens ? 0.25f : 0.5f;
         [SerializeField] float metallic = 0.5f;
-        [SerializeField] MeshRenderer mainRenderer;
-        [SerializeField] MeshFilter meshFilter;
+        [SerializeField] MeshRenderer? mainRenderer;
+        [SerializeField] MeshFilter? meshFilter;
 
-        Material textureMaterial;
-        Material textureMaterialAlpha;
+        Material? textureMaterial;
+        Material? textureMaterialAlpha;
         [SerializeField] bool autoSelectMaterial = true;
         bool shadowsEnabled = true;
 
-        [NotNull]
         MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
 
-        [NotNull] MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
+        MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
 
 
-        [CanBeNull]
-        public Texture2D DiffuseTexture
+        public Texture2D? DiffuseTexture
         {
             get => diffuseTexture;
             set
@@ -64,8 +57,7 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
-        public Texture2D BumpTexture
+        public Texture2D? BumpTexture
         {
             get => bumpTexture;
             set
@@ -133,7 +125,6 @@ namespace Iviz.Displays
             }
         }
         
-        [NotNull]
         public Mesh Mesh
         {
             get => MeshFilter.sharedMesh;
@@ -160,22 +151,6 @@ namespace Iviz.Displays
             Smoothness = smoothness;
 
             MainRenderer.ResetPropertyTextureScale();
-
-            /*
-            if (Settings.IsHololens)
-            {
-                var materials = MainRenderer.materials.ToArray();
-                foreach (ref var material in materials.Ref())
-                {
-                    if (material.name == "White") // bug: fix this!
-                    {
-                        material = Resource.Materials.Lit.Object;
-                    }
-                }
-
-                MainRenderer.materials = materials;
-            }
-            */
         }
 
         public bool OcclusionOnly
@@ -266,7 +241,7 @@ namespace Iviz.Displays
             MainRenderer.SetPropertyColor(effectiveColor);
         }
 
-        public void OverrideMaterial([CanBeNull] Material material)
+        public void OverrideMaterial(Material? material)
         {
             if (material == null)
             {

@@ -22,7 +22,7 @@ namespace Iviz.Ros
         [NotNull] string Type { get; }
         RosTransportHint TransportHint { get; set; }
         RosListenerStats Stats { get; }
-        (int Active, int Total) NumPublishers { get; }
+        (int active, int total) NumPublishers { get; }
         int MaxQueueSize { set; }
         bool Subscribed { get; }
         void Stop();
@@ -110,7 +110,7 @@ namespace Iviz.Ros
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
-        public (int Active, int Total) NumPublishers => Connection.GetNumPublishers(Topic);
+        public (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 1;
         public bool Subscribed { get; private set; }
 

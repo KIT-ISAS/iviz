@@ -17,9 +17,9 @@ namespace Iviz.Controllers
         ColorRGBA[] colors = Array.Empty<ColorRGBA>();
         Color32 color32;
 
-        readonly PointListResource.DirectPointSetter singleColor;
-        readonly PointListResource.DirectPointSetter noTint;
-        readonly PointListResource.DirectPointSetter tintColor;
+        readonly Action<NativeList<float4>> singleColor;
+        readonly Action<NativeList<float4>> noTint;
+        readonly Action<NativeList<float4>> tintColor;
 
         public MarkerPointHelper()
         {
@@ -28,7 +28,7 @@ namespace Iviz.Controllers
             tintColor = ProcessTintColor;
         }
 
-        public PointListResource.DirectPointSetter GetPointSetter(Marker msg)
+        public Action<NativeList<float4>> GetPointSetter(Marker msg)
         {
             points = msg.Points;
             colors = msg.Colors;

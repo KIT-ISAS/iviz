@@ -32,11 +32,12 @@
         float _AtlasRow;
         sampler2D _MainTex;
 
+        fixed4 _Color;
         UNITY_INSTANCING_BUFFER_START(Props)
         UNITY_DEFINE_INSTANCED_PROP(fixed4, _Tint)
         UNITY_INSTANCING_BUFFER_END(Props)
 
-        half4 LightingNoLighting(SurfaceOutput s, half3 _, half __)
+        half4 LightingNoLighting(SurfaceOutput s, half3 __, half ___)
         {
             half4 c;
             c.rgb = s.Albedo;

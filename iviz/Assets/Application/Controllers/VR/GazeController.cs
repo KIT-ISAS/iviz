@@ -1,22 +1,30 @@
 ﻿#nullable enable
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
+using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.OpenXR;
 
 namespace Iviz.Controllers
 {
-    public sealed class HandController : XRBaseController
+    /// <summary>
+    /// Custom controller for Gaze. Probably will be deprecated once the toolbox implements it. 
+    /// </summary>
+    public sealed class GazeController : CustomController
     {
-        public enum HandType
+        static readonly InputFeatureUsage<Vector3> GazePosition = new("gazePosition");
+        static readonly InputFeatureUsage<Quaternion> GazeRotation = new("gazeRotation");
+
+        protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
+            List<InputFeatureUsage> usages)
         {
-            Left,
-            Right
+            return HasFlag(characteristics, InputDeviceCharacteristics.EyeTracking)
+                   && usages.Contains((InputFeatureUsage) GazePosition)
+                   && usages.Contains((InputFeatureUsage) GazeRotation);
         }
 
-        [SerializeField] HandType handType;
-        
-        /// <inheritdoc />
         protected override void UpdateTrackingInput(XRControllerState? controllerState)
         {
             base.UpdateTrackingInput(controllerState);
@@ -25,51 +33,31 @@ namespace Iviz.Controllers
                 return;
             }
 
-            //controllerState.poseDataFlags = PoseDataFlags.NoData;
-            //controllerState.position = new Vector3(x, 0, 0);
-            //controllerState.poseDataFlags |= PoseDataFlags.Position;
+            controllerState.poseDataFlags = PoseDataFlags.NoData;
 
-            /*
-            {
-                if (inputDevice.TryGetFeatureValue(CommonUsages.trackingState, out var trackingState))
-                {
-                    if ((trackingState & InputTrackingState.Position) != 0 &&
-                        inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out var devicePosition))
-                    {
-                        controllerState.position = devicePosition;
-                        controllerState.poseDataFlags |= PoseDataFlags.Position;
-                    }
-
-                    if ((trackingState & InputTrackingState.Rotation) != 0 &&
-                        inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out var deviceRotation))
-                    {
-                        controllerState.rotation = deviceRotation;
-                        controllerState.poseDataFlags |= PoseDataFlags.Rotation;
-                    }
-                }
-            }
-            */
-        }
-
-        /// <inheritdoc />
-        protected override void UpdateInput(XRControllerState? controllerState)
-        {
-            base.UpdateInput(controllerState);
-            if (controllerState == null)
+            if (!TryGetDevice(out var device) 
+                || !device.TryGetFeatureValue(CommonUsages.trackingState, out var trackingState))
             {
                 return;
             }
 
-            controllerState.ResetFrameDependentStates();
-            //controllerState.selectInteractionState.SetFrameState(IsPressed(m_SelectUsage));
-            //controllerState.activateInteractionState.SetFrameState(IsPressed(m_ActivateUsage));
-            //controllerState.uiPressInteractionState.SetFrameState(IsPressed(m_UIPressUsage));
+            if (HasFlag(trackingState, InputTrackingState.Rotation)
+                && device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
+            {
+                controllerState.poseDataFlags |= PoseDataFlags.Rotation;
+            }
+
+            if (HasFlag(trackingState, InputTrackingState.Position)
+                && device.TryGetFeatureValue(GazePosition, out controllerState.position))
+            {
+                controllerState.poseDataFlags |= PoseDataFlags.Position;
+            }
         }
 
-        /// <inheritdoc />
-        public override bool SendHapticImpulse(float amplitude, float duration)
+        protected override void UpdateInput(XRControllerState? controllerState)
         {
-            return false;
+            base.UpdateInput(controllerState);
+            controllerState?.ResetFrameDependentStates();
         }
     }
 }

@@ -282,7 +282,7 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
 
-        public void SetDirect([NotNull] PointListResource.DirectPointSetter callback, int reserve = 0)
+        public void SetDirect([NotNull] Action<NativeList<float4>> callback, int reserve = 0)
         {
             if (callback == null)
             {

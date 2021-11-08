@@ -21,6 +21,8 @@ namespace Iviz.MarkerDetection
 
         readonly Task task;
         readonly CancellationTokenSource tokenSource = new();
+        readonly SemaphoreSlim signal = new(0);
+        CvContext? cvContext;
 
         CancellationToken Token => tokenSource.Token;
         public event Action<Screenshot, IMarkerCorners[]>? MarkerDetected;
@@ -55,13 +57,11 @@ namespace Iviz.MarkerDetection
 
         async Task RunAsync()
         {
-            CvContext? cvContext = null;
+            var detectedMarkers = new List<IMarkerCorners>();
+            var typeFoundInLastRound = (ARMarkerType?) null;
 
             try
             {
-                var signal = new SemaphoreSlim(0);
-
-                ARMarkerType? lastRoundFound = null;
                 while (!Token.IsCancellationRequested)
                 {
                     var screenCaptureManager = Settings.ScreenCaptureManager;
@@ -73,117 +73,69 @@ namespace Iviz.MarkerDetection
                         continue;
                     }
 
-                    await Task.Delay(lastRoundFound != null
+                    await Task.Delay(typeFoundInLastRound != null
                             ? DelayBetweenCapturesFastInMs
                             : DelayBetweenCapturesInMs,
                         Token);
 
-                    Screenshot? screenshot = null;
-                    GameThread.Post(async () =>
-                    {
-                        try
-                        {
-                            screenshot = await screenCaptureManager.CaptureColorAsync(250, Token).AwaitNoThrow(this);
-                        }
-                        finally
-                        {
-                            signal.Release();
-                        }
-                    });
-                    await signal.WaitAsync(Token);
-
+                    var screenshot = await CaptureScreenshotAsync();
                     if (screenshot == null)
                     {
                         continue;
                     }
 
-                    if (cvContext != null &&
-                        (cvContext.Width != screenshot.Width || cvContext.Height != screenshot.Height))
-                    {
-                        cvContext.Dispose();
-                        cvContext = null;
-                    }
-
-                    cvContext ??= new CvContext(screenshot.Width, screenshot.Height);
-
+                    var context = ValidateCvContextForScreenshot(screenshot);
                     if (Settings.IsHololens)
                     {
-                        cvContext.SetImageDataFlipY(screenshot.Bytes, screenshot.Bpp);
+                        context.SetImageDataFlipY(screenshot.Bytes, screenshot.Bpp);
                     }
                     else
                     {
-                        cvContext.SetImageData(screenshot.Bytes, screenshot.Bpp);
+                        context.SetImageData(screenshot.Bytes, screenshot.Bpp);
                     }
 
-                    IEnumerable<IMarkerCorners>? markerCorners;
-
-                    IEnumerable<IMarkerCorners>? ProcessQr()
+                    ARMarkerType? ProcessQr()
                     {
-                        if (cvContext.DetectQrMarkers() == 0)
-                        {
-                            return null;
-                        }
-
-                        lastRoundFound = ARMarkerType.QrCode;
-                        return cvContext.GetDetectedQrCorners();
+                        var corners = context.DetectQrMarkers();
+                        detectedMarkers.AddRange(corners);
+                        return corners.Length != 0 ? ARMarkerType.QrCode : null;
                     }
 
-                    IEnumerable<IMarkerCorners>? ProcessAruco()
+                    ARMarkerType? ProcessAruco()
                     {
-                        if (cvContext.DetectArucoMarkers() == 0)
-                        {
-                            return null;
-                        }
-
-                        lastRoundFound = ARMarkerType.Aruco;
-                        return cvContext.GetDetectedArucoCorners();
+                        var corners = context.DetectArucoMarkers();
+                        detectedMarkers.AddRange(corners);
+                        return corners.Length != 0 ? ARMarkerType.Aruco : null;
                     }
 
-                    //float start = GameThread.GameTime;
+                    detectedMarkers.Clear();
                     if (enableQr && !enableAruco)
                     {
-                        markerCorners = ProcessQr();
+                        typeFoundInLastRound = ProcessQr();
                     }
                     else if (enableAruco && !enableQr)
                     {
-                        markerCorners = ProcessAruco();
+                        typeFoundInLastRound = ProcessAruco();
                     }
-                    else if (lastRoundFound != null)
+                    else if (typeFoundInLastRound != null)
                     {
-                        markerCorners = lastRoundFound == ARMarkerType.Aruco ? ProcessAruco() : ProcessQr();
+                        // if both active, prefer the last type found
+                        typeFoundInLastRound = typeFoundInLastRound == ARMarkerType.Aruco
+                            ? ProcessAruco()
+                            : ProcessQr();
                     }
                     else
                     {
-                        var qrCorners = ProcessQr();
-                        var arucoCorners = ProcessAruco();
-                        markerCorners = (qrCorners != null && arucoCorners != null)
-                            ? qrCorners.Concat(arucoCorners)
-                            : (qrCorners ?? arucoCorners);
+                        typeFoundInLastRound = ProcessQr() ?? ProcessAruco();
                     }
 
-                    if (markerCorners == null)
+                    if (typeFoundInLastRound == null)
                     {
-                        lastRoundFound = null;
                         continue;
                     }
 
-                    GameThread.Post(() =>
-                    {
-                        try
-                        {
-                            MarkerDetected?.Invoke(screenshot, markerCorners.ToArray());
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error("Error during detector event:", e);
-                        }
-                        finally
-                        {
-                            signal.Release();
-                        }
-                    });
-
-                    await signal.WaitAsync(Token);
+                    var detectedMarkersAsArray = detectedMarkers.ToArray();
+                    await RaiseOnMarkerDetectedAsync(screenshot, detectedMarkersAsArray);
                 }
             }
             catch (OperationCanceledException)
@@ -196,6 +148,7 @@ namespace Iviz.MarkerDetection
             finally
             {
                 cvContext?.Dispose();
+                cvContext = null;
             }
         }
 
@@ -235,11 +188,71 @@ namespace Iviz.MarkerDetection
             return CvContext.SolvePnp(imageCorners, objectCorners, intrinsic);
         }
 
+        CvContext ValidateCvContextForScreenshot(Screenshot screenshot)
+        {
+            if (cvContext != null
+                && cvContext.Width == screenshot.Width
+                && cvContext.Height == screenshot.Height)
+            {
+                return cvContext;
+            }
+
+            cvContext?.Dispose();
+            cvContext = new CvContext(screenshot.Width, screenshot.Height);
+            return cvContext;
+        }
+        
+        async ValueTask<Screenshot?> CaptureScreenshotAsync()
+        {
+            Screenshot? screenshot = null;
+            GameThread.Post(async () =>
+            {
+                var screenCaptureManager = Settings.ScreenCaptureManager;
+                if (screenCaptureManager == null)
+                {
+                    return;
+                }
+
+                try
+                {
+                    screenshot = await screenCaptureManager.CaptureColorAsync(250, Token).AwaitNoThrow(this);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+            await signal.WaitAsync(Token);
+            return screenshot;
+        }
+
+        Task RaiseOnMarkerDetectedAsync(Screenshot screenshot, IMarkerCorners[] detectedMarkers)
+        {
+            GameThread.Post(() =>
+            {
+                try
+                {
+                    MarkerDetected?.Invoke(screenshot, detectedMarkers);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Error during detector event:", e);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+
+            return signal.WaitAsync(Token);
+        }
+
         public void Dispose()
         {
             tokenSource.Cancel();
             MarkerDetected = null;
             task.WaitNoThrow(2000, this);
+            signal.Dispose();
         }
 
         public override string ToString() => "[MarkerDetector]";

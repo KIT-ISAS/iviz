@@ -59,7 +59,7 @@ Shader "iviz/LineMesh"
 				unity_WorldToObject = _WorldToLocal;
 
 				const uint id = In.id;
-				const uint inst = In.inst;
+				uint inst = In.inst;
 				
 				v2f o;
 #ifdef USING_STEREO_MATRICES

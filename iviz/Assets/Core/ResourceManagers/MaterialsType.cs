@@ -7,7 +7,7 @@ namespace Iviz.Resources
     public sealed class MaterialsType
     {
         static readonly int Tint = Shader.PropertyToID("_Tint");
-        
+
         public Info<Material> FontMaterial { get; }
         public Info<Material> FontMaterialZWrite { get; }
 
@@ -55,7 +55,8 @@ namespace Iviz.Resources
         public MaterialsType()
         {
             var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
-            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
+            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
+                .GetComponent<AppAssetHolder>();
 
             FontMaterial = new Info<Material>(assetHolder.FontMaterial);
             FontMaterialZWrite = new Info<Material>(assetHolder.FontMaterialZWrite);
@@ -79,7 +80,7 @@ namespace Iviz.Resources
             TransparentLit = new Info<Material>(assetHolder.TransparentLit);
             TransparentTexturedLit = new Info<Material>(assetHolder.TransparentTexturedLit);
             TransparentLitAlwaysVisible = new Info<Material>(assetHolder.TransparentLitAlwaysVisible);
-            
+
             BumpLit = new Info<Material>(assetHolder.BumpLit);
             TransparentBumpLit = new Info<Material>(assetHolder.TransparentBumpLit);
             ImagePreview = new Info<Material>(appAssetHolder.ImagePreview);
@@ -88,8 +89,8 @@ namespace Iviz.Resources
             GridMap = new Info<Material>(appAssetHolder.GridMapMat);
             TransparentGridMap = new Info<Material>(appAssetHolder.TransparentGridMap);
             DepthCloud = new Info<Material>(appAssetHolder.DepthCloud);
-            OccupancyGridTexture = (Settings.IsMobile || Settings.IsHololens)
-                ? new Info<Material>(appAssetHolder.OccupancyGridMat) 
+            OccupancyGridTexture = (Settings.IsMobile || !Settings.IsHololens)
+                ? new Info<Material>(appAssetHolder.OccupancyGridMat)
                 : new Info<Material>(appAssetHolder.OccupancyGridClipMat);
 
             PointCloud = new Info<Material>(assetHolder.PointCloud);
@@ -106,11 +107,15 @@ namespace Iviz.Resources
             LineSimpleWithColormap = new Info<Material>(assetHolder.LineSimpleWithColormap);
             TransparentLineSimpleWithColormap = new Info<Material>(assetHolder.TransparentLineSimpleWithColormap);
 
-            LinePulse = new Info<Material>(assetHolder.LinePulse);
-            LinePulse.Object.SetColor(Tint, Color.white);            
+            LinePulse = new Info<Material>(Settings.SupportsComputeBuffers
+                ? assetHolder.LinePulse
+                : assetHolder.LinePulseSimple);
+            LinePulse.Object.SetColor(Tint, Color.white);
 
-            LineMesh = new Info<Material>(assetHolder.LineMesh);
-            LineMesh.Object.SetColor(Tint, Color.white);            
+            LineMesh = new Info<Material>(Settings.SupportsComputeBuffers
+                ? assetHolder.LineMesh
+                : assetHolder.LineMeshSimple);
+            LineMesh.Object.SetColor(Tint, Color.white);
 
             MeshList = new Info<Material>(assetHolder.MeshListMaterial);
             MeshListWithColormap = new Info<Material>(assetHolder.MeshListWithColormap);

@@ -16,9 +16,8 @@ namespace Iviz.Displays
 
         bool TryGetBoxCollider([NotNullWhen(true)] out BoxCollider? bc) => (bc = GetComponent<BoxCollider>()) != null;
 
-        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
-        [NotNull]
         protected BoxCollider BoxCollider
         {
             get => boxCollider != null || TryGetBoxCollider(out boxCollider)
@@ -31,7 +30,6 @@ namespace Iviz.Displays
 
         protected Bounds WorldBounds => BoxCollider.bounds;
 
-        [NotNull]
         public string Name
         {
             get => gameObject.name;

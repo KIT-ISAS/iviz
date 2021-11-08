@@ -37,8 +37,11 @@ namespace Iviz.Displays
         public Material TransparentLineSimple;
         public Material LineSimpleWithColormap;
         public Material TransparentLineSimpleWithColormap;
+
         public Material LineMesh;
         public Material LinePulse;
+        public Material LineMeshSimple;
+        public Material LinePulseSimple;
 
         public Material LitOcclusionOnly;
 

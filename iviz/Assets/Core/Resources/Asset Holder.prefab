@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -87,6 +88,8 @@ MonoBehaviour:
     type: 2}
   LineMesh: {fileID: 2100000, guid: 3073a184dd3904aa9920b788f7e3d5a6, type: 2}
   LinePulse: {fileID: 2100000, guid: ca42fce2b47404f9dab65980a1b37205, type: 2}
+  LineMeshSimple: {fileID: 2100000, guid: 5425a5f4235fa7242a1bae104bfc104c, type: 2}
+  LinePulseSimple: {fileID: 2100000, guid: aa3bd28ef79d6524b8a2b624135b53b4, type: 2}
   LitOcclusionOnly: {fileID: 2100000, guid: de0cfb337e3f84356a7a652c47ee75d5, type: 2}
   MeshListMaterial: {fileID: 2100000, guid: 4d085d458d11a23488567d041611c202, type: 2}
   MeshListWithColormap: {fileID: 2100000, guid: efabf005bac284c55baf34451ee0e132,

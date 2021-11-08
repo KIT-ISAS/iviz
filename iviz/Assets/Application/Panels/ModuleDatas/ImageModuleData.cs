@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using Logger = Iviz.Core.Logger;
@@ -14,8 +14,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class ImageModuleData : ListenerModuleData
     {
-        [NotNull] readonly ImageListener listener;
-        [NotNull] readonly ImagePanelContents panel;
+        readonly ImageListener listener;
+        readonly ImagePanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -23,9 +23,9 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
-        [CanBeNull] ImageDialogData imageDialogData;
+        ImageDialogData? imageDialogData;
 
-        public ImageModuleData([NotNull] ModuleDataConstructor constructor) :
+        public ImageModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
@@ -176,8 +176,8 @@ namespace Iviz.App
 
         sealed class ColorImageListener : ImageDialogListener
         {
-            [NotNull] readonly ImageModuleData moduleData;
-            public ColorImageListener([NotNull] ImageModuleData moduleData) => this.moduleData = moduleData;
+            readonly ImageModuleData moduleData;
+            public ColorImageListener(ImageModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.listener.Material;
             public override Vector2Int ImageSize => moduleData.listener.ImageSize;
             protected override void Stop() => moduleData.OnDialogClosed();

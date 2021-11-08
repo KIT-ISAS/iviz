@@ -5,7 +5,7 @@ Shader "iviz/LinePulse"
         Cull Off
         Tags
         {
-            "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"
+            "Queue"="Transparent" "RenderType"="Transparent"
         }
         ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
@@ -13,8 +13,6 @@ Shader "iviz/LinePulse"
         Pass
         {
             CGPROGRAM
-// Upgrade NOTE: excluded shader from DX11; has structs without semantics (struct v2f members color)
-#pragma exclude_renderers d3d11
             #include "UnityCG.cginc"
 
             #pragma vertex vert
@@ -61,7 +59,7 @@ Shader "iviz/LinePulse"
             struct v2f
             {
                 float4 position : SV_POSITION;
-                float color : ALPHA;
+                float color : COLOR0;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -71,7 +69,7 @@ Shader "iviz/LinePulse"
                 unity_WorldToObject = _WorldToLocal;
 
                 const uint id = In.id;
-                const uint inst = In.inst;
+                uint inst = In.inst;
 
                 v2f o;
                 #ifdef USING_STEREO_MATRICES

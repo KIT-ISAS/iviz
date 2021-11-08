@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -42,18 +40,19 @@ namespace Iviz.Displays
         static readonly int LinesID = Shader.PropertyToID("_Lines");
         static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
-        readonly NativeList<float4x2> lineBuffer = new NativeList<float4x2>();
+        readonly NativeList<float4x2> lineBuffer = new();
 
-        [CanBeNull] ComputeBuffer lineComputeBuffer;
-        [CanBeNull] Mesh mesh;
+        ComputeBuffer? lineComputeBuffer;
+        Mesh? mesh;
 
-        [SerializeField] MeshRenderer meshRenderer = null;
-        [SerializeField] MeshFilter meshFilter = null;
+        [SerializeField] MeshRenderer? meshRenderer = null;
+        [SerializeField] MeshFilter? meshFilter = null;
 
         bool linesNeedAlpha;
 
-        [NotNull] Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
-        [NotNull] MeshRenderer MeshRenderer => meshRenderer;
+        Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        MeshFilter MeshFilter => meshFilter.AssertNotNull(nameof(meshFilter));
         bool UsesAlpha => linesNeedAlpha || Tint.a <= 254f / 255f;
 
         public override bool UseColormap
@@ -69,7 +68,20 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull] public Material MaterialOverride { get; set; }
+        Material? materialOverride;
+
+        public Material? MaterialOverride
+        {
+            get => materialOverride;
+            set
+            {
+                materialOverride = value;
+                if (UseCapsuleLines)
+                {
+                    UpdateMeshMaterial();
+                }
+            }
+        }
 
         int Size => lineBuffer.Length;
 
@@ -93,7 +105,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="lines">The line list.</param>
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
-        public void Set([NotNull] NativeList<LineWithColor> lines, bool? overrideNeedsAlpha = null)
+        public void Set(NativeList<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
@@ -116,7 +128,7 @@ namespace Iviz.Displays
             UpdateLines(overrideNeedsAlpha);
         }
 
-        public void Set([NotNull] LineWithColor[] lines, bool? overrideNeedsAlpha = null)
+        public void Set(LineWithColor[] lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
@@ -144,13 +156,6 @@ namespace Iviz.Displays
         }
 
         /// <summary>
-        /// Delegate for a function that receives a line list as parameter, sets the values,
-        /// and returns true if alpha is needed, false if not, or null to request a manual check.
-        /// </summary>
-        /// <param name="lineBuffer">The line list to be set</param>
-        public delegate bool? DirectLineSetter([NotNull] NativeList<float4x2> lineBuffer);
-
-        /// <summary>
         /// Exposes the line list directly for manual setting.
         /// </summary>
         /// <param name="callback">
@@ -158,7 +163,7 @@ namespace Iviz.Displays
         /// false if not, or null to request a manual check.
         /// </param>
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
-        public void SetDirect([NotNull] DirectLineSetter callback, int reserve = 0)
+        public void SetDirect(Func<NativeList<float4x2>, bool?> callback, int reserve = 0)
         {
             if (callback == null)
             {
@@ -242,7 +247,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
-            meshFilter.sharedMesh = Mesh;
+            MeshFilter.sharedMesh = Mesh;
             MeshRenderer.SetPropertyBlock(Properties);
 
             base.Awake();
@@ -300,7 +305,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer) null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
             }
 
             Destroy(Mesh);
@@ -354,20 +359,20 @@ namespace Iviz.Displays
             UpdateMeshMaterial();
         }
 
-        [NotNull]
         Material GetMeshMaterial()
         {
-            switch (UseColormap)
+            if (MaterialOverride != null)
             {
-                case true when !UsesAlpha:
-                    return Resource.Materials.LineSimpleWithColormap.Object;
-                case true:
-                    return Resource.Materials.TransparentLineSimpleWithColormap.Object;
-                case false when !UsesAlpha:
-                    return Resource.Materials.LineSimple.Object;
-                case false:
-                    return Resource.Materials.TransparentLineSimple.Object;
+                return MaterialOverride;
             }
+            
+            return UseColormap switch
+            {
+                true when !UsesAlpha => Resource.Materials.LineSimpleWithColormap.Object,
+                true => Resource.Materials.TransparentLineSimpleWithColormap.Object,
+                false when !UsesAlpha => Resource.Materials.LineSimple.Object,
+                false => Resource.Materials.TransparentLineSimple.Object
+            };
         }
 
         void UpdateMeshMaterial()
@@ -392,13 +397,11 @@ namespace Iviz.Displays
         {
             BoxCollider.center = Vector3.zero;
             BoxCollider.size = Vector3.zero;
-            ;
 
             MeasuredIntensityBounds = Vector2.zero;
             if (!OverrideIntensityBounds)
             {
                 IntensityBounds = Vector2.zero;
-                ;
             }
         }
 
@@ -413,7 +416,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer) null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
             }
 
             if (lineBuffer.Capacity != 0)
@@ -433,12 +436,12 @@ namespace Iviz.Displays
             base.Suspend();
             Mesh.Clear();
             MeshRenderer.enabled = false;
-
+            MaterialOverride = null;
             lineBuffer.Clear();
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
-            Properties.SetBuffer(LinesID, (ComputeBuffer) null);
+            Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
         }
     }
 }

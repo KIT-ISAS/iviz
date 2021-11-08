@@ -154,15 +154,15 @@ namespace Iviz.Displays
                 return Instantiate(resource.Object, parent);
             }
 
-            var obj = instances.Dequeue().GameObject;
-            obj.transform.SetParentLocal(parent);
+            var newObject = instances.Dequeue().GameObject;
+            newObject.transform.SetParentLocal(parent);
             if (enable)
             {
-                obj.SetActive(true);
+                newObject.SetActive(true);
             }
 
-            destroyedObjects.Remove(obj.GetInstanceID());
-            return obj;
+            destroyedObjects.Remove(newObject.GetInstanceID());
+            return newObject;
         }
 
         void Add(Info<GameObject> resource, GameObject obj)
