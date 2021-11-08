@@ -213,7 +213,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T?> t, object caller) where T : class
+        public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
         {
             try
             {
