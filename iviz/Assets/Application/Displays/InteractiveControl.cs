@@ -78,7 +78,7 @@ namespace Iviz.Displays
                 targetTransform = value;
                 foreach (var resource in allResources)
                 {
-                    resource.GetComponent<IDraggable>().TargetTransform = value;
+                    resource.GetComponent<IScreenDraggable>().TargetTransform = value;
                 }
 
                 if (colliderDraggablePlane != null)
@@ -221,7 +221,6 @@ namespace Iviz.Displays
                     {
                         colliderDraggablePlane = gameObject.AddComponent<DraggablePlane>();
                         colliderDraggablePlane.TargetTransform = TargetTransform;
-                        colliderDraggablePlane.SourceTransform = colliderDraggablePlane.Transform;
                         colliderDraggablePlane.Moved += RaiseMoved;
                         colliderDraggablePlane.PointerDown += PointerDown;
                         colliderDraggablePlane.PointerUp += PointerUp;
@@ -583,7 +582,7 @@ namespace Iviz.Displays
 
             foreach (var resource in allResources)
             {
-                var draggable = resource.GetComponent<IDraggable>();
+                var draggable = resource.GetComponent<IScreenDraggable>();
                 draggable.Moved += RaiseMoved;
                 draggable.PointerUp += RaisePointerUp;
                 draggable.PointerDown += RaisePointerDown;

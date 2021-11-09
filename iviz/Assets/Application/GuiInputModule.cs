@@ -30,9 +30,9 @@ namespace Iviz.App
         const float AnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
-            {"Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega"};
+            { "Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega" };
 
-        static readonly string[] QualityInArOptions = {"Very Low", "Low", "Medium", "High", "Very High", "Ultra"};
+        static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
         static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
 
         readonly SettingsConfiguration config = new();
@@ -41,7 +41,7 @@ namespace Iviz.App
         bool pointerIsAlreadyMoving;
         bool alreadyScaling;
         TfFrame? cameraViewOverride;
-        IDraggable? draggedObject;
+        IScreenDraggable? draggedObject;
 
         bool pointerMotionIsInvalid;
 
@@ -109,7 +109,7 @@ namespace Iviz.App
             }
         }
 
-        public IDraggable? DraggedObject
+        public IScreenDraggable? DraggedObject
         {
             get => draggedObject;
             private set
@@ -126,11 +126,9 @@ namespace Iviz.App
         }
 
         static bool IsDraggingAllowed =>
-            Settings.IsMobile
+            Settings.IsVR || (Settings.IsMobile
                 ? Input.touchCount == 1
-                : Settings.IsVR
-                    ? Settings.IsVRButtonDown
-                    : Mouse.current.rightButton.isPressed;
+                : Mouse.current.rightButton.isPressed);
 
         void Awake()
         {
@@ -254,7 +252,7 @@ namespace Iviz.App
                 config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
                 if (ARController.IsActive)
                 {
-                    QualitySettings.SetQualityLevel((int) value, true);
+                    QualitySettings.SetQualityLevel((int)value, true);
                     Settings.RaiseQualityTypeChanged(value);
                 }
             }
@@ -273,7 +271,7 @@ namespace Iviz.App
 
                 if (value == QualityType.Mega)
                 {
-                    QualitySettings.SetQualityLevel((int) QualityType.Ultra, true);
+                    QualitySettings.SetQualityLevel((int)QualityType.Ultra, true);
                     Settings.RaiseQualityTypeChanged(value);
                     MainCamera.renderingPath = RenderingPath.DeferredShading;
                     GetComponent<PostProcessLayer>().enabled = true;
@@ -282,7 +280,7 @@ namespace Iviz.App
 
                 GetComponent<PostProcessLayer>().enabled = false;
                 MainCamera.renderingPath = RenderingPath.Forward;
-                QualitySettings.SetQualityLevel((int) value, true);
+                QualitySettings.SetQualityLevel((int)value, true);
                 Settings.RaiseQualityTypeChanged(value);
             }
         }
@@ -303,7 +301,7 @@ namespace Iviz.App
             set
             {
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
-                
+
                 config.BackgroundColor = colorToUse.WithAlpha(1);
 
                 Color valueNoAlpha = colorToUse.WithAlpha(0);
@@ -359,12 +357,15 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public void ResetDraggedObject()
+        public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-            DraggedObject = null;
+            if (DraggedObject == draggable)
+            {
+                DraggedObject = null;
+            }
         }
 
-        public void TrySetDraggedObject(IDraggable draggable)
+        public void TrySetDraggedObject(IScreenDraggable draggable)
         {
             if (!IsDraggingAllowed)
             {
@@ -475,14 +476,14 @@ namespace Iviz.App
             }
             else if (!pointerIsOnGui)
             {
-                bool anyPointerDown = pointerIsDown ||  altPointerIsDown;
+                bool anyPointerDown = pointerIsDown || altPointerIsDown;
                 if (!prevPointerDown && anyPointerDown)
                 {
                     PointerDown?.Invoke(new ClickInfo(pointerPosition));
                 }
 
                 if (prevPointerDown && !anyPointerDown
-                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+                                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
                 {
                     float timeDown = Time.time - pointerDownTime;
                     if (timeDown < shortClickTime)
@@ -501,7 +502,7 @@ namespace Iviz.App
         {
             EventSystem eventSystem = EventSystem.current;
             var results = new List<RaycastResult>();
-            eventSystem.RaycastAll(new PointerEventData(eventSystem) {position = pointerPosition}, results);
+            eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = pointerPosition }, results);
             return results.Any(result => result.gameObject.layer == LayerType.UI);
         }
 

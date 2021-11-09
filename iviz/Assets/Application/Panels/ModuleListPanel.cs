@@ -123,12 +123,6 @@ namespace Iviz.App
         bool initialized;
         static event Action InitFinished;
 
-        public IMenuDialogContents MenuDialog
-        {
-            get => menuDialog;
-            set => menuDialog = value;
-        }
-
         [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
 
         public ModuleListPanel()
@@ -216,8 +210,10 @@ namespace Iviz.App
             GuiDialogListener.ClearResources();
             ARController.ClearResources();
 
+#if UNITY_EDITOR || (!UNITY_IOS && !UNITY_ANDROID)
             Settings.IsHololens = isHololens;
             Settings.IsVR = isVREnabled;
+#endif
         }
 
         void OnDestroy()

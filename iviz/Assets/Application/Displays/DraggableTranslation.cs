@@ -7,59 +7,11 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.Displays
 {
-    public sealed class DraggableTranslation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggableTranslation : ScreenDraggable
     {
         [SerializeField] Vector3 line = new Vector3(0, 0, 1);
 
-        bool needsStart;
         Vector3 startOffset;
-
-        public Transform TargetTransform { get; set; }
-
-        public event Action Moved;
-        public event Action PointerDown;
-        public event Action PointerUp;
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void OnPointerMove(in Vector2 cursorPos)
-        {
-            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
-            OnPointerMove(pointerRay);
-        }
-
-        public void OnStartDragging()
-        {
-            needsStart = true;
-        }
-
-        public void OnEndDragging()
-        {
-        }
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
-            }
-
-            PointerDown?.Invoke();
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            PointerUp?.Invoke();
-        }
-
-        void SetTargetPose(in Pose pose)
-        {
-            TargetTransform.SetPose(pose);
-        }
 
         static (float, float) ClosestPointDelta(in Ray ray, in Ray other)
         {
@@ -75,20 +27,15 @@ namespace Iviz.Displays
             return (t.x, t.z);
         }
 
-        void IDraggable.OnPointerMove(in Ray pointerRay)
-        {
-            OnPointerMove(pointerRay);
-        }
-
-        void OnPointerMove(in Ray pointerRay)
+        protected override void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = transform;
-            Transform mParent = mTransform.parent;
+            Transform mParent = mTransform.parent.CheckedNull() ?? mTransform;
             Transform mTarget = TargetTransform;
-            Ray forwardRay = new Ray(mTransform.position, mParent.TransformDirection(line));
+            var forwardRay = new Ray(mTransform.position, mParent.TransformDirection(line));
 
             (float deltaDistance, float cameraDistance) = ClosestPointDelta(forwardRay, pointerRay);
-            //Debug.Log((deltaDistance, cameraDistance));
+
             if (cameraDistance < 0)
             {
                 return;
@@ -103,8 +50,8 @@ namespace Iviz.Displays
             }
             else
             {
-                SetTargetPose(new Pose(mTarget.position + deltaPosition - startOffset, mTarget.rotation));
-                Moved?.Invoke();
+                mTarget.position += deltaPosition - startOffset;
+                RaiseMoved();
             }
         }
     }

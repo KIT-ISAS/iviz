@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public interface IDraggable
+    public interface IScreenDraggable
     {
         event Action? PointerDown;
         event Action? PointerUp;

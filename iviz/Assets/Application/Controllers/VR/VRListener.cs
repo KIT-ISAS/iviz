@@ -8,6 +8,7 @@ using UnityEngine.AI;
 
 namespace Iviz.Controllers
 {
+#if false
     public class VRListener :  MonoBehaviour
     {
         [SerializeField] string topic = null;
@@ -130,4 +131,5 @@ namespace Iviz.Controllers
             controllerTransform.SetPose(localPose);
         }
     }
+#endif
 }

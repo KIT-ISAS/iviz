@@ -31,7 +31,9 @@ namespace Iviz.Controllers
         GameObject? modelRoot;
         [SerializeField] HandType handType;
         [SerializeField] Transform? cameraTransform;
-        [FormerlySerializedAs("localPivot")] [SerializeField] Vector3 shoulderToCamera = new Vector3(-0.1f, -0.2f, -0.7f);
+
+        [FormerlySerializedAs("localPivot")] [SerializeField]
+        Vector3 shoulderToCamera = new(-0.1f, -0.2f, -0.05f);
 
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
@@ -44,7 +46,6 @@ namespace Iviz.Controllers
                    && usages.Contains(HandDataBase);
         }
 
-        /// <inheritdoc />
         protected override void UpdateTrackingInput(XRControllerState? controllerState)
         {
             base.UpdateTrackingInput(controllerState);
@@ -82,14 +83,14 @@ namespace Iviz.Controllers
                 ? HandleBone(palm).transform.AsPose()
                 : null;
 
-            if (cameraTransform == null 
-                || palmPose is not {} palmReference
-                || fingerBases[0]?.Transform.AsPose() is not {} thumbReference)
+            if (cameraTransform == null
+                || palmPose is not { } palmReference
+                || fingerBases[0]?.Transform.AsPose() is not { } thumbReference)
             {
                 return;
             }
 
-            var controllerPosition = (palmReference.position + thumbReference.position) / 2; 
+            var controllerPosition = (palmReference.position + thumbReference.position) / 2;
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
             var controllerRotation = Quaternion.LookRotation(controllerPosition - pivot);
 
@@ -107,7 +108,7 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             controllerState.ResetFrameDependentStates();
 
             if (fingerTips[0] is not { } thumb
@@ -118,30 +119,35 @@ namespace Iviz.Controllers
 
             bool isPressed = Vector3.Distance(thumb.Transform.position, index.Transform.position) < 0.025f;
             var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
-            var emissive = isPressed ? Color.blue : Color.black;
             var scale = new Vector3(0.005f, 0.005f, 0.001f) * (isPressed ? 2 : 1);
 
-            
-            thumb.Color = color; 
-            thumb.EmissiveColor = emissive; 
+            thumb.Color = color;
             thumb.Transform.localScale = scale;
-            index.Color = color; 
-            index.EmissiveColor = emissive;
+            index.Color = color;
             index.Transform.localScale = scale;
-            
+
             controllerState.selectInteractionState.SetFrameState(isPressed);
             controllerState.uiPressInteractionState.SetFrameState(isPressed);
         }
 
-        bool ModelVisible
+        Transform RootTransform
         {
-            set
+            get
             {
                 if (modelRoot != null)
                 {
-                    modelRoot.SetActive(value);
+                    return modelRoot.transform;
                 }
+                
+                modelRoot = new GameObject(name + " Model");
+                modelRoot.transform.SetParentLocal(transform.parent);
+                return modelRoot.transform;
             }
+        }
+        
+        bool ModelVisible
+        {
+            set => RootTransform.gameObject.SetActive(value);
         }
 
         MeshMarkerResource HandleBone(Bone bone)
@@ -153,16 +159,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                if (modelRoot == null)
-                {
-                    modelRoot = new GameObject("Hand Model");
-                    modelRoot.transform.SetParentLocal(transform.parent);
-                }
-
-                boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, modelRoot.transform);
-                boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
-                boneObject.Color = Color.white.WithAlpha(0.3f);
-                bones[bone] = boneObject;
+                bones[bone] = boneObject = CreateBoneObject();
             }
 
             var localPose = new Pose();
@@ -172,6 +169,23 @@ namespace Iviz.Controllers
             }
 
             return boneObject;
+        }
+
+        MeshMarkerResource CreateBoneObject()
+        {
+            var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, RootTransform);
+            boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
+            boneObject.Color = Color.white.WithAlpha(0.3f);
+            boneObject.EmissiveColor = Color.blue;
+            return boneObject;
+        }
+
+        void OnDestroy()
+        {
+            if (modelRoot != null)
+            {
+                Destroy(modelRoot);
+            }
         }
     }
 }

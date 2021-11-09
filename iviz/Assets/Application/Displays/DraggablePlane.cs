@@ -1,96 +1,21 @@
-using System;
-using Iviz.App;
-using Iviz.Controllers;
+#nullable enable
+
 using Iviz.Core;
-using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 
 namespace Iviz.Displays
 {
-    public sealed class DraggablePlane : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggablePlane : XRScreenDraggable
     {
         [SerializeField] Vector3 normal = new Vector3(0, 0, 1);
+
+        Vector3 startIntersection;
 
         public Vector3 Normal
         {
             get => normal;
             set => normal = value;
-        }
-
-        [SerializeField] Transform sourceTransform = null;
-
-        Transform mTransform;
-        [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-
-        bool needsStart;
-        Vector3 startIntersection;
-
-        [SerializeField] Transform targetTransform;
-
-        public Transform TargetTransform
-        {
-            get => targetTransform;
-            set => targetTransform = value;
-        }
-
-        public Transform SourceTransform
-        {
-            get => sourceTransform;
-            set => sourceTransform = value;
-        }
-
-        public event Action Moved;
-        public event Action PointerDown;
-        public event Action PointerUp;
-        public event Action StartDragging;
-        public event Action EndDragging;
-
-        void Awake()
-        {
-            if (TargetTransform == null)
-            {
-                TargetTransform = Transform;
-            }
-        }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void OnPointerMove(in Vector2 cursorPos)
-        {
-            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
-            OnPointerMove(pointerRay);
-        }
-
-        void IDraggable.OnStartDragging()
-        {
-            needsStart = true;
-            StartDragging?.Invoke();
-        }
-
-        void IDraggable.OnEndDragging()
-        {
-            EndDragging?.Invoke();
-        }
-
-        void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
-        {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
-            }
-
-            PointerDown?.Invoke();
-        }
-
-        void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
-        {
-            PointerUp?.Invoke();
         }
 
         static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
@@ -102,20 +27,13 @@ namespace Iviz.Displays
             return (p, t);
         }
 
-        void IDraggable.OnPointerMove(in Ray pointerRay)
+        protected override void OnPointerMove(in Ray pointerRay)
         {
-            OnPointerMove(pointerRay);
-        }
-
-        void OnPointerMove(in Ray pointerRay)
-        {
-            Transform mParent = sourceTransform.CheckedNull()
-                                ?? Transform.parent.CheckedNull()
-                                ?? Transform;
+            Transform mTransform = Transform;
+            Transform mParent = mTransform.parent.CheckedNull() ?? mTransform;
             Transform mTarget = TargetTransform;
 
-            //Ray ray = new Ray(mTransform.position, mParent.TransformDirection(normal));/
-            Ray normalRay = new Ray(mParent.position, mParent.TransformDirection(normal));
+            var normalRay = new Ray(mTransform.position, mParent.TransformDirection(normal));
 
             (Vector3 intersection, float cameraDistance) = PlaneIntersection(normalRay, pointerRay);
             if (cameraDistance < 0)
@@ -131,13 +49,13 @@ namespace Iviz.Displays
             }
             else
             {
-                Vector3 deltaPosition = localIntersection - startIntersection;
+                var deltaPosition = localIntersection - startIntersection;
                 float deltaDistance = deltaPosition.Magnitude();
                 if (deltaDistance > 0.5f) deltaPosition *= 0.75f / deltaDistance;
 
-                Vector3 deltaPositionWorld = mParent.TransformVector(deltaPosition);
-                targetTransform.SetPose(new Pose(mTarget.position + deltaPositionWorld, mTarget.rotation));
-                Moved?.Invoke();
+                Vector3 deltaPositionWorld = mTransform.TransformVector(deltaPosition);
+                mTarget.position += deltaPositionWorld;
+                RaiseMoved();
             }
         }
     }

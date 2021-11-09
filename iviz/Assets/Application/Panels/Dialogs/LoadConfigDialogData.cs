@@ -1,11 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Iviz.Tools;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
@@ -14,8 +15,8 @@ namespace Iviz.App
     {
         internal const string Suffix = ".config.json";
 
-        [NotNull] readonly ItemListDialogContents itemList;
-        [NotNull] readonly List<SavedFileInfo> files = new List<SavedFileInfo>();
+        readonly ItemListDialogContents itemList;
+        readonly List<SavedFileInfo> files = new();
         public override IDialogPanelContents Panel => itemList;
 
         public LoadConfigDialogData()
@@ -24,7 +25,6 @@ namespace Iviz.App
             itemList.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 
-        [NotNull]
         public static IEnumerable<SavedFileInfo> SavedFiles => Directory
             .GetFiles(Settings.SavedFolder)
             .Where(name => name.HasSuffix(Suffix))
@@ -74,13 +74,12 @@ namespace Iviz.App
 
     public sealed class SavedFileInfo : IComparable<SavedFileInfo>
     {
-        [NotNull] public string FullPath { get; }
-        [NotNull] public string FileName => Path.GetFileName(FullPath);
+        public string FullPath { get; }
+        public string FileName => Path.GetFileName(FullPath);
 
         DateTime date;
         DateTime Date => date != default ? date : (date = File.GetLastWriteTime(FullPath));
 
-        [NotNull]
         public string Description
         {
             get
@@ -92,19 +91,18 @@ namespace Iviz.App
             }
         } 
 
-        public SavedFileInfo([NotNull] string fullPath)
+        public SavedFileInfo(string fullPath)
         {
             FullPath = fullPath;
         }
 
-        public int CompareTo([CanBeNull] SavedFileInfo other)
+        public int CompareTo(SavedFileInfo? other)
         {
             if (ReferenceEquals(this, other)) return 0;
             if (ReferenceEquals(null, other)) return 1;
             return Date.CompareTo(other.Date);
         }
 
-        [NotNull]
         public override string ToString()
         {
             return FullPath;

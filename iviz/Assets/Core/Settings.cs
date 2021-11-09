@@ -55,19 +55,24 @@ namespace Iviz.Core
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+        public const bool IsHololens = false;
+        public const bool IsVR = false;
+#else
         public static bool IsHololens { get; set; }
         public static bool IsVR { get; set; }
-        public static bool IsVRButtonDown { get; set; }
 
+#endif
 
         static string? persistentDataPath;
+
         static string? savedFolder;
         static string? bagsFolder;
         static string? simpleConfigurationPath;
         static string? resourcesPath;
         static string? savedRobotsPath;
         static string? resourcesFilePath;
-        
+
         static string PersistentDataPath => persistentDataPath ??= Application.persistentDataPath;
         public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
         public static string BagsFolder => bagsFolder ??= PersistentDataPath + "/bags";

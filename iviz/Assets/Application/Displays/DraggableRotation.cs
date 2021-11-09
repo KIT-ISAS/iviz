@@ -8,63 +8,14 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.Displays
 {
-    public sealed class DraggableRotation : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDraggable
+    public sealed class DraggableRotation : ScreenDraggable
     {
         [SerializeField] Vector3 normal;
-        [SerializeField, CanBeNull] Transform targetTransform;
 
-        bool needsStart;
         Vector3 startIntersection;
 
         public bool DoesRotationReset { get; set; }
         
-        [CanBeNull]
-        public Transform TargetTransform
-        {
-            get => targetTransform;
-            set => targetTransform = value;
-        }
-
-        public event Action Moved;
-        public event Action PointerDown;
-        public event Action PointerUp;
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public void OnPointerMove(in Vector2 cursorPos)
-        {
-            Ray pointerRay = Settings.MainCamera.ScreenPointToRay(cursorPos);
-            OnPointerMove(pointerRay);
-        }
-
-        public void OnStartDragging()
-        {
-            needsStart = true;
-        }
-
-        public void OnEndDragging()
-        {
-        }
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
-            }
-
-            PointerDown?.Invoke();
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            PointerUp?.Invoke();
-        }
-
         static (Vector3, float) PlaneIntersection(in Ray ray, in Ray other)
         {
             float t = Vector3.Dot(other.origin - ray.origin, ray.direction) /
@@ -74,29 +25,19 @@ namespace Iviz.Displays
             return (p, t);
         }
 
-        void IDraggable.OnPointerMove(in Ray pointerRay)
+        protected override void OnPointerMove(in Ray pointerRay)
         {
-            OnPointerMove(pointerRay);
-        }
+            Transform mTransform = transform;
+            Transform mParent = mTransform.parent.CheckedNull() ?? mTransform;
+            Transform mTarget = TargetTransform;
 
-        void OnPointerMove(in Ray pointerRay)
-        {
-            Transform ownTransform = transform;
-            Transform parentTransform = ownTransform.parent;
-
-            if (parentTransform == null)
+            if (mParent == null)
             {
                 Debug.LogWarning("The object with the DraggableRotation must have a parent!");
                 return;
             }
 
-            if (targetTransform == null)
-            {
-                Debug.LogWarning("Target transform of DraggableRotation must be nonnull!");
-                return;
-            }
-
-            Ray normalRay = new Ray(ownTransform.position, parentTransform.TransformDirection(normal));
+            var normalRay = new Ray(mTransform.position, mParent.TransformDirection(normal));
 
             (Vector3 intersection, float cameraDistance) = PlaneIntersection(normalRay, pointerRay);
             if (cameraDistance < 0)
@@ -104,7 +45,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Vector3 localIntersection = parentTransform.InverseTransformPoint(intersection);
+            Vector3 localIntersection = mParent.InverseTransformPoint(intersection);
             if (needsStart)
             {
                 needsStart = false;
@@ -119,9 +60,9 @@ namespace Iviz.Displays
 
                 float angle = Mathf.Asin(m.determinant) * Mathf.Rad2Deg;
 
-                Quaternion q = Quaternion.AngleAxis(angle, targetTransform.InverseTransformDirection(normalRay.direction));
-                targetTransform.SetPose(new Pose(targetTransform.position, targetTransform.rotation * q));
-                Moved?.Invoke();
+                Quaternion q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(normalRay.direction));
+                mTarget.rotation *= q;
+                RaiseMoved();
             }
 
             if (DoesRotationReset)
