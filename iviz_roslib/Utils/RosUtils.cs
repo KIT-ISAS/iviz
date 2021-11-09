@@ -171,30 +171,57 @@ namespace Iviz.Roslib.Utils
             string resolvedHostname = ConnectionUtils.GlobalResolver.TryGetValue(hostname, out string? newHostname)
                 ? newHostname
                 : hostname;
-            
-            return IPAddress.TryParse(resolvedHostname, out IPAddress? parsedAddress)
-                ? parsedAddress
-                : Dns.GetHostEntry(resolvedHostname).AddressList.FirstOrDefault(address =>
-                    address.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6);
+
+            if (IPAddress.TryParse(resolvedHostname, out IPAddress? parsedAddress))
+            {
+                return parsedAddress;
+            }
+
+            IPAddress[] addressList;
+            try
+            {
+                addressList = Dns.GetHostEntry(resolvedHostname).AddressList;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            return addressList.FirstOrDefault(address =>
+                address.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6);
         }
 
         internal static IPAddress? TryGetAccessibleAddress(IPAddress masterAddress)
         {
-            return NetworkInterface.GetAllNetworkInterfaces()
-                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
-                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
-                .FirstOrDefault(info => CanAccessAddress(info, masterAddress))
-                ?.Address;
+            try
+            {
+                return NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                    .FirstOrDefault(info => CanAccessAddress(info, masterAddress))
+                    ?.Address;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
-        internal static NetworkInterface? TryGetAccessibleInterface(IPAddress masterAddress)
+        static NetworkInterface? TryGetAccessibleInterface(IPAddress masterAddress)
         {
-            return NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
-                .Select(@interface => (@interface, infos: @interface.GetIPProperties().UnicastAddresses))
-                .FirstOrDefault(t => t.infos.Any(info => CanAccessAddress(info, masterAddress)))
-                .@interface;
+            try
+            {
+                return NetworkInterface
+                    .GetAllNetworkInterfaces()
+                    .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                    .Select(@interface => (@interface, infos: @interface.GetIPProperties().UnicastAddresses))
+                    .FirstOrDefault(t => t.infos.Any(info => CanAccessAddress(info, masterAddress)))
+                    .@interface;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         static bool CanAccessAddress(UnicastIPAddressInformation info, IPAddress address)
@@ -209,13 +236,20 @@ namespace Iviz.Roslib.Utils
 
         internal static IEnumerable<string> GetAllLocalAddresses()
         {
-            return NetworkInterface.GetAllNetworkInterfaces()
-                .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
-                .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
-                .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                .Select(info => info.Address.ToString());
+            try
+            {
+                return NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(@interface => @interface.OperationalStatus == OperationalStatus.Up)
+                    .SelectMany(@interface => @interface.GetIPProperties().UnicastAddresses)
+                    .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                    .Select(info => info.Address.ToString());
+            }
+            catch (Exception)
+            {
+                return Array.Empty<string>();
+            }
         }
-        
+
 
         internal static int? TryGetMaxPacketSizeForAddress(string address)
         {
@@ -234,18 +268,17 @@ namespace Iviz.Roslib.Utils
                 mtuCandidate =
                     @interface?.GetIPProperties()?.GetIPv4Properties()?.Mtu; // if v6 is active it will return same mtu
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // this shouldn't throw at all!
-                Logger.LogDebugFormat("Mono error: Failed to obtain interface MTU: {0}", e);
                 return null;
             }
 
-            if (mtuCandidate is not {} mtu || mtu == 0)
+            if (mtuCandidate is not { } mtu || mtu == 0)
             {
                 return null; // mono is bad at finding the mtu
             }
-            
+
             int headerSize =
                 (remoteAddress.AddressFamily == AddressFamily.InterNetworkV6 && !remoteAddress.IsIPv4MappedToIPv6)
                     ? UdpRosParams.Ip6UdpHeadersLength
@@ -260,8 +293,8 @@ namespace Iviz.Roslib.Utils
                 < 64 * 1024 => defaultSize,
                 < 128 * 1024 => 128 * 1024,
                 < 1024 * 1024 => 1024 * 1024,
-                _ => 4 * 1024 * 1024, 
-            };            
+                _ => 4 * 1024 * 1024,
+            };
         }
     }
 }

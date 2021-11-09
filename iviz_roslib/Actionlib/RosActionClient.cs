@@ -372,7 +372,7 @@ namespace Iviz.Roslib.Actionlib
                 throw new InvalidOperationException("Goal has not been set!");
             }
 
-            foreach (IMessage msg in source)
+            foreach (var msg in source)
             {
                 switch (msg)
                 {

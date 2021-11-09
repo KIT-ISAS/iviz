@@ -1,7 +1,8 @@
 namespace Iviz.Roslib
 {
     /// <summary>
-    /// Hint on what kind of connection will be requested
+    /// Hint on what kind of connection will be requested.
+    /// Only applies to subscribers. Iviz publishers will always offer both.
     /// </summary>
     public enum RosTransportHint
     {
