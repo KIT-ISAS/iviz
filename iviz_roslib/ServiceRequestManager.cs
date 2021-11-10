@@ -72,7 +72,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                if (!(e is ObjectDisposedException or OperationCanceledException))
+                if (e is not (ObjectDisposedException or OperationCanceledException))
                 {
                     Logger.LogFormat("{0}: Stopped thread {1}", this, e);
                 }
@@ -85,7 +85,7 @@ namespace Iviz.Roslib
 
         async ValueTask CleanupAsync(CancellationToken token)
         {
-            ServiceRequest<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
+            var toRemove = requests.Where(request => !request.IsAlive).ToArray();
             var tasks = toRemove.Select(async request =>
             {
                 Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
@@ -108,7 +108,7 @@ namespace Iviz.Roslib
             tokenSource.Cancel();
 
             // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
-            using (TcpClient client = new(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
+            using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
             {
                 await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
             }

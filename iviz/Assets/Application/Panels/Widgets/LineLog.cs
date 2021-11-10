@@ -1,26 +1,27 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Text;
 using Iviz.Core;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using TMPro;
 
 namespace Iviz.App
 {
     public sealed class LineLog : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text text2 = null;
-
+        const int MaxLines = 100;
+        
         static readonly char[] Separators = { '\n' };
 
-        readonly List<string> lines = new List<string>();
-
-        const int MaxLines = 100;
-
+        [SerializeField] TMP_Text? text2 = null;
+        
+        readonly List<string> lines = new();
         bool active = true;
 
+        TMP_Text Text2 => text2.AssertNotNull(nameof(text2));
+        
         public bool Active
         {
             get => active;
@@ -34,7 +35,7 @@ namespace Iviz.App
             }
         }
 
-        public void Add([NotNull] string str)
+        public void Add(string str)
         {
             if (str == null)
             {
@@ -78,7 +79,7 @@ namespace Iviz.App
                     }
                 }
 
-                text2.SetText(description);
+                Text2.SetText(description);
             }
             finally
             {
