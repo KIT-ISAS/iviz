@@ -1898,7 +1898,7 @@ namespace Iviz.Roslib
             ValueTask Wrapper(T x)
             {
                 callback(x);
-                return new ValueTask();
+                return default;
             }
 
             return AdvertiseServiceAsync<T>(serviceName, Wrapper, token);

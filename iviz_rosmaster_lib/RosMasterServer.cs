@@ -294,7 +294,7 @@ namespace Iviz.RosMaster
                 if (!args[1].TryGetString(out string topic) ||
                     !subscribersByTopic.TryGetValue(topic, out var subscribers))
                 {
-                    return new ValueTask();
+                    return default;
                 }
 
                 var publisherUris =
@@ -304,7 +304,7 @@ namespace Iviz.RosMaster
 
                 if (subscribers.Count == 0 || token.IsCancellationRequested)
                 {
-                    return new ValueTask();
+                    return default;
                 }
 
                 methodArgs = new XmlRpcArg[] { MasterCallerId, topic, new(publisherUris) };
@@ -316,7 +316,7 @@ namespace Iviz.RosMaster
                 NotifySubscriber(uri, methodArgs, token);
             }
 
-            return new ValueTask();
+            return default;
         }
 
         async void NotifySubscriber(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)

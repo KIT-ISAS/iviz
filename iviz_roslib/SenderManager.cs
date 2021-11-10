@@ -229,7 +229,7 @@ namespace Iviz.Roslib
             switch (localSenders.Length)
             {
                 case 0:
-                    return new ValueTask();
+                    return default;
                 case 1:
                     return localSenders[0].PublishAndWaitAsync(msg, token);
                 default:

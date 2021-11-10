@@ -53,7 +53,7 @@ namespace Iviz.Roslib
             {
                 bytesDropped += message.RosMessageLength;
                 numDropped++;
-                return new ValueTask();
+                return default;
             }
             
             var msgSignal = new TaskCompletionSource<object?>();

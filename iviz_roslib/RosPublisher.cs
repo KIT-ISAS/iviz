@@ -147,11 +147,11 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return new ValueTask();
+                    return default;
                 case RosPublishPolicy.WaitUntilSent:
                     return manager.PublishAndWaitAsync(message, token);
                 default:
-                    return new ValueTask();
+                    return default;
             }
         }
 
