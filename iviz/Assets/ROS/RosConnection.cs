@@ -10,6 +10,7 @@ using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
@@ -23,14 +24,14 @@ namespace Iviz.Ros
 
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
-        readonly ConcurrentQueue<Func<Task>> toDos = new();
+        readonly ConcurrentQueue<Func<ValueTask>> toDos = new();
         readonly CancellationTokenSource connectionTs = new();
 
         DateTime lastConnectionTry = DateTime.MinValue;
 
         protected RosConnection()
         {
-            task = TaskUtils.StartLongTask(Run);
+            task = TaskUtils.StartLongTask(async () => await Run().AwaitNoThrow(this));
         }
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
@@ -67,7 +68,7 @@ namespace Iviz.Ros
             GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
         }
 
-        protected void AddTask(Func<Task> a)
+        protected void AddTask(Func<ValueTask> a)
         {
             toDos.Enqueue(a);
             Signal();
@@ -78,7 +79,7 @@ namespace Iviz.Ros
             signal.Release();
         }
 
-        async Task Run()
+        async ValueTask Run()
         {
             try
             {
@@ -96,7 +97,7 @@ namespace Iviz.Ros
                         try
                         {
                             lastConnectionTry = now;
-                            connectionResult = await Connect();
+                            connectionResult = await ConnectAsync();
                         }
                         catch (Exception e)
                         {
@@ -124,15 +125,22 @@ namespace Iviz.Ros
             connectionTs.Cancel();
         }
 
-        async Task ExecuteTasks()
+        async ValueTask ExecuteTasks()
         {
             while (toDos.TryDequeue(out var action))
             {
-                await action().AwaitNoThrow(this);
+                try
+                {
+                    await action(); //.AwaitNoThrow(this);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("EXCEPTION " + e);
+                }
             }
         }
 
-        protected abstract ValueTask<bool> Connect();
+        protected abstract ValueTask<bool> ConnectAsync();
 
         public virtual void Disconnect()
         {

@@ -28,7 +28,7 @@ namespace Iviz.Core
         [DataMember] public int NetworkFrameSkip { get; set; } = 1;
 
         [DataMember]
-        public int TargetFps { get; set; } = (Settings.IsMobile || Settings.IsHololens) ? Settings.DefaultFps : 60;
+        public int TargetFps { get; set; } = Settings.IsMobile ? Settings.DefaultFps : 60;
 
         [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
         [DataMember] public int SunDirection { get; set; } = 0;

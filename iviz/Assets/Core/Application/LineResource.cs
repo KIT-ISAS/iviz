@@ -264,7 +264,7 @@ namespace Iviz.Displays
             }
 
             UpdateTransform();
-            //Properties.SetFloat(ScaleID, ElementScale * transform.lossyScale.x);
+
             Properties.SetFloat(ScaleID, ElementScale);
 
             Bounds worldBounds = BoxCollider.bounds;
@@ -276,21 +276,13 @@ namespace Iviz.Displays
             }
             else
             {
-                switch (UseColormap)
+                material = UseColormap switch
                 {
-                    case true when !UsesAlpha:
-                        material = Resource.Materials.LineWithColormap.Object;
-                        break;
-                    case true:
-                        material = Resource.Materials.TransparentLineWithColormap.Object;
-                        break;
-                    case false when !UsesAlpha:
-                        material = Resource.Materials.Line.Object;
-                        break;
-                    case false:
-                        material = Resource.Materials.TransparentLine.Object;
-                        break;
-                }
+                    true when !UsesAlpha => Resource.Materials.LineWithColormap.Object,
+                    true => Resource.Materials.TransparentLineWithColormap.Object,
+                    false when !UsesAlpha => Resource.Materials.Line.Object,
+                    false => Resource.Materials.TransparentLine.Object
+                };
             }
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size,

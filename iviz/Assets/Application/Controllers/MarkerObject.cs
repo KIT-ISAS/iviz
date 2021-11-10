@@ -174,7 +174,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public async Task SetAsync(Marker msg)
+        public async ValueTask SetAsync(Marker msg)
         {
             if (msg == null)
             {
@@ -663,7 +663,7 @@ namespace Iviz.Controllers
             }
         }
 
-        async Task UpdateResourceAsync(Marker msg)
+        async ValueTask UpdateResourceAsync(Marker msg)
         {
             var newResourceInfo = await GetRequestedResource(msg);
             if (newResourceInfo == resourceInfo)

@@ -625,35 +625,6 @@ namespace Iviz.Controllers
 
                 if (color != null)
                 {
-                    /*
-                    int pitch = color.Width * 3;
-                    byte[] bytes = color.Bytes;
-                    
-                    for (int v = 0; v < color.Height; v++)
-                    {
-                        int o_base = v * pitch;
-                        for (int u = 0; u < pitch; u += 3 * 16)
-                        {
-                            int o = o_base + u;
-                            bytes[o] = 0;
-                            bytes[o + 1] = 0;
-                            bytes[o + 2] = 0;
-                        }
-                    }
-
-                    for (int v = 0; v < color.Height; v += 16)
-                    {
-                        int o_base = v * pitch;
-                        for (int u = 0; u < pitch; u += 3)
-                        {
-                            int o = o_base + u;
-                            bytes[o] = 0;
-                            bytes[o + 1] = 0;
-                            bytes[o + 2] = 0;
-                        }
-                    }
-                    */
-
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
                     ColorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
                 }
@@ -666,7 +637,6 @@ namespace Iviz.Controllers
                 if (confidence != null)
                 {
                     byte[] bytes = confidence.Bytes;
-
                     for (int v = 0; v < confidence.Height * confidence.Width; v++)
                     {
                         bytes[v] = (byte)(bytes[v] * 127);

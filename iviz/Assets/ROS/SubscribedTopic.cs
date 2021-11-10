@@ -15,12 +15,10 @@ namespace Iviz.Ros
         void Add([NotNull] IListener subscriber);
         void Remove([NotNull] IListener subscriber);
 
-        [NotNull]
-        Task SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null,
+        ValueTask SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null,
             CancellationToken token = default);
 
-        [NotNull]
-        Task UnsubscribeAsync(CancellationToken token);
+        ValueTask UnsubscribeAsync(CancellationToken token);
 
         void Invalidate();
 
@@ -59,7 +57,7 @@ namespace Iviz.Ros
             listeners.Remove((Listener<T>)subscriber);
         }
 
-        public async Task SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
+        public async ValueTask SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
         {
             if (listener != null)
             {
@@ -97,7 +95,7 @@ namespace Iviz.Ros
             }
         }
 
-        public async Task UnsubscribeAsync(CancellationToken token)
+        public async ValueTask UnsubscribeAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
 

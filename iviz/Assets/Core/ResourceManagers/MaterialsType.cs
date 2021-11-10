@@ -60,21 +60,7 @@ namespace Iviz.Resources
 
             FontMaterial = new Info<Material>(assetHolder.FontMaterial);
             FontMaterialZWrite = new Info<Material>(assetHolder.FontMaterialZWrite);
-
-            /*
-            Lit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Holo White")
-                : new Info<Material>(assetHolder.Lit);
-            TexturedLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Holo Textured Lit")
-                : new Info<Material>(assetHolder.TexturedLit);
-            TransparentLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Holo Transparent Lit")
-                : new Info<Material>(assetHolder.TransparentLit);
-            TransparentTexturedLit = Settings.IsHololens
-                ? new Info<Material>("Hololens Materials/Holo Transparent Textured Lit")
-                : new Info<Material>(assetHolder.TransparentTexturedLit);
-                */
+            
             Lit = new Info<Material>(assetHolder.Lit);
             TexturedLit = new Info<Material>(assetHolder.TexturedLit);
             TransparentLit = new Info<Material>(assetHolder.TransparentLit);
@@ -89,7 +75,7 @@ namespace Iviz.Resources
             GridMap = new Info<Material>(appAssetHolder.GridMapMat);
             TransparentGridMap = new Info<Material>(appAssetHolder.TransparentGridMap);
             DepthCloud = new Info<Material>(appAssetHolder.DepthCloud);
-            OccupancyGridTexture = (Settings.IsMobile || !Settings.IsHololens)
+            OccupancyGridTexture = Settings.IsMobile
                 ? new Info<Material>(appAssetHolder.OccupancyGridMat)
                 : new Info<Material>(appAssetHolder.OccupancyGridClipMat);
 

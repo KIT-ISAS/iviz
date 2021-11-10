@@ -25,6 +25,7 @@ project.json
 project.lock.json
 
 ios/
+ios_BurstDebugInformation_DoNotShip/
 
 #Foler for generated UWP App to export to hololens
 App/

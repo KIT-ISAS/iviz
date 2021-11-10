@@ -38,7 +38,7 @@ namespace Iviz.Ros
             task = Task.Run(WriteMessagesAsync);
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -76,7 +76,7 @@ namespace Iviz.Ros
             }
         }
 
-        async Task WriteMessagesAsync()
+        async ValueTask WriteMessagesAsync()
         {
             RosbagFileWriter? writer = null;
             

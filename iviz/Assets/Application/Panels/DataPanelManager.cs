@@ -31,7 +31,6 @@ namespace Iviz.App
             Active = false;
             gameObject.SetActive(true);
             started = true;
-
             GameThread.EverySecond += UpdateSelected;
         }
 

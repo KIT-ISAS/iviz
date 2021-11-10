@@ -15,8 +15,6 @@ namespace Iviz.Core
         int SunDirection { get; set; }
         SettingsConfiguration Config { get; set; }
 
-        bool SupportsView { get; }
-        bool SupportsAR { get; }
         IEnumerable<string> QualityLevelsInView { get; }
         IEnumerable<string> QualityLevelsInAR { get; }
     }

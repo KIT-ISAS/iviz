@@ -11,7 +11,7 @@ namespace Iviz.App
     public sealed class StateConfiguration
     {
         [DataMember] public List<string> Entries { get; set; } = new();
-        [DataMember] public TfConfiguration? Tf { get; set; }
+        [DataMember] public TfConfiguration Tf { get; set; } = new();
         [DataMember] public List<GridConfiguration> Grids { get; set; } = new();
         [DataMember] public List<RobotConfiguration> SimpleRobots { get; set; } = new();
         [DataMember] public List<PointCloudConfiguration> PointClouds { get; set; } = new();
@@ -27,10 +27,10 @@ namespace Iviz.App
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
         [DataMember] public List<GuiDialogConfiguration> Dialogs { get; set; } = new();
-        [DataMember] public ARConfiguration? AR { get; set; }
-        [DataMember] public JoystickConfiguration? Joystick { get; set; }
+        [DataMember] public ARConfiguration AR { get; set; } = new();
+        [DataMember] public JoystickConfiguration Joystick { get; set; } = new();
 
-        public IEnumerable<IEnumerable<IConfiguration?>> CreateListOfEntries() => new IEnumerable<IConfiguration?>[]
+        public IEnumerable<IEnumerable<IConfiguration>> CreateListOfEntries() => new IEnumerable<IConfiguration>[]
         {
             Grids,
             SimpleRobots,

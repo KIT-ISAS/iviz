@@ -126,7 +126,7 @@ namespace Iviz.App
             initialized = true;
         }
 
-        async Task GenerateRobotAsync()
+        async ValueTask GenerateRobotAsync()
         {
             // move the world by 1 meter upwards
             TfListener.RootFrame.SetPose(new Pose(new UnityEngine.Vector3(0, 1f, 0), UnityEngine.Quaternion.identity));

@@ -9,8 +9,10 @@ using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering.PostProcessing;
 using Logger = Iviz.Core.Logger;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
@@ -109,10 +111,10 @@ namespace Iviz.App
             }
         }
 
-        public IScreenDraggable? DraggedObject
+        IScreenDraggable? DraggedObject
         {
             get => draggedObject;
-            private set
+            set
             {
                 if (draggedObject == value)
                 {
@@ -126,19 +128,21 @@ namespace Iviz.App
         }
 
         static bool IsDraggingAllowed =>
-            Settings.IsVR || (Settings.IsMobile
-                ? Input.touchCount == 1
+            Settings.IsXR || (Settings.IsPhone
+                //? Input.touchCount == 1
+                ? Touch.activeTouches.Count == 1
                 : Mouse.current.rightButton.isPressed);
 
         void Awake()
         {
+            EnhancedTouchSupport.Enable();
             Instance = this;
             Settings.SettingsManager = this;
         }
 
         void Start()
         {
-            if (!Settings.IsMobile)
+            if (!Settings.IsPhone)
             {
                 QualitySettings.vSyncCount = 0;
                 MainCamera.allowHDR = true;
@@ -172,7 +176,7 @@ namespace Iviz.App
 
             if (DraggedObject != null)
             {
-                if (!Settings.IsMobile && mOrbitCenterOverride == null)
+                if (!Settings.IsPhone && mOrbitCenterOverride == null)
                 {
                     ProcessFlying();
                 }
@@ -180,7 +184,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (Settings.IsMobile)
+            if (Settings.IsPhone)
             {
                 if (mOrbitCenterOverride != null)
                 {
@@ -300,10 +304,9 @@ namespace Iviz.App
             get => config.BackgroundColor;
             set
             {
+                config.BackgroundColor = value.WithAlpha(1);
+
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
-
-                config.BackgroundColor = colorToUse.WithAlpha(1);
-
                 Color valueNoAlpha = colorToUse.WithAlpha(0);
                 MainCamera.backgroundColor = valueNoAlpha;
 
@@ -323,9 +326,7 @@ namespace Iviz.App
             }
         }
 
-        public bool SupportsView => true;
-
-        public bool SupportsAR => Settings.IsMobile;
+        public bool SupportsAR => Settings.IsPhone;
 
         public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
 
@@ -386,7 +387,7 @@ namespace Iviz.App
 
             QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
 
-            if (Settings.IsVR) // VR manages its own stuff
+            if (Settings.IsXR) // XR doesn't need cursor management
             {
                 return;
             }
@@ -412,33 +413,39 @@ namespace Iviz.App
                 }
             }
 
-            //Debug.Log(QualitySettings.shadowDistance);
-
-            if (Settings.IsMobile)
+            if (Settings.IsPhone)
             {
+                var activeTouches = Touch.activeTouches;
+
                 prevPointerDown |= altPointerIsDown;
 
-                pointerIsDown = Input.touchCount == 1;
-                altPointerIsDown = Input.touchCount == 2;
+                //pointerIsDown = Input.touchCount == 1;
+                //altPointerIsDown = Input.touchCount == 2;
+                pointerIsDown = activeTouches.Count == 1;
+                altPointerIsDown = activeTouches.Count == 2;
 
                 if (altPointerIsDown)
                 {
-                    altPointerPosition = (Input.GetTouch(0).position + Input.GetTouch(1).position) / 2;
+                    //altPointerPosition = (Input.GetTouch(0).position + Input.GetTouch(1).position) / 2;
+                    altPointerPosition = (activeTouches[0].screenPosition + activeTouches[1].screenPosition) / 2;
                 }
 
                 distancePointerAndAlt = altPointerIsDown
-                    ? Vector2.Distance(Input.GetTouch(0).position, Input.GetTouch(1).position)
+                    //? Vector2.Distance(Input.GetTouch(0).position, Input.GetTouch(1).position)
+                    ? Vector2.Distance(activeTouches[0].screenPosition, activeTouches[1].screenPosition)
                     : 0;
                 if (pointerIsDown || altPointerIsDown)
                 {
-                    pointerPosition = Input.GetTouch(0).position;
+                    //pointerPosition = Input.GetTouch(0).position;
+                    pointerPosition = activeTouches[0].screenPosition;
 
                     if (!prevPointerDown)
                     {
                         pointerIsOnGui = IsPointerOnGui(pointerPosition) ||
                                          altPointerIsDown && IsPointerOnGui(altPointerPosition);
                         pointerDownTime = Time.time;
-                        pointerDownStart = Input.GetTouch(0).position;
+                        //pointerDownStart = Input.GetTouch(0).position;
+                        pointerDownStart = activeTouches[0].screenPosition;
                     }
                 }
             }
@@ -482,8 +489,9 @@ namespace Iviz.App
                     PointerDown?.Invoke(new ClickInfo(pointerPosition));
                 }
 
-                if (prevPointerDown && !anyPointerDown
-                                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+                if (prevPointerDown
+                    && !anyPointerDown
+                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
                 {
                     float timeDown = Time.time - pointerDownTime;
                     if (timeDown < shortClickTime)
@@ -740,7 +748,7 @@ namespace Iviz.App
             float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
             float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
 
-            if (!Settings.IsMobile)
+            if (!Settings.IsPhone)
             {
                 float distanceToFrame = (Transform.position - position).magnitude;
                 float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);

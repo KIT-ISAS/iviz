@@ -14,11 +14,10 @@ namespace Iviz.Core
         /// <summary>
         /// Is this being run on an Android, IOS, or Hololens device?
         /// </summary>
-        public const bool IsMobile =
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
-            true;
+        public const bool IsMobile = true;
 #else
-            false;
+        public static bool IsMobile => IsHololens;
 #endif
 
         public const bool IsStandalone =
@@ -38,7 +37,7 @@ namespace Iviz.Core
             false;
 #endif
 
-        public const bool IsIphone =
+        public const bool IsIPhone =
 #if !UNITY_EDITOR && UNITY_IOS
             true;
 #else
@@ -57,15 +56,18 @@ namespace Iviz.Core
         /// </summary>
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         public const bool IsHololens = false;
-        public const bool IsVR = false;
+        public const bool IsXR = false;
+#elif !UNITY_EDITOR && UNITY_WSA
+        public const bool IsHololens = true;
+        public const bool IsXR = true;
 #else
         public static bool IsHololens { get; set; }
-        public static bool IsVR { get; set; }
-
+        public static bool IsXR { get; set; }
 #endif
 
-        static string? persistentDataPath;
+        public static bool SupportsAR => IsPhone;
 
+        static string? persistentDataPath;
         static string? savedFolder;
         static string? bagsFolder;
         static string? simpleConfigurationPath;
@@ -101,7 +103,8 @@ namespace Iviz.Core
                     .GetComponent<Camera>();
             set
             {
-                mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");
+                mainCamera = value.CheckedNull() 
+                             ?? throw new NullReferenceException("Camera cannot be null!");
                 mainCameraTransform = value.transform;
             }
         }

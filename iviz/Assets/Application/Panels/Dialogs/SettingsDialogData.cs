@@ -40,18 +40,16 @@ namespace Iviz.App
         {
             panel.QualityInView.Options = SettingsManager.QualityLevelsInView;
             panel.QualityInView.Index = (int) SettingsManager.QualityInView;
-            panel.QualityInView.Interactable = SettingsManager.SupportsView;
 
             panel.QualityInAr.Options = SettingsManager.QualityLevelsInAR;
             panel.QualityInAr.Index = (int) SettingsManager.QualityInAr;
-            panel.QualityInAr.Interactable = SettingsManager.SupportsAR;
+            panel.QualityInAr.Interactable = Settings.SupportsAR;
 
             panel.TargetFps.Options = TargetFpsOptions;
             panel.NetworkProcessing.Options = NetworkProcessingOptions;
             panel.SunDirection.SetMinValue(-60).SetMaxValue(60).SetIntegerOnly(true);
 
             panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
-            panel.BackgroundColor.Interactable = SettingsManager.SupportsView;
 
             panel.SunDirection.Value = SettingsManager.SunDirection;
 
@@ -131,6 +129,7 @@ namespace Iviz.App
 
             panel.Close.Clicked += Close;
 
+            // ReSharper disable once AsyncVoidLambda
             panel.ClearModelCacheClicked += async () =>
             {
                 Logger.Info("Settings: Clearing model cache.");
@@ -138,6 +137,7 @@ namespace Iviz.App
                 panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
             };
 
+            // ReSharper disable once AsyncVoidLambda
             panel.ClearHostHistoryClicked += async () =>
             {
                 Logger.Info("Settings: Clearing cache of master uris.");
@@ -153,7 +153,7 @@ namespace Iviz.App
                 panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             };
 
-            panel.ModelService.ValueChanged += async (i, s) =>
+            panel.ModelService.ValueChanged += (i, s) =>
             {
                 switch ((ModelServerModes) i)
                 {
@@ -161,10 +161,10 @@ namespace Iviz.App
                         ModuleListPanel.ModelService.Dispose();
                         break;
                     case ModelServerModes.On:
-                        await ModuleListPanel.ModelService.Restart(false);
+                        _ = ModuleListPanel.ModelService.Restart(false);
                         break;
                     case ModelServerModes.OnWithFile:
-                        await ModuleListPanel.ModelService.Restart(true);
+                        _ = ModuleListPanel.ModelService.Restart(true);
                         break;
                 }
 

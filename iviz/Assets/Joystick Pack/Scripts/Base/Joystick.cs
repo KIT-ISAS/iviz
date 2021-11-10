@@ -84,7 +84,7 @@ namespace External
         public virtual void OnPointerDown(PointerEventData eventData)
         {
             GameThread.EveryFrame += OnDrag;
-            if (Settings.IsMobile)
+            if (Settings.IsPhone)
             {
                 touchId = eventData.pointerId;
             }

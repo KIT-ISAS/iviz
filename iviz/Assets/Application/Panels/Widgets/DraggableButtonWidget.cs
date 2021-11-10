@@ -235,7 +235,7 @@ namespace Iviz.App
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
-            if (Settings.IsVR && isDragging)
+            if (Settings.IsXR && isDragging)
             {
                 // end dragging sometimes does not get triggered
                 ((IEndDragHandler) this).OnEndDrag(eventData);

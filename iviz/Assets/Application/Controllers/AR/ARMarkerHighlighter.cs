@@ -32,10 +32,7 @@ namespace Iviz.Controllers
         public void Highlight([NotNull] IEnumerable<Vector2f> corners2, [NotNull] string code, Intrinsic intrinsic,
             float highlightTimeInMs)
         {
-            if (resources == null)
-            {
-                resources = GetComponentsInChildren<MeshMarkerResource>();
-            }
+            resources ??= GetComponentsInChildren<MeshMarkerResource>();
 
             var cornersWorld = corners2.Select(corner => intrinsic.Unproject(corner, Z)).ToArray();
             if (cornersWorld.Length == 0)

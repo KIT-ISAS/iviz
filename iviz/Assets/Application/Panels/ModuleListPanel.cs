@@ -31,8 +31,6 @@ namespace Iviz.App
     {
         public const int ModuleDataCaptionWidth = 200;
 
-        [SerializeField] bool isVREnabled;
-        [SerializeField] bool isHololens;
         [SerializeField] DataLabelWidget masterUriStr = null;
         [SerializeField] TopButtonWidget dragButton = null;
         [SerializeField] TrashButtonWidget masterUriButton = null;
@@ -88,8 +86,8 @@ namespace Iviz.App
 
         [SerializeField] TMP_Text cameraText = null;
 
-        [ItemNotNull] readonly List<ModuleData> moduleDatas = new List<ModuleData>();
-        [ItemNotNull] readonly HashSet<string> topicsWithModule = new HashSet<string>();
+        [ItemNotNull] readonly List<ModuleData> moduleDatas = new();
+        [ItemNotNull] readonly HashSet<string> topicsWithModule = new();
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -111,7 +109,7 @@ namespace Iviz.App
         SystemDialogData systemData;
         ARMarkerDialogData arMarkerData;
 
-        readonly HashSet<ImageDialogData> imageDatas = new HashSet<ImageDialogData>();
+        readonly HashSet<ImageDialogData> imageDatas = new();
 
         public Controllers.ModelService ModelService { get; private set; }
         ControllerService controllerService;
@@ -209,11 +207,6 @@ namespace Iviz.App
             Resource.ClearResources();
             GuiDialogListener.ClearResources();
             ARController.ClearResources();
-
-#if UNITY_EDITOR || (!UNITY_IOS && !UNITY_ANDROID)
-            Settings.IsHololens = isHololens;
-            Settings.IsVR = isVREnabled;
-#endif
         }
 
         void OnDestroy()
@@ -385,14 +378,14 @@ namespace Iviz.App
 
             AllGuiVisible = AllGuiVisible; // initialize value
 
-            if (isVREnabled || isHololens)
+            if (Settings.IsXR)
             {
                 foreach (var subCanvas in rootCanvas.GetComponentsInChildren<Canvas>(true))
                 {
                     subCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
                 }
             }
-            
+
             initialized = true;
 
             InitFinished?.Invoke();
@@ -480,6 +473,7 @@ namespace Iviz.App
                     break;
                 case ConnectionState.Connecting:
                     status.sprite = connectingSprite;
+
                     GameThread.EverySecond += RotateSprite;
                     break;
             }
@@ -510,7 +504,9 @@ namespace Iviz.App
 
         void UpdateLeftHideVisible()
         {
-            LeftHideGuiButton.gameObject.SetActive(Settings.IsMobile && !ARController.IsActive && !AllGuiVisible);
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            bool isMobile = Settings.IsMobile && !ARController.IsActive && !AllGuiVisible;
+            LeftHideGuiButton.gameObject.SetActive(isMobile);
         }
 
         public async void SaveStateConfiguration([NotNull] string file)
@@ -520,7 +516,7 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(file));
             }
 
-            StateConfiguration config = new StateConfiguration
+            var config = new StateConfiguration
             {
                 Entries = moduleDatas.Select(moduleData => moduleData.Configuration.Id).ToList()
             };
@@ -628,10 +624,15 @@ namespace Iviz.App
                     Settings.SettingsManager.Config = config.Settings;
                 }
 
-                systemData.HostAliases = config.HostAliases;
-                ConnectionManager.Connection.SetHostAliases(config.HostAliases
-                    .Where(alias => alias != null)
-                    .Select(alias => (alias.Value.Hostname, alias.Value.Address)));
+                var validHostAliases = config.HostAliases
+                    .Where(alias => alias is { Hostname: { }, Address: { } })
+                    .ToArray();
+                systemData.HostAliases = validHostAliases;
+
+                var validHostPairs =
+                    validHostAliases.Select(alias => (alias.Hostname, alias.Address));
+                ConnectionManager.Connection.SetHostAliases(validHostPairs);
+
                 arMarkerData.Configuration = config.MarkersConfiguration;
             }
             catch (Exception e) when
@@ -705,7 +706,7 @@ namespace Iviz.App
 
         public int NumMastersInCache => connectionData.LastMasterUris.Count;
 
-        public async Task ClearMastersCacheAsync(CancellationToken token = default)
+        public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
             if (Settings.SettingsManager == null || !File.Exists(path))
@@ -718,14 +719,14 @@ namespace Iviz.App
             try
             {
                 string inText = await FileUtils.ReadAllTextAsync(path, token);
-                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
-                config.LastMasterUris = new List<Uri>();
+                var config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
+                config.LastMasterUris.Clear();
 
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
             catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+                (e is IOException or SecurityException or JsonException)
             {
             }
             catch (Exception e)
@@ -896,9 +897,12 @@ namespace Iviz.App
             var description = BuilderPool.Rent();
             try
             {
-                description.Append(ARController.IsVisible
-                    ? "<font=Bold>AR View</font>\n"
-                    : "<font=Bold>Virtual View</font>\n"
+                description.Append(
+                    Settings.IsXR
+                        ? "<font=Bold>XR View</font>\n"
+                        : ARController.IsVisible
+                            ? "<font=Bold>AR View</font>\n"
+                            : "<font=Bold>Virtual View</font>\n"
                 );
 
                 var currentCamera = Settings.MainCameraTransform;

@@ -99,11 +99,11 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p) =>
-            new((float) p.X, (float) p.Y, (float) p.Z);
+            new((float)p.X, (float)p.Y, (float)p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p) =>
-            new((float) -p.Y, (float) p.Z, (float) p.X);
+            new((float)-p.Y, (float)p.Z, (float)p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Point32 p) =>
@@ -119,7 +119,7 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Point p) =>
-            new((float) -p.Y, (float) p.Z, (float) p.X);
+            new((float)-p.Y, (float)p.Z, (float)p.X);
 
         public static Color ToUnityColor(this in ColorRGBA p) =>
             new(p.R, p.G, p.B, p.A);
@@ -138,29 +138,27 @@ namespace Iviz.Core
         static float SanitizeColor(float f) => float.IsNaN(f) ? 0 : Mathf.Clamp01(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color32 ToUnityColor32(this in ColorRGBA c)
-        {
-            return new(
-                (byte) Mathf.Round(Mathf.Clamp01(c.R) * byte.MaxValue),
-                (byte) Mathf.Round(Mathf.Clamp01(c.G) * byte.MaxValue),
-                (byte) Mathf.Round(Mathf.Clamp01(c.B) * byte.MaxValue),
-                (byte) Mathf.Round(Mathf.Clamp01(c.A) * byte.MaxValue)
+        public static Color32 ToUnityColor32(this in ColorRGBA c) =>
+            new(
+                (byte)Mathf.Round(Mathf.Clamp01(c.R) * byte.MaxValue),
+                (byte)Mathf.Round(Mathf.Clamp01(c.G) * byte.MaxValue),
+                (byte)Mathf.Round(Mathf.Clamp01(c.B) * byte.MaxValue),
+                (byte)Mathf.Round(Mathf.Clamp01(c.A) * byte.MaxValue)
             );
-            // note: taken from unity Color 
-        }
+        // note: taken from unity Color 
 
         public static ColorRGBA ToRos(this in Color p) => new(p.r, p.g, p.b, p.a);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static UnityEngine.Quaternion ToUnity(this in Quaternion p) =>
-            new((float) p.X, (float) p.Y, (float) p.Z, (float) p.W);
+            new((float)p.X, (float)p.Y, (float)p.Z, (float)p.W);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion Ros2Unity(this in Quaternion p) =>
             (p.X == 0 && p.Y == 0 && p.Z == 0 && p.W == 0) ? UnityEngine.Quaternion.identity : p.ToUnity().Ros2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Quaternion Unity2RosQuaternion(this in UnityEngine.Quaternion p) => 
+        static Quaternion Unity2RosQuaternion(this in UnityEngine.Quaternion p) =>
             new(-p.z, p.x, -p.y, p.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -180,23 +178,23 @@ namespace Iviz.Core
             new Pose(p.position.Unity2RosPoint(), p.rotation.Unity2RosQuaternion());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this float f) => 
+        public static bool IsInvalid(this float f) =>
             float.IsNaN(f) || float.IsInfinity(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this double f) => 
+        public static bool IsInvalid(this double f) =>
             double.IsNaN(f) || double.IsInfinity(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this in float4 v) => 
+        public static bool HasNaN(this in float4 v) =>
             float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this in float3 v) => 
+        public static bool HasNaN(this in float3 v) =>
             float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HasNaN(this in Vector3 v) => 
+        public static bool HasNaN(this in Vector3 v) =>
             float.IsNaN(v.x) || float.IsNaN(v.y) || float.IsNaN(v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

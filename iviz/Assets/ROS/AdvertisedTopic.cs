@@ -16,11 +16,9 @@ namespace Iviz.Ros
         void Add([NotNull] ISender subscriber);
         void Remove([NotNull] ISender subscriber);
 
-        [NotNull]
-        Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
+        ValueTask AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
 
-        [NotNull]
-        Task UnadvertiseAsync([NotNull] RosClient client, CancellationToken token);
+        ValueTask UnadvertiseAsync([NotNull] RosClient client, CancellationToken token);
 
         void Invalidate();
     }
@@ -68,7 +66,7 @@ namespace Iviz.Ros
 
         public int Count => senders.Count;
 
-        public async Task AdvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask AdvertiseAsync(RosClient client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client != null)
@@ -94,7 +92,7 @@ namespace Iviz.Ros
             Publisher = null;
         }
 
-        public async Task UnadvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask UnadvertiseAsync(RosClient client, CancellationToken token)
         {
             if (client == null)
             {

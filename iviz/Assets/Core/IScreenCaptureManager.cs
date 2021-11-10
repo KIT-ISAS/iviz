@@ -12,8 +12,8 @@ namespace Iviz.Core
 
         IEnumerable<(int width, int height)> GetResolutions();
 
-        Task StartAsync(int width, int height, bool withHolograms);
-        Task StopAsync();
+        ValueTask StartAsync(int width, int height, bool withHolograms);
+        ValueTask StopAsync();
 
         ValueTask<Screenshot?> CaptureColorAsync(int reuseCaptureAgeInMs = 0, CancellationToken token = default);
         ValueTask<Screenshot?> CaptureDepthAsync(int reuseCaptureAgeInMs = 0, CancellationToken token = default);

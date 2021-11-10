@@ -86,7 +86,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                node.AttachTo(Decorate(Robot.BaseLink));
+                node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             }
         }
 
@@ -111,7 +111,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                node.AttachTo(Decorate(Robot.BaseLink));
+                node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             }
         }
 
@@ -208,12 +208,7 @@ namespace Iviz.Controllers
                     return Robot.Name;
                 }
 
-                if (Robot.LinkObjects.Count == 0)
-                {
-                    return "[Empty Robot]";
-                }
-
-                return Robot.Name == null ? "[No Name]" : "[Empty Name]";
+                return Robot.LinkObjects.Count == 0 ? "[Empty Robot]" : "[Empty Name]";
             }
         }
 
@@ -385,13 +380,13 @@ namespace Iviz.Controllers
             }
 
             Robot = newRobot;
-            async Task LoadRobotAsync()
+            async ValueTask LoadRobotAsync()
             {
                 await newRobot.StartAsync(ConnectionManager.ServiceProvider);
                 CheckRobotStartTask(true);
             }
 
-            robotLoadingTask = LoadRobotAsync();
+            robotLoadingTask = LoadRobotAsync().AsTask();
             HelpText = "[Loading Robot...]";
             CheckRobotStartTask();
             return true;
@@ -435,10 +430,6 @@ namespace Iviz.Controllers
                         else if (Robot.LinkObjects.Count == 0)
                         {
                             HelpText = "[Robot is Empty]";
-                        }
-                        else if (Robot.Name == null)
-                        {
-                            HelpText = "[No Name]";
                         }
                         else
                         {
@@ -491,7 +482,7 @@ namespace Iviz.Controllers
             Robot.ResetLinkParents();
             Robot.ApplyAnyValidConfiguration();
 
-            node.AttachTo(Decorate(Robot.BaseLink));
+            node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
 
@@ -520,7 +511,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            node.AttachTo(Decorate(Robot.BaseLink));
+            node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
         

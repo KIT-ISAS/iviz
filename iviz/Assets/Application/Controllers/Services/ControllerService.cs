@@ -96,7 +96,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task AddModuleAsync([NotNull] AddModule srv)
+        internal static async ValueTask AddModuleAsync([NotNull] AddModule srv)
         {
             var (id, success, message) = await TryAddModuleAsync(srv.Request.ModuleType, srv.Request.Id);
             srv.Response.Success = success;
@@ -184,7 +184,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task AddModuleFromTopicAsync([NotNull] AddModuleFromTopic srv)
+        internal static async ValueTask AddModuleFromTopicAsync([NotNull] AddModuleFromTopic srv)
         {
             var (id, success, message) = await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id);
             srv.Response.Success = success;
@@ -264,7 +264,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task UpdateModuleAsync([NotNull] UpdateModule srv)
+        internal static async ValueTask UpdateModuleAsync([NotNull] UpdateModule srv)
         {
             var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
             srv.Response.Success = success;
@@ -326,7 +326,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task GetModulesAsync([NotNull] GetModules srv)
+        internal static async ValueTask GetModulesAsync([NotNull] GetModules srv)
         {
             srv.Response.Configs = await GetModulesAsync();
         }
@@ -366,7 +366,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task SetFixedFrameAsync([NotNull] SetFixedFrame srv)
+        internal static async ValueTask SetFixedFrameAsync([NotNull] SetFixedFrame srv)
         {
             (bool success, string message) = await TrySetFixedFrame(srv.Request.Id);
             srv.Response.Success = success;
@@ -401,7 +401,7 @@ namespace Iviz.Controllers
             return (true, "");
         }
 
-        internal static async Task GetFramePoseAsync([NotNull] GetFramePose srv)
+        internal static async ValueTask GetFramePoseAsync([NotNull] GetFramePose srv)
         {
             (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
             srv.Response.Poses = poses;
@@ -469,7 +469,7 @@ namespace Iviz.Controllers
                 .ToArray();
         }
 
-        internal static async Task StartCaptureAsync([NotNull] StartCapture srv)
+        internal static async ValueTask StartCaptureAsync([NotNull] StartCapture srv)
         {
             if (Settings.ScreenCaptureManager == null)
             {
@@ -517,7 +517,7 @@ namespace Iviz.Controllers
             srv.Response.Success = true;
         }
 
-        internal static async Task StopCaptureAsync([NotNull] StopCapture srv)
+        internal static async ValueTask StopCaptureAsync([NotNull] StopCapture srv)
         {
             if (Settings.ScreenCaptureManager == null)
             {
@@ -566,7 +566,7 @@ namespace Iviz.Controllers
 
         static uint screenshotSeq;
 
-        internal static async Task CaptureScreenshotAsync([NotNull] CaptureScreenshot srv)
+        internal static async ValueTask CaptureScreenshotAsync([NotNull] CaptureScreenshot srv)
         {
             if (Settings.ScreenCaptureManager == null)
             {
@@ -578,7 +578,7 @@ namespace Iviz.Controllers
             string errorMessage = null;
             Screenshot ss = null;
             Pose? pose = null;
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(async () =>
                 {
@@ -592,7 +592,7 @@ namespace Iviz.Controllers
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
                         pose = ss != null
                             ? TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
-                            : (Pose?) null;
+                            : null;
                     }
                     catch (Exception e)
                     {
@@ -664,8 +664,7 @@ namespace Iviz.Controllers
             });
         }
 
-        [NotNull]
-        internal static Task UpdateRobotAsync([NotNull] UpdateRobot srv)
+        internal static ValueTask UpdateRobotAsync([NotNull] UpdateRobot srv)
         {
             switch (srv.Request.Operation)
             {
@@ -676,11 +675,11 @@ namespace Iviz.Controllers
                 default:
                     srv.Response.Success = false;
                     srv.Response.Message = "EE Unknown operation";
-                    return Task.CompletedTask;
+                    return new ValueTask();
             }
         }
 
-        static async Task RemoveRobotAsync([NotNull] UpdateRobot srv)
+        static async ValueTask RemoveRobotAsync([NotNull] UpdateRobot srv)
         {
             string id = srv.Request.Id;
             if (id.Length == 0)
@@ -739,7 +738,7 @@ namespace Iviz.Controllers
             }
         }
 
-        static async Task AddRobotAsync([NotNull] UpdateRobot srv)
+        static async ValueTask AddRobotAsync([NotNull] UpdateRobot srv)
         {
             string id = srv.Request.Id;
 
@@ -798,7 +797,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal static async Task LaunchDialogAsync([NotNull] LaunchDialog srv)
+        internal static async ValueTask LaunchDialogAsync([NotNull] LaunchDialog srv)
         {
             if (string.IsNullOrEmpty(srv.Request.Dialog.Id))
             {
@@ -899,14 +898,7 @@ namespace Iviz.Controllers
                         signal.Release();
                     }
                 });
-                /*
-                if (!await signal.WaitAsync(10000))
-                {
-                    srv.Response.Success = false;
-                    srv.Response.Message = "EE Request timed out!";
-                    return;
-                }
-                */
+
                 await signal.WaitAsync();
 
                 if (string.IsNullOrEmpty(srv.Response.Message))

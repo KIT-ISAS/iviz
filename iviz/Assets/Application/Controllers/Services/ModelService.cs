@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.IO;
 using System.Threading;
@@ -8,7 +10,6 @@ using Iviz.ModelService;
 #endif
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Ros;
-using JetBrains.Annotations;
 
 namespace Iviz.Controllers
 {
@@ -19,7 +20,7 @@ namespace Iviz.Controllers
         public int NumPackages => modelServer?.NumPackages ?? 0;
         public bool IsFileSchemeEnabled => modelServer?.IsFileSchemaEnabled ?? false;
 
-        ModelServer modelServer;
+        ModelServer? modelServer;
 #else
         public bool IsEnabled => false;
         public int NumPackages => 0;
@@ -28,10 +29,10 @@ namespace Iviz.Controllers
 #endif
 
 
-        public async Task Restart(bool enableFileScheme, CancellationToken token = default)
+        public async ValueTask Restart(bool enableFileScheme, CancellationToken token = default)
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
-            string rosPackagePathExtras = await GetPathExtras(token);
+            string? rosPackagePathExtras = await GetPathExtras(token);
 
             modelServer?.Dispose();
             modelServer = new ModelServer(rosPackagePathExtras, enableFileScheme);
@@ -70,10 +71,9 @@ namespace Iviz.Controllers
 #endif
         }
 
-        [ItemCanBeNull]
-        static async ValueTask<string> GetPathExtras(CancellationToken token)
+        static async ValueTask<string?> GetPathExtras(CancellationToken token)
         {
-            string homeFolder;
+            string? homeFolder;
             switch (UnityEngine.Application.platform)
             {
                 case UnityEngine.RuntimePlatform.OSXEditor:
@@ -116,8 +116,13 @@ namespace Iviz.Controllers
         }
 
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
-        async Task ModelCallback([NotNull] GetModelResource msg)
+        async ValueTask ModelCallback(GetModelResource msg)
         {
+            if (modelServer == null)
+            {
+                return;
+            }
+            
             modelServer.ModelCallback(msg);
             if (msg.Response.Success)
             {

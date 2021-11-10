@@ -125,7 +125,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Task ClearModelCacheAsync(CancellationToken token = default)
+        public ValueTask ClearModelCacheAsync(CancellationToken token = default)
         {
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();
@@ -162,7 +162,7 @@ namespace Iviz.Displays
             return WriteResourceFileAsync(token);
         }
 
-        Task WriteResourceFileAsync(CancellationToken token)
+        ValueTask WriteResourceFileAsync(CancellationToken token)
         {
             return FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
                 JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);

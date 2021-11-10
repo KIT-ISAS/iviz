@@ -90,7 +90,25 @@ namespace Iviz.Core
             {
                 try
                 {
-                    EverySecond?.Invoke();
+                    if (Settings.IsIPhone)
+                    {
+                        // BUG!! IL2CPP crashes in IOS if EverySecond.Invoke() is called!
+                        // I have no idea why only EverySecond, but in C+++ rgctxVar is null.
+                        // I need to check in a few versions to see if it is fixed
+                        if (EverySecond != null)
+                        {
+                            var delegates = EverySecond.GetInvocationList();
+                            foreach (var @delegate in delegates)
+                            {
+                                var action = (Action)@delegate;
+                                action();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        EverySecond?.Invoke();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -103,7 +121,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during LateEverySecond" + e);
+                    Logger.Error($"{this}: Error during LateEverySecond", e);
                 }
 
                 lastSecondRunTime = GameTime;
@@ -229,7 +247,7 @@ namespace Iviz.Core
         /// The return type is treated as async void. 
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        public static void Post(Func<Task> action) => 
+        public static void Post(Func<Task> action) =>
             Post(() => { action(); });
 
         /// <summary>
@@ -280,6 +298,6 @@ namespace Iviz.Core
             instance.actionsQueue.Enqueue(action);
         }
 
-        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
+        public static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
     }
 }

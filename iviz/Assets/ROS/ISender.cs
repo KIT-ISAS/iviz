@@ -3,6 +3,7 @@
 using System;
 using Iviz.Core;
 using Iviz.Msgs;
+using UnityEngine;
 using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros

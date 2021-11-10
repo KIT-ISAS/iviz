@@ -10,7 +10,7 @@ namespace Iviz.Core
 {
     public static class FileUtils
     {
-        static async Task WriteAllBytesAsync(string filePath, byte[] bytes, int count,
+        static async ValueTask WriteAllBytesAsync(string filePath, byte[] bytes, int count,
             CancellationToken token)
         {
             await using var stream =
@@ -18,13 +18,13 @@ namespace Iviz.Core
             await stream.WriteAsync(bytes, 0, count, token);
         }
 
-        public static Task WriteAllBytesAsync(string filePath, Rent<byte> bytes,
+        public static ValueTask WriteAllBytesAsync(string filePath, Rent<byte> bytes,
             CancellationToken token)
         {
             return WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);
         }
 
-        public static Task WriteAllBytesAsync(string filePath, byte[] bytes, CancellationToken token)
+        public static ValueTask WriteAllBytesAsync(string filePath, byte[] bytes, CancellationToken token)
         {
             return WriteAllBytesAsync(filePath, bytes, bytes.Length, token);
         }
@@ -38,7 +38,7 @@ namespace Iviz.Core
             return rent;
         }
 
-        public static async Task WriteAllTextAsync(string filePath, string text, CancellationToken token)
+        public static async ValueTask WriteAllTextAsync(string filePath, string text, CancellationToken token)
         {
             using var bytes = text.AsRent();
             await WriteAllBytesAsync(filePath, bytes.Array, bytes.Length, token);

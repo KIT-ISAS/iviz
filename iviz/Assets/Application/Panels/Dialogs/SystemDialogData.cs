@@ -590,17 +590,20 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public struct HostAlias : IEquatable<HostAlias>
+    public class HostAlias : IEquatable<HostAlias>
     {
-        [DataMember] public string Hostname { get; set; }
-        [DataMember] public string Address { get; set; }
+        [DataMember] public string Hostname { get; set; } = "";
+        [DataMember] public string Address { get; set; } = "";
+
+        public HostAlias()
+        {
+        }
 
         public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
 
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
 
-        public bool Equals(HostAlias? a) => a is { } ha && Equals(ha);
-        public bool Equals(HostAlias a) => a.Hostname == Hostname && a.Address == Address;
+        public bool Equals(HostAlias? a) => a is { } ha && a.Hostname == Hostname && a.Address == Address;
 
         public override bool Equals(object obj) => obj is HostAlias other && Equals(other);
 

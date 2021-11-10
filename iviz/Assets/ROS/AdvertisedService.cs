@@ -1,21 +1,20 @@
+#nullable enable
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
     internal interface IAdvertisedService
     {
-        [NotNull]
-        Task AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
+        ValueTask AdvertiseAsync(RosClient? client, CancellationToken token);
 
-        [NotNull]
-        Task UnadvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
+        ValueTask UnadvertiseAsync(RosClient? client, CancellationToken token);
 
-        bool TrySetCallback<TU>([NotNull] Func<TU, Task> callback) where TU : IService;
+        bool TrySetCallback<TU>(Func<TU, ValueTask> callback) where TU : IService;
     }
 
     internal sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
@@ -23,23 +22,23 @@ namespace Iviz.Ros
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
         
-        [NotNull] Func<T, Task> callback;
-        [NotNull] readonly string service;
+        Func<T, ValueTask> callback;
+        readonly string service;
 
-        public AdvertisedService([NotNull] string service, [NotNull] Func<T, Task> callback)
+        public AdvertisedService(string service, Func<T, ValueTask> callback)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
             this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
-        public bool TrySetCallback<TU>(Func<TU, Task> newCallback) where TU : IService
+        public bool TrySetCallback<TU>(Func<TU, ValueTask> newCallback) where TU : IService
         {
             if (newCallback == null)
             {
                 throw new ArgumentNullException(nameof(newCallback));
             }
             
-            if (!(newCallback is Func<T, Task> newCallbackT))
+            if (newCallback is not Func<T, ValueTask> newCallbackT)
             {
                 return false;
             }
@@ -48,7 +47,7 @@ namespace Iviz.Ros
             return true;
         }
 
-        public async Task AdvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask AdvertiseAsync(RosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
@@ -70,7 +69,7 @@ namespace Iviz.Ros
             }
         }
 
-        public async Task UnadvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask UnadvertiseAsync(RosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
@@ -80,9 +79,8 @@ namespace Iviz.Ros
             }
         }
 
-        Task CallbackImpl(T t) => callback(t);
+        ValueTask CallbackImpl(T t) => callback(t);
 
-        [NotNull]
         public override string ToString()
         {
             return $"[AdvertisedService '{service}']";

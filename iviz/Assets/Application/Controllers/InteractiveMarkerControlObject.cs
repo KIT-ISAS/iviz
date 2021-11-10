@@ -189,12 +189,6 @@ namespace Iviz.Controllers
                 {
                     parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                 }
-
-                /*
-                var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
-                    .GetComponent<AppAssetHolder>();
-                AudioSource.PlayClipAtPoint(assetHolder.Click, transform.position);
-                */
             };
 
             Control.MenuClicked += unityPositionHint => { parent.ShowMenu(unityPositionHint); };
@@ -356,7 +350,7 @@ namespace Iviz.Controllers
                             markers[markerId] = markerObject;
                         }
 
-                        Task _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
+                        _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
                         if (string.IsNullOrEmpty(marker.Header.FrameId))
                         {
                             markerObject.transform.SetParentLocal(markerNode.transform);

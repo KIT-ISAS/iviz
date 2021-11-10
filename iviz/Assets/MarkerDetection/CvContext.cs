@@ -354,7 +354,7 @@ namespace Iviz.MarkerDetection
         static class Native
         {
             const string IvizOpencvDll =
-                Settings.IsIphone
+                Settings.IsIPhone
                     ? "__Internal"
                     : Settings.IsAndroid
                         ? "ivizopencv-lib"

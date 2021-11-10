@@ -13,7 +13,7 @@ namespace Iviz.Displays
 
         protected void Start()
         {
-            if (Settings.IsVR)
+            if (Settings.IsXR)
             {
                 interactable = gameObject.AddComponent<XRSimpleInteractable>();
                 interactable.selectEntered.AddListener(OnSelectEntered);

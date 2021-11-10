@@ -36,7 +36,7 @@ namespace Iviz.Ros
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
 
-        readonly List<(string, string)> hostAliases = new();
+        readonly List<(string hostname, string address)> hostAliases = new();
 
         IReadOnlyCollection<string> cachedParameters = EmptyParameters;
         IReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
@@ -113,13 +113,13 @@ namespace Iviz.Ros
             }
         }
 
-        public void SetHostAliases(IEnumerable<(string, string)> newHostAliases)
+        public void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
         {
             hostAliases.Clear();
             hostAliases.AddRange(newHostAliases);
         }
 
-        async Task DisposeClient()
+        async ValueTask DisposeClientAsync()
         {
             if (!Connected)
             {
@@ -132,7 +132,7 @@ namespace Iviz.Ros
             client = null;
         }
 
-        protected override async ValueTask<bool> Connect()
+        protected override async ValueTask<bool> ConnectAsync()
         {
             if (MasterUri == null ||
                 MasterUri.Scheme != "http")
@@ -157,7 +157,7 @@ namespace Iviz.Ros
             if (Connected)
             {
                 Debug.LogWarning("Warning: New client requested, but old client still running?!");
-                await DisposeClient();
+                await DisposeClientAsync();
             }
 
             try
@@ -200,21 +200,21 @@ namespace Iviz.Ros
                     LogInternalIfHololens("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
-                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
                     LogInternalIfHololens("+++ Done advertising services");
 
                     LogInternalIfHololens("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
-                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
                     LogInternalIfHololens("+++ Done readvertising");
 
                     LogInternalIfHololens("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
-                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this))
+                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
                     LogInternalIfHololens("+++ Done resubscribing");
 
@@ -290,9 +290,8 @@ namespace Iviz.Ros
                 return;
             }
 
-            Dictionary<string, string> hosts = new Dictionary<string, string>();
-
-            foreach (XmlRpcValue entry in array)
+            var hosts = new Dictionary<string, string>();
+            foreach (var entry in array)
             {
                 if (!entry.TryGetArray(out XmlRpcValue[] pair) ||
                     pair.Length != 2 ||
@@ -471,7 +470,7 @@ namespace Iviz.Ros
 
         static Task DelayByPlatform(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
 
-        async Task ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
+        async ValueTask ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
             await topic.AdvertiseAsync(Connected ? Client : null, token);
@@ -479,13 +478,13 @@ namespace Iviz.Ros
             publishers[topic.Id] = topic.Publisher;
         }
 
-        async Task ReSubscribe(ISubscribedTopic topic, CancellationToken token)
+        async ValueTask ReSubscribe(ISubscribedTopic topic, CancellationToken token)
         {
             await DelayByPlatform(token);
             await topic.SubscribeAsync(Connected ? Client : null, token: token);
         }
 
-        async Task ReAdvertiseService(IAdvertisedService service, CancellationToken token)
+        async ValueTask ReAdvertiseService(IAdvertisedService service, CancellationToken token)
         {
             await DelayByPlatform(token);
             await service.AdvertiseAsync(Connected ? Client : null, token);
@@ -504,7 +503,7 @@ namespace Iviz.Ros
             AddTask(DisconnectImpl);
         }
 
-        async Task DisconnectImpl()
+        async ValueTask DisconnectImpl()
         {
             foreach (var entry in publishersByTopic.Values)
             {
@@ -519,7 +518,7 @@ namespace Iviz.Ros
             publishers.Clear();
 
             Core.Logger.Internal("Disconnecting...");
-            await DisposeClient();
+            await DisposeClientAsync();
             Core.Logger.Internal("<b>Disconnected.</b>");
             if (watchdogTask != null)
             {
@@ -559,7 +558,7 @@ namespace Iviz.Ros
         }
 
 
-        async Task AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
+        async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -616,11 +615,11 @@ namespace Iviz.Ros
             AdvertiseService(service, (T t) =>
             {
                 callback(t);
-                return Task.CompletedTask;
+                return new ValueTask();
             });
         }
 
-        public void AdvertiseService<T>(string service, Func<T, Task> callback)
+        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback)
             where T : IService, new()
         {
             if (service == null)
@@ -647,7 +646,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task AdvertiseServiceImpl<T>(string serviceName, Func<T, Task> callback,
+        async ValueTask AdvertiseServiceImpl<T>(string serviceName, Func<T, ValueTask> callback,
             CancellationToken token)
             where T : IService, new()
         {
@@ -731,9 +730,8 @@ namespace Iviz.Ros
 
             try
             {
-                if (publishers.TryGetValue(advertiser.Id, out var basePublisher) 
-                    && basePublisher is {NumSubscribers: > 0} 
-                    && basePublisher is IRosPublisher<T> publisher)
+                if (publishers.TryGetValue(advertiser.Id, out var basePublisher)
+                    && basePublisher is { NumSubscribers: > 0 } and IRosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
                 }
@@ -746,7 +744,7 @@ namespace Iviz.Ros
 
         internal bool TryGetResolvedTopicName(ISender advertiser, out string? topicName)
         {
-            if (advertiser.Id != InvalidId 
+            if (advertiser.Id != InvalidId
                 && publishers.TryGetValue(advertiser.Id, out var basePublisher)
                 && basePublisher != null)
             {
@@ -779,7 +777,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task SubscribeImpl<T>(IListener listener, CancellationToken token)
+        async ValueTask SubscribeImpl<T>(IListener listener, CancellationToken token)
             where T : IMessage, IDeserializable<T>, new()
         {
             if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic))
@@ -808,7 +806,7 @@ namespace Iviz.Ros
                     subscribedTopic.Subscriber.IsPaused = value;
                 }
 
-                return Task.CompletedTask;
+                return new ValueTask();
             });
         }
 
@@ -833,7 +831,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task UnadvertiseImpl(ISender advertiser, CancellationToken token)
+        async ValueTask UnadvertiseImpl(ISender advertiser, CancellationToken token)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -880,7 +878,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task UnsubscribeImpl(IListener subscriber, CancellationToken token)
+        async ValueTask UnsubscribeImpl(IListener subscriber, CancellationToken token)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
@@ -922,7 +920,7 @@ namespace Iviz.Ros
             });
         }
 
-        async Task UnadvertiseServiceImpl(string serviceName, CancellationToken token)
+        async ValueTask UnadvertiseServiceImpl(string serviceName, CancellationToken token)
         {
             if (!servicesByTopic.TryGetValue(serviceName, out var baseService))
             {
@@ -1099,7 +1097,7 @@ namespace Iviz.Ros
             return cachedSystemState;
         }
 
-        async Task GetSystemStateAsync()
+        async ValueTask GetSystemStateAsync()
         {
             if (!Connected)
             {
@@ -1137,7 +1135,7 @@ namespace Iviz.Ros
 
         internal int GetNumSubscribers(ISender sender)
         {
-            return sender.Id != InvalidId 
+            return sender.Id != InvalidId
                    && publishers.TryGetValue(sender.Id, out var basePublisher)
                    && basePublisher != null
                 ? basePublisher.NumSubscribers

@@ -9,6 +9,7 @@ namespace Iviz.Controllers
         [SerializeField] FixedJoystick left = null;
         [SerializeField] FixedJoystick right = null;
         [SerializeField] Canvas canvas = null;
+        bool visible;
 
         public enum Source
         {
@@ -18,7 +19,6 @@ namespace Iviz.Controllers
 
         public event Action<Source, Vector2> Changed;
         
-        bool visible;
         public bool Visible
         {
             get => visible;
@@ -28,17 +28,6 @@ namespace Iviz.Controllers
                 canvas.gameObject.SetActive(visible);
             }
         }
-
-        bool rightJoystickVisible;
-        public bool RightJoystickVisible
-        {
-            get => right.gameObject.activeSelf;
-            set
-            {
-                rightJoystickVisible = value;
-                right.gameObject.SetActive(value);
-            }
-        }        
 
         public Vector2 Left => left.Direction;
 

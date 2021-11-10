@@ -13,7 +13,7 @@ https://doi.org/10.1016/j.simpa.2021.100057) (open access!).
 ## 1. Installation
 
 To run iviz, you need the following:
-* Unity 2019.4 LTS on either Windows, Linux, or macOS
+* Unity 2021.1 on either Windows, Linux, or macOS
 * For mobile: iOS (> 11.0) or Android (> 7.0)
 
 The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
@@ -24,7 +24,7 @@ If you have Android, there is an APK in the [Binaries](Binaries/android) folder.
 
 Here are some instructions on how to get started:
 
-* (If using Unity) Start Unity 2019.4, and open the project on the iviz folder. Make sure that the scene **Scenes/UI AR** is active. Press Play.
+* (If using Unity) Start Unity 2021.2, and open the project on the iviz folder. Make sure that the scene **Scenes/UI AR** is active. Press Play.
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the address in bold with the arrow at the end.
 
 * You should now see the **Connection Dialog**.

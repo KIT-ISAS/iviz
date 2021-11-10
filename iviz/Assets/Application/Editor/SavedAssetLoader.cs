@@ -61,7 +61,7 @@ namespace Iviz.Editor
         */
 
 
-        static async Task CreateRobotsAsync([NotNull] ExternalResourceManager manager)
+        static async ValueTask CreateRobotsAsync([NotNull] ExternalResourceManager manager)
         {
             string unityDirectory = "Resources/Package/iviz/robots";
             string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";
@@ -87,7 +87,7 @@ namespace Iviz.Editor
         }
 
 
-        static async Task CreateAssetAsync([NotNull] Uri assetUri, ExternalResourceManager manager)
+        static async ValueTask CreateAssetAsync([NotNull] Uri assetUri, ExternalResourceManager manager)
         {
             const string basePath = "Assets/Resources/Package/";
             string uriPath = assetUri.Host + Uri.UnescapeDataString(assetUri.AbsolutePath);
