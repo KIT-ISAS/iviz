@@ -276,10 +276,10 @@ namespace Iviz.XmlRpc
         /// <returns>An awaitable task</returns>
         /// <exception cref="ArgumentNullException">Thrown if the context or the method list is null</exception>
         /// <exception cref="ParseException">Thrown if the request could not be understood</exception>
-        public static async Task MethodResponseAsync(
+        public static async ValueTask MethodResponseAsync(
             HttpListenerContext httpContext,
             IReadOnlyDictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods,
-            IReadOnlyDictionary<string, Func<XmlRpcValue[], CancellationToken, Task>>? lateCallbacks = null,
+            IReadOnlyDictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>? lateCallbacks = null,
             CancellationToken token = default)
         {
             if (httpContext is null)

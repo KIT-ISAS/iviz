@@ -82,7 +82,7 @@ namespace Iviz.Tools
 
             var timeout = new TaskCompletionSource<object?>();
             var timeoutTask = timeout.Task;
-            
+
 #if !NETSTANDARD2_0
             await using (tokenSource.Token.Register(SetResult, timeout))
 #else
@@ -127,6 +127,21 @@ namespace Iviz.Tools
                 }
             }
         }
+        
+        public static void WaitNoThrow(this ValueTask t, object caller)
+        {
+            try
+            {
+                t.GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                if (e is not OperationCanceledException)
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+            }
+        }        
 
         public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
         {
@@ -153,7 +168,7 @@ namespace Iviz.Tools
                 }
             }
         }
-
+        
         /// <summary>
         /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
         /// </summary>
@@ -230,6 +245,21 @@ namespace Iviz.Tools
             return default;
         }
 
+        public static async ValueTask AwaitNoThrow(this ValueTask t, object caller)
+        {
+            try
+            {
+                await t;
+            }
+            catch (Exception e)
+            {
+                if (e is not OperationCanceledException)
+                {
+                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                }
+            }
+        }
+
         public static Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
         {
             return Task.WhenAll(ts.ToArray());
@@ -258,6 +288,8 @@ namespace Iviz.Tools
     {
         public static ValueTask<T> FromResult<T>(T t) => new(t);
         public static ValueTask<T> FromException<T>(Exception e) => new(Task.FromException<T>(e));
+        public static ValueTask FromException(Exception e) => new(Task.FromException(e));
         public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
+        public static ValueTask AsValueTask(this Task t) => new(t);
     }
 }

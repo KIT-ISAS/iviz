@@ -30,7 +30,7 @@ namespace Iviz.Roslib
             Start(client, topic);
         }
 
-        public override async Task StartAsync(IRosClient client, string topic, CancellationToken token = default)
+        public override async ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {
@@ -96,7 +96,7 @@ namespace Iviz.Roslib
             Start(client, topic);
         }
 
-        public override async Task StartAsync(IRosClient client, string topic, CancellationToken token = default)
+        public override async ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {

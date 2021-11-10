@@ -154,7 +154,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Async function to be called when a service request arrives. The response should be written in the response field.</param>
         /// <param name="token">An optional cancellation token.</param>
         /// <typeparam name="T">Service type.</typeparam>
-        ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
+        ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
             CancellationToken token = default) where T : IService, new();
 
         /// <summary>

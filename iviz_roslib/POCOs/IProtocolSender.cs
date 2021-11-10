@@ -8,9 +8,9 @@ namespace Iviz.Roslib
     {
         bool IsAlive { get; }
         long MaxQueueSizeInBytes { set; }
-        Task DisposeAsync(CancellationToken token);
+        ValueTask DisposeAsync(CancellationToken token);
         void Publish(in TMessage msg);
-        Task PublishAndWaitAsync(in TMessage message, CancellationToken token);
+        ValueTask PublishAndWaitAsync(in TMessage message, CancellationToken token);
         PublisherSenderState State { get; }
     }
 }

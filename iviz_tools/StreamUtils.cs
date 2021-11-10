@@ -111,10 +111,10 @@ namespace Iviz.Tools
             }
         }
 
-        public static Task WriteChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token) =>
+        public static ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token) =>
             WriteChunkAsync(client, buffer.Array, buffer.Length, token);
 
-        public static async Task WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
+        public static async ValueTask WriteChunkAsync(this TcpClient client, byte[] buffer, int toWrite,
             CancellationToken token)
         {
             var socket = client.Client;
@@ -156,7 +156,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static async Task WriteChunkAsync(this TcpClient client, string text, CancellationToken token,
+        public static async ValueTask WriteChunkAsync(this TcpClient client, string text, CancellationToken token,
             int timeoutInMs = -1)
         {
             using var bytes = text.AsRent();
@@ -184,7 +184,7 @@ namespace Iviz.Tools
             }
         }
 
-        public static async Task WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
+        public static async ValueTask WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
         {
             int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 

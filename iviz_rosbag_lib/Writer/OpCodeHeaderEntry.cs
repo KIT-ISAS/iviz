@@ -19,7 +19,7 @@ namespace Iviz.Rosbag.Writer
             return rent.WriteTo(stream);
         }        
         
-        public async Task WriteAsync(Stream stream)
+        public async ValueTask WriteAsync(Stream stream)
         {
             using var rent = new RentStream(Length + 4);
             rent.Write(Length);

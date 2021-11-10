@@ -113,7 +113,7 @@ namespace Iviz.Rosbag.Writer
 
         void WriteMagic() => writer.WriteValue(RosbagMagic);
 
-        Task WriteMagicAsync() => writer.WriteValueAsync(RosbagMagic);
+        ValueTask WriteMagicAsync() => writer.WriteValueAsync(RosbagMagic);
 
         void WriteHeaderRecord(int numConnections, int numChunks, long connectionIndexPosition)
         {
@@ -145,7 +145,7 @@ namespace Iviz.Rosbag.Writer
                 .WriteValue(padding);
         }
 
-        async Task WriteHeaderRecordAsync(int numConnections, int numChunks, long connectionIndexPosition)
+        async ValueTask WriteHeaderRecordAsync(int numConnections, int numChunks, long connectionIndexPosition)
         {
             var op = new OpCodeHeaderEntry(OpCode.BagHeader);
             var chunkCount = new IntHeaderEntry("chunk_count", numChunks);
@@ -198,7 +198,7 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
-        async Task WriteConnectionRecordAsync(int connectionId, string topicName,
+        async ValueTask WriteConnectionRecordAsync(int connectionId, string topicName,
             IReadOnlyCollection<string> headerData)
         {
             var op = new OpCodeHeaderEntry(OpCode.Connection);
@@ -244,7 +244,7 @@ namespace Iviz.Rosbag.Writer
                 .WriteValue(bytes);
         }
 
-        async Task WriteMessageRecordAsync(int connectionId, time timestamp, IMessage message)
+        async ValueTask WriteMessageRecordAsync(int connectionId, time timestamp, IMessage message)
         {
             var op = new OpCodeHeaderEntry(OpCode.MessageData);
             var conn = new IntHeaderEntry("conn", connectionId);
@@ -282,7 +282,7 @@ namespace Iviz.Rosbag.Writer
             writer.WriteValue(sizeInBytes);
         }
 
-        async Task WritePartialChunkRecordAsync(int sizeInBytes)
+        async ValueTask WritePartialChunkRecordAsync(int sizeInBytes)
         {
             //Console.WriteLine("** Chunk start " + writer.Position);
             var op = new OpCodeHeaderEntry(OpCode.Chunk);
@@ -332,7 +332,7 @@ namespace Iviz.Rosbag.Writer
             //Console.WriteLine("** End position: " + writer.Position);
         }
 
-        async Task WriteIndexRecordAsync(int connectionId)
+        async ValueTask WriteIndexRecordAsync(int connectionId)
         {
             var list = chunkIndices[connectionId];
             if (list.Count == 0)
@@ -401,7 +401,7 @@ namespace Iviz.Rosbag.Writer
             //Console.WriteLine("** End position: " + writer.Position);
         }
 
-        async Task WriteChunkInfoRecordAsync(ChunkInfoRecord record)
+        async ValueTask WriteChunkInfoRecordAsync(ChunkInfoRecord record)
         {
             //Console.WriteLine("** Chunk start " + writer.Position);
 
@@ -454,7 +454,7 @@ namespace Iviz.Rosbag.Writer
             chunkStartTime = timestamp;
         }
 
-        async Task TryOpenChunkAsync(time timestamp)
+        async ValueTask TryOpenChunkAsync(time timestamp)
         {
             if (chunkStart != null)
             {
@@ -603,7 +603,7 @@ namespace Iviz.Rosbag.Writer
         /// See for example RosSubscriber.Subscribe with the IRosTcpReceiver callback.
         /// </param>
         /// <param name="timestamp">The time at which the message arrived</param>
-        public async Task WriteAsync(IMessage message, IRosConnection connection, time timestamp)
+        public async ValueTask WriteAsync(IMessage message, IRosConnection connection, time timestamp)
         {
             await TryOpenChunkAsync(timestamp);
 
@@ -688,7 +688,7 @@ namespace Iviz.Rosbag.Writer
             }
         }
 
-        async Task CloseAsync()
+        async ValueTask CloseAsync()
         {
             await TryCloseChunkAsync();
 
@@ -713,14 +713,10 @@ namespace Iviz.Rosbag.Writer
             await WriteHeaderRecordAsync(connections.Count, chunkInfos.Count, connectionStart);
         }
 
-#if !NETSTANDARD2_0
-        ValueTask IAsyncDisposable.DisposeAsync() => new(DisposeAsync());
-#endif
-
         /// <summary>
         /// Writes the connection index and closes the file.
         /// </summary>
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {

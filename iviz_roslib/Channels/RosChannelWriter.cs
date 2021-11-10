@@ -109,7 +109,7 @@ namespace Iviz.Roslib
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
-        public async Task StartAsync(IRosClient client, string topic, CancellationToken token = default)
+        public async ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default)
         {
             if (client == null)
             {
@@ -121,7 +121,7 @@ namespace Iviz.Roslib
             publisher.ForceTcpNoDelay = ForceTcpNoDelay;
         }
 
-        public async Task StartAsync(IRosClient client, string topic, DynamicMessage generator,
+        public async ValueTask StartAsync(IRosClient client, string topic, DynamicMessage generator,
             CancellationToken token = default)
         {
             if (!DynamicMessage.IsDynamic<T>())
@@ -153,7 +153,7 @@ namespace Iviz.Roslib
             Publisher.Publish(msg);
         }
 
-        public async Task WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public async ValueTask WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             await Publisher.PublishAsync(msg, policy, token);
@@ -256,7 +256,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -272,13 +272,6 @@ namespace Iviz.Roslib
 
             await Publisher.UnadvertiseAsync(publisherId!).AsTask().AwaitNoThrow(this);
         }
-
-#if !NETSTANDARD2_0
-        async ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            await DisposeAsync();
-        }
-#endif
     }
 
     public static class RosChannelWriterUtils

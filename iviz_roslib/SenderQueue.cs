@@ -47,13 +47,13 @@ namespace Iviz.Roslib
             signal.Release();
         }
 
-        public Task EnqueueAsync(in T message, CancellationToken token, ref int numDropped, ref long bytesDropped)
+        public ValueTask EnqueueAsync(in T message, CancellationToken token, ref int numDropped, ref long bytesDropped)
         {
             if (messagesInQueue > MaxPacketsInQueue)
             {
                 bytesDropped += message.RosMessageLength;
                 numDropped++;
-                return Task.CompletedTask;
+                return new ValueTask();
             }
             
             var msgSignal = new TaskCompletionSource<object?>();
@@ -62,10 +62,10 @@ namespace Iviz.Roslib
             
             return token.CanBeCanceled
                 ? WaitForSignal(msgSignal, token)
-                : msgSignal.Task;
+                : new ValueTask(msgSignal.Task);
         }
 
-        static async Task WaitForSignal(TaskCompletionSource<object?> msgSignal, CancellationToken token)
+        static async ValueTask WaitForSignal(TaskCompletionSource<object?> msgSignal, CancellationToken token)
         {
 #if !NETSTANDARD2_0
             await using (token.Register(StreamUtils.OnCanceled, msgSignal))

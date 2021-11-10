@@ -9,6 +9,6 @@ namespace Iviz.Roslib
         string Service { get; }
         string ServiceType { get; }
         Uri Uri { get; }
-        Task DisposeAsync(CancellationToken token);
+        ValueTask DisposeAsync(CancellationToken token);
     }
 }

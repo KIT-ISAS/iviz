@@ -93,7 +93,7 @@ namespace Iviz.Roslib.Actionlib
             runningTs.Dispose();
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -114,13 +114,6 @@ namespace Iviz.Roslib.Actionlib
             await resultSubscriber!.DisposeAsync();
             runningTs.Dispose();
         }
-
-#if !NETSTANDARD2_0
-        async ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            await DisposeAsync();
-        }
-#endif
 
         public event Action<RosActionClientState /* old */, RosActionClientState /* new */>? StateChanged;
 
@@ -161,7 +154,7 @@ namespace Iviz.Roslib.Actionlib
             mergedReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
         }
 
-        public async Task StartAsync(IRosClient client, string newActionName, CancellationToken token = default)
+        public async ValueTask StartAsync(IRosClient client, string newActionName, CancellationToken token = default)
         {
             ValidateStart(client, newActionName);
             goalPublisher = await client.CreateWriterAsync<TAGoal>($"/{actionName}/goal", true, token);
@@ -332,7 +325,7 @@ namespace Iviz.Roslib.Actionlib
             GoalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
         }
 
-        public async Task WaitForServerAsync(CancellationToken token = default)
+        public async ValueTask WaitForServerAsync(CancellationToken token = default)
         {
             if (GoalPublisher.Publisher.NumSubscribers != 0)
             {

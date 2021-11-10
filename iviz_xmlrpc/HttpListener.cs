@@ -54,12 +54,12 @@ namespace Iviz.XmlRpc
         }
         
 
-        public Task DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             return DisposeAsync(false);
         }
 
-        async Task DisposeAsync(bool sync)
+        async ValueTask DisposeAsync(bool sync)
         {
             if (disposed)
             {
@@ -106,7 +106,7 @@ namespace Iviz.XmlRpc
         /// </param>
         /// <returns>An awaitable task.</returns>
         /// <exception cref="ArgumentNullException">Thrown if handler is null</exception>
-        public async Task StartAsync(Func<HttpListenerContext, CancellationToken, Task> handler, bool runInBackground)
+        public async ValueTask StartAsync(Func<HttpListenerContext, CancellationToken, ValueTask> handler, bool runInBackground)
         {
             if (handler is null)
             {
@@ -168,7 +168,7 @@ namespace Iviz.XmlRpc
         /// </summary>
         /// <param name="timeoutInMs">Maximal time to wait</param>
         /// <returns>An awaitable task</returns>
-        public async Task AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
+        public async ValueTask AwaitRunningTasks(int timeoutInMs = DefaultTimeoutInMs)
         {
             backgroundTasks.RemoveAll(tuple => tuple.task.IsCompleted);
             if (backgroundTasks.Count == 0)

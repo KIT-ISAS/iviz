@@ -133,7 +133,7 @@ namespace Iviz.Roslib
             task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
         }
 
-        async Task StartSession(NullableMessage<T> latchedMsg)
+        async ValueTask StartSession(NullableMessage<T> latchedMsg)
         {
             Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -171,7 +171,7 @@ namespace Iviz.Roslib
             senderQueue.FlushRemaining();
         }
 
-        async Task ProcessLoop(NullableMessage<T> latchedMsg)
+        async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
         {
             if (latchedMsg.HasValue)
             {
@@ -203,7 +203,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
+        async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
         {
             const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
             byte[] array = writeBuffer.Array;
@@ -340,7 +340,7 @@ namespace Iviz.Roslib
             }
         }
         
-        async Task KeepAliveMessages()
+        async ValueTask KeepAliveMessages()
         {
             while (KeepRunning)
             {
@@ -349,7 +349,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -389,10 +389,10 @@ namespace Iviz.Roslib
             }
         }
 
-        public Task PublishAndWaitAsync(in T message, CancellationToken token)
+        public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
         {
             return !IsAlive
-                ? Task.FromException(new InvalidOperationException("Sender has been disposed."))
+                ? ValueTask2.FromException(new InvalidOperationException("Sender has been disposed."))
                 : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
         }
 

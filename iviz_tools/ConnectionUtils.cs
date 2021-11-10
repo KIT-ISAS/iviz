@@ -21,7 +21,7 @@ namespace Iviz.Tools
         static readonly Action<object?> OnTimeout = tcs =>
             ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetException(new TimeoutException());
 
-        public static async Task TryConnectAsync(this TcpClient client, string hostname, int port,
+        public static async ValueTask TryConnectAsync(this TcpClient client, string hostname, int port,
             CancellationToken token, int timeoutInMs = -1)
         {
             token.ThrowIfCancellationRequested();

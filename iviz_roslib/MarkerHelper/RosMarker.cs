@@ -48,7 +48,7 @@ namespace Iviz.Roslib.MarkerHelper
             publisher.Start(client, topic);
         }
 
-        public Task StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
+        public ValueTask StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
         {
             return publisher.StartAsync(client, topic, token);
         }
@@ -70,7 +70,7 @@ namespace Iviz.Roslib.MarkerHelper
             publisher.Dispose();
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -86,13 +86,6 @@ namespace Iviz.Roslib.MarkerHelper
 
             await publisher.DisposeAsync();
         }
-
-#if !NETSTANDARD2_0
-        async ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            await DisposeAsync();
-        }
-#endif
 
         int GetFreeId()
         {

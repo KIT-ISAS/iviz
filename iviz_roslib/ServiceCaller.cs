@@ -49,7 +49,7 @@ namespace Iviz.Roslib
             tcpClient.Dispose();
         }
 
-        Task SendHeaderAsync(bool persistent, CancellationToken token)
+        ValueTask SendHeaderAsync(bool persistent, CancellationToken token)
         {
             string[] contents =
             {
@@ -64,7 +64,7 @@ namespace Iviz.Roslib
             return tcpClient.WriteHeaderAsync(contents, token);
         }
 
-        async Task ProcessHandshakeAsync(bool persistent, CancellationToken token)
+        async ValueTask ProcessHandshakeAsync(bool persistent, CancellationToken token)
         {
             await SendHeaderAsync(persistent, token);
 
@@ -81,7 +81,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task StartAsync(Uri remoteUri, bool persistent, CancellationToken token)
+        public async ValueTask StartAsync(Uri remoteUri, bool persistent, CancellationToken token)
         {
             RemoteUri = remoteUri;
             string remoteHostname = remoteUri.Host;
@@ -123,7 +123,7 @@ namespace Iviz.Roslib
             return readBuffer;
         }
 
-        public async Task ExecuteAsync(T service, CancellationToken token)
+        public async ValueTask ExecuteAsync(T service, CancellationToken token)
         {
             if (tcpClient == null)
             {

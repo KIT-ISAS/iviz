@@ -16,7 +16,7 @@ namespace Iviz.Roslib.XmlRpc
         static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
 
         readonly RosClient client;
-        readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, Task>> lateCallbacks;
+        readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>> lateCallbacks;
         readonly HttpListener listener;
 
         readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
@@ -46,7 +46,7 @@ namespace Iviz.Roslib.XmlRpc
                 ["system.multicall"] = SystemMulticall,
             };
 
-            lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, Task>>
+            lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>
             {
                 ["publisherUpdate"] = PublisherUpdateLateCallback
             };
@@ -60,12 +60,12 @@ namespace Iviz.Roslib.XmlRpc
             DisposeAsync(true).WaitNoThrow(this);
         }
 
-        public Task DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             return DisposeAsync(false);
         }
 
-        async Task DisposeAsync(bool sync)
+        async ValueTask DisposeAsync(bool sync)
         {
             if (disposed)
             {
@@ -91,7 +91,7 @@ namespace Iviz.Roslib.XmlRpc
 
         public void Start()
         {
-            task = TaskUtils.StartLongTask(Run);
+            task = TaskUtils.StartLongTask(async() => await Run().AwaitNoThrow(this));
         }
 
         public override string ToString()
@@ -99,7 +99,7 @@ namespace Iviz.Roslib.XmlRpc
             return $"[RosNodeServer {Uri}]";
         }
 
-        async Task Run()
+        async ValueTask Run()
         {
             try
             {
@@ -112,7 +112,7 @@ namespace Iviz.Roslib.XmlRpc
             }
         }
 
-        async Task StartContext(HttpListenerContext context, CancellationToken token)
+        async ValueTask StartContext(HttpListenerContext context, CancellationToken token)
         {
             using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             try
@@ -237,7 +237,7 @@ namespace Iviz.Roslib.XmlRpc
             return DefaultOkResponse;
         }
 
-        async Task PublisherUpdateLateCallback(XmlRpcValue[] args, CancellationToken token)
+        async ValueTask PublisherUpdateLateCallback(XmlRpcValue[] args, CancellationToken token)
         {
             if (args.Length < 3 ||
                 !args[1].TryGetString(out string topic) ||

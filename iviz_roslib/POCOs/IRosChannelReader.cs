@@ -43,7 +43,7 @@ namespace Iviz.Roslib
         /// <param name="client">A connected IRosClient</param>
         /// <param name="topic">The topic to listen to</param>
         /// <param name="token">An optional cancellation token.</param>        
-        public Task StartAsync(IRosClient client, string topic, CancellationToken token = default);
+        public ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default);
         
         /// <summary>
         /// Starts the channel. Must be called after the constructor.

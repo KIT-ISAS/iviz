@@ -13,7 +13,7 @@ namespace Iviz.Roslib
 {
     internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
     {
-        readonly Func<T, Task> callback;
+        readonly Func<T, ValueTask> callback;
         readonly HashSet<ServiceRequest<T>> requests = new();
         readonly TcpListener listener;
         readonly ServiceInfo<T> serviceInfo;
@@ -21,23 +21,23 @@ namespace Iviz.Roslib
 
         readonly CancellationTokenSource tokenSource = new();
         bool KeepRunning => !tokenSource.IsCancellationRequested;
-        
+
         bool disposed;
 
-        public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, Task> callback)
+        public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, ValueTask> callback)
         {
             this.serviceInfo = serviceInfo;
             this.callback = callback;
 
-            listener = new TcpListener(IPAddress.IPv6Any, 0) {Server = {DualMode = true}};
+            listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
             listener.Start();
 
-            IPEndPoint localEndpoint = (IPEndPoint) listener.LocalEndpoint;
+            IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
             Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port.ToString()}/");
 
             Logger.LogDebugFormat("{0}: Starting!", this);
 
-            task = TaskUtils.StartLongTask(RunLoop);
+            task = TaskUtils.StartLongTask(async () => await RunLoop().AwaitNoThrow(this));
         }
 
         public Uri Uri { get; }
@@ -45,7 +45,7 @@ namespace Iviz.Roslib
         public string ServiceType => serviceInfo.Type;
 
 
-        async Task RunLoop()
+        async ValueTask RunLoop()
         {
             try
             {
@@ -58,7 +58,7 @@ namespace Iviz.Roslib
                     }
 
                     IPEndPoint? endPoint;
-                    if ((endPoint = (IPEndPoint?) client.Client.RemoteEndPoint) == null)
+                    if ((endPoint = (IPEndPoint?)client.Client.RemoteEndPoint) == null)
                     {
                         Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
                         continue;
@@ -72,7 +72,7 @@ namespace Iviz.Roslib
             }
             catch (Exception e)
             {
-                if (!(e is ObjectDisposedException || e is OperationCanceledException))
+                if (!(e is ObjectDisposedException or OperationCanceledException))
                 {
                     Logger.LogFormat("{0}: Stopped thread {1}", this, e);
                 }
@@ -83,7 +83,7 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
         }
 
-        async Task CleanupAsync(CancellationToken token)
+        async ValueTask CleanupAsync(CancellationToken token)
         {
             ServiceRequest<T>[] toRemove = requests.Where(request => !request.IsAlive).ToArray();
             var tasks = toRemove.Select(async request =>
@@ -96,7 +96,7 @@ namespace Iviz.Roslib
             await tasks.WhenAll().AwaitNoThrow(this);
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -108,7 +108,7 @@ namespace Iviz.Roslib
             tokenSource.Cancel();
 
             // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
-            using (TcpClient client = new(AddressFamily.InterNetworkV6) {Client = {DualMode = true}})
+            using (TcpClient client = new(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
             {
                 await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
             }
@@ -120,10 +120,10 @@ namespace Iviz.Roslib
             }
 
 
-            Task[] tasks = requests.Select(request => request.StopAsync(token)).ToArray();
+            Task[] tasks = requests.Select(request => request.StopAsync(token).AsTask()).ToArray();
             await tasks.WhenAll().AwaitNoThrow(this);
             requests.Clear();
-            
+
             tokenSource.Dispose();
         }
 

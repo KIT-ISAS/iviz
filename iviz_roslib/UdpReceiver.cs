@@ -20,7 +20,7 @@ namespace Iviz.Roslib
 
         readonly TopicInfo<T> topicInfo;
         readonly CancellationTokenSource runningTs = new();
-        readonly Task task = Task.CompletedTask;
+        readonly Task task;
         readonly ReceiverManager<T> manager;
         
         int receiveBufferSize = 8192;
@@ -59,6 +59,7 @@ namespace Iviz.Roslib
             UdpClient = client;
             this.topicInfo = topicInfo;
             MaxPacketSize = newMaxPacketSize;
+            task = Task.CompletedTask;
 
             client.Client.ReceiveBufferSize = 32768 * 32;
 
@@ -128,7 +129,7 @@ namespace Iviz.Roslib
             MaxPacketSize = MaxPacketSize
         };
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -143,7 +144,7 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        async Task StartSession()
+        async ValueTask StartSession()
         {
             try
             {
@@ -186,7 +187,7 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Stopped!", this);
         }
 
-        async Task ProcessLoop()
+        async ValueTask ProcessLoop()
         {
             var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
 

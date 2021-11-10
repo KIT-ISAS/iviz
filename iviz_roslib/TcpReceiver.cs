@@ -68,7 +68,7 @@ namespace Iviz.Roslib
             ErrorDescription = ErrorDescription
         };
 
-        async Task StartSession()
+        async ValueTask StartSession()
         {
             bool shouldRetry = false;
 
@@ -226,7 +226,7 @@ namespace Iviz.Roslib
             return length;
         }
 
-        Task SendHeader(TcpClient client)
+        ValueTask SendHeader(TcpClient client)
         {
             string[] contents =
             {
@@ -241,7 +241,7 @@ namespace Iviz.Roslib
             return client.WriteHeaderAsync(contents, runningTs.Token);
         }
 
-        async Task ProcessHandshake(TcpClient client)
+        async ValueTask ProcessHandshake(TcpClient client)
         {
             await SendHeader(client);
 
@@ -268,7 +268,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task ProcessMessages(TcpClient client)
+        async ValueTask ProcessMessages(TcpClient client)
         {
             var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
             using ByteBufferRent readBuffer = new(4);
@@ -320,7 +320,7 @@ namespace Iviz.Roslib
                 recommendedSize / 1024);
         }
 
-        async Task ProcessLoop(TcpClient client)
+        async ValueTask ProcessLoop(TcpClient client)
         {
             await ProcessHandshake(client);
             Status = ReceiverStatus.Running;
@@ -343,7 +343,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {

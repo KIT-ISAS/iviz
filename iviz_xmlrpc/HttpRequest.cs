@@ -27,7 +27,7 @@ namespace Iviz.XmlRpc
             client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true }, NoDelay = true };
         }
 
-        public Task StartAsync(CancellationToken token)
+        public ValueTask StartAsync(CancellationToken token)
         {
             return client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
         }

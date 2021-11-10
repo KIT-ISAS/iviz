@@ -98,7 +98,7 @@ namespace Iviz.Roslib
             manager.Publish((T)message);
         }
 
-        Task IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
+        ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
         {
             if (message is null)
             {
@@ -132,7 +132,7 @@ namespace Iviz.Roslib
             manager.Publish(message);
         }
 
-        public Task PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+        public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
             CancellationToken token = default)
         {
             if (message == null)
@@ -147,11 +147,11 @@ namespace Iviz.Roslib
             {
                 case RosPublishPolicy.DoNotWait:
                     manager.Publish(message);
-                    return Task.CompletedTask;
+                    return new ValueTask();
                 case RosPublishPolicy.WaitUntilSent:
                     return manager.PublishAndWaitAsync(message, token);
                 default:
-                    return Task.CompletedTask;
+                    return new ValueTask();
             }
         }
 
@@ -187,7 +187,7 @@ namespace Iviz.Roslib
             Dispose();
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -262,11 +262,11 @@ namespace Iviz.Roslib
             return removed;
         }
 
-        async Task RemovePublisherAsync(CancellationToken token)
+        Task RemovePublisherAsync(CancellationToken token)
         {
-            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
-            Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
-            await (disposeTask, unadvertiseTask).WhenAll();
+            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this).AsTask();
+            Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this).AsTask();
+            return (disposeTask, unadvertiseTask).WhenAll();
         }
 
         public bool ContainsId(string id)

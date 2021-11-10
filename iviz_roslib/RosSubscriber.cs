@@ -127,7 +127,7 @@ namespace Iviz.Roslib
             return new SubscriberTopicState(Topic, TopicType, callbacksById.Keys.ToArray(), manager.GetStates());
         }
 
-        Task IRosSubscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        ValueTask IRosSubscriber.PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             return PublisherUpdateRcpAsync(publisherUris, token);
         }
@@ -153,7 +153,7 @@ namespace Iviz.Roslib
             runningTs.Dispose();
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -260,15 +260,15 @@ namespace Iviz.Roslib
             else
             {
                 cachedCallbacks = EmptyCallback;
-                Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
-                Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
+                Task disposeTask = DisposeAsync(token).AwaitNoThrow(this).AsTask();
+                Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this).AsTask();
                 await (disposeTask, unsubscribeTask).WhenAll();
             }
 
             return removed;
         }
 
-        async Task PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        async ValueTask PublisherUpdateRcpAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             if (runningTs.IsCancellationRequested)
             {

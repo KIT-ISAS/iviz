@@ -75,7 +75,7 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public Task PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public ValueTask PublishAsync(IMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
 
         /// <summary>
         /// Unregisters the given id from the publisher. If the publisher has no ids left, the topic will be unadvertised from the master.
@@ -133,7 +133,7 @@ namespace Iviz.Roslib
         /// Async version of Dispose(), for NET Standard 2.0 where IAsyncDisposable is not available.
         /// </summary>
         /// <returns>The awaitable dispose task.</returns>
-        public Task DisposeAsync(CancellationToken token);
+        public ValueTask DisposeAsync(CancellationToken token);
         
         internal TopicRequestRpcResult RequestTopicRpc(bool requestsTcp, RpcUdpTopicRequest? requestsUdp,
             out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse);
@@ -164,7 +164,7 @@ namespace Iviz.Roslib
         /// <exception cref="ArgumentNullException">The message is null</exception>
         /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>          
         /// <exception cref="AggregateException">An exception happened in one or multiple connections while sending the message.</exception>          
-        public Task PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
+        public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait, CancellationToken token = default);
     }
 
 }

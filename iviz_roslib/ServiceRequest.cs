@@ -20,7 +20,7 @@ namespace Iviz.Roslib
         const byte ErrorByte = 0;
         const byte SuccessByte = 1;
 
-        readonly Func<TService, Task> callback;
+        readonly Func<TService, ValueTask> callback;
         readonly Endpoint remoteEndPoint;
         readonly ServiceInfo<TService> serviceInfo;
         readonly Task task;
@@ -33,14 +33,14 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource runningTs = new();
 
         internal ServiceRequest(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
-            Func<TService, Task> callback)
+            Func<TService, ValueTask> callback)
         {
             this.tcpClient = tcpClient;
             this.callback = callback;
             this.remoteEndPoint = remoteEndPoint;
             this.serviceInfo = serviceInfo;
 
-            task = TaskUtils.StartLongTask(StartSession, runningTs.Token);
+            task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
         }
 
         public bool IsAlive => !task.IsCompleted;
@@ -48,7 +48,7 @@ namespace Iviz.Roslib
         int Port => remoteEndPoint.Port;
         public string Hostname => remoteEndPoint.Hostname;
 
-        public async Task StopAsync(CancellationToken token)
+        public async ValueTask StopAsync(CancellationToken token)
         {
             tcpClient.Close();
             runningTs.Cancel();
@@ -144,7 +144,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        Task SendHeader(string? errorMessage)
+        ValueTask SendHeader(string? errorMessage)
         {
             string[] contents;
             if (errorMessage != null)
@@ -168,7 +168,7 @@ namespace Iviz.Roslib
             return tcpClient.WriteHeaderAsync(contents, runningTs.Token);
         }
 
-        async Task ProcessHandshake()
+        async ValueTask ProcessHandshake()
         {
             List<string> fields;
             using (var readBuffer = await ReceivePacket(runningTs.Token))
@@ -186,7 +186,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task StartSession()
+        async ValueTask StartSession()
         {
             try
             {

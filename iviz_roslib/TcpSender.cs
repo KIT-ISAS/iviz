@@ -76,10 +76,11 @@ namespace Iviz.Roslib
             TcpClient = client;
             Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
             RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
-            task = TaskUtils.StartLongTask(() => StartSession(latchedMsg), runningTs.Token);
+            task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this),
+                runningTs.Token);
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -126,7 +127,7 @@ namespace Iviz.Roslib
             throw new IOException("Connection closed during handshake");
         }
 
-        Task SendHeader(bool latching)
+        ValueTask SendHeader(bool latching)
         {
             string[] contents =
             {
@@ -141,7 +142,7 @@ namespace Iviz.Roslib
             return TcpClient.WriteHeaderAsync(contents, runningTs.Token);
         }
 
-        Task SendErrorHeader(string errorMessage)
+        ValueTask SendErrorHeader(string errorMessage)
         {
             string[] contents =
             {
@@ -208,7 +209,7 @@ namespace Iviz.Roslib
             return true;
         }
 
-        async Task ProcessHandshake(bool latching)
+        async ValueTask ProcessHandshake(bool latching)
         {
             List<string> fields;
             using (Rent<byte> readBuffer = await ReceivePacket())
@@ -229,7 +230,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task StartSession(NullableMessage<T> latchedMsg)
+        async ValueTask StartSession(NullableMessage<T> latchedMsg)
         {
             Logger.LogDebugFormat("{0}: Started!", this);
 
@@ -267,7 +268,7 @@ namespace Iviz.Roslib
             senderQueue.FlushRemaining();
         }
 
-        async Task ProcessLoop(NullableMessage<T> latchedMsg)
+        async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
         {
             using ByteBufferRent writeBuffer = new(4);
 
@@ -295,7 +296,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ByteBufferRent writeBuffer)
+        async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ByteBufferRent writeBuffer)
         {
             void WriteLengthToBuffer(int i)
             {
@@ -341,10 +342,10 @@ namespace Iviz.Roslib
             }
         }
 
-        public Task PublishAndWaitAsync(in T message, CancellationToken token)
+        public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
         {
             return !IsRunning
-                ? Task.FromException(new InvalidOperationException("Sender has been disposed."))
+                ? ValueTask2.FromException(new InvalidOperationException("Sender has been disposed."))
                 : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
         }
 

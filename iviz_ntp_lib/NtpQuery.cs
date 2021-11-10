@@ -107,7 +107,7 @@ namespace Iviz.Ntp
             return new TimeSpan(offsetTimes2.Ticks / 2);
         }
 
-        static async Task AwaitWithTimeout(Task task, Task timerTask)
+        static async ValueTask AwaitWithTimeout(Task task, Task timerTask)
         {
             Task resultTask = await Task.WhenAny(task, timerTask);
             if (resultTask == timerTask)

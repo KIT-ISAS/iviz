@@ -53,7 +53,7 @@ namespace Iviz.Roslib
         /// <param name="client">A connected RosClient</param>
         /// <param name="topic">The topic to listen to</param>
         /// <param name="token">An optional cancellation token.</param>
-        public abstract Task StartAsync(IRosClient client, string topic, CancellationToken token = default);
+        public abstract ValueTask StartAsync(IRosClient client, string topic, CancellationToken token = default);
 
         /// <summary>
         /// Starts the channel. Must be called after the constructor.
@@ -62,7 +62,7 @@ namespace Iviz.Roslib
         /// <param name="topic">The topic to listen to</param>
         public abstract void Start(IRosClient client, string topic);
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -85,10 +85,6 @@ namespace Iviz.Roslib
 #endif
             await subscriber.UnsubscribeAsync(subscriberId!).AsTask().AwaitNoThrow(this);
         }
-
-#if !NETSTANDARD2_0
-        ValueTask IAsyncDisposable.DisposeAsync() => new(DisposeAsync());
-#endif
 
         public void Dispose()
         {

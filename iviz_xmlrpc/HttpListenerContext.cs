@@ -54,7 +54,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public Task RespondAsync(string msgOut, int timeoutInMs = 2000, CancellationToken token = default)
+        public ValueTask RespondAsync(string msgOut, int timeoutInMs = 2000, CancellationToken token = default)
         {
             if (msgOut is null)
             {
@@ -81,7 +81,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public Task RespondWithUnexpectedErrorAsync(int timeoutInMs = 2000, CancellationToken token = default)
+        public ValueTask RespondWithUnexpectedErrorAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
             const string errorMsg =
                 "HTTP/1.0 500 Internal Server Error\r\n" +

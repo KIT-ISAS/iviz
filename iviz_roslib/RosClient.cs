@@ -632,7 +632,7 @@ namespace Iviz.Roslib
         /// Asks the master which topics we advertise and are subscribed to, and removes them.
         /// If you are interested in the async version, make sure to set ensureCleanSlate to false in the constructor.
         /// </summary>
-        public async Task EnsureCleanSlateAsync(CancellationToken token = default)
+        public async ValueTask EnsureCleanSlateAsync(CancellationToken token = default)
         {
             SystemState state = await GetSystemStateAsync(token);
             List<Task> tasks = new();
@@ -673,7 +673,7 @@ namespace Iviz.Roslib
         /// client wih the same ports interfering with ours.
         /// </summary>
         /// <param name="token">An optional cancellation token</param>
-        public async Task CheckOwnUriAsync(CancellationToken token = default)
+        public async ValueTask CheckOwnUriAsync(CancellationToken token = default)
         {
             GetPidResponse response;
             try
@@ -1015,7 +1015,7 @@ namespace Iviz.Roslib
             RosMasterClient.UnregisterSubscriber(subscriber.Topic);
         }
 
-        internal async Task RemoveSubscriberAsync(IRosSubscriber subscriber, CancellationToken token)
+        internal async ValueTask RemoveSubscriberAsync(IRosSubscriber subscriber, CancellationToken token)
         {
             subscribersByTopic.TryRemove(subscriber.Topic, out _);
             await RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, token);
@@ -1346,10 +1346,10 @@ namespace Iviz.Roslib
             return publisher?.UnadvertiseAsync(topicId) ?? ValueTask2.FromResult(false);
         }
 
-        internal Task RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
+        internal async ValueTask RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
         {
             publishersByTopic.TryRemove(publisher.Topic, out _);
-            return RosMasterClient.UnregisterPublisherAsync(publisher.Topic, token).AsTask();
+            await RosMasterClient.UnregisterPublisherAsync(publisher.Topic, token);
         }
 
         /// <summary>
@@ -1514,7 +1514,7 @@ namespace Iviz.Roslib
                 .ToArray();
         }
 
-        internal async Task PublisherUpdateRpcAsync(string topic, IEnumerable<Uri> publishers, CancellationToken token)
+        internal async ValueTask PublisherUpdateRpcAsync(string topic, IEnumerable<Uri> publishers, CancellationToken token)
         {
             if (!TryGetSubscriber(topic, out IRosSubscriber? subscriber))
             {
@@ -1558,7 +1558,7 @@ namespace Iviz.Roslib
         /// <summary>
         /// Close this connection. Unsubscribes and unadvertises all topics.
         /// </summary>
-        public async Task CloseAsync(CancellationToken token = default)
+        public async ValueTask CloseAsync(CancellationToken token = default)
         {
             const int timeoutInMs = 4000;
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
@@ -1569,7 +1569,7 @@ namespace Iviz.Roslib
 
             if (listener != null)
             {
-                Task listenerDispose = listener.DisposeAsync();
+                Task listenerDispose = listener.DisposeAsync().AsTask();
                 tasks.Add(listenerDispose);
             }
 
@@ -1578,7 +1578,7 @@ namespace Iviz.Roslib
 
             foreach (var publisher in publishers)
             {
-                tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
                 tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken)
                     .AwaitNoThrow(this)
                     .AsTask());
@@ -1589,7 +1589,7 @@ namespace Iviz.Roslib
 
             foreach (var subscriber in subscribers)
             {
-                tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
                 tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken)
                     .AwaitNoThrow(this)
                     .AsTask());
@@ -1608,7 +1608,7 @@ namespace Iviz.Roslib
 
             foreach (var serviceManager in serviceManagers)
             {
-                tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
+                tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
                 tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
                     .AwaitNoThrow(this)
                     .AsTask());
@@ -1895,10 +1895,10 @@ namespace Iviz.Roslib
             CancellationToken token = default)
             where T : IService, new()
         {
-            Task Wrapper(T x)
+            ValueTask Wrapper(T x)
             {
                 callback(x);
-                return Task.CompletedTask;
+                return new ValueTask();
             }
 
             return AdvertiseServiceAsync<T>(serviceName, Wrapper, token);
@@ -1911,7 +1911,7 @@ namespace Iviz.Roslib
         /// <param name="callback">Async function to be called when a service request arrives. The response should be written in the response field.</param>
         /// <param name="token">An optional cancellation token.</param>
         /// <typeparam name="T">Service type.</typeparam>
-        public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, Task> callback,
+        public async ValueTask<bool> AdvertiseServiceAsync<T>(string serviceName, Func<T, ValueTask> callback,
             CancellationToken token = default)
             where T : IService, new()
         {
@@ -1992,17 +1992,7 @@ namespace Iviz.Roslib
             Close();
         }
 
-        public Task DisposeAsync()
-        {
-            return CloseAsync();
-        }
-
-#if !NETSTANDARD2_0
-        ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            return new ValueTask(DisposeAsync());
-        }
-#endif
+        public ValueTask DisposeAsync() => CloseAsync();
 
         public override string ToString()
         {

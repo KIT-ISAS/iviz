@@ -99,13 +99,13 @@ namespace Iviz.Roslib
             listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
             listener.Start();
 
-            task = TaskUtils.StartLongTask(RunTcpReceiverLoop);
+            task = TaskUtils.StartLongTask(async () => await RunTcpReceiverLoop().AwaitNoThrow(this));
 
             Logger.LogDebugFormat("{0}: Starting at :{1}", this, Endpoint.Port.ToString());
         }
 
 
-        async Task RunTcpReceiverLoop()
+        async ValueTask RunTcpReceiverLoop()
         {
             try
             {
@@ -154,7 +154,7 @@ namespace Iviz.Roslib
             Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
         }
 
-        async Task CleanupAsync(CancellationToken token)
+        async ValueTask CleanupAsync(CancellationToken token)
         {
             var allSenders = senders.ToArray();
             if (allSenders.All(deadSender => deadSender.IsAlive))
@@ -218,7 +218,7 @@ namespace Iviz.Roslib
             }
         }
 
-        public Task PublishAndWaitAsync(in TMessage msg, CancellationToken token)
+        public ValueTask PublishAndWaitAsync(in TMessage msg, CancellationToken token)
         {
             if (Latching)
             {
@@ -229,17 +229,17 @@ namespace Iviz.Roslib
             switch (localSenders.Length)
             {
                 case 0:
-                    return Task.CompletedTask;
+                    return new ValueTask();
                 case 1:
                     return localSenders[0].PublishAndWaitAsync(msg, token);
                 default:
                     var tasks = new Task[localSenders.Length];
                     for (int i = 0; i < localSenders.Length; i++)
                     {
-                        tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token);
+                        tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token).AsTask();
                     }
-            
-                    return tasks.WhenAll();
+
+                    return tasks.WhenAll().AsValueTask();
             }
         }
 
@@ -248,7 +248,7 @@ namespace Iviz.Roslib
             Task.Run(() => DisposeAsync(default)).WaitNoThrow(this);
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
@@ -269,7 +269,7 @@ namespace Iviz.Roslib
                 Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
             }
 
-            await senders.Select(sender => sender.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
+            await senders.Select(sender => sender.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
             senders.Clear();
 
             cachedSenders = Array.Empty<IProtocolSender<TMessage>>();

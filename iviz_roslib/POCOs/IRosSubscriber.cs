@@ -103,9 +103,9 @@ namespace Iviz.Roslib
         /// </summary>
         /// <param name="publisherUris">The new list of publishers.</param>
         /// <param name="token">A cancellation token</param>
-        internal Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
+        internal ValueTask PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token);
 
-        public Task DisposeAsync(CancellationToken token);
+        public ValueTask DisposeAsync(CancellationToken token);
     }
     
     public delegate void RosCallback<T>(in T message, IRosReceiver info) where T : IMessage;

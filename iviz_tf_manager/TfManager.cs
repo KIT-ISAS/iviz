@@ -53,7 +53,7 @@ namespace Iviz.TfManager
 
 
 #if !NETSTANDARD2_0
-        public async Task UpdateAllAsync(RosChannelReader<TFMessage> reader, CancellationToken token = default)
+        public async ValueTask UpdateAllAsync(RosChannelReader<TFMessage> reader, CancellationToken token = default)
         {
             await foreach (var tfMessage in reader.ReadAllAsync(token))
             {

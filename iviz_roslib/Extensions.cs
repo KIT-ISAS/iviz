@@ -37,7 +37,7 @@ namespace Iviz.Roslib
             Task.Run(() => client.WaitForServiceAsync(service, token), token).WaitAndRethrow();
         }
 
-        public static async Task WaitForServiceAsync(this RosClient client, string service,
+        public static async ValueTask WaitForServiceAsync(this RosClient client, string service,
             CancellationToken token = default)
         {
             if (client == null)
@@ -91,7 +91,7 @@ namespace Iviz.Roslib
             Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
         }
 
-        public static async Task WaitForAnySubscriberAsync(this IRosPublisher publisher,
+        public static async ValueTask WaitForAnySubscriberAsync(this IRosPublisher publisher,
             CancellationToken token = default)
         {
             if (publisher == null)
@@ -134,7 +134,7 @@ namespace Iviz.Roslib
             Task.Run(() => subscriber.WaitForAnyPublisherAsync(token), token).WaitAndRethrow();
         }
 
-        public static async Task WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
+        public static async ValueTask WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
             CancellationToken token = default)
         {
             if (subscriber == null)
@@ -182,7 +182,7 @@ namespace Iviz.Roslib
             Task.Run(() => client.WaitForTopicAsync(topic, token), token).WaitAndRethrow();
         }
 
-        public static async Task WaitForTopicAsync(this RosClient client, string topic,
+        public static async ValueTask WaitForTopicAsync(this RosClient client, string topic,
             CancellationToken token = default)
         {
             if (client == null)

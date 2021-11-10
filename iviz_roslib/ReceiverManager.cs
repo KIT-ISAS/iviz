@@ -65,7 +65,7 @@ namespace Iviz.Roslib
             subscriber.MessageCallback(msg, receiver);
         }
 
-        public async Task PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
+        public async ValueTask PublisherUpdateRpcAsync(IEnumerable<Uri> publisherUris, CancellationToken token)
         {
             bool numConnectionsHasChanged;
 
@@ -81,7 +81,9 @@ namespace Iviz.Roslib
                         .Select(pair => pair.Value)
                         .ToArray();
 
-                    await toDelete.Select(receiver => receiver.DisposeAsync(token)).WhenAll().AwaitNoThrow(this);
+                    await toDelete.Select(receiver => receiver.DisposeAsync(token).AsTask())
+                        .WhenAll()
+                        .AwaitNoThrow(this);
                 }
 
                 if (newPublishers.Any(uri => !receiversByUri.ContainsKey(uri)))
@@ -197,7 +199,7 @@ namespace Iviz.Roslib
                 receiversByUri.TryRemove(receiver.RemoteUri, out _);
                 Logger.LogDebugFormat("{0}: Removing connection with uri '{1}' - dead x_x: {2}", this,
                     receiver.RemoteUri, receiver.ErrorDescription);
-                return receiver.DisposeAsync(token);
+                return receiver.DisposeAsync(token).AsTask();
             });
 
             await deleteTasks.WhenAll().AwaitNoThrow(this);
@@ -208,7 +210,7 @@ namespace Iviz.Roslib
                 connectorsByUri.TryRemove(connector.RemoteUri, out _);
                 Logger.LogDebugFormat("{0}: Removing connector with uri '{1}' - dead x_x: {2}", this,
                     connector.RemoteUri, connector.ErrorDescription);
-                return connector.DisposeAsync(token);
+                return connector.DisposeAsync(token).AsTask();
             });
 
             await connectorTasks.WhenAll().AwaitNoThrow(this);
@@ -220,15 +222,15 @@ namespace Iviz.Roslib
             Task.Run(() => StopAsync(default)).WaitNoThrow(this);
         }
 
-        public async Task StopAsync(CancellationToken token)
+        public async ValueTask StopAsync(CancellationToken token)
         {
             var receivers = receiversByUri.Values.ToArray();
             receiversByUri.Clear();
             var connectors = connectorsByUri.Values.ToArray();
             connectorsByUri.Clear();
 
-            await receivers.Select(receiver => receiver.DisposeAsync(token)).WhenAll();
-            await connectors.Select(connector => connector.DisposeAsync(token)).WhenAll();
+            await receivers.Select(receiver => receiver.DisposeAsync(token).AsTask()).WhenAll();
+            await connectors.Select(connector => connector.DisposeAsync(token).AsTask()).WhenAll();
         }
 
         public ReadOnlyCollection<SubscriberReceiverState> GetStates()

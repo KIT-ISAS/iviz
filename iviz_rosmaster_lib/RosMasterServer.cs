@@ -23,7 +23,7 @@ namespace Iviz.RosMaster
 
         readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
 
-        readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, Task>> lateCallbacks;
+        readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>> lateCallbacks;
 
         readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic = new();
 
@@ -44,7 +44,7 @@ namespace Iviz.RosMaster
         bool disposed;
 
         CancellationToken Token => runningTs.Token;
-        
+
         public Uri MasterUri { get; }
 
         public string MasterCallerId { get; }
@@ -88,13 +88,13 @@ namespace Iviz.RosMaster
                 ["system.multicall"] = SystemMulticall,
             };
 
-            lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, Task>>
+            lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>
             {
                 ["registerPublisher"] = RegisterPublisherLateCallback,
                 ["unregisterPublisher"] = RegisterPublisherLateCallback
             };
 
-            backgroundTask = startInBackground ? StartAsync() : null;
+            backgroundTask = startInBackground ? StartAsync().AsTask() : null;
         }
 
         public void Dispose()
@@ -113,7 +113,7 @@ namespace Iviz.RosMaster
             disposed = true;
         }
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
@@ -150,7 +150,7 @@ namespace Iviz.RosMaster
             return masterServer;
         }
 
-        public async Task StartAsync()
+        public async ValueTask StartAsync()
         {
             if (backgroundTask != null)
             {
@@ -166,7 +166,7 @@ namespace Iviz.RosMaster
             Logger.Log($"** {this}: Leaving thread.");
         }
 
-        async Task StartContext(HttpListenerContext context, CancellationToken token)
+        async ValueTask StartContext(HttpListenerContext context, CancellationToken token)
         {
             try
             {
@@ -178,7 +178,7 @@ namespace Iviz.RosMaster
             }
         }
 
-        async Task ManageRosoutAggAsync()
+        async ValueTask ManageRosoutAggAsync()
         {
             await Task.Delay(100);
 
@@ -284,7 +284,7 @@ namespace Iviz.RosMaster
             return OkResponse(new XmlRpcArg(currentSubscribers));
         }
 
-        Task RegisterPublisherLateCallback(XmlRpcValue[] args, CancellationToken token)
+        ValueTask RegisterPublisherLateCallback(XmlRpcValue[] args, CancellationToken token)
         {
             XmlRpcArg[] methodArgs;
             Uri[] subscribersToNotify;
@@ -294,7 +294,7 @@ namespace Iviz.RosMaster
                 if (!args[1].TryGetString(out string topic) ||
                     !subscribersByTopic.TryGetValue(topic, out var subscribers))
                 {
-                    return Task.CompletedTask;
+                    return new ValueTask();
                 }
 
                 var publisherUris =
@@ -304,7 +304,7 @@ namespace Iviz.RosMaster
 
                 if (subscribers.Count == 0 || token.IsCancellationRequested)
                 {
-                    return Task.CompletedTask;
+                    return new ValueTask();
                 }
 
                 methodArgs = new XmlRpcArg[] { MasterCallerId, topic, new(publisherUris) };
@@ -316,7 +316,7 @@ namespace Iviz.RosMaster
                 NotifySubscriber(uri, methodArgs, token);
             }
 
-            return Task.CompletedTask;            
+            return new ValueTask();
         }
 
         async void NotifySubscriber(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)

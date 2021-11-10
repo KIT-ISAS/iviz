@@ -72,7 +72,7 @@ namespace Iviz.Roslib
             task = TaskUtils.StartLongTask(async () => await KeepReconnecting().AwaitNoThrow(this));
         }
 
-        async Task KeepReconnecting()
+        async ValueTask KeepReconnecting()
         {
             int numTry;
             for (numTry = 0; numTry < MaxConnectionRetries; numTry++)
@@ -167,7 +167,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        public async Task DisposeAsync(CancellationToken token)
+        public async ValueTask DisposeAsync(CancellationToken token)
         {
             if (disposed)
             {
