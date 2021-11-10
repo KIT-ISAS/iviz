@@ -13,7 +13,6 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -50,7 +49,7 @@ namespace Iviz.Controllers
 
                 if (value.VisibleMask.Length != config.VisibleMask.Length)
                 {
-                    Logger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length.ToString()}");
+                    RosLogger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length.ToString()}");
                     return;
                 }
 
@@ -343,19 +342,19 @@ namespace Iviz.Controllers
                 case Marker.ADD:
                     if (msg.Pose.HasNaN())
                     {
-                        Logger.Debug("MarkerListener: NaN in pose!");
+                        RosLogger.Debug("MarkerListener: NaN in pose!");
                         break;
                     }
 
                     if (msg.Scale.HasNaN())
                     {
-                        Logger.Debug("MarkerListener: NaN in scale!");
+                        RosLogger.Debug("MarkerListener: NaN in scale!");
                         break;
                     }
 
                     if (msg.Type >= config.VisibleMask.Length)
                     {
-                        Logger.Debug($"MarkerListener: Unknown type {msg.Type.ToString()}");
+                        RosLogger.Debug($"MarkerListener: Unknown type {msg.Type.ToString()}");
                         break;
                     }
 

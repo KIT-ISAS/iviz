@@ -106,7 +106,7 @@ namespace Iviz.App
                         listener.MsgTrimFromEnd = config.MsgTrimFromEnd;
                         break;
                     default:
-                        Logger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

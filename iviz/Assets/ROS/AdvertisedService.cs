@@ -8,27 +8,20 @@ using Iviz.Roslib;
 
 namespace Iviz.Ros
 {
-    internal interface IAdvertisedService
-    {
-        ValueTask AdvertiseAsync(RosClient? client, CancellationToken token);
-
-        ValueTask UnadvertiseAsync(RosClient? client, CancellationToken token);
-
-        bool TrySetCallback<TU>(Func<TU, ValueTask> callback) where TU : IService;
-    }
-
     internal sealed class AdvertisedService<T> : IAdvertisedService where T : IService, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
         
-        Func<T, ValueTask> callback;
         readonly string service;
+        readonly Func<T, ValueTask> callCallback;
+        Func<T, ValueTask> callback;
 
         public AdvertisedService(string service, Func<T, ValueTask> callback)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
             this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            callCallback = t => this.callback(t);
         }
 
         public bool TrySetCallback<TU>(Func<TU, ValueTask> newCallback) where TU : IService
@@ -57,12 +50,12 @@ namespace Iviz.Ros
                 {
                     try
                     {
-                        await client.AdvertiseServiceAsync<T>(fullService, CallbackImpl, token);
+                        await client.AdvertiseServiceAsync<T>(fullService, callCallback, token);
                         break;
                     }
                     catch (RoslibException e)
                     {
-                        Core.Logger.Error($"Failed to advertise service (try {t}): ", e);
+                        Core.RosLogger.Error($"Failed to advertise service (try {t}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }
@@ -78,8 +71,6 @@ namespace Iviz.Ros
                 await client.UnadvertiseServiceAsync(fullService, token);
             }
         }
-
-        ValueTask CallbackImpl(T t) => callback(t);
 
         public override string ToString()
         {

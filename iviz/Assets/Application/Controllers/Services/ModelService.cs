@@ -38,19 +38,19 @@ namespace Iviz.Controllers
             modelServer = new ModelServer(rosPackagePathExtras, enableFileScheme);
             if (enableFileScheme)
             {
-                Logger.Warn(
+                RosLogger.Warn(
                     "Iviz.ModelService started. Uris starting with 'package://' and 'file://' are now enabled." +
                     " This grants access to all files from the outside");
             }
             else if (modelServer.NumPackages == 0)
             {
-                Logger.Info(
+                RosLogger.Info(
                     "Iviz.Model.Service started. However, no packages were found. Try creating a ros_package_path file with a list of ROS root paths.");
                 return;
             }
             else
             {
-                Logger.Info(
+                RosLogger.Info(
                     "Iviz.ModelService started. Uris starting with 'package://' are now enabled." +
                     " This grants access to all files within the ROS packages.");
             }
@@ -67,7 +67,7 @@ namespace Iviz.Controllers
             ConnectionManager.Connection.AdvertiseService<GetSdf>(
                 ModelServer.SdfServiceName, modelServer.SdfCallback);
 
-            Logger.Info($"Iviz.Model.Service started with {modelServer.NumPackages} paths.");
+            RosLogger.Info($"Iviz.Model.Service started with {modelServer.NumPackages} paths.");
 #endif
         }
 
@@ -87,7 +87,7 @@ namespace Iviz.Controllers
                     homeFolder = Environment.GetEnvironmentVariable("%HOMEDRIVE%%HOMEPATH%");
                     break;
                 default:
-                    Logger.Info("Iviz.Model.Service will not start, mobile platform detected. " +
+                    RosLogger.Info("Iviz.Model.Service will not start, mobile platform detected. " +
                                 "You will need to start it as an external node.");
                     return null;
             }
@@ -98,7 +98,7 @@ namespace Iviz.Controllers
             }
 
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
-            Logger.Info($"Iviz.ModelService: Searching for ROS package file in '{extrasPath}'");
+            RosLogger.Info($"Iviz.ModelService: Searching for ROS package file in '{extrasPath}'");
             if (!File.Exists(extrasPath))
             {
                 return null;
@@ -110,7 +110,7 @@ namespace Iviz.Controllers
             }
             catch (IOException e)
             {
-                Logger.Error($"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read", e);
+                RosLogger.Error($"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read", e);
                 return null;
             }
         }

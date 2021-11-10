@@ -262,7 +262,7 @@ namespace Iviz.App
                         RobotController.Smoothness = config.Smoothness;
                         break;
                     default:
-                        Logger.Warn($"{this}: Unknown field '{field}'");
+                        RosLogger.Warn($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

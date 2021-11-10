@@ -28,7 +28,9 @@ namespace Iviz.Ros
         internal const int InvalidId = -1;
 
         static readonly Action<string> LogInternalIfHololens =
-            Settings.IsHololens ? Core.Logger.Internal : Logger.LogDebug;
+            Settings.IsHololens ? RosLogger.Internal : Logger.LogDebug;
+
+        static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
 
         static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
         readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
@@ -137,20 +139,20 @@ namespace Iviz.Ros
             if (MasterUri == null ||
                 MasterUri.Scheme != "http")
             {
-                Core.Logger.Internal("Connection request failed. Invalid master uri.");
+                RosLogger.Internal("Connection request failed. Invalid master uri.");
                 return false;
             }
 
             if (MyId == null)
             {
-                Core.Logger.Internal("Connection request failed. Invalid id.");
+                RosLogger.Internal("Connection request failed. Invalid id.");
                 return false;
             }
 
             if (MyUri == null ||
                 MyUri.Scheme != "http")
             {
-                Core.Logger.Internal("Connection request failed. Invalid own uri.");
+                RosLogger.Internal("Connection request failed. Invalid own uri.");
                 return false;
             }
 
@@ -166,10 +168,10 @@ namespace Iviz.Ros
 
 #if LOG_ENABLED
                 //Logger.LogDebug = Core.Logger.Debug;
-                Logger.LogError = Core.Logger.Error;
-                Logger.Log = Core.Logger.Info;
+                Logger.LogError = RosLogger.Error;
+                Logger.Log = RosLogger.Info;
 #endif
-                Core.Logger.Internal("Connecting...");
+                RosLogger.Internal("Connecting...");
 
                 connectionTs.Cancel();
                 connectionTs = new CancellationTokenSource();
@@ -185,7 +187,7 @@ namespace Iviz.Ros
 
                 AddTask(async () =>
                 {
-                    Core.Logger.Internal("Resubscribing and readvertising...");
+                    RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
 
                     (bool success, XmlRpcValue hosts) =
@@ -226,15 +228,15 @@ namespace Iviz.Ros
                     cachedSystemState = null;
                     cachedTopics = EmptyTopics;
 
-                    Core.Logger.Internal("Finished resubscribing and readvertising!");
+                    RosLogger.Internal("Finished resubscribing and readvertising!");
 
                     watchdogTask = WatchdogTask(Client.RosMasterClient, token);
                     ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
 
-                Core.Logger.Debug("*** Connected!");
+                RosLogger.Debug("*** Connected!");
 
-                Core.Logger.Internal("<b>Connected!</b>");
+                RosLogger.Internal("<b>Connected!</b>");
                 LogConnectionCheck(token);
 
                 return true;
@@ -244,10 +246,10 @@ namespace Iviz.Ros
                 switch (e)
                 {
                     case RosUnreachableUriException _:
-                        Core.Logger.Internal($"<b>Connection failed:</b> Cannot reach my own URI. Reason: {e.Message}");
+                        RosLogger.Internal($"<b>Connection failed:</b> Cannot reach my own URI. Reason: {e.Message}");
                         break;
                     case RosUriBindingException _:
-                        Core.Logger.Internal(
+                        RosLogger.Internal(
                             $"<b>Error:</b> Port {MyUri?.Port.ToString()} is already being used by another application. " +
                             $"Maybe another iviz instance is running? Try another port!");
                         break;
@@ -255,20 +257,20 @@ namespace Iviz.Ros
                     case TimeoutException _:
                     case XmlRpcException _:
                     {
-                        Core.Logger.Internal("<b>Connection failed:</b>", e);
+                        RosLogger.Internal("<b>Connection failed:</b>", e);
                         if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                         {
-                            Core.Logger.Internal("Note: This appears to be a local ROS master. " +
+                            RosLogger.Internal("Note: This appears to be a local ROS master. " +
                                                  "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
                         }
 
                         break;
                     }
                     case OperationCanceledException _:
-                        Core.Logger.Info("Connection cancelled!");
+                        RosLogger.Info("Connection cancelled!");
                         break;
                     default:
-                        Core.Logger.Error("Exception during Connect(): ", e);
+                        RosLogger.Error("Exception during Connect(): ", e);
                         break;
                 }
             }
@@ -286,7 +288,7 @@ namespace Iviz.Ros
 
             if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
             {
-                Core.Logger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
+                RosLogger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
                 return;
             }
 
@@ -298,7 +300,7 @@ namespace Iviz.Ros
                     !pair[0].TryGetString(out string hostname) ||
                     !pair[1].TryGetString(out string address))
                 {
-                    Core.Logger.Error(
+                    RosLogger.Error(
                         "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
                     return;
                 }
@@ -309,7 +311,7 @@ namespace Iviz.Ros
             ConnectionUtils.GlobalResolver.Clear();
             foreach (var (key, value) in hosts)
             {
-                Core.Logger.Info($"Adding custom host {key} -> {value}");
+                RosLogger.Info($"Adding custom host {key} -> {value}");
                 ConnectionUtils.GlobalResolver[key] = value;
             }
         }
@@ -341,7 +343,7 @@ namespace Iviz.Ros
 
             if (sender.NumSubscribers == 0)
             {
-                Core.Logger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
+                RosLogger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
                                      "Maybe /rosout hasn't seen us yet. " +
                                      "But it also may be that outside nodes cannot connect to us, for example due to a firewall.");
             }
@@ -374,7 +376,7 @@ namespace Iviz.Ros
                     {
                         if (!warningSet)
                         {
-                            Core.Logger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
+                            RosLogger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
                                                  $" [{lastMasterAccess:HH:mm:ss}].");
                             connection.SetConnectionWarningState(true);
                             warningSet = true;
@@ -387,7 +389,7 @@ namespace Iviz.Ros
                     lastMasterAccess = now;
                     if (warningSet)
                     {
-                        Core.Logger.Internal("The master is visible again, but we may be out of sync. Restarting!");
+                        RosLogger.Internal("The master is visible again, but we may be out of sync. Restarting!");
                         connection.Disconnect();
                         break;
                     }
@@ -396,7 +398,7 @@ namespace Iviz.Ros
                     {
                         // we haven't seen the master in a while, but no error has been thrown
                         // by the routine that checks every 5 seconds. maybe the app was suspended?
-                        Core.Logger.Internal(
+                        RosLogger.Internal(
                             "Haven't seen the master in a while. We may be out of sync. Restarting!");
                         connection.Disconnect();
                         break;
@@ -413,7 +415,7 @@ namespace Iviz.Ros
                     }
                     else if (lastRosOutUri != response.Uri)
                     {
-                        Core.Logger.Internal("<b>Warning:</b> The master appears to have changed. Restarting!");
+                        RosLogger.Internal("<b>Warning:</b> The master appears to have changed. Restarting!");
                         connection.Disconnect();
                         break;
                     }
@@ -428,7 +430,7 @@ namespace Iviz.Ros
 
         static async Task NtpCheckerTask(string hostname, CancellationToken token)
         {
-            Core.Logger.Debug("[NtpChecker] Starting NTP task.");
+            RosLogger.Debug("[NtpChecker] Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
 
             TimeSpan offset;
@@ -440,11 +442,11 @@ namespace Iviz.Ros
             {
                 if (e is OperationCanceledException or IOException)
                 {
-                    Core.Logger.Debug("[NtpChecker] Failed to read NTP clock from the master.", e);
+                    RosLogger.Debug("[NtpChecker] Failed to read NTP clock from the master.", e);
                 }
                 else
                 {
-                    Core.Logger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
+                    RosLogger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
                 }
 
                 return;
@@ -453,7 +455,7 @@ namespace Iviz.Ros
             const int minOffsetInMs = 2;
             if (Math.Abs(offset.TotalMilliseconds) < minOffsetInMs)
             {
-                Core.Logger.Info("[NtpChecker] No significant time offset detected from master clock.");
+                RosLogger.Info("[NtpChecker] No significant time offset detected from master clock.");
             }
             else
             {
@@ -461,18 +463,18 @@ namespace Iviz.Ros
                 string offsetStr = Math.Abs(offset.TotalSeconds) >= 1
                     ? offset.TotalSeconds.ToString("#,0.###", BuiltIns.Culture) + " sec"
                     : offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture) + " ms";
-                Core.Logger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr}. " +
+                RosLogger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr}. " +
                                  "Local published messages will use this offset.");
             }
         }
 
         static readonly Random Random = new();
 
-        static Task DelayByPlatform(CancellationToken token) => Task.Delay(Random.Next(0, 1000), token);
+        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 
         async ValueTask ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
         {
-            await DelayByPlatform(token);
+            await RandomDelay(token);
             await topic.AdvertiseAsync(Connected ? Client : null, token);
             topic.Id = publishers.Count;
             publishers[topic.Id] = topic.Publisher;
@@ -480,13 +482,13 @@ namespace Iviz.Ros
 
         async ValueTask ReSubscribe(ISubscribedTopic topic, CancellationToken token)
         {
-            await DelayByPlatform(token);
+            await RandomDelay(token);
             await topic.SubscribeAsync(Connected ? Client : null, token: token);
         }
 
         async ValueTask ReAdvertiseService(IAdvertisedService service, CancellationToken token)
         {
-            await DelayByPlatform(token);
+            await RandomDelay(token);
             await service.AdvertiseAsync(Connected ? Client : null, token);
         }
 
@@ -517,9 +519,9 @@ namespace Iviz.Ros
 
             publishers.Clear();
 
-            Core.Logger.Internal("Disconnecting...");
+            RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
-            Core.Logger.Internal("<b>Disconnected.</b>");
+            RosLogger.Internal("<b>Disconnected.</b>");
             if (watchdogTask != null)
             {
                 await watchdogTask.AwaitNoThrow(this);
@@ -552,7 +554,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Advertise(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.Advertise(): ", e);
                 }
             });
         }
@@ -580,12 +582,11 @@ namespace Iviz.Ros
                 var publisher = newAdvertisedTopic.Publisher;
                 if (publisher == null)
                 {
-                    Core.Logger.Error($"Failed to advertise topic '{advertiser.Topic}'");
+                    RosLogger.Error($"Failed to advertise topic '{advertiser.Topic}'");
                     return;
                 }
 
                 publishers[id] = publisher;
-                PublishedTopics = Client.PublishedTopics;
             }
 
             else
@@ -615,7 +616,7 @@ namespace Iviz.Ros
             AdvertiseService(service, (T t) =>
             {
                 callback(t);
-                return new ValueTask();
+                return default;
             });
         }
 
@@ -641,7 +642,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
                 }
             });
         }
@@ -656,7 +657,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            Core.Logger.Info(
+            RosLogger.Info(
                 $"Advertising service <b>{serviceName}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
@@ -724,7 +725,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Rejecting invalid message: ", e);
+                RosLogger.Error($"{this}: Rejecting invalid message: ", e);
                 return;
             }
 
@@ -772,7 +773,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Subscribe(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.Subscribe(): ", e);
                 }
             });
         }
@@ -806,7 +807,7 @@ namespace Iviz.Ros
                     subscribedTopic.Subscriber.IsPaused = value;
                 }
 
-                return new ValueTask();
+                return default;
             });
         }
 
@@ -826,22 +827,22 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
                 }
             });
         }
 
-        async ValueTask UnadvertiseImpl(ISender advertiser, CancellationToken token)
+        ValueTask UnadvertiseImpl(ISender advertiser, CancellationToken token)
         {
             if (!publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
-                return;
+                return default;
             }
 
             advertisedTopic.Remove(advertiser);
             if (advertisedTopic.Count != 0)
             {
-                return;
+                return default;
             }
 
             publishersByTopic.Remove(advertiser.Topic);
@@ -850,11 +851,9 @@ namespace Iviz.Ros
                 publishers[advertiser.Id] = null;
             }
 
-            if (Connected)
-            {
-                await advertisedTopic.UnadvertiseAsync(Client, token);
-                PublishedTopics = Client.PublishedTopics;
-            }
+            return Connected 
+                ? advertisedTopic.UnadvertiseAsync(token) 
+                : default;
         }
 
         internal void Unsubscribe(IListener subscriber)
@@ -873,27 +872,28 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
                 }
             });
         }
 
-        async ValueTask UnsubscribeImpl(IListener subscriber, CancellationToken token)
+        ValueTask UnsubscribeImpl(IListener subscriber, CancellationToken token)
         {
             if (!subscribersByTopic.TryGetValue(subscriber.Topic, out var subscribedTopic))
             {
-                return;
+                return default;
             }
 
             subscribedTopic.Remove(subscriber);
-            if (subscribedTopic.Count == 0)
+            if (subscribedTopic.Count != 0)
             {
-                subscribersByTopic.Remove(subscriber.Topic);
-                if (Connected)
-                {
-                    await subscribedTopic.UnsubscribeAsync(token);
-                }
+                return default;
             }
+            
+            subscribersByTopic.Remove(subscriber.Topic);
+            return Connected 
+                ? subscribedTopic.UnsubscribeAsync(token) 
+                : default;
         }
 
         public void UnadvertiseService(string service)
@@ -915,23 +915,23 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
                 }
             });
         }
 
         async ValueTask UnadvertiseServiceImpl(string serviceName, CancellationToken token)
         {
-            if (!servicesByTopic.TryGetValue(serviceName, out var baseService))
+            if (!servicesByTopic.TryGetValue(serviceName, out var service))
             {
                 return;
             }
 
-            Core.Logger.Info($"Unadvertising service <b>{serviceName}</b>.");
+            RosLogger.Info($"Unadvertising service <b>{serviceName}</b>.");
 
             if (Connected)
             {
-                await baseService.UnadvertiseAsync(Client, token);
+                await service.UnadvertiseAsync(Client, token);
             }
 
             servicesByTopic.Remove(serviceName);
@@ -969,7 +969,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync(): ", e);
+                RosLogger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync(): ", e);
             }
 
             return cachedPublishedTopics;
@@ -1007,7 +1007,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync(): ", e);
+                RosLogger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync(): ", e);
             }
 
             return cachedTopics;
@@ -1034,7 +1034,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
+                    RosLogger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
                 }
             }, internalToken);
 
@@ -1082,7 +1082,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetParameter(): ", e);
+                RosLogger.Error("Exception during RoslibConnection.GetParameter(): ", e);
                 return (default, "Unknown error");
             }
         }
@@ -1117,7 +1117,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Error("Exception during RoslibConnection.GetSystemState(): ", e);
+                RosLogger.Error("Exception during RoslibConnection.GetSystemState(): ", e);
             }
         }
 

@@ -3,9 +3,9 @@
 using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -120,7 +120,7 @@ namespace Iviz.App
                         break;
 
                     default:
-                        Logger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

@@ -6,7 +6,6 @@ using System.IO;
 using Iviz.Core;
 using Iviz.Tools;
 using Iviz.Resources;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -61,7 +60,7 @@ namespace Iviz.App
                     }
                     catch (Exception e)
                     {
-                        Logger.Internal("Error deleting config file", e);
+                        RosLogger.Internal("Error deleting config file", e);
                     }
 
                     ReadAllFiles();

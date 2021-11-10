@@ -9,7 +9,6 @@ using Iviz.Msgs.IvizCommonMsgs;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
@@ -172,7 +171,7 @@ namespace Iviz.App.ARDialogs
         {
             if (button1 == null)
             {
-                Logger.Error($"{this}: Tried to set buttons in an asset that does not support them");
+                RosLogger.Error($"{this}: Tried to set buttons in an asset that does not support them");
                 return;
             }
 
@@ -244,7 +243,7 @@ namespace Iviz.App.ARDialogs
                     button3.Caption = "Cancel";
                     break;
                 default:
-                    Logger.Error($"{this}: Invalid dialog type for mode {value}");
+                    RosLogger.Error($"{this}: Invalid dialog type for mode {value}");
                     break;
             }
         }
@@ -312,7 +311,7 @@ namespace Iviz.App.ARDialogs
                 menuEntries = value.ToArray();
                 if (menuButtons.Length == 0)
                 {
-                    Logger.Error($"{this}: Trying to set a menu on an asset that does not support them");
+                    RosLogger.Error($"{this}: Trying to set a menu on an asset that does not support them");
                     return;
                 }
 

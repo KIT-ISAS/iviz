@@ -12,7 +12,6 @@ using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -204,7 +203,7 @@ namespace Iviz.Controllers
                 IsInvalidSize(msg.Info.Resolution) ||
                 msg.Info.Pose.HasNaN())
             {
-                Logger.Debug("GridMapListener: Message info has NaN!");
+                RosLogger.Debug("GridMapListener: Message info has NaN!");
                 return;
             }
 
@@ -213,13 +212,13 @@ namespace Iviz.Controllers
 
             if (width > MaxGridSize || height > MaxGridSize)
             {
-                Logger.Debug("GridMapListener: Gridmap is too large!");
+                RosLogger.Debug("GridMapListener: Gridmap is too large!");
                 return;
             }
 
             if (msg.Data.Length == 0)
             {
-                Logger.Debug("GridMapListener: Empty gridmap!");
+                RosLogger.Debug("GridMapListener: Empty gridmap!");
                 return;
             }
 
@@ -229,14 +228,14 @@ namespace Iviz.Controllers
             int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
             {
-                Logger.Debug("GridMapListener: Gridmap layer is not available!");
+                RosLogger.Debug("GridMapListener: Gridmap layer is not available!");
                 return;
             }
 
             int length = msg.Data[layer].Data.Length;
             if (length != width * height)
             {
-                Logger.Error($"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
+                RosLogger.Error($"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
                 return;
             }
 

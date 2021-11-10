@@ -6,7 +6,6 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
@@ -244,7 +243,7 @@ namespace Iviz.Controllers
             {
                 if (!SetParent(value))
                 {
-                    Logger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
+                    RosLogger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
             }
         }

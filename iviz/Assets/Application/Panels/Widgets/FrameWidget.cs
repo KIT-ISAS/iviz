@@ -91,11 +91,7 @@ namespace Iviz.App
                 return;
             }
 
-            var guiInputModule = ModuleListPanel.GuiInputModule;
-            if (guiInputModule != null)
-            {
-                guiInputModule.LookAt(Frame.AbsoluteUnityPose.position);
-            }
+            GuiInputModule.Instance.LookAt(Frame.AbsoluteUnityPose.position);
 
             Frame.Highlight();
         }
@@ -103,11 +99,11 @@ namespace Iviz.App
         protected override void OnRevealedRight()
         {
             base.OnRevealedRight();
-            
-            var guiInputModule = ModuleListPanel.GuiInputModule;
-            if (frame != null && guiInputModule != null)
+
+            if (Frame != null)
             {
-                guiInputModule.OrbitCenterOverride = guiInputModule.OrbitCenterOverride != frame ? frame : null;
+                GuiInputModule.Instance.OrbitCenterOverride =
+                    GuiInputModule.Instance.OrbitCenterOverride != frame ? frame : null;
             }
         }
     }

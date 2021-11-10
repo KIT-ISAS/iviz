@@ -1,45 +1,31 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
-using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    internal interface IAdvertisedTopic
-    {
-        [CanBeNull] IRosPublisher Publisher { get; }
-        int Id { get; set; }
-        int Count { get; }
-        void Add([NotNull] ISender subscriber);
-        void Remove([NotNull] ISender subscriber);
-
-        ValueTask AdvertiseAsync([CanBeNull] RosClient client, CancellationToken token);
-
-        ValueTask UnadvertiseAsync([NotNull] RosClient client, CancellationToken token);
-
-        void Invalidate();
-    }
-
     internal sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
         readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
-        [NotNull] readonly string topic;
-        [CanBeNull] string publisherId;
+        readonly string topic;
+        string? publisherId;
         
         int id = RoslibConnection.InvalidId;
 
-        public AdvertisedTopic([NotNull] string topic)
+        public IRosPublisher? Publisher { get; private set; }
+
+        public AdvertisedTopic(string topic)
         {
             this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
         }
-
-        public IRosPublisher Publisher { get; private set; }
 
         public int Id
         {
@@ -66,7 +52,7 @@ namespace Iviz.Ros
 
         public int Count => senders.Count;
 
-        public async ValueTask AdvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask AdvertiseAsync(RosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
             if (client != null)
@@ -82,7 +68,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.Logger.Error($"Failed to advertise topic (try {t}): ", e);
+                        Core.RosLogger.Error($"Failed to advertise topic (try {t}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }
@@ -92,13 +78,8 @@ namespace Iviz.Ros
             Publisher = null;
         }
 
-        public async ValueTask UnadvertiseAsync(RosClient client, CancellationToken token)
+        public async ValueTask UnadvertiseAsync(CancellationToken token)
         {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
             token.ThrowIfCancellationRequested();
             if (Publisher != null && publisherId != null)
             {
@@ -113,7 +94,6 @@ namespace Iviz.Ros
             publisherId = null;
         }
 
-        [NotNull]
         public override string ToString()
         {
             return $"[AdvertisedTopic '{topic}']";

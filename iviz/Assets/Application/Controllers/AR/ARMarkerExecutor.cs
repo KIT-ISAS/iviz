@@ -10,7 +10,6 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -99,7 +98,7 @@ namespace Iviz.Controllers
             }
             catch (CvMarkerException)
             {
-                Logger.Info($"{this}: OpenCV error while processing image");
+                RosLogger.Info($"{this}: OpenCV error while processing image");
                 return;
             }
 
@@ -110,7 +109,7 @@ namespace Iviz.Controllers
             double distanceMarkerToCamera = (rosCameraPosition - rosMarkerPose.Position).Norm;
             if (distanceMarkerToCamera > maxMarkerDistanceInM)
             {
-                Logger.Debug($"{this}: Detected origin marker at distance " +
+                RosLogger.Debug($"{this}: Detected origin marker at distance " +
                              $"{distanceMarkerToCamera.ToString(BuiltIns.Culture)}, " +
                              "discarding.");
                 return;

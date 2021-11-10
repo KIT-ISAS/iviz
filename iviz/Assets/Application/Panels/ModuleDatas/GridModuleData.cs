@@ -124,7 +124,7 @@ namespace Iviz.App
                         GridController.Offset = config.Offset;
                         break;
                     default:
-                        Core.Logger.Error($"{this}: Unknown field '{field}'");
+                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

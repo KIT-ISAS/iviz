@@ -10,7 +10,6 @@ using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
 
 namespace Iviz.Controllers
@@ -245,7 +244,7 @@ namespace Iviz.Controllers
                             break;
                         }
                         default:
-                            Logger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int) msg.Type).ToString()}");
+                            RosLogger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int) msg.Type).ToString()}");
                             return;
                     }
 
@@ -263,7 +262,7 @@ namespace Iviz.Controllers
                     break;
                 }
                 default:
-                    Logger.Error($"{this}: Widget '{msg.Id}' requested unknown action {((int) msg.Action).ToString()}");
+                    RosLogger.Error($"{this}: Widget '{msg.Id}' requested unknown action {((int) msg.Action).ToString()}");
                     break;
             }
         }
@@ -369,7 +368,7 @@ namespace Iviz.Controllers
                     break;
                 }
                 default:
-                    Logger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
+                    RosLogger.Info($"{this}: Unknown action id {((int) msg.Action).ToString()}");
                     break;
             }
         }

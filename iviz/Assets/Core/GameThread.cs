@@ -80,7 +80,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error during EveryFrame" + e);
+                RosLogger.Error($"{this}: Error during EveryFrame" + e);
             }
 
             Now = DateTime.Now;
@@ -112,7 +112,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during EverySecond", e);
+                    RosLogger.Error($"{this}: Error during EverySecond", e);
                 }
 
                 try
@@ -121,7 +121,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during LateEverySecond", e);
+                    RosLogger.Error($"{this}: Error during LateEverySecond", e);
                 }
 
                 lastSecondRunTime = GameTime;
@@ -135,7 +135,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during EveryFastTick", e);
+                    RosLogger.Error($"{this}: Error during EveryFastTick", e);
                 }
 
                 lastTickRunTime = GameTime;
@@ -149,7 +149,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during action call", e);
+                    RosLogger.Error($"{this}: Error during action call", e);
                 }
             }
 
@@ -165,7 +165,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error during ListenersEveryFrame", e);
+                RosLogger.Error($"{this}: Error during ListenersEveryFrame", e);
             }
 
             int queueSize = listenerQueue.Count;
@@ -182,7 +182,7 @@ namespace Iviz.Core
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error during listener action call", e);
+                    RosLogger.Error($"{this}: Error during listener action call", e);
                 }
             }
 
@@ -202,7 +202,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error during LateEveryFrame", e);
+                RosLogger.Error($"{this}: Error during LateEveryFrame", e);
             }
         }
 

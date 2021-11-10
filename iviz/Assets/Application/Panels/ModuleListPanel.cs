@@ -22,7 +22,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.UI;
-using Logger = Iviz.Core.Logger;
 using Quaternion = UnityEngine.Quaternion;
 
 namespace Iviz.App
@@ -121,8 +120,6 @@ namespace Iviz.App
         bool initialized;
         static event Action InitFinished;
 
-        [CanBeNull] public static GuiInputModule GuiInputModule => GuiInputModule.Instance;
-
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -151,12 +148,12 @@ namespace Iviz.App
 
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
 
-        AnchorToggleButton BottomHideGuiButton => anchorCanvas.HideGui;
-        Button LeftHideGuiButton => anchorCanvas.SideHideGui;
+        [NotNull] AnchorToggleButton BottomHideGuiButton => anchorCanvas.HideGui;
+        [NotNull] Button LeftHideGuiButton => anchorCanvas.SideHideGui;
         Button MiddleHideGuiButton => middleHideGuiButton;
 
-        AnchorToggleButton InteractableButton => anchorCanvas.Interact;
-        public Button UnlockButton => anchorCanvas.Unlock;
+        [NotNull] AnchorToggleButton InteractableButton => anchorCanvas.Interact;
+        [NotNull] public Button UnlockButton => anchorCanvas.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager;
         [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
         public TwistJoystick TwistJoystick => twistJoystick;
@@ -249,9 +246,9 @@ namespace Iviz.App
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
-            Logger.Internal("<b>Welcome to iviz!</b>");
-            Logger.Internal("This is the log for connection messages. " +
-                            "For general ROS log messages check the Log dialog.");
+            RosLogger.Internal("<b>Welcome to iviz!</b>");
+            RosLogger.Internal("This is the log for connection messages. " +
+                               "For general ROS log messages check the Log dialog.");
 
             CreateModule(ModuleType.TF, TfListener.DefaultTopic);
 
@@ -305,17 +302,17 @@ namespace Iviz.App
                 KeepReconnecting = false;
                 if (uri == null)
                 {
-                    Logger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
+                    RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
                     masterUriStr.Label = "(?) →";
                 }
                 else if (RosServerManager.IsActive)
                 {
-                    Logger.Internal($"Changing master uri to local master '{uri}'");
+                    RosLogger.Internal($"Changing master uri to local master '{uri}'");
                     masterUriStr.Label = MasterUriToString(uri);
                 }
                 else
                 {
-                    Logger.Internal($"Changing master uri to '{uri}'");
+                    RosLogger.Internal($"Changing master uri to '{uri}'");
                     masterUriStr.Label = MasterUriToString(uri);
                 }
             };
@@ -323,28 +320,29 @@ namespace Iviz.App
             {
                 if (id == null)
                 {
-                    Logger.Internal("<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
-                    Logger.Internal("First character must be alphanumeric [a-z A-Z] or a '/'");
-                    Logger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
+                    RosLogger.Internal(
+                        "<b>Error:</b> Failed to set caller id. Reason: Id is not a valid resource name.");
+                    RosLogger.Internal("First character must be alphanumeric [a-z A-Z] or a '/'");
+                    RosLogger.Internal("Remaining characters must be alphanumeric, digits, '_' or '/'");
                     return;
                 }
 
                 ConnectionManager.Connection.MyId = id;
                 KeepReconnecting = false;
-                Logger.Internal($"Changing my ROS id to '{id}'");
+                RosLogger.Internal($"Changing my ROS id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
             {
                 ConnectionManager.Connection.MyUri = uri;
                 KeepReconnecting = false;
-                Logger.Internal(uri == null
+                RosLogger.Internal(uri == null
                     ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid."
                     : $"Changing caller uri to '{uri}'"
                 );
             };
             stopButton.Clicked += () =>
             {
-                Logger.Internal(
+                RosLogger.Internal(
                     ConnectionManager.IsConnected
                         ? "Disconnection requested."
                         : "Already disconnected."
@@ -354,7 +352,7 @@ namespace Iviz.App
             };
             connectButton.Clicked += () =>
             {
-                Logger.Internal(
+                RosLogger.Internal(
                     ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
                 );
                 ConnectionManager.Connection.Disconnect();
@@ -380,10 +378,7 @@ namespace Iviz.App
 
             if (Settings.IsXR)
             {
-                foreach (var subCanvas in rootCanvas.GetComponentsInChildren<Canvas>(true))
-                {
-                    subCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
-                }
+                rootCanvas.ProcessCanvasForXR();
             }
 
             initialized = true;
@@ -527,18 +522,18 @@ namespace Iviz.App
 
             try
             {
-                Logger.Internal("Saving config file...");
+                RosLogger.Internal("Saving config file...");
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync($"{Settings.SavedFolder}/{file}", text, default);
-                Logger.Internal("Done.");
+                RosLogger.Internal("Done.");
             }
             catch (Exception e)
             {
-                Logger.Internal("Error saving state configuration", e);
+                RosLogger.Internal("Error saving state configuration", e);
                 return;
             }
 
-            Logger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
+            RosLogger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
         }
 
         public async void LoadStateConfiguration([NotNull] string file, CancellationToken token = default)
@@ -548,22 +543,22 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(file));
             }
 
-            Logger.Debug($"DisplayListPanel: Reading config from {Settings.SavedFolder}/{file}");
+            RosLogger.Debug($"DisplayListPanel: Reading config from {Settings.SavedFolder}/{file}");
             string text;
             try
             {
-                Logger.Internal("Loading config file...");
+                RosLogger.Internal("Loading config file...");
                 text = await FileUtils.ReadAllTextAsync($"{Settings.SavedFolder}/{file}", token);
-                Logger.Internal("Done.");
+                RosLogger.Internal("Done.");
             }
             catch (FileNotFoundException)
             {
-                Logger.Internal("<b>Error:</b> Config file not found.");
+                RosLogger.Internal("<b>Error:</b> Config file not found.");
                 return;
             }
             catch (Exception e)
             {
-                Logger.Internal("Error loading state configuration", e);
+                RosLogger.Internal("Error loading state configuration", e);
                 return;
             }
 
@@ -619,10 +614,7 @@ namespace Iviz.App
                     connectionData.LastMasterUris = config.LastMasterUris;
                 }
 
-                if (Settings.SettingsManager != null)
-                {
-                    Settings.SettingsManager.Config = config.Settings;
-                }
+                Settings.SettingsManager.Config = config.Settings;
 
                 var validHostAliases = config.HostAliases
                     .Where(alias => alias is { Hostname: { }, Address: { } })
@@ -638,7 +630,7 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                Logger.Debug($"{this}: Error loading simple configuration", e);
+                RosLogger.Debug($"{this}: Error loading simple configuration", e);
                 File.Delete(path);
             }
         }
@@ -666,14 +658,14 @@ namespace Iviz.App
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
-                Logger.Debug($"{this}: Error saving simple configuration", e);
+                RosLogger.Debug($"{this}: Error saving simple configuration", e);
             }
         }
 
         public void UpdateSimpleConfigurationSettings()
         {
             string path = Settings.SimpleConfigurationPath;
-            if (Settings.SettingsManager == null || !File.Exists(path))
+            if (!File.Exists(path))
             {
                 return;
             }
@@ -688,10 +680,9 @@ namespace Iviz.App
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(path, outText);
             }
-            catch (Exception e) when
-                (e is IOException || e is SecurityException || e is JsonException)
+            catch (Exception e) when (e is IOException or SecurityException or JsonException)
             {
-                Logger.Debug("ModuleListPanel: Error updating simple configuration", e);
+                RosLogger.Debug("ModuleListPanel: Error updating simple configuration", e);
             }
         }
 
@@ -709,7 +700,7 @@ namespace Iviz.App
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
-            if (Settings.SettingsManager == null || !File.Exists(path))
+            if (!File.Exists(path))
             {
                 return;
             }
@@ -725,13 +716,12 @@ namespace Iviz.App
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
-            catch (Exception e) when
-                (e is IOException or SecurityException or JsonException)
+            catch (Exception e) when (e is IOException or SecurityException or JsonException)
             {
             }
             catch (Exception e)
             {
-                Logger.Error($"Error clearing cache", e);
+                RosLogger.Error($"Error clearing cache", e);
             }
         }
 
@@ -747,7 +737,7 @@ namespace Iviz.App
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"Error deleting file '{file}'", e);
+                    RosLogger.Error($"Error deleting file '{file}'", e);
                 }
             }
         }

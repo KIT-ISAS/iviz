@@ -89,7 +89,7 @@ namespace Iviz.Resources
 
         public static ValueTask<(bool result, string? robotDescription)> TryGetRobotAsync(string robotName,
             CancellationToken token = default) =>
-            Internal.TryGetRobot(robotName, out string robotDescription)
+            Internal.TryGetRobot(robotName, out string? robotDescription)
                 ? new ValueTask<(bool, string?)>((true, robotDescription))
                 : External.TryGetRobotAsync(robotName, token);
 

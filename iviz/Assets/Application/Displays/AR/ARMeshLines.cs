@@ -8,7 +8,6 @@ using Iviz.Resources;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
@@ -137,7 +136,7 @@ namespace Iviz.Displays
             }
             else
             {
-                Logger.Warn("ARMeshLines: No mesh manager found!");
+                RosLogger.Warn("ARMeshLines: No mesh manager found!");
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
@@ -253,7 +252,7 @@ namespace Iviz.Displays
 
                     break;
                 default:
-                    Logger.Debug("MeshToLinesHelper: Unknown topology " + topology);
+                    RosLogger.Debug("MeshToLinesHelper: Unknown topology " + topology);
                     break;
             }
 

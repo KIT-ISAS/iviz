@@ -10,7 +10,6 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -73,9 +72,9 @@ namespace Iviz.Controllers
                 : new[] { (configuration.Value.width, configuration.Value.height) };
         }
 
-        public ValueTask StartAsync(int width, int height, bool withHolograms) => new ValueTask();
+        public ValueTask StartAsync(int width, int height, bool withHolograms) => default;
 
-        public ValueTask StopAsync() => new ValueTask();
+        public ValueTask StopAsync() => default;
 
         public ValueTask<Screenshot?> CaptureColorAsync(
             int reuseCaptureAgeInMs = 0,
@@ -119,7 +118,7 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        Logger.Info($"{this}: Conversion request of color image failed with status {status}");
+                        RosLogger.Info($"{this}: Conversion request of color image failed with status {status}");
                         return;
                     }
 
@@ -157,7 +156,7 @@ namespace Iviz.Controllers
 
             if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
             {
-                Logger.Info($"{this}: Depth capture failed.");
+                RosLogger.Info($"{this}: Depth capture failed.");
                 return ValueTask2.FromResult((Screenshot?)null);
             }
 
@@ -187,7 +186,7 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        Logger.Info($"{this}: Conversion request of depth image failed with status {status}");
+                        RosLogger.Info($"{this}: Conversion request of depth image failed with status {status}");
                         task.TrySetResult(null);
                         return;
                     }
@@ -231,7 +230,7 @@ namespace Iviz.Controllers
 
             if (!occlusionManager.TryAcquireEnvironmentDepthConfidenceCpuImage(out XRCpuImage image))
             {
-                Logger.Info($"{this}: Depth capture failed.");
+                RosLogger.Info($"{this}: Depth capture failed.");
                 return ValueTask2.FromResult((Screenshot?)null);
             }
 
@@ -263,7 +262,7 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        Logger.Info($"{this}: Conversion request of confidence image failed with status {status}");
+                        RosLogger.Info($"{this}: Conversion request of confidence image failed with status {status}");
                         task.TrySetResult(null);
                         return;
                     }

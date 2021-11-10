@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.RosMaster;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Ros
 {
@@ -69,7 +69,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Logger.Internal("<b>Error:</b> Failed to start ROS master", e);
+                RosLogger.Internal("<b>Error:</b> Failed to start ROS master", e);
                 server = null;
             }
 

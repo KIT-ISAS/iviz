@@ -17,7 +17,6 @@ using Newtonsoft.Json;
 using TMPro;
 using Unity.Collections;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 #if false
 using Microsoft.MixedReality.Toolkit;
 using UnityEngine.XR.ARSubsystems;

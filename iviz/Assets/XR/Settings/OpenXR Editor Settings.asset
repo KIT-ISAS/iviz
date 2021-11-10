@@ -16,4 +16,5 @@ MonoBehaviour:
   Values:
   - featureSets:
     - com.microsoft.openxr.featureset.hololens
-  - featureSets: []
+  - featureSets:
+    - com.microsoft.openxr.featureset.wmr

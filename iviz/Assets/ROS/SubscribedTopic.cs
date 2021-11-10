@@ -1,51 +1,34 @@
+#nullable enable
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    internal interface ISubscribedTopic
-    {
-        [CanBeNull] IRosSubscriber Subscriber { get; }
-        int Count { get; }
-        void Add([NotNull] IListener subscriber);
-        void Remove([NotNull] IListener subscriber);
-
-        ValueTask SubscribeAsync([CanBeNull] RosClient client, [CanBeNull] IListener listener = null,
-            CancellationToken token = default);
-
-        ValueTask UnsubscribeAsync(CancellationToken token);
-
-        void Invalidate();
-
-        [CanBeNull] BagListener BagListener { set; }
-    }
-
     internal sealed class SubscribedTopic<T> : ISubscribedTopic where T : IMessage, IDeserializable<T>, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
-        readonly ConcurrentSet<Listener<T>> listeners = new ConcurrentSet<Listener<T>>();
-        [NotNull] readonly string topic;
-        [CanBeNull] string subscriberId;
+        readonly ConcurrentSet<Listener<T>> listeners = new();
+        readonly string topic;
+        readonly RosTransportHint transportHint;
 
-        [CanBeNull] BagListener bagListener;
-        [CanBeNull] string bagId;
+        BagListener? bagListener;
+        string? subscriberId;
+        string? bagId;
 
-        public RosTransportHint TransportHint { get; }
+        public IRosSubscriber? Subscriber { get; private set; }
         
-        public SubscribedTopic([NotNull] string topic, RosTransportHint transportHint)
+        public SubscribedTopic(string topic, RosTransportHint transportHint)
         {
             this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            TransportHint = transportHint;
+            this.transportHint = transportHint;
         }
-
-        public IRosSubscriber Subscriber { get; private set; }
 
         public void Add(IListener subscriber)
         {
@@ -57,7 +40,7 @@ namespace Iviz.Ros
             listeners.Remove((Listener<T>)subscriber);
         }
 
-        public async ValueTask SubscribeAsync(RosClient client, IListener listener, CancellationToken token)
+        public async ValueTask SubscribeAsync(RosClient? client, IListener? listener, CancellationToken token)
         {
             if (listener != null)
             {
@@ -73,7 +56,7 @@ namespace Iviz.Ros
                     {
                         IRosSubscriber subscriber;
                         (subscriberId, subscriber) = await client.SubscribeAsync<T>(topic, Callback, token: token,
-                            transportHint: TransportHint);
+                            transportHint: transportHint);
                         if (bagListener != null)
                         {
                             bagId = subscriber.Subscribe(bagListener.EnqueueMessage);
@@ -84,7 +67,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.Logger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
+                        Core.RosLogger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }
@@ -115,7 +98,7 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        public BagListener BagListener
+        public BagListener? BagListener
         {
             set
             {
@@ -159,12 +142,11 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.Logger.Error($"{this}: Error in callback", e);
+                    Core.RosLogger.Error($"{this}: Error in callback", e);
                 }
             }
         }
 
-        [NotNull]
         public override string ToString()
         {
             return $"[SubscribedTopic '{topic}']";

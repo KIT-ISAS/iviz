@@ -16,7 +16,6 @@ using UnityEngine.Rendering;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -459,7 +458,7 @@ namespace Iviz.Controllers
             }
             catch (InvalidOperationException e)
             {
-                Logger.Error("Failed to initialize AR world anchor:", e);
+                RosLogger.Error("Failed to initialize AR world anchor:", e);
             }
         }
 
@@ -663,7 +662,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Logger.Error("CaptureScreenForPublish failed", e);
+                RosLogger.Error("CaptureScreenForPublish failed", e);
             }
         }
 

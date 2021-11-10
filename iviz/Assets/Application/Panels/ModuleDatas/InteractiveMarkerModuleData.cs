@@ -86,7 +86,7 @@ namespace Iviz.App
                         listener.DescriptionsVisible = config.DescriptionsVisible;
                         break;
                     default:
-                        Logger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

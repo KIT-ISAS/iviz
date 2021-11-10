@@ -62,6 +62,7 @@ namespace Iviz.Core
         public const bool IsXR = true;
 #else
         public static bool IsHololens { get; set; }
+
         public static bool IsXR { get; set; }
 #endif
 
@@ -75,6 +76,14 @@ namespace Iviz.Core
         static string? savedRobotsPath;
         static string? resourcesFilePath;
 
+        static Camera? mainCamera;
+        static Transform? mainCameraTransform;
+        static ISettingsManager? settingsManager;
+
+        static bool? supportsComputeBuffersHelper;
+        static bool? supportsR16;
+        static bool? supportsRGB24;
+
         static string PersistentDataPath => persistentDataPath ??= Application.persistentDataPath;
         public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
         public static string BagsFolder => bagsFolder ??= PersistentDataPath + "/bags";
@@ -86,28 +95,27 @@ namespace Iviz.Core
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
 
-        static Camera? mainCamera;
-        static Transform? mainCameraTransform;
-
-        public static Transform MainCameraTransform => mainCameraTransform != null
-            ? mainCameraTransform
-            : (mainCameraTransform = MainCamera.transform);
+        static GameObject FindMainCamera() =>
+            GameObject.FindWithTag("MainCamera").CheckedNull()
+            ?? GameObject.Find("MainCamera").CheckedNull()
+            ?? throw new NullReferenceException("Failed to find camera!");
 
         public static Camera MainCamera
         {
             get => mainCamera != null
                 ? mainCamera
-                : mainCamera = (GameObject.FindWithTag("MainCamera").CheckedNull()
-                                ?? GameObject.Find("MainCamera").CheckedNull()
-                                ?? throw new NullReferenceException("Failed to find camera!"))
-                    .GetComponent<Camera>();
+                : mainCamera = FindMainCamera().GetComponent<Camera>();
             set
             {
-                mainCamera = value.CheckedNull() 
-                             ?? throw new NullReferenceException("Camera cannot be null!");
+                mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");
                 mainCameraTransform = value.transform;
             }
         }
+
+        public static Transform MainCameraTransform =>
+            mainCameraTransform != null
+                ? mainCameraTransform
+                : (mainCameraTransform = MainCamera.transform);
 
         public static Camera? ARCamera { get; set; }
         public static event Action<QualityType>? QualityTypeChanged;
@@ -117,10 +125,12 @@ namespace Iviz.Core
             QualityTypeChanged?.Invoke(newQualityType);
         }
 
-        public static ISettingsManager? SettingsManager { get; set; }
-        public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
+        public static ISettingsManager SettingsManager =>
+            (UnityEngine.Object?)settingsManager != null
+                ? settingsManager
+                : settingsManager = FindMainCamera().GetComponent<ISettingsManager>();
 
-        static bool? supportsComputeBuffersHelper;
+        public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
         public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
                                                      (supportsComputeBuffersHelper =
@@ -128,12 +138,8 @@ namespace Iviz.Core
                                                          SystemInfo.supportsComputeShaders &&
                                                          SystemInfo.maxComputeBufferInputsVertex > 0).Value;
 
-        static bool? supportsR16;
-
         public static bool SupportsR16 => supportsR16 ??
                                           (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
-
-        static bool? supportsRGB24;
 
         public static bool SupportsRGB24 => supportsRGB24 ??
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))

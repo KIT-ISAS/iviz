@@ -346,12 +346,9 @@ namespace Iviz.App
             {
                 trailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
 
-                if (ModuleListPanel.GuiInputModule != null)
-                {
-                    lockPivotText.text = ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
-                        ? "Lock Pivot\n<b>On</b>"
-                        : "Lock Pivot\nOff";
-                }
+                lockPivotText.text = GuiInputModule.Instance.OrbitCenterOverride == SelectedFrame
+                    ? "Lock Pivot\n<b>On</b>"
+                    : "Lock Pivot\nOff";
             }
         }
 
@@ -363,10 +360,7 @@ namespace Iviz.App
             }
 
             SelectedFrame.Highlight();
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.LookAt(SelectedFrame.AbsoluteUnityPose.position);
-            }
+            GuiInputModule.Instance.LookAt(SelectedFrame.AbsoluteUnityPose.position);
         }
 
         public void OnTrailClicked()
@@ -392,13 +386,10 @@ namespace Iviz.App
 
         public void OnLockPivotClicked()
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.OrbitCenterOverride =
-                    ModuleListPanel.GuiInputModule.OrbitCenterOverride == SelectedFrame
-                        ? null
-                        : SelectedFrame;
-            }
+            GuiInputModule.Instance.OrbitCenterOverride =
+                GuiInputModule.Instance.OrbitCenterOverride == SelectedFrame
+                    ? null
+                    : SelectedFrame;
 
             UpdateFrameButtons();
             Close?.Invoke();
@@ -407,13 +398,10 @@ namespace Iviz.App
 
         public void OnLock1PVClicked()
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.CameraViewOverride =
-                    ModuleListPanel.GuiInputModule.CameraViewOverride == SelectedFrame
-                        ? null
-                        : SelectedFrame;
-            }
+            GuiInputModule.Instance.CameraViewOverride =
+                GuiInputModule.Instance.CameraViewOverride == SelectedFrame
+                    ? null
+                    : SelectedFrame;
 
             UpdateFrameButtons();
             Close?.Invoke();

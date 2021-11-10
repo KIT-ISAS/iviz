@@ -10,7 +10,6 @@ using Iviz.Roslib;
 using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -177,19 +176,19 @@ namespace Iviz.Controllers
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||
                 float.IsNaN(msg.AngleIncrement))
             {
-                Logger.Info("LaserScanListener: NaN in header!");
+                RosLogger.Info("LaserScanListener: NaN in header!");
                 return;
             }
 
             if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
-                Logger.Info("LaserScanListener: Invalid angle or range dimensions!");
+                RosLogger.Info("LaserScanListener: Invalid angle or range dimensions!");
                 return;
             }
 
             if (msg.Intensities.Length != 0 && msg.Intensities.Length != msg.Ranges.Length)
             {
-                Logger.Info("LaserScanListener: Invalid intensities length!");
+                RosLogger.Info("LaserScanListener: Invalid intensities length!");
                 return;
             }
 

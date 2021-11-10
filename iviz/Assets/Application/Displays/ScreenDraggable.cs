@@ -52,11 +52,7 @@ namespace Iviz.Displays
 
         protected void StartSelected()
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.TrySetDraggedObject(this);
-            }
-
+            GuiInputModule.Instance.TrySetDraggedObject(this);
             PointerDown?.Invoke();
         }
 
@@ -67,11 +63,7 @@ namespace Iviz.Displays
 
         protected void EndSelected()
         {
-            if (ModuleListPanel.GuiInputModule != null)
-            {
-                ModuleListPanel.GuiInputModule.TryUnsetDraggedObject(this);
-            }
-
+            GuiInputModule.Instance.TryUnsetDraggedObject(this);
             PointerUp?.Invoke();
         }
         

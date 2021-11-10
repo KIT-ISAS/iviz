@@ -11,7 +11,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering.PostProcessing;
-using Logger = Iviz.Core.Logger;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -36,6 +35,13 @@ namespace Iviz.App
 
         static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
         static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
+
+        static GuiInputModule? instance;
+
+        public static GuiInputModule Instance =>
+            instance != null
+                ? instance
+                : instance = ((GuiInputModule)Settings.SettingsManager).AssertNotNull(nameof(instance));
 
         readonly SettingsConfiguration config = new();
 
@@ -71,8 +77,6 @@ namespace Iviz.App
 
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
-
-        public static GuiInputModule? Instance { get; private set; }
 
         static Camera MainCamera => Settings.MainCamera;
 
@@ -136,8 +140,6 @@ namespace Iviz.App
         void Awake()
         {
             EnhancedTouchSupport.Enable();
-            Instance = this;
-            Settings.SettingsManager = this;
         }
 
         void Start()
@@ -150,7 +152,7 @@ namespace Iviz.App
 
             if (!Settings.SupportsComputeBuffers)
             {
-                Logger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
+                RosLogger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
             }
 
             Config = new SettingsConfiguration();
@@ -229,12 +231,6 @@ namespace Iviz.App
             GameThread.EveryFrame += UpdateEvenIfInactive;
         }
 
-        void OnDestroy()
-        {
-            Instance = null;
-            Settings.SettingsManager = null;
-        }
-
         public int SunDirection
         {
             get => config.SunDirection;
@@ -268,15 +264,18 @@ namespace Iviz.App
             set
             {
                 config.QualityInView = value;
+                
+                QualityType qualityToUse = Settings.IsHololens ? QualityType.Low : value;
+                
                 if (ARController.IsActive)
                 {
                     return;
                 }
 
-                if (value == QualityType.Mega)
+                if (qualityToUse == QualityType.Mega)
                 {
                     QualitySettings.SetQualityLevel((int)QualityType.Ultra, true);
-                    Settings.RaiseQualityTypeChanged(value);
+                    Settings.RaiseQualityTypeChanged(qualityToUse);
                     MainCamera.renderingPath = RenderingPath.DeferredShading;
                     GetComponent<PostProcessLayer>().enabled = true;
                     return;
@@ -284,8 +283,8 @@ namespace Iviz.App
 
                 GetComponent<PostProcessLayer>().enabled = false;
                 MainCamera.renderingPath = RenderingPath.Forward;
-                QualitySettings.SetQualityLevel((int)value, true);
-                Settings.RaiseQualityTypeChanged(value);
+                QualitySettings.SetQualityLevel((int)qualityToUse, true);
+                Settings.RaiseQualityTypeChanged(qualityToUse);
             }
         }
 
@@ -325,8 +324,6 @@ namespace Iviz.App
                 GameThread.NetworkFrameSkip = value;
             }
         }
-
-        public bool SupportsAR => Settings.IsPhone;
 
         public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
 

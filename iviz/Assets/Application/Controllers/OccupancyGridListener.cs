@@ -18,7 +18,6 @@ using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -253,14 +252,14 @@ namespace Iviz.Controllers
 
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                Logger.Debug(
+                RosLogger.Debug(
                     $"{this}: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
                 return;
             }
 
             if (float.IsNaN(msg.Info.Resolution))
             {
-                Logger.Debug($"{this}: NaN in header!");
+                RosLogger.Debug($"{this}: NaN in header!");
                 return;
             }
 
@@ -269,14 +268,14 @@ namespace Iviz.Controllers
 
             if (msg.Info.Origin.HasNaN())
             {
-                Logger.Debug($"{this}: NaN in origin!");
+                RosLogger.Debug($"{this}: NaN in origin!");
                 return;
             }
 
             Pose origin = msg.Info.Origin.Ros2Unity();
             if (!origin.IsUsable())
             {
-                Logger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
+                RosLogger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
                              $"{origin.position.z}) as position. Values too large");
                 origin = Pose.identity;
             }
@@ -416,7 +415,7 @@ namespace Iviz.Controllers
                         }
                         catch (Exception e)
                         {
-                            Logger.Error($"{this}: Error processing occupancy grid", e);
+                            RosLogger.Error($"{this}: Error processing occupancy grid", e);
                         }
                     }));
                 }

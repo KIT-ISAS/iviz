@@ -11,7 +11,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Buffer = System.Buffer;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
@@ -187,7 +186,7 @@ namespace Iviz.Displays
                     string encoding = EncodingFromPng(png);
                     if (encoding == null)
                     {
-                        Logger.Error($"{this}: Ignoring PNG with unsupported encoding '{png.Header.ColorType}'");
+                        RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{png.Header.ColorType}'");
                         return;
                     }
 
@@ -229,7 +228,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error processing PNG", e);
+                    RosLogger.Error($"{this}: Error processing PNG", e);
                     GameThread.PostInListenerQueue(onFinished);
                 }
             });
@@ -261,7 +260,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 4 != 0)
                             {
-                                Logger.Debug($"{this}: Row padding not implemented");
+                                RosLogger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -273,7 +272,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 4 != 0)
                             {
-                                Logger.Debug($"{this}: Row padding not implemented");
+                                RosLogger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -284,7 +283,7 @@ namespace Iviz.Displays
                         {
                             if (image.Width % 2 != 0)
                             {
-                                Logger.Debug($"{this}: Row padding not implemented");
+                                RosLogger.Debug($"{this}: Row padding not implemented");
                                 return;
                             }
 
@@ -299,7 +298,7 @@ namespace Iviz.Displays
 
                     if (encoding == null)
                     {
-                        Logger.Debug(
+                        RosLogger.Debug(
                             $"{this}: Unsupported encoding '{image.Colorspace}' with size {image.BitsPerComponent}");
                         return;
                     }
@@ -331,7 +330,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{this}: Error processing JPG", e);
+                    RosLogger.Error($"{this}: Error processing JPG", e);
                     GameThread.PostInListenerQueue(onFinished);
                 }
             });
@@ -360,13 +359,13 @@ namespace Iviz.Displays
 
             if (bpp == null)
             {
-                Logger.Debug($"{this}: Unsupported encoding '{encoding}'");
+                RosLogger.Debug($"{this}: Unsupported encoding '{encoding}'");
                 return;
             }
 
             if (data.Count < size * bpp)
             {
-                Logger.Debug(
+                RosLogger.Debug(
                     $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
                     $"received {data.Count.ToString()}");
                 return;

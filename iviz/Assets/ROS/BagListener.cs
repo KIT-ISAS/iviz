@@ -72,7 +72,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Debug($"{this}: Exception during EnqueueMessage: ", e);
+                RosLogger.Debug($"{this}: Exception during EnqueueMessage: ", e);
             }
         }
 
@@ -98,7 +98,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                Core.Logger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
+                RosLogger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
             }
 
             if (writer != null)

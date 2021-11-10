@@ -20,7 +20,6 @@ using UnityEngine;
 using Dialog = Iviz.Msgs.IvizCommonMsgs.Dialog;
 using Feedback = Iviz.Msgs.IvizCommonMsgs.Feedback;
 using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
-using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
 
@@ -164,12 +163,12 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        Logger.Info($"Creating module of type {moduleType}");
+                        RosLogger.Info($"Creating module of type {moduleType}");
                         var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                             requestedId: requestedId.Length != 0 ? requestedId : null);
                         result.id = newModuleData.Configuration.Id;
                         result.success = true;
-                        Logger.Info("Done!");
+                        RosLogger.Info("Done!");
                     }
                     catch (Exception e)
                     {
@@ -252,7 +251,7 @@ namespace Iviz.Controllers
                     catch (Exception e)
                     {
                         result.message = $"EE An exception was raised: {e.Message}";
-                        Logger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
+                        RosLogger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
                     }
                     finally
                     {
@@ -309,13 +308,13 @@ namespace Iviz.Controllers
                     {
                         result.success = false;
                         result.message = $"EE Error parsing JSON config: {e.Message}";
-                        Logger.Error("Error:", e);
+                        RosLogger.Error("Error:", e);
                     }
                     catch (Exception e)
                     {
                         result.success = false;
                         result.message = $"EE An exception was raised: {e.Message}";
-                        Logger.Error("Error:", e);
+                        RosLogger.Error("Error:", e);
                     }
                     finally
                     {
@@ -346,11 +345,11 @@ namespace Iviz.Controllers
                     }
                     catch (JsonException e)
                     {
-                        Logger.Error("ControllerService: Unexpected JSON exception in GetModules", e);
+                        RosLogger.Error("ControllerService: Unexpected JSON exception in GetModules", e);
                     }
                     catch (Exception e)
                     {
-                        Logger.Error("ControllerService: Unexpected exception in GetModules", e);
+                        RosLogger.Error("ControllerService: Unexpected exception in GetModules", e);
                     }
                     finally
                     {
@@ -359,7 +358,7 @@ namespace Iviz.Controllers
                 });
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("Timeout in GetModules");
+                    RosLogger.Error("Timeout in GetModules");
                 }
 
                 return result;
@@ -393,7 +392,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in TrySetFixedFrame");
+                    RosLogger.Error("ControllerService: Unexpected timeout in TrySetFixedFrame");
                     return result;
                 }
             }
@@ -446,7 +445,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    RosLogger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
                     return (new bool[ids.Length], new Pose[ids.Length]);
                 }
             }
@@ -500,7 +499,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in StartCaptureAsync");
+                    RosLogger.Error("ControllerService: Unexpected timeout in StartCaptureAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -547,7 +546,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in StopCaptureAsync");
+                    RosLogger.Error("ControllerService: Unexpected timeout in StopCaptureAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -606,7 +605,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    Logger.Error("ControllerService: Unexpected timeout in CaptureScreenshotAsync");
+                    RosLogger.Error("ControllerService: Unexpected timeout in CaptureScreenshotAsync");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -675,7 +674,7 @@ namespace Iviz.Controllers
                 default:
                     srv.Response.Success = false;
                     srv.Response.Message = "EE Unknown operation";
-                    return new ValueTask();
+                    return default;
             }
         }
 
@@ -711,7 +710,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        Logger.Info($"ControllerService: Removing robot");
+                        RosLogger.Info($"ControllerService: Removing robot");
                         ModuleListPanel.Instance.RemoveModule(moduleData);
                     }
                     catch (Exception e)
@@ -821,7 +820,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        Logger.Info($"ControllerService: Creating dialog");
+                        RosLogger.Info($"ControllerService: Creating dialog");
 
                         /*
                         var dialogTimeSpan = srv.Request.Dialog.Lifetime.ToTimeSpan();

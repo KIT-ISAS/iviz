@@ -51,7 +51,7 @@ namespace Iviz.App
                 int index = optionDatas.FindIndex(data => data.text == value);
                 if (index == -1)
                 {
-                    Core.Logger.Error($"DropdownWidget: Value {value} does not correspond to any index");
+                    Core.RosLogger.Error($"DropdownWidget: Value {value} does not correspond to any index");
                     return;
                 }
 

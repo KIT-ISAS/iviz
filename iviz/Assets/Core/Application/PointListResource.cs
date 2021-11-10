@@ -9,7 +9,6 @@ using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Displays
 {
@@ -68,7 +67,7 @@ namespace Iviz.Displays
         {
             if (!Settings.SupportsComputeBuffers)
             {
-                Logger.Info($"{this}: Device does not support compute buffers in vertices. " +
+                RosLogger.Info($"{this}: Device does not support compute buffers in vertices. " +
                             "Point clouds may not appear correctly.");
                 mesh = new Mesh {name = "PointCloud Mesh"};
                 mesh.MarkDynamic();

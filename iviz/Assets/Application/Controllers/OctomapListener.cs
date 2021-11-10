@@ -12,7 +12,6 @@ using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -131,7 +130,7 @@ namespace Iviz.Controllers
             {
                 if (lastMsg.Id != "OcTree")
                 {
-                    Logger.Debug($"{this}: Unknown or unimplemented binary octomap id '{lastMsg.Id}'");
+                    RosLogger.Debug($"{this}: Unknown or unimplemented binary octomap id '{lastMsg.Id}'");
                     return;
                 }
 
@@ -154,7 +153,7 @@ namespace Iviz.Controllers
                         valueStride = 7; // float value + rgb
                         break;
                     default:
-                        Logger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");
+                        RosLogger.Debug($"{this}: Unknown or unimplemented octomap id '{lastMsg.Id}'");
                         return;
                 }
 
@@ -166,7 +165,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            Logger.Debug($"{this}: Construction of octomap finished with {buffer.Length.ToString()} values");
+            RosLogger.Debug($"{this}: Construction of octomap finished with {buffer.Length.ToString()} values");
         }
 
         public override void StopController()

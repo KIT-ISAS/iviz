@@ -118,7 +118,8 @@ namespace Iviz.Controllers
             }
 
             bool isPressed = Vector3.Distance(thumb.Transform.position, index.Transform.position) < 0.025f;
-            var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
+            //var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
+            var color = Color.white;
             var scale = new Vector3(0.005f, 0.005f, 0.001f) * (isPressed ? 2 : 1);
 
             thumb.Color = color;
@@ -175,7 +176,7 @@ namespace Iviz.Controllers
         {
             var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, RootTransform);
             boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
-            boneObject.Color = Color.white.WithAlpha(0.3f);
+            boneObject.Color = Color.white;
             boneObject.EmissiveColor = Color.blue;
             return boneObject;
         }

@@ -13,7 +13,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -569,14 +568,14 @@ namespace Iviz.App
                 }
 
                 HostAliases[index] = newHostAlias;
-                Logger.Info($"{this}: Adding pair {hostname} -> {address} to resolver list.");
+                RosLogger.Info($"{this}: Adding pair {hostname} -> {address} to resolver list.");
                 ConnectionUtils.GlobalResolver[hostname] = address;
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             }
             else if (HostAliases[index] is var (aliasHostname, _))
             {
                 ConnectionUtils.GlobalResolver.Remove(aliasHostname);
-                Logger.Info($"{this}: Removing {aliasHostname} from resolver list.");
+                RosLogger.Info($"{this}: Removing {aliasHostname} from resolver list.");
                 HostAliases[index] = null;
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             }

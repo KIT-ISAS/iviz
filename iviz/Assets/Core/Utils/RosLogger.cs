@@ -7,7 +7,7 @@ using Iviz.Tools;
 
 namespace Iviz.Core
 {
-    public static class Logger
+    public static class RosLogger
     {
         const string NullMessage = "[null message]";
         const string NullException = "[null exception]";

@@ -140,7 +140,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        Core.Logger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
+                        Core.RosLogger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
                                          $"'{diffuseTexture.Path}' required by {uriString}");
                     }
                 }
@@ -154,7 +154,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        Core.Logger.Warn($"SceneModel: Failed to retrieve normal texture " +
+                        Core.RosLogger.Warn($"SceneModel: Failed to retrieve normal texture " +
                                          $"'{bumpTexture.Path}' required by {uriString}");
                     }
                 }

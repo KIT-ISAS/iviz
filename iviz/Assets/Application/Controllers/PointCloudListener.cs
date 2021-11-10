@@ -14,7 +14,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -312,7 +311,7 @@ namespace Iviz.Controllers
                     msg.RowStep < msg.PointStep * msg.Width ||
                     msg.Data.Length < msg.RowStep * msg.Height)
                 {
-                    Logger.Info($"{this}: Invalid point cloud dimensions!");
+                    RosLogger.Info($"{this}: Invalid point cloud dimensions!");
                     IsProcessing = false;
                     return;
                 }
@@ -330,7 +329,7 @@ namespace Iviz.Controllers
                     !TryGetField(msg.Fields, "y", out PointField? yField) || yField.Datatype != PointField.FLOAT32 ||
                     !TryGetField(msg.Fields, "z", out PointField? zField) || zField.Datatype != PointField.FLOAT32)
                 {
-                    Logger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                    RosLogger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     IsProcessing = false;
                     return;
                 }
@@ -347,7 +346,7 @@ namespace Iviz.Controllers
                 int iSize = FieldSizeFromType(iField.Datatype);
                 if (iSize == -1 || msg.PointStep < iOffset + iSize)
                 {
-                    Logger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type!");
                     IsProcessing = false;
                     return;
                 }
@@ -400,7 +399,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Error handling point cloud", e);
+                RosLogger.Error($"{this}: Error handling point cloud", e);
                 IsProcessing = false;
             }
         }

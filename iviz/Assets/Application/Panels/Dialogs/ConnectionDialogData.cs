@@ -6,7 +6,6 @@ using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -80,12 +79,12 @@ namespace Iviz.App
         public ConnectionDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
-            Logger.LogInternal += OnLogInternal;
+            RosLogger.LogInternal += OnLogInternal;
         }
 
         public override void FinalizePanel()
         {
-            Logger.LogInternal -= OnLogInternal;
+            RosLogger.LogInternal -= OnLogInternal;
         }
 
         void OnLogInternal(string msg)
@@ -168,7 +167,7 @@ namespace Iviz.App
                 {
                     if (ConnectionManager.IsConnected)
                     {
-                        Logger.Internal("Cannot create master node while connected!");
+                        RosLogger.Internal("Cannot create master node while connected!");
                         return;
                     }
 
@@ -185,7 +184,7 @@ namespace Iviz.App
                         }
 
                         panel.ServerMode.State = true;
-                        Logger.Internal(
+                        RosLogger.Internal(
                             $"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
                         MasterActiveChanged?.Invoke(true);
                     }
@@ -194,12 +193,12 @@ namespace Iviz.App
                 {
                     if (ConnectionManager.IsConnected)
                     {
-                        Logger.Internal("Cannot remove master node while connected!");
+                        RosLogger.Internal("Cannot remove master node while connected!");
                         return;
                     }
 
                     RosServerManager.Dispose();
-                    Logger.Internal("Master node removed. Switched to <b>client mode</b>.");
+                    RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
                     panel.ServerMode.State = false;
                     MasterActiveChanged?.Invoke(false);
                 }

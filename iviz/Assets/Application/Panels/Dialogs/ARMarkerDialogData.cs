@@ -9,7 +9,6 @@ using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -103,7 +102,7 @@ namespace Iviz.App
 
                 if (!float.TryParse(panel.Sizes[index].Value, out float sizeInMm) || sizeInMm <= 0)
                 {
-                    Logger.Info($"{this}: Ignoring size for entry {index}, cannot parse '{panel.Sizes[index].Value}' " +
+                    RosLogger.Info($"{this}: Ignoring size for entry {index}, cannot parse '{panel.Sizes[index].Value}' " +
                                 "into a positive number.");
                     continue;
                 }
@@ -111,7 +110,7 @@ namespace Iviz.App
                 string code = panel.Codes[index].Value.Trim();
                 if (string.IsNullOrEmpty(code))
                 {
-                    Logger.Info($"{this}: Ignoring empty code for entry {index}.");
+                    RosLogger.Info($"{this}: Ignoring empty code for entry {index}.");
                     continue;
                 }
 

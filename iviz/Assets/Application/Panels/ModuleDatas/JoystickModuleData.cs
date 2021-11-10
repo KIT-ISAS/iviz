@@ -181,7 +181,7 @@ namespace Iviz.App
                         controller.XIsFront = config.XIsFront;
                         break;
                     default:
-                        Logger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

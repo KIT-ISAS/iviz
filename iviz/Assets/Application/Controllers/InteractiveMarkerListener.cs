@@ -10,7 +10,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
 
@@ -234,7 +233,7 @@ namespace Iviz.Controllers
             {
                 if (msg.Poses.Length != 0 || msg.Erases.Length != 0 || msg.Markers.Length != 0)
                 {
-                    Logger.Info(
+                    RosLogger.Info(
                         $"{this}: A keep-alive message with non-empty payload was sent. The payload will be ignored.");
                 }
 
@@ -337,7 +336,7 @@ namespace Iviz.Controllers
                 position != null
             );
             Publisher.Publish(msg);
-            Logger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
+            RosLogger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnInteractiveControlObjectMoved(
@@ -377,7 +376,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher.Publish(msg);
-            Logger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
+            RosLogger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 
         void DestroyAllMarkers()

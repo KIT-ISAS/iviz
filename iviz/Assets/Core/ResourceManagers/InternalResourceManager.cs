@@ -8,7 +8,6 @@ using System.IO;
 using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Resources
 {
@@ -36,7 +35,7 @@ namespace Iviz.Resources
             string? robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
             if (string.IsNullOrEmpty(robotsFile))
             {
-                Logger.Warn($"{this}: Empty resource file!");
+                RosLogger.Warn($"{this}: Empty resource file!");
                 robotDescriptions = new Dictionary<string, string>().AsReadOnly();
                 return;
             }
@@ -49,7 +48,7 @@ namespace Iviz.Resources
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
                 if (string.IsNullOrEmpty(robotDescription))
                 {
-                    Logger.Info($"{this}: Empty or null description file {value}!");
+                    RosLogger.Info($"{this}: Empty or null description file {value}!");
                     continue;
                 }
 
@@ -119,7 +118,7 @@ namespace Iviz.Resources
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
-                Logger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
+                RosLogger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
                 negRepository.Add(uriString);
                 return false;
             }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
@@ -12,7 +13,7 @@ namespace Iviz.App
     public sealed class DataPanelManager : MonoBehaviour
     {
         readonly Dictionary<ModuleType, DataPanelContents> panelByResourceType = new();
-        
+
         Canvas? parentCanvas;
         Canvas ParentCanvas => (parentCanvas != null) ? parentCanvas : GetComponentInParent<Canvas>();
 
@@ -43,12 +44,9 @@ namespace Iviz.App
         {
             if (panelByResourceType.TryGetValue(resource, out DataPanelContents existingContents))
             {
-                if (existingContents is not T tContents)
-                {
-                    throw new InvalidOperationException("Panel type for " + resource + "does not match!");
-                }
-
-                return tContents;
+                return existingContents is T validatedContents
+                    ? validatedContents
+                    : throw new InvalidOperationException("Panel type for " + resource + "does not match!");
             }
 
             var newContents = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
@@ -63,6 +61,10 @@ namespace Iviz.App
             }
 
             panelByResourceType[resource] = contents;
+
+            var rootCanvas = contents.GetComponentInParent<Canvas>();
+            rootCanvas.ProcessCanvasForXR();
+
             return contents;
         }
 
@@ -73,7 +75,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (newSelected?.Panel is null)
+            if (newSelected.Panel is null)
             {
                 throw new NullReferenceException("Invalid selected panel: null");
             }

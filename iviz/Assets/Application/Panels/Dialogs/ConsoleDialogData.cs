@@ -7,7 +7,6 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.App
 {
@@ -65,13 +64,13 @@ namespace Iviz.App
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogContents>(DialogPanelType.Console);
             ConnectionManager.LogMessageArrived += HandleMessage;
-            Logger.LogExternal += HandleMessage;
+            RosLogger.LogExternal += HandleMessage;
         }
 
         public override void FinalizePanel()
         {
             ConnectionManager.LogMessageArrived -= HandleMessage;
-            Logger.LogExternal -= HandleMessage;
+            RosLogger.LogExternal -= HandleMessage;
         }
 
         public override void SetupPanel()

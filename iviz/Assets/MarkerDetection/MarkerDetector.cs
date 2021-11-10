@@ -9,7 +9,6 @@ using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.MarkerDetection
@@ -236,7 +235,7 @@ namespace Iviz.MarkerDetection
                 }
                 catch (Exception e)
                 {
-                    Logger.Error("Error during detector event:", e);
+                    RosLogger.Error("Error during detector event:", e);
                 }
                 finally
                 {

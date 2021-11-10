@@ -132,7 +132,7 @@ namespace Iviz.App
             // ReSharper disable once AsyncVoidLambda
             panel.ClearModelCacheClicked += async () =>
             {
-                Logger.Info("Settings: Clearing model cache.");
+                RosLogger.Info("Settings: Clearing model cache.");
                 await Resource.External.ClearModelCacheAsync();
                 panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
             };
@@ -140,7 +140,7 @@ namespace Iviz.App
             // ReSharper disable once AsyncVoidLambda
             panel.ClearHostHistoryClicked += async () =>
             {
-                Logger.Info("Settings: Clearing cache of master uris.");
+                RosLogger.Info("Settings: Clearing cache of master uris.");
                 await ModuleListPanel.Instance.ClearMastersCacheAsync();
                 panel.HostHistoryLabel.text =
                     $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
@@ -148,7 +148,7 @@ namespace Iviz.App
 
             panel.ClearSavedFilesClicked += () =>
             {
-                Logger.Info("Settings: Clearing saved files.");
+                RosLogger.Info("Settings: Clearing saved files.");
                 ModuleListPanel.ClearSavedFiles();
                 panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             };

@@ -96,7 +96,7 @@ namespace Iviz.App
                         controller.Visible = config.Visible;
                         break;
                     default:
-                        Core.Logger.Error($"{this}: Unknown field '{field}'");
+                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

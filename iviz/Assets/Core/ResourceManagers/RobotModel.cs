@@ -14,7 +14,6 @@ using Iviz.Tools;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
-using Logger = Iviz.Core.Logger;
 using Material = Iviz.Urdf.Material;
 using Object = UnityEngine.Object;
 using Vector3 = UnityEngine.Vector3;
@@ -180,7 +179,7 @@ namespace Iviz.Displays
 
                 if (linkObjects.Count == 0)
                 {
-                    Logger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
+                    RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
                     return;
                 }
 
@@ -205,17 +204,17 @@ namespace Iviz.Displays
                 ApplyAnyValidConfiguration();
 
                 string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
-                Logger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
+                RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
                             $"links and {Joints.Count.ToString()} joints. {errorStr}");
             }
             catch (OperationCanceledException)
             {
-                Logger.Error($"{this}: Robot building canceled.");
+                RosLogger.Error($"{this}: Robot building canceled.");
                 throw;
             }
             catch (Exception e)
             {
-                Logger.Error($"{this}: Failed to construct '{Name}'", e);
+                RosLogger.Error($"{this}: Failed to construct '{Name}'", e);
                 throw;
             }
         }
@@ -271,14 +270,14 @@ namespace Iviz.Displays
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
                     numErrors++;
                     return;
                 }
 
                 if (info == null)
                 {
-                    Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'");
                     numErrors++;
                     return;
                 }
@@ -350,14 +349,14 @@ namespace Iviz.Displays
                 }
                 catch (Exception e) when (!(e is OperationCanceledException))
                 {
-                    Logger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
                     numErrors++;
                     return;
                 }
 
                 if (info == null)
                 {
-                    Logger.Error($"{this}: Failed to retrieve '{uri}'");
+                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'");
                     numErrors++;
                     return;
                 }

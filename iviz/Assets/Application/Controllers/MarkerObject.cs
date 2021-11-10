@@ -12,7 +12,6 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
-using Logger = Iviz.Core.Logger;
 
 namespace Iviz.Controllers
 {
@@ -677,7 +676,7 @@ namespace Iviz.Controllers
             {
                 if (msg.Type() != MarkerType.MeshResource)
                 {
-                    Logger.Warn($"MarkerObject: Marker type '{msg.Type.ToString()}' has no resource assigned!");
+                    RosLogger.Warn($"MarkerObject: Marker type '{msg.Type.ToString()}' has no resource assigned!");
                     description.Append(ErrorStr).AppendLine("Unknown marker type ").Append(msg.Type).AppendLine();
                     numErrors++;
                 }
@@ -799,7 +798,7 @@ namespace Iviz.Controllers
                     }
                     catch (Exception e)
                     {
-                        Logger.Error($"{this}: LoadResourceAsync failed for '{msg.MeshResource}'", e);
+                        RosLogger.Error($"{this}: LoadResourceAsync failed for '{msg.MeshResource}'", e);
                         return null;
                     }
 

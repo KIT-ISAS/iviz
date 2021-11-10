@@ -104,7 +104,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during UpdatePanel: " + e);
+                Core.RosLogger.Error($"{this}: Exception during UpdatePanel: " + e);
             }
         }
 
@@ -116,7 +116,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during UpdatePanel: " + e);
+                Core.RosLogger.Error($"{this}: Exception during UpdatePanel: " + e);
             }
         }
 
@@ -160,7 +160,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                Core.Logger.Error($"{this}: Exception during SetupPanel: " + e);
+                Core.RosLogger.Error($"{this}: Exception during SetupPanel: " + e);
             }
 
             selectedDialogData.Panel.Active = true;
