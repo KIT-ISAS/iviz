@@ -123,13 +123,13 @@ namespace Iviz.App
             {
                 if (value)
                 {
-                    description.Append("<font=Bold><u><link=").Append(key).Append(">").Append(key)
-                        .Append("</link></u></font>\n      [");
+                    description.Append("<b><u><link=").Append(key).Append(">").Append(key)
+                        .Append("</link></u></b>\n      [");
                 }
                 else
                 {
-                    description.Append("<color=grey><font=Bold><u><link=").Append(key).Append(">").Append(key)
-                        .Append("</link></u></font></color>\n      [");
+                    description.Append("<color=grey><b><u><link=").Append(key).Append(">").Append(key)
+                        .Append("</link></u></b></color>\n      [");
                 }
 
                 description.Append(topicTypes.TryGetValue(key, out string type) ? type : "unknown")
@@ -154,9 +154,9 @@ namespace Iviz.App
 
             foreach (string service in services)
             {
-                description.Append("<font=Bold><u><link=")
+                description.Append("<b><u><link=")
                     .Append(service).Append(">").Append(service)
-                    .AppendLine("</link></u></font>");
+                    .AppendLine("</link></u></b>");
             }
 
             UpdateTop();
@@ -176,8 +176,8 @@ namespace Iviz.App
 
             foreach (string parameter in parameters)
             {
-                description.Append("<font=Bold><u><link=").Append(parameter).Append(">").Append(parameter)
-                    .AppendLine("</link></u></font>");
+                description.Append("<b><u><link=").Append(parameter).Append(">").Append(parameter)
+                    .AppendLine("</link></u></b>");
             }
 
             UpdateTop();
@@ -203,8 +203,8 @@ namespace Iviz.App
 
             foreach (string node in nodes)
             {
-                description.Append("<font=Bold><u><link=").Append(node).Append(">").Append(node)
-                    .AppendLine("</link></u></font>");
+                description.Append("<b><u><link=").Append(node).Append(">").Append(node)
+                    .AppendLine("</link></u></b>");
             }
 
             UpdateTop();
@@ -254,9 +254,9 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<font=Bold>").Append(link).AppendLine("</font>");
+            description.Append("<b>").Append(link).AppendLine("</b>");
 
-            description.Append("<color=#800000ff><font=Bold>Publishers:</font></color>").AppendLine();
+            description.Append("<color=#800000ff><b>Publishers:</b></color>").AppendLine();
             var publishers = systemState.Publishers.FirstOrDefault(tuple => tuple.Topic == link);
             if (publishers != null && publishers.Members.Count != 0)
             {
@@ -270,7 +270,7 @@ namespace Iviz.App
                 description.AppendLine("  (none)");
             }
 
-            description.Append("<color=#000080ff><font=Bold>Subscribers:</font></color>").AppendLine();
+            description.Append("<color=#000080ff><b>Subscribers:</b></color>").AppendLine();
             var subscribers = systemState.Subscribers.FirstOrDefault(tuple => tuple.Topic == link);
             if (subscribers != null && subscribers.Members.Count != 0)
             {
@@ -297,7 +297,7 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<font=Bold>").Append(link).AppendLine("</font>");
+            description.Append("<b>").Append(link).AppendLine("</b>");
 
             if (providerAddress != null)
             {
@@ -310,7 +310,7 @@ namespace Iviz.App
                 GetServiceInfo(link, tokenSource.Token);
             }
 
-            description.Append("<color=#008000ff><font=Bold>Provider:</font></color>").AppendLine();
+            description.Append("<color=#008000ff><b>Provider:</b></color>").AppendLine();
             var providers = systemState.Services.FirstOrDefault(tuple => tuple.Topic == link);
             if (providers != null && providers.Members.Count != 0)
             {
@@ -360,11 +360,11 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<font=Bold>").Append(link).AppendLine("</font>");
+            description.Append("<b>").Append(link).AppendLine("</b>");
 
             if (!paramValue.IsEmpty)
             {
-                description.AppendLine("<font=Bold>Value:</font>");
+                description.AppendLine("<b>Value:</b>");
 
                 string value = JsonConvert
                     .SerializeObject(paramValue, Formatting.Indented, JsonConverter);
@@ -420,7 +420,7 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<font=Bold>").Append(link).AppendLine("</font>");
+            description.Append("<b>").Append(link).AppendLine("</b>");
 
             if (nodeAddress != null)
             {
@@ -433,7 +433,7 @@ namespace Iviz.App
                 GetNodeInfo(link, tokenSource.Token);
             }
 
-            description.Append("<color=#800000ff><font=Bold>Advertises:</font></color>").AppendLine();
+            description.Append("<color=#800000ff><b>Advertises:</b></color>").AppendLine();
             var published = systemState.Publishers.Where(tuple => tuple.Members.Contains(link)).ToArray();
             if (published.Length != 0)
             {
@@ -447,7 +447,7 @@ namespace Iviz.App
                 description.AppendLine("  (none)");
             }
 
-            description.Append("<color=#000080ff><font=Bold>Subscribed to:</font></color>").AppendLine();
+            description.Append("<color=#000080ff><b>Subscribed to:</b></color>").AppendLine();
             var subscribed = systemState.Subscribers.Where(tuple => tuple.Members.Contains(link)).ToArray();
             if (subscribed.Length != 0)
             {
@@ -461,7 +461,7 @@ namespace Iviz.App
                 description.AppendLine("  (none)");
             }
 
-            description.Append("<color=#008000ff><font=Bold>Provides Services:</font></color>").AppendLine();
+            description.Append("<color=#008000ff><b>Provides Services:</b></color>").AppendLine();
             var services = systemState.Services.Where(tuple => tuple.Members.Contains(link)).ToArray();
             if (services.Length != 0)
             {

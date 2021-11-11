@@ -287,7 +287,7 @@ namespace Iviz.App
 
                         if (message.Stamp == default)
                         {
-                            description.Append("<font=Bold>[] ");
+                            description.Append("<b>[] ");
                         }
                         else
                         {
@@ -297,14 +297,14 @@ namespace Iviz.App
                                     ? "HH:mm:ss.fff"
                                     : "yy-MM-dd HH:mm:ss.fff");
 
-                            description.Append("<font=Bold>[").Append(dateAsStr).Append("] ");
+                            description.Append("<b>[").Append(dateAsStr).Append("] ");
                         }
 
                         string levelColor = ColorFromLevel(messageLevel);
 
                         description
                             .Append("<color=").Append(levelColor).Append(">")
-                            .Append(message.SourceId ?? "[Me]").Append(": </color></font>");
+                            .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
 
 
                         if (message.SourceId == null || message.Message.Length < MaxMessageLength)

@@ -10,16 +10,16 @@ using JetBrains.Annotations;
 
 namespace Iviz.App
 {
-    public class ItemListDialogContents : PanelContents, IReadOnlyList<ItemListDialogContents.ItemEntry>
+    public class ItemListDialogContents : PanelContents, IReadOnlyList<IItemEntry>
     {
         static float baseButtonHeight;
 
         static float BaseButtonHeight => baseButtonHeight != 0
             ? baseButtonHeight
-            : baseButtonHeight = ((RectTransform) Resource.Widgets.ItemButton.Object.transform).rect.height;
+            : baseButtonHeight = ((RectTransform)Resource.Widgets.ItemButton.Object.transform).rect.height;
 
 
-        readonly List<ItemEntry> itemEntries = new List<ItemEntry>();
+        readonly List<ItemEntry> itemEntries = new();
         protected float yOffset = 5;
         protected float buttonHeight;
 
@@ -28,7 +28,7 @@ namespace Iviz.App
         [NotNull]
         public Info<GameObject> ButtonType
         {
-            get => buttonType ?? (buttonType = Resource.Widgets.ItemButton);
+            get => buttonType ??= Resource.Widgets.ItemButton;
             set => buttonType = value;
         }
 
@@ -53,7 +53,7 @@ namespace Iviz.App
             set => emptyText.text = value;
         }
 
-        public sealed class ItemEntry
+        sealed class ItemEntry : IItemEntry
         {
             readonly ItemButton button;
             readonly float buttonHeight;
@@ -84,7 +84,7 @@ namespace Iviz.App
                 this.buttonHeight = buttonHeight;
                 this.yOffset = yOffset;
                 this.buttonType = buttonType;
-                
+
                 button = ResourcePool.Rent<ItemButton>(buttonType, parent.transform, false);
                 button.Height = buttonHeight;
                 button.Clicked += subIndex => callback(Index, subIndex);
@@ -106,23 +106,17 @@ namespace Iviz.App
 
             public string Text
             {
-                get => button.Text;
+                get => button.Caption;
                 set
                 {
-                    button.Text = value;
+                    button.Caption = value;
                     int lineBreaks = value.Count(x => x == '\n');
-                    switch (lineBreaks)
+                    button.FontSize = lineBreaks switch
                     {
-                        case 2:
-                            button.FontSize = 11;
-                            break;
-                        case 3:
-                            button.FontSize = 10;
-                            break;
-                        default:
-                            button.FontSize = 12;
-                            break;
-                    }
+                        2 => 11,
+                        3 => 10,
+                        _ => 12
+                    };
                 }
             }
 
@@ -131,12 +125,12 @@ namespace Iviz.App
                 get => button.Interactable;
                 set => button.Interactable = value;
             }
-            
+
             public Color Color
             {
                 get => button.Color;
                 set => button.Color = value;
-            }            
+            }
 
             public void Dispose()
             {
@@ -231,7 +225,7 @@ namespace Iviz.App
 
         void UpdateSize()
         {
-            RectTransform rectTransform = ((RectTransform) contentObject.transform);
+            RectTransform rectTransform = ((RectTransform)contentObject.transform);
             rectTransform.sizeDelta = new Vector2(0, 2 * yOffset + itemEntries.Count * (buttonHeight + yOffset));
 
             emptyText.gameObject.SetActive(itemEntries.Count == 0);
@@ -246,7 +240,7 @@ namespace Iviz.App
             int entriesCount = Math.Min(itemEntries.Count, maxSizeInEntries);
             float sizeDelta = 2 * yOffset + entriesCount * (buttonHeight + yOffset);
 
-            var t = (RectTransform) transform;
+            var t = (RectTransform)transform;
             t.sizeDelta = new Vector2(t.sizeDelta.x, sizeDelta + 45);
         }
 
@@ -256,14 +250,9 @@ namespace Iviz.App
             CloseClicked = null;
         }
 
-        public List<ItemEntry>.Enumerator GetEnumerator()
+        public IEnumerator<IItemEntry> GetEnumerator()
         {
             return itemEntries.GetEnumerator();
-        }
-
-        IEnumerator<ItemEntry> IEnumerable<ItemEntry>.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -273,6 +262,12 @@ namespace Iviz.App
 
         public int Count => itemEntries.Count;
 
-        public ItemEntry this[int index] => itemEntries[index];
+        public IItemEntry this[int index] => itemEntries[index];
+    }
+
+    public interface IItemEntry
+    {
+        bool Interactable { set; }
+        Color Color { set; }
     }
 }

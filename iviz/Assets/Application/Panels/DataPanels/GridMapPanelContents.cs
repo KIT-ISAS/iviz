@@ -29,7 +29,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("GridMap");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            Description = p.AddDataLabel("Min/Max").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;
+            Description = p.AddDataLabel("Min/Max").SetHasRichText(true).SetCentered();
             IntensityChannel = p.AddDropdown("Intensity Channel");
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)

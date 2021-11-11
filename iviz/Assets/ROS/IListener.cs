@@ -1,9 +1,7 @@
-﻿using System;
+﻿#nullable enable
+
 using System.Text;
-using Iviz.Msgs;
 using Iviz.Roslib;
-using JetBrains.Annotations;
-using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -12,8 +10,8 @@ namespace Iviz.Ros
     /// </summary>
     public interface IListener
     {
-        [NotNull] string Topic { get; }
-        [NotNull] string Type { get; }
+        string Topic { get; }
+        string Type { get; }
         RosTransportHint TransportHint { get; set; }
         RosListenerStats Stats { get; }
         (int active, int total) NumPublishers { get; }
@@ -23,6 +21,6 @@ namespace Iviz.Ros
         void SetSuspend(bool value);
         void Reset();
         void SetPause(bool value);
-        void WriteDescriptionTo([NotNull] StringBuilder b);
+        void WriteDescriptionTo(StringBuilder b);
     }
 }

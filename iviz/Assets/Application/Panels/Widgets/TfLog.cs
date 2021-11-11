@@ -257,11 +257,11 @@ namespace Iviz.App
                 else
                 {
                     string id = SelectedFrame.Id;
-                    description.Append("<font=Bold>[")
+                    description.Append("<b>[")
                         .Append(id)
                         .AppendLine(id == TfListener.FixedFrameId
-                            ? "]</font>  <i>[Fixed]</i>"
-                            : "]</font>");
+                            ? "]</b>  <i>[Fixed]</i>"
+                            : "]</b>");
 
                     description.AppendLine(
                         SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
@@ -442,7 +442,7 @@ namespace Iviz.App
                 str.Append(' ', level * 4);
             }
 
-            str.Append("<link=").Append(name).Append("><font=Bold>");
+            str.Append("<link=").Append(name).Append("><b>");
 
             if (selected)
             {
@@ -481,7 +481,7 @@ namespace Iviz.App
                 str.Append("<u>").Append(name).Append("</u>");
             }
 
-            str.AppendLine("</font></link>");
+            str.AppendLine("</b></link>");
 
             if (withChildren)
             {

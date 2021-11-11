@@ -1,20 +1,24 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class DataLabelWidget : MonoBehaviour, IWidget
+    public sealed class DataLabelWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
+        [SerializeField] TMP_Text? label = null;
         bool interactable = true;
 
-        [NotNull]
-        public string Label
+        TMP_Text Label => label.AssertNotNull(nameof(label));
+        
+        public string Text
         {
-            get => label.text;
+            get => Label.text;
             set
             {
                 if (value == null)
@@ -23,7 +27,7 @@ namespace Iviz.App
                 }
 
                 name = "DataLabel:" + value;
-                label.text = value;
+                Label.text = value;
             }
         }
 
@@ -33,26 +37,25 @@ namespace Iviz.App
             set
             {
                 interactable = value;
-                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 
         public bool HasRichText
         {
-            get => label.supportRichText;
-            set => label.supportRichText = value;
+            get => Label.richText;
+            set => Label.richText = value;
         }
 
-        public TextAnchor Alignment
+        TextAlignmentOptions Alignment
         {
-            get => label.alignment;
-            set => label.alignment = value;
+            get => Label.alignment;
+            set => Label.alignment = value;
         }
 
-        [NotNull]
-        public DataLabelWidget SetLabel([NotNull] string f)
+        public DataLabelWidget SetLabel(string f)
         {
-            Label = f;
+            Text = f;
             return this;
         }
 
@@ -60,17 +63,15 @@ namespace Iviz.App
         {
         }
 
-        [NotNull]
         public DataLabelWidget SetHasRichText(bool b)
         {
             HasRichText = b;
             return this;
         }
 
-        [NotNull]
-        public DataLabelWidget SetAlignment(TextAnchor t)
+        public DataLabelWidget SetCentered()
         {
-            Alignment = t;
+            Alignment = TextAlignmentOptions.Midline;
             return this;
         }
     }

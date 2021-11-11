@@ -1,18 +1,21 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public sealed class HeadTitleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
+        [SerializeField] TMP_Text? text = null;
 
-        [NotNull]
+        TMP_Text Text => text.AssertNotNull(nameof(text));
+        
         public string Label
         {
-            get => label.text;
+            get => Text.text;
             set
             {
                 if (value == null)
@@ -20,13 +23,12 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                label.text = value;
+                Text.text = value;
                 name = $"HeadTitle:{value}";
             }
         }
 
-        [NotNull]
-        public HeadTitleWidget SetLabel([NotNull] string f)
+        public HeadTitleWidget SetLabel(string f)
         {
             Label = f;
             return this;

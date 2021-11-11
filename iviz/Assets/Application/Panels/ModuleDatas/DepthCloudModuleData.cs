@@ -63,7 +63,7 @@ namespace Iviz.App
             panel.ColorPreview.Material = controller.ColorMaterial;
             panel.DepthPreview.Material = controller.DepthMaterial;
 
-            panel.Description.Label = controller.Description;
+            panel.Description.Text = controller.Description;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -128,7 +128,7 @@ namespace Iviz.App
             panel.DepthPreview.ToggleImageEnabled();
             colorDialogData?.ToggleImageEnabled();
             depthDialogData?.ToggleImageEnabled();
-            panel.Description.Label = controller.Description;
+            panel.Description.Text = controller.Description;
         }
 
         [NotNull]

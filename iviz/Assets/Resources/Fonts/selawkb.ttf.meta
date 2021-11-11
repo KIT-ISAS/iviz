@@ -3,12 +3,11 @@ guid: f14f6aaae776743cfab890a5b6af14ca
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
-  fontSize: 16
+  fontSize: 12
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Selawik
   fontNames:
   - Selawik
   fallbackFontReferences:

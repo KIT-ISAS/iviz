@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -11,7 +12,7 @@ namespace Iviz.Displays
         public GameObject ConsoleLog = null;
         public GameObject DataLabel = null;
         public GameObject DataPanel = null;
-        public GameObject DisplayButton = null;
+        public GameObject DraggableDisplayButton = null;
         public GameObject Dropdown = null;
         public GameObject EchoPanel = null;
         public GameObject Frame = null;
@@ -32,10 +33,8 @@ namespace Iviz.Displays
         public GameObject NetworkPanel = null;
         public GameObject NumberInputField = null;
         public GameObject SaveAsPanel = null;
-        public GameObject SectionTitle = null;
         public GameObject Sender = null;
         public GameObject SettingsPanel = null;
-        public GameObject ShortInputField = null;
         
         public GameObject Slider = null;
         public GameObject TfTreePanel = null;

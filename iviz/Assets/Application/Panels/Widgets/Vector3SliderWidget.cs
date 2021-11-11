@@ -1,6 +1,7 @@
 ﻿using System;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ namespace Iviz.App
         [SerializeField] SliderWidget inputX = null;
         [SerializeField] SliderWidget inputY = null;
         [SerializeField] SliderWidget inputZ = null;
-        [SerializeField] Text label = null;
+        [SerializeField] TMP_Text label = null;
         [SerializeField] Image panel = null;
         //bool disableUpdates;
 

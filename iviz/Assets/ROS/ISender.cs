@@ -1,7 +1,7 @@
 #nullable enable
 
+using System.Text;
 using Iviz.Msgs;
-using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -14,5 +14,6 @@ namespace Iviz.Ros
         int NumSubscribers { get; }
         void Stop();
         void Publish(IMessage msg);
+        void WriteDescriptionTo(StringBuilder description);
     }
 }

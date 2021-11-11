@@ -64,7 +64,7 @@ namespace Iviz.App
             }
 
             var masterApi = client.RosMasterClient;
-            builder.Append("<font=Bold>== Master</font> (").Append(masterApi.TotalRequests.ToString("N0"))
+            builder.Append("<b>== Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
                 .Append(" queries | Ping ")
                 .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
                 .AppendLine();
@@ -80,8 +80,8 @@ namespace Iviz.App
 
             foreach (var stat in subscriberStats.Topics)
             {
-                builder.Append("<color=#000080ff><font=Bold><< Subscribed to ")
-                    .Append(stat.Topic).Append("</font></color>")
+                builder.Append("<color=#000080ff><b><< Subscribed to ")
+                    .Append(stat.Topic).Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 
@@ -166,8 +166,8 @@ namespace Iviz.App
 
             foreach (var stat in publisherStats.Topics)
             {
-                builder.Append("<color=#800000ff><font=Bold>>> Publishing to ").Append(stat.Topic)
-                    .Append("</font></color>")
+                builder.Append("<color=#800000ff><b>>> Publishing to ").Append(stat.Topic)
+                    .Append("</b></color>")
                     .AppendLine();
                 builder.Append("<b>Type: </b>[").Append(stat.Type).Append("]").AppendLine();
 

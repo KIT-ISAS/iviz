@@ -51,11 +51,6 @@ namespace Iviz.App
             return Resource.Widgets.HeadTitle.Instantiate<HeadTitleWidget>(NonStatics.transform).SetLabel(label);
         }
 
-        public SectionTitleWidget AddSectionTitleWidget(string label)
-        {
-            return Resource.Widgets.SectionTitle.Instantiate<SectionTitleWidget>(NonStatics.transform).SetLabel(label);
-        }
-
         public ToggleWidget AddToggle(string label)
         {
             return Resource.Widgets.Toggle.Instantiate<ToggleWidget>(NonStatics.transform).SetLabel(label);
@@ -75,11 +70,6 @@ namespace Iviz.App
         {
             return Resource.Widgets.InputWithHints.Instantiate<InputFieldWithHintsWidget>(NonStatics.transform)
                 .SetLabel(label);
-        }
-
-        public InputFieldWidget AddShortInputField(string label)
-        {
-            return Resource.Widgets.ShortInput.Instantiate<InputFieldWidget>(NonStatics.transform).SetLabel(label);
         }
 
         public NumberInputFieldWidget AddNumberInputField(string label)

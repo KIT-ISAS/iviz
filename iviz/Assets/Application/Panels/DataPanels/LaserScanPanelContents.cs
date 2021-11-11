@@ -31,7 +31,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("LaserScan");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
+            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)

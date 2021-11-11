@@ -93,7 +93,7 @@ namespace Iviz.Displays
             StringBuilder str = BuilderPool.Rent();
             try
             {
-                str.Append("<font=Bold>").Append(node.ParentId).Append("</font>\n");
+                str.Append("<b>").Append(node.ParentId).Append("</b>\n");
                 str.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
                 tooltip.SetCaption(str);
             }

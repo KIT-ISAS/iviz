@@ -1,9 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,19 +13,25 @@ namespace Iviz.App
 {
     public class DropdownWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
-        [SerializeField] TMP_Dropdown dropdown = null;
+        [SerializeField] TMP_Text? label = null;
+        [SerializeField] TMP_Dropdown? dropdown = null;
 
+        readonly List<TMP_Dropdown.OptionData> optionDatas = new();
+
+        TMP_Text Label => label.AssertNotNull(nameof(label));
+        TMP_Dropdown Dropdown => dropdown.AssertNotNull(nameof(dropdown));
+        
+        public event Action<int, string>? ValueChanged;
+        
         public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         } 
         
-        [NotNull]
-        public string Label
+        public string Text
         {
-            get => label.text;
+            get => Label.text;
             set
             {
                 if (value == null)
@@ -32,12 +39,11 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
                 
-                label.text = value;
+                Label.text = value;
                 name = "Dropdown:" + value;
             }
         }
 
-        [NotNull]
         public string Value
         {
             get => optionDatas[Index].text;
@@ -51,7 +57,7 @@ namespace Iviz.App
                 int index = optionDatas.FindIndex(data => data.text == value);
                 if (index == -1)
                 {
-                    Core.RosLogger.Error($"DropdownWidget: Value {value} does not correspond to any index");
+                    RosLogger.Error($"DropdownWidget: Value {value} does not correspond to any index");
                     return;
                 }
 
@@ -61,34 +67,30 @@ namespace Iviz.App
 
         public int Index
         {
-            get => dropdown.value;
-            set => dropdown.value = value;
+            get => Dropdown.value;
+            set => Dropdown.value = value;
         }
 
         public bool Interactable
         {
-            get => dropdown.interactable;
+            get => Dropdown.interactable;
             set
             {
-                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                dropdown.interactable = value;
+                Label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Dropdown.interactable = value;
             }
         }
 
-        readonly List<TMP_Dropdown.OptionData> optionDatas = new List<TMP_Dropdown.OptionData>();
-        [NotNull]
         public IEnumerable<string> Options
         {
-            get => dropdown.options.Select(x => x.text);
+            get => Dropdown.options.Select(x => x.text);
             set
             {
                 optionDatas.Clear();
                 optionDatas.AddRange(value.Select(x => new TMP_Dropdown.OptionData(x)));
-                dropdown.options = optionDatas;
+                Dropdown.options = optionDatas;
             }
         }
-
-        public event Action<int, string> ValueChanged;
 
         public void OnValueChanged(int i)
         {
@@ -100,46 +102,40 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        [NotNull]
         public DropdownWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        [NotNull]
         public DropdownWidget SetIndex(int f)
         {
             Index = f;
             return this;
         }
 
-        [NotNull]
-        public DropdownWidget SetLabel([NotNull] string f)
+        public DropdownWidget SetLabel(string f)
         {
-            Label = f;
+            Text = f;
             return this;
         }
 
-        [NotNull]
-        public DropdownWidget SetOptions([NotNull] IEnumerable<string> f)
+        public DropdownWidget SetOptions(IEnumerable<string> f)
         {
             Options = f;
             return this;
         }
 
-        [NotNull]
         public DropdownWidget SubscribeValueChanged(Action<int, string> f)
         {
             ValueChanged += f;
             return this;
         }
 
-        [NotNull]
         public DropdownWidget OverrideCaption(string f)
         {
-            dropdown.value = 0;
-            dropdown.captionText.text = f;
+            Dropdown.value = 0;
+            Dropdown.captionText.text = f;
             return this;
         }
     }

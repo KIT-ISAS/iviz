@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
 using System;
+using System.Text;
+using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
 
@@ -10,9 +12,8 @@ namespace Iviz.Ros
     {
         static RoslibConnection Connection => ConnectionManager.Connection;
 
-        int lastMsgBytes;
-        int lastMsgCounter;
-        int totalMsgCounter;
+        long lastMsgBytes;
+        int recentMsgs;
 
         public string Topic { get; }
         public string Type { get; }
@@ -50,9 +51,8 @@ namespace Iviz.Ros
         {
             Connection.Publish(this, msg);
 
-            totalMsgCounter++;
-            lastMsgCounter++;
-            lastMsgBytes += msg.RosMessageLength;
+            Interlocked.Increment(ref recentMsgs);
+            Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
         }
 
         public void Reset()
@@ -63,21 +63,33 @@ namespace Iviz.Ros
 
         void UpdateStats()
         {
-            if (lastMsgCounter == 0)
+            if (recentMsgs == 0)
             {
                 Stats = default;
                 NumSubscribers = Connection.GetNumSubscribers(this);
                 return;
             }
 
-            Stats = new RosSenderStats(totalMsgCounter, lastMsgCounter, lastMsgBytes);
+            Stats = new RosSenderStats(recentMsgs, lastMsgBytes);
 
             ConnectionManager.ReportBandwidthUp(lastMsgBytes);
 
-            lastMsgBytes = 0;
-            lastMsgCounter = 0;
+            Interlocked.Exchange(ref recentMsgs, 0);
+            Interlocked.Exchange(ref lastMsgBytes, 0);
 
             NumSubscribers = Connection.GetNumSubscribers(this);
+        }
+        
+        public void WriteDescriptionTo(StringBuilder description)
+        {
+            int numSubscribers = NumSubscribers;
+            if (numSubscribers == -1)
+            {
+                description.Append("Off");
+                return;
+            }
+            
+            description.Append(numSubscribers).Append(" sub");
         }
 
         public override string ToString() => $"[Sender {Topic} [{Type}]]";

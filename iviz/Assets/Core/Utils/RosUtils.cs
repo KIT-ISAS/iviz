@@ -2,6 +2,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -222,5 +223,24 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool HasNaN(this in Pose pose) => HasNaN(pose.Orientation) || HasNaN(pose.Position);
+
+        public static void WriteFormattedBandwidth(StringBuilder description, long bytesPerSecond)
+        {
+            switch (bytesPerSecond)
+            {
+                case < 1024:
+                    string bPerSecond = bytesPerSecond.ToString("#,0", UnityUtils.Culture);
+                    description.Append(bPerSecond).Append(" B/s");
+                    break;
+                case < 1024 * 1024:
+                    string kbPerSecond = (bytesPerSecond * (1f / 1024)).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(kbPerSecond).Append(" kB/s");
+                    break;
+                default:
+                    string mbPerSecond = (bytesPerSecond * (1f / 1024 / 1024)).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(mbPerSecond).Append(" MB/s");
+                    break;
+            }
+        }
     }
 }

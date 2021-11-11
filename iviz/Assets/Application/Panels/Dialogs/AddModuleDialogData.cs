@@ -54,7 +54,7 @@ namespace Iviz.App
             var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();
             
-            if (!(moduleData is ARModuleData))
+            if (moduleData is not ARModuleData)
             {
                 moduleData.ShowPanel();
             }

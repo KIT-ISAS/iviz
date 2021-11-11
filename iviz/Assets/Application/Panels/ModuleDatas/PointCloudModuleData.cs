@@ -46,7 +46,7 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            panel.NumPoints.Label = BuildDescriptionString();
+            panel.NumPoints.Text = BuildDescriptionString();
 
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
@@ -86,7 +86,7 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.IntensityChannel.Hints = listener.FieldNames;
-            panel.NumPoints.Label = BuildDescriptionString();
+            panel.NumPoints.Text = BuildDescriptionString();
         }
 
         string BuildDescriptionString()

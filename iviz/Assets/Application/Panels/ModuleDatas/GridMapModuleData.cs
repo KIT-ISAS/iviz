@@ -49,7 +49,7 @@ namespace Iviz.App
 
             string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-            panel.Description.Label = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
+            panel.Description.Text = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
 
             panel.Colormap.Index = (int) listener.Colormap;
 
@@ -83,7 +83,7 @@ namespace Iviz.App
             panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
             panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
             panel.Alpha.ValueChanged += f => listener.Tint = Color.white.WithAlpha(f);
-            panel.Description.Label = listener.Description;
+            panel.Description.Text = listener.Description;
         }
 
         public override void UpdatePanel()
@@ -97,7 +97,7 @@ namespace Iviz.App
                 panel.IntensityChannel.Value = listener.IntensityChannel;
             }
 
-            panel.Description.Label = listener.Description;
+            panel.Description.Text = listener.Description;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

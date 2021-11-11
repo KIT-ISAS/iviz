@@ -1,6 +1,7 @@
 ﻿using System;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,8 @@ namespace Iviz.App
         [SerializeField] SliderWidget sliderX = null;
         [SerializeField] SliderWidget sliderY = null;
         [SerializeField] SliderWidget sliderZ = null;
-        [SerializeField] Text label = null;
+        //[SerializeField] Text label = null;
+        [SerializeField] TMP_Text label = null;
         [SerializeField] Button button = null;
         [SerializeField] Image panel = null;
         Color color;

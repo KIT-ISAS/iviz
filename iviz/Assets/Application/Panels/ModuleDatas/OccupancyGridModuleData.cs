@@ -57,7 +57,7 @@ namespace Iviz.App
 
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
-            panel.Description.Label = listener.Description;
+            panel.Description.Text = listener.Description;
 
             panel.OcclusionOnlyMode.Interactable = listener.CubesVisible;
             panel.ScaleZ.Interactable = listener.CubesVisible;
@@ -89,7 +89,7 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            panel.Description.Label = listener.Description;
+            panel.Description.Text = listener.Description;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

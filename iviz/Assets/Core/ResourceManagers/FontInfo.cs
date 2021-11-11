@@ -14,11 +14,11 @@ namespace Iviz.Resources
         readonly Font font;
         readonly int dotWidth;
         readonly int arrowWidth;
-        readonly Dictionary<char, int> charWidths = new Dictionary<char, int>();
+        readonly Dictionary<char, int> charWidths = new();
 
         public FontInfo()
         {
-            font = UnityEngine.Resources.Load<Font>("Fonts/selawk base");
+            font = UnityEngine.Resources.Load<Font>("Fonts/selawk");
             dotWidth = CharWidth('.') * 3; // ...
             arrowWidth = CharWidth('→') + CharWidth(' ');
         }

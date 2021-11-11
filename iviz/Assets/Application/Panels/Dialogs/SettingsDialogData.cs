@@ -74,7 +74,7 @@ namespace Iviz.App
             panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
 
             panel.ModelService.Options = ModelServerModesNames;
-            panel.ModelService.Label = UpdateModelServiceLabel();
+            panel.ModelService.Text = UpdateModelServiceLabel();
             panel.ModelService.Interactable = !Settings.IsMobile;
 
             panel.QualityInView.ValueChanged += (f, _) =>
@@ -168,7 +168,7 @@ namespace Iviz.App
                         break;
                 }
 
-                panel.ModelService.Label = UpdateModelServiceLabel();
+                panel.ModelService.Text = UpdateModelServiceLabel();
             };
         }
 

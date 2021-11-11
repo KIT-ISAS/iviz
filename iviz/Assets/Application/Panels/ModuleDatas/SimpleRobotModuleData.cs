@@ -61,7 +61,7 @@ namespace Iviz.App
                 RobotController.TryLoadFromSourceParameter(RobotController.SourceParameter);
             }
 
-            panel.HelpText.Label = RobotController.HelpText;
+            panel.HelpText.Text = RobotController.HelpText;
             UpdateModuleButton();
         }
 
@@ -76,7 +76,7 @@ namespace Iviz.App
         {
             panel.Frame.Owner = RobotController;
             panel.SourceParameter.Value = RobotController.SourceParameter;
-            panel.HelpText.Label = RobotController.HelpText;
+            panel.HelpText.Text = RobotController.HelpText;
 
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
@@ -120,7 +120,7 @@ namespace Iviz.App
                 panel.SourceParameter.Value = "";
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = RobotController.HelpText;
+                panel.HelpText.Text = RobotController.HelpText;
                 UpdateModuleButton();
 
                 panel.Save.Interactable =
@@ -133,7 +133,7 @@ namespace Iviz.App
                 panel.SavedRobotName.Index = 0;
                 panel.Save.Value = IsRobotSaved;
 
-                panel.HelpText.Label = RobotController.HelpText;
+                panel.HelpText.Text = RobotController.HelpText;
                 UpdateModuleButton();
 
                 panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
@@ -173,7 +173,7 @@ namespace Iviz.App
             tokenSource = new CancellationTokenSource();
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
 
-            panel.HelpText.Label = RobotController.HelpText;
+            panel.HelpText.Text = RobotController.HelpText;
             RobotController.CheckRobotStartTask();
             UpdateModuleButton();
             panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
@@ -283,7 +283,7 @@ namespace Iviz.App
 
                 if (IsSelected)
                 {
-                    panel.HelpText.Label = RobotController.HelpText;
+                    panel.HelpText.Text = RobotController.HelpText;
                 }
 
                 UpdateModuleButton();

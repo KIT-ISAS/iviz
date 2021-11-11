@@ -131,9 +131,19 @@ namespace Iviz.Controllers
                 }
             }
 
-            var poseToHighlight = clickInfo.TryGetARRaycastResults(out var arHitResults)
-                ? arHitResults[0].CreatePose()
-                : hitResults[0].CreatePose();
+            Pose poseToHighlight;
+            if (clickInfo.TryGetARRaycastResults(out var arHitResults))
+            {
+                poseToHighlight = arHitResults[0].CreatePose();
+            }
+            else if (hitResults.Length != 0)
+            {
+                poseToHighlight = hitResults[0].CreatePose();
+            }
+            else
+            {
+                return;
+            }
 
             ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(poseToHighlight);
             if (!isShortClick)

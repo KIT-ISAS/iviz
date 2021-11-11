@@ -266,7 +266,10 @@ namespace Iviz.Ros
             }
             else
             {
-                description.Append($"{numActivePublishers.ToString()}/{numPublishers.ToString()}↓");
+                description.Append(numActivePublishers.ToString())
+                    .Append("/")
+                    .Append(numPublishers.ToString())
+                    .Append(" pub");
             }
         }
 

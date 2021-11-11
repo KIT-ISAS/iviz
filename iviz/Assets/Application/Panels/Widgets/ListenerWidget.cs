@@ -1,24 +1,28 @@
-﻿using System.Text;
+﻿#nullable enable
+
+using System;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using JetBrains.Annotations;
+using TMPro;
 
 namespace Iviz.App
 {
     public sealed class ListenerWidget : MonoBehaviour, IWidget
     {
-        const int Size = 200;
+        const int MaxTopicLength = 200;
 
-        [SerializeField] Text text = null;
-        [SerializeField] Image panel = null;
-        [CanBeNull] IListener listener;
+        [SerializeField] TMP_Text? text = null;
+        [SerializeField] Image? panel = null;
+        IListener? listener;
 
-        [CanBeNull]
-        public IListener Listener
+        TMP_Text Text => text.AssertNotNull(nameof(text));
+        Image Panel => panel.AssertNotNull(nameof(text));
+
+        public IListener? Listener
         {
             private get => listener;
             set
@@ -37,7 +41,7 @@ namespace Iviz.App
             }
         }
 
-        [CanBeNull] string Topic => Listener?.Topic;
+        string? Topic => Listener?.Topic;
         int MessagesPerSecond => Listener?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Listener?.Stats.BytesPerSecond ?? 0;
 
@@ -45,15 +49,18 @@ namespace Iviz.App
         {
             if (listener == null)
             {
-                text.text = "[No Topic Set]\n<b>Off</b>";
-                panel.color = Resource.Colors.DisabledPanel;
+                Text.text = "[No Topic Set]\n" +
+                            "<b>Off</b>";
+                Panel.color = Resource.Colors.DisabledPanel;
                 return;
             }
 
             var description = BuilderPool.Rent();
             try
             {
-                description.Append(Resource.Font.Split(Topic ?? "", Size)).Append("\n<b>");
+                description
+                    .Append(Resource.Font.Split(Topic ?? "", MaxTopicLength))
+                    .Append("\n<b>");
 
                 listener.WriteDescriptionTo(description);
 
@@ -61,30 +68,17 @@ namespace Iviz.App
                     .Append(MessagesPerSecond)
                     .Append(" Hz | ");
 
-                if (BytesPerSecond < 1024)
-                {
-                    string bPerSecond = BytesPerSecond.ToString("#,0", UnityUtils.Culture);
-                    description.Append(bPerSecond).Append(" B/s</b>");
-                }
-                else if (BytesPerSecond < 1024 * 1024)
-                {
-                    string kbPerSecond = (BytesPerSecond * (1f / 1024)).ToString("#,0.0", UnityUtils.Culture);
-                    description.Append(kbPerSecond).Append(" kB/s</b>");
-                }
-                else
-                {
-                    string mbPerSecond = (BytesPerSecond * (1f / 1024 / 1024)).ToString("#,0.0", UnityUtils.Culture);
-                    description.Append(mbPerSecond).Append(" MB/s</b>");
-                }
+                RosUtils.WriteFormattedBandwidth(description, BytesPerSecond);
 
-                text.text = description.ToString();
+                description.Append("</b>");
+                Text.SetText(description);
             }
             finally
             {
                 BuilderPool.Return(description);
             }
 
-            panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
+            Panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
         }
 
         public void OnClick()
@@ -95,12 +89,17 @@ namespace Iviz.App
             }
 
             listener.SetSuspend(listener.Subscribed);
-            panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
+            Panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;
         }
 
         public void ClearSubscribers()
         {
             Listener = null;
+        }
+
+        void OnDestroy()
+        {
+            GameThread.EverySecond -= UpdateStats;
         }
     }
 }

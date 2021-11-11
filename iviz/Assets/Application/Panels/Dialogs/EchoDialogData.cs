@@ -198,7 +198,7 @@ namespace Iviz.App
             {
                 foreach (var (timeFormatted, msg) in messageQueue)
                 {
-                    description.Append("<font=Bold>").Append(timeFormatted).Append("</font> ");
+                    description.Append("<b>").Append(timeFormatted).Append("</b> ");
                     JsonSerializer.Serialize(jsonTextWriter, msg, null);
                     description.AppendLine();
                 }
@@ -231,12 +231,12 @@ namespace Iviz.App
 
             public override void WritePropertyName(string name)
             {
-                base.WritePropertyName($"<font=Bold>{name}</font>");
+                base.WritePropertyName($"<b>{name}</b>");
             }
 
             public override void WritePropertyName(string name, bool escape)
             {
-                base.WritePropertyName($"<font=Bold>{name}</font>", escape);
+                base.WritePropertyName($"<b>{name}</b>", escape);
             }
         }
 

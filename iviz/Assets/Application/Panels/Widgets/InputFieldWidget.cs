@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,15 +11,19 @@ namespace Iviz.App
 {
     public sealed class InputFieldWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
-        [SerializeField] InputField text = null;
-        [SerializeField] Text placeholder = null;
-        [SerializeField] Image textImage = null;
+        [SerializeField] TMP_Text? label = null;
+        [SerializeField] InputField? text = null;
+        [SerializeField] Text? placeholder = null;
+        [SerializeField] Image? textImage = null;
 
-        [NotNull]
-        public string Label
+        TMP_Text Label => label.AssertNotNull(nameof(label));
+        InputField Text => text.AssertNotNull(nameof(text));
+        Text Placeholder => placeholder.AssertNotNull(nameof(placeholder));
+        Image TextImage => textImage.AssertNotNull(nameof(textImage));
+        
+        public string Title
         {
-            get => label.text;
+            get => Label.text;
             set
             {
                 if (value == null)
@@ -24,15 +31,14 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                label.text = value;
+                Label.text = value;
                 name = "InputField:" + value;
             }
         }
 
-        [NotNull]
         public string Value
         {
-            get => text.text;
+            get => Text.text;
             set
             {
                 if (value == null)
@@ -40,14 +46,13 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                text.text = value;
+                Text.text = value;
             }
         }
 
-        [NotNull]
-        public string Placeholder
+        public string PlaceholderText
         {
-            get => placeholder.text;
+            get => Placeholder.text;
             set
             {
                 if (value == null)
@@ -55,29 +60,29 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
                 
-                placeholder.text = value;
+                Placeholder.text = value;
             }
         }
 
         InputField.ContentType ContentType
         {
-            get => text.contentType;
-            set => text.contentType = value;
+            get => Text.contentType;
+            set => Text.contentType = value;
         }
 
         public bool Interactable
         {
-            get => text.interactable;
+            get => Text.interactable;
             set
             {
-                text.interactable = value;
-                textImage.raycastTarget = value;
-                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Text.interactable = value;
+                TextImage.raycastTarget = value;
+                Label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 
-        public event Action<string> ValueChanged;
-        public event Action<string> EndEdit;
+        public event Action<string>? ValueChanged;
+        public event Action<string>? EndEdit;
 
         public void OnValueChanged(string f)
         {
@@ -95,49 +100,42 @@ namespace Iviz.App
             EndEdit = null;
         }
 
-        [NotNull]
         public InputFieldWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWidget SetValue([NotNull] string f)
+        public InputFieldWidget SetValue(string f)
         {
             Value = f ?? throw new ArgumentNullException(nameof(f));
             return this;
         }
 
-        [NotNull]
-        public InputFieldWidget SetPlaceholder([NotNull] string f)
+        public InputFieldWidget SetPlaceholder(string f)
         {
-            Placeholder = f;
+            PlaceholderText = f;
             return this;
         }
 
-        [NotNull]
         public InputFieldWidget SetContentType(InputField.ContentType contentType)
         {
             ContentType = contentType;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWidget SetLabel([NotNull] string f)
+        public InputFieldWidget SetLabel(string f)
         {
-            Label = f;
+            Title = f;
             return this;
         }
 
-        [NotNull]
         public InputFieldWidget SubscribeValueChanged(Action<string> f)
         {
             ValueChanged += f;
             return this;
         }
 
-        [NotNull]
         public InputFieldWidget SubscribeEndEdit(Action<string> f)
         {
             EndEdit += f;
