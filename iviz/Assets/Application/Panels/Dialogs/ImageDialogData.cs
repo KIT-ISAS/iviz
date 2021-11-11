@@ -20,7 +20,7 @@ namespace Iviz.App
             this.listener = listener;
             canvas = ResourcePool.Rent(Resource.Widgets.ImageCanvas, holder);
             panel = canvas.GetComponentInChildren<ImageDialogContents>();
-            panel.CloseButton.Clicked += () => Closed?.Invoke();
+            panel.Closed += () => Closed?.Invoke();
         }
 
         public string Title

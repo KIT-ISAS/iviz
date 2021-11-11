@@ -1,6 +1,4 @@
-﻿using Iviz.Resources;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 namespace Iviz.App
 {
@@ -19,22 +17,4 @@ namespace Iviz.App
         
         public abstract void ClearSubscribers();
     }
-
-    public abstract class DetachablePanelContents : PanelContents
-    {
-        [SerializeField] protected DialogScalerWidget scalerWidget = null;
-        Image panelImage;
-
-        Image PanelImage => panelImage != null ? panelImage : (panelImage = GetComponent<Image>());
-
-        public bool Detached
-        {
-            set
-            {
-                scalerWidget.gameObject.SetActive(value);
-                PanelImage.color = value ? Resource.Colors.DetachedPanelColor : Resource.Colors.AttachedPanelColor;
-            }
-        }
-    }
-    
 }

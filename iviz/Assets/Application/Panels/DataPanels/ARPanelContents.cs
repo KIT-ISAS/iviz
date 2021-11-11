@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -34,7 +35,7 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             ResetButton = p.AddResetButton();
             Frame = p.AddFrame();
-            Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
+            Description = p.AddDataLabel("").SetHasRichText(true).SetCentered();
             WorldScale = p.AddSlider("World Scale").SetMinValue(0.01f).SetMaxValue(1f);
 
             AutoFocus = p.AddToggle("Enable AutoFocus");

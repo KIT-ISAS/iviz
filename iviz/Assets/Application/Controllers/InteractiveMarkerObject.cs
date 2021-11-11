@@ -128,7 +128,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Clear();
-            description.Append("<color=blue><font=Bold>** InteractiveMarker ");
+            description.Append("<color=blue><b>** InteractiveMarker ");
 
             if (string.IsNullOrEmpty(msg.Name))
             {
@@ -139,7 +139,7 @@ namespace Iviz.Controllers
                 description.Append("'").Append(msg.Name).Append("'");
             }
 
-            description.Append("</font></color>").AppendLine();
+            description.Append("</b></color>").AppendLine();
 
             string msgDescription = msg.Description.Length != 0
                 ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")

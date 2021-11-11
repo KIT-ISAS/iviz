@@ -14,9 +14,9 @@ namespace Iviz.App
         Dropdown reserve = null;
 
         [NotNull]
-        public string Label
+        public string Title
         {
-            get => input.Label;
+            get => input.Title;
             set
             {
                 if (value == null)
@@ -24,7 +24,7 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                input.Label = value;
+                input.Title = value;
             }
         }
 
@@ -46,7 +46,7 @@ namespace Iviz.App
         [NotNull]
         public string Placeholder
         {
-            get => input.Placeholder;
+            get => input.PlaceholderText;
             set
             {
                 if (value == null)
@@ -54,7 +54,7 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                input.Placeholder = value;
+                input.PlaceholderText = value;
             }
         }
 
@@ -141,7 +141,7 @@ namespace Iviz.App
         [NotNull]
         public InputFieldWithHintsWidget SetLabel([NotNull] string f)
         {
-            Label = f;
+            Title = f;
             return this;
         }
 

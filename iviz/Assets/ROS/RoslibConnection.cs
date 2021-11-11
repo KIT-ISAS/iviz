@@ -18,7 +18,6 @@ using Iviz.XmlRpc;
 using Nito.AsyncEx;
 using UnityEngine;
 using Iviz.Tools;
-using Logger = Iviz.Tools.Logger;
 using Random = System.Random;
 
 namespace Iviz.Ros
@@ -26,9 +25,6 @@ namespace Iviz.Ros
     public sealed class RoslibConnection : RosConnection
     {
         internal const int InvalidId = -1;
-
-        static readonly Action<string> LogInternalIfHololens =
-            Settings.IsHololens ? RosLogger.Internal : Logger.LogDebug;
 
         static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
 
@@ -167,9 +163,9 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
 #if LOG_ENABLED
-                //Logger.LogDebug = Core.Logger.Debug;
-                Logger.LogError = RosLogger.Error;
-                Logger.Log = RosLogger.Info;
+                //Tools.Logger.LogDebug = Core.Logger.Debug;
+                Tools.Logger.LogError = RosLogger.Error;
+                Tools.Logger.Log = RosLogger.Info;
 #endif
                 RosLogger.Internal("Connecting...");
 
@@ -199,31 +195,31 @@ namespace Iviz.Ros
 
                     AddConfigHostAliases();
 
-                    LogInternalIfHololens("--- Advertising services...");
+                    RosLogger.Debug("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
                         .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
-                    LogInternalIfHololens("+++ Done advertising services");
+                    RosLogger.Debug("+++ Done advertising services");
 
-                    LogInternalIfHololens("--- Readvertising...");
+                    RosLogger.Debug("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
                         .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
-                    LogInternalIfHololens("+++ Done readvertising");
+                    RosLogger.Debug("+++ Done readvertising");
 
-                    LogInternalIfHololens("--- Resubscribing...");
+                    RosLogger.Debug("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
                         .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this).AsTask())
                         .WhenAll();
-                    LogInternalIfHololens("+++ Done resubscribing");
+                    RosLogger.Debug("+++ Done resubscribing");
 
-                    LogInternalIfHololens("--- Requesting topics...");
+                    RosLogger.Debug("--- Requesting topics...");
                     token.ThrowIfCancellationRequested();
                     cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(token);
-                    LogInternalIfHololens("+++ Done requesting topics");
+                    RosLogger.Debug("+++ Done requesting topics");
 
                     cachedSystemState = null;
                     cachedTopics = EmptyTopics;

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.MarkerDetection;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -143,8 +142,19 @@ namespace Iviz.App
         [CanBeNull] static ModuleListPanel instance;
 
         [NotNull]
-        public static ModuleListPanel Instance =>
-            instance.CheckedNull() ?? throw new InvalidOperationException("Module list panel has not been set!");
+        public static ModuleListPanel Instance
+        {
+            get
+            {
+                GameObject instanceObject;
+                return instance != null
+                    ? instance
+                    : (instanceObject = GameObject.Find("ModuleList Panel")) != null
+                      && (instance = instanceObject.GetComponent<ModuleListPanel>()) != null
+                        ? instance
+                        : throw new InvalidOperationException("Module list panel has not been set!");
+            }
+        }
 
         public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
 
@@ -200,7 +210,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            instance = this;
             Resource.ClearResources();
             GuiDialogListener.ClearResources();
             ARController.ClearResources();
@@ -221,7 +230,7 @@ namespace Iviz.App
 
         [NotNull]
         static string MasterUriToString([CanBeNull] Uri uri) =>
-            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri} →" : $"{uri.Host}:{uri.Port.ToString()} →";
+            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri}" : $"{uri.Host}:{uri.Port.ToString()}";
 
         void Start()
         {
@@ -287,7 +296,7 @@ namespace Iviz.App
             recordBag.onClick.AddListener(OnStartRecordBag);
             showSystem.onClick.AddListener(systemData.Show);
 
-            masterUriStr.Label = MasterUriToString(connectionData.MasterUri);
+            masterUriStr.Text = MasterUriToString(connectionData.MasterUri);
             masterUriButton.Clicked += connectionData.Show;
             dragButton.Dragged += OnHideGuiButtonClick;
 
@@ -303,17 +312,17 @@ namespace Iviz.App
                 if (uri == null)
                 {
                     RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
-                    masterUriStr.Label = "(?) →";
+                    masterUriStr.Text = "(?) →";
                 }
                 else if (RosServerManager.IsActive)
                 {
                     RosLogger.Internal($"Changing master uri to local master '{uri}'");
-                    masterUriStr.Label = MasterUriToString(uri);
+                    masterUriStr.Text = MasterUriToString(uri);
                 }
                 else
                 {
                     RosLogger.Internal($"Changing master uri to '{uri}'");
-                    masterUriStr.Label = MasterUriToString(uri);
+                    masterUriStr.Text = MasterUriToString(uri);
                 }
             };
             connectionData.MyIdChanged += id =>
@@ -647,7 +656,7 @@ namespace Iviz.App
                     MyUri = connectionData.MyUri?.ToString() ?? "",
                     MyId = connectionData.MyId ?? "",
                     LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
-                    Settings = Settings.SettingsManager?.Config ?? new SettingsConfiguration(),
+                    Settings = Settings.SettingsManager.Config,
                     HostAliases = systemData.HostAliases,
                     MarkersConfiguration = arMarkerData.Configuration,
                 };
@@ -889,10 +898,10 @@ namespace Iviz.App
             {
                 description.Append(
                     Settings.IsXR
-                        ? "<font=Bold>XR View</font>\n"
+                        ? "<b>XR View</b>\n"
                         : ARController.IsVisible
-                            ? "<font=Bold>AR View</font>\n"
-                            : "<font=Bold>Virtual View</font>\n"
+                            ? "<b>AR View</b>\n"
+                            : "<b>Virtual View</b>\n"
                 );
 
                 var currentCamera = Settings.MainCameraTransform;

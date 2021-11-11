@@ -8,13 +8,11 @@ namespace Iviz.Ros
     [DataContract]
     public readonly struct RosSenderStats
     {
-        [DataMember] public int TotalMessages { get; }
         [DataMember] public int MessagesPerSecond { get; }
-        [DataMember] public int BytesPerSecond { get; }
+        [DataMember] public long BytesPerSecond { get; }
         
-        public RosSenderStats(int totalMessages, int messagesPerSecond, int bytesPerSecond)
+        public RosSenderStats(int messagesPerSecond, long bytesPerSecond)
         {
-            TotalMessages = totalMessages;
             MessagesPerSecond = messagesPerSecond;
             BytesPerSecond = bytesPerSecond;
         }

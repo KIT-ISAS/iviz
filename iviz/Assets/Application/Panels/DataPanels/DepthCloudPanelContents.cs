@@ -23,7 +23,7 @@ namespace Iviz.App
             //DepthInfoTopic = p.AddListener();
             ColorTopic = p.AddListener();
             Frame = p.AddFrame();
-            Description = p.AddDataLabel("").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);;
+            Description = p.AddDataLabel("").SetHasRichText(true).SetCentered();
             Depth = p.AddInputFieldWithHints("Depth Topic");
             Color = p.AddInputFieldWithHints("Color Topic");
             DepthPreview = p.AddImagePreviewWidget("Depth Preview");

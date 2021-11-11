@@ -67,5 +67,7 @@ namespace Iviz.Displays
         public Texture2D Hsv;
         public Texture2D Jet;
         public Texture2D Parula;
+        
+        public Font BaseFont;
     }
 }

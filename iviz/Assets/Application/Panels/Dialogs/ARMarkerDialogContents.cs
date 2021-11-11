@@ -78,7 +78,7 @@ namespace Iviz.App
             {
                 widget.EndEdit += value => SizesEndEdit?.Invoke(row,
                     float.TryParse(value, NumberStyles.Float, BuiltIns.Culture, out float i) ? i : -1);
-                widget.Placeholder = "0";
+                widget.PlaceholderText = "0";
                 widget.SetContentType(InputField.ContentType.DecimalNumber);
             }
 

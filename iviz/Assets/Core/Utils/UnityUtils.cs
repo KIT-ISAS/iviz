@@ -222,8 +222,13 @@ namespace Iviz.Core
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T AssertNotNull<T>(this T? o, string name) where T : UnityEngine.Object =>
-            o != null ? o : throw new NullReferenceException($"Asset {name} has not been set!");
+        public static T AssertNotNull<T>(this T? o, string name,
+            [CallerFilePath] string? caller = null,
+            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object =>
+            o != null
+                ? o
+                : throw new MissingAssetFieldException($"Asset '{name}' has not been set!\n" +
+                                                       $"At: {caller} line {lineNumber}");
 
         public static Color WithAlpha(this Color c, float alpha)
         {
@@ -331,13 +336,13 @@ namespace Iviz.Core
                 }
 
                 extractArrayFromListTypeFn =
-                    (Func<object, Array>) methodInfo.CreateDelegate(typeof(Func<object, Array>));
+                    (Func<object, Array>)methodInfo.CreateDelegate(typeof(Func<object, Array>));
 
                 return extractArrayFromListTypeFn;
             }
         }
 
-        public static T[] ExtractArray<T>(this List<T> list) => (T[]) ExtractArrayFromList(list);
+        public static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
     }
 
     public static class ResourceUtils
@@ -361,7 +366,7 @@ namespace Iviz.Core
             }
 
             resource.Suspend();
-            ResourcePool.Return(info, ((MonoBehaviour) resource).gameObject);
+            ResourcePool.Return(info, ((MonoBehaviour)resource).gameObject);
         }
 
         public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
@@ -373,7 +378,7 @@ namespace Iviz.Core
         {
             return source.Select((item, index) => (item, index));
         }
-        
+
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
             gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
 
@@ -382,7 +387,7 @@ namespace Iviz.Core
             var component = o.Instantiate(parent).GetComponent<T>();
             if (component == null)
             {
-                throw new NullReferenceException("While instantiating " + o + " the component " + 
+                throw new NullReferenceException("While instantiating " + o + " the component " +
                                                  typeof(T).Name + " was not found.");
             }
 
@@ -395,7 +400,7 @@ namespace Iviz.Core
         [return: NotNullIfNotNull("resource")]
         public static Transform? GetTransform(this IDisplay? resource)
         {
-            return ((MonoBehaviour?) resource)?.transform;
+            return ((MonoBehaviour?)resource)?.transform;
         }
 
         static readonly Vector3[] CubePoints =
@@ -519,7 +524,7 @@ namespace Iviz.Core
 
             return result;
         }
-        
+
         static readonly Plane[] PlaneCache = new Plane[6];
 
         public static bool IsVisibleFromMainCamera(this in Bounds bounds)
@@ -680,5 +685,12 @@ namespace Iviz.Core
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
+    }
+
+    public class MissingAssetFieldException : Exception
+    {
+        public MissingAssetFieldException(string message) : base(message)
+        {
+        }
     }
 }

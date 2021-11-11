@@ -1,6 +1,8 @@
+#nullable enable
+
 using System;
 using Iviz.Core;
-using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,22 +12,17 @@ namespace Iviz.App
     public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler,
         IPointerUpHandler
     {
-        [SerializeField] Button button = null;
-        [SerializeField] RectTransform targetTransform = null;
-        [SerializeField] RectTransform storeTransform = null;
-        [SerializeField] Text buttonText = null;
+        [SerializeField] Button? button = null;
+        [SerializeField] RectTransform? targetTransform = null;
+        [SerializeField] RectTransform? storeTransform = null;
+        [SerializeField] TMP_Text? buttonLabel = null;
         [SerializeField] bool allowRevealLeft = true;
         [SerializeField] bool allowRevealRight = true;
         [SerializeField] float moveThresholdLeft = 40;
         [SerializeField] float moveThresholdRight = 60;
         [SerializeField] float minMotionThreshold = 5;
-        [SerializeField] ScrollRect parentScrollRect = null;
-        [SerializeField] GameObject[] detachables = null;
-
-        float ScaledMoveThresholdLeft => moveThresholdLeft * ModuleListPanel.CanvasScale;
-        float ScaledMoveThresholdRight => moveThresholdRight * ModuleListPanel.CanvasScale;
-        float ScaledMinMotionThreshold => minMotionThreshold * ModuleListPanel.CanvasScale;
-        float ScaledMaxMotionYThreshold => 10 * ModuleListPanel.CanvasScale;
+        [SerializeField] ScrollRect? parentScrollRect = null;
+        [SerializeField] GameObject[] detachables = Array.Empty<GameObject>();
 
         bool isDragging;
         bool stuckRight;
@@ -37,15 +34,22 @@ namespace Iviz.App
         bool raiseLeftOnRelease;
         bool raiseRightOnRelease;
 
-        [NotNull] public RectTransform Transform => (RectTransform) GameObject.transform;
-        public Text ButtonText => buttonText;
-        [NotNull] public GameObject GameObject => transform.parent.gameObject;
+        float ScaledMoveThresholdLeft => moveThresholdLeft;
+        float ScaledMoveThresholdRight => moveThresholdRight;
+        float ScaledMinMotionThreshold => minMotionThreshold;
+        static float ScaledMaxMotionYThreshold => 10;
+        Button Button => button.AssertNotNull(nameof(button));
+        RectTransform TargetTransform => targetTransform.AssertNotNull(nameof(targetTransform));
+        RectTransform StoreTransform => storeTransform.AssertNotNull(nameof(storeTransform));
+        ScrollRect ParentScrollRect => parentScrollRect.AssertNotNull(nameof(parentScrollRect));
+        TMP_Text ButtonLabel => buttonLabel.AssertNotNull(nameof(buttonLabel));
+        public RectTransform Transform => (RectTransform)GameObject.transform;
+        public GameObject GameObject => transform.parent.gameObject;
 
-        public event Action RevealedLeft;
-        public event Action RevealedRight;
-        public event Action Clicked;
+        public event Action? RevealedLeft;
+        public event Action? RevealedRight;
+        public event Action? Clicked;
 
-        [NotNull]
         public string Name
         {
             get => GameObject.name;
@@ -57,25 +61,22 @@ namespace Iviz.App
             get => GameObject.activeSelf;
             set => GameObject.SetActive(value);
         }
+        
+        public string ButtonText
+        {
+            get => ButtonLabel.text;
+            set => ButtonLabel.text = value;
+        }
+
+        public float ButtonFontSize
+        {
+            get => ButtonLabel.fontSize;
+            set => ButtonLabel.fontSize = value;
+        }
 
         protected virtual void Awake()
         {
-            if (targetTransform == null)
-            {
-                targetTransform = (RectTransform) transform;
-            }
-
-            if (storeTransform == null)
-            {
-                storeTransform = (RectTransform) transform.parent;
-            }
-
-            if (button == null)
-            {
-                button = GameObject.GetComponentInChildren<Button>();
-            }
-
-            button.onClick.AddListener(() =>
+            Button.onClick.AddListener(() =>
             {
                 if (!isDragging)
                 {
@@ -91,19 +92,15 @@ namespace Iviz.App
 
         void Start()
         {
-            if (detachables != null)
+            foreach (var detachable in detachables)
             {
-                foreach (var detachable in detachables)
-                {
-                    detachable.transform.SetParent(storeTransform);
-                    detachable.transform.SetAsFirstSibling();
-                }
+                detachable.transform.SetParent(StoreTransform);
+                detachable.transform.SetAsFirstSibling();
             }
         }
 
-        void IDragHandler.OnDrag([NotNull] PointerEventData eventData)
+        void IDragHandler.OnDrag(PointerEventData eventData)
         {
-            //Debug.Log(eventData.delta.x);
             movedX += eventData.delta.x;
             movedY += eventData.delta.y;
 
@@ -112,24 +109,24 @@ namespace Iviz.App
                 || Mathf.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
                 || Mathf.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
             {
-                parentScrollRect.OnDrag(eventData);
+                ParentScrollRect.OnDrag(eventData);
                 return;
             }
 
             if (!isDragging)
             {
-                startX = targetTransform.anchoredPosition.x;
+                startX = TargetTransform.anchoredPosition.x;
                 //startX = targetTransform.position.x;
                 isDragging = true;
             }
 
-            if (targetTransform == null)
+            if (TargetTransform == null)
             {
                 return;
             }
 
             //targetTransform.position = targetTransform.position.WithX(startX + movedX);
-            targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX + movedX);
+            TargetTransform.anchoredPosition = TargetTransform.anchoredPosition.WithX(startX + movedX);
 
             if (movedX > ScaledMoveThresholdLeft)
             {
@@ -140,8 +137,8 @@ namespace Iviz.App
                 }
 
                 //targetTransform.position = targetTransform.position.WithX(startX + ScaledMoveThresholdLeft);
-                targetTransform.anchoredPosition =
-                    targetTransform.anchoredPosition.WithX(startX + ScaledMoveThresholdLeft);
+                TargetTransform.anchoredPosition =
+                    TargetTransform.anchoredPosition.WithX(startX + ScaledMoveThresholdLeft);
             }
             else
             {
@@ -158,8 +155,8 @@ namespace Iviz.App
                 }
 
                 //targetTransform.position = targetTransform.position.WithX(startX - ScaledMoveThresholdRight);
-                targetTransform.anchoredPosition =
-                    targetTransform.anchoredPosition.WithX(startX - ScaledMoveThresholdRight);
+                TargetTransform.anchoredPosition =
+                    TargetTransform.anchoredPosition.WithX(startX - ScaledMoveThresholdRight);
             }
             else
             {
@@ -175,7 +172,7 @@ namespace Iviz.App
 
             if (!isDragging)
             {
-                parentScrollRect.OnEndDrag(eventData);
+                ParentScrollRect.OnEndDrag(eventData);
                 return;
             }
 
@@ -183,7 +180,7 @@ namespace Iviz.App
             stuckLeft = false;
             stuckRight = false;
             //targetTransform.position = targetTransform.position.WithX(startX);
-            targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX);
+            TargetTransform.anchoredPosition = TargetTransform.anchoredPosition.WithX(startX);
             if (raiseLeftOnRelease)
             {
                 OnRevealedLeft();
@@ -224,13 +221,13 @@ namespace Iviz.App
                 stuckLeft = false;
                 stuckRight = false;
                 //targetTransform.position = targetTransform.position.WithX(startX);
-                targetTransform.anchoredPosition = targetTransform.anchoredPosition.WithX(startX);
+                TargetTransform.anchoredPosition = TargetTransform.anchoredPosition.WithX(startX);
             }
         }
 
         void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
         {
-            parentScrollRect.OnBeginDrag(eventData);
+            ParentScrollRect.OnBeginDrag(eventData);
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
@@ -238,7 +235,7 @@ namespace Iviz.App
             if (Settings.IsXR && isDragging)
             {
                 // end dragging sometimes does not get triggered
-                ((IEndDragHandler) this).OnEndDrag(eventData);
+                ((IEndDragHandler)this).OnEndDrag(eventData);
             }
         }
     }

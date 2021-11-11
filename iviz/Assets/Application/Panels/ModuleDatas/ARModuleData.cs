@@ -57,7 +57,7 @@ namespace Iviz.App
 
             panel.AutoFocus.Value = controller.EnableAutoFocus;
 
-            panel.Description.Label = controller.Description;
+            panel.Description.Text = controller.Description;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -80,7 +80,7 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            panel.Description.Label = controller.Description;
+            panel.Description.Text = controller.Description;
             panel.ARMarkers.Description = controller.MarkerExecutor.Description;
         }
 

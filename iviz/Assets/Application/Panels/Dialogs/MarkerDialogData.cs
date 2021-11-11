@@ -34,7 +34,7 @@ namespace Iviz.App
                 throw new InvalidOperationException("Cannot setup panel without a listener!");
             }
 
-            panel.Label.Label = $"<b>Topic:</b>: {Listener.Topic}";
+            panel.Label.Text = $"<b>Topic:</b>: {Listener.Topic}";
             panel.Close.Clicked += Close;
             panel.ResetAll += Listener.Reset;
 

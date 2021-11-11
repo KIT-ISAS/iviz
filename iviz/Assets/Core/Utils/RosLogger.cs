@@ -54,7 +54,7 @@ namespace Iviz.Core
 
         public static void Internal(string? msg)
         {
-            string msgTxt = $"<font=Bold>[{GameThread.NowFormatted}]</font> {msg ?? NullMessage}";
+            string msgTxt = $"<b>[{GameThread.NowFormatted}]</b> {msg ?? NullMessage}";
             LogInternal?.Invoke(msgTxt);
             UnityEngine.Debug.Log(msgTxt);
         }
@@ -75,9 +75,9 @@ namespace Iviz.Core
         static void InternalImpl(string? msg, Exception? e, StringBuilder str)
         {
             str.Length = 0;
-            str.Append("<font=Bold>[")
+            str.Append("<b>[")
                 .Append(GameThread.NowFormatted)
-                .Append("]</font> ")
+                .Append("]</b> ")
                 .Append(msg ?? NullMessage);
 
             if (e == null)

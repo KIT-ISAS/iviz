@@ -32,7 +32,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("PointCloud");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetAlignment(TextAnchor.MiddleCenter);
+            NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
             PointSize = p.AddSlider("Point Size").SetMinValue(0.05f).SetMaxValue(1f);
             SizeMultiplier = p.AddSlider("Multiply Point Size by Power of 10").SetMinValue(-4).SetMaxValue(4)
                 .SetIntegerOnly(true);

@@ -1,18 +1,24 @@
+#nullable enable
+
 using System;
-using Iviz.Displays;
-using JetBrains.Annotations;
+using Iviz.Core;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public sealed class ItemButton : MonoBehaviour
     {
-        [SerializeField] Button button = null;
-        [SerializeField] Text text = null;
-        [NotNull] RectTransform ButtonTransform => (RectTransform) transform;
-
-        public event Action<int> Clicked;
+        [SerializeField] Button? button = null;
+        [FormerlySerializedAs("text")] [SerializeField] TMP_Text? label = null;
+        
+        RectTransform ButtonTransform => (RectTransform) transform;
+        Button Button => button.AssertNotNull(nameof(button));
+        TMP_Text Label => label.AssertNotNull(nameof(label));
+        
+        public event Action<int>? Clicked;
 
         public void RaiseClicked(int subIndex)
         {
@@ -31,33 +37,33 @@ namespace Iviz.App
             set => gameObject.SetActive(value);
         }
 
-        public string Text
+        public string Caption
         {
-            get => text.text;
-            set => text.text = value;
+            get => Label.text;
+            set => Label.text = value;
         }
 
         public bool Interactable
         {
-            get => button.interactable;
-            set => button.interactable = value;
+            get => Button.interactable;
+            set => Button.interactable = value;
         }
         
         public Color Color
         {
-            get => button.colors.normalColor;
+            get => Button.colors.normalColor;
             set
             {
-                var block = button.colors;
+                var block = Button.colors;
                 block.normalColor = value;
-                button.colors = block;
+                Button.colors = block;
             }
         }
 
-        public int FontSize
+        public float FontSize
         {
-            get => text.fontSize;
-            set => text.fontSize = value;
+            get => Label.fontSize;
+            set => Label.fontSize = value;
         }
 
         public float Height

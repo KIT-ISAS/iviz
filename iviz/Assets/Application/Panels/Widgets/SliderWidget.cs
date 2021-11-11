@@ -1,7 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Globalization;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,14 +12,19 @@ namespace Iviz.App
 {
     public sealed class SliderWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Slider slider = null;
-        [SerializeField] Text label = null;
-        [SerializeField] Text value = null;
+        [SerializeField] Slider? slider = null;
+        [SerializeField] TMP_Text? text = null;
+        [SerializeField] TMP_Text? valueText = null;
 
-        [NotNull]
+        Slider Slider => slider.AssertNotNull(nameof(slider));
+        TMP_Text Text => text.AssertNotNull(nameof(text));
+        TMP_Text ValueText => valueText.AssertNotNull(nameof(valueText));
+        
+        public event Action<float>? ValueChanged;
+        
         public string Label
         {
-            get => label.text;
+            get => Text.text;
             set
             {
                 if (value == null)
@@ -25,7 +33,7 @@ namespace Iviz.App
                 }
                 
                 name = "Slider:" + value;
-                label.text = value;
+                Text.text = value;
             }
         }
 
@@ -41,18 +49,18 @@ namespace Iviz.App
 
         float ValueInternal
         {
-            get => slider.value;
-            set => slider.SetValueWithoutNotify(Math.Max((int) value, 0));
+            get => Slider.value;
+            set => Slider.SetValueWithoutNotify(Math.Max((int) value, 0));
         }
 
         public bool Interactable
         {
-            get => slider.interactable;
+            get => Slider.interactable;
             set
             {
-                slider.interactable = value;
-                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                this.value.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Slider.interactable = value;
+                Text.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                this.ValueText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 
@@ -92,8 +100,8 @@ namespace Iviz.App
                 float v = Value;
 
                 numberOfSteps = value;
-                slider.minValue = 0;
-                slider.maxValue = NumberOfSteps;
+                Slider.minValue = 0;
+                Slider.maxValue = NumberOfSteps;
                 //Debug.Log(Label + " " + NumberOfSteps);
                 Value = v;
             }
@@ -113,11 +121,9 @@ namespace Iviz.App
             }
         }
 
-        public event Action<float> ValueChanged;
-
         void Awake()
         {
-            slider.wholeNumbers = true;
+            Slider.wholeNumbers = true;
             NumberOfSteps = NumberOfSteps;
             Min = Min;
             Max = Max;
@@ -132,7 +138,7 @@ namespace Iviz.App
 
         void UpdateLabel(float v)
         {
-            value.text = v.ToString("0.###", CultureInfo.InvariantCulture);
+            ValueText.text = v.ToString("0.###", CultureInfo.InvariantCulture);
         }
 
         public void ClearSubscribers()
@@ -140,63 +146,54 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        [NotNull]
-        public SliderWidget SetLabel([NotNull] string f)
+        public SliderWidget SetLabel(string f)
         {
             Label = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetValue(float f)
         {
             Value = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetMinValue(float f)
         {
             Min = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetMaxValue(float f)
         {
             Max = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget UpdateValue()
         {
             OnValueChanged(ValueInternal);
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetIntegerOnly(bool f)
         {
             IntegerOnly = f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SubscribeValueChanged(Action<float> f)
         {
             ValueChanged += f;
             return this;
         }
 
-        [NotNull]
         public SliderWidget SetNumberOfSteps(int num)
         {
             NumberOfSteps = num;

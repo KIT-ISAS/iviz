@@ -19,7 +19,7 @@ namespace Iviz.App
 
         public ModuleListButtons(GameObject contentObject)
         {
-            buttonHeight = Resource.Widgets.DisplayButton.Object.GetComponent<RectTransform>().rect.height;
+            buttonHeight = Resource.Widgets.DraggableDisplayButton.Object.GetComponent<RectTransform>().rect.height;
             contentObjectTransform = (RectTransform) contentObject.transform;
         }
 
@@ -29,11 +29,11 @@ namespace Iviz.App
             float y = 2 * YOffset + size * (buttonHeight + YOffset);
 
             var button = ResourcePool
-                .Rent(Resource.Widgets.DisplayButton, contentObjectTransform, false)
+                .Rent(Resource.Widgets.DraggableDisplayButton, contentObjectTransform, false)
                 .GetComponentInChildren<DraggableButtonWidget>();
 
             button.Transform.anchoredPosition = new Vector2(0, -y);
-            button.ButtonText.text = moduleData.ButtonText;
+            button.ButtonText = moduleData.ButtonText;
             button.Name = $"Button:{moduleData.ModuleType}";
             button.Visible = true;
             
@@ -50,7 +50,7 @@ namespace Iviz.App
         {
             var button = buttons[index];
             button.ClearSubscribers();
-            ResourcePool.Return(Resource.Widgets.DisplayButton, button.GameObject);
+            ResourcePool.Return(Resource.Widgets.DraggableDisplayButton, button.GameObject);
 
             buttons.RemoveAt(index);
 
@@ -76,10 +76,9 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(content));
             }
 
-            var text = buttons[index].ButtonText;
-            text.text = content;
+            buttons[index].ButtonText = content;
             int lineBreaks = content.Count(x => x == '\n');
-            text.fontSize = lineBreaks switch
+            buttons[index].ButtonFontSize = lineBreaks switch
             {
                 2 => 11,
                 3 => 10,

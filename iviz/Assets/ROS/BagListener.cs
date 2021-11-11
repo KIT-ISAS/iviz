@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
-using Iviz.Tools;
 using Nito.AsyncEx;
-using Logger = Iviz.Tools.Logger;
 
 namespace Iviz.Ros
 {
@@ -28,11 +26,11 @@ namespace Iviz.Ros
             if (Settings.IsMobile)
             {
                 string filename = Path.GetFileName(path);
-                Logger.LogFormat("{0}: Writing rosbag to file '{1}' in the app's /bags folder", this, filename);
+                RosLogger.Info($"{this}: Writing rosbag to file '{filename}' in the app's /bags folder");
             }
             else
             {
-                Logger.LogFormat("{0}: Writing rosbag to path {1}", this, path);
+                RosLogger.Info($"{this}: Writing rosbag to path {path}");
             }
 
             task = Task.Run(WriteMessagesAsync);
@@ -42,7 +40,7 @@ namespace Iviz.Ros
         {
             if (disposed)
             {
-                Logger.LogError("Tried to close rosbag file twice");
+                RosLogger.Error("Tried to close rosbag file twice");
                 return;
             }
 
@@ -52,11 +50,11 @@ namespace Iviz.Ros
             if (Settings.IsMobile)
             {
                 string filename = Path.GetFileName(path);
-                Logger.LogFormat("{0}: Closing rosbag file '{1}' in the app's /bags folder", this, filename);
+                RosLogger.Info($"{this}: Closing rosbag file '{filename}' in the app's /bags folder");
             }
             else
             {
-                Logger.LogFormat("{0}: Closing rosbag on path {1}", this, path);
+                RosLogger.Info($"{this}: Closing rosbag on path {path}");
             }
         }
 

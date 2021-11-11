@@ -27,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -57,7 +58,7 @@ MonoBehaviour:
     type: 3}
   DataPanel: {fileID: 1548678831843444569, guid: c2bf7f3b3ac700d40b318b07fa3fad78,
     type: 3}
-  DisplayButton: {fileID: 5577215166083142449, guid: ac3719ec5dcc84c14af4dd7200405c9d,
+  DraggableDisplayButton: {fileID: 5577215166083142449, guid: ac3719ec5dcc84c14af4dd7200405c9d,
     type: 3}
   Dropdown: {fileID: 3511868748855208351, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
     type: 3}
@@ -95,12 +96,8 @@ MonoBehaviour:
     type: 3}
   SaveAsPanel: {fileID: 7786611109638139303, guid: f59bb10ce6a0442b7b8c58dbe72a9841,
     type: 3}
-  SectionTitle: {fileID: 7568132585207823462, guid: b145c9e1753854845bba65d4889df52e,
-    type: 3}
   Sender: {fileID: 6469948729944380942, guid: 9e8c455ddca0f46fca19c60ff40a4b13, type: 3}
   SettingsPanel: {fileID: 8946395367666485985, guid: 073a5f0da4fa34dbabc4b394ebda7d53,
-    type: 3}
-  ShortInputField: {fileID: 4996971547462451916, guid: 1215b92ab1a264d298657b08a446787e,
     type: 3}
   Slider: {fileID: 2236944325299982083, guid: f4814752b52a24c4eb60c6322f4e24ab, type: 3}
   TfTreePanel: {fileID: 7291371499597271211, guid: f74455175387045dcb254fe3abbc19b1,

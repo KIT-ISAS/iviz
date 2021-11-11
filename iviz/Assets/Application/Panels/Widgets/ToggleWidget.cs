@@ -1,6 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,13 +11,15 @@ namespace Iviz.App
 {
     public sealed class ToggleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Toggle toggle = null;
-        [SerializeField] Text label = null;
+        [SerializeField] Toggle? toggle = null;
+        [SerializeField] TMP_Text? label = null;
 
-        [NotNull]
-        public string Label
+        TMP_Text Label => label.AssertNotNull(nameof(label));
+        Toggle Toggle => toggle.AssertNotNull(nameof(toggle));
+        
+        public string Text
         {
-            get => label.text;
+            get => Label.text;
             set
             {
                 if (value == null)
@@ -23,29 +28,26 @@ namespace Iviz.App
                 }
                 
                 name = "Toggle:" + value;
-                label.text = value;
+                Label.text = value;
             }
         }
         public bool Value
         {
-            get => toggle.isOn;
-            set
-            {
-                toggle.isOn = value;
-            }
+            get => Toggle.isOn;
+            set => Toggle.isOn = value;
         }
 
         public bool Interactable
         {
-            get => toggle.interactable;
+            get => Toggle.interactable;
             set
             {
-                toggle.interactable = value;
-                label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Toggle.interactable = value;
+                Label.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 
-        public event Action<bool> ValueChanged;
+        public event Action<bool>? ValueChanged;
 
         public void OnValueChanged(bool f)
         {
@@ -57,28 +59,24 @@ namespace Iviz.App
             ValueChanged = null;
         }
 
-        [NotNull]
-        public ToggleWidget SetLabel([NotNull] string f)
+        public ToggleWidget SetLabel(string f)
         {
-            Label = f;
+            Text = f;
             return this;
         }
 
-        [NotNull]
         public ToggleWidget SetValue(bool f)
         {
             Value = f;
             return this;
         }
 
-        [NotNull]
         public ToggleWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        [NotNull]
         public ToggleWidget SubscribeValueChanged(Action<bool> f)
         {
             ValueChanged += f;

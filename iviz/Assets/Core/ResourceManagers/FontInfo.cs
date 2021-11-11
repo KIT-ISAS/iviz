@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -13,14 +14,14 @@ namespace Iviz.Resources
     {
         readonly Font font;
         readonly int dotWidth;
-        readonly int arrowWidth;
-        readonly Dictionary<char, int> charWidths = new Dictionary<char, int>();
+        readonly int spaceWidth;
+        readonly Dictionary<char, int> charWidths = new();
 
         public FontInfo()
         {
-            font = UnityEngine.Resources.Load<Font>("Fonts/selawk base");
+            font = UnityEngine.Resources.Load<AssetHolder>("Asset Holder").BaseFont.AssertNotNull(nameof(font));
             dotWidth = CharWidth('.') * 3; // ...
-            arrowWidth = CharWidth('→') + CharWidth(' ');
+            spaceWidth = CharWidth(' ');
         }
 
         [NotNull]
@@ -59,8 +60,8 @@ namespace Iviz.Resources
 
                         if (numLines != maxLines - 1)
                         {
-                            description.Append("...\n→ ").Append(str[i]);
-                            usedWidth = arrowWidth;
+                            description.Append("...\n  ").Append(str[i]);
+                            usedWidth = 2 * spaceWidth;
                             numLines = 1;
                         }
                         else
